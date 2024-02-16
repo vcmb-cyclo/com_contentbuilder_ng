@@ -219,8 +219,7 @@ function contentbuilder_is_internal_path($path){
 function cbinternal($value){
     $nl = '';
     $out = '';
-    // XDA-GIL - Deprecated NULL values
-    $values = explode("\n", ''.$value);
+    $values = explode("\n", $value);
     $length = count($values);
     $i = 0;
     foreach($values As $_value){
