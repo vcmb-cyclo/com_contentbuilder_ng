@@ -727,7 +727,7 @@ class contentbuilder_com_contentbuilder{
             $user_id = JFactory::getUser()->get('id',0);
         }
         
-        $date = JFactory::getDate();
+        $date = Factory::getDate();
 	    $now = $date->toSql();
         $options = null;
         foreach($cleaned_values As $id => $value){

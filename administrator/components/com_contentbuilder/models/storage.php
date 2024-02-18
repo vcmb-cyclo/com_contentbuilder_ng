@@ -314,7 +314,7 @@ class ContentbuilderModelStorage extends CBModel
         
         if ($handle !== FALSE) {
             
-            $last_update = JFactory::getDate();
+            $last_update = Factory::getDate();
             $last_update = CBCompat::toSql($last_update);
             
             $fieldnames = array();
@@ -527,7 +527,7 @@ class ContentbuilderModelStorage extends CBModel
         // table
         // create or update the corresponding table, field synch below
         
-        $last_update = JFactory::getDate();
+        $last_update = Factory::getDate();
         $last_update = CBCompat::toSql($last_update);
         
         $tables = CBCompat::getTableFields( Factory::getContainer()->get(DatabaseInterface::class)->getTableList() );

@@ -902,7 +902,7 @@ class ContentbuilderModelForm extends CBModel
             $data['title'] = $form->form->getPageTitle();
         }
         
-        $last_update = JFactory::getDate();
+        $last_update = Factory::getDate();
         $last_update = CBCompat::toSql($last_update);
         $data['last_update'] = $last_update;
 

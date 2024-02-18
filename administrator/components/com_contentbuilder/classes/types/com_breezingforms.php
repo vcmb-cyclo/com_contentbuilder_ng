@@ -900,8 +900,7 @@ class contentbuilder_com_breezingforms{
                 $user_full_name = JFactory::getUser()->get('name','');
             }
             jimport('joomla.environment.browser');
-            $date = JFactory::getDate();
-            $now = $date->toSql();
+            $now = Factory::getDate()->toSql();
             $db->setQuery("Insert Into #__facileforms_records (
                 `submitted`,
                 `form`,

@@ -252,7 +252,7 @@ class  plgSystemContentbuilder_system extends JPlugin
                 // managing published states
                 
                 $db = Factory::getContainer()->get(DatabaseInterface::class);
-                $date = JFactory::getDate();
+                $date = Factory::getDate();
                 
                 $db->setQuery("Update #__contentbuilder_records Set published = 1 Where is_future = 1 And publish_up <> '0000-00-00 00:00:00' And publish_up <= '".CBCompat::toSql($date)."'");
                 $db->execute();
@@ -522,7 +522,7 @@ class  plgSystemContentbuilder_system extends JPlugin
                     $lang->load('com_contentbuilder', JPATH_ADMINISTRATOR);
                 }
                 
-                $jdate = JFactory::getDate();
+                $jdate = Factory::getDate();
                 $now   = CBCompat::toSql($jdate);
                 
                 foreach($list As $data){

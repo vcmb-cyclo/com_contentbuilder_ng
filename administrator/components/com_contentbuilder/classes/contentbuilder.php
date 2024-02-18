@@ -1763,7 +1763,7 @@ class contentbuilder{
         $created_by_alias = '';
         $created_article = null;
         
-        $_now = JFactory::getDate();
+        $_now = Factory::getDate();
         
         $created_up = $publish_up_record;
         $created_down = $publish_down_record;
@@ -1925,9 +1925,7 @@ class contentbuilder{
         }
         
         $created_by = $created_by ? $created_by : $metadata->created_id;
-
-        $date = JFactory::getDate();
-	    $created = $date->toSql();
+	    $created = Factory::getDate()->toSql();
 
         $created = $created_article && $created_article != '0000-00-00 00:00:00' ? $created_article : ($metadata->created ? $metadata->created : $created);
 
@@ -1945,7 +1943,7 @@ class contentbuilder{
         
         $alias = $alias ? self::stringURLUnicodeSlug($alias) : self::stringURLUnicodeSlug($label);
         if(trim(str_replace('-','',$alias)) == '') {
-                $datenow = JFactory::getDate();
+                $datenow = Factory::getDate();
 	            $alias = $datenow->format("%Y-%m-%d-%H-%M-%S");
         }
 
@@ -2017,7 +2015,7 @@ class contentbuilder{
             $db->execute();
 
             $article = $db->insertid();
-            $datenow = JFactory::getDate();
+            $datenow = Factory::getDate();
 	        $___datenow = $datenow->toSql();
 
             $db->setQuery("Insert Into #__contentbuilder_articles (`type`,`reference_id`,`last_update`,`article_id`,`record_id`,`form_id`) Values (".$db->Quote($form['type']).",".$db->Quote($form['reference_id']).",".$db->Quote($___datenow).",$article,".$db->Quote($record_id).",".intval($contentbuilder_form_id).")");
@@ -2052,9 +2050,7 @@ class contentbuilder{
 
         // existing, update
         }else{
-            
-            $datenow = JFactory::getDate();
-	        $___datenow = $datenow->toSql();
+	        $___datenow = Factory::getDate()->toSql();
             $modified = $metadata->modified ? $metadata->modified : $___datenow;
             $modified_by = $metadata->modified_id ? $metadata->modified_id : JFactory::getUser()->get('id',0);
         
@@ -2312,7 +2308,7 @@ class contentbuilder{
 
 	    }
 
-	    $jdate = JFactory::getDate();
+	    $jdate = Factory::getDate();
 
 	    $permissions['verify_view'] = true;
 	    if($result['verification_required_view']){

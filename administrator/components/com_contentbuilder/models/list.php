@@ -252,7 +252,7 @@ class ContentbuilderModelList extends CBModel
                     }
                     
                     // enables the record randomizer
-                    $now = JFactory::getDate();
+                    $now = Factory::getDate();
                     $data->rand_update = intval($data->rand_update);
                     if($data->rand_update < 1){
                         $data->rand_update = 86400;

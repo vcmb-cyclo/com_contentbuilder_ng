@@ -10,6 +10,7 @@
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
+
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
 CBCompat::requireModel();
@@ -130,7 +131,7 @@ class ContentbuilderModelAjax extends CBModel
                 
                 if($result['rating_slots'] == 2 || $rating){
                     
-                    $_now = JFactory::getDate();
+                    $_now = Factory::getDate();
                     
                     // clear rating cache
 	                $___now = $_now->toSql();

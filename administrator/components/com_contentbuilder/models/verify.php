@@ -81,7 +81,7 @@ class ContentbuilderModelVerify extends CBModel
             $out['plugin_options'] = array();
         }
         
-        $_now = JFactory::getDate();
+        $_now = Factory::getDate();
         
         //$this->_db->setQuery("Select count(id) From #__contentbuilder_verifications Where Timestampdiff(Second, `start_date`, '".strtotime($_now->toMySQL())."') < 1 And ip = " . $this->_db->Quote($_SERVER['REMOTE_ADDR']));
         //$ver = $this->_db->loadResult();

@@ -57,7 +57,7 @@ class ContentbuilderViewDetails extends CBView
 
 	    $alias = $table->alias ? contentbuilder::stringURLUnicodeSlug($table->alias) : contentbuilder::stringURLUnicodeSlug($subject->page_title);
 	    if(trim(str_replace('-','',$alias)) == '') {
-		    $datenow = JFactory::getDate();
+		    $datenow = Factory::getDate();
 		    $alias = $datenow->format("%Y-%m-%d-%H-%M-%S");
 	    }
 
