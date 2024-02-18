@@ -10,6 +10,7 @@
 // No direct access
 
 use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -75,7 +76,7 @@ class ContentbuilderModelElementoptions extends CBModel
     function getValidationPlugins(){
         jimport('joomla.version');
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         
         $version = new JVersion();
         

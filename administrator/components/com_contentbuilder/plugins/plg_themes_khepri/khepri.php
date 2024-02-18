@@ -6,6 +6,9 @@
  * @license     GNU/GPL
 */
 
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
+
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -969,7 +972,7 @@ table.group-rules td select
          * @return string
          */
         function onContentTemplateSample($contentbuilder_form_id, $form){
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             $out = '<table border="0" width="100%" class="admintable adminlist"><tbody>'."\n";
             $names = $form->getElementNames();
             foreach($names As $reference_id => $name){
@@ -993,7 +996,7 @@ table.group-rules td select
          * @return string
          */
         function onEditableTemplateSample($contentbuilder_form_id, $form){
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             $out = '<table border="0" width="100%" class="admintable adminlist"><tbody>'."\n";
             $names = $form->getElementNames();
             $hidden = array();

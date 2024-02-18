@@ -6,6 +6,8 @@
 * @license Released under the terms of the GNU General Public License
 **/
 
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
 /** ensure this file is being included by a parent file */
 defined( '_JEXEC' ) or die( 'Direct Access to this location is not allowed.' );
@@ -62,7 +64,7 @@ class plgContentContentbuilder_permission_observer extends JPlugin {
                 $frontend = false;
             }
             
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             $db->setQuery("Select form.`reference_id`,article.`record_id`,article.`form_id`,form.`type`,form.`published_only`,form.`own_only`,form.`own_only_fe` From #__contentbuilder_articles As article, #__contentbuilder_forms As form Where form.`published` = 1 And form.id = article.`form_id` And article.`article_id` = " . $db->quote($article->id));
             $data = $db->loadAssoc();
 

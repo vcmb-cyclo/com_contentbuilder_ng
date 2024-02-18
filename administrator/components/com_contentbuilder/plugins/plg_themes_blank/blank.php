@@ -90,7 +90,7 @@ class plgContentbuilder_themesBlank extends JPlugin
          * @return string
          */
         function onContentTemplateSample($contentbuilder_form_id, $form){
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             $out = '<table border="0" width="100%" class="blanktable_content"><tbody>'."\n";
             $names = $form->getElementNames();
             foreach($names As $reference_id => $name){
@@ -114,7 +114,7 @@ class plgContentbuilder_themesBlank extends JPlugin
          * @return string
          */
         function onEditableTemplateSample($contentbuilder_form_id, $form){
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             $out = '<table border="0" width="100%" class="blanktable_edit"><tbody>'."\n";
             $names = $form->getElementNames();
             $hidden = array();

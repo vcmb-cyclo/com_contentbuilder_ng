@@ -8,7 +8,10 @@
 
 // No direct access
 
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 use Joomla\Utilities\ArrayHelper;
+
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -32,7 +35,7 @@ class ContentbuilderModelUsers extends CBModel
 
     function  __construct($config) {
 
-		$this->_db = CBFactory::getDbo();
+		$this->_db = Factory::getContainer()->get(DatabaseInterface::class);
 
         parent::__construct($config);
 

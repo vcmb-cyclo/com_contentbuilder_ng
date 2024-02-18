@@ -9,6 +9,7 @@
 // no direct access
 
 use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -36,8 +37,9 @@ class ContentbuilderViewDetails extends CBView
         
         $event = new stdClass();
         
-        CBFactory::getDbo()->setQuery("Select articles.`article_id` From #__contentbuilder_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($subject->form_id) . " And articles.record_id = " . CBFactory::getDbo()->Quote($subject->record_id));
-        $article = CBFactory::getDbo()->loadResult();
+		$db = Factory::getContainer()->get(DatabaseInterface::class);
+        $db->setQuery("Select articles.`article_id` From #__contentbuilder_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($subject->form_id) . " And articles.record_id = " . $db->Quote($subject->record_id));
+        $article = $db->loadResult();
 
         $table = JTable::getInstance('content');
 

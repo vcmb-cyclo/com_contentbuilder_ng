@@ -7,3 +7,5 @@ administrator/logs/
 
 # Joomla cache files exclusion
 administrator/cache/
+
+configuration.php

@@ -9,6 +9,8 @@
 // No direct access
 
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -30,7 +32,7 @@ class ContentbuilderModelStorage extends CBModel
     {
         parent::__construct();
 
-		$this->_db = CBFactory::getDbo();
+		$this->_db = Factory::getContainer()->get(DatabaseInterface::class);
 
         $mainframe = JFactory::getApplication();
         $option = 'com_contentbuilder';
@@ -117,7 +119,7 @@ class ContentbuilderModelStorage extends CBModel
 
     function getDbTables(){
         
-        $tables = CBFactory::getDbo()->getTableList();
+        $tables = Factory::getContainer()->get(DatabaseInterface::class)->getTableList();
         return $tables;
         
     }
@@ -382,7 +384,7 @@ class ContentbuilderModelStorage extends CBModel
     function store($post_replace = null)
     {
         $isNew = false;
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $row = $this->getTable();
         $storage = $this->getStorage();
         $storage_id = 0;
@@ -528,10 +530,10 @@ class ContentbuilderModelStorage extends CBModel
         $last_update = JFactory::getDate();
         $last_update = CBCompat::toSql($last_update);
         
-        $tables = CBCompat::getTableFields( CBFactory::getDbo()->getTableList() );
+        $tables = CBCompat::getTableFields( Factory::getContainer()->get(DatabaseInterface::class)->getTableList() );
         
-        if(!$bytable && !isset($tables[CBFactory::getDbo()->getPrefix().$data['name']])){
-            if($storage->name && isset($tables[CBFactory::getDbo()->getPrefix().$storage->name])){
+        if(!$bytable && !isset($tables[Factory::getContainer()->get(DatabaseInterface::class)->getPrefix().$data['name']])){
+            if($storage->name && isset($tables[Factory::getContainer()->get(DatabaseInterface::class)->getPrefix().$storage->name])){
                 
                 $this->_db->setQuery("Rename Table #__".$storage->name." To #__".$data['name']);
                 $this->_db->execute();
@@ -551,16 +553,16 @@ class ContentbuilderModelStorage extends CBModel
                     ) ;
                     ');
                     $this->_db->execute();
-                    CBFactory::getDbo()->setQuery("ALTER TABLE `#__".$data['name']."` ADD INDEX ( `storage_id` )");
-                    CBFactory::getDbo()->execute();
-                    CBFactory::getDbo()->setQuery("ALTER TABLE `#__".$data['name']."` ADD INDEX ( `user_id` )");
-                    CBFactory::getDbo()->execute();
-                    CBFactory::getDbo()->setQuery("ALTER TABLE `#__".$data['name']."` ADD INDEX ( `created` )");
-                    CBFactory::getDbo()->execute();
-                    CBFactory::getDbo()->setQuery("ALTER TABLE `#__".$data['name']."` ADD INDEX ( `modified_user_id` )");
-                    CBFactory::getDbo()->execute();
-                    CBFactory::getDbo()->setQuery("ALTER TABLE `#__".$data['name']."` ADD INDEX ( `modified` )");
-                    CBFactory::getDbo()->execute();
+                    $this->_db->setQuery("ALTER TABLE `#__".$data['name']."` ADD INDEX ( `storage_id` )");
+                    $this->_db->execute();
+                    $this->_db->setQuery("ALTER TABLE `#__".$data['name']."` ADD INDEX ( `user_id` )");
+                    $this->_db->execute();
+                    $this->_db->setQuery("ALTER TABLE `#__".$data['name']."` ADD INDEX ( `created` )");
+                    $this->_db->execute();
+                    $this->_db->setQuery("ALTER TABLE `#__".$data['name']."` ADD INDEX ( `modified_user_id` )");
+                    $this->_db->execute();
+                    $this->_db->setQuery("ALTER TABLE `#__".$data['name']."` ADD INDEX ( `modified` )");
+                    $this->_db->execute();
                 }catch(Exception $e){
                     
                 }
@@ -680,7 +682,7 @@ class ContentbuilderModelStorage extends CBModel
             }
         }
 
-        $tables = CBCompat::getTableFields( CBFactory::getDbo()->getTableList() );
+        $tables = CBCompat::getTableFields( $this->_db->getTableList() );
 
         foreach($listnames As $field_id => $name){
 
@@ -728,7 +730,7 @@ class ContentbuilderModelStorage extends CBModel
                     continue;
                 }
                 $fieldname = $field->name;
-                if($fieldname && !isset( $tables[CBFactory::getDbo()->getPrefix().$data['name']][$fieldname] )){
+                if($fieldname && !isset( $tables[$this->_db->getPrefix().$data['name']][$fieldname] )){
                     try{
                         $this->_db->setQuery("ALTER TABLE `#__".$data['name']."` ADD `".$fieldname."` TEXT NULL ");
                         $this->_db->execute();
@@ -824,7 +826,7 @@ class ContentbuilderModelStorage extends CBModel
 
     function move($direction) {
 
-      $db = CBFactory::getDbo();
+      $db = Factory::getContainer()->get(DatabaseInterface::class);
       $mainframe = JFactory::getApplication();
 
       $row = $this->getTable('storage');
@@ -848,7 +850,7 @@ class ContentbuilderModelStorage extends CBModel
 	   ArrayHelper::toInteger($items);
 
       if(count($items)){
-          $db = CBFactory::getDbo();
+          $db = Factory::getContainer()->get(DatabaseInterface::class);
           $row = $this->getTable('storage_fields');
 
           if (!$row->load($items[0])) {

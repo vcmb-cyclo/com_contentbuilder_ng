@@ -9,6 +9,7 @@
 /** ensure this file is being included by a parent file */
 
 use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
 defined( '_JEXEC' ) or die( 'Direct Access to this location is not allowed.' );
 
@@ -83,7 +84,7 @@ class plgContentContentbuilder_verify extends JPlugin {
             return true;
         }
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $matches = array();
         preg_match_all("/\{CBVerify([^}]*)\}/i", $article->text, $matches);
 

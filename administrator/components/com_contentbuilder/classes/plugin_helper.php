@@ -8,6 +8,7 @@
  */
 
 use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
 defined('JPATH_PLATFORM') or die;
 
@@ -184,7 +185,7 @@ abstract class CBPluginHelper
 
 		if (!$plugins = $cache->get($levels)) {
                     
-			$db		= CBFactory::getDbo();
+			$db = Factory::getContainer()->get(DatabaseInterface::class);
 			$query	= $db->getQuery(true);
 
 			$query->select('folder AS type, element AS name, params')

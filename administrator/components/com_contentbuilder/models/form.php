@@ -11,6 +11,7 @@
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 use \Joomla\Utilities\ArrayHelper;
 
 JHTML::_('behavior.keepalive');
@@ -42,7 +43,7 @@ class ContentbuilderModelForm extends CBModel
     
     function  __construct($config)
     {
-	    $this->_db = CBFactory::getDbo();
+	    $this->_db = Factory::getContainer()->get(DatabaseInterface::class);
 
         parent::__construct();
 
@@ -207,7 +208,7 @@ class ContentbuilderModelForm extends CBModel
         
         jimport('joomla.version');
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         
         $version = new JVersion();
         
@@ -231,7 +232,7 @@ class ContentbuilderModelForm extends CBModel
         
         jimport('joomla.version');
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         
         $version = new JVersion();
         
@@ -268,7 +269,7 @@ class ContentbuilderModelForm extends CBModel
     function getVerificationPlugins(){
         jimport('joomla.version');
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         
         $version = new JVersion();
         
@@ -471,7 +472,7 @@ class ContentbuilderModelForm extends CBModel
             }
         }
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select * From #__contentbuilder_list_states Where form_id = " . $this->_id . " Order By id");
         $list_states = $db->loadAssocList();
 
@@ -497,7 +498,7 @@ class ContentbuilderModelForm extends CBModel
         // Initialise variables.
         $options = array();
 
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $query = $db->getQuery(true);
 
         $query->select('a.id AS value, a.title AS text, a.level');
@@ -595,7 +596,7 @@ class ContentbuilderModelForm extends CBModel
 
     function store()
     {
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $row = $this->getTable();
         $form = $this->getForm();
         $form_id = 0;
@@ -772,7 +773,7 @@ class ContentbuilderModelForm extends CBModel
         jimport('joomla.version');
         $version = new JVersion();
 
-	    $db = CBFactory::getDbo();
+	    $db = Factory::getContainer()->get(DatabaseInterface::class);
 	    $query = 'SELECT CONCAT( REPEAT(\'..\', COUNT(parent.id) - 1), node.title) as text, node.id as value'
 		    . ' FROM #__usergroups AS node, #__usergroups AS parent'
 		    . ' WHERE node.lft BETWEEN parent.lft AND parent.rgt'
@@ -1256,7 +1257,7 @@ class ContentbuilderModelForm extends CBModel
 
     function move($direction) {
 
-      $db = CBFactory::getDbo();
+      $db = Factory::getContainer()->get(DatabaseInterface::class);
       $mainframe = JFactory::getApplication();
 
       $row = $this->getTable('form');
@@ -1280,7 +1281,7 @@ class ContentbuilderModelForm extends CBModel
       ArrayHelper::toInteger($items);
 
       if(count($items)){
-          $db = CBFactory::getDbo();
+          $db = Factory::getContainer()->get(DatabaseInterface::class);
           $row = $this->getTable('elements');
 
           if (!$row->load($items[0])) {

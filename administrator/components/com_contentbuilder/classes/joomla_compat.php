@@ -6,10 +6,14 @@
  * @license     GNU/GPL
 */
 
+// Compatibility mode class for Joomla 2. Useless ???
+
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\Database\DatabaseInterface;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'CBFile.php');
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'CBFactory.php');
@@ -60,11 +64,7 @@ class CBCompat {
     }
     
     public static function loadColumn(){
-       if(version_compare(CBJOOMLAVERSION, '3.0', '>=')){
-            return CBFactory::getDbo()->loadColumn();
-        }else{
-            return CBFactory::getDbo()->loadResultArray();
-        } 
+        return Factory::getContainer()->get(DatabaseInterface::class)->loadColumn();
     }
     
     public static function getCheckAll($rows){
@@ -129,7 +129,7 @@ class CBCompat {
     public static function getTableFields($tables, $typeOnly = true)
     {
             if(version_compare(CBJOOMLAVERSION, '3.0', '<')){
-                return CBFactory::getDbo()->getTableFields($tables); 
+                return $db = Factory::getContainer()->get(DatabaseInterface::class)->getTableFields($tables); 
             }
 
             $results = array();
@@ -138,7 +138,7 @@ class CBCompat {
 
             foreach ($tables as $table)
             {
-                    $results[$table] = CBFactory::getDbo()->getTableColumns($table, $typeOnly);
+                    $results[$table] = $db = Factory::getContainer()->get(DatabaseInterface::class)->getTableColumns($table, $typeOnly);
             }
 
             return $results;

@@ -6,6 +6,8 @@
  * @license Released under the terms of the GNU General Public License
  **/
 
+ use Joomla\CMS\Factory;
+ use Joomla\Database\DatabaseInterface;
 
 /** ensure this file is being included by a parent file */
 defined( '_JEXEC' ) or die( 'Direct Access to this location is not allowed.' );
@@ -150,7 +152,7 @@ class plgContentContentbuilder_image_scale extends JPlugin {
 
 		if(isset($article->id) || isset($article->cbrecord)){
 
-			$db = CBFactory::getDbo();
+			$db = Factory::getContainer()->get(DatabaseInterface::class);
 
 			$matches = array();
 

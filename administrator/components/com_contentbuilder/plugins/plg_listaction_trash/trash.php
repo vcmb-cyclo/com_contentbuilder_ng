@@ -6,6 +6,9 @@
  * @license     GNU/GPL
 */
 
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
+
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -24,7 +27,7 @@ class plgContentbuilder_listactionTrash extends JPlugin
          * @return string error
          */
         function onBeforeAction($form_id, $record_ids){
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             
             $lang = JFactory::getLanguage();
             $lang->load('plg_contentbuilder_listaction_trash', JPATH_ADMINISTRATOR);
@@ -65,7 +68,7 @@ class plgContentbuilder_listactionTrash extends JPlugin
          */
         function onAfterArticleCreation($form_id, $record_id, $article_id){
             
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             $db->setQuery("Select action From #__contentbuilder_list_records As lr, #__contentbuilder_list_states As ls Where lr.state_id = ls.id And lr.form_id = ls.form_id And lr.form_id = " . intval($form_id) . " And lr.record_id = " . $db->Quote($record_id));
             $action = $db->loadResult();
             

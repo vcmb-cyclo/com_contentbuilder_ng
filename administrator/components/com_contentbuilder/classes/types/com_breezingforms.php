@@ -6,6 +6,8 @@
  * @license     GNU/GPL
 */
 
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 use Joomla\Utilities\ArrayHelper;
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
@@ -18,7 +20,7 @@ class contentbuilder_com_breezingforms{
     public $exists = false;
     
     function __construct($id, $published = true){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         
         $db->setQuery("SET SESSION group_concat_max_len = 9999999");
         $db->execute();
@@ -47,7 +49,7 @@ class contentbuilder_com_breezingforms{
         
         if(!is_object($this->properties)) return;
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select r.`id` 
                 From 
                 (
@@ -98,7 +100,7 @@ class contentbuilder_com_breezingforms{
     }
     
     public function getUniqueValues($element_id, $where_field = '', $where = ''){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $where_add = '';
         if($where_field != '' && $where != ''){
            $db->setQuery("Select Distinct s.`record` From #__facileforms_subrecords As s, #__facileforms_records As r Where r.form = ".$this->properties->id." And r.id = s.record And s.`element` = ".intval($where_field)." And s.`value` <> '' And s.`value` = ".$db->Quote($where)."  Order By s.`value`");
@@ -132,7 +134,7 @@ class contentbuilder_com_breezingforms{
     }
     
     public function getAllElements(){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select * From #__facileforms_elements Where form = ".intval($this->properties->id)." And published = 1 Order By `ordering`");
         $e = $db->loadAssocList();
         $elements = array();
@@ -170,7 +172,7 @@ class contentbuilder_com_breezingforms{
          
          $data = new stdClass();
          
-         $db = CBFactory::getDbo();
+         $db = Factory::getContainer()->get(DatabaseInterface::class);
          
          $db->setQuery("Select metakey, metadesc, author, robots, rights, xreference From #__contentbuilder_records Where `type` = 'com_breezingforms' And reference_id = ".$db->Quote($this->properties->id)." And record_id = " . $db->Quote($record_id));
          $metadata = $db->loadObject();
@@ -221,7 +223,7 @@ class contentbuilder_com_breezingforms{
             $show_all_languages = false
     ){
         if(!is_object($this->properties)) return array();
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
 
         /////////////
         // we need all elements, so they will be searchable through having
@@ -345,7 +347,7 @@ class contentbuilder_com_breezingforms{
             return array();
         }
 
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
 
         /////////////
         // we need all elements, so they will be searchable through having
@@ -771,7 +773,7 @@ class contentbuilder_com_breezingforms{
 
     public static function getFormsList(){
         $list = array();
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select `id`,`title`,`name` From #__facileforms_forms Where published = 1 Order By `ordering`");
         $rows = $db->loadAssocList();
         foreach($rows As $row){
@@ -787,7 +789,7 @@ class contentbuilder_com_breezingforms{
      */
     
     public function isGroup($element_id){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select `type`, `flag1` From #__facileforms_elements Where id = " . intval($element_id));
         $result = $db->loadAssoc();
         if(is_array($result)){
@@ -811,7 +813,7 @@ class contentbuilder_com_breezingforms{
     
     public function getGroupDefinition($element_id){
         $return = array();
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select data2 From #__facileforms_elements Where `type` Not In ('Radio Button', 'Checkbox') And id = " . intval($element_id));
         $result = $db->loadResult();
         if($result){
@@ -901,20 +903,20 @@ class contentbuilder_com_breezingforms{
     }
     
     public function saveRecordUserData($record_id, $user_id, $fullname, $username){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Update #__facileforms_records Set user_id = " . intval($user_id) . ", username = " . $db->Quote($username) . ", user_full_name = " . $db->Quote($fullname) . " Where id = " . $db->Quote($record_id));
         $db->execute();
     }
 
 	public function clearDirtyRecordUserData($record_id){
-		$db = CBFactory::getDbo();
+		$db = Factory::getContainer()->get(DatabaseInterface::class);
 		$db->setQuery("Delete From #__facileforms_records Where user_id = 0 And id = " . $db->quote($record_id));
 		$db->execute();
 	}
     
     public function saveRecord($record_id, array $cleaned_values){
         $record_id = intval($record_id);
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $insert_id = 0;
         if(!$record_id){
             $username = '-';
@@ -1079,7 +1081,7 @@ class contentbuilder_com_breezingforms{
     }
     
     function delete($items, $form_id){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         ArrayHelper::toInteger($items);
         if(count($items)){
             jimport('joomla.filesystem.file');
@@ -1113,7 +1115,7 @@ class contentbuilder_com_breezingforms{
     }
     
     function isOwner($user_id, $record_id){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select id From #__facileforms_records Where id = " . intval($record_id) . " And user_id = " . intval($user_id));
         return $db->loadResult() !== null ? true : false;
     }

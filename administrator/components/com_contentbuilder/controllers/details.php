@@ -6,8 +6,10 @@
  * @license     GNU/GPL
 */
 
-// no direct access
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
+// no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
@@ -37,7 +39,7 @@ class ContentbuilderControllerDetails extends CBController
         
         if(CBRequest::getWord('view', '') == 'latest'){
 
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             
             $db->setQuery('Select `type`, `reference_id` From #__contentbuilder_forms Where id = '.intval(CBRequest::getInt('id',0)).' And published = 1');
             $form = $db->loadAssoc();

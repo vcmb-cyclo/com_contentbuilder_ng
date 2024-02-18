@@ -9,6 +9,7 @@
 // no direct access
 
 use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -49,8 +50,8 @@ class  plgSystemContentbuilder_system extends JPlugin
                 return;
             }
             
-            $db   = CBFactory::getDbo();
-            $app  = JFactory::getApplication();
+            $db   = Factory::getContainer()->get(DatabaseInterface::class);
+            $app  = Factory::getApplication();
             
              // managing auto-groups
             jimport('joomla.version');
@@ -62,7 +63,7 @@ class  plgSystemContentbuilder_system extends JPlugin
                 
                 if(intval($pluginParams->get('is_auto_groups', 0)) == 1 && count($pluginParams->get('auto_groups', array()))){
                 
-                    $db = CBFactory::getDbo();
+                    $db = Factory::getContainer()->get(DatabaseInterface::class);
 
                     $operateViews = array();
                     if($pluginParams->get('auto_groups_limit_views','') != ''){
@@ -232,7 +233,7 @@ class  plgSystemContentbuilder_system extends JPlugin
             // register non-existent records
             if( in_array(CBRequest::getVar('option', ''), array('com_contentbuilder', 'com_content')) ){
                 
-                $db = CBFactory::getDbo();
+                $db = Factory::getContainer()->get(DatabaseInterface::class);
                 
                 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php');
                 $db->setQuery("Select `type`, `reference_id` From #__contentbuilder_forms Where published = 1");
@@ -252,7 +253,7 @@ class  plgSystemContentbuilder_system extends JPlugin
             if(CBRequest::getCmd('option', '') == 'com_content' || CBRequest::getCmd('option', '') == 'com_contentbuilder'){
                 // managing published states
                 
-                $db = CBFactory::getDbo();
+                $db = Factory::getContainer()->get(DatabaseInterface::class);
                 $date = JFactory::getDate();
                 
                 $db->setQuery("Update #__contentbuilder_records Set published = 1 Where is_future = 1 And publish_up <> '0000-00-00 00:00:00' And publish_up <= '".CBCompat::toSql($date)."'");
@@ -300,7 +301,7 @@ class  plgSystemContentbuilder_system extends JPlugin
              
             if(CBRequest::getVar('option') == 'com_contentbuilder'){
                 
-                CBFactory::getDbo()->setQuery("
+                Factory::getContainer()->get(DatabaseInterface::class)->setQuery("
                     Update 
                         #__contentbuilder_records As records,
                         #__contentbuilder_forms As forms,
@@ -329,9 +330,9 @@ class  plgSystemContentbuilder_system extends JPlugin
                         )
                       )
                     ");
-                CBFactory::getDbo()->execute();
+                Factory::getContainer()->get(DatabaseInterface::class)->execute();
                 
-                CBFactory::getDbo()->setQuery("
+                Factory::getContainer()->get(DatabaseInterface::class)->setQuery("
                     Update 
                         #__contentbuilder_records As records,
                         #__contentbuilder_forms As forms,
@@ -356,7 +357,7 @@ class  plgSystemContentbuilder_system extends JPlugin
                     And
                         users.block = 0
                     ");
-                CBFactory::getDbo()->execute();
+                Factory::getContainer()->get(DatabaseInterface::class)->execute();
             }
         }
         
@@ -384,8 +385,8 @@ class  plgSystemContentbuilder_system extends JPlugin
             // synch the records if there are any changes
             if($app->isClient('site')){
 
-                $db         = CBFactory::getDbo();
-                $user       = JFactory::getUser();
+                $db         = Factory::getContainer()->get(DatabaseInterface::class);
+                $user       = Factory::getUser();
                 
                 $db->setQuery("
                     Update

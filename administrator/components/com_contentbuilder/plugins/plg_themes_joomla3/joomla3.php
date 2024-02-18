@@ -6,6 +6,9 @@
  * @license     GNU/GPL
 */
 
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
+
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -90,7 +93,7 @@ class plgContentbuilder_themesJoomla3 extends JPlugin
          * @return string
          */
         function onContentTemplateSample($contentbuilder_form_id, $form){
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             $out = '<ul class="category list-striped list-condensed">'."\n";
             $names = $form->getElementNames();
             foreach($names As $reference_id => $name){
@@ -114,7 +117,7 @@ class plgContentbuilder_themesJoomla3 extends JPlugin
          * @return string
          */
         function onEditableTemplateSample($contentbuilder_form_id, $form){
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             $out = ''."\n";
             $names = $form->getElementNames();
             $hidden = array();

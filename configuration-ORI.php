@@ -24,7 +24,7 @@ class JConfig {
 	public $dbsslcert = '';
 	public $dbsslca = '';
 	public $dbsslcipher = '';
-	public $force_ssl = 0;
+	public $force_ssl = 2;
 	public $live_site = '';
 	public $secret = 'pZzt0wWBOuTafAuC';
 	public $gzip = false;
@@ -50,14 +50,14 @@ class JConfig {
 	public $MetaAuthor = true;
 	public $MetaVersion = false;
 	public $robots = 'noindex, nofollow';
-	public $sef = false;
+	public $sef = true;
 	public $sef_rewrite = true;
 	public $sef_suffix = false;
 	public $unicodeslugs = false;
 	public $feed_limit = 10;
 	public $feed_email = 'none';
-	public $log_path = '/var/www/html/joomla/administrator/logs';
-	public $tmp_path = '/var/www/html/joomla/tmp';
+	public $log_path = '/home/vfuz2145/SITES-BREEZINGFORMS/joomla/administrator/logs';
+	public $tmp_path = '/home/vfuz2145/SITES-BREEZINGFORMS/joomla/tmp';
 	public $lifetime = 15;
 	public $session_handler = 'database';
 	public $shared_session = false;
@@ -84,7 +84,7 @@ class JConfig {
 	public $replytoname = '';
 	public $MetaRights = '';
 	public $sitename_pagetitles = 0;
-	public $session_filesystem_path = '/var/www/html/joomla/tmp';
+	public $session_filesystem_path = '';
 	public $session_memcached_server_host = 'localhost';
 	public $session_memcached_server_port = 11211;
 	public $session_redis_persist = 1;
@@ -99,7 +99,7 @@ class JConfig {
 	public $log_categories = '';
 	public $log_category_mode = 0;
 	public $cookie_domain = '';
-	public $cookie_path = '/var/www/html/joomla/tmp';
+	public $cookie_path = '';
 	public $asset_id = '1';
 	public $redis_server_auth = '';
 	public $session_redis_server_auth = '';

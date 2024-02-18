@@ -6,6 +6,9 @@
  * @license     GNU/GPL
 */
 
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
+
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -24,7 +27,7 @@ class plgContentbuilder_listactionUntrash extends JPlugin
          * @return string error
          */
         function onBeforeAction($form_id, $record_ids){
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             
             $lang = JFactory::getLanguage();
             $lang->load('plg_contentbuilder_listaction_untrash', JPATH_ADMINISTRATOR);

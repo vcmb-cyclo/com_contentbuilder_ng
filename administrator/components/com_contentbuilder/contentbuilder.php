@@ -10,6 +10,7 @@
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
 if( !defined( 'DS' ) ){
     define('DS', DIRECTORY_SEPARATOR);
@@ -46,7 +47,7 @@ if ( !( CBRequest::getCmd('controller','') == 'elementoptions' || CBRequest::get
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php');
 
-$db = CBFactory::getDbo();
+$db     = Factory::getContainer()->get(DatabaseInterface::class);
 $db->setQuery("Select `id`,`name` From #__contentbuilder_forms Where display_in In (1,2) And published = 1");
 $forms = $db->loadAssocList();
 

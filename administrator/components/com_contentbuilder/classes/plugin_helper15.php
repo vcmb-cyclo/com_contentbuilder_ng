@@ -12,6 +12,10 @@
 * See COPYRIGHT.php for copyright notices and details.
 */
 
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
+
+
 // Check to ensure this file is within the rest of the framework
 defined('JPATH_BASE') or die();
 
@@ -267,8 +271,8 @@ class CBPluginHelper
 			return $plugins;
 		}
 
-		$db		=& CBFactory::getDbo();
-		$user	=& JFactory::getUser();
+		$db		=& Factory::getContainer()->get(DatabaseInterface::class);
+		$user	=& Factory::getApplication()->getIdentity();
 
 		if (isset($user))
 		{
@@ -308,7 +312,7 @@ class CBPluginHelper
 
 		if (!$plugins = $cache->get($levels)) {
                     
-			$db		= CBFactory::getDbo();
+			$db		= Factory::getContainer()->get(DatabaseInterface::class);
 			$query	= $db->getQuery(true);
 
 			$query->select('folder AS type, element AS name, params')

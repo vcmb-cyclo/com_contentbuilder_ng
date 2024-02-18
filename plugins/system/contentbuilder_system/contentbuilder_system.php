@@ -9,6 +9,7 @@
 // no direct access
 
 use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -49,8 +50,8 @@ class  plgSystemContentbuilder_system extends JPlugin
                 return;
             }
             
-            $db   = CBFactory::getDbo();
-            $app  = JFactory::getApplication();
+            $db     = Factory::getContainer()->get(DatabaseInterface::class);
+            $app    = Factory::getApplication();
             
              // managing auto-groups
             jimport('joomla.version');
@@ -62,7 +63,7 @@ class  plgSystemContentbuilder_system extends JPlugin
                 
                 if(intval($pluginParams->get('is_auto_groups', 0)) == 1 && count($pluginParams->get('auto_groups', array()))){
                 
-                    $db = CBFactory::getDbo();
+                    $db     = Factory::getContainer()->get(DatabaseInterface::class);
 
                     $operateViews = array();
                     if($pluginParams->get('auto_groups_limit_views','') != ''){
@@ -252,13 +253,13 @@ class  plgSystemContentbuilder_system extends JPlugin
             if(CBRequest::getCmd('option', '') == 'com_content' || CBRequest::getCmd('option', '') == 'com_contentbuilder'){
                 // managing published states
                 
-                $db = CBFactory::getDbo();
-                $date = JFactory::getDate();
+                $db     = Factory::getContainer()->get(DatabaseInterface::class);
+                $date   = Factory::getDate();
                 
-                $db->setQuery("Update #__contentbuilder_records Set published = 1 Where is_future = 1 And publish_up <> '0000-00-00 00:00:00' And publish_up <= '".CBCompat::toSql($date)."'");
+                $db->setQuery("Update #__contentbuilder_records Set published = 1 Where is_future = 1 And publish_up <> '0000-00-00 00:00:00' And publish_up <= '".$date->toSql()."'");
                 $db->execute();
                 
-                $db->setQuery("Update #__contentbuilder_records Set published = 0 Where publish_down <> '0000-00-00 00:00:00' And publish_down <= '".CBCompat::toSql($date)."'");
+                $db->setQuery("Update #__contentbuilder_records Set published = 0 Where publish_down <> '0000-00-00 00:00:00' And publish_down <= '".$date->toSql()."'");
                 $db->execute();
                 
                 // published states END
@@ -384,8 +385,8 @@ class  plgSystemContentbuilder_system extends JPlugin
             // synch the records if there are any changes
             if($app->isClient('site')){
 
-                $db         = CBFactory::getDbo();
-                $user       = JFactory::getUser();
+                $db     = Factory::getContainer()->get(DatabaseInterface::class);
+                $user   = Factory::getApplication()->getIdentity();
                 
                 $db->setQuery("
                     Update
@@ -523,8 +524,8 @@ class  plgSystemContentbuilder_system extends JPlugin
                     $lang->load('com_contentbuilder', JPATH_ADMINISTRATOR);
                 }
                 
-                $jdate = JFactory::getDate();
-                $now   = CBCompat::toSql($jdate);
+                $jdate = Factory::getDate();
+                $now   = $jdate->toSql();
                 
                 foreach($list As $data){
                 

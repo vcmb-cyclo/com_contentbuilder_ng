@@ -7,7 +7,9 @@
 */
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Factory;
 use \Joomla\CMS\Filesystem\File;
+use Joomla\Database\DatabaseInterface;
 
 if(!class_exists('CBFactory'))
 {
@@ -481,11 +483,11 @@ function contentbuilder_install_db(){
     
     require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
     
-    $db = CBFactory::getDBO();
+    $db     = Factory::getContainer()->get(DatabaseInterface::class);
     
-    $tables = CBCompat::getTableFields( CBFactory::getDBO()->getTableList() );
+    $tables = CBCompat::getTableFields( $db->getTableList() );
 
-    if(isset($tables[CBFactory::getDBO()->getPrefix().'contentbuilder_forms'])){
+    if(isset($tables[$db->getPrefix().'contentbuilder_forms'])){
 
 	    return true;
     }
@@ -838,7 +840,7 @@ class com_contentbuilderInstallerScript
             
             require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
-                $db = CBFactory::getDBO();
+                $db = Factory::getContainer()->get(DatabaseInterface::class);
 
                 jimport('joomla.filesystem.file');
                 jimport('joomla.filesystem.folder');
@@ -918,7 +920,7 @@ class com_contentbuilderInstallerScript
             jimport('joomla.version');
             $version = new JVersion();
             
-            $db = CBFactory::getDBO();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             
             $db->setQuery("Delete From #__menu Where `link` Like 'index.php?option=com_contentbuilder%'");
             $db->execute();
@@ -944,7 +946,7 @@ class com_contentbuilderInstallerScript
                 }
             }
             
-            $db = CBFactory::getDBO();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
             if(!$db->loadResult()){
                 $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
@@ -959,12 +961,12 @@ class com_contentbuilderInstallerScript
 	 */
 	function preflight($type, $parent) 
 	{
-            $db = CBFactory::getDBO();
-            $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
-            if(!$db->loadResult()){
-                $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
-                $db->execute();
-            }
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
+        if(!$db->loadResult()){
+            $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
+            $db->execute();
+        }
 	}
  
 	/**
@@ -974,7 +976,7 @@ class com_contentbuilderInstallerScript
 	 */
 	function postflight($type, $parent) 
 	{
-            $db = CBFactory::getDBO();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
 
 			/*
             $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");

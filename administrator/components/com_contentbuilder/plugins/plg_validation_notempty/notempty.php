@@ -6,6 +6,9 @@
  * @license     GNU/GPL
 */
 
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
+
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -24,7 +27,7 @@ class plgContentbuilder_validationNotempty extends JPlugin
             $lang = JFactory::getLanguage();
             $lang->load('plg_contentbuilder_validation_notempty', JPATH_ADMINISTRATOR);
 
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
             $msg = '';
             
             if(!is_array($value)){

@@ -6,8 +6,9 @@
  * @license     GNU/GPL
 */
 
-use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Editor\Editor;
+use Joomla\Database\DatabaseInterface;
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -382,7 +383,7 @@ class contentbuilder{
             return $langs;
         }
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         
         jimport('joomla.version');
         $version = new JVersion();
@@ -450,7 +451,7 @@ class contentbuilder{
 	    $registry = new JRegistry;
 	    $registry->loadString('{}');
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select reference_id, item_wrapper, wordwrap, `label`, `options` From #__contentbuilder_elements Where published = 1 And form_id = " . intval($contentbuilder_form_id));
         $wrappers = $db->loadAssocList();
         foreach($wrappers As $wrapper){
@@ -573,7 +574,7 @@ class contentbuilder{
     }
 
     public static function createBackendMenuItem15($contentbuilder_form_id, $name, $update){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $parent_id = 0;
         $db->setQuery("Select id From #__components Where `option`='' And admin_menu_link='option=com_contentbuilder&viewcontainer=true'");
         $res = $db->loadResult();
@@ -647,7 +648,7 @@ class contentbuilder{
 
     public static function createBackendMenuItem16($contentbuilder_form_id, $name, $update){
         if(trim($name)){
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
 
             $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder' And parent_id = 1");
             $result = $db->loadResult();
@@ -729,7 +730,7 @@ class contentbuilder{
 
         if(trim($name)){
 
-            $db = CBFactory::getDbo();
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
 
             $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder' And parent_id = 1");
             $result = $db->loadResult();
@@ -823,7 +824,7 @@ class contentbuilder{
         if(!$contentbuilder_form_id || !is_object($form)){
             return;
         }
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $out = '';
         if($html){
             $out = '<table border="0" width="100%"><tbody>'."\n";
@@ -867,7 +868,7 @@ class contentbuilder{
             return;
         }
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $ids = array();
         $elements = $form->getElementLabels();
 
@@ -992,7 +993,7 @@ class contentbuilder{
     }
 
     public static function getListSearchableElements($contentbuilder_form_id){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select reference_id From #__contentbuilder_elements Where search_include = 1 And published = 1 And form_id = " . intval($contentbuilder_form_id));
         
         jimport('joomla.version');
@@ -1005,7 +1006,7 @@ class contentbuilder{
     }
 
     public static function getListLinkableElements($contentbuilder_form_id){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select reference_id From #__contentbuilder_elements Where linkable = 1 And published = 1 And form_id = " . intval($contentbuilder_form_id));
         jimport('joomla.version');
         $version = new JVersion();
@@ -1017,7 +1018,7 @@ class contentbuilder{
     }
     
     public static function getListEditableElements($contentbuilder_form_id){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select reference_id From #__contentbuilder_elements Where editable = 1 And published = 1 And form_id = " . intval($contentbuilder_form_id));
         jimport('joomla.version');
         $version = new JVersion();
@@ -1029,7 +1030,7 @@ class contentbuilder{
     }
     
     public static function getListNonEditableElements($contentbuilder_form_id){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select reference_id From #__contentbuilder_elements Where ( editable = 0 Or published = 0 ) And form_id = " . intval($contentbuilder_form_id));
         jimport('joomla.version');
         $version = new JVersion();
@@ -1046,7 +1047,7 @@ class contentbuilder{
             return $_template[$hash];
         }
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select `type`,reference_id,details_template, details_prepare, edit_by_type, act_as_registration, registration_name_field, registration_username_field, registration_email_field, registration_email_repeat_field, registration_password_field, registration_password_repeat_field From #__contentbuilder_forms Where id = " . intval($contentbuilder_form_id));
         $result = $db->loadAssoc();
         if(is_array($result) && $result['details_template']){
@@ -1170,7 +1171,7 @@ class contentbuilder{
     public static function getFormElementsPlugins(){
         jimport('joomla.version');
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         
         $version = new JVersion();
         
@@ -1205,7 +1206,7 @@ class contentbuilder{
             return $_template[$hash];
         }
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select `name`,`type`,reference_id,email_template, email_admin_template, email_html, email_admin_html, act_as_registration, registration_name_field, registration_username_field, registration_email_field  From #__contentbuilder_forms Where id = " . intval($contentbuilder_form_id));
         $result = $db->loadAssoc();
         if(is_array($result)){
@@ -1322,7 +1323,7 @@ class contentbuilder{
             JFactory::getSession()->clear('cb_failed_values', 'com_contentbuilder.'.$contentbuilder_form_id);
         }
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select `type`, reference_id, editable_template, editable_prepare, edit_by_type, act_as_registration, registration_name_field, registration_username_field, registration_email_field, registration_email_repeat_field, registration_password_field, registration_password_repeat_field From #__contentbuilder_forms Where id = " . intval($contentbuilder_form_id));
         $result = $db->loadAssoc();
 
@@ -1747,7 +1748,7 @@ class contentbuilder{
         
         $tpl = self::getTemplate($contentbuilder_form_id, $record_id, $record, $elements_allowed, true);
         if(!$tpl) return 0;
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select * From #__contentbuilder_forms Where id = " . intval($contentbuilder_form_id)." And published = 1");
         $form = $db->loadAssoc();
 
@@ -2292,7 +2293,7 @@ class contentbuilder{
     
     public static function setPermissions($form_id, $record_id = 0, $suffix = ''){
         
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         
         $db->setQuery("Select `type`, `reference_id` From #__contentbuilder_forms Where id = " . intval($form_id) . " And published = 1");
         $type = $db->loadAssoc();
@@ -2726,7 +2727,7 @@ class contentbuilder{
             
 
             if(is_array($user_return) && isset($user_return['own']) && $user_return['own']){
-                $db = CBFactory::getDbo();
+                $db = Factory::getContainer()->get(DatabaseInterface::class);
                 
             // XDA+GIL 08/JAN/2024 - PHP 8.3 Fix (double declaration of static bar)
             // static $typeref;
@@ -2872,7 +2873,7 @@ class contentbuilder{
                 if(isset($permissions['own'.$suffix][$action])){
                     $user_return = $permissions['own'.$suffix][$action];
                     if(is_array($user_return) && isset($user_return['own']) && $user_return['own']){
-                        $db = CBFactory::getDbo();
+                        $db = Factory::getContainer()->get(DatabaseInterface::class);
                         
                     // XDA+GIL 08/JAN/2024 - PHP 8.3 Fix (double declaration of static bar)
                     // static $typeref;
@@ -2937,7 +2938,7 @@ class contentbuilder{
     }
     
     public static function getListStates($id){
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select * From #__contentbuilder_list_states where form_id = " . intval($id) . " And published = 1 Order By id");
         $list_states = $db->loadAssocList();
         return $list_states;
@@ -2945,7 +2946,7 @@ class contentbuilder{
     
     public static function getStateColors($items, $id){
         $out = array();
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $imp = '';
         $itemcnt = count($items);
         $i = 0;
@@ -2965,7 +2966,7 @@ class contentbuilder{
     
     public static function getStateTitles($items, $id){
         $out = array();
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $imp = '';
         $itemcnt = count($items);
         $i = 0;
@@ -2985,7 +2986,7 @@ class contentbuilder{
     
     public static function getRecordsPublishInfo($items, $type, $reference_id){
         $out = array();
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         if($reference_id){
             
             $imp = '';
@@ -3010,7 +3011,7 @@ class contentbuilder{
     
     public static function getRecordsLanguage($items, $type, $reference_id){
         $out = array();
-        $db = CBFactory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         if($reference_id){
             
             $imp = '';

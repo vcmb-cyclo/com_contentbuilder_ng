@@ -10,6 +10,7 @@
 
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 use Joomla\Utilities\ArrayHelper;
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
@@ -1823,7 +1824,7 @@ var contentbuilder = new function(){
 		if( $user_id ){
 
 			jimport('joomla.user.helper');
-			$db = CBFactory::getDbo();
+			$db = Factory::getContainer()->get(DatabaseInterface::class);
 
 			$pw = '';
 			if(!empty($the_password_field)){
@@ -1883,7 +1884,7 @@ var contentbuilder = new function(){
 			return false;
 		}
 
-		$query = CBFactory::getDbo()->getQuery(true);
+		$query = Factory::getContainer()->get(DatabaseInterface::class)->getQuery(true);
 
 		// Compile the notification mail values.
 		$data = $user->getProperties();
@@ -1982,11 +1983,11 @@ var contentbuilder = new function(){
 			      ->from(JFactory::getDbo()->quoteName('#__users'))
 			      ->where(JFactory::getDbo()->quoteName('sendEmail') . ' = ' . 1);
 
-			CBFactory::getDbo()->setQuery($query);
+            Factory::getContainer()->get(DatabaseInterface::class)->setQuery($query);
 
 			try
 			{
-				$rows = CBFactory::getDbo()->loadObjectList();
+				$rows = Factory::getContainer()->get(DatabaseInterface::class)->loadObjectList();
 			}
 			catch (RuntimeException $e)
 			{
@@ -2031,7 +2032,7 @@ var contentbuilder = new function(){
 			$this->setError(JText::_('COM_USERS_REGISTRATION_SEND_MAIL_FAILED'));
 
 			// Send a system message to administrators receiving system mails
-			$db = CBFactory::getDbo();
+			$db = Factory::getContainer()->get(DatabaseInterface::class);
 			$q = "SELECT id
                         FROM #__users
                         WHERE block = 0
@@ -2075,7 +2076,7 @@ var contentbuilder = new function(){
     {
             global $mainframe;
 
-            $db		= CBFactory::getDbo();
+            $db		= Factory::getContainer()->get(DatabaseInterface::class)
 
             $name 		= $user->get('name');
             $email 		= $user->get('email');
