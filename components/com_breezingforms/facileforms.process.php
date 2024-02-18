@@ -22,7 +22,7 @@ class bfMobile {
 
 }
 
-$mainframe = JFactory::getApplication();
+$mainframe = Factory::getApplication();
 
 $ff_processor = null;
 
@@ -446,6 +446,7 @@ class HTML_facileFormsProcessor {
     var $template = null;     // 0-frontend 1-backend
     var $homepage = null;     // home page
     var $mospath = null;     // mos absolute path
+    var $mossite = null;     // mos site
     var $images = null;     // ff_images path
     var $uploads = null;     // ff_uploads path
     var $border = null;     // show border
@@ -8078,10 +8079,7 @@ class HTML_facileFormsProcessor {
 
                 jimport('joomla.version');
                 $version = new JVersion();
-                $j15 = true;
-                if (version_compare($version->getShortVersion(), '1.6', '>=')) {
-                    $j15 = false;
-                }
+                $j15 = false;
 
 
                 $paymentAction = true;

@@ -109,9 +109,6 @@ class ContentbuilderModelList extends CBModel
         if($this->frontend && CBRequest::getInt('Itemid',0)){
             
             // try menu item
-            jimport('joomla.version');
-            $version = new JVersion();
-
 	        $menu = JFactory::getApplication()->getMenu();
 	        $item = $menu->getActive();
 	        if (is_object($item)) {
@@ -260,13 +257,8 @@ class ContentbuilderModelList extends CBModel
                     if($data->rand_update < 1){
                         $data->rand_update = 86400;
                     }
-                    jimport('joomla.version');
-                    $version = new JVersion();
-                    if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                        $___now = $now->toSql();
-                    }else{
-                        $___now = $now->toMySQL();
-                    }
+                    $___now = $now->toSql();
+
                     if( $data->initial_sort_order == 'Rand' && ( $data->rand_date_update == '0000-00-00 00:00:00' || $now->toUnix() - strtotime($data->rand_date_update) >= $data->rand_update ) ){
                         $this->_db->setQuery("UPDATE #__contentbuilder_records SET rand_date = '".$___now."' + interval rand()*10000 day Where `type` = ".$this->_db->Quote($data->type)." And reference_id = " . $this->_db->Quote($data->reference_id));
                         $this->_db->execute();
@@ -452,9 +444,6 @@ class ContentbuilderModelList extends CBModel
                     $data->slug2 = '';
                     
                     // "buddy quaid hack", should be an option in future versions
-                    
-                    jimport('joomla.version');
-                    $version = new JVersion();
 
 	                $custom_page_heading = '';
 
@@ -587,9 +576,6 @@ class ContentbuilderModelList extends CBModel
         // Load the content if it doesn't already exist
         if (empty($this->_pagination)) {
             
-            jimport('joomla.version');
-            $version = new JVersion();
-
             // using a different chrome to bypass problems with pagination in frontend 
             require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'pagination.php');
             $this->_pagination = new CBPagination($this->getTotal(), $this->getState('limitstart'), $this->getState('limit') );

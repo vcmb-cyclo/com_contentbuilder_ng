@@ -36,12 +36,9 @@ class ContentbuilderViewForm extends CBView
         .icon-48-logo_left { background-image: url(../administrator/components/com_contentbuilder/views/logo_left.png); }
         </style>
         ';
-        jimport('joomla.version');
-        $version = new JVersion();
 
-        if(version_compare($version->getShortVersion(), '1.6', '>=')){
-            echo '<link rel="stylesheet" href="'.JURI::root(true).'/administrator/components/com_contentbuilder/views/bluestork.fix.css" type="text/css" />';
-        }
+        echo '<link rel="stylesheet" href="'.JURI::root(true).'/administrator/components/com_contentbuilder/views/bluestork.fix.css" type="text/css" />';
+
         $form     = $this->get('Form');
         $elements  = $this->get('Data');
         $all_elements  = $this->get('AllElements');
@@ -94,7 +91,7 @@ class ContentbuilderViewForm extends CBView
 	    $db->setQuery($query);
 	    $gmap = $db->loadObjectList();
         
-        $form->config = unserialize(cb_b64dec($form->config));
+        $form->config = $form->config ? unserialize(cb_b64dec($form->config)) : null;
 
         $actionPlugins = $this->get('ListStatesActionPlugins');
         $verificationPlugins = $this->get('VerificationPlugins');

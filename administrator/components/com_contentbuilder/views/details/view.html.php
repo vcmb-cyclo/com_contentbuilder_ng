@@ -43,9 +43,6 @@ class ContentbuilderViewDetails extends CBView
 
         $table = JTable::getInstance('content');
 
-        jimport('joomla.version');
-        $version = new JVersion();
-        
         // required for pagebreak plugin
         CBRequest::setVar('view', 'article');
 

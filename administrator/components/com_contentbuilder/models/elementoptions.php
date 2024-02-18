@@ -19,10 +19,6 @@ require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilde
 CBCompat::requireModel();
 
 require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'contentbuilder.php');
-
-jimport('joomla.version');
-$version = new JVersion();
-
 require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper.php');
 require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper4.php');
 
@@ -74,40 +70,11 @@ class ContentbuilderModelElementoptions extends CBModel
     }
     
     function getValidationPlugins(){
-        jimport('joomla.version');
-        
         $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_validation' And `enabled` = 1");
         
-        $version = new JVersion();
-        
-        if(version_compare($version->getShortVersion(), '1.6', '>=')){
-            
-            $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_validation' And `enabled` = 1");
-            
-            jimport('joomla.version');
-            $version = new JVersion();
-            if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                $res = $db->loadColumn();
-            }else{
-                $res = $db->loadResultArray();
-            }
-            return $res;
-            
-        } else {
-            
-            $db->setQuery("Select `element` From #__plugins Where `folder` = 'contentbuilder_validation' And `published` = 1");
-            
-            jimport('joomla.version');
-            $version = new JVersion();
-            if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                $res = $db->loadColumn();
-            }else{
-                $res = $db->loadResultArray();
-            }
-            return $res;
-        }
-        
-        return array();
+        $res = $db->loadColumn();
+        return $res;
     }
     
     function getGroupDefinition(){

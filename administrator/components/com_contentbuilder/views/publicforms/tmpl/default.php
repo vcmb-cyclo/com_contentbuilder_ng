@@ -7,12 +7,7 @@
 */
 
 defined('_JEXEC') or die('Restricted access');
-jimport('joomla.version');
-$version = new JVersion();
-$th = 'td';
-if (version_compare($version->getShortVersion(), '1.6', '>=')) {
-    $th = 'th';
-}
+$th = 'th';
 if($this->page_heading){
 ?>
 <h1 class="contentheading">

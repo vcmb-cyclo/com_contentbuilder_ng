@@ -27,9 +27,6 @@ class ContentbuilderViewEdit extends CBView
         // Get data from the model
         $subject = $this->get('Data');
         
-        jimport('joomla.version');
-        $version = new JVersion();
-
         $event = new stdClass();
         $event->afterDisplayTitle = '';
         $event->beforeDisplayContent = '';
@@ -44,9 +41,6 @@ class ContentbuilderViewEdit extends CBView
             $article = CBFactory::getDbo()->loadResult();
 
             $table = JTable::getInstance('content');
-
-            jimport('joomla.version');
-            $version = new JVersion();
 
             // required for pagebreak plugin
             CBRequest::setVar('view', 'article');
@@ -63,24 +57,14 @@ class ContentbuilderViewEdit extends CBView
 	        $alias = $table->alias ? contentbuilder::stringURLUnicodeSlug($table->alias) : contentbuilder::stringURLUnicodeSlug($subject->page_title);
 	        if(trim(str_replace('-','',$alias)) == '') {
 		        $datenow = JFactory::getDate();
-		        jimport('joomla.version');
-		        $version = new JVersion();
-		        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-			        $alias = $datenow->format("%Y-%m-%d-%H-%M-%S");
-		        }else{
-			        $alias = $datenow->toFormat("%Y-%m-%d-%H-%M-%S");
-		        }
+		        $alias = $datenow->format("%Y-%m-%d-%H-%M-%S");
 	        }
 
 	        // we pass the slug with a flag in the end, and see in the end if the slug has been used in the output
 	        $table->slug = ($article > 0 ? $article : 0) . ':' . $alias . ':contentbuilder_slug_used';
 
 	        $registry = new JRegistry;
-	        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-		        $registry->loadString($table->attribs);
-	        }else{
-		        $registry->loadString($table->attribs);
-	        }
+	        $registry->loadString($table->attribs);
 
 	        JPluginHelper::importPlugin('content', 'breezingforms');
 

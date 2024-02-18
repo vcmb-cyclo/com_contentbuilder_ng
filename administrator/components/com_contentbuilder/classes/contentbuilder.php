@@ -16,10 +16,6 @@ jimport('joomla.filesystem.file');
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder_helpers.php');
-
-jimport('joomla.version');
-$version = new JVersion();
-
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'plugin_helper.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'plugin_helper4.php');
 class contentbuilder{
@@ -384,65 +380,14 @@ class contentbuilder{
         }
         
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        
-        jimport('joomla.version');
-        $version = new JVersion();
-
-        if(version_compare($version->getShortVersion(), '1.6', '<')){
-            
-            $langs = array();
-            $client =& JApplicationHelper::getClientInfo(0);
-            
-            jimport('joomla.filesystem.folder');
-            $path = JLanguage::getLanguagePath($client->path);
-            $dirs = JFolder::folders( $path );
-            
-            jimport('joomla.filesystem.folder');
-            $path = JLanguage::getLanguagePath($client->path);
-            $dirs = JFolder::folders( $path );
-
-            foreach ($dirs as $dir)
-            {
-                    $files = JFolder::files( $path.DS.$dir, '^([-_A-Za-z]*)\.xml$' );
-                    foreach ($files as $file)
-                    {
-                            $data = JApplicationHelper::parseXMLLangMetaFile($path.DS.$dir.DS.$file);
-
-                            $language 	= substr($file,0,-4);
-
-                            if (!is_array($data)) {
-                                    continue;
-                            }
-
-                            // if current than set published
-                            $params = JComponentHelper::getParams('com_languages');
-                            //if ( $params->get($client->name, 'en-GB') == $language) {
-                                $langs[] = $language;
-                            //}
-                    }
-            }
-            
-            return $langs;
-        }
-        else{
-            $db->setQuery("Select lang_code From #__languages Where published = 1 Order By ordering");
-            $langs = CBCompat::loadColumn();
-            return $langs;
-        }
+        $db->setQuery("Select lang_code From #__languages Where published = 1 Order By ordering");
+        $langs = CBCompat::loadColumn();
+        return $langs;
     }
     
     public static function applyItemWrappers($contentbuilder_form_id, array $items, $form){
         
-        jimport('joomla.version');
-        $version = new JVersion();
-
-        if(version_compare($version->getShortVersion(), '1.7', '>=')){
-            require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper.php');
-        } else {
-            // joomla 1.6 shares the 1.5 code with JPluginHelper
-            require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper15.php');
-        }
-
+        require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper.php');
         $article = JTable::getInstance('content');
         $registry = null;
         $onContentPrepare = '';
@@ -996,44 +941,24 @@ class contentbuilder{
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select reference_id From #__contentbuilder_elements Where search_include = 1 And published = 1 And form_id = " . intval($contentbuilder_form_id));
         
-        jimport('joomla.version');
-        $version = new JVersion();
-        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-            return $db->loadColumn();
-        }else{
-            return $db->loadResultArray();
-        }
+        return $db->loadColumn();
     }
 
     public static function getListLinkableElements($contentbuilder_form_id){
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select reference_id From #__contentbuilder_elements Where linkable = 1 And published = 1 And form_id = " . intval($contentbuilder_form_id));
-        jimport('joomla.version');
-        $version = new JVersion();
-        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-            return $db->loadColumn();
-        }else{
-            return $db->loadResultArray();
-        }
+        return $db->loadColumn();
     }
     
     public static function getListEditableElements($contentbuilder_form_id){
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select reference_id From #__contentbuilder_elements Where editable = 1 And published = 1 And form_id = " . intval($contentbuilder_form_id));
-        jimport('joomla.version');
-        $version = new JVersion();
-        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-            return $db->loadColumn();
-        }else{
-            return $db->loadResultArray();
-        }
+        return $db->loadColumn();
     }
     
     public static function getListNonEditableElements($contentbuilder_form_id){
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select reference_id From #__contentbuilder_elements Where ( editable = 0 Or published = 0 ) And form_id = " . intval($contentbuilder_form_id));
-        jimport('joomla.version');
-        $version = new JVersion();
 	    return $db->loadColumn();
     }
 
@@ -1169,31 +1094,10 @@ class contentbuilder{
     }
     
     public static function getFormElementsPlugins(){
-        jimport('joomla.version');
-        
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        
-        $version = new JVersion();
-        
-        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-            $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_form_elements' And `enabled` = 1");
-            $res = $db->loadColumn();
-            return $res;
-        } else
-        if(version_compare($version->getShortVersion(), '1.6', '>=')){
-            
-            $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_form_elements' And `enabled` = 1");
-            $res = $db->loadResultArray();
-            return $res;
-            
-        } else {
-            
-            $db->setQuery("Select `element` From #__plugins Where `folder` = 'contentbuilder_form_elements' And `published` = 1");
-            $res = $db->loadResultArray();
-            return $res;
-        }
-        
-        return array();
+        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_form_elements' And `enabled` = 1");
+        $res = $db->loadColumn();
+        return $res;
     }
     
     public static function getEmailTemplate($contentbuilder_form_id, $record_id, array $record, array $elements_allowed, $isAdmin){
@@ -1744,7 +1648,6 @@ class contentbuilder{
         }
         
         $is15 = false;
-        $version = new JVersion();
         
         $tpl = self::getTemplate($contentbuilder_form_id, $record_id, $record, $elements_allowed, true);
         if(!$tpl) return 0;
@@ -1879,11 +1782,7 @@ class contentbuilder{
         if(is_array($article) && isset($article['article_id']) && intval($form['default_publish_down_days']) != 0){
             //$date = JFactory::getDate(strtotime( ($created_up !== null ? $created_up : $_now).' +'.intval($form['default_publish_down_days']).' days'));
             $date = JFactory::getDate(strtotime( ($created_up !== null && $created_up != '0000-00-00 00:00:00' ? $created_up : $_now).' +'.intval($form['default_publish_down_days']).' days'));
-            if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                $created_down = $date->toSql();
-            }else{
-                $created_down = $date->toMySQL();
-            }
+            $created_down = $date->toSql();
         }
         
         $publish_down = $created_down;
@@ -1939,11 +1838,7 @@ class contentbuilder{
             
             if($form['article_record_impact_publish'] && isset($config['publish_up']) && $config['publish_up'] != $publish_up){
                // check in strtotime due to php's different behavior on 64bit machines
-               if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                   $___now = $_now->toSql();
-               }else{
-                   $___now = $_now->toMySQL();
-               }
+               $___now = $_now->toSql();
                $db->setQuery("Update #__contentbuilder_records Set ".(strtotime($config['publish_up'] == '0000-00-00 00:00:00' ? '1976-03-07 22:10:00' : $config['publish_up']) >= strtotime($___now) ? 'published = 0, is_future = 1, ' : '')." publish_up = ".$db->Quote($config['publish_up'])." Where `type` = ".$db->Quote($form['type'])." And reference_id = ".$db->Quote($form['reference_id'])." And record_id = " . $db->Quote($record_id));
                $db->execute();
             }
@@ -1952,11 +1847,7 @@ class contentbuilder{
             $publish_up = isset($config['publish_up']) ? $config['publish_up'] : $publish_up;
             
             if($form['article_record_impact_publish'] && isset($config['publish_down']) && $config['publish_down'] != $publish_down){
-                if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                   $___now = $_now->toSql();
-                }else{
-                   $___now = $_now->toMySQL();
-                }
+                $___now = $_now->toSql();
                 $db->setQuery("Update #__contentbuilder_records Set ".(strtotime($config['publish_down'] == '0000-00-00 00:00:00' ? '1976-03-07 22:10:00' : $config['publish_down'] ) <= strtotime($___now) ? 'published = 0,' : '')."  publish_down = ".$db->Quote($config['publish_down'])." Where `type` = ".$db->Quote($form['type'])." And reference_id = ".$db->Quote($form['reference_id'])." And record_id = " . $db->Quote($record_id));
                 $db->execute();
             }
@@ -2639,291 +2530,148 @@ class contentbuilder{
     public static function checkPermissions($action, $error_msg, $suffix = '', $auth = false){
         
         $allowed = false;
+        $permissions = JFactory::getSession()->get('permissions'.$suffix, array(), 'com_contentbuilder');
         
-        jimport('joomla.version');
-        $version = new JVersion();
-        
-        if(version_compare($version->getShortVersion(), '1.6', '<')){
-            $user = JFactory::getUser();
-            
-            if($user->guest){
-                $user->usertype = 'public frontend'; 
-                $user->gid      = JFactory::getAcl()->get_group_id ( 'public frontend', 'ARO' );
-            }
-            
-            $user_return = $user->authorize('com_contentbuilder', $action);
-            
-            $published_return = $user->authorize('com_contentbuilder_published', 'any');
-            if($published_return !== 'ok'){
-                if(!$auth){
-                    //JError::raiseError(403, $error_msg);
-	                Factory::getApplication()->enqueueMessage($error_msg, 'error');
-                    JFactory::getApplication()->redirect('index.php');
-                }else{
-                    return false;
-                }
-            }
-            
-            switch($action){
-                case 'edit':
-                    $edit_return = $user->authorize('com_contentbuilder_limit_edit', $action);
-                    if($edit_return !== 'ok'){
-                        if(!$auth){
-	                        Factory::getApplication()->enqueueMessage($error_msg, 'error');
-                            JFactory::getApplication()->redirect('index.php');
-                        }else{
-                            return false;
-                        }
-                    }
-                    break;
-            }
-            
-            switch($action){
-                case 'new':
-                    $add_return = $user->authorize('com_contentbuilder_limit_add', $action);
-                    if($add_return !== 'ok'){
-                        if(!$auth){
-	                        Factory::getApplication()->enqueueMessage($error_msg, 'error');
-                            JFactory::getApplication()->redirect('index.php');
-                        }else{
-                            return false;
-                        }
-                    }
-                    break;
-            }
-            
-            switch($action){
-                case 'edit':
-                case 'new':
-                case 'view':
-                case 'delete':
-                    $myaction = $action == 'delete' ? 'edit' : $action;
-                    
-                    $verify_return = $user->authorize('com_contentbuilder_verify', $myaction);
-                    if($verify_return !== 'ok'){
-                        if($verify_return === 'notok'){
-                            if(!$auth){
-	                            Factory::getApplication()->enqueueMessage($error_msg, 'error');
-                                JFactory::getApplication()->redirect('index.php');
-                            }else{
-                                return false;
-                            }
-                        }
-                        else if($verify_return !== 'notok'){
-                            if(!$auth){
-                                JFactory::getApplication()->redirect($verify_return);
-                            } else {
-                                return false;
-                            }
-                        }
-                    }
-                    break;
-            }
-            
-            if($user->guest){
-                $user->usertype = ''; 
-                $user->gid      = 0;
-            }
-            
-
-            if(is_array($user_return) && isset($user_return['own']) && $user_return['own']){
-                $db = Factory::getContainer()->get(DatabaseInterface::class);
-                
-            // XDA+GIL 08/JAN/2024 - PHP 8.3 Fix (double declaration of static bar)
-            // static $typeref;
-                
-                if(is_array($typeref)){
-                    $typerefid = $typeref[intval($user_return['form_id'])];
-                }else{
-                    $db->setQuery("Select `type`, `reference_id` From #__contentbuilder_forms Where id = " . intval($user_return['form_id']));
-                    $typerefid = $db->loadAssoc();
-                    $typeref[intval($user_return['form_id'])] = $typerefid;
-                }
-                
-                if(is_array($typerefid)){
-                    $form = self::getForm($typerefid['type'], $typerefid['reference_id']);
-                    if($form && (!isset($user_return['record_id']))){
-                        $allowed = true;
-                    }else{
-                        if(is_array($user_return['record_id'])){
-                            foreach($user_return['record_id'] As $recid){
-                               $db->setQuery("Select session_id From #__contentbuilder_records Where `record_id` = ".$db->Quote($recid)." And `type` = ".$db->Quote($typerefid['type'])." And `reference_id` = ".$db->Quote($typerefid['reference_id'])."");
-                               $session_id = $db->loadResult();
-                               if($form && $session_id != JFactory::getSession()->getId() && !$form->isOwner(JFactory::getUser()->get('id',0), $recid)){
-                                    $allowed = false;
-                                    break;
-                                } else {
-                                    $allowed = true;
-                                }
-                            }
-                        }else{
-                            $db->setQuery("Select session_id From #__contentbuilder_records Where `record_id` = ".$db->Quote($user_return['record_id'])." And `type` = ".$db->Quote($typerefid['type'])." And `reference_id` = ".$db->Quote($typerefid['reference_id'])."");
-                            $session_id = $db->loadResult();
-                            if($form && ( $session_id == JFactory::getSession()->getId() || ( JFactory::getUser()->get('id',0) && $form->isOwner(JFactory::getUser()->get('id',0), $user_return['record_id']) ) ) ){
-                                $allowed = true;
-                            }
-                        }
-                    }
-                }
-                
+        $published_return = $permissions['published'];
+        if(!$published_return){
+            if(!$auth){
+                Factory::getApplication()->enqueueMessage($error_msg, 'error');
+                JFactory::getApplication()->redirect('index.php');
             }else{
-                if(!is_array($user_return) && $user_return){
-                    $allowed = true;
-                }
+                return false;
             }
-            if (!$allowed) {
-                if(!$auth){
-	                Factory::getApplication()->enqueueMessage($error_msg, 'error');
-                    JFactory::getApplication()->redirect('index.php');
-                }else{
-                    return false;
+        }
+        
+        switch($action){
+            case 'edit':
+                $edit_return = $permissions['limit_edit'];
+                if(!$edit_return){
+                    if(!$auth){
+                        Factory::getApplication()->enqueueMessage($error_msg, 'error');
+                        JFactory::getApplication()->redirect('index.php');
+                    }else{
+                        return false;
+                    }
+                }
+                break;
+        }
+        
+        switch($action){
+            case 'new':
+                $add_return = $permissions['limit_add'];
+                if(!$add_return){
+                    if(!$auth){
+                        Factory::getApplication()->enqueueMessage($error_msg, 'error');
+                        JFactory::getApplication()->redirect('index.php');
+                    }else{
+                        return false;
+                    }
+                }
+                break;
+        }
+        
+        switch($action){
+            case 'edit':
+            case 'new':
+            case 'view':
+            case 'delete':
+                $myaction = $action == 'delete' ? 'edit' : $action;
+                $verify_return = $permissions['verify_'.$myaction];
+                
+                if($verify_return !== true){
+                    
+                    if($verify_return === false){
+                        
+                        if(!$auth){
+                            Factory::getApplication()->enqueueMessage($error_msg, 'error');
+                            JFactory::getApplication()->redirect('index.php');
+                        }else{
+                            return false;
+                        }
+                    }
+                    else if(is_string ($verify_return)){
+                        if(!$auth){
+                            JFactory::getApplication()->redirect($verify_return);
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+                break;
+        }
+        
+        if(!isset($permissions['own'.$suffix])){
+            $gids = array();
+            
+            $groups = JAccess::getGroupsByUser(JFactory::getUser()->get('id',0));
+            
+            foreach($groups As $gid){
+                $gids[] = $gid;
+            }
+            
+            foreach($permissions As $group_id => $group_action){
+                if(isset($group_action[$action]) && $group_action[$action] && in_array($group_id, $gids)){
+                    $allowed = true;
+                    break;
                 }
             }
             
         }else{
-           
-            $permissions = JFactory::getSession()->get('permissions'.$suffix, array(), 'com_contentbuilder');
-           
-            $published_return = $permissions['published'];
-            if(!$published_return){
-                if(!$auth){
-	                Factory::getApplication()->enqueueMessage($error_msg, 'error');
-                    JFactory::getApplication()->redirect('index.php');
-                }else{
-                    return false;
-                }
-            }
             
-            switch($action){
-                case 'edit':
-                    $edit_return = $permissions['limit_edit'];
-                    if(!$edit_return){
-                        if(!$auth){
-	                        Factory::getApplication()->enqueueMessage($error_msg, 'error');
-                            JFactory::getApplication()->redirect('index.php');
-                        }else{
-                            return false;
-                        }
-                    }
-                    break;
-            }
-            
-            switch($action){
-                case 'new':
-                    $add_return = $permissions['limit_add'];
-                    if(!$add_return){
-                        if(!$auth){
-	                        Factory::getApplication()->enqueueMessage($error_msg, 'error');
-                            JFactory::getApplication()->redirect('index.php');
-                        }else{
-                            return false;
-                        }
-                    }
-                    break;
-            }
-            
-            switch($action){
-                case 'edit':
-                case 'new':
-                case 'view':
-                case 'delete':
-                    $myaction = $action == 'delete' ? 'edit' : $action;
-                    $verify_return = $permissions['verify_'.$myaction];
+            if(isset($permissions['own'.$suffix][$action])){
+                $user_return = $permissions['own'.$suffix][$action];
+                if(is_array($user_return) && isset($user_return['own']) && $user_return['own']){
+                    $db = Factory::getContainer()->get(DatabaseInterface::class);
                     
-                    if($verify_return !== true){
-                        
-                        if($verify_return === false){
-                            
-                            if(!$auth){
-	                            Factory::getApplication()->enqueueMessage($error_msg, 'error');
-                                JFactory::getApplication()->redirect('index.php');
-                            }else{
-                                return false;
-                            }
-                        }
-                        else if(is_string ($verify_return)){
-                            if(!$auth){
-                                JFactory::getApplication()->redirect($verify_return);
-                            } else {
-                                return false;
-                            }
-                        }
-                    }
-                    break;
-            }
+                // XDA+GIL 08/JAN/2024 - PHP 8.3 Fix (double declaration of static bar)
+                // static $typeref;
             
-            if(!isset($permissions['own'.$suffix])){
-                $gids = array();
-                
-                $groups = JAccess::getGroupsByUser(JFactory::getUser()->get('id',0));
-                
-                foreach($groups As $gid){
-                    $gids[] = $gid;
-                }
-                
-                foreach($permissions As $group_id => $group_action){
-                    if(isset($group_action[$action]) && $group_action[$action] && in_array($group_id, $gids)){
-                        $allowed = true;
-                        break;
+                    if(is_array($typeref)){
+                        $typerefid = $typeref[intval($user_return['form_id'])];
+                    }else{
+                        $db->setQuery("Select `type`, `reference_id` From #__contentbuilder_forms Where id = " . intval($user_return['form_id']));
+                        $typerefid = $db->loadAssoc();
+                        $typeref[intval($user_return['form_id'])] = $typerefid;
                     }
-                }
-                
-            }else{
-                
-                if(isset($permissions['own'.$suffix][$action])){
-                    $user_return = $permissions['own'.$suffix][$action];
-                    if(is_array($user_return) && isset($user_return['own']) && $user_return['own']){
-                        $db = Factory::getContainer()->get(DatabaseInterface::class);
-                        
-                    // XDA+GIL 08/JAN/2024 - PHP 8.3 Fix (double declaration of static bar)
-                    // static $typeref;
-                
-                        if(is_array($typeref)){
-                            $typerefid = $typeref[intval($user_return['form_id'])];
+                    if(is_array($typerefid)){
+                        $form = self::getForm($typerefid['type'], $typerefid['reference_id']);
+                        if($form && (!isset($user_return['record_id']))){
+                            $allowed = true;
                         }else{
-                            $db->setQuery("Select `type`, `reference_id` From #__contentbuilder_forms Where id = " . intval($user_return['form_id']));
-                            $typerefid = $db->loadAssoc();
-                            $typeref[intval($user_return['form_id'])] = $typerefid;
-                        }
-                        if(is_array($typerefid)){
-                            $form = self::getForm($typerefid['type'], $typerefid['reference_id']);
-                            if($form && (!isset($user_return['record_id']))){
-                                $allowed = true;
-                            }else{
-                                if(is_array($user_return['record_id'])){
-                                    foreach($user_return['record_id'] As $recid){
-                                       $db->setQuery("Select session_id From #__contentbuilder_records Where `record_id` = ".$db->Quote($recid)." And `type` = ".$db->Quote($typerefid['type'])." And `reference_id` = ".$db->Quote($typerefid['reference_id'])."");
-                                       $session_id = $db->loadResult();
-                                       if($form && $session_id != JFactory::getSession()->getId() && !$form->isOwner(JFactory::getUser()->get('id',0), $recid)){
-                                            $allowed = false;
-                                            break;
-                                        } else {
-                                            $allowed = true;
-                                        }
-                                    }
-                                }else{
-                                    
-                                    $db->setQuery("Select session_id From #__contentbuilder_records Where `record_id` = ".$db->Quote($user_return['record_id'])." And `type` = ".$db->Quote($typerefid['type'])." And `reference_id` = ".$db->Quote($typerefid['reference_id'])."");
+                            if(is_array($user_return['record_id'])){
+                                foreach($user_return['record_id'] As $recid){
+                                    $db->setQuery("Select session_id From #__contentbuilder_records Where `record_id` = ".$db->Quote($recid)." And `type` = ".$db->Quote($typerefid['type'])." And `reference_id` = ".$db->Quote($typerefid['reference_id'])."");
                                     $session_id = $db->loadResult();
-                                    
-                                    if($form && ( $user_return['record_id'] == false || $session_id == JFactory::getSession()->getId() || ( $form->isOwner(JFactory::getUser()->get('id',0), $user_return['record_id']) ) ) ){
+                                    if($form && $session_id != JFactory::getSession()->getId() && !$form->isOwner(JFactory::getUser()->get('id',0), $recid)){
+                                        $allowed = false;
+                                        break;
+                                    } else {
                                         $allowed = true;
                                     }
+                                }
+                            }else{
+                                
+                                $db->setQuery("Select session_id From #__contentbuilder_records Where `record_id` = ".$db->Quote($user_return['record_id'])." And `type` = ".$db->Quote($typerefid['type'])." And `reference_id` = ".$db->Quote($typerefid['reference_id'])."");
+                                $session_id = $db->loadResult();
+                                
+                                if($form && ( $user_return['record_id'] == false || $session_id == JFactory::getSession()->getId() || ( $form->isOwner(JFactory::getUser()->get('id',0), $user_return['record_id']) ) ) ){
+                                    $allowed = true;
                                 }
                             }
                         }
                     }
                 }
             }
+        }
             
-            if(!$allowed){
-               if(!$auth){
+        if(!$allowed){
+            if(!$auth){
                 JFactory::getApplication()->redirect('index.php', 403);
-               }else{
-                   return false;
-               }
+            }else{
+                return false;
             }
         }
+        
         if($auth){
             return true;
         }

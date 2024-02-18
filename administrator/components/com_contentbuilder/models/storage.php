@@ -583,8 +583,6 @@ class ContentbuilderModelStorage extends CBModel
             if($fieldin){
                 $this->_db->setQuery("Select `name` From #__contentbuilder_storage_fields Where `name` In (".$fieldin.") And storage_id = ".$this->_id);
                 
-                jimport('joomla.version');
-                $version = new JVersion();
 	            $fieldnames = $this->_db->loadColumn();
                 foreach($fields As $field => $type){
                     if(!in_array($field, $fieldnames) && !in_array($field, $system_fields)){
@@ -649,8 +647,6 @@ class ContentbuilderModelStorage extends CBModel
 
                     $this->_db->setQuery("Select id From `".$data['name']."`");
                     
-                    jimport('joomla.version');
-                    $version = new JVersion();
 	                $third_party_ids = $this->_db->loadColumn();
                     
                     foreach($third_party_ids As $third_party_id){

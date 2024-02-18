@@ -11,12 +11,8 @@ use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 
-jimport('joomla.version');
-$version = new JVersion();
-$___tableOrdering = "function tableOrdering";
-if (version_compare($version->getShortVersion(), '3.0', '>=')) {
-    $___tableOrdering = "Joomla.tableOrdering = function";
-}
+$___tableOrdering = "Joomla.tableOrdering = function";
+
 ?>
 <style type="text/css">
     .cbPagesCounter{
@@ -706,8 +702,6 @@ echo $cbcompat->startPanel( $title, "tab3" );
         </td>
         <td>
         <?php
-        $version = new JVersion();
-        if (version_compare($version->getShortVersion(), '1.6', '>=')) {    
         ?>
             <select class="form-select-sm" id="default_category" name="sectioncategories">
                <?php
@@ -719,30 +713,6 @@ echo $cbcompat->startPanel( $title, "tab3" );
                ?>
             </select> 
         <?php
-        } else {
-        ?>
-        <!-- Joomla 1.5 begin -->
-        <select class="form-select-sm" id="default_category" name="sectioncategories">
-            <option value="0"><?php echo JText::_('COM_CONTENTBUILDER_UNCATEGORIZED'); ?></option>
-            <?php
-            foreach ($this->form->sectioncategories As $section) {
-                ?>
-                <optgroup label="<?php echo $section['title']; ?>">
-                    <?php
-                    foreach ($section['categories'] As $category) {
-                        ?>
-                        <option <?php echo $this->form->default_section == $section['id'] && $this->form->default_category == $category['id'] ? ' selected="selected"' : ''?>value="<?php echo $section['id']; ?>:<?php echo $category['id']; ?>"><?php echo htmlentities($category['title'], ENT_QUOTES, 'UTF-8'); ?></option>
-                        <?php
-                    }
-                    ?>
-                </optgroup>
-                <?php
-            }
-            ?>
-        </select>
-        <!-- Joomla 1.5 end -->
-        <?php
-        }
         ?>
         </td>
     </tr>
@@ -807,24 +777,9 @@ echo $cbcompat->startPanel( $title, "tab3" );
         </td>
         <td>
             <?php
-            $version = new JVersion();
-            if (version_compare($version->getShortVersion(), '1.6', '>=')) {    
             ?>
             <?php echo JHtml::_('access.level', 'default_access', $this->form->default_access, '', array(), 'default_access');?>
             <?php
-            } else {
-            ?>
-            <select class="form-select-sm" name="default_access" id="default_access">
-                <?php
-                foreach($this->form->accesslevels As $accesslevel){
-                ?>
-                <option value="<?php echo $accesslevel['id']; ?>"<?php echo $accesslevel['id'] == $this->form->default_access ? ' selected="selected"' : ''?>><?php echo htmlentities($accesslevel['name'], ENT_QUOTES, 'UTF-8'); ?></option>
-                <?php
-                }
-                ?>
-            </select>
-            <?php
-            }
             ?>
         </td>
         <td width="20%">

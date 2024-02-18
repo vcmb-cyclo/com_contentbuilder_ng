@@ -7,12 +7,9 @@
 */
 
 defined('_JEXEC') or die('Restricted access');
-jimport('joomla.version');
-$version = new JVersion();
+
 $___tableOrdering = "function tableOrdering";
-if (version_compare($version->getShortVersion(), '3.0', '>=')) {
-    $___tableOrdering = "Joomla.tableOrdering = function";
-}
+$___tableOrdering = "Joomla.tableOrdering = function";
 ?>
 <style type="text/css">
     .cbPagesCounter{

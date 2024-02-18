@@ -23,29 +23,16 @@ class ContentbuilderViewStorages extends CBView
         .icon-48-logo_left { background-image: url(../administrator/components/com_contentbuilder/views/logo_left.png); }
         </style>
         ';
-        jimport('joomla.version');
-        $version = new JVersion();
-        if(version_compare($version->getShortVersion(), '1.6', '>=')){
-            echo '<link rel="stylesheet" href="'.JURI::root(true).'/administrator/components/com_contentbuilder/views/bluestork.fix.css" type="text/css" />';
-        }
+        echo '<link rel="stylesheet" href="'.JURI::root(true).'/administrator/components/com_contentbuilder/views/bluestork.fix.css" type="text/css" />';
         
-        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-            JToolBarHelper::addNew();
-            JToolBarHelper::editList();
-        }
+        JToolBarHelper::addNew();
+        JToolBarHelper::editList();
 
 	    JToolBarHelper::title(   'ContentBuilder :: ' . JText::_( 'COM_CONTENTBUILDER_STORAGES' ) . '</span>', 'logo_left.png' );
         
         JToolBarHelper::deleteList();
         
-        if(version_compare($version->getShortVersion(), '3.0', '<')){
-            JToolBarHelper::editListX();
-            JToolBarHelper::addNewX();
-        }
-
-        if(version_compare($version->getShortVersion(), '1.6', '>=')){
-            JToolBarHelper::preferences('com_contentbuilder');
-        }
+        JToolBarHelper::preferences('com_contentbuilder');
         
         // Get data from the model
         $items = $this->get( 'Data');

@@ -21,21 +21,9 @@ class bfRecordManagement {
         jimport('joomla.filesystem.file');
         jimport('joomla.filesystem.folder');
 
-        jimport('joomla.version');
-        $version = new JVersion();
         $this->version = $version->getShortVersion();
+        $this->tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
 
-        if (version_compare($this->version, '3.2', '>=')) {
-            $this->tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
-        }
-
-        if (version_compare($this->version, '2.5', '>=') && version_compare($this->version, '3.0', '<')) {
-            JFactory::getDocument()->addStyleDeclaration('
-                #bfRecordsTableContainer{
-                    padding-top: 30px;
-                }
-            ');
-        }
         // bfRecordsTableContainer
     }
 

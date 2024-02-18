@@ -11,9 +11,6 @@ use Joomla\CMS\Factory;
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
-jimport('joomla.version');
-$version = new JVersion();
-
 require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper.php');
 require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper4.php');
 

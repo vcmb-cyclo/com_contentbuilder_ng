@@ -38,9 +38,6 @@ class ContentbuilderControllerEdit extends CBController
 
     function save($apply=false){
 
-        jimport('joomla.version');
-        $version = new JVersion();
-
         if(JFactory::getApplication()->isClient('site') && CBRequest::getInt('Itemid',0)){
 	        $menu = JFactory::getApplication()->getMenu();
 	        $item = $menu->getActive();
