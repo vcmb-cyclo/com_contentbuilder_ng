@@ -205,88 +205,36 @@ class ContentbuilderModelForm extends CBModel
     }
 
     function getListStatesActionPlugins(){
-        
-        jimport('joomla.version');
-        
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        
-        $version = new JVersion();
-        
-        if(version_compare($version->getShortVersion(), '1.6', '>=')){
-            
-            $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_listaction' And `enabled` = 1");
-            $res = CBCompat::loadColumn();
-            return $res;
-            
-        } else {
-            
-            $db->setQuery("Select `element` From #__plugins Where `folder` = 'contentbuilder_listaction' And `published` = 1");
-            $res = CBCompat::loadColumn();
-            return $res;
-        }
-        
-        return array();
+        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_listaction' And `enabled` = 1");
+        $res = CBCompat::loadColumn();
+        return $res;
     }
     
     function getThemePlugins(){
-        
-        jimport('joomla.version');
-        
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         
-        $version = new JVersion();
+        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_themes' And `enabled` = 1");
+        $res = CBCompat::loadColumn();
         
-        if(version_compare($version->getShortVersion(), '1.6', '>=')){
-            
-            $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_themes' And `enabled` = 1");
-            $res = CBCompat::loadColumn();
-            
-            // put the joomla3 theme on top of the theme stack for joomla3 users
-            if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                $i = 0;
-                foreach($res As $theme){
-                    if($theme == 'joomla3'){
-                        unset($res[$i]);
-                        $res = array_merge(array('joomla3'), $res);
-                        break;
-                    }
-                    $i++;
-                }
+        $i = 0;
+        foreach($res As $theme){
+            if($theme == 'joomla3'){
+                unset($res[$i]);
+                $res = array_merge(array('joomla3'), $res);
+                break;
             }
-            
-            return $res;
-            
-        } else {
-            
-            $db->setQuery("Select `element` From #__plugins Where `folder` = 'contentbuilder_themes' And `published` = 1");
-            $res = CBCompat::loadColumn();
-            return $res;
+            $i++;
         }
         
-        return array();
+        return $res;
     }
     
     function getVerificationPlugins(){
-        jimport('joomla.version');
-        
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        
-        $version = new JVersion();
-        
-        if(version_compare($version->getShortVersion(), '1.6', '>=')){
-            
-            $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_verify' And `enabled` = 1");
-            $res = CBCompat::loadColumn();
-            return $res;
-            
-        } else {
-            
-            $db->setQuery("Select `element` From #__plugins Where `folder` = 'contentbuilder_verify' And `published` = 1");
-            $res = CBCompat::loadColumn();
-            return $res;
-        }
-        
-        return array();
+        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_verify' And `enabled` = 1");
+        $res = CBCompat::loadColumn();
+        return $res;
     }
     
     
@@ -484,8 +432,6 @@ class ContentbuilderModelForm extends CBModel
 
         $data->language_codes = contentbuilder::getLanguageCodes();
         
-        $version = new JVersion();
-
 	    $data->sectioncategories = $this->getOptions();
 	    $data->accesslevels = array();
         
@@ -515,12 +461,15 @@ class ContentbuilderModelForm extends CBModel
         // Get the options.
         $db->setQuery($query);
 
-        $options = $db->loadObjectList();
-
-        // Check for a database error.
-        if ($db->getErrorNum()) {
-	        Factory::getApplication()->enqueueMessage($db->getErrorMsg(), 'error');
-        }
+        try
+		{
+            $options = $db->loadObjectList();
+		}
+		catch (Exception $e)
+		{
+            // Check for a database error.
+            Factory::getApplication()->enqueueMessage($db->getErrorMsg(), 'error : ' .$e->getMessage());
+		}
 
         // Pad the option text with spaces using depth level as a multiplier.
         for ($i = 0, $n = count($options); $i < $n; $i++) {
@@ -770,9 +719,6 @@ class ContentbuilderModelForm extends CBModel
             $config['own_fe']['rating'] = true;
         }
         
-        jimport('joomla.version');
-        $version = new JVersion();
-
 	    $db = Factory::getContainer()->get(DatabaseInterface::class);
 	    $query = 'SELECT CONCAT( REPEAT(\'..\', COUNT(parent.id) - 1), node.title) as text, node.id as value'
 		    . ' FROM #__usergroups AS node, #__usergroups AS parent'
@@ -871,20 +817,7 @@ class ContentbuilderModelForm extends CBModel
         $list_states = $data['list_states'];
         unset($data['list_states']);
         
-        $version = new JVersion();
-
-        if (version_compare($version->getShortVersion(), '1.6', '>=')) {
-        
-            $data['default_category'] = CBRequest::getInt('sectioncategories',0);
-        
-        } else {
-        
-            // Joomla 1.5 begin
-            $sectioncategory = explode(':',CBRequest::getVar('sectioncategories',''));
-            $data['default_section'] = intval($sectioncategory[0]);
-            $data['default_category'] = intval(isset($sectioncategory[1]) ? $sectioncategory[1] : 0) ;
-            // Joomla 1.5 end
-        }
+        $data['default_category'] = CBRequest::getInt('sectioncategories',0);
         
         $data['edit_by_type'] = CBRequest::getInt('edit_by_type',0);
         if($data['edit_by_type'] && $data['type'] == 'com_breezingforms'){
@@ -1062,13 +995,9 @@ class ContentbuilderModelForm extends CBModel
     {
         jimport( 'joomla.database.table' );
         jimport( 'joomla.event.dispatcher' );
-        jimport('joomla.version');
-                 
-        $is15 = true;
-        $version = new JVersion();
-        if (version_compare($version->getShortVersion(), '1.6', '>=')) {
-           $is15 = false; 
-        }
+
+        // Mode Joomla5
+        $is15 = false; 
         
         $cids = CBRequest::getVar( 'cid', array(0), 'post', 'array' );
         ArrayHelper::toInteger($cids);
@@ -1162,27 +1091,13 @@ class ContentbuilderModelForm extends CBModel
 
             $this->getTable('elements')->reorder('form_id = ' . $cid);
 
-            jimport('joomla.version');
-            $version = new JVersion();
-
-            if(version_compare($version->getShortVersion(), '1.6', '<')){
-                $this->_db->setQuery("Delete From #__components Where admin_menu_link = 'option=com_contentbuilder&controller=list&id=".intval($cid)."'");
+            $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&controller=list&id=".intval($cid)."'");
+            $this->_db->execute();
+            $this->_db->setQuery("Select count(id) From #__menu Where `link` Like 'index.php?option=com_contentbuilder&controller=list&id=%'");
+            $amount = $this->_db->loadResult();
+            if(!$amount){
+                $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&viewcontainer=true'");
                 $this->_db->execute();
-                $this->_db->setQuery("Select count(id) From #__components Where admin_menu_link Like 'option=com_contentbuilder&controller=list&id=%'");
-                $amount = $this->_db->loadResult();
-                if(!$amount){
-                    $this->_db->setQuery("Delete From #__components Where admin_menu_link = 'option=com_contentbuilder&viewcontainer=true'");
-                    $this->_db->execute();
-                }
-            }else{
-                $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&controller=list&id=".intval($cid)."'");
-                $this->_db->execute();
-                $this->_db->setQuery("Select count(id) From #__menu Where `link` Like 'index.php?option=com_contentbuilder&controller=list&id=%'");
-                $amount = $this->_db->loadResult();
-                if(!$amount){
-                    $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&viewcontainer=true'");
-                    $this->_db->execute();
-                }
             }
 
             if (!$row->delete( $cid )) {
@@ -1212,14 +1127,7 @@ class ContentbuilderModelForm extends CBModel
         
         // article deletion if required
         $this->_db->setQuery("Select `id` From #__contentbuilder_forms");
-        
-        jimport('joomla.version');
-        $version = new JVersion();
-        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-            $references = $this->_db->loadColumn();
-        }else{
-            $references = $this->_db->loadResultArray();
-        }
+        $references = $this->_db->loadColumn();
         
         $cnt = count($references);
         if ($cnt) {

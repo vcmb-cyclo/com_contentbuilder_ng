@@ -26,14 +26,8 @@ JFactory::getDocument()->addScript(JURI::root(true).'/components/com_contentbuil
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 $wa->useScript('jquery');
 
-jimport('joomla.version');
-$version = new JVersion();
-$___getpost = 'get';
-$___tableOrdering = "function tableOrdering";
-if (version_compare($version->getShortVersion(), '3.0', '>=')) {
-    $___getpost = 'post';
-    $___tableOrdering = "Joomla.tableOrdering = function";
-}
+$___getpost = 'post';
+$___tableOrdering = "Joomla.tableOrdering = function";
 ?>
 <?php JFactory::getDocument()->addStyleDeclaration($this->theme_css);?>
 <?php JFactory::getDocument()->addScriptDeclaration($this->theme_js);?>

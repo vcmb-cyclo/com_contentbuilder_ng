@@ -37,8 +37,6 @@ class ContentbuilderModelAjax extends CBModel
 
     function getData()
     {
-        jimport('joomla.version');
-        $version = new JVersion();
 
         switch($this->_subject){
             
@@ -159,11 +157,7 @@ class ContentbuilderModelAjax extends CBModel
                     $this->_db->execute();
                     
                     // adding vote to cache
-                    if(version_compare($version->getShortVersion(), '3.0', '<')){
-                        $___now = $_now->toMySQL();
-                    }else{
-                        $___now = $_now->toSql();
-                    }
+                    $___now = $_now->toSql();
                     $this->_db->setQuery("Insert Into #__contentbuilder_rating_cache (`record_id`,`form_id`,`ip`,`date`) Values (".$this->_db->Quote(CBRequest::getCmd('record_id','')).", ".$this->_id.",".$this->_db->Quote($_SERVER['REMOTE_ADDR']).",'".$___now."')");
                     $this->_db->execute();
                     

@@ -54,10 +54,7 @@ class  plgSystemContentbuilder_system extends JPlugin
             $app    = Factory::getApplication();
             
              // managing auto-groups
-            jimport('joomla.version');
-            $version = new JVersion();
-            
-            if(version_compare($version->getShortVersion(), '1.6', '>=') && ( CBRequest::getVar('option') == 'com_kunena' || CBRequest::getVar('option') == 'com_contentbuilder')){
+            if(CBRequest::getVar('option') == 'com_kunena' || CBRequest::getVar('option') == 'com_contentbuilder'){
                 
                 $pluginParams = CBCompat::getPluginParams($this, 'system', 'contentbuilder_system');
                 

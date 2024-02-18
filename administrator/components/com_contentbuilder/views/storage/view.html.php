@@ -35,12 +35,7 @@ class ContentbuilderViewStorage extends CBView
         .icon-48-logo_left { background-image: url(../administrator/components/com_contentbuilder/views/logo_left.png); }
         </style>
         ';
-        jimport('joomla.version');
-        $version = new JVersion();
-
-        if(version_compare($version->getShortVersion(), '1.6', '>=')){
-            echo '<link rel="stylesheet" href="'.JURI::root(true).'/administrator/components/com_contentbuilder/views/bluestork.fix.css" type="text/css" />';
-        }
+        echo '<link rel="stylesheet" href="'.JURI::root(true).'/administrator/components/com_contentbuilder/views/bluestork.fix.css" type="text/css" />';
         $tables     = $this->get('DbTables');
         $form     = $this->get('Storage');
         $elements  = $this->get('Data');

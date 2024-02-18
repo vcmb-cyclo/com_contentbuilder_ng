@@ -84,9 +84,6 @@ class ContentbuilderModelPublicforms extends CBModel
             $this->_menu_item = true;
             
             // try menu item
-            jimport('joomla.version');
-            $version = new JVersion();
-
             $forms = null;
 
 	        $menu = JFactory::getApplication()->getMenu();

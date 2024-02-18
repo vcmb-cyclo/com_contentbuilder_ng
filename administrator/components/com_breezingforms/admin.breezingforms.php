@@ -6,6 +6,9 @@
 * @copyright (C) 2008-2020 by Markus Bopp
 * @license Released under the terms of the GNU General Public License
 **/
+
+use Joomla\CMS\Version;
+
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFFactory.php');
@@ -521,12 +524,8 @@ function _ff_selectValue($sql)
 
 function protectedComponentIds()
 {
-    jimport('joomla.version');
-    $version = new JVersion();
 
-    if(version_compare($version->getShortVersion(), '1.6', '>=')){
-
-        $rows = _ff_select(
+    $rows = _ff_select(
         "select id, parent_id As parent from #__menu ".
         "where ".
         " link in (".
@@ -542,26 +541,6 @@ function protectedComponentIds()
         "order by id"
     );
 
-    }else{
-
-    $rows = _ff_select(
-        "select id, parent from #__components ".
-        "where `option`='com_breezingforms' ".
-        "and admin_menu_link in (".
-            "'option=com_breezingforms&act=managerecs',".
-            "'option=com_breezingforms&act=managemenus',".
-            "'option=com_breezingforms&act=manageforms',".
-            "'option=com_breezingforms&act=managescripts',".
-            "'option=com_breezingforms&act=managepieces',".
-            "'option=com_breezingforms&act=share',".
-            "'option=com_breezingforms&act=integrate',".
-            "'option=com_breezingforms&act=configuration'".
-        ") ".
-        "order by id"
-    );
-
-    }
-    
     $parent = 0;
     $ids = array();
     if (count($rows))

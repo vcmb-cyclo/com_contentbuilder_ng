@@ -117,31 +117,18 @@ class CBPluginHelper
 	*/
 	function importPlugin($type, $plugin = null, $autocreate = true, $dispatcher = null)
 	{
-                jimport('joomla.version');
-                $version = new JVersion();
-        
+       
 		$result = array();
-
-                if(version_compare($version->getShortVersion(), '1.6', '<')){
-                    $plugins = CBPluginHelper::_load();
-                }else{
-                    $plugins = CBPluginHelper::_load16();
-                }
+        $plugins = CBPluginHelper::_load16();
 		$total = count($plugins);
 		for($i = 0; $i < $total; $i++) {
 			if($plugins[$i]->type == $type && ($plugins[$i]->name == $plugin ||  $plugin === null)) {
+				$o = CBPluginHelper::_import16( $plugins[$i], $autocreate, $dispatcher );
 				
-
-                                if(version_compare($version->getShortVersion(), '1.6', '<')){
-                                    $o = CBPluginHelper::_import( $plugins[$i], $autocreate, $dispatcher );
-                                }else{
-                                    $o = CBPluginHelper::_import16( $plugins[$i], $autocreate, $dispatcher );
-                                }
-                                
-                                if(!in_array($o, $result)){
-                                    $result[] = $o;
-                                }
-                        }
+				if(!in_array($o, $result)){
+					$result[] = $o;
+				}
+			}
 		}
 
 		return $result;
@@ -252,16 +239,16 @@ class CBPluginHelper
 	function _load()
 	{
 		jimport('joomla.version');
-                $version = new JVersion();
+    	$version = new JVersion();
 
-                if(version_compare($version->getShortVersion(), '1.6', '>=') && version_compare($version->getShortVersion(), '1.7', '<')){
-                    return CBPluginHelper::_load16();
-                } 
-                else
-                if(version_compare($version->getShortVersion(), '1.6', '<')){
-                    return CBPluginHelper::_load15();
-                }
-                return;
+		if(version_compare($version->getShortVersion(), '1.6', '>=') && version_compare($version->getShortVersion(), '1.7', '<')){
+			return CBPluginHelper::_load16();
+		} 
+		else
+		if(version_compare($version->getShortVersion(), '1.6', '<')){
+			return CBPluginHelper::_load15();
+		}
+		return;
 	}
         
         function _load15(){

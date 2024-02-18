@@ -151,13 +151,8 @@ class ContentbuilderModelVerify extends CBModel
         } 
            
         if( !CBRequest::getBool('verify', 0) && !CBRequest::getVar('token','') ){
-            jimport('joomla.version');
-            $version = new JVersion();
-            if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                $___now = $_now->toSql();
-            }else{
-                $___now = $_now->toMySQL();
-            }
+            $___now = $_now->toSql();
+
             $verification_id = md5(uniqid(null,true) . mt_rand(0, mt_getrandmax()) . $user_id);
             $this->_db->setQuery("
                     Insert Into #__contentbuilder_verifications
@@ -273,8 +268,6 @@ class ContentbuilderModelVerify extends CBModel
                             $usertableid = $this->_db->loadResult();
 
                             $levels = explode(',',$out['verify_levels']);
-                            jimport('joomla.version');
-                            $version = new JVersion();
 	                        $___now = $_now->toSql();
                             if($usertableid){
                                 $this->_db->setQuery("Update #__contentbuilder_users
@@ -337,10 +330,6 @@ class ContentbuilderModelVerify extends CBModel
                             
                             // token check if given
                             if( CBRequest::getVar('token','') ){
-
-                                jimport('joomla.version');
-                                $version = new JVersion();
-
 	                            $this->activate(CBRequest::getVar('token',''));
                             }
                             

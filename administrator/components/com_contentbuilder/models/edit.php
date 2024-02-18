@@ -12,6 +12,7 @@ use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Version;
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -22,8 +23,6 @@ CBCompat::requireModel();
 require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'contentbuilder.php');
 require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'contentbuilder_helpers.php');
 
-jimport('joomla.version');
-$version = new JVersion();
 
 require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper.php');
 require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper4.php');
@@ -87,25 +86,16 @@ class ContentbuilderModelEdit extends CBModel
             $path = str_replace('{'.strtolower($name).':value}', $value, $path);
         }
         
-        $path = str_replace('{userid}', JFactory::getUser()->get('id', 0), $path);
-        $path = str_replace('{username}', JFactory::getUser()->get('username', 'anonymous') . '_' . JFactory::getUser()->get('id', 0), $path);
-        $path = str_replace('{name}', JFactory::getUser()->get('name', 'Anonymous') . '_' . JFactory::getUser()->get('id', 0), $path);
+        $path = str_replace('{userid}', Factory::getUser()->get('id', 0), $path);
+        $path = str_replace('{username}', Factory::getUser()->get('username', 'anonymous') . '_' . Factory::getUser()->get('id', 0), $path);
+        $path = str_replace('{name}', Factory::getUser()->get('name', 'Anonymous') . '_' . Factory::getUser()->get('id', 0), $path);
         
-        $_now = JFactory::getDate();
+        $_now = Factory::getDate();
         
-        jimport('joomla.version');
-        $version = new JVersion();
-        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-            $path = str_replace('{date}', $_now->toSql(), $path);
-            $path = str_replace('{time}', $_now->format('H:i:s'), $path);
-            $path = str_replace('{date}', $_now->toSql(), $path);
-            $path = str_replace('{datetime}', $_now->format('Y-m-d H:i:s'), $path);
-        }else{
-            $path = str_replace('{date}', $_now->toMySQL(), $path);
-            $path = str_replace('{time}', $_now->toFormat('H:i:s'), $path);
-            $path = str_replace('{date}', $_now->toMySQL(), $path);
-            $path = str_replace('{datetime}', $_now->toFormat('Y-m-d H:i:s'), $path);
-        }
+        $path = str_replace('{date}', $_now->toSql(), $path);
+        $path = str_replace('{time}', $_now->format('H:i:s'), $path);
+        $path = str_replace('{date}', $_now->toSql(), $path);
+        $path = str_replace('{datetime}', $_now->format('Y-m-d H:i:s'), $path);
         
         $endpath = contentbuilder::makeSafeFolder($path);
         $parts = explode(DS, $endpath);
@@ -125,30 +115,19 @@ class ContentbuilderModelEdit extends CBModel
 
         parent::__construct($config);
 
-        $version = new JVersion();
-        if (version_compare($version->getShortVersion(), '3.0', '>=')) {
-           $this->is15 = false;
-           $this->is16 = false;
-           $this->is30 = true;
-        } else
-        if (version_compare($version->getShortVersion(), '1.6', '>=')) {
-           $this->is15 = false;
-           $this->is16 = true;
-           $this->is30 = false;
-        }
+        $this->is15 = false;
+        $this->is16 = false;
+        $this->is30 = true;
         
         CBRequest::setVar('cb_category_id',null);
         
-        $this->frontend = JFactory::getApplication()->isClient('site');
+        $this->frontend = Factory::getApplication()->isClient('site');
         
         if($this->frontend && CBRequest::getInt('Itemid',0)){
             $this->_menu_item = true;
             
             // try menu item
-            jimport('joomla.version');
-            $version = new JVersion();
-
-	        $menu = JFactory::getApplication()->getMenu();
+	        $menu = Factory::getApplication()->getMenu();
 	        $item = $menu->getActive();
 
 	        if (is_object($item)) {
@@ -212,10 +191,10 @@ class ContentbuilderModelEdit extends CBModel
         $this->setIds(CBRequest::getInt('id',  0), CBRequest::getCmd('record_id',  0));
         
         if(!$this->frontend){
-            JFactory::getLanguage()->load('com_content');
+            Factory::getLanguage()->load('com_content');
         }else{
-            JFactory::getLanguage()->load('com_content', JPATH_SITE . DS . 'administrator');
-            JFactory::getLanguage()->load('joomla', JPATH_SITE . DS . 'administrator');
+            Factory::getLanguage()->load('com_content', JPATH_SITE . DS . 'administrator');
+            Factory::getLanguage()->load('joomla', JPATH_SITE . DS . 'administrator');
         }
     }
 
@@ -364,7 +343,7 @@ class ContentbuilderModelEdit extends CBModel
                         if(!$this->_menu_item){
                             $data->page_title = $data->use_view_name_as_title ? $data->name : $data->form->getPageTitle();
                         }else{
-                            $data->page_title = $data->use_view_name_as_title ? $data->name : JFactory::getDocument()->getTitle();
+                            $data->page_title = $data->use_view_name_as_title ? $data->name : Factory::getDocument()->getTitle();
                         }
                     }
                     
@@ -383,7 +362,7 @@ class ContentbuilderModelEdit extends CBModel
                         }
                     }
                     
-                    $data->items = $data->form->getRecord($this->_record_id, $data->published_only, $this->frontend ? ( $data->own_only_fe ? JFactory::getUser()->get('id', 0) : -1 ) : ( $data->own_only ? JFactory::getUser()->get('id', 0) : -1 ), $this->frontend ? $data->show_all_languages_fe : true );
+                    $data->items = $data->form->getRecord($this->_record_id, $data->published_only, $this->frontend ? ( $data->own_only_fe ? Factory::getUser()->get('id', 0) : -1 ) : ( $data->own_only ? Factory::getUser()->get('id', 0) : -1 ), $this->frontend ? $data->show_all_languages_fe : true );
                     
                     if(count($data->items)){
                         
@@ -429,9 +408,6 @@ class ContentbuilderModelEdit extends CBModel
                         }
                         
                         // "buddy quaid hack", should be an option in future versions
-                        
-                        jimport('joomla.version');
-                        $version = new JVersion();
 
 	                    if($this->_show_page_heading && $this->_page_title != '' && $this->_page_heading != '' && $this->_page_title == $this->_page_heading){
 		                    $data->page_title = $this->_page_title;
@@ -441,7 +417,7 @@ class ContentbuilderModelEdit extends CBModel
 	                    }
                         
                         if($this->frontend){
-                            $document = JFactory::getDocument();
+                            $document = Factory::getDocument();
                             $document->setTitle(html_entity_decode ($data->page_title, ENT_QUOTES, 'UTF-8'));
                         }
 
@@ -459,7 +435,7 @@ class ContentbuilderModelEdit extends CBModel
                         }
                         $items = $api_items;
 
-                        JFactory::getDocument()->addScriptDeclaration(
+                        Factory::getDocument()->addScriptDeclaration(
 '
 <!--
 var contentbuilder = new function(){
@@ -555,7 +531,7 @@ var contentbuilder = new function(){
                     
                     $data->template = contentbuilder::getEditableTemplate($this->_id, $this->_record_id, $data->items, $ids, !$data->edit_by_type);
 
-                    if(JFactory::getApplication()->isClient('administrator')
+                    if(Factory::getApplication()->isClient('administrator')
                         && strpos($data->template, '[[hide-admin-title]]') !== false){
 
                         $data->page_title = '';
@@ -598,7 +574,7 @@ var contentbuilder = new function(){
         CBRequest::checkToken('default') or jexit(JText::_('JInvalid_Token'));
         
         JPluginHelper::importPlugin('contentbuilder_submit');
-        JFactory::getSession()->clear('cb_failed_values', 'com_contentbuilder.'.$this->_id);
+        Factory::getSession()->clear('cb_failed_values', 'com_contentbuilder.'.$this->_id);
         CBRequest::setVar('cb_submission_failed', 0);
         
         $query = $this->_buildQuery();
@@ -709,7 +685,7 @@ var contentbuilder = new function(){
                         $cap_value = CBRequest::getVar( 'cb_' . $the_captcha_field['reference_id'], null, 'POST' );
                         if ($securimage->check($cap_value) == false) {
                             CBRequest::setVar('cb_submission_failed', 1);
-                            JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_CAPTCHA_FAILED'), 'error');
+                            Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_CAPTCHA_FAILED'), 'error');
                         }
                         $values[$the_captcha_field['reference_id']] = $cap_value;
                         $noneditable_fields[] = $the_captcha_field['reference_id'];
@@ -731,53 +707,53 @@ var contentbuilder = new function(){
                             if( !trim($name) )
                             {
                                 CBRequest::setVar('cb_submission_failed', 1);
-                                JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_NAME_EMPTY'), 'error');
+                                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_NAME_EMPTY'), 'error');
                             }
                             
                             if( !trim($username) )
                             {
                                 CBRequest::setVar('cb_submission_failed', 1);
-                                JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_EMPTY'), 'error');
+                                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_EMPTY'), 'error');
                             }
                             else if( preg_match( "#[<>\"'%;()&]#i", $username) || strlen(utf8_decode($username )) < 2 )
                             {
                                 CBRequest::setVar('cb_submission_failed', 1);
-                                JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_INVALID'), 'error');
+                                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_INVALID'), 'error');
                             }
                             
                             if( !trim($email) )
                             {
                                 CBRequest::setVar('cb_submission_failed', 1);
-                                JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_EMPTY'), 'error');
+                                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_EMPTY'), 'error');
                             }
                             else if( !contentbuilder_is_email($email) )
                             {
                                 CBRequest::setVar('cb_submission_failed', 1);
-                                JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_INVALID'), 'error');
+                                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_INVALID'), 'error');
                             } 
                             else if( $email != $email2 )
                             {
                                 CBRequest::setVar('cb_submission_failed', 1);
-                                JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_MISMATCH'), 'error');
+                                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_MISMATCH'), 'error');
                             }
                             
-                            if( !$meta->created_id && !JFactory::getUser()->get('id', 0) ){
+                            if( !$meta->created_id && !Factory::getUser()->get('id', 0) ){
 
                                 $this->_db->setQuery("Select count(id) From #__users Where `username` = " . $this->_db->Quote($username));
                                 if($this->_db->loadResult()){
                                     CBRequest::setVar('cb_submission_failed', 1);
-                                    JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
+                                    Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
                                 }
 
                                 $this->_db->setQuery("Select count(id) From #__users Where `email` = " . $this->_db->Quote($email));
                                 if($this->_db->loadResult()){
                                     CBRequest::setVar('cb_submission_failed', 1);
-                                    JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
+                                    Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
                                 }
                                 
                                 if( $pw1 != $pw2 ){
                                     CBRequest::setVar('cb_submission_failed', 1);
-                                    JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PASSWORD_MISMATCH'), 'error');
+                                    Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PASSWORD_MISMATCH'), 'error');
                                 
                                     CBRequest::setVar( 'cb_' . $the_password_field['reference_id'], '' );
                                     CBRequest::setVar( 'cb_' . $the_password_repeat_field['reference_id'], '' );
@@ -786,7 +762,7 @@ var contentbuilder = new function(){
                                 else if( !trim($pw1) )
                                 {
                                     CBRequest::setVar('cb_submission_failed', 1);
-                                    JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PASSWORD_EMPTY'), 'error');
+                                    Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PASSWORD_EMPTY'), 'error');
                                 
                                     CBRequest::setVar( 'cb_' . $the_password_field['reference_id'], '' );
                                     CBRequest::setVar( 'cb_' . $the_password_repeat_field['reference_id'], '' );
@@ -794,31 +770,31 @@ var contentbuilder = new function(){
                             }
                             else
                             {
-                                if($meta->created_id && $meta->created_id != JFactory::getUser()->get('id', 0)){
+                                if($meta->created_id && $meta->created_id != Factory::getUser()->get('id', 0)){
                                     $this->_db->setQuery("Select count(id) From #__users Where id <> ".$this->_db->Quote($meta->created_id)." And `username` = " . $this->_db->Quote($username));
                                     if($this->_db->loadResult()){
                                         CBRequest::setVar('cb_submission_failed', 1);
-                                        JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
+                                        Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
                                     }
 
                                     $this->_db->setQuery("Select count(id) From #__users Where id <> ".$this->_db->Quote($meta->created_id)." And `email` = " . $this->_db->Quote($email));
                                     if($this->_db->loadResult()){
                                         CBRequest::setVar('cb_submission_failed', 1);
-                                        JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
+                                        Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
                                     }
                                 }
                                 else
                                 {
-                                    $this->_db->setQuery("Select count(id) From #__users Where id <> ".$this->_db->Quote(JFactory::getUser()->get('id', 0))." And `username` = " . $this->_db->Quote($username));
+                                    $this->_db->setQuery("Select count(id) From #__users Where id <> ".$this->_db->Quote(Factory::getUser()->get('id', 0))." And `username` = " . $this->_db->Quote($username));
                                     if($this->_db->loadResult()){
                                         CBRequest::setVar('cb_submission_failed', 1);
-                                        JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
+                                        Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
                                     }
 
-                                    $this->_db->setQuery("Select count(id) From #__users Where id <> ".$this->_db->Quote(JFactory::getUser()->get('id', 0))." And `email` = " . $this->_db->Quote($email));
+                                    $this->_db->setQuery("Select count(id) From #__users Where id <> ".$this->_db->Quote(Factory::getUser()->get('id', 0))." And `email` = " . $this->_db->Quote($email));
                                     if($this->_db->loadResult()){
                                         CBRequest::setVar('cb_submission_failed', 1);
-                                        JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
+                                        Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
                                     }
                                 }
                                 
@@ -826,7 +802,7 @@ var contentbuilder = new function(){
                                     
                                     if( $pw1 != $pw2 ){
                                         CBRequest::setVar('cb_submission_failed', 1);
-                                        JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PASSWORD_MISMATCH'), 'error');
+                                        Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PASSWORD_MISMATCH'), 'error');
                                     
                                         CBRequest::setVar( 'cb_' . $the_password_field['reference_id'], '' );
                                         CBRequest::setVar( 'cb_' . $the_password_repeat_field['reference_id'], '' );
@@ -834,7 +810,7 @@ var contentbuilder = new function(){
                                     else if( !trim($pw1) )
                                     {
                                         CBRequest::setVar('cb_submission_failed', 1);
-                                        JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PASSWORD_EMPTY'), 'error');
+                                        Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PASSWORD_EMPTY'), 'error');
                                     
                                         CBRequest::setVar( 'cb_' . $the_password_field['reference_id'], '' );
                                         CBRequest::setVar( 'cb_' . $the_password_repeat_field['reference_id'], '' );
@@ -874,7 +850,7 @@ var contentbuilder = new function(){
 
                     $form_elements_objects = array();
                     
-                    $_items = $data->form->getRecord($this->_record_id, $data->published_only, $this->frontend ? ( $data->own_only_fe ? JFactory::getUser()->get('id', 0) : -1 ) : ( $data->own_only ? JFactory::getUser()->get('id', 0) : -1 ), $this->frontend ? $data->show_all_languages_fe : true );
+                    $_items = $data->form->getRecord($this->_record_id, $data->published_only, $this->frontend ? ( $data->own_only_fe ? Factory::getUser()->get('id', 0) : -1 ) : ( $data->own_only ? Factory::getUser()->get('id', 0) : -1 ), $this->frontend ? $data->show_all_languages_fe : true );
                     
                     // asigning the proper names first
                     foreach($names As $id => $name){
@@ -1071,7 +1047,7 @@ var contentbuilder = new function(){
 
                                         if($dest == '' || $uploaded !== true){
                                             CBRequest::setVar('cb_submission_failed', 1);
-                                            JFactory::getApplication()->enqueueMessage($msg . ' ('.$infile.')', 'error');
+                                            Factory::getApplication()->enqueueMessage($msg . ' ('.$infile.')', 'error');
                                             $the_upload_fields[$id]['value'] = '';
                                         }
                                         else
@@ -1091,7 +1067,7 @@ var contentbuilder = new function(){
                                         $msg = trim($msg);
                                         if(!empty($msg)){
                                             CBRequest::setVar('cb_submission_failed', 1);
-                                            JFactory::getApplication()->enqueueMessage(trim($msg), 'error');
+                                            Factory::getApplication()->enqueueMessage(trim($msg), 'error');
                                         }
                                     }
 
@@ -1113,7 +1089,7 @@ var contentbuilder = new function(){
                                         foreach($results As $result){
                                             $result = trim($result);
                                             if(!empty($result)){
-                                                JFactory::getApplication()->enqueueMessage(trim($result), 'error');
+                                                Factory::getApplication()->enqueueMessage(trim($result), 'error');
                                             }
                                         }
                                     }
@@ -1182,7 +1158,7 @@ var contentbuilder = new function(){
                                         $msg = trim($msg);
                                         if(!empty($msg)){
                                             CBRequest::setVar('cb_submission_failed', 1);
-                                            JFactory::getApplication()->enqueueMessage(trim($msg), 'error');
+                                            Factory::getApplication()->enqueueMessage(trim($msg), 'error');
                                         }
                                     }
 
@@ -1202,7 +1178,7 @@ var contentbuilder = new function(){
                                         foreach($results As $result){
                                             $result = trim($result);
                                             if(!empty($result)){
-                                                JFactory::getApplication()->enqueueMessage(trim($result), 'error');
+                                                Factory::getApplication()->enqueueMessage(trim($result), 'error');
                                             }
                                         }
                                     }
@@ -1226,7 +1202,7 @@ var contentbuilder = new function(){
                     $submit_before_result = Factory::getApplication()->triggerEvent('onBeforeSubmit', array(CBRequest::getCmd('record_id',0), $data->form, $values));
                             
                     if(CBRequest::getVar('cb_submission_failed',0)){
-                        JFactory::getSession()->set('cb_failed_values', $values, 'com_contentbuilder.'.$this->_id);
+                        Factory::getSession()->set('cb_failed_values', $values, 'com_contentbuilder.'.$this->_id);
                         return CBRequest::getCmd('record_id',0);
                     }
 
@@ -1258,7 +1234,7 @@ var contentbuilder = new function(){
                             
                             if( intval($user_id) > 0 ){
                             
-                                JFactory::getSession()->set('cb_last_record_user_id', $user_id, 'com_contentbuilder');
+                                Factory::getSession()->set('cb_last_record_user_id', $user_id, 'com_contentbuilder');
 
                                 $data->form->saveRecordUserData( 
                                         $record_return,
@@ -1290,7 +1266,7 @@ var contentbuilder = new function(){
                                 $verification_id = '';
 
                                 if($bypass->text != $orig_text){
-                                    $verification_id = md5(uniqid(null,true) . mt_rand(0, mt_getrandmax()) . JFactory::getUser()->get('id',0));
+                                    $verification_id = md5(uniqid(null,true) . mt_rand(0, mt_getrandmax()) . Factory::getUser()->get('id',0));
                                 }
 
                                 $user_id = $this->register(
@@ -1306,7 +1282,7 @@ var contentbuilder = new function(){
 
                                 if( intval($user_id) > 0 ){
 
-                                    JFactory::getSession()->set('cb_last_record_user_id', $user_id, 'com_contentbuilder');
+                                    Factory::getSession()->set('cb_last_record_user_id', $user_id, 'com_contentbuilder');
 
                                     $data->form->saveRecordUserData( 
                                             $record_return,
@@ -1324,18 +1300,11 @@ var contentbuilder = new function(){
 
                                 if($bypass->text != $orig_text && intval($user_id) > 0){
 
-                                    $_now = JFactory::getDate();
+                                    $_now = Factory::getDate();
 
-                                    $setup = JFactory::getSession()->get($data->registration_bypass_plugin.$verification_name, '', 'com_contentbuilder.verify.'.$data->registration_bypass_plugin.$verification_name);
-                                    JFactory::getSession()->clear($data->registration_bypass_plugin.$verification_name, 'com_contentbuilder.verify.'.$data->registration_bypass_plugin.$verification_name);
-                                    
-                                    jimport('joomla.version');
-                                    $version = new JVersion();
-                                    if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                                        $___now = $_now->toSql();
-                                    }else{
-                                        $___now = $_now->toMySQL();
-                                    }
+                                    $setup = Factory::getSession()->get($data->registration_bypass_plugin.$verification_name, '', 'com_contentbuilder.verify.'.$data->registration_bypass_plugin.$verification_name);
+                                    Factory::getSession()->clear($data->registration_bypass_plugin.$verification_name, 'com_contentbuilder.verify.'.$data->registration_bypass_plugin.$verification_name);
+                                    $___now = $_now->toSql();
                                     
                                     $this->_db->setQuery("
                                             Insert Into #__contentbuilder_verifications
@@ -1358,7 +1327,7 @@ var contentbuilder = new function(){
                                             ".$this->_db->Quote($data->registration_bypass_plugin).",
                                             ".$this->_db->Quote($_SERVER['REMOTE_ADDR']).",
                                             ".$this->_db->Quote($setup).",
-                                            ".intval(JFactory::getApplication()->isAdmin() ? 1 : 0)."
+                                            ".intval(Factory::getApplication()->isAdmin() ? 1 : 0)."
                                             )
                                     ");
                                     $this->_db->execute();
@@ -1370,7 +1339,7 @@ var contentbuilder = new function(){
                     if( $this->frontend && !CBRequest::getCmd('record_id',0) && $record_return && !CBRequest::getVar('return','') ){
                         
                         if( $data->force_login ){
-                            if( !JFactory::getUser()->get('id', 0) ){
+                            if( !Factory::getUser()->get('id', 0) ){
                                 if(!$this->is15){
                                     CBRequest::setVar('return', cb_b64enc(JRoute::_('index.php?option=com_users&view=login&Itemid='.CBRequest::getInt('Itemid', 0), false)));
                                 }
@@ -1401,27 +1370,10 @@ var contentbuilder = new function(){
                         $sef = '';
                         $ignore_lang_code = '*';
                         if($data->default_lang_code_ignore){
-
-                            jimport('joomla.version');
-                            $version = new JVersion();
-
-                            if(version_compare($version->getShortVersion(), '1.6', '>=')){
-
-                                $this->_db->setQuery("Select lang_code From #__languages Where published = 1 And sef = " . $this->_db->Quote(trim(CBRequest::getCmd('lang',''))));
-                                $ignore_lang_code = $this->_db->loadResult();
-                                if(!$ignore_lang_code){
-                                    $ignore_lang_code = '*';
-                                }
-                            }
-                            else
-                            {
-                                $codes = contentbuilder::getLanguageCodes();
-                                foreach($codes As $code){
-                                    if(strstr(strtolower($code), strtolower(trim(CBRequest::getCmd('lang','')))) !== false){
-                                        $ignore_lang_code = strtolower($code);
-                                        break;
-                                    }
-                                }
+                            $this->_db->setQuery("Select lang_code From #__languages Where published = 1 And sef = " . $this->_db->Quote(trim(CBRequest::getCmd('lang',''))));
+                            $ignore_lang_code = $this->_db->loadResult();
+                            if(!$ignore_lang_code){
+                                $ignore_lang_code = '*';
                             }
 
                             $sef = trim(CBRequest::getCmd('lang',''));
@@ -1430,10 +1382,6 @@ var contentbuilder = new function(){
                             }
 
                         } else {
-
-                            jimport('joomla.version');
-                            $version = new JVersion();
-
 	                        $this->_db->setQuery("Select sef From #__languages Where published = 1 And lang_code = " . $this->_db->Quote($data->default_lang_code));
 	                        $sef = $this->_db->loadResult();
                         }
@@ -1442,34 +1390,26 @@ var contentbuilder = new function(){
 
                         $this->_db->setQuery("Select id, edited From #__contentbuilder_records Where `type` = ".$this->_db->Quote($data->type)." And `reference_id` = ".$this->_db->Quote($data->form->getReferenceId())." And record_id = " . $this->_db->Quote($record_return));
                         $res = $this->_db->loadAssoc();
-                        $last_update = JFactory::getDate();
-                        jimport('joomla.version');
-                        $version = new JVersion();
-                        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                            $last_update = $last_update->toSql();
-                        }else{
-                            $last_update = $last_update->toMySQL();
-                        }
+                        $last_update = Factory::getDate();
+                        $last_update = $last_update->toSql();
+
                         if(!is_array($res)){
 
                             $is_future = 0;
-                            $created_up = JFactory::getDate();
-                            if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                                $created_up = $created_up->toSql();
-                            }else{
-                                $created_up = $created_up->toMySQL();
-                            }
+                            $created_up = Factory::getDate();
+                            $created_up = $created_up->toSql();
+
                             if(intval($data->default_publish_up_days) != 0){
                                 $is_future = 1;
-                                $date = JFactory::getDate(strtotime('now +'.intval($data->default_publish_up_days).' days'));
+                                $date = Factory::getDate(strtotime('now +'.intval($data->default_publish_up_days).' days'));
 	                            $created_up = $date->toSql();
                             }
                             $created_down = '0000-00-00 00:00:00';
                             if(intval($data->default_publish_down_days) != 0){
-                                $date = JFactory::getDate(strtotime($created_up.' +'.intval($data->default_publish_down_days).' days'));
+                                $date = Factory::getDate(strtotime($created_up.' +'.intval($data->default_publish_down_days).' days'));
 	                            $created_down = $date->toSql();
                             }
-                            $this->_db->setQuery("Insert Into #__contentbuilder_records (session_id,`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id, publish_up, publish_down) Values ('".JFactory::getSession()->getId()."',".$this->_db->Quote($data->type).",".$this->_db->Quote($last_update).",$is_future,".$this->_db->Quote($language).",".$this->_db->Quote(trim($sef)).",".$this->_db->Quote($data->auto_publish && !$is_future ? 1 : 0).", ".$this->_db->Quote($record_return).", ".$this->_db->Quote($data->form->getReferenceId()).", ".$this->_db->Quote($created_up).", ".$this->_db->Quote($created_down).")");
+                            $this->_db->setQuery("Insert Into #__contentbuilder_records (session_id,`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id, publish_up, publish_down) Values ('".Factory::getSession()->getId()."',".$this->_db->Quote($data->type).",".$this->_db->Quote($last_update).",$is_future,".$this->_db->Quote($language).",".$this->_db->Quote(trim($sef)).",".$this->_db->Quote($data->auto_publish && !$is_future ? 1 : 0).", ".$this->_db->Quote($record_return).", ".$this->_db->Quote($data->form->getReferenceId()).", ".$this->_db->Quote($created_up).", ".$this->_db->Quote($created_down).")");
                             $this->_db->execute();
                         }else{
                             $this->_db->setQuery("Update #__contentbuilder_records Set last_update = ".$this->_db->Quote($last_update).",lang_code = ".$this->_db->Quote($language).", sef = ".$this->_db->Quote(trim($sef)).", edited = edited + 1 Where `type` = ".$this->_db->Quote($data->type)." And  `reference_id` = ".$this->_db->Quote($data->form->getReferenceId())." And record_id = " . $this->_db->Quote($record_return));
@@ -1483,7 +1423,7 @@ var contentbuilder = new function(){
                     
                 }
 
-                $data->items = $data->form->getRecord($record_return, $data->published_only, $this->frontend ? ( $data->own_only_fe ? JFactory::getUser()->get('id', 0)  : -1 ) : ( $data->own_only ? JFactory::getUser()->get('id', 0)  : -1 ), true );
+                $data->items = $data->form->getRecord($record_return, $data->published_only, $this->frontend ? ( $data->own_only_fe ? Factory::getUser()->get('id', 0)  : -1 ) : ( $data->own_only ? Factory::getUser()->get('id', 0)  : -1 ), true );
 
                 $data_email_items = $data->form->getRecord($record_return, false, -1, true );
 
@@ -1570,7 +1510,7 @@ var contentbuilder = new function(){
                         $fromname = CBCompat::getJoomlaConfig('config.fromname');
                         
                         
-                        $mailer = JFactory::getMailer();
+                        $mailer = Factory::getMailer();
                         
                         $email_admin_template = '';
                         $email_template       = '';
@@ -1636,10 +1576,10 @@ var contentbuilder = new function(){
                                 }
                                 $subject_admin = $data->email_admin_subject;
                                 $subject_admin = str_replace(array('{RECORD_ID}','{record_id}'), $record_return, $subject_admin);
-                                $subject_admin = str_replace(array('{USER_ID}','{user_id}'), JFactory::getUser()->get('id'), $subject_admin);
-                                $subject_admin = str_replace(array('{USERNAME}','{username}'), JFactory::getUser()->get('username'), $subject_admin);
-                                $subject_admin = str_replace(array('{USER_FULL_NAME}','{user_full_name}'), JFactory::getUser()->get('name'), $subject_admin);
-                                $subject_admin = str_replace(array('{EMAIL}','{email}'), JFactory::getUser()->get('email'), $subject_admin);
+                                $subject_admin = str_replace(array('{USER_ID}','{user_id}'), Factory::getUser()->get('id'), $subject_admin);
+                                $subject_admin = str_replace(array('{USERNAME}','{username}'), Factory::getUser()->get('username'), $subject_admin);
+                                $subject_admin = str_replace(array('{USER_FULL_NAME}','{user_full_name}'), Factory::getUser()->get('name'), $subject_admin);
+                                $subject_admin = str_replace(array('{EMAIL}','{email}'), Factory::getUser()->get('email'), $subject_admin);
                                 $subject_admin = str_replace(array('{VIEW_NAME}','{view_name}'), $data->name, $subject_admin);
                                 $subject_admin = str_replace(array('{VIEW_ID}','{view_id}'), $this->_id, $subject_admin);
                                 $subject_admin = str_replace(array('{IP}','{ip}'), $_SERVER['REMOTE_ADDR'], $subject_admin);
@@ -1678,7 +1618,7 @@ var contentbuilder = new function(){
                                 $send = $mailer->Send();
 
                                 if ( $send !== true ) {
-                                    JFactory::getApplication()->enqueueMessage('Error sending email: ' . $mailer->ErrorInfo, 'error');
+                                    Factory::getApplication()->enqueueMessage('Error sending email: ' . $mailer->ErrorInfo, 'error');
                                 }
                             }
                             
@@ -1748,10 +1688,10 @@ var contentbuilder = new function(){
                                 }
                                 $subject = $data->email_subject;
                                 $subject = str_replace(array('{RECORD_ID}','{record_id}'), $record_return, $subject);
-                                $subject = str_replace(array('{USER_ID}','{user_id}'), JFactory::getUser()->get('id'), $subject);
-                                $subject = str_replace(array('{USERNAME}','{username}'), JFactory::getUser()->get('username'), $subject);
-                                $subject = str_replace(array('{EMAIL}','{email}'), JFactory::getUser()->get('email'), $subject);
-                                $subject = str_replace(array('{USER_FULL_NAME}','{user_full_name}'), JFactory::getUser()->get('name'), $subject);
+                                $subject = str_replace(array('{USER_ID}','{user_id}'), Factory::getUser()->get('id'), $subject);
+                                $subject = str_replace(array('{USERNAME}','{username}'), Factory::getUser()->get('username'), $subject);
+                                $subject = str_replace(array('{EMAIL}','{email}'), Factory::getUser()->get('email'), $subject);
+                                $subject = str_replace(array('{USER_FULL_NAME}','{user_full_name}'), Factory::getUser()->get('name'), $subject);
                                 $subject = str_replace(array('{VIEW_NAME}','{view_name}'), $data->name, $subject);
                                 $subject = str_replace(array('{VIEW_ID}','{view_id}'), $this->_id, $subject);
                                 $subject = str_replace(array('{IP}','{ip}'), $_SERVER['REMOTE_ADDR'], $subject);
@@ -1791,7 +1731,7 @@ var contentbuilder = new function(){
                                 $send = $mailer->Send();
 
                                 if ( $send !== true ) {
-                                    JFactory::getApplication()->enqueueMessage('Error sending email: ' . $mailer->ErrorInfo, 'error');
+                                    Factory::getApplication()->enqueueMessage('Error sending email: ' . $mailer->ErrorInfo, 'error');
                                 }
                             }
                             
@@ -1806,9 +1746,9 @@ var contentbuilder = new function(){
             }
         }
 
-	    $cache = JFactory::getCache('com_content');
+	    $cache = Factory::getCache('com_content');
 	    $cache->clean();
-	    $cache = JFactory::getCache('com_contentbuilder');
+	    $cache = Factory::getCache('com_contentbuilder');
 	    $cache->clean();
         
         return false;
@@ -1839,13 +1779,9 @@ var contentbuilder = new function(){
 		}
 
 		// else execute the registration
+		Factory::getLanguage()->load('com_users', JPATH_SITE );
 
-		jimport('joomla.version');
-		$version = new JVersion();
-
-		JFactory::getLanguage()->load('com_users', JPATH_SITE );
-
-		$config = JFactory::getConfig();
+		$config = Factory::getConfig();
 		$params = JComponentHelper::getParams('com_users');
 
 		// Initialise the table with JUser.
@@ -1959,7 +1895,7 @@ var contentbuilder = new function(){
 		$return = false;
 
 		try {
-			$return = JFactory::getMailer()->sendMail( $data['mailfrom'], $data['fromname'], $data['email'], $emailSubject, $emailBody );
+			$return = Factory::getMailer()->sendMail( $data['mailfrom'], $data['fromname'], $data['email'], $emailSubject, $emailBody );
 		}catch(Exception $e){
 
 		}
@@ -1979,9 +1915,9 @@ var contentbuilder = new function(){
 
 			// Get all admin users
 			$query->clear()
-			      ->select(JFactory::getDbo()->quoteName(array('name', 'email', 'sendEmail')))
-			      ->from(JFactory::getDbo()->quoteName('#__users'))
-			      ->where(JFactory::getDbo()->quoteName('sendEmail') . ' = ' . 1);
+			      ->select(Factory::getDbo()->quoteName(array('name', 'email', 'sendEmail')))
+			      ->from(Factory::getDbo()->quoteName('#__users'))
+			      ->where(Factory::getDbo()->quoteName('sendEmail') . ' = ' . 1);
 
             Factory::getContainer()->get(DatabaseInterface::class)->setQuery($query);
 
@@ -1999,7 +1935,7 @@ var contentbuilder = new function(){
 			// Send mail to all superadministrators id
 			foreach ($rows as $row)
 			{
-				$return = JFactory::getMailer()->sendMail($data['mailfrom'], $data['fromname'], $row->email, $emailSubject, $emailBodyAdmin);
+				$return = Factory::getMailer()->sendMail($data['mailfrom'], $data['fromname'], $row->email, $emailSubject, $emailBodyAdmin);
 
 				// Check for an error.
 				if ($return !== true)
@@ -2013,21 +1949,21 @@ var contentbuilder = new function(){
 
 		if ($useractivation == 0)
 		{
-			JFactory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_SAVE_SUCCESS'));
+			Factory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_SAVE_SUCCESS'));
 		}
 		elseif ($useractivation == 1)
 		{
-			JFactory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_COMPLETE_ACTIVATE'));
+			Factory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_COMPLETE_ACTIVATE'));
 		}
 		else
 		{
-			JFactory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_COMPLETE_VERIFY'));
+			Factory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_COMPLETE_VERIFY'));
 		}
 
 		// Check for an error.
 		if ($return !== true) {
 
-			JFactory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_SEND_MAIL_FAILED'), 'error');
+			Factory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_SEND_MAIL_FAILED'), 'error');
 
 			$this->setError(JText::_('COM_USERS_REGISTRATION_SEND_MAIL_FAILED'));
 
@@ -2038,28 +1974,17 @@ var contentbuilder = new function(){
                         WHERE block = 0
                         AND sendEmail = 1";
 			$db->setQuery($q);
+        	$sendEmail = $db->loadColumn();
 
-			jimport('joomla.version');
-			$version = new JVersion();
-			if(version_compare($version->getShortVersion(), '3.0', '>=')){
-				$sendEmail = $db->loadColumn();
-			}else{
-				$sendEmail = $db->loadResultArray();
-			}
-			if (count($sendEmail) > 0) {
+            if (count($sendEmail) > 0) {
 				$jdate = new JDate();
 				// Build the query to add the messages
 				$q = "INSERT INTO `#__messages` (`user_id_from`, `user_id_to`, `date_time`, `subject`, `message`)
                                 VALUES ";
 				$messages = array();
-				jimport('joomla.version');
-				$version = new JVersion();
-				if(version_compare($version->getShortVersion(), '3.0', '>=')){
-					$___jdate = $jdate->toSql();
-				}else{
-					$___jdate = $jdate->toMySQL();
-				}
-				foreach ($sendEmail as $userid) {
+        		$___jdate = $jdate->toSql();
+
+                foreach ($sendEmail as $userid) {
 					$messages[] = "(".$userid.", ".$userid.", '".$___jdate."', '".JText::_('COM_USERS_MAIL_SEND_FAILURE_SUBJECT')."', '".JText::sprintf('COM_USERS_MAIL_SEND_FAILURE_BODY', $return, $data['username'])."')";
 				}
 				$q .= implode(',', $messages);
@@ -2076,7 +2001,7 @@ var contentbuilder = new function(){
     {
             global $mainframe;
 
-            $db		= Factory::getContainer()->get(DatabaseInterface::class)
+            $db		= Factory::getContainer()->get(DatabaseInterface::class);
 
             $name 		= $user->get('name');
             $email 		= $user->get('email');
@@ -2171,14 +2096,8 @@ var contentbuilder = new function(){
                         $this->_db->execute();
                         if($data->delete_articles){
                             $this->_db->setQuery("Select article_id From #__contentbuilder_articles Where `type` = ".$this->_db->Quote($data->type)." And reference_id = ".$this->_db->Quote($data->form->getReferenceId())." And record_id In ($new_items)");
-                            
-                            jimport('joomla.version');
-                            $version = new JVersion();
-                            if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                                $articles = $this->_db->loadColumn();
-                            }else{
-                                $articles = $this->_db->loadResultArray();
-                            }
+                            $articles = $this->_db->loadColumn();
+
                             if( count($articles) ){
                                 $article_items = array();
 								$article_ids = array();
@@ -2217,15 +2136,15 @@ var contentbuilder = new function(){
         }
         
         if(!$this->is15){
-            $cache = JFactory::getCache('com_content');
+            $cache = Factory::getCache('com_content');
             $cache->clean();
-            $cache = JFactory::getCache('com_contentbuilder');
+            $cache = Factory::getCache('com_contentbuilder');
             $cache->clean();
             
         }else{
-            $cache = JFactory::getCache('com_content');
+            $cache = Factory::getCache('com_content');
             $cache->clean();
-            $cache = JFactory::getCache('com_contentbuilder');
+            $cache = Factory::getCache('com_contentbuilder');
             $cache->clean();
         }
     }
@@ -2252,7 +2171,7 @@ var contentbuilder = new function(){
         $error = implode('',$result);
         
         if($error){
-            JFactory::getApplication()->enqueueMessage($error);
+            Factory::getApplication()->enqueueMessage($error);
         }
         
         foreach($items As $item){
@@ -2271,7 +2190,7 @@ var contentbuilder = new function(){
         $error = implode('',$result);
         
         if($error){
-            JFactory::getApplication()->enqueueMessage($error);
+            Factory::getApplication()->enqueueMessage($error);
         }
     }
     
@@ -2289,27 +2208,8 @@ var contentbuilder = new function(){
         $items	= CBRequest::getVar( 'cid', array(), 'request', 'array' );
         
         $sef = '';
-        jimport('joomla.version');
-        $version = new JVersion();
-
-        if(version_compare($version->getShortVersion(), '1.6', '>=')){
-
-            $this->_db->setQuery("Select sef From #__languages Where published = 1 And lang_code = " . $this->_db->Quote(CBRequest::getVar('list_language','*')));
-            $sef = $this->_db->loadResult();
-
-        } else {
-
-            $codes = contentbuilder::getLanguageCodes();
-            foreach($codes As $code){
-                if($code == CBRequest::getVar('list_language','*')){
-                    $sef = explode('-', $code);
-                    if(count($sef)){
-                        $sef = strtolower($sef[0]);
-                    }
-                    break;
-                }
-            }
-        }
+        $this->_db->setQuery("Select sef From #__languages Where published = 1 And lang_code = " . $this->_db->Quote(CBRequest::getVar('list_language','*')));
+        $sef = $this->_db->loadResult();
         
         foreach($items As $item){
             $this->_db->setQuery("Select id From #__contentbuilder_records Where `type` = ".$this->_db->Quote($type)." And `reference_id` = ".$this->_db->Quote($reference_id)." And record_id = " . $this->_db->Quote($item));
@@ -2326,9 +2226,9 @@ var contentbuilder = new function(){
 	        $this->_db->execute();
         }
 
-        $cache = JFactory::getCache('com_content');
+        $cache = Factory::getCache('com_content');
         $cache->clean();
-        $cache = JFactory::getCache('com_contentbuilder');
+        $cache = Factory::getCache('com_contentbuilder');
         $cache->clean();
     }
     
@@ -2348,9 +2248,7 @@ var contentbuilder = new function(){
         $this->_db->setQuery("SET @ids := null");
         $this->_db->execute();
         
-        $created_up = JFactory::getDate();
-        jimport('joomla.version');
-        $version = new JVersion();
+        $created_up = Factory::getDate();
 	    $created_up = $created_up->toSql();
         
         foreach($items As $item){
@@ -2373,9 +2271,9 @@ var contentbuilder = new function(){
         if( $select_ids ){
             $affected_articles = explode(',',$this->_db->loadResult());
         }
-	    $cache = JFactory::getCache('com_content');
+	    $cache = Factory::getCache('com_content');
 	    $cache->clean();
-	    $cache = JFactory::getCache('com_contentbuilder');
+	    $cache = Factory::getCache('com_contentbuilder');
 	    $cache->clean();
 
 	    // Trigger the onContentChangeState event.

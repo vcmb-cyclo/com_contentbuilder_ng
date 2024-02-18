@@ -46,12 +46,10 @@ class CBCompat {
     protected $pane = null;
     
     public function startPane($key){
-
 	    return HTMLHelper::_('uitab.startTabSet', $key, array('active' => 'tab_settings'));
     }
     
     public function startPanel($title, $id){
-
 		return HTMLHelper::_('uitab.addTab', 'tabs ' . $id, 'tab_settings', $title);;
     }
     

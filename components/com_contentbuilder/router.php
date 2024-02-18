@@ -7,8 +7,6 @@
  */
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
-jimport('joomla.version');
-
 function ContentbuilderBuildRoute(&$query) {
 
     $segments = array();

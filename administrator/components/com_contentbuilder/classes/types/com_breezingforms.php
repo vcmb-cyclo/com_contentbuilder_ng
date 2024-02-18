@@ -75,13 +75,7 @@ class contentbuilder_com_breezingforms{
                 cr.`record_id` Is Null");
         
         
-        jimport('joomla.version');
-        $version = new JVersion();
-        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-            $reference_ids = $db->loadColumn();
-        }else{
-            $reference_ids = $db->loadResultArray();
-        }
+        $reference_ids = $db->loadColumn();
         
         if(is_array($reference_ids)){
             foreach($reference_ids As $reference_id){
@@ -105,13 +99,7 @@ class contentbuilder_com_breezingforms{
         if($where_field != '' && $where != ''){
            $db->setQuery("Select Distinct s.`record` From #__facileforms_subrecords As s, #__facileforms_records As r Where r.form = ".$this->properties->id." And r.id = s.record And s.`element` = ".intval($where_field)." And s.`value` <> '' And s.`value` = ".$db->Quote($where)."  Order By s.`value`");
            
-           jimport('joomla.version');
-           $version = new JVersion();
-           if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                $l = $db->loadColumn();
-           }else{
-                $l = $db->loadResultArray();
-           }
+           $l = $db->loadColumn();
            
            if(count($l)){
             $where_fields = '';
@@ -123,14 +111,7 @@ class contentbuilder_com_breezingforms{
            }
         }
         $db->setQuery("Select Distinct s.`value` From #__facileforms_subrecords As s, #__facileforms_records As r Where r.form = ".$this->properties->id." And r.id = s.record And s.`element` = ".intval($element_id)." And s.`value` <> '' $where_add  Order By s.`value`");
-        
-        jimport('joomla.version');
-        $version = new JVersion();
-        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-            return $db->loadColumn();
-        }else{
-            return $db->loadResultArray();
-        }
+        return $db->loadColumn();
     }
     
     public function getAllElements(){
@@ -833,14 +814,7 @@ class contentbuilder_com_breezingforms{
             $name = $db->loadResult();
             if($name){
                 $db->setQuery("Select `data1` From #__facileforms_elements Where `type` In ('Radio Button', 'Checkbox') And name = " . $db->Quote(trim($name)));
-                
-                jimport('joomla.version');
-                $version = new JVersion();
-                if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                    $values = $db->loadColumn();
-                }else{
-                    $values = $db->loadResultArray();
-                }
+                $values = $db->loadColumn();
                 
                 foreach($values As $value){
                     $return[$value] = '';
@@ -927,13 +901,7 @@ class contentbuilder_com_breezingforms{
             }
             jimport('joomla.environment.browser');
             $date = JFactory::getDate();
-            jimport('joomla.version');
-            $version = new JVersion();
-            if(version_compare($version->getShortVersion(), '3.0', '<')){
-                $now = $date->toMySQL();
-            }else{
-                $now = $date->toSql();
-            }
+            $now = $date->toSql();
             $db->setQuery("Insert Into #__facileforms_records (
                 `submitted`,
                 `form`,
@@ -1088,14 +1056,7 @@ class contentbuilder_com_breezingforms{
             $db->setQuery("Delete From #__facileforms_records Where id In (".implode(',',$items).")");
             $db->execute();
             $db->setQuery("Select `value` From #__facileforms_subrecords Where `type` = 'File Upload' And record In (".implode(',',$items).")");
-            
-            jimport('joomla.version');
-            $version = new JVersion();
-            if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                $files = $db->loadColumn();
-            }else{
-                $files = $db->loadResultArray();
-            }
+            $files = $db->loadColumn();
             
             foreach($files As $file){
                 $_values = explode("\n", $file);

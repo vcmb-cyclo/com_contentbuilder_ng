@@ -52,13 +52,7 @@ class contentbuilder_com_contentbuilder{
                 ) 
         ");
         
-        jimport('joomla.version');
-        $version = new JVersion();
-        if(version_compare($version->getShortVersion(), '3.0', '>=')){
-            $reference_ids = $db->loadColumn();
-        }else{
-            $reference_ids = $db->loadResultArray();
-        }
+        $reference_ids = $db->loadColumn();
         
         if(is_array($reference_ids)){
             foreach($reference_ids As $reference_id){
@@ -97,13 +91,7 @@ class contentbuilder_com_contentbuilder{
         }
         if($name){
             $db->setQuery("Select Distinct `".$name."` From ".$this->bytable.$this->properties->name . " Where `".$name."` <> '' ".$where_add." Order By `".$name."`");
-            jimport('joomla.version');
-            $version = new JVersion();
-            if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                return $db->loadColumn();
-            }else{
-                return $db->loadResultArray();
-            }
+            return $db->loadColumn();
         }
         return array();
     }
@@ -738,8 +726,6 @@ class contentbuilder_com_contentbuilder{
         }
         
         $date = JFactory::getDate();
-        jimport('joomla.version');
-        $version = new JVersion();
 	    $now = $date->toSql();
         $options = null;
         foreach($cleaned_values As $id => $value){
@@ -870,23 +856,12 @@ class contentbuilder_com_contentbuilder{
         ArrayHelper::toInteger($items);
         if(count($items)){
             $db->setQuery("Select reference_id From #__contentbuilder_elements Where `type` = 'upload' And form_id = " . intval($form_id));
-            
-            jimport('joomla.version');
-            $version = new JVersion();
-            if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                $refs = $db->loadColumn();
-            }else{
-                $refs = $db->loadResultArray();
-            }
+            $refs = $db->loadColumn();
+
             if(count($refs)){
                 $db->setQuery("Select `name` From #__contentbuilder_storage_fields Where id In (".implode(',',$refs).")");
-                jimport('joomla.version');
-                $version = new JVersion();
-                if(version_compare($version->getShortVersion(), '3.0', '>=')){
-                    $names = $db->loadColumn();
-                }else{
-                    $names = $db->loadResultArray();
-                }
+                $names = $db->loadColumn();
+
                 if(count($names)){
                     $_names = '';
                     foreach($names As $name){

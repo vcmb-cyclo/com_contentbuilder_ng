@@ -54,8 +54,6 @@ class ContentbuilderModelDetails extends CBModel
             $this->_menu_item = true;
 
             // try menu item
-            jimport('joomla.version');
-            $version = new JVersion();
 
 	        $menu = JFactory::getApplication()->getMenu();
 	        $item = $menu->getActive();
@@ -340,37 +338,16 @@ class ContentbuilderModelDetails extends CBModel
                         }
 
                         // "buddy quaid hack", should be an option in future versions
+                        if($this->_show_page_heading && $this->_page_title != '' && $this->_page_heading != '' && $this->_page_title == $this->_page_heading){
+                            $data->page_title = $this->_page_title;
+                        }
+                        else{
+                            $data->page_title .= $label ? ( !$data->page_title ? '' : ( !$ordered_extra_title ? ': ' : ' &raquo; ' ) ) . $label : '';
+                        }
 
-                        jimport('joomla.version');
-                        $version = new JVersion();
-
-                        if(version_compare($version->getShortVersion(), '1.6', '>=')){
-
-                            if($this->_show_page_heading && $this->_page_title != '' && $this->_page_heading != '' && $this->_page_title == $this->_page_heading){
-                                $data->page_title = $this->_page_title;
-                            }
-                            else{
-                                $data->page_title .= $label ? ( !$data->page_title ? '' : ( !$ordered_extra_title ? ': ' : ' &raquo; ' ) ) . $label : '';
-                            }
-
-                            if($this->frontend){
-                                $document = JFactory::getDocument();
-                                $document->setTitle(html_entity_decode ($data->page_title, ENT_QUOTES, 'UTF-8'));
-                            }
-
-                        }else{
-
-                            if($this->_show_page_heading && $this->_page_title != '' && !CBRequest::getInt('cb_prefix_in_title', 1)){
-                                $data->page_title = $this->_page_title;
-                            }
-                            else{
-                                $data->page_title .= $label ? ( !$data->page_title ? '' : ( !$ordered_extra_title ? ': ' : ' &raquo; ' ) ) . $label : '';
-                            }
-
-                            if($this->frontend){
-                                $document = JFactory::getDocument();
-                                $document->setTitle(html_entity_decode ($data->page_title, ENT_QUOTES, 'UTF-8'));
-                            }
+                        if($this->frontend){
+                            $document = JFactory::getDocument();
+                            $document->setTitle(html_entity_decode ($data->page_title, ENT_QUOTES, 'UTF-8'));
                         }
 
                         $data->template = contentbuilder::getTemplate($this->_id, $this->_record_id, $data->items, $ids);
