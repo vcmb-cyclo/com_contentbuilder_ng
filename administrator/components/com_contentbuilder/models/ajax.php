@@ -7,8 +7,8 @@
 */
 
 // No direct access
-
 defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
@@ -45,12 +45,12 @@ class ContentbuilderModelAjax extends CBModel
                 
                 if( $this->frontend ){
                     if( !contentbuilder::authorizeFe('listaccess') ){
-                        return json_encode(array('code' => 1, 'msg' => JText::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED')));
+                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED')));
                     }
                 }
                 else{
                     if( !contentbuilder::authorize('listaccess') ){
-                        return json_encode(array('code' => 1, 'msg' => JText::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED')));
+                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED')));
                     }
                 }
                 
@@ -60,7 +60,7 @@ class ContentbuilderModelAjax extends CBModel
                 $form = contentbuilder::getForm($result['type'], $result['reference_id']);
                 
                 if(!$form || !$form->exists){
-                    return json_encode(array('code' => 2, 'msg' => JText::_('COM_CONTENTBUILDER_FORM_ERROR')));
+                    return json_encode(array('code' => 2, 'msg' => Text::_('COM_CONTENTBUILDER_FORM_ERROR')));
                 }
                 
                 $values = $form->getUniqueValues(CBRequest::getCmd('field_reference_id',''), CBRequest::getCmd('where_field',''), CBRequest::getVar('where',''));
@@ -74,12 +74,12 @@ class ContentbuilderModelAjax extends CBModel
                 
                 if( $this->frontend ){
                     if( !contentbuilder::authorizeFe('rating') ){
-                        return json_encode( array('code' => 1, 'msg' => JText::_('COM_CONTENTBUILDER_RATING_NOT_ALLOWED')));
+                        return json_encode( array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDER_RATING_NOT_ALLOWED')));
                     }
                 }
                 else{
                     if( !contentbuilder::authorize('rating') ){
-                        return json_encode(array('code' => 1, 'msg' => JText::_('COM_CONTENTBUILDER_RATING_NOT_ALLOWED')));
+                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDER_RATING_NOT_ALLOWED')));
                     }
                 }
                 
@@ -89,7 +89,7 @@ class ContentbuilderModelAjax extends CBModel
                 $form = contentbuilder::getForm($result['type'], $result['reference_id']);
                 
                 if(!$form || !$form->exists){
-                    return json_encode(array('code' => 2, 'msg' => JText::_('COM_CONTENTBUILDER_FORM_ERROR')));
+                    return json_encode(array('code' => 2, 'msg' => Text::_('COM_CONTENTBUILDER_FORM_ERROR')));
                 }
                 
                 $rating = 0;
@@ -146,7 +146,7 @@ class ContentbuilderModelAjax extends CBModel
                     
                     if($rated || $cached)
                     {
-                        return json_encode(array('code' => 1, 'msg' => JText::_('COM_CONTENTBUILDER_RATED_ALREADY')));
+                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDER_RATED_ALREADY')));
                     }
                     else
                     {
@@ -217,7 +217,7 @@ class ContentbuilderModelAjax extends CBModel
                     }
                 }
                 
-                return json_encode(array('code' => 0, 'msg' => JText::_('COM_CONTENTBUILDER_THANK_YOU_FOR_RATING') ));
+                return json_encode(array('code' => 0, 'msg' => Text::_('COM_CONTENTBUILDER_THANK_YOU_FOR_RATING') ));
                 break;
         }
         return null;

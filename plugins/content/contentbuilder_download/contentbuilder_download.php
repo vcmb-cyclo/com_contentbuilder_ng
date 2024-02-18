@@ -9,6 +9,8 @@
 /** ensure this file is being included by a parent file */
 defined( '_JEXEC' ) or die( 'Direct Access to this location is not allowed.' );
 
+use Joomla\CMS\Language\Text;
+
 if(!function_exists('cb_b64enc')){
     
     function cb_b64enc($str){
@@ -437,13 +439,13 @@ class plgContentContentbuilder_download extends JPlugin {
                                              $open_ = JRoute::_($url.(strstr($url,'?') !== false ? '&' : '?').'contentbuilder_download_file='.  sha1($field.$the_value));
 
                                              $out .= '<div style="'.($align_ ? 'float: '.$align_.';' : '' ). str_replace('::',';',$box_style_).'">
-                                                        <a href="'.$open_.'">'.JText::_('COM_CONTENTBUILDER_PLUGIN_DOWNLOAD_DOWNLOAD').'</a>'
+                                                        <a href="'.$open_.'">'.Text::_('COM_CONTENTBUILDER_PLUGIN_DOWNLOAD_DOWNLOAD').'</a>'
                                                      .($info_ ? 
                                                                 '<div style="'.(str_replace('::',';',$info_style_)).'">
-                                                                    '.($hide_filename_ ? '' : '<span class="cbPluginDownloadFilename">'.JText::_('COM_CONTENTBUILDER_PLUGIN_DOWNLOAD_FILENAME').':</span> '.$download_name.'<br/>').'
-                                                                    '.($hide_mime_ ? '' : '<span class="cbPluginDownloadMime">'.JText::_('COM_CONTENTBUILDER_PLUGIN_DOWNLOAD_MIME').':</span> '.$mime.'<br/>').'
-                                                                    '.($hide_size_ ? '' : '<span '.($hide_size_ ? ' style="display:none;" ' : '').'class="cbPluginDownloadSize">'.JText::_('COM_CONTENTBUILDER_PLUGIN_DOWNLOAD_SIZE').':</span> '.$size.'<br/>').'
-                                                                    '.($hide_downloads_ ? '' : '<span '.($hide_downloads_ ? ' style="display:none;" ' : '').'class="cbPluginDownloadDownloads">'.JText::_('COM_CONTENTBUILDER_PLUGIN_DOWNLOAD_DOWNLOADS').':</span> '.$hits.'<br/>').'
+                                                                    '.($hide_filename_ ? '' : '<span class="cbPluginDownloadFilename">'.Text::_('COM_CONTENTBUILDER_PLUGIN_DOWNLOAD_FILENAME').':</span> '.$download_name.'<br/>').'
+                                                                    '.($hide_mime_ ? '' : '<span class="cbPluginDownloadMime">'.Text::_('COM_CONTENTBUILDER_PLUGIN_DOWNLOAD_MIME').':</span> '.$mime.'<br/>').'
+                                                                    '.($hide_size_ ? '' : '<span '.($hide_size_ ? ' style="display:none;" ' : '').'class="cbPluginDownloadSize">'.Text::_('COM_CONTENTBUILDER_PLUGIN_DOWNLOAD_SIZE').':</span> '.$size.'<br/>').'
+                                                                    '.($hide_downloads_ ? '' : '<span '.($hide_downloads_ ? ' style="display:none;" ' : '').'class="cbPluginDownloadDownloads">'.Text::_('COM_CONTENTBUILDER_PLUGIN_DOWNLOAD_DOWNLOADS').':</span> '.$hits.'<br/>').'
                                                                  </div>' : '').'</div>';
 
                                              if($is_series && $align_ && (strtolower($align_) == 'left' || strtolower($align_) == 'right' )){

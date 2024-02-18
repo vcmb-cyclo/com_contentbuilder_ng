@@ -8,6 +8,8 @@
  */
 defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Language\Text;
+
 jimport('joomla.html.html');
 jimport('joomla.form.formfield');
 
@@ -49,7 +51,7 @@ class JFormFieldCategories extends JFormField {
         for ($i = 0, $n = count($options); $i < $n; $i++) {
             // Translate ROOT
             if ($options[$i]->level == 0) {
-                $options[$i]->text = JText::_('JGLOBAL_ROOT_PARENT');
+                $options[$i]->text = Text::_('JGLOBAL_ROOT_PARENT');
             }
 
             $options[$i]->text = str_repeat('- ', $options[$i]->level) . $options[$i]->text;
@@ -88,7 +90,7 @@ class JFormFieldCategories extends JFormField {
         if (isset($row) && !isset($options[0])) {
             if ($row->parent_id == '1') {
                 $parent = new stdClass();
-                $parent->text = JText::_('JGLOBAL_ROOT_PARENT');
+                $parent->text = Text::_('JGLOBAL_ROOT_PARENT');
                 array_unshift($options, $parent);
             }
         }
@@ -98,7 +100,7 @@ class JFormFieldCategories extends JFormField {
         
         $out = '<select style="max-width: 200px;" name="' . $this->name . '" id="' . $this->id . '" class="' . $this->element['class'] . '">' . "\n";
         
-        $out .= '<option value="-2">'.JText::_('COM_CONTENTBUILDER_INHERIT').'</option>'."\n";
+        $out .= '<option value="-2">'.Text::_('COM_CONTENTBUILDER_INHERIT').'</option>'."\n";
         
         foreach ($options As $category) {
             $out .= '<option '.($this->value == $category->value  ? ' selected="selected"' : '').'value="'.$category->value.'">'.htmlentities($category->text, ENT_QUOTES, 'UTF-8').'</option>'."\n";

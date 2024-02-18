@@ -7,6 +7,9 @@
 */
 
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\CMS\Language\Text;
+
 ?>
 <style type="text/css">
     .cbPagesCounter{
@@ -22,24 +25,24 @@ defined('_JEXEC') or die('Restricted access');
 
 
 <input style="display:inline-block;" class="form-control form-control-sm w-25" type="text" name="users_search" id="users_search" value="<?php echo $this->lists['users_search'];?>" onchange="document.adminForm.submit();" />
-<input type="button" class="btn btn-sm btn-primary" value="<?php echo JText::_( 'COM_CONTENTBUILDER_SEARCH' ); ?>" onclick="this.form.submit();" />
-<input type="button" class="btn btn-sm btn-primary" value="<?php echo JText::_( 'COM_CONTENTBUILDER_RESET' ); ?>" onclick="document.getElementById('users_search').value='';document.adminForm.submit();" />
+<input type="button" class="btn btn-sm btn-primary" value="<?php echo Text::_( 'COM_CONTENTBUILDER_SEARCH' ); ?>" onclick="this.form.submit();" />
+<input type="button" class="btn btn-sm btn-primary" value="<?php echo Text::_( 'COM_CONTENTBUILDER_RESET' ); ?>" onclick="document.getElementById('users_search').value='';document.adminForm.submit();" />
 
     
 <div style="float:right">
 <select class="form-select-sm" onchange="if(this.selectedIndex == 1 || this.selectedIndex == 2){document.adminForm.task.value=this.options[this.selectedIndex].value;document.adminForm.submit();}">
-    <option> - <?php echo JText::_( 'COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED' ); ?> - </option>
-    <option value="publish"><?php echo JText::_( 'PUBLISH' ); ?></option>
-    <option value="unpublish"><?php echo JText::_( 'UNPUBLISH' ); ?></option>
+    <option> - <?php echo Text::_( 'COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED' ); ?> - </option>
+    <option value="publish"><?php echo Text::_( 'PUBLISH' ); ?></option>
+    <option value="unpublish"><?php echo Text::_( 'UNPUBLISH' ); ?></option>
 </select>
 <select class="form-select-sm" onchange="if(this.selectedIndex != 0){document.adminForm.task.value=this.options[this.selectedIndex].value;document.adminForm.submit();}">
-    <option> - <?php echo JText::_( 'COM_CONTENTBUILDER_SET_VERIFICATION' ); ?> - </option>
-    <option value="verified_view"><?php echo JText::_( 'COM_CONTENTBUILDER_VERIFIED_VIEW' ); ?></option>
-    <option value="not_verified_view"><?php echo JText::_( 'COM_CONTENTBUILDER_UNVERIFIED_VIEW' ); ?></option>
-    <option value="verified_new"><?php echo JText::_( 'COM_CONTENTBUILDER_VERIFIED_NEW' ); ?></option>
-    <option value="not_verified_new"><?php echo JText::_( 'COM_CONTENTBUILDER_UNVERIFIED_NEW' ); ?></option>
-    <option value="verified_edit"><?php echo JText::_( 'COM_CONTENTBUILDER_VERIFIED_EDIT' ); ?></option>
-    <option value="not_verified_edit"><?php echo JText::_( 'COM_CONTENTBUILDER_UNVERIFIED_EDIT' ); ?></option>
+    <option> - <?php echo Text::_( 'COM_CONTENTBUILDER_SET_VERIFICATION' ); ?> - </option>
+    <option value="verified_view"><?php echo Text::_( 'COM_CONTENTBUILDER_VERIFIED_VIEW' ); ?></option>
+    <option value="not_verified_view"><?php echo Text::_( 'COM_CONTENTBUILDER_UNVERIFIED_VIEW' ); ?></option>
+    <option value="verified_new"><?php echo Text::_( 'COM_CONTENTBUILDER_VERIFIED_NEW' ); ?></option>
+    <option value="not_verified_new"><?php echo Text::_( 'COM_CONTENTBUILDER_UNVERIFIED_NEW' ); ?></option>
+    <option value="verified_edit"><?php echo Text::_( 'COM_CONTENTBUILDER_VERIFIED_EDIT' ); ?></option>
+    <option value="not_verified_edit"><?php echo Text::_( 'COM_CONTENTBUILDER_UNVERIFIED_EDIT' ); ?></option>
 </select>
 </div> 
     
@@ -50,28 +53,28 @@ defined('_JEXEC') or die('Restricted access');
     <thead>
         <tr>
             <th width="5">
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_ID' ), 'id', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_ID' ), 'id', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th width="20">
               <input class="form-check-input" type="checkbox" name="toggle" value="" onclick="<?php echo CBCompat::getCheckAll($this->items); ?>" />
             </th>
             <th>
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th>
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_USERNAME' ), 'username', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_USERNAME' ), 'username', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th>
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_VERIFIED_VIEW' ), 'verified_view', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_VERIFIED_VIEW' ), 'verified_view', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th>
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_VERIFIED_NEW' ), 'verified_new', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_VERIFIED_NEW' ), 'verified_new', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th>
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_VERIFIED_EDIT' ), 'verified_edit', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_VERIFIED_EDIT' ), 'verified_edit', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th width="5">
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_PUBLISHED' ), 'published', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_PUBLISHED' ), 'published', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
         </tr>
     </thead>

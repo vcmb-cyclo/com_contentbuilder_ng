@@ -6,11 +6,13 @@
  * @license     GNU/GPL
 */
 
+
+defined( '_JEXEC' ) or die( 'Restricted access' );
+
 use Joomla\CMS\Factory;
 use Joomla\CMS\Editor\Editor;
 use Joomla\Database\DatabaseInterface;
-
-defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 jimport('joomla.filesystem.file');
 
@@ -107,10 +109,10 @@ class contentbuilder{
 <div class="pagination">
     <ul>
         <li class="pagination-start">
-            <?php echo $pages_current - 1 > 0 ? '<a title="'.JText::_('COM_CONTENTBUILDER_START').'" href="'.$open.'" class="pagenav">'.JText::_('COM_CONTENTBUILDER_START').'</a>' : '<span class="pagenav">'.JText::_('COM_CONTENTBUILDER_START').'</span>' ;?>
+            <?php echo $pages_current - 1 > 0 ? '<a title="'.Text::_('COM_CONTENTBUILDER_START').'" href="'.$open.'" class="pagenav">'.Text::_('COM_CONTENTBUILDER_START').'</a>' : '<span class="pagenav">'.Text::_('COM_CONTENTBUILDER_START').'</span>' ;?>
         </li>
         <li class="pagination-prev">
-            <?php echo $pages_current - 1 > 0 ? '<a title="'.JText::_('COM_CONTENTBUILDER_PREV').'" href="'.$open.'start='.($limitstart - $limit).'" class="pagenav">'.JText::_('COM_CONTENTBUILDER_PREV').'</a>' : '<span class="pagenav">'.JText::_('COM_CONTENTBUILDER_PREV').'</span>' ;?>
+            <?php echo $pages_current - 1 > 0 ? '<a title="'.Text::_('COM_CONTENTBUILDER_PREV').'" href="'.$open.'start='.($limitstart - $limit).'" class="pagenav">'.Text::_('COM_CONTENTBUILDER_PREV').'</a>' : '<span class="pagenav">'.Text::_('COM_CONTENTBUILDER_PREV').'</span>' ;?>
         </li>
         <?php echo $begin;?>
         <?php
@@ -127,8 +129,8 @@ class contentbuilder{
         }
         ?>
         <?php echo $end;?>
-        <li class="pagination-next"><?php echo $pages_current < $pages_total ? '<a title="'.JText::_('COM_CONTENTBUILDER_NEXT').'" href="'.$open.'start='.($pages_current * $limit).'" class="pagenav">'.JText::_('COM_CONTENTBUILDER_NEXT').'</a>' : '<span class="pagenav">'.JText::_('COM_CONTENTBUILDER_NEXT').'</span>' ;?></li>
-        <li class="pagination-end"><?php echo $pages_total > 1 && $pages_current < $pages_total ? '<a title="'.JText::_('COM_CONTENTBUILDER_END').'" href="'.$open.'start='.(($pages_total-1) * $limit).'" class="pagenav">'.JText::_('COM_CONTENTBUILDER_END').'</a>' : '<span class="pagenav">'.JText::_('COM_CONTENTBUILDER_END').'</span>' ;?></li>
+        <li class="pagination-next"><?php echo $pages_current < $pages_total ? '<a title="'.Text::_('COM_CONTENTBUILDER_NEXT').'" href="'.$open.'start='.($pages_current * $limit).'" class="pagenav">'.Text::_('COM_CONTENTBUILDER_NEXT').'</a>' : '<span class="pagenav">'.Text::_('COM_CONTENTBUILDER_NEXT').'</span>' ;?></li>
+        <li class="pagination-end"><?php echo $pages_total > 1 && $pages_current < $pages_total ? '<a title="'.Text::_('COM_CONTENTBUILDER_END').'" href="'.$open.'start='.(($pages_total-1) * $limit).'" class="pagenav">'.Text::_('COM_CONTENTBUILDER_END').'</a>' : '<span class="pagenav">'.Text::_('COM_CONTENTBUILDER_END').'</span>' ;?></li>
     </ul>
 </div>
         <?php
@@ -246,7 +248,7 @@ class contentbuilder{
                         <div align="center" class="cbRatingCount"><?php echo $percentage3 ? $percentage3.'%' : '';?></div>
                     </div>
                     <div style="clear: both;"></div>
-                    <div align="center" class="cbRatingVotes"><?php echo $rating_count == 1 ? $rating_count . ' ' . JText::_('COM_CONTENTBUILDER_VOTES_SINGULAR') : $rating_count . ' ' . JText::_('COM_CONTENTBUILDER_VOTES_PLURAL');?></div>
+                    <div align="center" class="cbRatingVotes"><?php echo $rating_count == 1 ? $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_VOTES_SINGULAR') : $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_VOTES_PLURAL');?></div>
                 </div>
         <?php
                     break;
@@ -255,7 +257,7 @@ class contentbuilder{
                 <div class="cbRating">
                 <div class="cbRatingImage" style="cursor:pointer;" onclick="cbRate('<?php echo $rating_link.'&rate='.$x; ?>','cbRatingMsg<?php echo $record_id; ?>');"></div>
                 <div align="center" id="cbRatingMsg<?php echo $record_id; ?>Counter" class="cbRatingCount"><?php echo $rating_count;?></div>
-                <div align="center" class="cbRatingVotes"><?php echo $rating_count == 1 ? JText::_('COM_CONTENTBUILDER_VOTES_SINGULAR') : JText::_('COM_CONTENTBUILDER_VOTES_PLURAL');?></div>
+                <div align="center" class="cbRatingVotes"><?php echo $rating_count == 1 ? Text::_('COM_CONTENTBUILDER_VOTES_SINGULAR') : Text::_('COM_CONTENTBUILDER_VOTES_PLURAL');?></div>
                 </div>
         <?php
                 }
@@ -276,7 +278,7 @@ class contentbuilder{
                         <div align="center" class="cbRatingCount"><?php echo $percentage3 ? $percentage3.'%' : '';?></div>
                     </div>
                     <div style="clear: both;"></div>
-                    <div align="center" class="cbRatingVotes"><?php echo $rating_count == 1 ? $rating_count . ' ' . JText::_('COM_CONTENTBUILDER_VOTES_SINGULAR') : $rating_count . ' ' . JText::_('COM_CONTENTBUILDER_VOTES_PLURAL');?></div>
+                    <div align="center" class="cbRatingVotes"><?php echo $rating_count == 1 ? $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_VOTES_SINGULAR') : $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_VOTES_PLURAL');?></div>
                 </div>
         <?php
                     break;
@@ -285,7 +287,7 @@ class contentbuilder{
                 <div class="cbRating">
                 <div class="cbRatingImage" style="cursor:default;"></div>
                 <div align="center" class="cbRatingCount"><?php echo $rating_count;?></div>
-                <div align="center" class="cbRatingVotes"><?php echo $rating_count == 1 ? JText::_('COM_CONTENTBUILDER_VOTES_SINGULAR') : JText::_('COM_CONTENTBUILDER_VOTES_PLURAL');?></div>
+                <div align="center" class="cbRatingVotes"><?php echo $rating_count == 1 ? Text::_('COM_CONTENTBUILDER_VOTES_SINGULAR') : Text::_('COM_CONTENTBUILDER_VOTES_PLURAL');?></div>
                 </div>
         <?php
                 }
@@ -296,7 +298,7 @@ class contentbuilder{
         </div>
         <div class="cbVotingStars" id="cbVotingStars<?php echo $record_id; ?>" style="width: <?php echo $percentage;?>px;"></div>
         <div style="clear: left;"></div>
-        <div align="center" class="cbRatingVotes"><?php echo $rating_count == 1 ? $rating_count . ' ' . JText::_('COM_CONTENTBUILDER_VOTES_SINGULAR') : $rating_count . ' ' . JText::_('COM_CONTENTBUILDER_VOTES_PLURAL');?></div>
+        <div align="center" class="cbRatingVotes"><?php echo $rating_count == 1 ? $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_VOTES_SINGULAR') : $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_VOTES_PLURAL');?></div>
         </div>
         <?php
         }
@@ -1035,7 +1037,7 @@ class contentbuilder{
                         }
                     }
                     
-                    $items[$item->recName]['value'] = ($item->recValue != '' ? $item->recValue : JText::_('COM_CONTENTBUILDER_NOT_AVAILABLE'));
+                    $items[$item->recName]['value'] = ($item->recValue != '' ? $item->recValue : Text::_('COM_CONTENTBUILDER_NOT_AVAILABLE'));
                     $items[$item->recName]['id']    = $item->recElementId;
                     $regex = "/([\{]hide-if-empty ".$item->recName."[\}])(.*)([\{][\/]hide[\}])/isU";
 
@@ -1079,7 +1081,7 @@ class contentbuilder{
             return $template;
         } else {
             if($quiet_skip) return '';
-	        throw new Exception(JText::_('COM_CONTENTBUILDER_TEMPLATE_NOT_FOUND'), 404);
+	        throw new Exception(Text::_('COM_CONTENTBUILDER_TEMPLATE_NOT_FOUND'), 404);
         }
         return '';
     }
@@ -1164,12 +1166,12 @@ class contentbuilder{
                             $item->recValue = $user->email;
                         }
                     }
-                    $items[$item->recName]['value'] = ($item->recValue != '' ? $item->recValue : JText::_('COM_CONTENTBUILDER_NOT_AVAILABLE'));
+                    $items[$item->recName]['value'] = ($item->recValue != '' ? $item->recValue : Text::_('COM_CONTENTBUILDER_NOT_AVAILABLE'));
                     $items[$item->recName]['id']    = $item->recElementId;
                     $regex = "/([\{]hide-if-empty ".$item->recName."[\}])(.*)([\{][\/]hide[\}])/isU";
                     $regex2 = "/([\{]hide-if-empty ".$item->recName." ".$item->recValue."[\}])(.*)([\{][\/]hide[\}])/isU";
 
-                    $items[$item->recName]['value'] = ($item->recValue != '' ? $item->recValue : JText::_('COM_CONTENTBUILDER_NOT_AVAILABLE'));
+                    $items[$item->recName]['value'] = ($item->recValue != '' ? $item->recValue : Text::_('COM_CONTENTBUILDER_NOT_AVAILABLE'));
                     $items[$item->recName]['id']    = $item->recElementId;
                     $regex = "/([\{]hide-if-empty ".$item->recName."[\}])(.*)([\{][\/]hide[\}])/isU";
 
@@ -1523,7 +1525,7 @@ class contentbuilder{
                          $the_item = '<div class="cbFormField cbUploadField">';
                          $the_item .= '<input type="file" id="cb_'.$item['id'].'" name="cb_'.$item['id'].'"/>';
                          if(trim($item['value']) != ''){
-                            $the_item .= '<div>'.($deletable ? '<label for="cb_delete_'.$item['id'].'">'.JText::_('COM_CONTENTBUILDER_DELETE').'</label> <input type="checkbox" id="cb_delete_'.$item['id'].'" name="cb_delete_'.$item['id'].'" value="1"/> ' : '').htmlentities(basename($item['value']),ENT_QUOTES,'UTF-8').'</div><div style="clear:both;"></div>';
+                            $the_item .= '<div>'.($deletable ? '<label for="cb_delete_'.$item['id'].'">'.Text::_('COM_CONTENTBUILDER_DELETE').'</label> <input type="checkbox" id="cb_delete_'.$item['id'].'" name="cb_delete_'.$item['id'].'" value="1"/> ' : '').htmlentities(basename($item['value']),ENT_QUOTES,'UTF-8').'</div><div style="clear:both;"></div>';
                          }
                          $the_item .= '</div>';
                          break;
@@ -1614,9 +1616,9 @@ class contentbuilder{
 
         } else {
 
-            throw new Exception(JText::_('COM_CONTENTBUILDER_TEMPLATE_NOT_FOUND'), 404);
+            throw new Exception(Text::_('COM_CONTENTBUILDER_TEMPLATE_NOT_FOUND'), 404);
 
-            //JError::raiseError(404, JText::_('COM_CONTENTBUILDER_TEMPLATE_NOT_FOUND'));
+            //JError::raiseError(404, Text::_('COM_CONTENTBUILDER_TEMPLATE_NOT_FOUND'));
         }
 
         return '';

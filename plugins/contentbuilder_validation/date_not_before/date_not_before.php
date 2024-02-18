@@ -8,6 +8,7 @@
 
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 jimport( 'joomla.plugin.plugin' );
 
@@ -29,7 +30,7 @@ class plgContentbuilder_validationDate_not_before extends JPlugin
                 if(isset($other_field['name']) && isset($other_field['value']) && isset($field['name']) && $field['name'].'_later' == $other_field['name']){
                  
                     if(is_array($value)){
-                       return JText::_('COM_CONTENTBUILDER_VALIDATION_DATE_NOT_BEFORE_GROUPS');
+                       return Text::_('COM_CONTENTBUILDER_VALIDATION_DATE_NOT_BEFORE_GROUPS');
                     }
                     
                     $other_value = $other_field['value'];
@@ -37,14 +38,14 @@ class plgContentbuilder_validationDate_not_before extends JPlugin
                     $value = contentbuilder_convert_date($value, $field['options']->transfer_format, 'YYYY-MM-DD');
                     
                     if(is_array($other_value)){
-                        return JText::_('COM_CONTENTBUILDER_VALIDATION_DATE_NOT_BEFORE_GROUPS');
+                        return Text::_('COM_CONTENTBUILDER_VALIDATION_DATE_NOT_BEFORE_GROUPS');
                     }
                     
                     $value = preg_replace("/[^0-9]/",'',$value);
                     $other_value = preg_replace("/[^0-9]/",'',$other_value);
                     
                     if($other_value < $value){
-                        return JText::_('COM_CONTENTBUILDER_VALIDATION_DATE_NOT_BEFORE') . ': ' . $other_field['label'] . ' (' . $other_field['value'] . ')';
+                        return Text::_('COM_CONTENTBUILDER_VALIDATION_DATE_NOT_BEFORE') . ': ' . $other_field['label'] . ' (' . $other_field['value'] . ')';
                     }
                     
                     return '';

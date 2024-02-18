@@ -9,6 +9,7 @@
 // no direct access
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -37,9 +38,9 @@ class ContentbuilderControllerElementoptions extends CBController
         $id = $model->store();
         
         if ($id) {
-            $msg = JText::_( 'COM_CONTENTBUILDER_SAVED' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_SAVED' );
         } else {
-            $msg = JText::_( 'COM_CONTENTBUILDER_ERROR' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_ERROR' );
         }
 
         

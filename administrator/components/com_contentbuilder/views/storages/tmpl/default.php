@@ -7,6 +7,9 @@
 */
 
 defined('_JEXEC') or die('Restricted access');
+use Joomla\CMS\Language\Text;
+
+
 $___tableOrdering = "Joomla.tableOrdering = function";
 ?>
 <style type="text/css">
@@ -56,23 +59,23 @@ if( typeof Joomla != 'undefined' ){
     <thead>
         <tr>
             <th width="5">
-                <?php echo JText::_( 'COM_CONTENTBUILDER_ID' ); ?>
+                <?php echo Text::_( 'COM_CONTENTBUILDER_ID' ); ?>
             </th>
             <th width="20">
               <input type="checkbox" name="toggle" value="" onclick="<?php echo CBCompat::getCheckAll($this->items);?>" />
             </th>
             <th>
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th>
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_STORAGE_TITLE' ), 'title', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_STORAGE_TITLE' ), 'title', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th width="120">
-                <?php echo JHTML::_('grid.sort',   JText::_( 'COM_CONTENTBUILDER_ORDERBY') , 'ordering', 'desc', @$this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort',   Text::_( 'COM_CONTENTBUILDER_ORDERBY') , 'ordering', 'desc', @$this->lists['order'] ); ?>
                 <?php // TODO: dragandrop if ($this->ordering) echo JHTML::_('grid.order',  $this->items ); ?>
             </th>
             <th width="5">
-                <?php echo JText::_( 'COM_CONTENTBUILDER_PUBLISHED' ); ?>
+                <?php echo Text::_( 'COM_CONTENTBUILDER_PUBLISHED' ); ?>
             </th>
         </tr>
     </thead>
@@ -120,7 +123,7 @@ if( typeof Joomla != 'undefined' ){
                         <div class="cbPagesCounter">
 	                        <?php echo $this->pagination->getPagesCounter(); ?>
 	                        <?php
-	                        echo '<span>'.JText::_('COM_CONTENTBUILDER_DISPLAY_NUM') . '&nbsp;</span>';
+	                        echo '<span>'.Text::_('COM_CONTENTBUILDER_DISPLAY_NUM') . '&nbsp;</span>';
 	                        echo '<div style="display:inline-block;">'.$this->pagination->getLimitBox().'</div>';
 	                        ?>
                         </div>

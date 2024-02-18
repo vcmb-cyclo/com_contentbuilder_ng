@@ -7,8 +7,8 @@
 */
 
 // no direct access
-
 defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -22,7 +22,7 @@ class ContentbuilderViewUsers extends CBView
     function display($tpl = null)
     {
 
-        JToolBarHelper::title(   '<span style="display:inline-block; vertical-align:middle">' . JText::_( 'COM_CONTENTBUILDER_FORMS' ) . '</span>', 'logo_left.png' );
+        JToolBarHelper::title(   '<span style="display:inline-block; vertical-align:middle">' . Text::_( 'COM_CONTENTBUILDER_FORMS' ) . '</span>', 'logo_left.png' );
         JToolBarHelper::editList();
 
         // Get data from the model

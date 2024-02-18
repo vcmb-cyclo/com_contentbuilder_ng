@@ -7,12 +7,12 @@
 */
 
 // No direct access
+defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
-
-defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 JHTML::_('behavior.keepalive');
 
@@ -219,7 +219,7 @@ class ContentbuilderModelStorage extends CBModel
         $data = CBRequest::get( 'post' );
         
         if(isset($data['bytable']) && $data['bytable']){
-            return JText::_('COM_CONTENTBUILDER_CANNOT_USE_CSV_WITH_FOREIGN_TABLE');
+            return Text::_('COM_CONTENTBUILDER_CANNOT_USE_CSV_WITH_FOREIGN_TABLE');
         }
         
         if(isset($data['bytable'])){
@@ -305,7 +305,7 @@ class ContentbuilderModelStorage extends CBModel
         
         if($encoding){
             if(!function_exists('iconv')){
-                return JText::_('COM_CONTENTBUILDER_CSV_IMPORT_REPAIR_NO_ICONV');
+                return Text::_('COM_CONTENTBUILDER_CSV_IMPORT_REPAIR_NO_ICONV');
             }
             $handle = $this->utf8_fopen_read("$source_file", $encoding);
         }else{
@@ -325,7 +325,7 @@ class ContentbuilderModelStorage extends CBModel
             foreach ($columns as &$column) {
                 $col = str_replace(".","",trim($column));
                 if(in_array($col, $colCheck)){
-                    return JText::_('COM_CONTENTBUILDER_CSV_IMPORT_COLUMN_NOT_UNIQUE');
+                    return Text::_('COM_CONTENTBUILDER_CSV_IMPORT_COLUMN_NOT_UNIQUE');
                 }
                 $colCheck[] = $col;
             }

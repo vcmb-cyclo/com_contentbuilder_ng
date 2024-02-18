@@ -7,8 +7,9 @@
 */
 
 // no direct access
-
 defined( '_JEXEC' ) or die( 'Restricted access' );
+
+use Joomla\CMS\Language\Text;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -28,7 +29,7 @@ class ContentbuilderViewStorages extends CBView
         JToolBarHelper::addNew();
         JToolBarHelper::editList();
 
-	    JToolBarHelper::title(   'ContentBuilder :: ' . JText::_( 'COM_CONTENTBUILDER_STORAGES' ) . '</span>', 'logo_left.png' );
+	    JToolBarHelper::title(   'ContentBuilder :: ' . Text::_( 'COM_CONTENTBUILDER_STORAGES' ) . '</span>', 'logo_left.png' );
         
         JToolBarHelper::deleteList();
         

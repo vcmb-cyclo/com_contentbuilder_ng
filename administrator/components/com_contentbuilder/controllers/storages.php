@@ -9,6 +9,7 @@
 // no direct access
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -33,7 +34,7 @@ class ContentbuilderControllerStorages extends CBController
     function listdelete(){
         $model = $this->getModel( 'storage' );
         $model->listDelete();
-        JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_DELETED'));
+        JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_DELETED'));
         CBRequest::setVar( 'view', 'storage' );
         CBRequest::setVar( 'layout', 'form'  );
         CBRequest::setVar( 'hidemainmenu', 0 );
@@ -107,7 +108,7 @@ class ContentbuilderControllerStorages extends CBController
             $model->setPublished();
         }
 
-        $this->setRedirect( JRoute::_('index.php?option=com_contentbuilder&controller=storages&limitstart='.CBRequest::getInt('limitstart'), false), JText::_('COM_CONTENTBUILDER_PUBLISHED') );
+        $this->setRedirect( JRoute::_('index.php?option=com_contentbuilder&controller=storages&limitstart='.CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_PUBLISHED') );
     }
 
     function listpublish() {
@@ -140,7 +141,7 @@ class ContentbuilderControllerStorages extends CBController
             $model->setUnpublished();
         }
 
-        $this->setRedirect( JRoute::_('index.php?option=com_contentbuilder&controller=storages&limitstart='.CBRequest::getInt('limitstart'), false), JText::_('COM_CONTENTBUILDER_UNPUBLISHED') );
+        $this->setRedirect( JRoute::_('index.php?option=com_contentbuilder&controller=storages&limitstart='.CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_UNPUBLISHED') );
     }
 
     function listunpublish() {
@@ -192,11 +193,11 @@ class ContentbuilderControllerStorages extends CBController
         }
         
         if (is_numeric($id) && $id) {
-            $msg = JText::_( 'COM_CONTENTBUILDER_SAVED' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_SAVED' );
         } else if(!is_numeric($id) && !is_bool($id) && is_string($id)) {
             $msg = $id;
         } else {
-            $msg = JText::_( 'COM_CONTENTBUILDER_ERROR' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_ERROR' );
         }
 
         $limit = 0;
@@ -218,9 +219,9 @@ class ContentbuilderControllerStorages extends CBController
         $model = $this->getModel('storage');
 
         if ($model->store()) {
-            $msg = JText::_( 'COM_CONTENTBUILDER_SAVED' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_SAVED' );
         } else {
-            $msg = JText::_( 'COM_CONTENTBUILDER_ERROR' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_ERROR' );
         }
 
         // Check the table in so it can be edited.... we are done with it anyway
@@ -232,9 +233,9 @@ class ContentbuilderControllerStorages extends CBController
     {
         $model = $this->getModel('storage');
         if(!$model->delete()) {
-            $msg = JText::_( 'COM_CONTENTBUILDER_ERROR' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_ERROR' );
         } else {
-            $msg = JText::_( 'COM_CONTENTBUILDER_DELETED' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_DELETED' );
         }
 
         $this->setRedirect( JRoute::_('index.php?option=com_contentbuilder&controller=storages&limitstart='.CBRequest::getInt('limitstart'), false), $msg );
@@ -244,9 +245,9 @@ class ContentbuilderControllerStorages extends CBController
     {
         $model = $this->getModel('storage');
         if(!$model->listDelete()) {
-            $msg = JText::_( 'COM_CONTENTBUILDER_ERROR' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_ERROR' );
         } else {
-            $msg = JText::_( 'COM_CONTENTBUILDER_DELETED' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_DELETED' );
         }
 
         CBRequest::setVar( 'view', 'storage' );
@@ -261,7 +262,7 @@ class ContentbuilderControllerStorages extends CBController
 
     function cancel()
     {
-        $msg = JText::_( 'COM_CONTENTBUILDER_CANCELLED' );
+        $msg = Text::_( 'COM_CONTENTBUILDER_CANCELLED' );
         $this->setRedirect( JRoute::_('index.php?option=com_contentbuilder&controller=storages&limitstart=0', false), $msg );
     }
 

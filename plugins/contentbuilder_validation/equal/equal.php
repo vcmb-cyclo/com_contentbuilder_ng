@@ -8,6 +8,7 @@
 
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 jimport( 'joomla.plugin.plugin' );
 
@@ -51,7 +52,7 @@ class plgContentbuilder_validationEqual extends JPlugin
                     if( $value == $other_value ){
                         return '';
                     } else {
-                        return JText::_('COM_CONTENTBUILDER_VALIDATION_NOT_EQUAL') . ': ' . $field['label'] . ' / ' . $other_field['label'];
+                        return Text::_('COM_CONTENTBUILDER_VALIDATION_NOT_EQUAL') . ': ' . $field['label'] . ' / ' . $other_field['label'];
                     }
                 }
             }

@@ -7,8 +7,10 @@
 */
 
 // no direct access
-
 defined( '_JEXEC' ) or die( 'Restricted access' );
+
+use Joomla\CMS\Language\Text;
+
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -51,10 +53,10 @@ class ContentbuilderControllerEdit extends CBController
         CBRequest::setVar('cbInternalCheck', 1);
         
         if(CBRequest::getCmd('record_id',  '')){
-            contentbuilder::checkPermissions('edit', JText::_('COM_CONTENTBUILDER_PERMISSIONS_EDIT_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
+            contentbuilder::checkPermissions('edit', Text::_('COM_CONTENTBUILDER_PERMISSIONS_EDIT_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
         }else{
             CBRequest::setVar('cbIsNew', 1);
-            contentbuilder::checkPermissions('new', JText::_('COM_CONTENTBUILDER_PERMISSIONS_NEW_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
+            contentbuilder::checkPermissions('new', Text::_('COM_CONTENTBUILDER_PERMISSIONS_NEW_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
         }
 
         $model = $this->getModel('edit');
@@ -66,7 +68,7 @@ class ContentbuilderControllerEdit extends CBController
         $type = 'message';
         if ($id && !$submission_failed) {
 
-            $msg = JText::_( 'COM_CONTENTBUILDER_SAVED' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_SAVED' );
             $return = CBRequest::getVar('return','');
             if( $return ){
                 $return = cb_b64dec($return);
@@ -102,36 +104,36 @@ class ContentbuilderControllerEdit extends CBController
     
     function delete(){
         
-        contentbuilder::checkPermissions('delete', JText::_('COM_CONTENTBUILDER_PERMISSIONS_DELETE_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
+        contentbuilder::checkPermissions('delete', Text::_('COM_CONTENTBUILDER_PERMISSIONS_DELETE_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
 
         $model = $this->getModel('edit');
         $id = $model->delete();
-        $msg = JText::_('COM_CONTENTBUILDER_ENTRIES_DELETED');
+        $msg = Text::_('COM_CONTENTBUILDER_ENTRIES_DELETED');
         $link = JRoute::_('index.php?option=com_contentbuilder&controller=list&id='.CBRequest::getInt('id', 0).(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order').'&Itemid='.CBRequest::getInt('Itemid',0), false);
         $this->setRedirect($link, $msg, 'message');
     }
     
     function state(){
         
-        contentbuilder::checkPermissions('state', JText::_('COM_CONTENTBUILDER_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
+        contentbuilder::checkPermissions('state', Text::_('COM_CONTENTBUILDER_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
 
         $model = $this->getModel('edit');
         $model->change_list_states();
-        $msg = JText::_('COM_CONTENTBUILDER_STATES_CHANGED');
+        $msg = Text::_('COM_CONTENTBUILDER_STATES_CHANGED');
         $link = JRoute::_('index.php?option=com_contentbuilder&controller=list&id='.CBRequest::getInt('id', 0).(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order').'&Itemid='.CBRequest::getInt('Itemid',0), false);
         $this->setRedirect($link, $msg, 'message');
     }
     
     function publish(){
         
-        contentbuilder::checkPermissions('publish', JText::_('COM_CONTENTBUILDER_PERMISSIONS_PUBLISHING_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
+        contentbuilder::checkPermissions('publish', Text::_('COM_CONTENTBUILDER_PERMISSIONS_PUBLISHING_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
 
         $model = $this->getModel('edit');
         $model->change_list_publish();
         if(CBRequest::getInt('list_publish', 0)){
-            $msg = JText::_('PUBLISHED');
+            $msg = Text::_('PUBLISHED');
         }else{
-            $msg = JText::_('UNPUBLISHED');
+            $msg = Text::_('UNPUBLISHED');
         }
         $link = JRoute::_('index.php?option=com_contentbuilder&controller=list&id='.CBRequest::getInt('id', 0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order').(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0), false);
         $this->setRedirect($link, $msg, 'message');
@@ -139,11 +141,11 @@ class ContentbuilderControllerEdit extends CBController
     
     function language(){
         
-        contentbuilder::checkPermissions('language', JText::_('COM_CONTENTBUILDER_PERMISSIONS_CHANGE_LANGUAGE_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
+        contentbuilder::checkPermissions('language', Text::_('COM_CONTENTBUILDER_PERMISSIONS_CHANGE_LANGUAGE_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
 
         $model = $this->getModel('edit');
         $model->change_list_language();
-        $msg = JText::_('COM_CONTENTBUILDER_LANGUAGE_CHANGED');
+        $msg = Text::_('COM_CONTENTBUILDER_LANGUAGE_CHANGED');
         $link = JRoute::_('index.php?option=com_contentbuilder&controller=list&id='.CBRequest::getInt('id', 0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order').(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0), false);
         $this->setRedirect($link, $msg, 'message');
     }
@@ -152,9 +154,9 @@ class ContentbuilderControllerEdit extends CBController
     {
 
         if(CBRequest::getCmd('record_id',  '')){
-            contentbuilder::checkPermissions('edit', JText::_('COM_CONTENTBUILDER_PERMISSIONS_EDIT_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
+            contentbuilder::checkPermissions('edit', Text::_('COM_CONTENTBUILDER_PERMISSIONS_EDIT_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
         }else{
-            contentbuilder::checkPermissions('new', JText::_('COM_CONTENTBUILDER_PERMISSIONS_NEW_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
+            contentbuilder::checkPermissions('new', Text::_('COM_CONTENTBUILDER_PERMISSIONS_NEW_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
         }
 
         CBRequest::setVar('tmpl', CBRequest::getWord('tmpl',null));

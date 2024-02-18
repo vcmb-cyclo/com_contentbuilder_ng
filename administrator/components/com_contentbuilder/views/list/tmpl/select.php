@@ -8,6 +8,9 @@
 
 defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+
 require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'contentbuilder_helpers.php');
 
 $language_allowed = contentbuilder::authorize('language');
@@ -62,7 +65,7 @@ function contentbuilder_language(){
     document.adminForm.submit();
 }
 function contentbuilder_delete(){
-    var confirmed = confirm('<?php echo JText::_('COM_CONTENTBUILDER_CONFIRM_DELETE_MESSAGE');?>');
+    var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDER_CONFIRM_DELETE_MESSAGE');?>');
     if(confirmed){
         document.getElementById('controller').value='edit';
         document.getElementById('view').value='edit';
@@ -100,7 +103,7 @@ SELECT
                <?php
                 if ($new_allowed) {
                 ?>
-                <a class="button cbButton cbNewButton" href="<?php echo JRoute::_( 'index.php?option=com_contentbuilder&controller=edit&backtolist=1&id='.CBRequest::getInt('id', 0).(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&record_id=&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>"><?php echo JText::_('COM_CONTENTBUILDER_NEW'); ?></a>
+                <a class="button cbButton cbNewButton" href="<?php echo JRoute::_( 'index.php?option=com_contentbuilder&controller=edit&backtolist=1&id='.CBRequest::getInt('id', 0).(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&record_id=&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>"><?php echo Text::_('COM_CONTENTBUILDER_NEW'); ?></a>
                 <?php
                 }
                 ?>
@@ -108,7 +111,7 @@ SELECT
                 <?php
                 if ($delete_allowed) {
                 ?>
-                <a class="button cbButton cbDeleteButton" href="javascript:contentbuilder_delete();"><?php echo JText::_('COM_CONTENTBUILDER_DELETE'); ?></a>
+                <a class="button cbButton cbDeleteButton" href="javascript:contentbuilder_delete();"><?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?></a>
                 <?php
                 }
                 ?>
@@ -117,7 +120,7 @@ SELECT
                 if ($state_allowed && count($this->states)) {
                 ?>
                 <select style="max-width: 100px;" name="list_state">
-                    <option value="0"> - <?php echo JText::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> - </option>
+                    <option value="0"> - <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> - </option>
                 <?php
                     foreach($this->states As $state){
                 ?>
@@ -126,7 +129,7 @@ SELECT
                     }
                 ?>
                 </select>
-                <a class="button cbButton cbSetButton" href="javascript:contentbuilder_state();"><?php echo JText::_('COM_CONTENTBUILDER_SET'); ?></a>
+                <a class="button cbButton cbSetButton" href="javascript:contentbuilder_state();"><?php echo Text::_('COM_CONTENTBUILDER_SET'); ?></a>
                 <?php  
                 }
                 ?>
@@ -135,11 +138,11 @@ SELECT
                 if ($publish_allowed) {
                 ?>
                 <select style="max-width: 100px;" name="list_publish">
-                    <option value="-1"> - <?php echo JText::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> - </option>
-                    <option value="1"><?php echo JText::_('PUBLISH')?></option>
-                    <option value="0"><?php echo JText::_('UNPUBLISH')?></option>
+                    <option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> - </option>
+                    <option value="1"><?php echo Text::_('PUBLISH')?></option>
+                    <option value="0"><?php echo Text::_('UNPUBLISH')?></option>
                 </select>
-                <a class="button cbButton cbSetButton" href="javascript:contentbuilder_publish();"><?php echo JText::_('COM_CONTENTBUILDER_SET'); ?></a>
+                <a class="button cbButton cbSetButton" href="javascript:contentbuilder_publish();"><?php echo Text::_('COM_CONTENTBUILDER_SET'); ?></a>
                 <?php  
                 }
                 ?>
@@ -148,8 +151,8 @@ SELECT
                 if ($language_allowed) {
                 ?>
                 <select style="max-width: 100px;" name="list_language">
-                    <option value="*"> - <?php echo JText::_('COM_CONTENTBUILDER_LANGUAGE'); ?> - </option>
-                    <option value="*"><?php echo JText::_('COM_CONTENTBUILDER_ANY'); ?></option>
+                    <option value="*"> - <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?> - </option>
+                    <option value="*"><?php echo Text::_('COM_CONTENTBUILDER_ANY'); ?></option>
                     <?php
                     foreach($this->languages As $filter_language){
                     ?>
@@ -158,7 +161,7 @@ SELECT
                     }
                     ?>
                 </select>
-                <a class="button cbButton cbSetButton" href="javascript:contentbuilder_language();"><?php echo JText::_('COM_CONTENTBUILDER_SET'); ?></a>
+                <a class="button cbButton cbSetButton" href="javascript:contentbuilder_language();"><?php echo Text::_('COM_CONTENTBUILDER_SET'); ?></a>
                 <?php
                 }
                 
@@ -167,10 +170,10 @@ SELECT
                 
                 <?php echo $this->pagination->getPagesCounter(); ?>
                 <?php
-                echo '&nbsp;&nbsp;&nbsp;' . JText::_('COM_CONTENTBUILDER_DISPLAY_NUM') . '&nbsp;';
+                echo '&nbsp;&nbsp;&nbsp;' . Text::_('COM_CONTENTBUILDER_DISPLAY_NUM') . '&nbsp;';
                 echo $this->pagination->getLimitBox();
                 ?>
-                <?php echo JText::_('COM_CONTENTBUILDER_OF');?>
+                <?php echo Text::_('COM_CONTENTBUILDER_OF');?>
                 <?php echo $this->total;?> 
                 
                 <?php
@@ -183,13 +186,13 @@ SELECT
             if($this->display_filter){
             ?>
             <td align="left" width="60%" nowrap="nowrap">
-                <?php echo JText::_('COM_CONTENTBUILDER_FILTER') . '&nbsp;'; ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_FILTER') . '&nbsp;'; ?>
                 <input type="text" id="contentbuilder_filter" name="filter" value="<?php echo $this->escape($this->lists['filter']); ?>" class="inputbox" onchange="document.adminForm.submit();"/>
                 <?php
                 if ($this->list_state && count($this->states)) {
                 ?>
                 <select style="max-width: 100px;" name="list_state_filter" id="list_state_filter" onchange="document.adminForm.submit();">
-                <option value="0"> - <?php echo JText::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> - </option>
+                <option value="0"> - <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> - </option>
                 <?php
                     foreach($this->states As $state){
                 ?>
@@ -205,9 +208,9 @@ SELECT
                 ?>
                 
                 <select style="max-width: 100px;" name="list_publish_filter" id="list_publish_filter" onchange="document.adminForm.submit();">
-                    <option value="-1"> - <?php echo JText::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> - </option>
-                    <option value="1"<?php echo $this->lists['filter_publish'] == 1 ? ' selected="selected"' : ''; ?>><?php echo JText::_('PUBLISHED')?></option>
-                    <option value="0"<?php echo $this->lists['filter_publish'] == 0 ? ' selected="selected"' : ''; ?>><?php echo JText::_('UNPUBLISHED')?></option>
+                    <option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> - </option>
+                    <option value="1"<?php echo $this->lists['filter_publish'] == 1 ? ' selected="selected"' : ''; ?>><?php echo Text::_('PUBLISHED')?></option>
+                    <option value="0"<?php echo $this->lists['filter_publish'] == 0 ? ' selected="selected"' : ''; ?>><?php echo Text::_('UNPUBLISHED')?></option>
                 </select>
                 <?php
                 }
@@ -215,7 +218,7 @@ SELECT
                 if($this->list_language){
                 ?>
                 <select style="max-width: 100px;" name="list_language_filter" id="list_language_filter" onchange="document.adminForm.submit();">
-                    <option value=""> - <?php echo JText::_('COM_CONTENTBUILDER_LANGUAGE'); ?> - </option>
+                    <option value=""> - <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?> - </option>
                     <?php
                     foreach($this->languages As $filter_language){
                     ?>
@@ -227,8 +230,8 @@ SELECT
                 <?php
                 }
                 ?>
-                <button class="button cbButton cbSearchButton" onclick="document.adminForm.submit();"><?php echo JText::_('COM_CONTENTBUILDER_SEARCH') ?></button>
-                <button class="button cbButton cbResetButton" onclick="document.getElementById('contentbuilder_filter').value='';<?php echo $this->list_state && count($this->states) ? "if(document.getElementById('list_state_filter')) document.getElementById('list_state_filter').selectedIndex=0;" : ""; ?><?php echo $this->list_publish ? "if(document.getElementById('list_publish_filter')) document.getElementById('list_publish_filter').selectedIndex=0;" : ""; ?>document.adminForm.submit();"><?php echo JText::_('COM_CONTENTBUILDER_RESET') ?></button>
+                <button class="button cbButton cbSearchButton" onclick="document.adminForm.submit();"><?php echo Text::_('COM_CONTENTBUILDER_SEARCH') ?></button>
+                <button class="button cbButton cbResetButton" onclick="document.getElementById('contentbuilder_filter').value='';<?php echo $this->list_state && count($this->states) ? "if(document.getElementById('list_state_filter')) document.getElementById('list_state_filter').selectedIndex=0;" : ""; ?><?php echo $this->list_publish ? "if(document.getElementById('list_publish_filter')) document.getElementById('list_publish_filter').selectedIndex=0;" : ""; ?>document.adminForm.submit();"><?php echo Text::_('COM_CONTENTBUILDER_RESET') ?></button>
             </td>
             <?php
             }
@@ -259,13 +262,13 @@ SELECT
             }
             ?>
             <th class="sectiontableheader" width="20">
-                <?php echo JText::_('COM_CONTENTBUILDER_ADD_RELATION'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_ADD_RELATION'); ?>
             </th>
             <?php
             if($this->edit_button && $edit_allowed){
             ?>
             <th class="sectiontableheader" width="20">
-                <?php echo JText::_('COM_CONTENTBUILDER_EDIT'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_EDIT'); ?>
             </th>
             <?php
             }
@@ -273,7 +276,7 @@ SELECT
             if($this->list_state){
             ?>
             <th class="sectiontableheader" width="20">
-                <?php echo JText::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>
             </th>
             <?php
             }
@@ -281,7 +284,7 @@ SELECT
             if($this->list_publish && $publish_allowed){
             ?>
             <th class="sectiontableheader" width="20">
-                <?php echo JText::_('PUBLISHED'); ?>
+                <?php echo Text::_('PUBLISHED'); ?>
             </th>
             <?php
             }
@@ -289,7 +292,7 @@ SELECT
             if($this->list_language){
             ?>
             <th class="sectiontableheader" width="20">
-                <?php echo JText::_('COM_CONTENTBUILDER_LANGUAGE'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?>
             </th>
             <?php
             }

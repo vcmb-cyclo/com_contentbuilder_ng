@@ -6,13 +6,12 @@
  * @license     GNU/GPL
 */
 
-
 // No direct access
+defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
-
-defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -250,7 +249,7 @@ class ContentbuilderModelElementoptions extends CBModel
                         $tokens = '|'.$upl_ex[1];
                     }
                     
-                    JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' ('.DS.'media'.DS.'contentbuilder'.DS.'upload'.')', 'warning');
+                    JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' ('.DS.'media'.DS.'contentbuilder'.DS.'upload'.')', 'warning');
                 
                 } else if(trim(CBRequest::getVar('upload_directory', '')) != '' && !JFolder::exists(contentbuilder::makeSafeFolder(CBRequest::getVar('upload_directory', '')))){
                     
@@ -268,7 +267,7 @@ class ContentbuilderModelElementoptions extends CBModel
                         $tokens = '|'.$upl_ex2[1];
                     }
                     
-                    JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' ('.$upload_directory.')', 'warning');
+                    JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' ('.$upload_directory.')', 'warning');
                 
                 } else if(trim(CBRequest::getVar('upload_directory', '')) != '' && JFolder::exists(contentbuilder::makeSafeFolder(CBRequest::getVar('upload_directory', '')))){
                     

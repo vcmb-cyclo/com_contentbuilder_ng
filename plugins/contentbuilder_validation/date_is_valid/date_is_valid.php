@@ -8,6 +8,7 @@
 
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 jimport( 'joomla.plugin.plugin' );
 
@@ -39,7 +40,7 @@ class plgContentbuilder_validationDate_is_valid extends JPlugin
             
             foreach( $values As $val ){
                 if( !contentbuilder_is_valid_date($val, isset($options->transfer_format) ? $options->transfer_format : 'YYYY-mm-dd') ){
-                    return JText::_('COM_CONTENTBUILDER_VALIDATION_DATE_IS_VALID') . ': ' . $field['label'] . ($val ? ' ('.$val.')' : '');
+                    return Text::_('COM_CONTENTBUILDER_VALIDATION_DATE_IS_VALID') . ': ' . $field['label'] . ($val ? ' ('.$val.')' : '');
                 }
             }
            

@@ -8,6 +8,10 @@
 
 defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+
+
 $___tableOrdering = "function tableOrdering";
 $___tableOrdering = "Joomla.tableOrdering = function";
 ?>
@@ -78,7 +82,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
         }
         
         if( pressbutton == 'listdelete' ){
-            var result = confirm("<?php echo addslashes(JText::_('COM_CONTENTBUILDER_STORAGE_DELETE_WARNING')); ?>");
+            var result = confirm("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_STORAGE_DELETE_WARNING')); ?>");
             if(!result){
                 return;
             }
@@ -104,7 +108,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                     if( document.getElementById('name').value == '' )
                     {
                         error = true;
-                        alert("<?php echo addslashes( JText::_('COM_CONTENTBUILDER_ERROR_ENTER_STORAGENAME') ) ;?>");
+                        alert("<?php echo addslashes( Text::_('COM_CONTENTBUILDER_ERROR_ENTER_STORAGENAME') ) ;?>");
                     }
                     else if(nodes)
                     {
@@ -112,7 +116,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                         {
                             if(nodes.checked && document.adminForm['itemNames['+nodes.value+']'].value == ''){
                                 error = true;
-                                alert("<?php echo addslashes( JText::_('COM_CONTENTBUILDER_ERROR_ENTER_STORAGENAME') ) ;?>");
+                                alert("<?php echo addslashes( Text::_('COM_CONTENTBUILDER_ERROR_ENTER_STORAGENAME') ) ;?>");
                                 break;
                             }
                         }
@@ -122,7 +126,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                             {
                                 if(nodes[i].checked && document.adminForm['itemNames['+nodes[i].value+']'].value == ''){
                                     error = true;
-                                    alert("<?php echo addslashes( JText::_('COM_CONTENTBUILDER_ERROR_ENTER_STORAGENAME') ) ;?>");
+                                    alert("<?php echo addslashes( Text::_('COM_CONTENTBUILDER_ERROR_ENTER_STORAGENAME') ) ;?>");
                                     break;
                                 }
                             }
@@ -164,7 +168,7 @@ $cbcompat = new CBCompat();
 
 <?php
 echo $cbcompat->startPane("view-pane");
-echo $cbcompat->startPanel(JText::_( 'COM_CONTENTBUILDER_STORAGE' ), "tab0");
+echo $cbcompat->startPanel(Text::_( 'COM_CONTENTBUILDER_STORAGE' ), "tab0");
 ?>
 
     <table width="100%">
@@ -176,7 +180,7 @@ echo $cbcompat->startPanel(JText::_( 'COM_CONTENTBUILDER_STORAGE' ), "tab0");
                 <tr>
                     <td style="min-width: 150px;">
                         <label for="name">
-                            <b><?php echo JText::_( 'COM_CONTENTBUILDER_NAME' ); ?></b>
+                            <b><?php echo Text::_( 'COM_CONTENTBUILDER_NAME' ); ?></b>
                         </label>
                     </td>
                 </tr>
@@ -196,10 +200,10 @@ echo $cbcompat->startPanel(JText::_( 'COM_CONTENTBUILDER_STORAGE' ), "tab0");
                         
                         if(!$this->form->id){
                         ?>
-                        <b><?php echo JText::_('COM_CONTENTBUILDER_CHOOSE_TABLE'); ?></b>
+                        <b><?php echo Text::_('COM_CONTENTBUILDER_CHOOSE_TABLE'); ?></b>
                         <br/>
-                        <select class="form-select-sm" onchange="if(this.selectedIndex != 0){ document.getElementById('name').disabled = true; document.getElementById('csvUploadHead').style.display = 'none'; document.getElementById('csvUpload').style.display = 'none'; alert('<?php echo addslashes(JText::_('COM_CONTENTBUILDER_CUSTOM_STORAGE_MSG')); ?>'); }else{ document.getElementById('name').disabled = false; document.getElementById('csvUploadHead').style.display = ''; document.getElementById('csvUpload').style.display = ''; }" name="bytable" id="bytable" style="max-width: 150px;">
-                            <option value=""> - <?php echo JText::_('COM_CONTENTBUILDER_NONE'); ?> - </option>
+                        <select class="form-select-sm" onchange="if(this.selectedIndex != 0){ document.getElementById('name').disabled = true; document.getElementById('csvUploadHead').style.display = 'none'; document.getElementById('csvUpload').style.display = 'none'; alert('<?php echo addslashes(Text::_('COM_CONTENTBUILDER_CUSTOM_STORAGE_MSG')); ?>'); }else{ document.getElementById('name').disabled = false; document.getElementById('csvUploadHead').style.display = ''; document.getElementById('csvUpload').style.display = ''; }" name="bytable" id="bytable" style="max-width: 150px;">
+                            <option value=""> - <?php echo Text::_('COM_CONTENTBUILDER_NONE'); ?> - </option>
                             <?php
                             foreach($this->tables As $table){
                             ?>
@@ -225,7 +229,7 @@ echo $cbcompat->startPanel(JText::_( 'COM_CONTENTBUILDER_STORAGE' ), "tab0");
                 <tr>
                     <td width="100">
                         <label for="title">
-                            <b><?php echo JText::_( 'COM_CONTENTBUILDER_STORAGE_TITLE' ); ?></b>
+                            <b><?php echo Text::_( 'COM_CONTENTBUILDER_STORAGE_TITLE' ); ?></b>
                         </label>
                     </td>
                 </tr>
@@ -238,7 +242,7 @@ echo $cbcompat->startPanel(JText::_( 'COM_CONTENTBUILDER_STORAGE' ), "tab0");
                     <td width="100">
                         <br/>
                         <div class="mb-3" onclick="if(document.getElementById('csvUpload').style.display == 'none'){document.getElementById('csvUpload').style.display='';}else{document.getElementById('csvUpload').style.display='none'}" style="cursor:pointer;">
-                            <b><?php echo JText::_( 'COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV' ); ?></b>
+                            <b><?php echo Text::_( 'COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV' ); ?></b>
                         </div>
                     </td>
                 </tr>
@@ -269,17 +273,17 @@ echo $cbcompat->startPanel(JText::_( 'COM_CONTENTBUILDER_STORAGE' ), "tab0");
                         ?>
                         <br/>
                         <br/>
-                        <label for="csv_drop_records"><?php echo JText::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_DROP_RECORDS'); ?></label> <input class="form-check-input" type="checkbox" id="csv_drop_records" name="csv_drop_records" value="1" checked="checked"/>
+                        <label for="csv_drop_records"><?php echo Text::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_DROP_RECORDS'); ?></label> <input class="form-check-input" type="checkbox" id="csv_drop_records" name="csv_drop_records" value="1" checked="checked"/>
                         <br/>
-                        <label for="csv_published"><?php echo JText::_('COM_CONTENTBUILDER_AUTO_PUBLISH'); ?></label> <input class="form-check-input" type="checkbox" id="csv_published" name="csv_published" value="1" checked="checked"/>
+                        <label for="csv_published"><?php echo Text::_('COM_CONTENTBUILDER_AUTO_PUBLISH'); ?></label> <input class="form-check-input" type="checkbox" id="csv_published" name="csv_published" value="1" checked="checked"/>
                         <br/>
-                        <label for="csv_delimiter"><?php echo JText::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_DELIMITER'); ?></label> <input class="form-control form-control-sm" maxlength="3" type="text" size="1" id="csv_delimiter" name="csv_delimiter" value=","/>
+                        <label for="csv_delimiter"><?php echo Text::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_DELIMITER'); ?></label> <input class="form-control form-control-sm" maxlength="3" type="text" size="1" id="csv_delimiter" name="csv_delimiter" value=","/>
                         <br/>
                         <br/>
-                        <label class="editlinktip hasTip" title="<?php echo JText::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_REPAIR_ENCODING_TIP'); ?>" for="csv_repair_encoding"><?php echo JText::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_REPAIR_ENCODING'); ?>*</label>
+                        <label class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_REPAIR_ENCODING_TIP'); ?>" for="csv_repair_encoding"><?php echo Text::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_REPAIR_ENCODING'); ?>*</label>
                         <br/>
                         <select class="form-select-sm" style="width: 150px;" name="csv_repair_encoding" id="csv_repair_encoding">
-                            <option value=""> - <?php echo JText::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_NO_REPAIR_ENCODING'); ?> - </option>
+                            <option value=""> - <?php echo Text::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_NO_REPAIR_ENCODING'); ?> - </option>
                             <option value="WINDOWS-1250">WINDOWS-1250</option>
                             <option value="WINDOWS-1251">WINDOWS-1251</option>
                             <option value="WINDOWS-1252">WINDOWS-1252 (ANSI)</option>
@@ -331,12 +335,12 @@ echo $cbcompat->startPanel(JText::_( 'COM_CONTENTBUILDER_STORAGE' ), "tab0");
             if(!$this->form->bytable){
             ?>
             <fieldset class="adminform">
-                <legend><?php echo JText::_( 'COM_CONTENTBUILDER_STORAGE_NEW_FIELD' ); ?></legend>
+                <legend><?php echo Text::_( 'COM_CONTENTBUILDER_STORAGE_NEW_FIELD' ); ?></legend>
                 <table class="admintable" width="100%">
                 <tr>
                     <td>
                         <label for="fieldname">
-                            <b><?php echo JText::_( 'COM_CONTENTBUILDER_NAME' ); ?></b>
+                            <b><?php echo Text::_( 'COM_CONTENTBUILDER_NAME' ); ?></b>
                         </label>
                     </td>
                 </tr>
@@ -348,7 +352,7 @@ echo $cbcompat->startPanel(JText::_( 'COM_CONTENTBUILDER_STORAGE' ), "tab0");
                 <tr>
                     <td width="100">
                         <label for="fieldtitle">
-                            <b><?php echo JText::_( 'COM_CONTENTBUILDER_STORAGE_TITLE' ); ?></b>
+                            <b><?php echo Text::_( 'COM_CONTENTBUILDER_STORAGE_TITLE' ); ?></b>
                         </label>
                     </td>
                 </tr>
@@ -360,20 +364,20 @@ echo $cbcompat->startPanel(JText::_( 'COM_CONTENTBUILDER_STORAGE' ), "tab0");
                 <tr>
                     <td width="100">
                         <label for="is_group">
-                            <b><?php echo JText::_( 'COM_CONTENTBUILDER_STORAGE_GROUP' ); ?></b>
+                            <b><?php echo Text::_( 'COM_CONTENTBUILDER_STORAGE_GROUP' ); ?></b>
                         </label>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <input class="form-check-input" type="radio" id="is_group" name="is_group" value="1"/> <label for="is_group"><?php echo JText::_('COM_CONTENTBUILDER_YES');?></label>
-                        <input class="form-check-input" type="radio" id="is_group_no" name="is_group" value="0" checked="checked"/> <label for="is_group_no"><?php echo JText::_('COM_CONTENTBUILDER_NO');?></label>
+                        <input class="form-check-input" type="radio" id="is_group" name="is_group" value="1"/> <label for="is_group"><?php echo Text::_('COM_CONTENTBUILDER_YES');?></label>
+                        <input class="form-check-input" type="radio" id="is_group_no" name="is_group" value="0" checked="checked"/> <label for="is_group_no"><?php echo Text::_('COM_CONTENTBUILDER_NO');?></label>
                     </td>
                 </tr>
                 <tr>
                     <td width="100">
                         <label for="group_definition">
-                            <b><?php echo JText::_( 'COM_CONTENTBUILDER_STORAGE_GROUP_DEFINITION' ); ?></b>
+                            <b><?php echo Text::_( 'COM_CONTENTBUILDER_STORAGE_GROUP_DEFINITION' ); ?></b>
                         </label>
                     </td>
                 </tr>
@@ -396,26 +400,26 @@ Label 3;value3</textarea>
             <thead>
                 <tr>
                     <th width="5">
-                        <?php echo JText::_( 'COM_CONTENTBUILDER_ID' ); ?>
+                        <?php echo Text::_( 'COM_CONTENTBUILDER_ID' ); ?>
                     </th>
                     <th width="20">
                         <input class="form-check-input" type="checkbox" name="toggle" value="" onclick="<?php echo CBCompat::getCheckAll($this->elements);?>" />
                     </th>
                     <th>
-                        <?php echo JText::_( 'COM_CONTENTBUILDER_NAME' ); ?>
+                        <?php echo Text::_( 'COM_CONTENTBUILDER_NAME' ); ?>
                     </th>
                     <th>
-                        <?php echo JText::_( 'COM_CONTENTBUILDER_STORAGE_TITLE' ); ?>
+                        <?php echo Text::_( 'COM_CONTENTBUILDER_STORAGE_TITLE' ); ?>
                     </th>
                     <th>
-                        <?php echo JText::_( 'COM_CONTENTBUILDER_STORAGE_GROUP' ); ?>
+                        <?php echo Text::_( 'COM_CONTENTBUILDER_STORAGE_GROUP' ); ?>
                     </th>
                     <th>
-                        <?php echo JHTML::_('grid.sort',   JText::_( 'COM_CONTENTBUILDER_ORDERBY') , 'ordering', 'desc', @$this->lists['order'], 'edit' ); ?>
+                        <?php echo JHTML::_('grid.sort',   Text::_( 'COM_CONTENTBUILDER_ORDERBY') , 'ordering', 'desc', @$this->lists['order'], 'edit' ); ?>
                         <?php // TODO: draganddrop if ($this->ordering) echo JHTML::_('grid.order',  $this->elements ); ?>
                     </th>
                     <th>
-                        <?php echo JText::_( 'COM_CONTENTBUILDER_PUBLISHED' ); ?>
+                        <?php echo Text::_( 'COM_CONTENTBUILDER_PUBLISHED' ); ?>
                     </th>
                 </tr>
             </thead>
@@ -444,9 +448,9 @@ Label 3;value3</textarea>
                         <input class="form-control form-control-sm w-100" onblur="if(this.value=='') {this.value = 'Untitled';} this.style.display='none';document.getElementById('itemTitles_<?php echo $row->id ?>').innerHTML=this.value;document.getElementById('itemTitles_<?php echo $row->id ?>').style.display='block';" id="itemTitles<?php echo $row->id ?>" type="text" style="display:none; width: 100%;" name="itemTitles[<?php echo $row->id ?>]" value="<?php echo htmlentities($row->title, ENT_QUOTES, 'UTF-8')?>"/>
                     </td>
                     <td width="200" align="center">
-                        <input class="form-check-input" type="radio" name="itemIsGroup[<?php echo $row->id ?>]" value="1" id="itemIsGroup_<?php echo $row->id ?>"<?php echo $row->is_group ? ' checked="checked"' : ''?>/> <label for="itemIsGroup_<?php echo $row->id ?>"><?php echo JText::_('COM_CONTENTBUILDER_YES'); ?></label>
-                        <input class="form-check-input" type="radio" name="itemIsGroup[<?php echo $row->id ?>]" value="0" id="itemIsGroupNo_<?php echo $row->id ?>"<?php echo !$row->is_group ? ' checked="checked"' : ''?>/> <label for="itemIsGroupNo_<?php echo $row->id ?>"/><?php echo JText::_('COM_CONTENTBUILDER_NO'); ?></label>
-                        <div style="cursor:pointer;width: 100%;display:block;" id="itemGroupDefinitions_<?php echo $row->id ?>" onclick="document.getElementById('itemGroupDefinitions<?php echo $row->id ?>').style.display='block';this.style.display='none';document.getElementById('itemGroupDefinitions<?php echo $row->id ?>').focus();"><?php echo htmlentities('['.JText::_('COM_CONTENTBUILDER_EDIT').']', ENT_QUOTES, 'UTF-8'); ?></div>
+                        <input class="form-check-input" type="radio" name="itemIsGroup[<?php echo $row->id ?>]" value="1" id="itemIsGroup_<?php echo $row->id ?>"<?php echo $row->is_group ? ' checked="checked"' : ''?>/> <label for="itemIsGroup_<?php echo $row->id ?>"><?php echo Text::_('COM_CONTENTBUILDER_YES'); ?></label>
+                        <input class="form-check-input" type="radio" name="itemIsGroup[<?php echo $row->id ?>]" value="0" id="itemIsGroupNo_<?php echo $row->id ?>"<?php echo !$row->is_group ? ' checked="checked"' : ''?>/> <label for="itemIsGroupNo_<?php echo $row->id ?>"/><?php echo Text::_('COM_CONTENTBUILDER_NO'); ?></label>
+                        <div style="cursor:pointer;width: 100%;display:block;" id="itemGroupDefinitions_<?php echo $row->id ?>" onclick="document.getElementById('itemGroupDefinitions<?php echo $row->id ?>').style.display='block';this.style.display='none';document.getElementById('itemGroupDefinitions<?php echo $row->id ?>').focus();"><?php echo htmlentities('['.Text::_('COM_CONTENTBUILDER_EDIT').']', ENT_QUOTES, 'UTF-8'); ?></div>
                         <textarea class="form-control form-control-sm" onblur="if(this.value=='') {this.value = '';} this.style.display='none';document.getElementById('itemGroupDefinitions_<?php echo $row->id ?>').style.display='block';" id="itemGroupDefinitions<?php echo $row->id ?>" style="display:none; width: 100%;height:50px;" name="itemGroupDefinitions[<?php echo $row->id ?>]"><?php echo htmlentities($row->group_definition, ENT_QUOTES, 'UTF-8')?></textarea>
                     </td>
                     <td class="order" nowrap="nowrap" width="100">
@@ -470,7 +474,7 @@ Label 3;value3</textarea>
                                 <div class="cbPagesCounter">
 	                                <?php echo $this->pagination->getPagesCounter(); ?>
 	                                <?php
-	                                echo '<span>'.JText::_('COM_CONTENTBUILDER_DISPLAY_NUM') . '&nbsp;</span>';
+	                                echo '<span>'.Text::_('COM_CONTENTBUILDER_DISPLAY_NUM') . '&nbsp;</span>';
 	                                echo '<div style="display:inline-block;">'.$this->pagination->getLimitBox().'</div>';
 	                                ?>
                                 </div>

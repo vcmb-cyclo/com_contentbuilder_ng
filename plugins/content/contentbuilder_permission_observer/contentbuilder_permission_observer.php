@@ -9,6 +9,7 @@
 
 /** ensure this file is being included by a parent file */
 defined( '_JEXEC' ) or die( 'Direct Access to this location is not allowed.' );
+use Joomla\CMS\Language\Text;
 
 if(!function_exists('cb_b64enc')){
     
@@ -79,15 +80,15 @@ class plgContentContentbuilder_permission_observer extends JPlugin {
                 contentbuilder::setPermissions($data['form_id'], $data['record_id'], $frontend ? '_fe' : '');
                 
                 if(CBRequest::getCmd('view') == 'article'){
-                   contentbuilder::checkPermissions('view', JText::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED'), $frontend ? '_fe' : '');
+                   contentbuilder::checkPermissions('view', Text::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED'), $frontend ? '_fe' : '');
                 }else{
                     if($frontend){
                         if(!contentbuilder::authorizeFe('view')){
-                            $article->text = JText::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED');
+                            $article->text = Text::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED');
                         }
                     }else{
                         if(!contentbuilder::authorize('view')){
-                            $article->text = JText::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED');
+                            $article->text = Text::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED');
                         }
                     }
                 }

@@ -6,11 +6,12 @@
  * @license     GNU/GPL
 */
 
-use Joomla\CMS\Factory;
-use Joomla\Database\DatabaseInterface;
-
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
+
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
+use Joomla\CMS\Language\Text;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -81,7 +82,7 @@ class ContentbuilderControllerDetails extends CBController
                 if($auth){
                     JFactory::getApplication()->redirect(JRoute::_('index.php?option=com_contentbuilder&controller=edit&latest=1&backtolist='.CBRequest::getInt('backtolist',0).'&id='.CBRequest::getInt('id',0).(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&record_id=&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getVar('filter_order',''), false));
                 } else {
-                   JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
+                   JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
                    JFactory::getApplication()->redirect('index.php');
                 }
             }
@@ -93,7 +94,7 @@ class ContentbuilderControllerDetails extends CBController
 
     function display($cachable = false, $urlparams = array())
     {
-        contentbuilder::checkPermissions('view', JText::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
+        contentbuilder::checkPermissions('view', Text::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
         
         CBRequest::setVar('tmpl', CBRequest::getWord('tmpl',null));
         CBRequest::setVar('layout', CBRequest::getWord('layout',null) == 'latest' ? null : CBRequest::getWord('layout',null));

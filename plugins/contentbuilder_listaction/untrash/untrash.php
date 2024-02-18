@@ -8,6 +8,7 @@
 
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 jimport( 'joomla.plugin.plugin' );
 
@@ -35,7 +36,7 @@ class plgContentbuilder_listactionUntrash extends JPlugin
                 $db->execute();
             }
             
-            JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_UNTRASH_SUCCESSFULL'));
+            JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_UNTRASH_SUCCESSFULL'));
         
             return ''; // no error
         }

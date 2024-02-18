@@ -6,10 +6,9 @@
  * @license     GNU/GPL
 */
 
-
 // No direct access
-
 defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -147,15 +146,15 @@ class ContentbuilderModelDetails extends CBModel
             $this->_data = $this->_getList($query, 0, 1);
 
             if(!count($this->_data)){
-	            throw new Exception(JText::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+	            throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
             }
 
             foreach($this->_data As $data){
 
                 if(!$this->frontend && $data->display_in == 0){
-	                throw new Exception(JText::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+	                throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                 }else if($this->frontend && $data->display_in == 1){
-	                throw new Exception(JText::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+	                throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                 }
 
                 $data->form_id = $this->_id;
@@ -202,7 +201,7 @@ class ContentbuilderModelDetails extends CBModel
                             if($auth){
                                 JFactory::getApplication()->redirect(JRoute::_('index.php?option=com_contentbuilder&controller=edit&latest=1&backtolist='.CBRequest::getInt('backtolist',0).'&id='.$this->_id.'&record_id=&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getVar('filter_order',''), false));
                             } else {
-                               JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
+                               JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
                                JFactory::getApplication()->redirect('index.php');
                             }
                         }
@@ -210,7 +209,7 @@ class ContentbuilderModelDetails extends CBModel
 
                     $data->show_page_heading = $this->_show_page_heading;
                     if(!$data->form->exists){
-	                    throw new Exception(JText::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+	                    throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                     }
                     $data->page_title = '';
                     if(CBRequest::getInt('cb_prefix_in_title', 1)){
@@ -287,15 +286,15 @@ class ContentbuilderModelDetails extends CBModel
                                         $val2 = $ex2[1];
                                       }
                                       if(strtolower(trim($ex[1])) == 'date'){
-                                          $val = JHTML::_('date', $ex2[0], JText::_('DATE_FORMAT_LC3'));
+                                          $val = JHTML::_('date', $ex2[0], Text::_('DATE_FORMAT_LC3'));
                                           if(isset($ex2[1])){
-                                            $val2 = JHTML::_('date', $ex2[1], JText::_('DATE_FORMAT_LC3'));
+                                            $val2 = JHTML::_('date', $ex2[1], Text::_('DATE_FORMAT_LC3'));
                                           }
                                       }
                                       if(count($ex2) == 2){
-                                          $out = (trim($ex2[0]) ? JText::_('COM_CONTENTBUILDER_FROM') . ' ' . trim($val) : '') . ' '.JText::_('COM_CONTENTBUILDER_TO').' ' . trim($val2);
+                                          $out = (trim($ex2[0]) ? Text::_('COM_CONTENTBUILDER_FROM') . ' ' . trim($val) : '') . ' '.Text::_('COM_CONTENTBUILDER_TO').' ' . trim($val2);
                                       }else if(count($ex2) > 0){
-                                          $out = JText::_('COM_CONTENTBUILDER_FROM') . ' ' . trim($val);
+                                          $out = Text::_('COM_CONTENTBUILDER_FROM') . ' ' . trim($val);
                                       }
                                       if($out){
                                         $this->_menu_filter[$order_key] = $ex;
@@ -312,7 +311,7 @@ class ContentbuilderModelDetails extends CBModel
                                         $i = 0;
                                         foreach($ex2 As $val){
                                            if($i + 1 < $size){
-                                               $out .= trim($val) . ' ' . JText::_('COM_CONTENTBUILDER_AND') . ' ';
+                                               $out .= trim($val) . ' ' . Text::_('COM_CONTENTBUILDER_AND') . ' ';
                                            }else{
                                                $out .= trim($val);
                                            }
@@ -383,7 +382,7 @@ class ContentbuilderModelDetails extends CBModel
                             $data->xreference = '';
                         }
                     }else{
-	                    throw new Exception(JText::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+	                    throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                     }
                 }
                 return $data;

@@ -7,6 +7,8 @@
 */
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
+use Joomla\CMS\Language\Text;
+
 function contentbuilder_is_valid_date($value, $format = 'YYYY-mm-dd'){
     
     $format = $format = str_replace('%', '', $format);
@@ -494,7 +496,7 @@ class contentbuilder_helpers{
 
         $icon = $row->list_include ? $publish_icon : $unpublish_icon;
         $task = $row->list_include ? 'no_list_include' : 'list_include';
-        $action = $row->list_include ? JText::_('COM_CONTENTBUILDER_NO_LIST_INCLUDE') : JText::_('COM_CONTENTBUILDER_LIST_INCLUDE');
+        $action = $row->list_include ? Text::_('COM_CONTENTBUILDER_NO_LIST_INCLUDE') : Text::_('COM_CONTENTBUILDER_LIST_INCLUDE');
 
 	    $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -507,7 +509,7 @@ class contentbuilder_helpers{
 
 	    $icon = $row->search_include ? $publish_icon : $unpublish_icon;
         $task = $row->search_include ? 'no_search_include' : 'search_include';
-        $action = $row->search_include ? JText::_('COM_CONTENTBUILDER_NO_SEARCH_INCLUDE') : JText::_('COM_CONTENTBUILDER_SEARCH_INCLUDE');
+        $action = $row->search_include ? Text::_('COM_CONTENTBUILDER_NO_SEARCH_INCLUDE') : Text::_('COM_CONTENTBUILDER_SEARCH_INCLUDE');
 
 	    $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -521,7 +523,7 @@ class contentbuilder_helpers{
 
         $icon = $row->linkable ? $publish_icon : $unpublish_icon;
         $task = $row->linkable ? 'not_linkable' : 'linkable';
-        $action = $row->linkable ? JText::_('COM_CONTENTBUILDER_NOT_LINKABLE') : JText::_('COM_CONTENTBUILDER_LINKABLE');
+        $action = $row->linkable ? Text::_('COM_CONTENTBUILDER_NOT_LINKABLE') : Text::_('COM_CONTENTBUILDER_LINKABLE');
 
 	    $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -535,7 +537,7 @@ class contentbuilder_helpers{
 
         $icon = $row->editable ? $publish_icon : $unpublish_icon;
         $task = $row->editable ? 'not_editable' : 'editable';
-        $action = $row->editable ? JText::_('COM_CONTENTBUILDER_NOT_EDITABLE') : JText::_('COM_CONTENTBUILDER_EDITABLE');
+        $action = $row->editable ? Text::_('COM_CONTENTBUILDER_NOT_EDITABLE') : Text::_('COM_CONTENTBUILDER_EDITABLE');
 
         $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -549,7 +551,7 @@ class contentbuilder_helpers{
 
 	    $icon = $row->verified_view ? $publish_icon : $unpublish_icon;
         $task = $row->verified_view ? 'not_verified_view' : 'verified_view';
-        $action = $row->verified_view ? JText::_('COM_CONTENTBUILDER_VERIFIED_VIEW') : JText::_('COM_CONTENTBUILDER_VERIFIED_VIEW');
+        $action = $row->verified_view ? Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW') : Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW');
 
 	    $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -563,7 +565,7 @@ class contentbuilder_helpers{
 
 	    $icon = $row->verified_new ? $publish_icon : $unpublish_icon;
         $task = $row->verified_new ? 'not_verified_new' : 'verified_new';
-        $action = $row->verified_new ? JText::_('COM_CONTENTBUILDER_VERIFIED_NEW') : JText::_('COM_CONTENTBUILDER_VERIFIED_NEW');
+        $action = $row->verified_new ? Text::_('COM_CONTENTBUILDER_VERIFIED_NEW') : Text::_('COM_CONTENTBUILDER_VERIFIED_NEW');
 
 	    $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -577,7 +579,7 @@ class contentbuilder_helpers{
 
 	    $icon = $row->verified_edit ? $publish_icon : $unpublish_icon;
         $task = $row->verified_edit ? 'not_verified_edit' : 'verified_edit';
-        $action = $row->verified_edit ? JText::_('COM_CONTENTBUILDER_VERIFIED_EDIT') : JText::_('COM_CONTENTBUILDER_VERIFIED_EDIT');
+        $action = $row->verified_edit ? Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT') : Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT');
 
 	    $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -591,7 +593,7 @@ class contentbuilder_helpers{
 
 		$icon = $row->published ? $publish_icon : $unpublish_icon;
 		$task = $row->published ? 'unpublish' : 'publish';
-		$action = $row->published ? JText::_('UNPUBLISH') : JText::_('PUBLISH');
+		$action = $row->published ? Text::_('UNPUBLISH') : Text::_('PUBLISH');
 
 		$href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -605,8 +607,8 @@ class contentbuilder_helpers{
 
         $img = $published ? $imgY : $imgX;
         $url = $published ? $url_unpublish : $url_publish;
-        $alt = $published ? JText::_('PUBLISH') : JText::_('UNPUBLISH');
-        $action = $published ? JText::_('PUBLISH') : JText::_('UNPUBLISH');
+        $alt = $published ? Text::_('PUBLISH') : Text::_('UNPUBLISH');
+        $action = $published ? Text::_('PUBLISH') : Text::_('UNPUBLISH');
 
 	    $href = ($allowed ? '<a href="'.$url.'" title="' . $action . '">' : '').'
                      <img src="'.JURI::root(true).'/components/com_contentbuilder/images/_' . $img . '" border="0" alt="' . $alt . '" />'.

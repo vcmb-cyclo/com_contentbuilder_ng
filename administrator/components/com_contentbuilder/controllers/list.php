@@ -7,8 +7,8 @@
 */
 
 // no direct access
-
 defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -26,7 +26,7 @@ class ContentbuilderControllerList extends CBController
 
     function display($cachable = false, $urlparams = array())
     {
-        contentbuilder::checkPermissions('listaccess', JText::_('COM_CONTENTBUILDER_PERMISSIONS_LISTACCESS_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
+        contentbuilder::checkPermissions('listaccess', Text::_('COM_CONTENTBUILDER_PERMISSIONS_LISTACCESS_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
         
         CBRequest::setVar('tmpl', CBRequest::getWord('tmpl',null));
         CBRequest::setVar('layout', CBRequest::getWord('layout',null) == 'latest' ? null : CBRequest::getWord('layout',null));

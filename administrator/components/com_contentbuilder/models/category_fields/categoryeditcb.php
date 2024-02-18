@@ -6,6 +6,7 @@
  */
 
 defined('JPATH_BASE') or die;
+use Joomla\CMS\Language\Text;
 
 JFormHelper::loadFieldClass('list');
 
@@ -71,7 +72,7 @@ class JFormFieldCategoryEditCb extends JFormFieldList
             for ($i = 0, $n = count($options); $i < $n; $i++) {
                 // Translate ROOT
                 if ($options[$i]->level == 0) {
-                    $options[$i]->text = JText::_('JGLOBAL_ROOT_PARENT');
+                    $options[$i]->text = Text::_('JGLOBAL_ROOT_PARENT');
                 }
 
                 $options[$i]->text = str_repeat('- ', $options[$i]->level) . $options[$i]->text;
@@ -80,7 +81,7 @@ class JFormFieldCategoryEditCb extends JFormFieldList
             if (isset($row) && !isset($options[0])) {
                 if ($row->parent_id == '1') {
                     $parent = new stdClass();
-                    $parent->text = JText::_('JGLOBAL_ROOT_PARENT');
+                    $parent->text = Text::_('JGLOBAL_ROOT_PARENT');
                     array_unshift($options, $parent);
                 }
             }

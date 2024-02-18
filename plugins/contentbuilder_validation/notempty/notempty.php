@@ -8,6 +8,7 @@
 
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 jimport( 'joomla.plugin.plugin' );
 
@@ -42,12 +43,12 @@ class plgContentbuilder_validationNotempty extends JPlugin
                        }
                    }
                    if(!$record_with_file_found && empty($value)){
-                       $msg = trim($field['validation_message']) ? trim($field['validation_message']) : JText::_('COM_CONTENTBUILDER_VALIDATION_VALUE_EMPTY') . ': ' . $field['label'];
+                       $msg = trim($field['validation_message']) ? trim($field['validation_message']) : Text::_('COM_CONTENTBUILDER_VALIDATION_VALUE_EMPTY') . ': ' . $field['label'];
                    }
                 }else{
                     $value = trim($value);
                     if(empty($value)){
-                        $msg = trim($field['validation_message']) ? trim($field['validation_message']) : JText::_('COM_CONTENTBUILDER_VALIDATION_VALUE_EMPTY') . ': ' . $field['label'];
+                        $msg = trim($field['validation_message']) ? trim($field['validation_message']) : Text::_('COM_CONTENTBUILDER_VALIDATION_VALUE_EMPTY') . ': ' . $field['label'];
                     }
                 }
             } else {
@@ -58,7 +59,7 @@ class plgContentbuilder_validationNotempty extends JPlugin
                     }
                 }
                 if(!$has){
-                    $msg = trim($field['validation_message']) ? trim($field['validation_message']) : JText::_('COM_CONTENTBUILDER_VALIDATION_VALUE_EMPTY') . ': ' . $field['label'];
+                    $msg = trim($field['validation_message']) ? trim($field['validation_message']) : Text::_('COM_CONTENTBUILDER_VALIDATION_VALUE_EMPTY') . ': ' . $field['label'];
                 }
             }
             return $msg;

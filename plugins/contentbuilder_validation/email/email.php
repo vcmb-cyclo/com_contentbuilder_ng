@@ -8,6 +8,7 @@
 
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 jimport( 'joomla.plugin.plugin' );
 
@@ -29,7 +30,7 @@ class plgContentbuilder_validationEmail extends JPlugin
             
             if(!is_array($value)){
                 if(!contentbuilder_is_email($value)){
-                    return JText::_('COM_CONTENTBUILDER_VALIDATION_EMAIL_INVALID') . ': ' . $field['label'];
+                    return Text::_('COM_CONTENTBUILDER_VALIDATION_EMAIL_INVALID') . ': ' . $field['label'];
                 }
             }else{
                 foreach($value As $val){
@@ -38,7 +39,7 @@ class plgContentbuilder_validationEmail extends JPlugin
                   }
                 }
                 if($msg){
-                    return JText::_('COM_CONTENTBUILDER_VALIDATION_EMAIL_INVALID') . ': ' . $field['label'] . ' (' . $msg . ')';
+                    return Text::_('COM_CONTENTBUILDER_VALIDATION_EMAIL_INVALID') . ': ' . $field['label'] . ' (' . $msg . ')';
                 }
             }
             

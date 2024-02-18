@@ -7,6 +7,8 @@
 */
 
 defined('_JEXEC') or die('Restricted access');
+use Joomla\CMS\Language\Text;
+
 $th = 'th';
 if($this->page_heading){
 ?>
@@ -21,9 +23,9 @@ if($this->page_heading){
     <?php
     if($this->show_tags){
     ?>
-    <?php echo JText::_( 'COM_CONTENTBUILDER_FILTER_TAG' ); ?>: 
+    <?php echo Text::_( 'COM_CONTENTBUILDER_FILTER_TAG' ); ?>: 
     <select name="filter_tag" onchange="document.adminForm.submit();">
-        <option value=""> - <?php echo htmlentities(JText::_('COM_CONTENTBUILDER_FILTER_TAG_ALL'), ENT_QUOTES, 'UTF-8')?> - </option>
+        <option value=""> - <?php echo htmlentities(Text::_('COM_CONTENTBUILDER_FILTER_TAG_ALL'), ENT_QUOTES, 'UTF-8')?> - </option>
     <?php
     foreach($this->tags As $tag){
     ?>
@@ -45,8 +47,8 @@ if($this->page_heading){
             ?>
             
             <<?php echo $th; ?> width="5" class="sectiontableheader">
-                <?php echo JText::_( 'COM_CONTENTBUILDER_ID' ); ?>
-                <?php //echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_ID' ), 'id', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo Text::_( 'COM_CONTENTBUILDER_ID' ); ?>
+                <?php //echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_ID' ), 'id', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </<?php echo $th; ?>>
             
             <?php
@@ -54,8 +56,8 @@ if($this->page_heading){
             ?>
             
             <<?php echo $th; ?> style="width: 200px !important;" class="sectiontableheader">
-                <?php echo JText::_( 'COM_CONTENTBUILDER_VIEW_NAME' ); ?>
-                <?php // echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_VIEW_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo Text::_( 'COM_CONTENTBUILDER_VIEW_NAME' ); ?>
+                <?php // echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_VIEW_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </<?php echo $th; ?>>
             
             <?php
@@ -63,7 +65,7 @@ if($this->page_heading){
             ?>
             
             <<?php echo $th; ?> class="sectiontableheader">
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_TAG' ), 'tag', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_TAG' ), 'tag', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </<?php echo $th; ?>>
             
             <?php
@@ -75,7 +77,7 @@ if($this->page_heading){
             ?>
             
             <<?php echo $th; ?> class="sectiontableheader">
-            <?php echo JText::_('COM_CONTENTBUILDER_INTROTEXT'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDER_INTROTEXT'); ?>
             </<?php echo $th; ?>>
             
             <?php
@@ -87,7 +89,7 @@ if($this->page_heading){
             ?>
             
             <<?php echo $th; ?> class="sectiontableheader">
-            <?php echo JText::_('COM_CONTENTBUILDER_ACCESS_VIEW'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDER_ACCESS_VIEW'); ?>
             </<?php echo $th; ?>>
             
             <?php
@@ -99,7 +101,7 @@ if($this->page_heading){
             ?>
             
             <<?php echo $th; ?> class="sectiontableheader">
-            <?php echo JText::_('COM_CONTENTBUILDER_ACCESS_NEW'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDER_ACCESS_NEW'); ?>
             </<?php echo $th; ?>>
             
             <?php
@@ -111,7 +113,7 @@ if($this->page_heading){
             ?>
             
             <<?php echo $th; ?> class="sectiontableheader">
-            <?php echo JText::_('COM_CONTENTBUILDER_ACCESS_EDIT'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDER_ACCESS_EDIT'); ?>
             </<?php echo $th; ?>>
             
             <?php

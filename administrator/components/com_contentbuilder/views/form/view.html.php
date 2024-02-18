@@ -7,10 +7,10 @@
 */
 
 // no direct access
+defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
-
-defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 jimport('joomla.html.pane');
 
@@ -45,23 +45,23 @@ class ContentbuilderViewForm extends CBView
         $pagination   = $this->get('Pagination');
         $isNew        = ($form->id < 1);
 
-        $text = $isNew ? JText::_( 'COM_CONTENTBUILDER_NEW' ) : JText::_( 'COM_CONTENTBUILDER_EDIT' );
+        $text = $isNew ? Text::_( 'COM_CONTENTBUILDER_NEW' ) : Text::_( 'COM_CONTENTBUILDER_EDIT' );
 
-	    JToolBarHelper::title(   'ContentBuilder :: ' . ($isNew ? JText::_( 'COM_CONTENTBUILDER_FORM' ) : $form->name) .' : <small><small>[ ' . $text.' ]</small></small></span>', 'logo_left.png' );
+	    JToolBarHelper::title(   'ContentBuilder :: ' . ($isNew ? Text::_( 'COM_CONTENTBUILDER_FORM' ) : $form->name) .' : <small><small>[ ' . $text.' ]</small></small></span>', 'logo_left.png' );
         
-        //JToolBarHelper::customX('linkable', 'default', '', JText::_('COM_CONTENTBUILDER_LINKABLE'), false);
-        //JToolBarHelper::customX('not_linkable', 'default', '', JText::_('COM_CONTENTBUILDER_NOT_LINKABLE'), false);
+        //JToolBarHelper::customX('linkable', 'default', '', Text::_('COM_CONTENTBUILDER_LINKABLE'), false);
+        //JToolBarHelper::customX('not_linkable', 'default', '', Text::_('COM_CONTENTBUILDER_NOT_LINKABLE'), false);
         
         JToolBarHelper::apply();
         JToolBarHelper::save();
 
-	    JToolBarHelper::custom('saveNew', 'save', '', JText::_('COM_CONTENTBUILDER_SAVENEW'), false);
-	    JToolBarHelper::custom('list_include', 'menu', '', JText::_('COM_CONTENTBUILDER_LIST_INCLUDE'), false);
-	    JToolBarHelper::custom('no_list_include', 'menu', '', JText::_('COM_CONTENTBUILDER_NO_LIST_INCLUDE'), false);
-	    JToolBarHelper::custom('editable', 'edit', '', JText::_('COM_CONTENTBUILDER_EDITABLE'), false);
-	    JToolBarHelper::custom('not_editable', 'edit', '', JText::_('COM_CONTENTBUILDER_NOT_EDITABLE'), false);
-	    JToolBarHelper::custom('listpublish', 'publish', '', JText::_('COM_CONTENTBUILDER_PUBLISH'), false);
-	    JToolBarHelper::custom('listunpublish', 'unpublish', '', JText::_('COM_CONTENTBUILDER_UNPUBLISH'), false);
+	    JToolBarHelper::custom('saveNew', 'save', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
+	    JToolBarHelper::custom('list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_LIST_INCLUDE'), false);
+	    JToolBarHelper::custom('no_list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_NO_LIST_INCLUDE'), false);
+	    JToolBarHelper::custom('editable', 'edit', '', Text::_('COM_CONTENTBUILDER_EDITABLE'), false);
+	    JToolBarHelper::custom('not_editable', 'edit', '', Text::_('COM_CONTENTBUILDER_NOT_EDITABLE'), false);
+	    JToolBarHelper::custom('listpublish', 'publish', '', Text::_('COM_CONTENTBUILDER_PUBLISH'), false);
+	    JToolBarHelper::custom('listunpublish', 'unpublish', '', Text::_('COM_CONTENTBUILDER_UNPUBLISH'), false);
 
 	    //JToolBarHelper::deleteList();
         if ($isNew) {

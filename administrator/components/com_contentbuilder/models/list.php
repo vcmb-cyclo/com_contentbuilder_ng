@@ -7,10 +7,10 @@
 */
 
 // No direct access
+defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
-
-defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -215,14 +215,14 @@ class ContentbuilderModelList extends CBModel
             $this->_data = $this->_getList($query, 0, 1);
 
             if(!count($this->_data)){
-	            throw new Exception(JText::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+	            throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
             }
 
             foreach($this->_data As $data){
                 if(!$this->frontend && $data->display_in == 0){
-	                throw new Exception(JText::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+	                throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                 }else if($this->frontend && $data->display_in == 1){
-	                throw new Exception(JText::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+	                throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                 }
                 
                 // filter by category if requested by menu item
@@ -240,7 +240,7 @@ class ContentbuilderModelList extends CBModel
                 if($data->type && $data->reference_id){
                     $data->form = contentbuilder::getForm($data->type, $data->reference_id);
                     if(!$data->form->exists){
-	                    throw new Exception(JText::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+	                    throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                     }
                     $data->page_title = '';
                     if(CBRequest::getInt('cb_prefix_in_title', 1)){
@@ -397,15 +397,15 @@ class ContentbuilderModelList extends CBModel
                                     $val2 = $ex2[1];
                                   }
                                   if(strtolower(trim($ex[1])) == 'date'){
-                                      $val = JHTML::_('date', $ex2[0], JText::_('DATE_FORMAT_LC3'));
+                                      $val = JHTML::_('date', $ex2[0], Text::_('DATE_FORMAT_LC3'));
                                       if(isset($ex2[1])){
-                                        $val2 = JHTML::_('date', $ex2[1], JText::_('DATE_FORMAT_LC3'));
+                                        $val2 = JHTML::_('date', $ex2[1], Text::_('DATE_FORMAT_LC3'));
                                       }
                                   }
                                   if(count($ex2) == 2){
-                                      $out = (trim($ex2[0]) ? JText::_('COM_CONTENTBUILDER_FROM') . ' ' . trim($val) : '') . ' '.JText::_('COM_CONTENTBUILDER_TO').' ' . trim($val2);
+                                      $out = (trim($ex2[0]) ? Text::_('COM_CONTENTBUILDER_FROM') . ' ' . trim($val) : '') . ' '.Text::_('COM_CONTENTBUILDER_TO').' ' . trim($val2);
                                   }else if(count($ex2) > 0){
-                                      $out = JText::_('COM_CONTENTBUILDER_FROM2') . ' ' . trim($val);
+                                      $out = Text::_('COM_CONTENTBUILDER_FROM2') . ' ' . trim($val);
                                   }
                                   if($out){
                                     $this->_menu_filter[$order_key] = $ex;
@@ -422,7 +422,7 @@ class ContentbuilderModelList extends CBModel
                                     $i = 0;
                                     foreach($ex2 As $val){
                                        if($i + 1 < $size){
-                                           $out .= trim($val) . ' ' . JText::_('COM_CONTENTBUILDER_AND') . ' ';
+                                           $out .= trim($val) . ' ' . Text::_('COM_CONTENTBUILDER_AND') . ' ';
                                        }else{
                                            $out .= trim($val);
                                        }
@@ -504,7 +504,7 @@ class ContentbuilderModelList extends CBModel
                     
                     if($data->items === null){
                         $mainframe->setUserState($option.'formsd_filter_order', '');
-	                    throw new Exception(JText::_('Stale list setup detected. Please reload view.'), 500);
+	                    throw new Exception(Text::_('Stale list setup detected. Please reload view.'), 500);
                     }
                     $data->items = contentbuilder::applyItemWrappers($this->_id, $data->items, $data);
                     $this->_total = $data->form->getListRecordsTotal($ids, $this->getState('formsd_filter'), $searchable_elements);

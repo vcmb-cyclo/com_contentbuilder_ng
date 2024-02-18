@@ -7,11 +7,11 @@
 */
 
 // no direct access
+defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
-
-defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 if( !defined( 'DS' ) ){
     define('DS', DIRECTORY_SEPARATOR);
@@ -202,7 +202,7 @@ class  plgSystemContentbuilder_system extends JPlugin
                 // if somebody tries to submit an article through the built-in joomla content submit
                 if( $pluginParams->def('disable_new_articles', 0) && trim(CBRequest::getCmd('option','')) == 'com_content' && ( trim(CBRequest::getCmd('task','')) == 'new' || trim(CBRequest::getCmd('task','')) == 'article.add' || ( trim(CBRequest::getCmd('view','')) == 'article' && trim(CBRequest::getCmd('layout','')) == 'form' ) || ( trim(CBRequest::getCmd('view','')) == 'form' && trim(CBRequest::getCmd('layout','')) == 'edit' ) && $a_id <= 0 ) ){
                     JFactory::getLanguage()->load('com_contentbuilder');
-	                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PERMISSIONS_NEW_NOT_ALLOWED'), 'error');
+	                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_PERMISSIONS_NEW_NOT_ALLOWED'), 'error');
                     JFactory::getApplication()->redirect('index.php');
                 }
                 

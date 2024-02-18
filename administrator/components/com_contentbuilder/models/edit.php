@@ -8,13 +8,15 @@
 
 // No direct access
 
+
+defined( '_JEXEC' ) or die( 'Restricted access' );
+
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Utilities\ArrayHelper;
-use Joomla\CMS\Version;
+use Joomla\CMS\Language\Text;
 
-defined( '_JEXEC' ) or die( 'Restricted access' );
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -230,15 +232,15 @@ class ContentbuilderModelEdit extends CBModel
             $this->_data = $this->_getList($query, 0, 1);
 
             if(!count($this->_data)){
-	            throw new Exception(JText::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+	            throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
             }
 
             foreach($this->_data As $data){
                 
                 if(!$this->frontend && $data->display_in == 0){
-					throw new Exception(JText::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+					throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                 }else if($this->frontend && $data->display_in == 1){
-	                throw new Exception(JText::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+	                throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                 }
                 
                 $data->show_page_heading = $this->_show_page_heading;
@@ -336,7 +338,7 @@ class ContentbuilderModelEdit extends CBModel
                     $data->frontend = $this->frontend;
                     $data->form = contentbuilder::getForm($data->type, $data->reference_id);
                     if(!$data->form->exists){
-                        throw new Exception(JText::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                        throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                     }
                     $data->page_title = '';
                     if(CBRequest::getInt('cb_prefix_in_title', 1)){
@@ -571,7 +573,7 @@ var contentbuilder = new function(){
     
     function store(){
 
-        CBRequest::checkToken('default') or jexit(JText::_('JInvalid_Token'));
+        CBRequest::checkToken('default') or jexit(Text::_('JInvalid_Token'));
         
         JPluginHelper::importPlugin('contentbuilder_submit');
         Factory::getSession()->clear('cb_failed_values', 'com_contentbuilder.'.$this->_id);
@@ -581,15 +583,15 @@ var contentbuilder = new function(){
         $this->_data = $this->_getList($query, 0, 1);
 
         if (!count($this->_data)) {
-			throw new Exception(JText::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+			throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
         }
 
         foreach ($this->_data As $data) {
 
             if (!$this->frontend && $data->display_in == 0) {
-	            throw new Exception(JText::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+	            throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
             } else if ($this->frontend && $data->display_in == 1) {
-	            throw new Exception(JText::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+	            throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
             }
             
             $data->form_id = $this->_id;
@@ -685,7 +687,7 @@ var contentbuilder = new function(){
                         $cap_value = CBRequest::getVar( 'cb_' . $the_captcha_field['reference_id'], null, 'POST' );
                         if ($securimage->check($cap_value) == false) {
                             CBRequest::setVar('cb_submission_failed', 1);
-                            Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_CAPTCHA_FAILED'), 'error');
+                            Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_CAPTCHA_FAILED'), 'error');
                         }
                         $values[$the_captcha_field['reference_id']] = $cap_value;
                         $noneditable_fields[] = $the_captcha_field['reference_id'];
@@ -707,34 +709,34 @@ var contentbuilder = new function(){
                             if( !trim($name) )
                             {
                                 CBRequest::setVar('cb_submission_failed', 1);
-                                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_NAME_EMPTY'), 'error');
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NAME_EMPTY'), 'error');
                             }
                             
                             if( !trim($username) )
                             {
                                 CBRequest::setVar('cb_submission_failed', 1);
-                                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_EMPTY'), 'error');
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_USERNAME_EMPTY'), 'error');
                             }
                             else if( preg_match( "#[<>\"'%;()&]#i", $username) || strlen(utf8_decode($username )) < 2 )
                             {
                                 CBRequest::setVar('cb_submission_failed', 1);
-                                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_INVALID'), 'error');
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_USERNAME_INVALID'), 'error');
                             }
                             
                             if( !trim($email) )
                             {
                                 CBRequest::setVar('cb_submission_failed', 1);
-                                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_EMPTY'), 'error');
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_EMAIL_EMPTY'), 'error');
                             }
                             else if( !contentbuilder_is_email($email) )
                             {
                                 CBRequest::setVar('cb_submission_failed', 1);
-                                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_INVALID'), 'error');
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_EMAIL_INVALID'), 'error');
                             } 
                             else if( $email != $email2 )
                             {
                                 CBRequest::setVar('cb_submission_failed', 1);
-                                Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_MISMATCH'), 'error');
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_EMAIL_MISMATCH'), 'error');
                             }
                             
                             if( !$meta->created_id && !Factory::getUser()->get('id', 0) ){
@@ -742,18 +744,18 @@ var contentbuilder = new function(){
                                 $this->_db->setQuery("Select count(id) From #__users Where `username` = " . $this->_db->Quote($username));
                                 if($this->_db->loadResult()){
                                     CBRequest::setVar('cb_submission_failed', 1);
-                                    Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
+                                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
                                 }
 
                                 $this->_db->setQuery("Select count(id) From #__users Where `email` = " . $this->_db->Quote($email));
                                 if($this->_db->loadResult()){
                                     CBRequest::setVar('cb_submission_failed', 1);
-                                    Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
+                                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
                                 }
                                 
                                 if( $pw1 != $pw2 ){
                                     CBRequest::setVar('cb_submission_failed', 1);
-                                    Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PASSWORD_MISMATCH'), 'error');
+                                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_PASSWORD_MISMATCH'), 'error');
                                 
                                     CBRequest::setVar( 'cb_' . $the_password_field['reference_id'], '' );
                                     CBRequest::setVar( 'cb_' . $the_password_repeat_field['reference_id'], '' );
@@ -762,7 +764,7 @@ var contentbuilder = new function(){
                                 else if( !trim($pw1) )
                                 {
                                     CBRequest::setVar('cb_submission_failed', 1);
-                                    Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PASSWORD_EMPTY'), 'error');
+                                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_PASSWORD_EMPTY'), 'error');
                                 
                                     CBRequest::setVar( 'cb_' . $the_password_field['reference_id'], '' );
                                     CBRequest::setVar( 'cb_' . $the_password_repeat_field['reference_id'], '' );
@@ -774,13 +776,13 @@ var contentbuilder = new function(){
                                     $this->_db->setQuery("Select count(id) From #__users Where id <> ".$this->_db->Quote($meta->created_id)." And `username` = " . $this->_db->Quote($username));
                                     if($this->_db->loadResult()){
                                         CBRequest::setVar('cb_submission_failed', 1);
-                                        Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
+                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
                                     }
 
                                     $this->_db->setQuery("Select count(id) From #__users Where id <> ".$this->_db->Quote($meta->created_id)." And `email` = " . $this->_db->Quote($email));
                                     if($this->_db->loadResult()){
                                         CBRequest::setVar('cb_submission_failed', 1);
-                                        Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
+                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
                                     }
                                 }
                                 else
@@ -788,13 +790,13 @@ var contentbuilder = new function(){
                                     $this->_db->setQuery("Select count(id) From #__users Where id <> ".$this->_db->Quote(Factory::getUser()->get('id', 0))." And `username` = " . $this->_db->Quote($username));
                                     if($this->_db->loadResult()){
                                         CBRequest::setVar('cb_submission_failed', 1);
-                                        Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
+                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
                                     }
 
                                     $this->_db->setQuery("Select count(id) From #__users Where id <> ".$this->_db->Quote(Factory::getUser()->get('id', 0))." And `email` = " . $this->_db->Quote($email));
                                     if($this->_db->loadResult()){
                                         CBRequest::setVar('cb_submission_failed', 1);
-                                        Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
+                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
                                     }
                                 }
                                 
@@ -802,7 +804,7 @@ var contentbuilder = new function(){
                                     
                                     if( $pw1 != $pw2 ){
                                         CBRequest::setVar('cb_submission_failed', 1);
-                                        Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PASSWORD_MISMATCH'), 'error');
+                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_PASSWORD_MISMATCH'), 'error');
                                     
                                         CBRequest::setVar( 'cb_' . $the_password_field['reference_id'], '' );
                                         CBRequest::setVar( 'cb_' . $the_password_repeat_field['reference_id'], '' );
@@ -810,7 +812,7 @@ var contentbuilder = new function(){
                                     else if( !trim($pw1) )
                                     {
                                         CBRequest::setVar('cb_submission_failed', 1);
-                                        Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_PASSWORD_EMPTY'), 'error');
+                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_PASSWORD_EMPTY'), 'error');
                                     
                                         CBRequest::setVar( 'cb_' . $the_password_field['reference_id'], '' );
                                         CBRequest::setVar( 'cb_' . $the_password_repeat_field['reference_id'], '' );
@@ -966,7 +968,7 @@ var contentbuilder = new function(){
                                             }
 
                                             if($file['size'] > $val){
-                                                $msg = JText::_('COM_CONTENTBUILDER_FILESIZE_EXCEEDED') . ' ' . $the_upload_fields[$id]['options']->max_filesize . 'b';
+                                                $msg = Text::_('COM_CONTENTBUILDER_FILESIZE_EXCEEDED') . ' ' . $the_upload_fields[$id]['options']->max_filesize . 'b';
                                             }
                                         }
 
@@ -978,7 +980,7 @@ var contentbuilder = new function(){
                                             $ext = strtolower(JFile::getExt($filename));
 
                                             if(!in_array($ext, $allowed)){
-                                                $msg = JText::_('COM_CONTENTBUILDER_FILE_EXTENSION_NOT_ALLOWED');
+                                                $msg = Text::_('COM_CONTENTBUILDER_FILE_EXTENSION_NOT_ALLOWED');
                                             }
                                         }
 
@@ -1041,7 +1043,7 @@ var contentbuilder = new function(){
                                             $uploaded = JFile::upload($src, $dest . DS . $filename, false, true);
 
                                             if(!$uploaded){
-                                                $msg = JText::_('COM_CONTENTBUILDER_UPLOAD_FAILED');
+                                                $msg = Text::_('COM_CONTENTBUILDER_UPLOAD_FAILED');
                                             }
                                         }
 
@@ -1452,7 +1454,7 @@ var contentbuilder = new function(){
                     $data->page_title = $data->use_view_name_as_title ? $data->name : $data->form->getPageTitle();
                     
                     //if(!count($data->items)){
-                   //     JError::raiseError(404, JText::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'));
+                   //     JError::raiseError(404, Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'));
                     //}
                     
                     $this->_db->setQuery("Select articles.`id` From #__contentbuilder_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($this->_id) . " And articles.record_id = " . $this->_db->Quote($record_return));
@@ -1569,7 +1571,7 @@ var contentbuilder = new function(){
                             $email_admin_template = contentbuilder::getEmailTemplate($this->_id, $record_return, $data_email_items, $ids, true);
                         
                             // subject
-                            $subject_admin = JText::_('COM_CONTENTBUILDER_EMAIL_RECORD_RECEIVED');
+                            $subject_admin = Text::_('COM_CONTENTBUILDER_EMAIL_RECORD_RECEIVED');
                             if( trim($data->email_admin_subject) ){
                                 foreach($data->items As $item){
                                     $data->email_admin_subject = str_replace('{'.$item->recName.'}',cbinternal($item->recValue), $data->email_admin_subject);
@@ -1681,7 +1683,7 @@ var contentbuilder = new function(){
                             $email_template = contentbuilder::getEmailTemplate($this->_id, $record_return, $data_email_items, $ids, false);
                         
                             // subject
-                            $subject = JText::_('COM_CONTENTBUILDER_EMAIL_RECORD_RECEIVED');
+                            $subject = Text::_('COM_CONTENTBUILDER_EMAIL_RECORD_RECEIVED');
                             if( trim($data->email_subject) ){
                                 foreach($data->items As $item){
                                     $data->email_subject = str_replace('{'.$item->recName.'}',cbinternal($item->recValue), $data->email_subject);
@@ -1807,7 +1809,7 @@ var contentbuilder = new function(){
 
 		// Bind the data.
 		if (!$user->bind($data)) {
-			$this->setError(JText::sprintf('COM_USERS_REGISTRATION_BIND_FAILED', $user->getError()));
+			$this->setError(Text::sprintf('COM_USERS_REGISTRATION_BIND_FAILED', $user->getError()));
 			return false;
 		}
 
@@ -1816,7 +1818,7 @@ var contentbuilder = new function(){
 
 		// Store the data.
 		if (!$user->save()) {
-			$this->setError(JText::sprintf('COM_USERS_REGISTRATION_SAVE_FAILED', $user->getError()));
+			$this->setError(Text::sprintf('COM_USERS_REGISTRATION_SAVE_FAILED', $user->getError()));
 			return false;
 		}
 
@@ -1838,7 +1840,7 @@ var contentbuilder = new function(){
 			$base = $uri->toString(array('scheme', 'user', 'pass', 'host', 'port'));
 			$data['activate'] = $base.JRoute::_('index.php?option=com_users&task=registration.activate&token='.$data['activation'], false);
 
-			$emailSubject = JText::_('COM_USERS_EMAIL_ACCOUNT_DETAILS');
+			$emailSubject = Text::_('COM_USERS_EMAIL_ACCOUNT_DETAILS');
 			$emailSubject = str_replace('{NAME}', $data['name'], $emailSubject);
 			$emailSubject = str_replace('{SITENAME}', $data['sitename'], $emailSubject);
 
@@ -1847,7 +1849,7 @@ var contentbuilder = new function(){
 				$siteurl = $data['siteurl'].'index.php?option=com_contentbuilder&controller=verify&plugin='.urlencode($bypass_plugin).'&verification_name='.urlencode($bypass_verification_name).'&token='.$data['activation'].'&verification_id='.$verification_id.'&format=raw';
 			}
 
-			$emailBody = JText::_('COM_USERS_EMAIL_REGISTERED_WITH_ADMIN_ACTIVATION_BODY');
+			$emailBody = Text::_('COM_USERS_EMAIL_REGISTERED_WITH_ADMIN_ACTIVATION_BODY');
 			$emailBody = str_replace('{NAME}', $data['name'], $emailBody);
 			$emailBody = str_replace('{SITENAME}', $data['sitename'], $emailBody);
 			$emailBody = str_replace('{ACTIVATE}', $siteurl, $emailBody);
@@ -1862,7 +1864,7 @@ var contentbuilder = new function(){
 			$base = $uri->toString(array('scheme', 'user', 'pass', 'host', 'port'));
 			$data['activate'] = $base.JRoute::_('index.php?option=com_users&task=registration.activate&token='.$data['activation'], false);
 
-			$emailSubject = JText::_('COM_USERS_EMAIL_ACCOUNT_DETAILS');
+			$emailSubject = Text::_('COM_USERS_EMAIL_ACCOUNT_DETAILS');
 			$emailSubject = str_replace('{NAME}', $data['name'], $emailSubject);
 			$emailSubject = str_replace('{SITENAME}', $data['sitename'], $emailSubject);
 
@@ -1871,7 +1873,7 @@ var contentbuilder = new function(){
 				$siteurl = $data['siteurl'].'index.php?option=com_contentbuilder&controller=verify&plugin='.urlencode($bypass_plugin).'&verification_name='.urlencode($bypass_verification_name).'&token='.$data['activation'].'&verification_id='.$verification_id.'&format=raw';
 			}
 
-			$emailBody = JText::_('COM_USERS_EMAIL_REGISTERED_WITH_ACTIVATION_BODY');
+			$emailBody = Text::_('COM_USERS_EMAIL_REGISTERED_WITH_ACTIVATION_BODY');
 			$emailBody = str_replace('{NAME}', $data['name'], $emailBody);
 			$emailBody = str_replace('{SITENAME}', $data['sitename'], $emailBody);
 			$emailBody = str_replace('{ACTIVATE}', $siteurl, $emailBody);
@@ -1881,11 +1883,11 @@ var contentbuilder = new function(){
 
 		} else {
 
-			$emailSubject = JText::_('COM_USERS_EMAIL_ACCOUNT_DETAILS');
+			$emailSubject = Text::_('COM_USERS_EMAIL_ACCOUNT_DETAILS');
 			$emailSubject = str_replace('{NAME}', $data['name'], $emailSubject);
 			$emailSubject = str_replace('{SITENAME}', $data['sitename'], $emailSubject);
 
-			$emailBody = JText::_('COM_USERS_EMAIL_REGISTERED_BODY');
+			$emailBody = Text::_('COM_USERS_EMAIL_REGISTERED_BODY');
 			$emailBody = str_replace('{NAME}', $data['name'], $emailBody);
 			$emailBody = str_replace('{SITENAME}', $data['sitename'], $emailBody);
 			$emailBody = str_replace('{SITEURL}', $data['siteurl'], $emailBody);
@@ -1904,11 +1906,11 @@ var contentbuilder = new function(){
 		if (($params->get('useractivation') < 2) && ($params->get('mail_to_admin') == 1))
 		{
 
-			$emailSubject = JText::_('COM_USERS_EMAIL_ACCOUNT_DETAILS');
+			$emailSubject = Text::_('COM_USERS_EMAIL_ACCOUNT_DETAILS');
 			$emailSubject = str_replace('{NAME}', $data['name'], $emailSubject);
 			$emailSubject = str_replace('{SITENAME}', $data['sitename'], $emailSubject);
 
-			$emailBodyAdmin = JText::_('COM_USERS_EMAIL_REGISTERED_NOTIFICATION_TO_ADMIN_BODY');
+			$emailBodyAdmin = Text::_('COM_USERS_EMAIL_REGISTERED_NOTIFICATION_TO_ADMIN_BODY');
 			$emailBodyAdmin = str_replace('{NAME}', $data['name'], $emailBodyAdmin);
 			$emailBodyAdmin = str_replace('{USERNAME}', $data['username'], $emailBodyAdmin);
 			$emailBodyAdmin = str_replace('{SITEURL}', $data['siteurl'], $emailBodyAdmin);
@@ -1927,7 +1929,7 @@ var contentbuilder = new function(){
 			}
 			catch (RuntimeException $e)
 			{
-				$this->setError(JText::sprintf('COM_USERS_DATABASE_ERROR', $e->getMessage()), 500);
+				$this->setError(Text::sprintf('COM_USERS_DATABASE_ERROR', $e->getMessage()), 500);
 
 				return false;
 			}
@@ -1940,7 +1942,7 @@ var contentbuilder = new function(){
 				// Check for an error.
 				if ($return !== true)
 				{
-					$this->setError(JText::_('COM_USERS_REGISTRATION_ACTIVATION_NOTIFY_SEND_MAIL_FAILED'));
+					$this->setError(Text::_('COM_USERS_REGISTRATION_ACTIVATION_NOTIFY_SEND_MAIL_FAILED'));
 
 					return false;
 				}
@@ -1949,23 +1951,23 @@ var contentbuilder = new function(){
 
 		if ($useractivation == 0)
 		{
-			Factory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_SAVE_SUCCESS'));
+			Factory::getApplication()->enqueueMessage(Text::_('COM_USERS_REGISTRATION_SAVE_SUCCESS'));
 		}
 		elseif ($useractivation == 1)
 		{
-			Factory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_COMPLETE_ACTIVATE'));
+			Factory::getApplication()->enqueueMessage(Text::_('COM_USERS_REGISTRATION_COMPLETE_ACTIVATE'));
 		}
 		else
 		{
-			Factory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_COMPLETE_VERIFY'));
+			Factory::getApplication()->enqueueMessage(Text::_('COM_USERS_REGISTRATION_COMPLETE_VERIFY'));
 		}
 
 		// Check for an error.
 		if ($return !== true) {
 
-			Factory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_SEND_MAIL_FAILED'), 'error');
+			Factory::getApplication()->enqueueMessage(Text::_('COM_USERS_REGISTRATION_SEND_MAIL_FAILED'), 'error');
 
-			$this->setError(JText::_('COM_USERS_REGISTRATION_SEND_MAIL_FAILED'));
+			$this->setError(Text::_('COM_USERS_REGISTRATION_SEND_MAIL_FAILED'));
 
 			// Send a system message to administrators receiving system mails
 			$db = Factory::getContainer()->get(DatabaseInterface::class);
@@ -1985,7 +1987,7 @@ var contentbuilder = new function(){
         		$___jdate = $jdate->toSql();
 
                 foreach ($sendEmail as $userid) {
-					$messages[] = "(".$userid.", ".$userid.", '".$___jdate."', '".JText::_('COM_USERS_MAIL_SEND_FAILURE_SUBJECT')."', '".JText::sprintf('COM_USERS_MAIL_SEND_FAILURE_BODY', $return, $data['username'])."')";
+					$messages[] = "(".$userid.", ".$userid.", '".$___jdate."', '".Text::_('COM_USERS_MAIL_SEND_FAILURE_SUBJECT')."', '".Text::sprintf('COM_USERS_MAIL_SEND_FAILURE_BODY', $return, $data['username'])."')";
 				}
 				$q .= implode(',', $messages);
 				$db->setQuery($q);
@@ -2014,7 +2016,7 @@ var contentbuilder = new function(){
             $fromname 		= $mainframe->getCfg( 'fromname' );
             $siteURL		= JURI::base();
 
-            $subject 	= sprintf ( JText::_( 'Account details for' ), $name, $sitename);
+            $subject 	= sprintf ( Text::_( 'Account details for' ), $name, $sitename);
             $subject 	= html_entity_decode($subject, ENT_QUOTES);
 
             $siteurl_ = $siteURL."index.php?option=com_user&task=activate&activation=".$user->get('activation');
@@ -2023,9 +2025,9 @@ var contentbuilder = new function(){
             }
             
             if ( $useractivation == 1 ){
-                    $message = sprintf ( JText::_( 'SEND_MSG_ACTIVATE' ), $name, $sitename, $siteurl_, $siteURL, $username, $password);
+                    $message = sprintf ( Text::_( 'SEND_MSG_ACTIVATE' ), $name, $sitename, $siteurl_, $siteURL, $username, $password);
             } else {
-                    $message = sprintf ( JText::_( 'SEND_MSG' ), $name, $sitename, $siteURL);
+                    $message = sprintf ( Text::_( 'SEND_MSG' ), $name, $sitename, $siteURL);
             }
 
             $message = html_entity_decode($message, ENT_QUOTES);
@@ -2046,7 +2048,7 @@ var contentbuilder = new function(){
             JUtility::sendMail($mailfrom, $fromname, $email, $subject, $message);
 
             // Send notification to all administrators
-            $subject2 = sprintf ( JText::_( 'Account details for' ), $name, $sitename);
+            $subject2 = sprintf ( Text::_( 'Account details for' ), $name, $sitename);
             $subject2 = html_entity_decode($subject2, ENT_QUOTES);
 
             // get superadministrators id
@@ -2054,7 +2056,7 @@ var contentbuilder = new function(){
             {
                     if ($row->sendEmail)
                     {
-                            $message2 = sprintf ( JText::_( 'SEND_MSG_ADMIN' ), $row->name, $sitename, $name, $email, $username);
+                            $message2 = sprintf ( Text::_( 'SEND_MSG_ADMIN' ), $row->name, $sitename, $name, $email, $username);
                             $message2 = html_entity_decode($message2, ENT_QUOTES);
                             JUtility::sendMail($mailfrom, $fromname, $row->email, $subject2, $message2);
                     }
@@ -2070,14 +2072,14 @@ var contentbuilder = new function(){
             $this->_data = $this->_getList($query, 0, 1);
 
             if(!count($this->_data)){
-	            throw new Exception(JText::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+	            throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
             }
 
             foreach($this->_data As $data){
                 if(!$this->frontend && $data->display_in == 0){
-	                throw new Exception(JText::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+	                throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                 }else if($this->frontend && $data->display_in == 1){
-	                throw new Exception(JText::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+	                throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                 }
                 $data->form_id = $this->_id;
                 if($data->type && $data->reference_id){

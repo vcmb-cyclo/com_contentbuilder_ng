@@ -7,10 +7,10 @@
 */
 
 // no direct access
+defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
-
-defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -28,9 +28,9 @@ class ContentbuilderViewForms extends CBView
         ';
         echo '<link rel="stylesheet" href="'.JURI::root(true).'/administrator/components/com_contentbuilder/views/bluestork.fix.css" type="text/css" />';
 
-	    JToolBarHelper::title(   'ContentBuilder :: ' . JText::_( 'COM_CONTENTBUILDER_FORMS' ) . '</span>', 'logo_left.png' );
+	    JToolBarHelper::title(   'ContentBuilder :: ' . Text::_( 'COM_CONTENTBUILDER_FORMS' ) . '</span>', 'logo_left.png' );
 	    JToolBarHelper::addNew();
-	    JToolBarHelper::custom('copy', 'copy', '', JText::_('COM_CONTENTBUILDER_COPY'));
+	    JToolBarHelper::custom('copy', 'copy', '', Text::_('COM_CONTENTBUILDER_COPY'));
 	    JToolBarHelper::editList();
         JToolBarHelper::deleteList();
 	    JToolBarHelper::preferences('com_contentbuilder');

@@ -8,6 +8,8 @@
  */
 defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Language\Text;
+
 jimport('joomla.html.html');
 jimport('joomla.form.formfield');
 
@@ -36,7 +38,7 @@ class JFormFieldCbfilter extends JFormField {
 		}
 		else
 		{
-			$out .= '<br/><br/>'.JText::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST');
+			$out .= '<br/><br/>'.Text::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST');
 		}
 		$out .= '</div>';
 		$out .= '
@@ -48,7 +50,7 @@ class JFormFieldCbfilter extends JFormField {
                 document.getElementById("'.$this->id.'").value = form_id;
                 
                 if(curr_form_id != form_id){
-                    document.getElementById("cbElementsWrapper").innerHTML = "'.addslashes(JText::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST')).'";
+                    document.getElementById("cbElementsWrapper").innerHTML = "'.addslashes(Text::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST')).'";
                     document.getElementById("jform_params_cb_list_filterhidden").value = "";
                     document.getElementById("jform_params_cb_list_orderhidden").value = "";
                 }
@@ -81,7 +83,7 @@ class JFormFieldCbfilter extends JFormField {
 
                 function contentbuilder_setFormId(form_id){
                     document.getElementById("'.$this->id.'").value = form_id;
-                    document.getElementById("cbElementsWrapper").innerHTML = "'.addslashes(JText::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST')).'";
+                    document.getElementById("cbElementsWrapper").innerHTML = "'.addslashes(Text::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST')).'";
                     document.getElementById("jform_params_cb_list_filterhidden").value = "";
                     document.getElementById("jform_params_cb_list_orderhidden").value = "";
                 }

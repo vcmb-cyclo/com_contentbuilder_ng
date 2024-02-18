@@ -6,11 +6,12 @@
  * @license     GNU/GPL
 */
 
-use Joomla\CMS\Factory;
-use Joomla\Database\DatabaseInterface;
-
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
+
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
+use Joomla\CMS\Language\Text;
 
 jimport( 'joomla.plugin.plugin' );
 
@@ -38,7 +39,7 @@ class plgContentbuilder_listactionTrash extends JPlugin
                 $db->execute();
             }
             
-            JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_TRASH_SUCCESSFULL'));
+            JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_TRASH_SUCCESSFULL'));
         
             return ''; // no error
         }

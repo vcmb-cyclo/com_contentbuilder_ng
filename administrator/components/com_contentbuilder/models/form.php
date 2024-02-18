@@ -13,6 +13,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use \Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Language\Text;
 
 JHTML::_('behavior.keepalive');
 
@@ -404,7 +405,7 @@ class ContentbuilderModelForm extends CBModel
         if($data->type && $data->reference_id){
             $data->form = contentbuilder::getForm($data->type, $data->reference_id);
             if(!$data->form->exists){
-	            Factory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 'error');
+	            Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 'error');
                 JFactory::getApplication()->redirect('index.php?option=com_contentbuilder&controller=forms&limitstart='.$this->getState('limitstart',0));
             }
             if(isset($data->form->properties) && isset($data->form->properties->name)){
@@ -475,7 +476,7 @@ class ContentbuilderModelForm extends CBModel
         for ($i = 0, $n = count($options); $i < $n; $i++) {
             // Translate ROOT
             if ($options[$i]->level == 0) {
-                $options[$i]->text = JText::_('JGLOBAL_ROOT_PARENT');
+                $options[$i]->text = Text::_('JGLOBAL_ROOT_PARENT');
             }
 
             $options[$i]->text = str_repeat('- ', $options[$i]->level) . $options[$i]->text;
@@ -484,7 +485,7 @@ class ContentbuilderModelForm extends CBModel
         if (isset($row) && !isset($options[0])) {
             if ($row->parent_id == '1') {
                 $parent = new stdClass();
-                $parent->text = JText::_('JGLOBAL_ROOT_PARENT');
+                $parent->text = Text::_('JGLOBAL_ROOT_PARENT');
                 array_unshift($options, $parent);
             }
         }
@@ -608,7 +609,7 @@ class ContentbuilderModelForm extends CBModel
                 $tmp_upload_directory = '{CBSite}' . DS . 'media'.DS.'contentbuilder'.DS.'upload';
             }
             
-            JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' ('.DS.'media'.DS.'contentbuilder'.DS.'upload'.')', 'warning');
+            JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' ('.DS.'media'.DS.'contentbuilder'.DS.'upload'.')', 'warning');
         }
         
         if( isset($upl_ex[1]) ){
@@ -641,7 +642,7 @@ class ContentbuilderModelForm extends CBModel
         $data['show_all_languages_fe'] = CBRequest::getInt('show_all_languages_fe', 0);
         
         if(!$data['show_all_languages_fe'] && !$data['default_lang_code_ignore']){
-            JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_LANGUAGE_WARNING'), 'warning');
+            JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_LANGUAGE_WARNING'), 'warning');
         }
         
         #### PERMISSIONS
@@ -829,7 +830,7 @@ class ContentbuilderModelForm extends CBModel
         $data['act_as_registration'] = CBRequest::getInt('act_as_registration',0);
         if($data['edit_by_type'] && $data['act_as_registration']){
             $data['act_as_registration'] = 0;
-            JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_ACT_AS_REGISTRATION_WARNING'), 'warning');
+            JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ACT_AS_REGISTRATION_WARNING'), 'warning');
         }
         
         if($data['act_as_registration'] && ( 
@@ -840,7 +841,7 @@ class ContentbuilderModelForm extends CBModel
                 !$data['registration_password_field'] ||
                 !$data['registration_password_repeat_field']
         ) ){
-            JFactory::getApplication()->enqueueMessage(JText::_('COM_CONTENTBUILDER_ACT_AS_REGISTRATION_MISSING_FIELDS_WARNING'), 'warning');
+            JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ACT_AS_REGISTRATION_MISSING_FIELDS_WARNING'), 'warning');
         }
         
         $data['email_notifications'] = CBRequest::getInt('email_notifications',0);

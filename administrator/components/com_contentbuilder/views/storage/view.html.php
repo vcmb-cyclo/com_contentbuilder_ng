@@ -7,10 +7,10 @@
 */
 
 // no direct access
+defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
-
-defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -42,23 +42,23 @@ class ContentbuilderViewStorage extends CBView
         $pagination   = $this->get('Pagination');
         $isNew        = ($form->id < 1);
 
-        $text = $isNew ? JText::_( 'COM_CONTENTBUILDER_NEW' ) : JText::_( 'COM_CONTENTBUILDER_EDIT' );
+        $text = $isNew ? Text::_( 'COM_CONTENTBUILDER_NEW' ) : Text::_( 'COM_CONTENTBUILDER_EDIT' );
 
-	    JToolBarHelper::title(   'ContentBuilder :: ' . ($isNew ? JText::_( 'COM_CONTENTBUILDER_STORAGES' ) : $form->title) .' : <small><small>[ ' . $text.' ]</small></small></span>', 'logo_left.png' );
+	    JToolBarHelper::title(   'ContentBuilder :: ' . ($isNew ? Text::_( 'COM_CONTENTBUILDER_STORAGES' ) : $form->title) .' : <small><small>[ ' . $text.' ]</small></small></span>', 'logo_left.png' );
         
         JToolBarHelper::apply();
         JToolBarHelper::save();
         
         if(version_compare(CBJOOMLAVERSION, '3.0', '<')){
-            JToolBarHelper::customX('saveNew', 'save', '', JText::_('COM_CONTENTBUILDER_SAVENEW'), false);
-            JToolBarHelper::customX('listpublish', 'publish', '', JText::_('COM_CONTENTBUILDER_PUBLISH'), false);
-            JToolBarHelper::customX('listunpublish', 'unpublish', '', JText::_('COM_CONTENTBUILDER_UNPUBLISH'), false);
-            JToolBarHelper::customX('listdelete', 'delete', '', JText::_('COM_CONTENTBUILDER_DELETE_FIELDS'), false);
+            JToolBarHelper::customX('saveNew', 'save', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
+            JToolBarHelper::customX('listpublish', 'publish', '', Text::_('COM_CONTENTBUILDER_PUBLISH'), false);
+            JToolBarHelper::customX('listunpublish', 'unpublish', '', Text::_('COM_CONTENTBUILDER_UNPUBLISH'), false);
+            JToolBarHelper::customX('listdelete', 'delete', '', Text::_('COM_CONTENTBUILDER_DELETE_FIELDS'), false);
         } else {
-            JToolBarHelper::custom('saveNew', 'save', '', JText::_('COM_CONTENTBUILDER_SAVENEW'), false);
-            JToolBarHelper::custom('listpublish', 'publish', '', JText::_('COM_CONTENTBUILDER_PUBLISH'), false);
-            JToolBarHelper::custom('listunpublish', 'unpublish', '', JText::_('COM_CONTENTBUILDER_UNPUBLISH'), false);
-            JToolBarHelper::custom('listdelete', 'delete', '', JText::_('COM_CONTENTBUILDER_DELETE_FIELDS'), false);
+            JToolBarHelper::custom('saveNew', 'save', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
+            JToolBarHelper::custom('listpublish', 'publish', '', Text::_('COM_CONTENTBUILDER_PUBLISH'), false);
+            JToolBarHelper::custom('listunpublish', 'unpublish', '', Text::_('COM_CONTENTBUILDER_UNPUBLISH'), false);
+            JToolBarHelper::custom('listdelete', 'delete', '', Text::_('COM_CONTENTBUILDER_DELETE_FIELDS'), false);
         }
         
         //JToolBarHelper::deleteList();

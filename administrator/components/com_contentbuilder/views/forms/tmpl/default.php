@@ -7,6 +7,8 @@
 */
 
 defined('_JEXEC') or die('Restricted access');
+use Joomla\CMS\Language\Text;
+
 ?>
 <style type="text/css">
     .cbPagesCounter{
@@ -51,9 +53,9 @@ if( typeof Joomla != 'undefined' ){
 <form action="index.php?option=com_contentbuilder&amp;controller=forms" method="post" name="adminForm" id="adminForm">
 
 <div id="editcell">
-    <label for="filter_tag"><?php echo JText::_( 'COM_CONTENTBUILDER_FILTER_TAG' ); ?>:</label>
+    <label for="filter_tag"><?php echo Text::_( 'COM_CONTENTBUILDER_FILTER_TAG' ); ?>:</label>
     <select class="form-select-sm" id="filter_tag" name="filter_tag" onchange="document.adminForm.submit();">
-        <option value=""> - <?php echo htmlentities(JText::_('COM_CONTENTBUILDER_FILTER_TAG_ALL'), ENT_QUOTES, 'UTF-8')?> - </option>
+        <option value=""> - <?php echo htmlentities(Text::_('COM_CONTENTBUILDER_FILTER_TAG_ALL'), ENT_QUOTES, 'UTF-8')?> - </option>
     <?php
     foreach($this->tags As $tag){
     ?>
@@ -68,32 +70,32 @@ if( typeof Joomla != 'undefined' ){
     <thead>
         <tr>
             <th width="5">
-                <?php echo JText::_( 'COM_CONTENTBUILDER_ID' ); ?>
+                <?php echo Text::_( 'COM_CONTENTBUILDER_ID' ); ?>
             </th>
             <th width="20">
                 <input type="checkbox" name="toggle" value="" onclick="<?php echo CBCompat::getCheckAll($this->items); ?>" />
             </th>
             <th>
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_VIEW_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_VIEW_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th>
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_TAG' ), 'tag', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_TAG' ), 'tag', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th>
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_FORM_SOURCE' ), 'title', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_FORM_SOURCE' ), 'title', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th>
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_TYPE' ), 'type', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_TYPE' ), 'type', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th>
-                <?php echo JHTML::_('grid.sort', JText::_( 'COM_CONTENTBUILDER_DISPLAY' ), 'display_in', $this->lists['order_Dir'], $this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_DISPLAY' ), 'display_in', $this->lists['order_Dir'], $this->lists['order'] ); ?>
             </th>
             <th width="120">
-                <?php echo JHTML::_('grid.sort',   JText::_( 'COM_CONTENTBUILDER_ORDERBY') , 'ordering', 'desc', @$this->lists['order'] ); ?>
+                <?php echo JHTML::_('grid.sort',   Text::_( 'COM_CONTENTBUILDER_ORDERBY') , 'ordering', 'desc', @$this->lists['order'] ); ?>
                 <?php // TODO: change to draganddrop if ($this->ordering) echo JHTML::_('grid.order',  $this->items ); ?>
             </th>
             <th width="5">
-                <?php echo JText::_( 'COM_CONTENTBUILDER_PUBLISHED' ); ?>
+                <?php echo Text::_( 'COM_CONTENTBUILDER_PUBLISHED' ); ?>
             </th>
         </tr>
     </thead>
@@ -127,7 +129,7 @@ if( typeof Joomla != 'undefined' ){
                 <a href="<?php echo $link; ?>"><?php echo $row->type; ?></a>
             </td>
             <td>
-                <a href="<?php echo $link; ?>"><?php echo $row->display_in == 0 ? JText::_('COM_CONTENTBUILDER_DISPLAY_FRONTEND') : ( $row->display_in == 1 ? JText::_('COM_CONTENTBUILDER_DISPLAY_BACKEND') : JText::_('COM_CONTENTBUILDER_DISPLAY_BOTH') ) ; ?></a>
+                <a href="<?php echo $link; ?>"><?php echo $row->display_in == 0 ? Text::_('COM_CONTENTBUILDER_DISPLAY_FRONTEND') : ( $row->display_in == 1 ? Text::_('COM_CONTENTBUILDER_DISPLAY_BACKEND') : Text::_('COM_CONTENTBUILDER_DISPLAY_BOTH') ) ; ?></a>
             </td>
             <td class="order" nowrap="nowrap">
                 <span><?php echo $this->pagination->orderUpIcon( $i, true, 'orderup', 'Move Up', $this->ordering); ?></span>
@@ -149,7 +151,7 @@ if( typeof Joomla != 'undefined' ){
                         <div class="cbPagesCounter">
 	                        <?php echo $this->pagination->getPagesCounter(); ?>
 	                        <?php
-	                        echo '<span>'.JText::_('COM_CONTENTBUILDER_DISPLAY_NUM') . '&nbsp;</span>';
+	                        echo '<span>'.Text::_('COM_CONTENTBUILDER_DISPLAY_NUM') . '&nbsp;</span>';
 	                        echo '<div style="display:inline-block;">'.$this->pagination->getLimitBox().'</div>';
 	                        ?>
                         </div>

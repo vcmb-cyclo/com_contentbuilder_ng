@@ -7,10 +7,10 @@
 */
 
 // No direct access
+defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
-
-defined( '_JEXEC' ) or die( 'Restricted access' );
+use Joomla\CMS\Language\Text;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -236,7 +236,7 @@ class ContentbuilderModelVerify extends CBModel
 
                         if($verify_result[0] === false){
 
-                            $msg = JText::_('COM_CONTENTBUILDER_VERIFICATION_FAILED');
+                            $msg = Text::_('COM_CONTENTBUILDER_VERIFICATION_FAILED');
 
                         }else{
 
@@ -252,7 +252,7 @@ class ContentbuilderModelVerify extends CBModel
                                 }
                                 else
                                 {
-                                    $msg = JText::_('COM_CONTENTBUILDER_VERIFICATION_SUCCESS');
+                                    $msg = Text::_('COM_CONTENTBUILDER_VERIFICATION_SUCCESS');
                                 }
                             }
 
@@ -349,7 +349,7 @@ class ContentbuilderModelVerify extends CBModel
                 }
                 else
                 {
-                    $msg = JText::_('COM_CONTENTBUILDER_VERIFICATION_NOT_EXECUTED');
+                    $msg = Text::_('COM_CONTENTBUILDER_VERIFICATION_NOT_EXECUTED');
                 }
 
 	            Factory::getApplication()->enqueueMessage($msg, 'warning');
@@ -393,7 +393,7 @@ class ContentbuilderModelVerify extends CBModel
 
 	    // Check for a valid user id.
 	    if (!$userId) {
-		    throw new Exception(JText::_('COM_USERS_ACTIVATION_TOKEN_NOT_FOUND'), 500);
+		    throw new Exception(Text::_('COM_USERS_ACTIVATION_TOKEN_NOT_FOUND'), 500);
 	    }
 
 	    // Load the users plugin group.
@@ -409,7 +409,7 @@ class ContentbuilderModelVerify extends CBModel
 
 		// Store the user object.
 		if (!$user->save()) {
-			throw new Exception(JText::sprintf('COM_USERS_REGISTRATION_ACTIVATION_SAVE_FAILED', $user->getError()), 500);
+			throw new Exception(Text::sprintf('COM_USERS_REGISTRATION_ACTIVATION_SAVE_FAILED', $user->getError()), 500);
 		}
 
 	    $params = JComponentHelper::getParams('com_users');
@@ -424,7 +424,7 @@ class ContentbuilderModelVerify extends CBModel
 
 	    $sendpassword = $params->get('sendpassword', 1);
 
-	    $emailSubject = JText::sprintf(
+	    $emailSubject = Text::sprintf(
 		    'COM_USERS_EMAIL_ACCOUNT_DETAILS',
 		    $data['name'],
 		    $data['sitename']
@@ -432,7 +432,7 @@ class ContentbuilderModelVerify extends CBModel
 
 	    if ($sendpassword)
 	    {
-		    $emailBody = JText::sprintf(
+		    $emailBody = Text::sprintf(
 			    'COM_USERS_EMAIL_REGISTERED_BODY',
 			    $data['name'],
 			    $data['sitename'],
@@ -443,7 +443,7 @@ class ContentbuilderModelVerify extends CBModel
 	    }
 	    else
 	    {
-		    $emailBody = JText::sprintf(
+		    $emailBody = Text::sprintf(
 			    'COM_USERS_EMAIL_REGISTERED_BODY_NOPW',
 			    $data['name'],
 			    $data['sitename'],
@@ -455,7 +455,7 @@ class ContentbuilderModelVerify extends CBModel
 		// Send the registration email.
 		$return = JFactory::getMailer()->sendMail($data['mailfrom'], $data['fromname'], $data['email'], $emailSubject, $emailBody);
 
-		JFactory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_ADMINACTIVATE_SUCCESS'));
+		JFactory::getApplication()->enqueueMessage(Text::_('COM_USERS_REGISTRATION_ADMINACTIVATE_SUCCESS'));
 	    JFactory::getApplication()->redirect(JRoute::_('index.php?option=com_users', false));
     }
     
@@ -478,7 +478,7 @@ class ContentbuilderModelVerify extends CBModel
 
         // Check for a valid user id.
         if (!$userId) {
-	        throw new Exception(JText::_('COM_USERS_ACTIVATION_TOKEN_NOT_FOUND'), 500);
+	        throw new Exception(Text::_('COM_USERS_ACTIVATION_TOKEN_NOT_FOUND'), 500);
         }
 
         // Load the users plugin group.
@@ -512,13 +512,13 @@ class ContentbuilderModelVerify extends CBModel
 		    $data['mailfrom'] = $config->get('mailfrom');
 		    $data['sitename'] = $config->get('sitename');
 		    $user->setParam('activate', 1);
-		    $emailSubject = JText::sprintf(
+		    $emailSubject = Text::sprintf(
 			    'COM_USERS_EMAIL_ACTIVATE_WITH_ADMIN_ACTIVATION_SUBJECT',
 			    $data['name'],
 			    $data['sitename']
 		    );
 
-		    $emailBody = JText::sprintf(
+		    $emailBody = Text::sprintf(
 			    'COM_USERS_EMAIL_ACTIVATE_WITH_ADMIN_ACTIVATION_BODY',
 			    $data['sitename'],
 			    $data['name'],
@@ -541,7 +541,7 @@ class ContentbuilderModelVerify extends CBModel
 		    }
 		    catch (RuntimeException $e)
 		    {
-			    $this->setError(JText::sprintf('COM_USERS_DATABASE_ERROR', $e->getMessage()), 500);
+			    $this->setError(Text::sprintf('COM_USERS_DATABASE_ERROR', $e->getMessage()), 500);
 
 			    return false;
 		    }
@@ -558,14 +558,14 @@ class ContentbuilderModelVerify extends CBModel
 				    // Check for an error.
 				    if ($return !== true)
 				    {
-					    $this->setError(JText::_('COM_USERS_REGISTRATION_ACTIVATION_NOTIFY_SEND_MAIL_FAILED'));
+					    $this->setError(Text::_('COM_USERS_REGISTRATION_ACTIVATION_NOTIFY_SEND_MAIL_FAILED'));
 
 					    return false;
 				    }
 			    }
 		    }
 
-		    JFactory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_VERIFY_SUCCESS'));
+		    JFactory::getApplication()->enqueueMessage(Text::_('COM_USERS_REGISTRATION_VERIFY_SUCCESS'));
 	    }
 	    // Admin activation is on and admin is activating the account
 	    elseif (($userParams->get('useractivation') == 2) && $user->getParam('activate', 0))
@@ -580,13 +580,13 @@ class ContentbuilderModelVerify extends CBModel
 		    $data['mailfrom'] = $config->get('mailfrom');
 		    $data['sitename'] = $config->get('sitename');
 		    $data['siteurl'] = JUri::root();
-		    $emailSubject = JText::sprintf(
+		    $emailSubject = Text::sprintf(
 			    'COM_USERS_EMAIL_ACTIVATED_BY_ADMIN_ACTIVATION_SUBJECT',
 			    $data['name'],
 			    $data['sitename']
 		    );
 
-		    $emailBody = JText::sprintf(
+		    $emailBody = Text::sprintf(
 			    'COM_USERS_EMAIL_ACTIVATED_BY_ADMIN_ACTIVATION_BODY',
 			    $data['name'],
 			    $data['siteurl'],
@@ -598,25 +598,25 @@ class ContentbuilderModelVerify extends CBModel
 		    // Check for an error.
 		    if ($return !== true)
 		    {
-			    $this->setError(JText::_('COM_USERS_REGISTRATION_ACTIVATION_NOTIFY_SEND_MAIL_FAILED'));
+			    $this->setError(Text::_('COM_USERS_REGISTRATION_ACTIVATION_NOTIFY_SEND_MAIL_FAILED'));
 
 			    return false;
 		    }
 
-		    JFactory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_VERIFY_SUCCESS'));
+		    JFactory::getApplication()->enqueueMessage(Text::_('COM_USERS_REGISTRATION_VERIFY_SUCCESS'));
 	    }
 	    else {
 
 		    $user->set( 'activation', '' );
 		    $user->set( 'block', '0' );
 
-		    JFactory::getApplication()->enqueueMessage(JText::_('COM_USERS_REGISTRATION_SAVE_SUCCESS'));
+		    JFactory::getApplication()->enqueueMessage(Text::_('COM_USERS_REGISTRATION_SAVE_SUCCESS'));
 
 	    }
 
         // Store the user object.
         if (!$user->save()) {
-	        throw new Exception(JText::sprintf('COM_USERS_REGISTRATION_ACTIVATION_SAVE_FAILED', $user->getError()), 500);
+	        throw new Exception(Text::sprintf('COM_USERS_REGISTRATION_ACTIVATION_SAVE_FAILED', $user->getError()), 500);
         }
 
         return true;
