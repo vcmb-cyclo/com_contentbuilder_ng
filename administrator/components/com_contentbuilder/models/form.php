@@ -12,8 +12,9 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
-use \Joomla\Utilities\ArrayHelper;
+use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Language\Text;
+use Joomla\Filesystem\Folder;
 
 JHTML::_('behavior.keepalive');
 
@@ -587,15 +588,15 @@ class ContentbuilderModelForm extends CBModel
         $protect = $data['protect_upload_directory'];
         
         // if not exissting, we create the fallback directory
-        if(!JFolder::exists($upload_directory)){
+        if(!is_dir($upload_directory)){
                     
-            if(!JFolder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')){
-                JFolder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder');
+            if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')){
+                Folder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder');
                 JFile::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'index.html', $def = '');
             }
 
-            if(!JFolder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'upload')){
-                JFolder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'upload');
+            if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'upload')){
+                Folder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'upload');
                 JFile::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'upload' . DS . 'index.html', $def = '');
 
                 if($protect){
@@ -616,11 +617,11 @@ class ContentbuilderModelForm extends CBModel
             $tokens = '|'.$upl_ex[1];
         }
         
-        if($data['protect_upload_directory'] && JFolder::exists(contentbuilder::makeSafeFolder($data['upload_directory']))){
+        if($data['protect_upload_directory'] && is_dir(contentbuilder::makeSafeFolder($data['upload_directory']))){
             if(!JFile::exists(contentbuilder::makeSafeFolder($data['upload_directory']) . DS . 'index.html')) JFile::write(contentbuilder::makeSafeFolder($data['upload_directory']) . DS . 'index.html', $def = '');
         }
         
-        if($data['protect_upload_directory'] && JFolder::exists(contentbuilder::makeSafeFolder($data['upload_directory']))){
+        if($data['protect_upload_directory'] && is_dir(contentbuilder::makeSafeFolder($data['upload_directory']))){
             
             if(!JFile::exists(contentbuilder::makeSafeFolder($data['upload_directory']) . DS . '.htaccess')) JFile::write(contentbuilder::makeSafeFolder($data['upload_directory']) . DS . '.htaccess', $def = 'deny from all');
         
@@ -903,8 +904,7 @@ class ContentbuilderModelForm extends CBModel
             $data['title'] = $form->form->getPageTitle();
         }
         
-        $last_update = Factory::getDate();
-        $last_update = CBCompat::toSql($last_update);
+        $last_update = Factory::getDate()->toSql();
         $data['last_update'] = $last_update;
 
         if (!$row->bind($data)) {

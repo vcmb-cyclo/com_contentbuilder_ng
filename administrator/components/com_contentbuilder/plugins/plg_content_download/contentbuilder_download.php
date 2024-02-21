@@ -12,6 +12,7 @@ defined( '_JEXEC' ) or die( 'Direct Access to this location is not allowed.' );
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
+use Joomla\Filesystem\Folder;
 
 if(!function_exists('cb_b64enc')){
     
@@ -169,19 +170,19 @@ class plgContentContentbuilder_download extends JPlugin {
             
         }
         
-        if(!JFolder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')) {
+        if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')) {
             JFolder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder');
         }
         
         if(!JFile::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'index.html')) JFile::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'index.html', $def = '');
         
-        if(!JFolder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins')) {
+        if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins')) {
             JFolder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins');
         }
         
         if(!JFile::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'index.html')) JFile::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'index.html', $def = '');
         
-        if(!JFolder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'download')) {
+        if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'download')) {
             JFolder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'download');
         }
         

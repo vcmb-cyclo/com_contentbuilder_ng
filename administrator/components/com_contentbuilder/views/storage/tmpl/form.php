@@ -189,7 +189,7 @@ echo $cbcompat->startPanel(Text::_( 'COM_CONTENTBUILDER_STORAGE' ), "tab0");
                         <?php
                         if(!$this->form->bytable){
                         ?>
-                        <input class="form-control form-control-sm w-100" type="text" id="name" name="name" value="<?php echo htmlentities($this->form->name, ENT_QUOTES, 'UTF-8'); ?>"/>
+                        <input class="form-control form-control-sm w-100" type="text" id="name" name="name" value="<?php echo htmlentities($this->form->name ?? '', ENT_QUOTES, 'UTF-8'); ?>"/>
                         <br/><br/>
                         <?php
                         } else {
@@ -235,7 +235,7 @@ echo $cbcompat->startPanel(Text::_( 'COM_CONTENTBUILDER_STORAGE' ), "tab0");
                 </tr>
                 <tr>
                     <td>
-                        <input class="form-control form-control-sm w-100" type="text" id="title" name="title" value="<?php echo htmlentities($this->form->title, ENT_QUOTES, 'UTF-8'); ?>"/>
+                        <input class="form-control form-control-sm w-100" type="text" id="title" name="title" value="<?php echo htmlentities($this->form->title ?? '', ENT_QUOTES, 'UTF-8'); ?>"/>
                     </td>
                 </tr>
                 <tr id="csvUploadHead">

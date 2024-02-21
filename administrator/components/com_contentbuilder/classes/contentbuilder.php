@@ -13,8 +13,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Editor\Editor;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
-
-jimport('joomla.filesystem.file');
+use Joomla\Filesystem\Folder;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder_helpers.php');
@@ -862,21 +861,21 @@ class contentbuilder{
         jimport('joomla.filesystem.file');
         jimport('joomla.filesystem.folder');
 
-        if(!JFolder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')){
+        if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')){
             JFolder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder');
         }
         
         $def = '';
         
         if(!JFile::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'index.html')) JFile::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'index.html', $def);
-        if(!JFolder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'types')){
+        if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'types')){
             JFolder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'types');
         }
         
         if(!JFile::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'types' . DS . 'index.html')) JFile::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'types' . DS . 'index.html', $def);
         
         $sourcePath = JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'types' . DS;
-        if (JFolder::exists($sourcePath) && @is_readable($sourcePath) && @is_dir($sourcePath) && $handle = @opendir($sourcePath)) {
+        if (is_dir($sourcePath) && @is_readable($sourcePath) && @is_dir($sourcePath) && $handle = @opendir($sourcePath)) {
             while (false !== ($file = @readdir($handle))) {
                 if ($file != "." && $file != ".." && strtolower($file) != 'index.html' && strtolower($file) != '.cvs' && strtolower($file) != '.svn') {
                     $exploded = explode('.', $file);

@@ -12,6 +12,8 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
+use Joomla\Filesystem\Folder;
+
 
 if( !defined( 'DS' ) ){
     define('DS', DIRECTORY_SEPARATOR);
@@ -36,7 +38,7 @@ class  plgSystemContentbuilder_system extends JPlugin
             $pluginParams = CBCompat::getPluginParams($this, 'system', 'contentbuilder_system');
 
             if($pluginParams->def('nocache', 1)){
-                CBCompat::setJoomlaConfig('config.caching', $this->caching);
+                Factory::getConfig()->set('config.caching', $this->caching);
             }
         }
         
@@ -75,7 +77,7 @@ class  plgSystemContentbuilder_system extends JPlugin
                     // KUNENA SUPPORT, REMOVES THE KUNENA SESSION IF EXISTING ON GROUP UPDATES
                     jimport('joomla.filesystem.folder');
                     $kill_kunena_session = false;
-                    if(JFolder::exists(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_kunena'.DS)){
+                    if(is_dir(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_kunena'.DS)){
                         $kill_kunena_session = true;
                     }
                     
@@ -252,12 +254,12 @@ class  plgSystemContentbuilder_system extends JPlugin
                 // managing published states
                 
                 $db = Factory::getContainer()->get(DatabaseInterface::class);
-                $date = Factory::getDate();
+                $date = Factory::getDate()->toSql();
                 
-                $db->setQuery("Update #__contentbuilder_records Set published = 1 Where is_future = 1 And publish_up <> '0000-00-00 00:00:00' And publish_up <= '".CBCompat::toSql($date)."'");
+                $db->setQuery("Update #__contentbuilder_records Set published = 1 Where is_future = 1 And publish_up <> '0000-00-00 00:00:00' And publish_up <= '".$date."'");
                 $db->execute();
                 
-                $db->setQuery("Update #__contentbuilder_records Set published = 0 Where publish_down <> '0000-00-00 00:00:00' And publish_down <= '".CBCompat::toSql($date)."'");
+                $db->setQuery("Update #__contentbuilder_records Set published = 0 Where publish_down <> '0000-00-00 00:00:00' And publish_down <= '".$date."'");
                 $db->execute();
                 
                 // published states END
@@ -293,7 +295,7 @@ class  plgSystemContentbuilder_system extends JPlugin
                 
                 if($pluginParams->def('nocache', 1)){
                     $this->caching = CBCompat::getJoomlaConfig('config.caching');
-                    CBCompat::setJoomlaConfig('config.caching', 0);
+                    Factory::getConfig()->set('config.caching', 0);
                 }
             }
              
@@ -522,8 +524,7 @@ class  plgSystemContentbuilder_system extends JPlugin
                     $lang->load('com_contentbuilder', JPATH_ADMINISTRATOR);
                 }
                 
-                $jdate = Factory::getDate();
-                $now   = CBCompat::toSql($jdate);
+                $now = Factory::getDate()->toSql();
                 
                 foreach($list As $data){
                 

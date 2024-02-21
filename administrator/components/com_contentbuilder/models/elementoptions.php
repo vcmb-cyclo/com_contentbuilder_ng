@@ -12,6 +12,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
+use Joomla\Filesystem\Folder;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -226,14 +227,14 @@ class ContentbuilderModelElementoptions extends CBModel
                 
                 $protect = $setup['protect_upload_directory'];
                 
-                if(!trim(CBRequest::getVar('upload_directory', '')) && !JFolder::exists($upload_directory)){
+                if(!trim(CBRequest::getVar('upload_directory', '')) && !is_dir($upload_directory)){
                     
-                    if(!JFolder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')){
+                    if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')){
                         JFolder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder');
                         JFile::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'index.html', $def = '');
                     }
                     
-                    if(!JFolder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'upload')){
+                    if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'upload')){
                         JFolder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'upload');
                         JFile::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'upload' . DS . 'index.html', $def = '');
                     }
@@ -251,7 +252,7 @@ class ContentbuilderModelElementoptions extends CBModel
                     
                     JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' ('.DS.'media'.DS.'contentbuilder'.DS.'upload'.')', 'warning');
                 
-                } else if(trim(CBRequest::getVar('upload_directory', '')) != '' && !JFolder::exists(contentbuilder::makeSafeFolder(CBRequest::getVar('upload_directory', '')))){
+                } else if(trim(CBRequest::getVar('upload_directory', '')) != '' && !is_dir(contentbuilder::makeSafeFolder(CBRequest::getVar('upload_directory', '')))){
                     
                     $upload_directory = contentbuilder::makeSafeFolder(CBRequest::getVar('upload_directory', ''));
                     
@@ -269,7 +270,7 @@ class ContentbuilderModelElementoptions extends CBModel
                     
                     JFactory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' ('.$upload_directory.')', 'warning');
                 
-                } else if(trim(CBRequest::getVar('upload_directory', '')) != '' && JFolder::exists(contentbuilder::makeSafeFolder(CBRequest::getVar('upload_directory', '')))){
+                } else if(trim(CBRequest::getVar('upload_directory', '')) != '' && is_dir(contentbuilder::makeSafeFolder(CBRequest::getVar('upload_directory', '')))){
                     
                     $upload_directory = contentbuilder::makeSafeFolder(CBRequest::getVar('upload_directory', ''));
                     
@@ -288,11 +289,11 @@ class ContentbuilderModelElementoptions extends CBModel
                    }
                 }
                 
-                if($protect && JFolder::exists($upload_directory)){
+                if($protect && is_dir($upload_directory)){
                     
                     JFile::write(contentbuilder::makeSafeFolder($upload_directory) . DS . '.htaccess', $def = 'deny from all');
                 
-                } else if(!$protect && JFolder::exists($upload_directory)){
+                } else if(!$protect && is_dir($upload_directory)){
                     if(JFile::exists(contentbuilder::makeSafeFolder($upload_directory) . DS . '.htaccess')){
                         JFile::delete(contentbuilder::makeSafeFolder($upload_directory) . DS . '.htaccess');
                     }
@@ -303,7 +304,7 @@ class ContentbuilderModelElementoptions extends CBModel
                 $hint          = CBRequest::getVar('hint','', 'POST', 'STRING', CBREQUEST_ALLOWHTML);
                 
                 $options = new stdClass();
-                $options->upload_directory = JFolder::exists($upload_directory) ? ($is_relative ? $tmp_upload_directory :  $upload_directory) . $tokens : '';
+                $options->upload_directory = is_dir($upload_directory) ? ($is_relative ? $tmp_upload_directory :  $upload_directory) . $tokens : '';
                 $options->allowed_file_extensions = CBRequest::getVar('allowed_file_extensions','');
                 $options->max_filesize = CBRequest::getVar('max_filesize','');
                 

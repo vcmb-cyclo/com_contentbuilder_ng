@@ -10,10 +10,10 @@
 /** ensure this file is being included by a parent file */
 defined( '_JEXEC' ) or die( 'Direct Access to this location is not allowed.' );
 use Joomla\CMS\Factory;
-use Joomla\CMS\Filesystem\Folder;
 use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Uri\Uri;
+use Joomla\Filesystem\Folder;
 
 if(!function_exists('cb_b64enc')){
 
@@ -137,19 +137,19 @@ class plgContentContentbuilder_image_scale extends JPlugin {
 
 		}
 
-		if(!Folder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')) {
+		if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')) {
 			Folder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder');
 		}
 
 		if(!File::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'index.html')) File::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'index.html', $def = '');
 
-		if(!Folder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins')) {
+		if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins')) {
 			Folder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins');
 		}
 
 		if(!File::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'index.html')) File::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'index.html', $def = '');
 
-		if(!Folder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale')) {
+		if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale')) {
 			Folder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale');
 		}
 
@@ -216,13 +216,13 @@ class plgContentContentbuilder_image_scale extends JPlugin {
 
 				if(!File::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale' . DS . 'index.html')) File::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale' . DS . 'index.html', $def = '');
 
-				if(!Folder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale' . DS . 'cache')) {
+				if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale' . DS . 'cache')) {
 					Folder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale' . DS . 'cache');
 				}
 
 				if(!File::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale' . DS . 'cache' . DS . 'index.html')) File::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale' . DS . 'cache' . DS . 'index.html', $def = '');
 
-				if(!Folder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale' . DS . 'cache' . DS . $form_id )) {
+				if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale' . DS . 'cache' . DS . $form_id )) {
 					Folder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale' . DS . 'cache' . DS . $form_id);
 				}
 
@@ -494,7 +494,7 @@ class plgContentContentbuilder_image_scale extends JPlugin {
 													$pathinfo = pathinfo($the_value);
 													$basename = basename($the_value, '.' . $pathinfo['extension']) . '_' . $width . 'x' . $height .  '_cbresized';
 
-													if ($folder && Folder::exists($folder)) {
+													if ($folder && is_dir($folder)) {
 														$filename = $folder . DS . $basename . image_type_to_extension($exif_type);
 													} else {
 														$filename = $pathinfo['dirname'] . DS . $basename . image_type_to_extension($exif_type);

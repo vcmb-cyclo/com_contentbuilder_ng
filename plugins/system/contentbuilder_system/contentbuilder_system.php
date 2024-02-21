@@ -37,7 +37,7 @@ class  plgSystemContentbuilder_system extends JPlugin
             $pluginParams = CBCompat::getPluginParams($this, 'system', 'contentbuilder_system');
 
             if($pluginParams->def('nocache', 1)){
-                CBCompat::setJoomlaConfig('config.caching', $this->caching);
+                Factory::getConfig()->set('config.caching', $this->caching);
             }
         }
         
@@ -75,7 +75,7 @@ class  plgSystemContentbuilder_system extends JPlugin
                     // KUNENA SUPPORT, REMOVES THE KUNENA SESSION IF EXISTING ON GROUP UPDATES
                     jimport('joomla.filesystem.folder');
                     $kill_kunena_session = false;
-                    if(JFolder::exists(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_kunena'.DS)){
+                    if(is_dir(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_kunena'.DS)){
                         $kill_kunena_session = true;
                     }
                     
@@ -293,7 +293,7 @@ class  plgSystemContentbuilder_system extends JPlugin
                 
                 if($pluginParams->def('nocache', 1)){
                     $this->caching = CBCompat::getJoomlaConfig('config.caching');
-                    CBCompat::setJoomlaConfig('config.caching', 0);
+                    Factory::getConfig()->set('config.caching', 0);
                 }
             }
              

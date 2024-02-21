@@ -16,7 +16,7 @@ use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Language\Text;
-
+use Joomla\Filesystem\Folder;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -103,7 +103,7 @@ class ContentbuilderModelEdit extends CBModel
         $parts = explode(DS, $endpath);
         $inner_path = '';
         foreach( $parts As $part ){
-            if( !JFolder::exists( $inner_path.$part ) ) {
+            if( !is_dir( $inner_path.$part ) ) {
                 $inner_path .= DS;
             }
             JFolder::create($inner_path.$part);

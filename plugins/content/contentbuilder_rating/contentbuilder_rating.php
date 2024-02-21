@@ -11,8 +11,8 @@
 defined( '_JEXEC' ) or die( 'Direct Access to this location is not allowed.' );
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\Filesystem\Folder;
 use Joomla\CMS\Filesystem\File;
+use Joomla\Filesystem\Folder;
 
 if(!function_exists('cb_b64enc')){
     
@@ -97,13 +97,13 @@ class plgContentContentbuilder_rating extends JPlugin {
             $article->cbrecord->record_id = $item->colRecord;
         }
         
-        if(!Folder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')) {
+        if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')) {
             Folder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder');
         }
         
         if(!File::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'index.html')) File::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'index.html', $def = '');
         
-        if(!Folder::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins')) {
+        if(!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins')) {
             Folder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins');
         }
         
