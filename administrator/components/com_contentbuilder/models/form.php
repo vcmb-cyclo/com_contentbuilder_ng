@@ -855,7 +855,7 @@ class ContentbuilderModelForm extends CBModel
         
         $data['config'] = cb_b64enc(serialize($config));
         
-        contentbuilder::createBackendMenuItem($form->id, $form->name, CBRequest::getInt('display_in',0));
+        //contentbuilder::createBackendMenuItem($form->id, $form->name, CBRequest::getInt('display_in',0));
 
         if(CBRequest::getBool('create_sample',false)){
             $data['details_template'] .= contentbuilder::createDetailsSample($form->id, $form->form, $data['theme_plugin']);
