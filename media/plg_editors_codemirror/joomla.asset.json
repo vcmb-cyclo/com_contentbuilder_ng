@@ -203,6 +203,13 @@
     },
     {
       "type": "script",
+      "name": "@codemirror/theme-one-dark",
+      "uri": "media/vendor/codemirror/js/codemirror-theme-one-dark.min.js",
+      "importmap": true,
+      "version": "6.1.2"
+    },
+    {
+      "type": "script",
       "name": "@codemirror/view",
       "uri": "media/vendor/codemirror/js/codemirror-view.min.js",
       "importmap": true,
@@ -352,7 +359,7 @@
       "name": "plg_editors_codemirror",
       "type": "style",
       "uri": "plg_editors_codemirror/codemirror.css",
-      "version": "bb6caa"
+      "version": "4f7fd0"
     },
     {
       "name": "codemirror",
@@ -388,6 +395,7 @@
         "@codemirror/lint",
         "@codemirror/search",
         "@codemirror/state",
+        "@codemirror/theme-one-dark",
         "@codemirror/view",
         "@lezer/common",
         "@lezer/css",

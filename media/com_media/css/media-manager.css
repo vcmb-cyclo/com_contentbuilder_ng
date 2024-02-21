@@ -249,6 +249,7 @@ html[dir="rtl"] .infobar-leave-active {
 .media-browser-item-info {
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 250px;
   padding: 0 2px;
   font-size: .9rem;
   line-height: 28px;
@@ -325,8 +326,7 @@ html[dir="rtl"] .infobar-leave-active {
   border: 1px solid hsl(var(--hue), 35%, 95%);
   box-shadow: 0 2px 10px -8px var(--template-bg-dark-50);
   border-radius: .25rem;
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
   top: 0;
 }
 
@@ -357,8 +357,11 @@ html[dir="rtl"] .infobar-leave-active {
 }
 
 .media-browser-actions-list .media-browser-actions-item-name {
+  text-overflow: ellipsis;
+  white-space: nowrap;
   margin-block-end: 3px;
   padding: 2px;
+  overflow: hidden;
 }
 
 .media-browser-actions-list button, .media-browser-actions-list a {

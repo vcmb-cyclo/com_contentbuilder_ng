@@ -100,8 +100,8 @@ class ContentbuilderModelForms extends CBModel
                 $element->form_id = $insertId;
                 $this->_db->insertObject('#__contentbuilder_list_states', $element);
             }
-            // XDA-Gil fix 'Copy of Form' in Component Menu in Backen CB View
-            // contentbuilder::createBackendMenuItem($insertId, $obj->name, true);
+            
+            contentbuilder::createBackendMenuItem($insertId, $obj->name, true);
         }
         
         $table->reorder();

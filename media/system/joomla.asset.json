@@ -281,18 +281,6 @@
       "version": "08e025"
     },
     {
-      "name": "messages",
-      "type": "script",
-      "uri": "system/messages.min.js",
-      "attributes": {
-        "type": "module"
-      },
-      "dependencies": [
-        "messages-legacy"
-      ],
-      "version": "7a5169"
-    },
-    {
       "name": "inlinehelp",
       "type": "script",
       "uri": "system/inlinehelp.min.js",
@@ -315,6 +303,18 @@
         "type": "module"
       },
       "version": "5fac85"
+    },
+    {
+      "name": "messages",
+      "type": "script",
+      "uri": "system/messages.min.js",
+      "attributes": {
+        "type": "module"
+      },
+      "dependencies": [
+        "messages-legacy"
+      ],
+      "version": "7a5169"
     },
     {
       "name": "searchtools",
@@ -341,12 +341,6 @@
       "version": "891646"
     },
     {
-      "name": "switcher",
-      "type": "style",
-      "uri": "system/fields/switcher.min.css",
-      "version": "541300"
-    },
-    {
       "name": "table.columns",
       "type": "script",
       "class": "TableColumnsAssetItem",
@@ -359,6 +353,12 @@
         "type": "module"
       },
       "version": "154f2f"
+    },
+    {
+      "name": "switcher",
+      "type": "style",
+      "uri": "system/fields/switcher.min.css",
+      "version": "541300"
     },
     {
       "name": "form.validate",
@@ -495,16 +495,16 @@
       "version": "57c6b1"
     },
     {
-      "name": "webcomponent.field-media",
-      "type": "style",
-      "uri": "system/fields/joomla-field-media.min.css",
-      "version": "fd7126"
-    },
-    {
       "name": "webcomponent.media-select",
       "type": "style",
       "uri": "system/fields/joomla-media-select.min.css",
       "version": "9d90ea"
+    },
+    {
+      "name": "webcomponent.field-media",
+      "type": "style",
+      "uri": "system/fields/joomla-field-media.min.css",
+      "version": "fd7126"
     },
     {
       "name": "webcomponent.media-select",

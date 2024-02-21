@@ -1,20 +1,10 @@
 {
   "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
   "name": "joomla",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "description": "Joomla CMS",
   "license": "GPL-2.0-or-later",
   "assets": [
-    {
-      "name": "es-module-shims",
-      "type": "script",
-      "uri": "vendor/es-module-shims/es-module-shims.min.js",
-      "attributes": {
-        "async": true
-      },
-      "package": "es-module-shims",
-      "version": "1.8.0"
-    },
     {
       "name": "diff",
       "type": "script",
@@ -24,6 +14,16 @@
       },
       "package": "diff",
       "version": "5.1.0"
+    },
+    {
+      "name": "es-module-shims",
+      "type": "script",
+      "uri": "vendor/es-module-shims/es-module-shims.min.js",
+      "attributes": {
+        "async": true
+      },
+      "package": "es-module-shims",
+      "version": "1.8.0"
     },
     {
       "name": "wcpolyfill",
@@ -48,6 +48,16 @@
       },
       "package": "accessibility",
       "version": "3.0.17"
+    },
+    {
+      "name": "short-and-sweet",
+      "type": "script",
+      "uri": "vendor/short-and-sweet/short-and-sweet.min.js",
+      "attributes": {
+        "defer": true
+      },
+      "package": "short-and-sweet",
+      "version": "1.0.4"
     },
     {
       "name": "awesomplete",
@@ -174,26 +184,6 @@
       "version": "5.2.0"
     },
     {
-      "name": "short-and-sweet",
-      "type": "script",
-      "uri": "vendor/short-and-sweet/short-and-sweet.min.js",
-      "attributes": {
-        "defer": true
-      },
-      "package": "short-and-sweet",
-      "version": "1.0.4"
-    },
-    {
-      "name": "hotkeysjs",
-      "type": "script",
-      "uri": "vendor/hotkeysjs/hotkeys.min.js",
-      "attributes": {
-        "defer": true
-      },
-      "package": "hotkeys-js",
-      "version": "3.12.0"
-    },
-    {
       "name": "jquery",
       "type": "script",
       "uri": "vendor/jquery/jquery.min.js",
@@ -209,6 +199,16 @@
       ],
       "package": "jquery-migrate",
       "version": "3.4.1"
+    },
+    {
+      "name": "hotkeysjs",
+      "type": "script",
+      "uri": "vendor/hotkeysjs/hotkeys.min.js",
+      "attributes": {
+        "defer": true
+      },
+      "package": "hotkeys-js",
+      "version": "3.12.0"
     },
     {
       "name": "webcomponent.joomla-alert",
@@ -279,6 +279,33 @@
       "version": "0.2.0"
     },
     {
+      "name": "chosen",
+      "type": "style",
+      "uri": "vendor/chosen/chosen.css",
+      "package": "chosen-js",
+      "version": "1.8.7"
+    },
+    {
+      "name": "chosen",
+      "type": "script",
+      "uri": "vendor/chosen/chosen.jquery.js",
+      "dependencies": [
+        "jquery"
+      ],
+      "package": "chosen-js",
+      "version": "1.8.7"
+    },
+    {
+      "name": "chosen",
+      "type": "preset",
+      "dependencies": [
+        "chosen#style",
+        "chosen#script"
+      ],
+      "package": "chosen-js",
+      "version": "1.8.7"
+    },
+    {
       "name": "minicolors",
       "type": "style",
       "uri": "vendor/minicolors/jquery.minicolors.css",
@@ -309,43 +336,6 @@
       "version": "2.3.6"
     },
     {
-      "name": "skipto",
-      "type": "script",
-      "uri": "vendor/skipto/skipto.min.js",
-      "attributes": {
-        "defer": true
-      },
-      "package": "skipto",
-      "version": "4.1.7"
-    },
-    {
-      "name": "chosen",
-      "type": "style",
-      "uri": "vendor/chosen/chosen.css",
-      "package": "chosen-js",
-      "version": "1.8.7"
-    },
-    {
-      "name": "chosen",
-      "type": "script",
-      "uri": "vendor/chosen/chosen.jquery.js",
-      "dependencies": [
-        "jquery"
-      ],
-      "package": "chosen-js",
-      "version": "1.8.7"
-    },
-    {
-      "name": "chosen",
-      "type": "preset",
-      "dependencies": [
-        "chosen#style",
-        "chosen#script"
-      ],
-      "package": "chosen-js",
-      "version": "1.8.7"
-    },
-    {
       "name": "metismenujs",
       "type": "script",
       "uri": "vendor/metismenujs/metismenujs.min.js",
@@ -354,6 +344,16 @@
       },
       "package": "metismenujs",
       "version": "1.4.0"
+    },
+    {
+      "name": "skipto",
+      "type": "script",
+      "uri": "vendor/skipto/skipto.min.js",
+      "attributes": {
+        "defer": true
+      },
+      "package": "skipto",
+      "version": "4.1.7"
     },
     {
       "name": "qrcode",
