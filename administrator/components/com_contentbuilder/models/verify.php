@@ -12,6 +12,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\User\UserFactoryInterface;
+use Joomla\CMS\Uri\Uri;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
@@ -124,7 +125,7 @@ class ContentbuilderModelVerify extends CBModel
             }
             
             if(intval($user_id) == 0){
-                JFactory::getApplication()->redirect('index.php?option=com_contentbuilder&lang='.CBRequest::getCmd('lang','').'&return='.  cb_b64enc(JURI::getInstance()->toString()).'&controller=edit&record_id=&id='.$id.'&rand='.rand(0,  getrandmax()));
+                JFactory::getApplication()->redirect('index.php?option=com_contentbuilder&lang='.CBRequest::getCmd('lang','').'&return='.  cb_b64enc(Uri::getInstance()->toString()).'&controller=edit&record_id=&id='.$id.'&rand='.rand(0,  getrandmax()));
             }
             
             $rec = $form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, $user_id, 0, -1, -1, -1, -1, array(), true, null);
@@ -135,7 +136,7 @@ class ContentbuilderModelVerify extends CBModel
             }
             
             if(!$form->getListRecordsTotal($ids)){
-                JFactory::getApplication()->redirect('index.php?option=com_contentbuilder&lang='.CBRequest::getCmd('lang','').'&return='.  cb_b64enc(JURI::getInstance()->toString()).'&controller=edit&record_id=&id='.$id.'&rand='.rand(0,  getrandmax()));
+                JFactory::getApplication()->redirect('index.php?option=com_contentbuilder&lang='.CBRequest::getCmd('lang','').'&return='.  cb_b64enc(Uri::getInstance()->toString()).'&controller=edit&record_id=&id='.$id.'&rand='.rand(0,  getrandmax()));
             }
         }
         
@@ -183,18 +184,18 @@ class ContentbuilderModelVerify extends CBModel
         
         /*
          if(intval($out['client']) && !JFactory::getApplication()->isClient('administrator')){
-            parse_str(JURI::getInstance()->getQuery(), $data1);
-            $this_page = JURI::getInstance()->base() . 'administrator/index.php?'.http_build_query($data1, '', '&');
+            parse_str(Uri::getInstance()->getQuery(), $data1);
+            $this_page = Uri::getInstance()->base() . 'administrator/index.php?'.http_build_query($data1, '', '&');
         }else{
-            parse_str(JURI::getInstance()->getQuery(), $data1);
-            $urlex = explode('?', JURI::getInstance()->toString());
+            parse_str(Uri::getInstance()->getQuery(), $data1);
+            $urlex = explode('?', Uri::getInstance()->toString());
             $this_page = $urlex[0] . '?' . http_build_query($data1, '', '&');
         }
          */
         if(intval($out['client']) && !JFactory::getApplication()->isClient('administrator')){
-            $this_page = JURI::getInstance()->base() . 'administrator/index.php?'.JURI::getInstance()->getQuery();
+            $this_page = Uri::getInstance()->base() . 'administrator/index.php?'.Uri::getInstance()->getQuery();
         }else{
-            $this_page = JURI::getInstance()->toString();
+            $this_page = Uri::getInstance()->toString();
         }
         
         JPluginHelper::importPlugin('contentbuilder_verify', $plugin);
@@ -205,14 +206,14 @@ class ContentbuilderModelVerify extends CBModel
             if( !CBRequest::getBool('verify', 0) ){
                 
                 if(JFactory::getApplication()->isClient('administrator')){
-                    $local = explode('/', JURI::getInstance()->base());
+                    $local = explode('/', Uri::getInstance()->base());
                     unset($local[count($local)-1]);
                     unset($local[count($local)-1]);
-                    parse_str(JURI::getInstance()->getQuery(), $data);
+                    parse_str(Uri::getInstance()->getQuery(), $data);
                     $this_page = implode('/', $local).'/index.php?'. http_build_query($data, '', '&') . '&verify=1&verification_id='.$verification_id;
                 }else{
-                    parse_str(JURI::getInstance()->getQuery(), $data);
-                    $urlex = explode('?', JURI::getInstance()->toString());
+                    parse_str(Uri::getInstance()->getQuery(), $data);
+                    $urlex = explode('?', Uri::getInstance()->toString());
                     $this_page = $urlex[0] . '?' . http_build_query($data, '', '&') . '&verify=1&verification_id='.$verification_id;
                 }
                 
@@ -258,7 +259,7 @@ class ContentbuilderModelVerify extends CBModel
 
                             if( ( !$out['client'] && ( !isset($out['return-site']) || !$out['return-site'] ) ) || ( $out['client'] && ( !isset($out['return-admin']) || !$out['return-admin'] ) ) ){
                                 if(intval($out['client']) && !JFactory::getApplication()->isClient('administrator')){
-                                    $redirect_view = JURI::getInstance()->base() . 'administrator/index.php?option=com_contentbuilder&controller=list&lang='.CBRequest::getCmd('lang','').'&id='.$out['verify_view'];
+                                    $redirect_view = Uri::getInstance()->base() . 'administrator/index.php?option=com_contentbuilder&controller=list&lang='.CBRequest::getCmd('lang','').'&id='.$out['verify_view'];
                                 }else{
                                     $redirect_view = 'index.php?option=com_contentbuilder&controller=list&lang='.CBRequest::getCmd('lang','').'&id='.$out['verify_view'];
                                 }

@@ -13,6 +13,7 @@ use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\Folder;
+use Joomla\CMS\Uri\Uri;
 
 if(!function_exists('cb_b64enc')){
     
@@ -433,10 +434,10 @@ class plgContentContentbuilder_download extends JPlugin {
                                              $hide_size_ = $hide_size;
                                              $hide_downloads_ = $hide_downloads;
                                              
-                                             $url = JURI::getInstance()->toString();
+                                             $url = Uri::getInstance()->toString();
                                              //fixing downloads on other pages than page 1
                                              if( CBRequest::getVar('controller','') == 'list' ){
-                                                 $url = JURI::getInstance()->base().'index.php?option=com_contentbuilder&amp;controller=list&amp;id='.intval($form_id).'&amp;limitstart='.CBRequest::getInt('limitstart',0);
+                                                 $url = Uri::getInstance()->base().'index.php?option=com_contentbuilder&amp;controller=list&amp;id='.intval($form_id).'&amp;limitstart='.CBRequest::getInt('limitstart',0);
                                              }
                                              
                                              $open_ = JRoute::_($url.(strstr($url,'?') !== false ? '&' : '?').'contentbuilder_download_file='.  sha1($field.$the_value));

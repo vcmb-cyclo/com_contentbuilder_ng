@@ -390,7 +390,7 @@
 		<title>Add custom CSS File</title>
 		<type>Before Form</type>
 		<description>Adds a custom css file to the form. To choose a css file\x2C execute this piece and call the function ff_addCustomCSSFile(\x27path/to/css/file\x27) with the RELATIVE (not full!) path to your joomla installation.\r\nDo not forget to call $this-\x3EexecPieceByName(\x27ff_InitLib\x27) before!\r\n\r\nExample:\r\n\r\nglobal $mainframe\x3B\r\n\r\n$this-\x3EexecPieceByName(\x27ff_InitLib\x27)\x3B\r\n$this-\x3EexecPieceByName(\x27ff_addCustomCSSFile\x27)\x3B\r\n\r\nff_addCustomCSSFile(\x27templates/\x27 . $mainframe-\x3EgetTemplate() . \x27/css/template.css\x27)\x3B</description>
-		<code>function ff_addCustomCSSFile($path){\r\n	if(file_exists(JPATH_SITE . \x27/\x27 . $path)){\r\n		JFactory::getDocument()-\x3EaddStyleSheet(JURI::root() . $path)\x3B\r\n	}\r\n}</code>
+		<code>function ff_addCustomCSSFile($path){\r\n	if(file_exists(JPATH_SITE . \x27/\x27 . $path)){\r\n		JFactory::getDocument()-\x3EaddStyleSheet(Uri::root() . $path)\x3B\r\n	}\r\n}</code>
 	</piece>
 	<piece id="2">
 		<package>FF</package>
@@ -557,7 +557,7 @@
 		<name>ff_securityImage</name>
 		<title>Security Image</title>
 		<description>Create code to display the security image</description>
-		<code>global $ff_seccode\x3B\r\n\r\nif (!isset($this-\x3Erecord_id)) { $ff_seccode = null\x3B }\r\n\r\nfunction ff_securityImage()\r\n{\r\n    global $ff_comsite\x2C $ff_seccode\x3B\r\n    if (!isset($ff_seccode)) { \r\n        mt_srand((double)microtime()*1000000)\x3B\r\n        $ff_seccode = mt_rand(10000\x2C 99999)\x3B\r\n        JFactory::getSession()-\x3Eset(\x27ff_seccode\x27\x2C $ff_seccode)\x3B\r\n    } // if\r\n\r\n    return \x27\x3Cimg src=\x22\x27.JURI::root().\x27ff_secimage.php?option=com_breezingforms\x26showSecImage=true\x22 title=\x22\x22 alt=\x22\x22 /\x3E\x27\x3B\r\n} // ff_securityImage</code>
+		<code>global $ff_seccode\x3B\r\n\r\nif (!isset($this-\x3Erecord_id)) { $ff_seccode = null\x3B }\r\n\r\nfunction ff_securityImage()\r\n{\r\n    global $ff_comsite\x2C $ff_seccode\x3B\r\n    if (!isset($ff_seccode)) { \r\n        mt_srand((double)microtime()*1000000)\x3B\r\n        $ff_seccode = mt_rand(10000\x2C 99999)\x3B\r\n        JFactory::getSession()-\x3Eset(\x27ff_seccode\x27\x2C $ff_seccode)\x3B\r\n    } // if\r\n\r\n    return \x27\x3Cimg src=\x22\x27.Uri::root().\x27ff_secimage.php?option=com_breezingforms\x26showSecImage=true\x22 title=\x22\x22 alt=\x22\x22 /\x3E\x27\x3B\r\n} // ff_securityImage</code>
 	</piece>
 	<piece id="25">
 		<package>FF</package>

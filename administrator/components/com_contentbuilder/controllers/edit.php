@@ -10,7 +10,7 @@
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Language\Text;
-
+use Joomla\CMS\Uri\Uri;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -77,7 +77,7 @@ class ContentbuilderControllerEdit extends CBController
 	                Factory::getApplication()->enqueueMessage($msg, 'warning');
                     JFactory::getApplication()->redirect($return);
                 }
-                if( JURI::isInternal($return) ){
+                if( Uri::isInternal($return) ){
 	                Factory::getApplication()->enqueueMessage($msg, 'warning');
                     JFactory::getApplication()->redirect($return);
                 }

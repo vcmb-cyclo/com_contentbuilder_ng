@@ -18,6 +18,7 @@ use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\Folder;
 use Joomla\Registry\Registry;
+use Joomla\CMS\Uri\Uri;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
@@ -1836,7 +1837,7 @@ var contentbuilder = new function(){
 		if ($useractivation == 2)
 		{
 			// Set the link to confirm the user email.
-			$uri = JURI::getInstance();
+			$uri = Uri::getInstance();
 			$base = $uri->toString(array('scheme', 'user', 'pass', 'host', 'port'));
 			$data['activate'] = $base.JRoute::_('index.php?option=com_users&task=registration.activate&token='.$data['activation'], false);
 
@@ -1860,7 +1861,7 @@ var contentbuilder = new function(){
 		else if ($useractivation == 1)
 		{
 			// Set the link to activate the user account.
-			$uri = JURI::getInstance();
+			$uri = Uri::getInstance();
 			$base = $uri->toString(array('scheme', 'user', 'pass', 'host', 'port'));
 			$data['activate'] = $base.JRoute::_('index.php?option=com_users&task=registration.activate&token='.$data['activation'], false);
 
@@ -2014,7 +2015,7 @@ var contentbuilder = new function(){
             $useractivation = $usersConfig->get( 'useractivation' );
             $mailfrom 		= $mainframe->getCfg( 'mailfrom' );
             $fromname 		= $mainframe->getCfg( 'fromname' );
-            $siteURL		= JURI::base();
+            $siteURL		= Uri::base();
 
             $subject 	= sprintf ( Text::_( 'Account details for' ), $name, $sitename);
             $subject 	= html_entity_decode($subject, ENT_QUOTES);

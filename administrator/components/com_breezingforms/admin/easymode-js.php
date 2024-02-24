@@ -7,6 +7,10 @@
 * @license Released under the terms of the GNU General Public License
 **/
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
+
+
+use Joomla\CMS\Uri\Uri;
+
 JHTML::_('bootstrap.modal');
 
 
@@ -17,19 +21,19 @@ JHTML::_('bootstrap.modal');
 
 <script
 	type="text/javascript"
-	src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/' ;?>jq.js"></script>
+	src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/' ;?>jq.js"></script>
 <script
 	type="text/javascript"
-	src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/' ;?>jq-ui.min.js"></script>
+	src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/' ;?>jq-ui.min.js"></script>
 <script
 	type="text/javascript"
-	src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/plugins/bas' ;?>e64.js"></script>
+	src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/plugins/bas' ;?>e64.js"></script>
 <script
 	type="text/javascript"
-	src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/plugins/' ;?>json.js"></script>
+	src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/plugins/' ;?>json.js"></script>
 <script
 	type="text/javascript"
-	src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/plugins/' ;?>md5.js"></script>
+	src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/plugins/' ;?>md5.js"></script>
 
 <script>$  = moobackup;</script>
 <script>$$ = moobackup2;</script>
@@ -1687,7 +1691,7 @@ function BF_EasyModeApp()
 					var reload = document.createElement('div');
 					JQuery(reload).css('float','left');
 					JQuery(reload).css('padding-left','5px');
-					reload.innerHTML = '<a href="#" onclick="document.getElementById(\'bfCaptchaEntry\').value=\'\';document.getElementById(\'bfCaptchaEntry\').focus();var splitsrc = document.getElementById(\'ff_capimgValue\').src.split(\'?\'); document.getElementById(\'ff_capimgValue\').src = splitsrc[0] + \'?bfMathRandom=\' + Math.random(); return false"><img src="<?php echo JURI::root() ?>components/com_breezingforms/images/captcha/refresh-captcha.png" border="0" /></a>';
+					reload.innerHTML = '<a href="#" onclick="document.getElementById(\'bfCaptchaEntry\').value=\'\';document.getElementById(\'bfCaptchaEntry\').focus();var splitsrc = document.getElementById(\'ff_capimgValue\').src.split(\'?\'); document.getElementById(\'ff_capimgValue\').src = splitsrc[0] + \'?bfMathRandom=\' + Math.random(); return false"><img src="<?php echo Uri::root() ?>components/com_breezingforms/images/captcha/refresh-captcha.png" border="0" /></a>';
 				
 					JQuery(element).append(imageHolder);
 					JQuery(element).append(br);
@@ -1700,7 +1704,7 @@ function BF_EasyModeApp()
 
 				case 'bfIcon':
 												
-					var iconImage = '<?php echo JURI::root() ?>components/com_breezingforms/images/next.png';
+					var iconImage = '<?php echo Uri::root() ?>components/com_breezingforms/images/next.png';
 												
 					bfType = 'Icon';
 					elementType = 'div';
@@ -1724,7 +1728,7 @@ function BF_EasyModeApp()
 													
 					JQuery(element).click(appScope.resizableElement);
 											
-					data3 = '<?php echo JURI::root() ?>components/com_breezingforms/images/next_f2.png',
+					data3 = '<?php echo Uri::root() ?>components/com_breezingforms/images/next_f2.png',
 					data1 = iconImage;
 													
 					break;
@@ -1873,7 +1877,7 @@ function BF_EasyModeApp()
 													
 				case 'bfImageButton':
 				
-					var iconImage = '<?php echo JURI::root() ?>components/com_breezingforms/images/next.png';
+					var iconImage = '<?php echo Uri::root() ?>components/com_breezingforms/images/next.png';
 					bfType = 'Graphic Button';
 					elementType = 'input';
 					element = document.createElement(elementType);
@@ -1911,10 +1915,10 @@ function BF_EasyModeApp()
 					element.setAttribute('id', 'ff_elem' + rndId);
 					element.setAttribute('name', 'ff_nm_' + rndId + '[]');
 					element.setAttribute('class', 'ff_elem');
-					element.setAttribute('src', '<?php echo JURI::root() ?>/components/com_breezingforms/images/tooltip.png');
+					element.setAttribute('src', '<?php echo Uri::root() ?>/components/com_breezingforms/images/tooltip.png');
 					JQuery(element).click(appScope.resizableElement);
 					
-					options = { text: 'Some <em>hint</em> or <strong/>warning</strong> for the user', image: '<?php echo JURI::root() ?>/components/com_breezingforms/images/tooltip.png', type: 'info' };
+					options = { text: 'Some <em>hint</em> or <strong/>warning</strong> for the user', image: '<?php echo Uri::root() ?>/components/com_breezingforms/images/tooltip.png', type: 'info' };
 					data2 = 'Some <em>hint</em> or <strong/>warning</strong> for the user';
 					break;  
 					
@@ -1948,7 +1952,7 @@ function BF_EasyModeApp()
 						itemnumber: '',
 						amount: '',
 						tax: '',
-						thankYouPage: '<?php echo JURI::root()?>',
+						thankYouPage: '<?php echo Uri::root()?>',
 						locale: 'us',
 						currencyCode: 'USD',
 						image: iconImage
@@ -1958,7 +1962,7 @@ function BF_EasyModeApp()
 					
 				case 'bfSofortueberweisung':
 				
-					var iconImage = '<?php echo JURI::root()?>components/com_breezingforms/images/200x65px.png';
+					var iconImage = '<?php echo Uri::root()?>components/com_breezingforms/images/200x65px.png';
 					bfType = 'Sofortueberweisung';
 					elementType = 'input';
 					element = document.createElement(elementType);
@@ -1982,7 +1986,7 @@ function BF_EasyModeApp()
 						reason_1: '',
 						reason_2: '',
 						amount: '',
-						thankYouPage: '<?php echo JURI::root()?>',
+						thankYouPage: '<?php echo Uri::root()?>',
 						language_id: 'DE',
 						currency_id: 'EUR',
 						image: iconImage,
@@ -2979,11 +2983,11 @@ function BF_EasyModeApp()
 								appScope.optionElement.name = JQuery.trim(JQuery('#bfTooltipName').get(0).value);
 								if(JQuery('#bfTooltipTypeInfo').get(0).checked){
 									appScope.optionElement.flag1 = 0;
-									appScope.optionElement.options.image = '<?php echo JURI::root(); ?>includes/js/ThemeOffice/tooltip.png';
+									appScope.optionElement.options.image = '<?php echo Uri::root(); ?>includes/js/ThemeOffice/tooltip.png';
 									appScope.optionElement.options.type = 'info';
 								} else if(JQuery('#bfTooltipTypeWarning').get(0).checked){
 									appScope.optionElement.flag1 = 1;
-									appScope.optionElement.options.image = '<?php echo JURI::root(); ?>includes/js/ThemeOffice/warning.png';
+									appScope.optionElement.options.image = '<?php echo Uri::root(); ?>includes/js/ThemeOffice/warning.png';
 									appScope.optionElement.options.type = 'warning';
 								} else if(JQuery('#bfTooltipTypeCustom').get(0).checked){
 									appScope.optionElement.options.image = JQuery.trim(JQuery('#bfTooltipCustomImage').get(0).value);
@@ -3487,7 +3491,7 @@ var bf_submitbutton = function(pressbutton)
 						this.setContent(handler,modalUrl);
 			   	};
 			         
-			    SqueezeBox.loadModal("<?php echo JURI::root()?>index.php?format=html&tmpl=component&option=com_breezingforms&ff_form=<?php echo $formId ?>&ff_page=<?php echo $page ?>","iframe",820,400);
+			    SqueezeBox.loadModal("<?php echo Uri::root()?>index.php?format=html&tmpl=component&option=com_breezingforms&ff_form=<?php echo $formId ?>&ff_page=<?php echo $page ?>","iframe",820,400);
 				break; 
 			case 'preview_site':
 				SqueezeBox.initialize({});               
@@ -3501,7 +3505,7 @@ var bf_submitbutton = function(pressbutton)
 						this.setContent(handler,modalUrl);
 			   	};
 			         
-			    SqueezeBox.loadModal("<?php echo JURI::root()?>index.php?option=com_breezingforms&ff_form=<?php echo $formId ?>&ff_page=<?php echo $page ?>","iframe",1024,400);
+			    SqueezeBox.loadModal("<?php echo Uri::root()?>index.php?option=com_breezingforms&ff_form=<?php echo $formId ?>&ff_page=<?php echo $page ?>","iframe",1024,400);
 				break;        
 			default:
 				break;

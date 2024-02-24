@@ -10,6 +10,7 @@ defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Uri\Uri;
 
 class QuickModeHtml {
 
@@ -20,34 +21,34 @@ class QuickModeHtml {
         jimport('joomla.version');
         $version = new JVersion();
         $iconBase = '../administrator/components/com_breezingforms/libraries/jquery/themes/quickmode/i/';
-        JFactory::getDocument()->addStyleSheet(JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/quickmode/quickmode.all.css');
-        JFactory::getDocument()->addStyleSheet(JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/jtree/tree_component.css');
-        JFactory::getDocument()->addStyleSheet(JURI::root() . 'administrator/components/com_breezingforms/admin/style.css');
+        JFactory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/quickmode/quickmode.all.css');
+        JFactory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/jtree/tree_component.css');
+        JFactory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/admin/style.css');
         ?>
 
         <script type="text/javascript"
-        src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/jtree/'; ?>_lib.js"></script>
+        src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/jtree/'; ?>_lib.js"></script>
         <script type="text/javascript"
-        src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/jtree/'; ?>tree_component.min.js"></script>
+        src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/jtree/'; ?>tree_component.min.js"></script>
         <script
             type="text/javascript"
-        src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/'; ?>jq-ui.min.js"></script>
+        src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/'; ?>jq-ui.min.js"></script>
         <script
             type="text/javascript"
-        src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/plugins/bas'; ?>e64.js"></script>
+        src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/plugins/bas'; ?>e64.js"></script>
         <script
             type="text/javascript"
-        src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/plugins/'; ?>json.js"></script>
+        src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/plugins/'; ?>json.js"></script>
         <script
             type="text/javascript"
-        src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/plugins/'; ?>md5.js"></script>
+        src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/plugins/'; ?>md5.js"></script>
         <script
             type="text/javascript"
-        src="<?php echo JURI::root() ?>components/com_breezingforms/libraries/jquery/center.js"></script>
+        src="<?php echo Uri::root() ?>components/com_breezingforms/libraries/jquery/center.js"></script>
 
         <script
             type="text/javascript"
-        src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/'; ?>jquery.scroll.js"></script>
+        src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/'; ?>jquery.scroll.js"></script>
 
 
 
@@ -829,7 +830,7 @@ class QuickModeHtml {
 
                     JQuery('#bfElementFileAdvancedHideLabel').attr('checked', mdata.hideLabel);
                     if (mdata.useUrl && mdata.useUrlDownloadDirectory == '') {
-                        mdata.useUrlDownloadDirectory = '<?php echo JURI::root() . 'media/breezingforms/uploads'; ?>';
+                        mdata.useUrlDownloadDirectory = '<?php echo Uri::root() . 'media/breezingforms/uploads'; ?>';
                     }
 
                     JQuery('#bfElementFileAdvancedResizeTargetWidth').val(mdata.resize_target_width);
@@ -3414,7 +3415,7 @@ class QuickModeHtml {
         echo JHtmlBootstrap::renderModal(
                 'bfPreviewModal',
                 array(
-                    'url' => JURI::root() . "index.php?format=html&tmpl=component&option=com_breezingforms&ff_form=" . $formId . "&ff_page=1",
+                    'url' => Uri::root() . "index.php?format=html&tmpl=component&option=com_breezingforms&ff_form=" . $formId . "&ff_page=1",
                     'width' => '1024px',
                     'height' => '500px'
                 )
@@ -3423,7 +3424,7 @@ class QuickModeHtml {
         echo JHtmlBootstrap::renderModal(
                 'bfPreviewModal2',
                 array(
-                    'url' => JURI::root() . "index.php?format=html&option=com_breezingforms&ff_form=" . $formId . "&ff_page=1",
+                    'url' => Uri::root() . "index.php?format=html&option=com_breezingforms&ff_form=" . $formId . "&ff_page=1",
                     'width' => '1024px',
                     'height' => '500px'
                 )

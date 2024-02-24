@@ -11,6 +11,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 
@@ -27,14 +28,14 @@ class ContentbuilderViewStorage extends CBView
 	    Factory::getApplication()->input->set('hidemainmenu', true);
 
         $document = JFactory::getDocument();
-        $document->addScript( JURI::root(true) . '/administrator/components/com_contentbuilder/assets/js/jscolor/jscolor.js' );
+        $document->addScript( Uri::root(true) . '/administrator/components/com_contentbuilder/assets/js/jscolor/jscolor.js' );
 
         echo '
         <style type="text/css">
         .icon-48-logo_left { background-image: url(../administrator/components/com_contentbuilder/views/logo_left.png); }
         </style>
         ';
-        echo '<link rel="stylesheet" href="'.JURI::root(true).'/administrator/components/com_contentbuilder/views/bluestork.fix.css" type="text/css" />';
+        echo '<link rel="stylesheet" href="'.Uri::root(true).'/administrator/components/com_contentbuilder/views/bluestork.fix.css" type="text/css" />';
         $tables     = $this->get('DbTables');
         $form     = $this->get('Storage');
         $elements  = $this->get('Data');

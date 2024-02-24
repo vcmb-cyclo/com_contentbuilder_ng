@@ -8,6 +8,8 @@
 **/
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Uri\Uri;
+
 $database = BFFactory::getDbo();
 
 /*
@@ -56,7 +58,7 @@ $task    = BFRequest::getVar('ff_task','view');
 if ($inframe) {
 	// create url for the frame
 	$url =
-		$ff_mossite = JURI::root().'index.php'
+		$ff_mossite = Uri::root().'index.php'
 			.'?option=com_breezingforms'
                         .'&amp;tmpl=component'
 			.'&amp;Itemid=0'

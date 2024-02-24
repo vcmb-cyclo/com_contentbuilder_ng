@@ -8,6 +8,8 @@
 **/
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Uri\Uri;
+
 class EasyModeHtml{
 
 	public static function showApplication($formId = 0, $formName = '', $templateCode = '', $callbackParams = array(), $elementScripts = array(), $pages = 1, $page = 1){
@@ -39,9 +41,9 @@ class EasyModeHtml{
 	#menutab { float: left; width: 300px; height: 100%; }
 	#form-area-easymode { padding-left: 310px; }
 	#trashcan { list-style: none; }
-	#trashcan-box { height: 100px; background: #fbfbfb url(<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/easymode/i/trash-here.png' ;?>) center no-repeat; margin-bottom: 10px; }
+	#trashcan-box { height: 100px; background: #fbfbfb url(<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/easymode/i/trash-here.png' ;?>) center no-repeat; margin-bottom: 10px; }
  	#trashcan-box ul#trashcan { width:100%; height:100px; overflow:auto; padding:0; margin:0; float:left; }
-	.ff_dragBox { width: 10px; height: 10px; cursor: move; float: left; background-image: url("<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/hand_icon.png' ?>"); }
+	.ff_dragBox { width: 10px; height: 10px; cursor: move; float: left; background-image: url("<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/hand_icon.png' ?>"); }
 	.draggableElement { padding: 2px; }
 	-->
 	</style>
@@ -57,7 +59,7 @@ class EasyModeHtml{
                 width: 100%;
 		min-width: 700px !important;
 		overflow: auto;
-		background: #f6f6f6 url(<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/easymode/i/drag-here.png' ;?>) center no-repeat;
+		background: #f6f6f6 url(<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/easymode/i/drag-here.png' ;?>) center no-repeat;
 		border: 2px dashed #ccc;
 		width: auto;
 	}
@@ -73,7 +75,7 @@ class EasyModeHtml{
 	-->
 	</style>
 
-	<link rel="stylesheet" href="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/easymode/easymode.all.css' ;?>" type="text/css" media="screen" title="Flora (Default)">
+	<link rel="stylesheet" href="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/easymode/easymode.all.css' ;?>" type="text/css" media="screen" title="Flora (Default)">
 	<?php require_once(JPATH_SITE . '/administrator/components/com_breezingforms/admin/easymode-js.php'); ?>
 
 	<div>
@@ -641,8 +643,8 @@ class EasyModeHtml{
 									<br/>
 									<?php echo BFText::_('COM_BREEZINGFORMS_TYPE') ?>:
 									<br/>
-									<input type="radio" name="bfTooltipType" id="bfTooltipTypeInfo" value="info"/> <img src="<?php echo JURI::root(); ?>includes/js/ThemeOffice/tooltip.png"/>
-									<input type="radio" name="bfTooltipType" id="bfTooltipTypeWarning" value="warning"/> <img src="<?php echo JURI::root(); ?>includes/js/ThemeOffice/warning.png"/>
+									<input type="radio" name="bfTooltipType" id="bfTooltipTypeInfo" value="info"/> <img src="<?php echo Uri::root(); ?>includes/js/ThemeOffice/tooltip.png"/>
+									<input type="radio" name="bfTooltipType" id="bfTooltipTypeWarning" value="warning"/> <img src="<?php echo Uri::root(); ?>includes/js/ThemeOffice/warning.png"/>
 									<input type="radio" name="bfTooltipType" id="bfTooltipTypeCustom" value="warning"/> <?php echo BFText::_('COM_BREEZINGFORMS_CUSTOM') ?>:
 									<br/>
 									<input type="text" class="bfOptionsTextInput" id="bfTooltipCustomImage" value=""/>
@@ -742,7 +744,7 @@ class EasyModeHtml{
 									<br/>
 									<?php echo BFText::_('COM_BREEZINGFORMS_THANKYOUPAGE_IF_NOT_DOWNLOADABLE_FILE') ?>:
 									<br/>
-									<input type="text" class="bfOptionsTextInput" id="bfPayPalThankYouPage" value="<?php echo JURI::root() ?>"/>
+									<input type="text" class="bfOptionsTextInput" id="bfPayPalThankYouPage" value="<?php echo Uri::root() ?>"/>
 									<br/>
 
 									<?php echo BFText::_('COM_BREEZINGFORMS_LOCALE') ?>:
@@ -830,7 +832,7 @@ class EasyModeHtml{
 									<br/>
 									<?php echo BFText::_('COM_BREEZINGFORMS_THANKYOUPAGE_IF_NOT_DOWNLOADABLE_FILE') ?>:
 									<br/>
-									<input type="text" class="bfOptionsTextInput" id="bfSofortueberweisungThankYouPage" value="<?php echo JURI::root() ?>"/>
+									<input type="text" class="bfOptionsTextInput" id="bfSofortueberweisungThankYouPage" value="<?php echo Uri::root() ?>"/>
 									<br/>
 
 									<?php echo BFText::_('COM_BREEZINGFORMS_LANGUAGE_ID') ?>:
@@ -844,7 +846,7 @@ class EasyModeHtml{
 									<?php echo BFText::_('COM_BREEZINGFORMS_SOFORTUEBERWEISUNGIMAGE') ?>:
 									<br/>
 
-									<input type="text" class="bfOptionsTextInput" id="bfSofortueberweisungImage" value="<?php echo JURI::root()?>components/com_breezingforms/images/200x65px.png"/>
+									<input type="text" class="bfOptionsTextInput" id="bfSofortueberweisungImage" value="<?php echo Uri::root()?>components/com_breezingforms/images/200x65px.png"/>
 									<br/>
 									<?php echo BFText::_('COM_BREEZINGFORMS_WIDTH') ?>:
 									<br/>

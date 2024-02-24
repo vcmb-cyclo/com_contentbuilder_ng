@@ -8,9 +8,11 @@
 **/
 defined( '_JEXEC' ) or die( 'Direct Access to this location is not allowed.' );
 
+use Joomla\CMS\Uri\Uri;
+
 global $ff_version, $ff_resnames, $ff_request, $ff_target;
 
-$ff_version = '1.9.1 Stable (build 943)';
+$ff_version = '5.0.0 Beta (build 1)';
 $ff_target  = 0;
 
 $ff_resnames = array(
@@ -135,7 +137,7 @@ function initFacileForms()
 
 	if (!isset($ff_mossite)) {
 		if ($ff_config->livesite == 0) {
-			//$ff_mossite = str_replace('\\','/', JURI::root());
+			//$ff_mossite = str_replace('\\','/', Uri::root());
 			$ff_mossite = JUri::root();
 		} else {
 			$s = empty($_SERVER["HTTPS"]) ? '' : ( ($_SERVER["HTTPS"] == "on") ? "s" : "" );

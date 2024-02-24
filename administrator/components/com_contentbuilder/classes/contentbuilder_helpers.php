@@ -8,6 +8,7 @@
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
 
 function contentbuilder_is_valid_date($value, $format = 'YYYY-mm-dd'){
     
@@ -611,7 +612,7 @@ class contentbuilder_helpers{
         $action = $published ? Text::_('PUBLISH') : Text::_('UNPUBLISH');
 
 	    $href = ($allowed ? '<a href="'.$url.'" title="' . $action . '">' : '').'
-                     <img src="'.JURI::root(true).'/components/com_contentbuilder/images/_' . $img . '" border="0" alt="' . $alt . '" />'.
+                     <img src="'.Uri::root(true).'/components/com_contentbuilder/images/_' . $img . '" border="0" alt="' . $alt . '" />'.
 		    ($allowed ? '</a>' : '')
 	    ;
 

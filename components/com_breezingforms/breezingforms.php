@@ -17,6 +17,8 @@
  * */
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Uri\Uri;
+
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFFactory.php');
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFRequest.php');
 
@@ -26,7 +28,8 @@ if (!defined('DS')) {
 
 if (!function_exists('bf_b64enc')) {
 
-    function bf_b64enc($str) {
+    function bf_b64enc($str)
+    {
         $base = 'base';
         $sixty_four = '64_encode';
         return call_user_func($base . $sixty_four, $str);
@@ -36,7 +39,8 @@ if (!function_exists('bf_b64enc')) {
 
 if (!function_exists('bf_b64dec')) {
 
-    function bf_b64dec($str) {
+    function bf_b64dec($str)
+    {
         $base = 'base';
         $sixty_four = '64_decode';
         return call_user_func($base . $sixty_four, $str);
@@ -132,20 +136,20 @@ $my_ff_params = $plainform || $parent_target == $ff_target;
 $ff_request = array();
 
 if (
-        !BFRequest::getBool('bfCaptcha') &&
-        !BFRequest::getBool('checkCaptcha') &&
-        !BFRequest::getBool('confirmStripe') &&
-        !BFRequest::getBool('confirmPayPal') &&
-        !BFRequest::getBool('confirmPayPalIpn') &&
-        !BFRequest::getBool('paypalDownload') &&
-        !BFRequest::getBool('stripeDownload') &&
-        !BFRequest::getBool('showPayPalConnectMsg') &&
-        !BFRequest::getBool('successSofortueberweisung') &&
-        !BFRequest::getBool('confirmSofortueberweisung') &&
-        !BFRequest::getBool('sofortueberweisungDownload') &&
-        !BFRequest::getBool('flashUpload') &&
-        BFRequest::getVar('opt_in') != 'true' &&
-        BFRequest::getVar('opt_out') != 'true'
+    !BFRequest::getBool('bfCaptcha') &&
+    !BFRequest::getBool('checkCaptcha') &&
+    !BFRequest::getBool('confirmStripe') &&
+    !BFRequest::getBool('confirmPayPal') &&
+    !BFRequest::getBool('confirmPayPalIpn') &&
+    !BFRequest::getBool('paypalDownload') &&
+    !BFRequest::getBool('stripeDownload') &&
+    !BFRequest::getBool('showPayPalConnectMsg') &&
+    !BFRequest::getBool('successSofortueberweisung') &&
+    !BFRequest::getBool('confirmSofortueberweisung') &&
+    !BFRequest::getBool('sofortueberweisungDownload') &&
+    !BFRequest::getBool('flashUpload') &&
+    BFRequest::getVar('opt_in') != 'true' &&
+    BFRequest::getVar('opt_out') != 'true'
 ) {
 
     BFRequest::setVar('format', 'html');
@@ -261,8 +265,8 @@ if (
     $ok = true;
     if (is_numeric($formid)) {
         $database->setQuery(
-                "select * from #__facileforms_forms " .
-                "where id=" . intval($formid) . " and published=1"
+            "select * from #__facileforms_forms " .
+            "where id=" . intval($formid) . " and published=1"
         );
         $forms = $database->loadObjectList();
         if (count($forms) < 1) {
@@ -271,43 +275,43 @@ if (
         } else
             $form = $forms[0];
     } else
-    if ($formname != null) {
-        $database->setQuery(
+        if ($formname != null) {
+            $database->setQuery(
                 "select * from #__facileforms_forms " .
                 "where name=" . $database->Quote($formname) . " and published=1 " .
                 "order by ordering, id"
-        );
-        $forms = $database->loadObjectList();
-        if (count($forms) < 1) {
-            echo '[Form ' . htmlentities($formname, ENT_QUOTES, 'UTF-8') . ' not found!]';
-            $ok = false;
-        } else
-            $form = $forms[0];
-    } else {
-
-        if (BFRequest::getVar('option', '') != 'com_breezingforms') {
-            throw new Exception(JText::_('No form id or name provided!'), 404);
+            );
+            $forms = $database->loadObjectList();
+            if (count($forms) < 1) {
+                echo '[Form ' . htmlentities($formname, ENT_QUOTES, 'UTF-8') . ' not found!]';
+                $ok = false;
+            } else
+                $form = $forms[0];
         } else {
-            echo '[No form id or name provided!]';
-        }
 
-        $ok = false;
-    } // if
+            if (BFRequest::getVar('option', '') != 'com_breezingforms') {
+                throw new Exception(JText::_('No form id or name provided!'), 404);
+            } else {
+                echo '[No form id or name provided!]';
+            }
+
+            $ok = false;
+        } // if
 
     if ($ok) {
 
         // set by plugin
-        if (isset($_SESSION['ff_editablePlg' . $form->name]) && $_SESSION['ff_editablePlg' . BFRequest::getInt('ff_contentid', 0) . $form->name] != 0 && ( BFRequest::getVar('ff_applic') == 'plg_facileforms' || ( isset($ff_applic) && $ff_applic == 'plg_facileforms' ))) {
+        if (isset($_SESSION['ff_editablePlg' . $form->name]) && $_SESSION['ff_editablePlg' . BFRequest::getInt('ff_contentid', 0) . $form->name] != 0 && (BFRequest::getVar('ff_applic') == 'plg_facileforms' || (isset($ff_applic) && $ff_applic == 'plg_facileforms'))) {
             $editable = $_SESSION['ff_editablePlg' . BFRequest::getInt('ff_contentid', 0) . $form->name];
         }
 
         // set by plugin
-        if (isset($_SESSION['ff_editable_overridePlg' . $form->name]) && $_SESSION['ff_editable_overridePlg' . BFRequest::getInt('ff_contentid', 0) . $form->name] != 0 && ( BFRequest::getVar('ff_applic') == 'plg_facileforms' || ( isset($ff_applic) && $ff_applic == 'plg_facileforms' ))) {
+        if (isset($_SESSION['ff_editable_overridePlg' . $form->name]) && $_SESSION['ff_editable_overridePlg' . BFRequest::getInt('ff_contentid', 0) . $form->name] != 0 && (BFRequest::getVar('ff_applic') == 'plg_facileforms' || (isset($ff_applic) && $ff_applic == 'plg_facileforms'))) {
             $editable_override = $_SESSION['ff_editable_overridePlg' . BFRequest::getInt('ff_contentid', 0) . $form->name];
         }
 
         // set by module
-        if (( BFRequest::getVar('ff_applic') == 'mod_facileforms' || ( isset($ff_applic) && $ff_applic == 'mod_facileforms' ))) {
+        if ((BFRequest::getVar('ff_applic') == 'mod_facileforms' || (isset($ff_applic) && $ff_applic == 'mod_facileforms'))) {
             if (JFactory::getSession()->get('ff_editableMod' . $xModuleId . $form->name, 0) != 0) {
                 $editable = JFactory::getSession()->get('ff_editableMod' . $xModuleId . $form->name, 0);
             } else if (JFactory::getSession()->get('ff_editableMod' . BFRequest::getInt('ff_module_id', 0) . $form->name, 0) != 0) {
@@ -316,7 +320,7 @@ if (
         }
 
         // set by module
-        if (( BFRequest::getVar('ff_applic') == 'mod_facileforms' || ( isset($ff_applic) && $ff_applic == 'mod_facileforms' ))) {
+        if ((BFRequest::getVar('ff_applic') == 'mod_facileforms' || (isset($ff_applic) && $ff_applic == 'mod_facileforms'))) {
             if (JFactory::getSession()->get('ff_editable_overrideMod' . $xModuleId . $form->name, 0) != 0) {
                 $editable_override = JFactory::getSession()->get('ff_editable_overrideMod' . $xModuleId . $form->name, 0);
             } else if (JFactory::getSession()->get('ff_editable_overrideMod' . BFRequest::getInt('ff_module_id', 0) . $form->name, 0) != 0) {
@@ -324,7 +328,7 @@ if (
             }
         }
 
-        if ((!isset($ff_applic) || $ff_applic != 'plg_facileforms') && $pagetitle && $form->title != '' && !(BFRequest::getInt('cb_form_id', 0) || BFRequest::getCmd('cb_record_id', '') )) {
+        if ((!isset($ff_applic) || $ff_applic != 'plg_facileforms') && $pagetitle && $form->title != '' && !(BFRequest::getInt('cb_form_id', 0) || BFRequest::getCmd('cb_record_id', ''))) {
             if ($menu_item_title != '') {
                 JFactory::getDocument()->setTitle($menu_item_title);
             } else if ($pagetitle) { // being set by module, false implies no change at all
@@ -351,16 +355,21 @@ if (
             // open frame and detach processing
             $divstyle = 'width:100%;';
             switch ($align) {
-                case 0: $divstyle .= 'text-align:left;';
+                case 0:
+                    $divstyle .= 'text-align:left;';
                     break;
-                case 1: $divstyle .= 'text-align:center;';
+                case 1:
+                    $divstyle .= 'text-align:center;';
                     break;
-                case 2: $divstyle .= 'text-align:right;';
+                case 2:
+                    $divstyle .= 'text-align:right;';
                     break;
-                case 3: if ($left > 0)
+                case 3:
+                    if ($left > 0)
                         $divstyle .= 'padding-left:' . htmlentities($left, ENT_QUOTES, 'UTF-8') . 'px;';
                     break;
-                default: break;
+                default:
+                    break;
             } // switch
             if ($top > 0)
                 $divstyle .= 'padding-top:' . htmlentities($top, ENT_QUOTES, 'UTF-8') . 'px;';
@@ -369,14 +378,14 @@ if (
             if (!$form->heightmode)
                 $frameheight = 'height="' . htmlentities($form->height, ENT_QUOTES, 'UTF-8') . '" ';
             $url = $ff_mossite . '/index.php'
-                    . '?option=com_breezingforms'
-                    . '&amp;Itemid=' . ((BFRequest::getInt('Itemid', 0) > 0 && BFRequest::getInt('Itemid', 0) < 99999999) ? BFRequest::getInt('Itemid', 0) : 0)
-                    . '&amp;ff_form=' . htmlentities($form->id, ENT_QUOTES, 'UTF-8')
-                    . '&amp;ff_applic=' . htmlentities($ff_applic, ENT_QUOTES, 'UTF-8')
-                    . '&amp;ff_module_id=' . htmlentities($xModuleId, ENT_QUOTES, 'UTF-8')
-                    . '&amp;format=html'
-                    . '&amp;tmpl=component'
-                    . '&amp;ff_frame=1';
+                . '?option=com_breezingforms'
+                . '&amp;Itemid=' . ((BFRequest::getInt('Itemid', 0) > 0 && BFRequest::getInt('Itemid', 0) < 99999999) ? BFRequest::getInt('Itemid', 0) : 0)
+                . '&amp;ff_form=' . htmlentities($form->id, ENT_QUOTES, 'UTF-8')
+                . '&amp;ff_applic=' . htmlentities($ff_applic, ENT_QUOTES, 'UTF-8')
+                . '&amp;ff_module_id=' . htmlentities($xModuleId, ENT_QUOTES, 'UTF-8')
+                . '&amp;format=html'
+                . '&amp;tmpl=component'
+                . '&amp;ff_frame=1';
             if ($page != 1)
                 $url .= '&amp;ff_page=' . htmlentities($page, ENT_QUOTES, 'UTF-8');
             if ($border)
@@ -389,15 +398,15 @@ if (
                 $url .= '&amp;' . htmlentities($prop, ENT_QUOTES, 'UTF-8') . '=' . htmlentities(urlencode($val), ENT_QUOTES, 'UTF-8');
 
             $params = 'id="ff_frame' . $form->id . '" ' .
-                    'src="' . $url . '" ' .
-                    $framewidth .
-                    $frameheight .
-                    'frameborder="' . htmlentities($border, ENT_QUOTES, 'UTF-8') . '" ' .
-                    'allowtransparency="true" ' .
-                    'scrolling="no" ';
+                'src="' . $url . '" ' .
+                $framewidth .
+                $frameheight .
+                'frameborder="' . htmlentities($border, ENT_QUOTES, 'UTF-8') . '" ' .
+                'allowtransparency="true" ' .
+                'scrolling="no" ';
             if ($form->autoheight == 1) {
-                JFactory::getDocument()->addScript(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/jq.min.js');
-                JFactory::getDocument()->addScript(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/jq.iframeautoheight.js');
+                JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq.min.js');
+                JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq.iframeautoheight.js');
                 JFactory::getDocument()->addScriptDeclaration("<!--
                             JQuery(document).ready(function() {
                                 //JQuery(\".breezingforms_iframe\").css(\"width\",\"100%\");
@@ -412,15 +421,15 @@ if (
             echo "\n<!-- BreezingForms V" . $ff_version . " Copyright(c) 2008-2013 by Markus Bopp | FacileForms Copyright 2004-2006 by Peter Koch, Chur, Switzerland.  All rights reserved. -->\n";
             // END OF COPYRIGHT
             echo '<div class="bfClearfix" style="' . $divstyle . '">' . "\n" .
-            "<iframe class=\"breezingforms_iframe\" " . $params . " sandbox=\"allow-modals allow-same-origin allow-scripts allow-forms allow-pointer-lock allow-popups allow-top-navigation\">\n" .
-            "<p>Sorry, your browser cannot display frames!</p>\n" .
-            "</iframe>\n" .
-            "</div>\n";
+                "<iframe class=\"breezingforms_iframe\" " . $params . " sandbox=\"allow-modals allow-same-origin allow-scripts allow-forms allow-pointer-lock allow-popups allow-top-navigation\">\n" .
+                "<p>Sorry, your browser cannot display frames!</p>\n" .
+                "</iframe>\n" .
+                "</div>\n";
         } else {
 
 
             if ($menu_item_show_page_heading) {
-                echo '<h1>' . ( $menu_item_title != '' ? ( $menu_item_page_heading != '' ? $menu_item_page_heading : $menu_item_title ) : $form->title ) . '</h1>' . "\n";
+                echo '<h1>' . ($menu_item_title != '' ? ($menu_item_page_heading != '' ? $menu_item_page_heading : $menu_item_title) : $form->title) . '</h1>' . "\n";
             }
 
             // process inline
@@ -552,8 +561,17 @@ if (
             }
 
             $ff_processor = new HTML_facileFormsProcessor(
-                    $runmode, $inframe, $form->id, $page, $border,
-                    $align, $top, $ff_target, $suffix, $editable, $editable_override
+                $runmode,
+                $inframe,
+                $form->id,
+                $page,
+                $border,
+                $align,
+                $top,
+                $ff_target,
+                $suffix,
+                $editable,
+                $editable_override
             );
 
             if ($task == 'submit') {
@@ -694,7 +712,7 @@ if (
         echo 'capResult=>true';
     }
     exit;
-} else if (BFRequest::getBool('confirmPayPalIpn') && (!isset($ff_applic) || $ff_applic == '' )) {
+} else if (BFRequest::getBool('confirmPayPalIpn') && (!isset($ff_applic) || $ff_applic == '')) {
 
     BFRequest::setVar('format', 'html');
 
@@ -716,9 +734,9 @@ if (
         exit;
     }
 
-    foreach ($areas As $area) {
+    foreach ($areas as $area) {
 
-        foreach ($area['elements'] As $element) {
+        foreach ($area['elements'] as $element) {
             if ($element['internalType'] == 'bfPayPal') {
 
                 $options = $element['options'];
@@ -855,7 +873,7 @@ if (
             }
         }
     }
-} else if (BFRequest::getBool('confirmStripe') && (!isset($ff_applic) || $ff_applic == '' )) {
+} else if (BFRequest::getBool('confirmStripe') && (!isset($ff_applic) || $ff_applic == '')) {
 
     BFRequest::setVar('format', 'html');
 
@@ -866,7 +884,7 @@ if (
     $list = $db->loadObjectList();
 
     if (count($list) == 0) {
-        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_FORM_DOES_NOT_EXIST'));
+        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_FORM_DOES_NOT_EXIST'));
         exit;
     }
 
@@ -875,16 +893,16 @@ if (
     $areas = Zend_Json::decode($form->template_areas);
 
     if (!is_array($areas)) {
-        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_STRIPE_DATA'));
+        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_STRIPE_DATA'));
         exit;
     }
 
     $tx_token = BFRequest::getVar('token');
     $record_id = BFRequest::getInt('record_id');
 
-    foreach ($areas As $area) {
+    foreach ($areas as $area) {
 
-        foreach ($area['elements'] As $element) {
+        foreach ($area['elements'] as $element) {
 
             if ($element['internalType'] == 'bfStripe') {
 
@@ -893,7 +911,7 @@ if (
                 require_once JPATH_SITE . '/administrator/components/com_breezingforms/libraries/stripe/vendor/autoload.php';
 
                 \Stripe\Stripe::setApiKey($options['secretKey']);
-                                $stripe = new \Stripe\StripeClient($options['secretKey']);
+                $stripe = new \Stripe\StripeClient($options['secretKey']);
 
                 // Create the charge on Stripe's servers - this will charge the user's card
                 try {
@@ -912,11 +930,11 @@ if (
 
                     if (!$exists) {
 
-                                        /* XDA if( JFactory::getSession()->get('bf_stripe_last_payment_amount'.$record_id, null) == null ){
+                        /* XDA if( JFactory::getSession()->get('bf_stripe_last_payment_amount'.$record_id, null) == null ){
 
-                            BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_STRIPE_AMOUNT'));
-                            exit;
-                                                } XDA */
+            BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_STRIPE_AMOUNT'));
+            exit;
+                                } XDA */
 
                         $stripearray = array();
                         $stripearray = [
@@ -926,89 +944,85 @@ if (
                             "source" => $tx_token,
                             "description" => $options['itemname'],
                             "metadata" => array()
-                                //,"metadata" => array("Order ID" => $_session_cart['order_id'])
+                            //,"metadata" => array("Order ID" => $_session_cart['order_id'])
                         ];
                         if (JFactory::getSession()->get('emailfield', '') !== '') {
                             $stripearray += ['receipt_email' => JFactory::getSession()->get('emailfield', '')];
                             JFactory::getSession()->clear('emailfield');
                         }
-                                                //$charge = \Stripe\Charge::create( $stripearray );
-                                                /*
-                                                $charge = \Stripe\Checkout\Session::create([
-                                                        'customer_email' => 'bff@gmail.com',
-                                                        'billing_address_collection' => 'required',
-                                                        'line_items' => [[
-                                                          'price' => 'price_1JYA3UDkYxK6vMJ2QF2S6fNh',
-                                                          'quantity' => 1,
-                                                        ]],
-                                                        'payment_method_types' => [
-                                                          'card',
-                                                        ],
-                                                        'mode' => 'payment',
-                                                        'success_url' => 'https://firadeldibuixilapintura.cat/test/success',
-                                                        'cancel_url' => 'https://firadeldibuixilapintura.cat/test/cancel',
-                                                  ]);*/
+                        //$charge = \Stripe\Charge::create( $stripearray );
+                        /*
+                        $charge = \Stripe\Checkout\Session::create([
+                                'customer_email' => 'bff@gmail.com',
+                                'billing_address_collection' => 'required',
+                                'line_items' => [[
+                                  'price' => 'price_1JYA3UDkYxK6vMJ2QF2S6fNh',
+                                  'quantity' => 1,
+                                ]],
+                                'payment_method_types' => [
+                                  'card',
+                                ],
+                                'mode' => 'payment',
+                                'success_url' => 'https://firadeldibuixilapintura.cat/test/success',
+                                'cancel_url' => 'https://firadeldibuixilapintura.cat/test/cancel',
+                          ]);*/
 
 
                         JFactory::getSession()->clear('bf_stripe_last_payment_amount' . $record_id);
-                                        }
-                                        else
-                                        {
+                    } else {
 
                         $exploded = explode(':', $exists);
-                                                //$charge = \Stripe\Charge::retrieve(trim($exploded[1]));
+                        //$charge = \Stripe\Charge::retrieve(trim($exploded[1]));
                     }
 
-//                                      $tx_token = $charge->id;
-                                        $session_id = $_GET['session_id'];
-                                        $session = $stripe->checkout->sessions->retrieve(
-                                                "$session_id",
-                                                []
-                                          );
+                    //                                      $tx_token = $charge->id;
+                    $session_id = $_GET['session_id'];
+                    $session = $stripe->checkout->sessions->retrieve(
+                        "$session_id",
+                        []
+                    );
 
-                                        if($session->payment_status != 'paid'){
+                    if ($session->payment_status != 'paid') {
 
-                                                //echo $_GET['session_id'].'<br>bf dont understand new stripe and says it was diclined lol: <br>'.var_dump($session);
+                        //echo $_GET['session_id'].'<br>bf dont understand new stripe and says it was diclined lol: <br>'.var_dump($session);
                         $msg = JText::_("COM_BREEZINGFORMS_STRIPE_DECLINED");
 
-                                                require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
-                                        }
-                                        else
-                                        {
-                                                /** get payment intend id and creation time */
-                                                $stripe_pi_id = $session->payment_intent; //payment intent id from last session also replacing tx_token/charge->id with paymentIntents->id
-                                                $stripe_pi = $stripe->paymentIntents->retrieve(
-                                                        "$stripe_pi_id",
-                                                        []
-                                                  );
-                                                $stripe_pi_create = $stripe_pi->created; // replacing charge->created with paymentIntents->created
-                                                // XDA BEGIN
-                                                // Stripe Payment Intent updates to complete its description from pi_xxx to BF item Name - pi_xxx
-                        $stripe->paymentIntents->update($stripe_pi_id, ['description' => $options['itemname']]);                        
-                                                // XDA END
+                        require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
+                    } else {
+                        /** get payment intend id and creation time */
+                        $stripe_pi_id = $session->payment_intent; //payment intent id from last session also replacing tx_token/charge->id with paymentIntents->id
+                        $stripe_pi = $stripe->paymentIntents->retrieve(
+                            "$stripe_pi_id",
+                            []
+                        );
+                        $stripe_pi_create = $stripe_pi->created; // replacing charge->created with paymentIntents->created
+                        // XDA BEGIN
+                        // Stripe Payment Intent updates to complete its description from pi_xxx to BF item Name - pi_xxx
+                        $stripe->paymentIntents->update($stripe_pi_id, ['description' => $options['itemname']]);
+                        // XDA END
                         $db->setQuery("
                                                                                 Update 
                                                                                         #__facileforms_records 
                                                                                 Set 
-                                                                                        paypal_tx_id = " . $db->Quote( 'Stripe: ' . strip_tags( $stripe_pi_id ) ) . ", 
-                                                                                        paypal_payment_date = " . $db->Quote( date( 'Y-m-d H:i:s', $stripe_pi_create ) ) . ",
-                                                                                        paypal_testaccount = " . $db->Quote( !$stripe_pi->livemode ? 1 : 0 ) . ",
+                                                                                        paypal_tx_id = " . $db->Quote('Stripe: ' . strip_tags($stripe_pi_id)) . ", 
+                                                                                        paypal_payment_date = " . $db->Quote(date('Y-m-d H:i:s', $stripe_pi_create)) . ",
+                                                                                        paypal_testaccount = " . $db->Quote(!$stripe_pi->livemode ? 1 : 0) . ",
                                                                                         paypal_download_tries = 0
                                                                                 Where 
-                                                                                        id = '" . BFRequest::getInt('record_id', - 1) . "'
+                                                                                        id = '" . BFRequest::getInt('record_id', -1) . "'
 											");
 
                         $db->execute();
 
                         // trigger a script after succeeded payment?
                         if (JFile::exists(JPATH_SITE . '/bf_stripe_success.php')) {
-                            require_once( JPATH_SITE . '/bf_stripe_success.php' );
+                            require_once(JPATH_SITE . '/bf_stripe_success.php');
                         }
 
                         // send mail after succeeded payment?
                         if (isset($options['sendNotificationAfterPayment']) && $options['sendNotificationAfterPayment']) {
-                            bf_sendNotificationByPaymentCache(BFRequest::getInt('form_id', - 1), BFRequest::getInt('record_id', - 1), 'admin');
-                            bf_sendNotificationByPaymentCache(BFRequest::getInt('form_id', - 1), BFRequest::getInt('record_id', - 1), 'mailback');
+                            bf_sendNotificationByPaymentCache(BFRequest::getInt('form_id', -1), BFRequest::getInt('record_id', -1), 'admin');
+                            bf_sendNotificationByPaymentCache(BFRequest::getInt('form_id', -1), BFRequest::getInt('record_id', -1), 'mailback');
                         }
 
                         if ($options['downloadableFile']) {
@@ -1022,7 +1036,7 @@ if (
                             if ($options['thankYouPage'] != '') {
                                 BFRedirect($options['thankYouPage']);
                             } else {
-                                BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_THANK_YOU_FOR_PAYING_WITH_STRIPE'));
+                                BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_THANK_YOU_FOR_PAYING_WITH_STRIPE'));
                             }
                         }
                     }
@@ -1036,7 +1050,7 @@ if (
             }
         }
     }
-} else if (BFRequest::getBool('stripeDownload') && (!isset($ff_applic) || $ff_applic == '' )) {
+} else if (BFRequest::getBool('stripeDownload') && (!isset($ff_applic) || $ff_applic == '')) {
 
     BFRequest::setVar('format', 'raw');
 
@@ -1046,7 +1060,7 @@ if (
     $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote(BFRequest::getInt('form', -1)));
     $list = $db->loadObjectList();
     if (count($list) == 0) {
-        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_FORM_DOES_NOT_EXIST'));
+        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_FORM_DOES_NOT_EXIST'));
         exit;
     }
 
@@ -1054,11 +1068,11 @@ if (
 
     $areas = Zend_Json::decode($form->template_areas);
     if (!is_array($areas)) {
-        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_PAYMENT_DATA'));
+        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_PAYMENT_DATA'));
     }
 
-    foreach ($areas As $area) {
-        foreach ($area['elements'] As $element) {
+    foreach ($areas as $area) {
+        foreach ($area['elements'] as $element) {
             if ($element['internalType'] == 'bfStripe') {
 
                 $options = $element['options'];
@@ -1096,7 +1110,7 @@ if (
                             $db->query();
 
                             if (!file_exists($file)) {
-                                BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_DOWNLOAD_FILE'));
+                                BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_DOWNLOAD_FILE'));
                             }
 
                             header('Content-Description: File Transfer');
@@ -1113,22 +1127,22 @@ if (
                             exit;
                         } else {
 
-                            BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_MAX_DOWNLOAD_TRIES_REACHED'));
+                            BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_MAX_DOWNLOAD_TRIES_REACHED'));
                         }
                     } else {
 
-                        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_DOWNLOAD_NOT_POSSIBLE'));
+                        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_DOWNLOAD_NOT_POSSIBLE'));
                     }
                 } else {
 
-                    BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_NO_DOWNLOADABLE_PRODUCT'));
+                    BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_NO_DOWNLOADABLE_PRODUCT'));
                 }
 
                 break;
             }
         }
     }
-} else if (BFRequest::getBool('confirmPayPal') && (!isset($ff_applic) || $ff_applic == '' )) {
+} else if (BFRequest::getBool('confirmPayPal') && (!isset($ff_applic) || $ff_applic == '')) {
 
     BFRequest::setVar('format', 'html');
 
@@ -1138,7 +1152,7 @@ if (
     $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote(BFRequest::getInt('form_id', -1)));
     $list = $db->loadObjectList();
     if (count($list) == 0) {
-        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_FORM_DOES_NOT_EXIST'));
+        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_FORM_DOES_NOT_EXIST'));
         exit;
     }
 
@@ -1146,19 +1160,19 @@ if (
 
     $areas = Zend_Json::decode($form->template_areas);
     if (!is_array($areas)) {
-        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_PAYPAL_DATA'));
+        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_PAYPAL_DATA'));
         exit;
     }
 
-    foreach ($areas As $area) {
+    foreach ($areas as $area) {
         $checkPP = true;
-        foreach ($area['elements'] As $element) {
+        foreach ($area['elements'] as $element) {
             if ($element['name'] == 'PayPalSelect' || $element['name'] == 'BfPaymentSelect') {
                 $checkPP = false;
                 break;
             }
         }
-        foreach ($area['elements'] As $element) {
+        foreach ($area['elements'] as $element) {
             if ($element['internalType'] == 'bfPayPal') {
 
                 $options = $element['options'];
@@ -1221,7 +1235,7 @@ if (
                         }
                     }
 
-                    if ($checkPP && ( ( $options['amount'] > 0 && $keyarray['mc_gross'] != (doubleval($options['amount']) + doubleval($options['tax'])) ) || $keyarray['mc_currency'] != strtoupper($options['currencyCode']) )) {
+                    if ($checkPP && (($options['amount'] > 0 && $keyarray['mc_gross'] != (doubleval($options['amount']) + doubleval($options['tax']))) || $keyarray['mc_currency'] != strtoupper($options['currencyCode']))) {
 
                         $success = false;
                         $msg = JText::_("Payment was not correct (amount/currency)");
@@ -1272,7 +1286,7 @@ if (
                                     if ($options['thankYouPage'] != '') {
                                         BFRedirect($options['thankYouPage']);
                                     } else {
-                                        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_THANK_YOU_FOR_PAYING_WITH_PAYPAL'));
+                                        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_THANK_YOU_FOR_PAYING_WITH_PAYPAL'));
                                     }
                                 }
 
@@ -1289,7 +1303,7 @@ if (
                                         if ($options['thankYouPage'] != '') {
                                             BFRedirect($options['thankYouPage']);
                                         } else {
-                                            BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_THANK_YOU_FOR_PAYING_WITH_PAYPAL'));
+                                            BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_THANK_YOU_FOR_PAYING_WITH_PAYPAL'));
                                         }
                                     } else {
                                         $success = false;
@@ -1318,7 +1332,7 @@ if (
             }
         }
     }
-} else if (BFRequest::getBool('paypalDownload') && (!isset($ff_applic) || $ff_applic == '' )) {
+} else if (BFRequest::getBool('paypalDownload') && (!isset($ff_applic) || $ff_applic == '')) {
 
     BFRequest::setVar('format', 'raw');
 
@@ -1328,7 +1342,7 @@ if (
     $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote(BFRequest::getInt('form', -1)));
     $list = $db->loadObjectList();
     if (count($list) == 0) {
-        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_FORM_DOES_NOT_EXIST'));
+        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_FORM_DOES_NOT_EXIST'));
         exit;
     }
 
@@ -1336,11 +1350,11 @@ if (
 
     $areas = Zend_Json::decode($form->template_areas);
     if (!is_array($areas)) {
-        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_PAYPAL_DATA'));
+        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_PAYPAL_DATA'));
     }
 
-    foreach ($areas As $area) {
-        foreach ($area['elements'] As $element) {
+    foreach ($areas as $area) {
+        foreach ($area['elements'] as $element) {
             if ($element['internalType'] == 'bfPayPal') {
 
                 $options = $element['options'];
@@ -1386,7 +1400,7 @@ if (
                             $db->query();
 
                             if (!file_exists($file)) {
-                                BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_DOWNLOAD_FILE'));
+                                BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_DOWNLOAD_FILE'));
                             }
 
                             header('Content-Description: File Transfer');
@@ -1403,15 +1417,15 @@ if (
                             exit;
                         } else {
 
-                            BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_MAX_DOWNLOAD_TRIES_REACHED'));
+                            BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_MAX_DOWNLOAD_TRIES_REACHED'));
                         }
                     } else {
 
-                        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_DOWNLOAD_NOT_POSSIBLE'));
+                        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_DOWNLOAD_NOT_POSSIBLE'));
                     }
                 } else {
 
-                    BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_NO_DOWNLOADABLE_PRODUCT'));
+                    BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_NO_DOWNLOADABLE_PRODUCT'));
                 }
 
                 break;
@@ -1422,7 +1436,7 @@ if (
 
     BFRequest::setVar('format', 'html');
 
-    $style = '<link rel="stylesheet" href="' . JURI::root() . 'templates/' . $mainframe->getTemplate() . '/css/template.css" type="text/css" />';
+    $style = '<link rel="stylesheet" href="' . Uri::root() . 'templates/' . $mainframe->getTemplate() . '/css/template.css" type="text/css" />';
 
     echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="' . strtolower(JFactory::getApplication()->getLanguage()->getTag()) . '" lang="' . strtolower(JFactory::getApplication()->getLanguage()->getTag()) . '" >
@@ -1454,7 +1468,7 @@ if (
             $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote($formId));
             $list = $db->loadObjectList();
             if (count($list) == 0) {
-                BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_FORM_DOES_NOT_EXIST'));
+                BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_FORM_DOES_NOT_EXIST'));
                 exit;
             }
 
@@ -1462,11 +1476,11 @@ if (
 
             $areas = Zend_Json::decode($form->template_areas);
             if (!is_array($areas)) {
-                BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_SU_DATA'));
+                BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_SU_DATA'));
             }
 
-            foreach ($areas As $area) {
-                foreach ($area['elements'] As $element) {
+            foreach ($areas as $area) {
+                foreach ($area['elements'] as $element) {
                     if ($element['internalType'] == 'bfSofortueberweisung') {
                         $options = $element['options'];
                         if ($options['downloadableFile']) {
@@ -1494,7 +1508,7 @@ if (
                             if ($options['thankYouPage'] != '') {
                                 BFRedirect($options['thankYouPage']);
                             } else {
-                                BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_THANK_YOU_FOR_PAYING_WITH_SU'));
+                                BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_THANK_YOU_FOR_PAYING_WITH_SU'));
                             }
                         }
 
@@ -1534,8 +1548,8 @@ if (
         exit;
     }
 
-    foreach ($areas As $area) {
-        foreach ($area['elements'] As $element) {
+    foreach ($areas as $area) {
+        foreach ($area['elements'] as $element) {
             if ($element['internalType'] == 'bfSofortueberweisung') {
 
                 $options = $element['options'];
@@ -1660,7 +1674,7 @@ if (
             }
         }
     }
-} else if (BFRequest::getBool('sofortueberweisungDownload') && (!isset($ff_applic) || $ff_applic == '' )) {
+} else if (BFRequest::getBool('sofortueberweisungDownload') && (!isset($ff_applic) || $ff_applic == '')) {
 
     BFRequest::setVar('format', 'raw');
 
@@ -1670,7 +1684,7 @@ if (
     $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote(BFRequest::getInt('form', -1)));
     $list = $db->loadObjectList();
     if (count($list) == 0) {
-        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_FORM_DOES_NOT_EXIST'));
+        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_FORM_DOES_NOT_EXIST'));
         exit;
     }
 
@@ -1678,11 +1692,11 @@ if (
 
     $areas = Zend_Json::decode($form->template_areas);
     if (!is_array($areas)) {
-        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_PAYMENT_DATA'));
+        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_PAYMENT_DATA'));
     }
 
-    foreach ($areas As $area) {
-        foreach ($area['elements'] As $element) {
+    foreach ($areas as $area) {
+        foreach ($area['elements'] as $element) {
             if ($element['internalType'] == 'bfSofortueberweisung') {
 
                 $options = $element['options'];
@@ -1720,7 +1734,7 @@ if (
                             $db->query();
 
                             if (!file_exists($file)) {
-                                BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_DOWNLOAD_FILE'));
+                                BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_DOWNLOAD_FILE'));
                             }
 
                             header('Content-Description: File Transfer');
@@ -1737,15 +1751,15 @@ if (
                             exit;
                         } else {
 
-                            BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_MAX_DOWNLOAD_TRIES_REACHED'));
+                            BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_MAX_DOWNLOAD_TRIES_REACHED'));
                         }
                     } else {
 
-                        BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_DOWNLOAD_NOT_POSSIBLE'));
+                        BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_DOWNLOAD_NOT_POSSIBLE'));
                     }
                 } else {
 
-                    BFRedirect(JURI::root(), BFText::_('COM_BREEZINGFORMS_NO_DOWNLOADABLE_PRODUCT'));
+                    BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_NO_DOWNLOADABLE_PRODUCT'));
                 }
 
                 break;
@@ -1754,7 +1768,8 @@ if (
     }
 } else if (BFRequest::getBool('flashUpload')) {
 
-    function bfProcess(&$dataObject, $finaltargetFile, $parent = null, $index = 0, $childrenLength = 0) {
+    function bfProcess(&$dataObject, $finaltargetFile, $parent = null, $index = 0, $childrenLength = 0)
+    {
         $mdata = $dataObject['properties'];
         if ($mdata['type'] == 'element') {
             switch ($mdata['bfType']) {

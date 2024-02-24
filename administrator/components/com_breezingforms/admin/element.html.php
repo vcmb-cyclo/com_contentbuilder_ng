@@ -8,6 +8,8 @@
 **/
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Uri\Uri;
+
 require_once($ff_compath.'/facileforms.process.php');
 
 jimport('joomla.version');
@@ -18,7 +20,7 @@ class HTML_facileFormsElement
 	static function newitem($option, $pkg, $form, $page)
 	{
 		$mainframe = JFactory::getApplication();
-		$ff_mossite = JURI::base();
+		$ff_mossite = Uri::base();
 ?>
 
 		<div id="overDiv" style="position:absolute; visibility:hidden; z-index:10000;"></div>
@@ -109,7 +111,7 @@ class HTML_facileFormsElement
 	{
 		global $ff_mossite, $ff_admsite, $ff_config;
 		$mainframe = JFactory::getApplication();
-		$ff_mossite = JURI::base();
+		$ff_mossite = Uri::base();
 		$action = $row->id ? BFText::_('COM_BREEZINGFORMS_ELEMENTS_EDIT') : BFText::_('COM_BREEZINGFORMS_ELEMENTS_ADD');
 
 		$hasInit = false;
@@ -2482,7 +2484,7 @@ class HTML_facileFormsElement
 		$mainframe = JFactory::getApplication();
 		$database = BFFactory::getDbo();
 		
-		$ff_mossite = JURI::root();
+		$ff_mossite = Uri::root();
 ?>
 		<script type="text/javascript">
 			<!--
@@ -2857,7 +2859,7 @@ class HTML_facileFormsElement
 <?php
 		} else {
 ?>
-			<script type="text/javascript" src="<?php echo JURI::root() . 'administrator/components/com_breezingforms/libraries/wz_dragdrop/wz_dragdrop.js' ?>"></script>
+			<script type="text/javascript" src="<?php echo Uri::root() . 'administrator/components/com_breezingforms/libraries/wz_dragdrop/wz_dragdrop.js' ?>"></script>
 			<!-- BEGIN OF SURFACE -->
 			<div id="SelectOptionDialog" style="background-color: #cccccc;position:absolute;top:233px;right:15px;z-index:100;">
 <?php

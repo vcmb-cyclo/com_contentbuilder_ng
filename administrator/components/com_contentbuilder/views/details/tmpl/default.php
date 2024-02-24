@@ -6,12 +6,14 @@
  * @license     GNU/GPL
 */
 defined( '_JEXEC' ) or die( 'Restricted access' );
+
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
 
 $edit_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('edit') : contentbuilder::authorize('edit');
 $delete_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('delete') : contentbuilder::authorize('delete');
 $view_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('view') : contentbuilder::authorize('view');
-JFactory::getDocument()->addScript(JURI::root(true).'/components/com_contentbuilder/assets/js/contentbuilder.js');
+JFactory::getDocument()->addScript(Uri::root(true).'/components/com_contentbuilder/assets/js/contentbuilder.js');
 ?>
 
 <?php if($this->author) JFactory::getDocument()->setMetaData('author', $this->author);?>

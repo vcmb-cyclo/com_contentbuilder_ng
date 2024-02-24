@@ -15,6 +15,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\Folder;
 use Joomla\Registry\Registry;
+use Joomla\CMS\Uri\Uri;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder_helpers.php');
@@ -55,8 +56,8 @@ class contentbuilder{
                 $pages_current = ceil(($limitstart + 1) / $limit);
         }
         
-        $url  = JURI::getInstance()->toString();
-        $query = JURI::getInstance()->getQuery(true);
+        $url  = Uri::getInstance()->toString();
+        $query = Uri::getInstance()->getQuery(true);
         if(isset($query['start'])){
             unset($query['start']);
         }
@@ -158,7 +159,7 @@ class contentbuilder{
 }
 
 .cbVotingDisplay {
-	background-image: url('.JURI::root(true).'/components/com_contentbuilder/assets/images/bg_votingStarOff.png);
+	background-image: url('.Uri::root(true).'/components/com_contentbuilder/assets/images/bg_votingStarOff.png);
 	background-repeat: repeat-x;
         height: auto;
 }
@@ -168,7 +169,7 @@ class contentbuilder{
 	float: left;
 	height: 20px;
 	overflow: hidden;
-	background-image: url('.JURI::root(true).'/components/com_contentbuilder/assets/images/bg_votingStarOn.png);
+	background-image: url('.Uri::root(true).'/components/com_contentbuilder/assets/images/bg_votingStarOn.png);
 	background-repeat: repeat-x;
 }
 
@@ -193,14 +194,14 @@ class contentbuilder{
 .cbRatingImage2{
     width: 30px;
     height: 30px;
-    background-image: url('.JURI::root(true).'/components/com_contentbuilder/assets/images/thumbs_down.png);
+    background-image: url('.Uri::root(true).'/components/com_contentbuilder/assets/images/thumbs_down.png);
     background-repeat: no-repeat;
 }
 
 .cbRatingImage{ 
     width: 30px;
     height: 30px;
-    background-image: url('.JURI::root(true).'/components/com_contentbuilder/assets/images/thumbs_up.png);
+    background-image: url('.Uri::root(true).'/components/com_contentbuilder/assets/images/thumbs_up.png);
     background-repeat: no-repeat;
 }');
             
@@ -225,7 +226,7 @@ class contentbuilder{
         $rating_link = '';
         if($rating_allowed){
             if(JFactory::getApplication()->isClient('site')){
-                $rating_link = JURI::root(true) . (JFactory::getApplication()->isClient('administrator') ? '/administrator' : (CBRequest::getCmd('lang','') && CBCompat::getJoomlaConfig('config.sef') && CBCompat::getJoomlaConfig('config.sef_rewrite') ? '/'.CBRequest::getCmd('lang','') : '') ).'/?option=com_contentbuilder&lang='.$lang.'&controller=ajax&format=raw&subject=rating&id='.$form_id.'&record_id='.$record_id;
+                $rating_link = Uri::root(true) . (JFactory::getApplication()->isClient('administrator') ? '/administrator' : (CBRequest::getCmd('lang','') && CBCompat::getJoomlaConfig('config.sef') && CBCompat::getJoomlaConfig('config.sef_rewrite') ? '/'.CBRequest::getCmd('lang','') : '') ).'/?option=com_contentbuilder&lang='.$lang.'&controller=ajax&format=raw&subject=rating&id='.$form_id.'&record_id='.$record_id;
             }else{
                 $rating_link = 'index.php?option=com_contentbuilder&lang='.$lang.'&controller=ajax&format=raw&subject=rating&id='.$form_id.'&record_id='.$record_id;
             }
@@ -508,7 +509,7 @@ class contentbuilder{
                             $item->$key = $value;
                         } else if(trim($wrapper['item_wrapper']) != ''){
                             $item->$key = str_replace('{value}',$new_value,trim($wrapper['item_wrapper']));
-                            $item->$key = str_replace('{webpath}', str_replace(array('{CBSite}','{cbsite}',JPATH_SITE),JURI::getInstance()->getScheme().'://'.JURI::getInstance()->getHost().(JURI::getInstance()->getPort() == 80 ? '' : ':'.JURI::getInstance()->getPort()).JURI::root(true),$value), $item->$key);
+                            $item->$key = str_replace('{webpath}', str_replace(array('{CBSite}','{cbsite}',JPATH_SITE),Uri::getInstance()->getScheme().'://'.Uri::getInstance()->getHost().(Uri::getInstance()->getPort() == 80 ? '' : ':'.Uri::getInstance()->getPort()).Uri::root(true),$value), $item->$key);
                         }else{
                             $item->$key = $new_value;
                         }
@@ -1074,7 +1075,7 @@ class contentbuilder{
                 if(!isset($item['label']) || !isset($item['id'])) continue;
                 $template = str_replace('{'.$key.':label}',$item['label'], $template);
                 $template = str_replace('{'.$key.':value}',$item['value'], $template);
-                $template = str_replace('{webpath '.$key.'}', str_replace(array('{CBSite}','{cbsite}',JPATH_SITE),JURI::getInstance()->getScheme().'://'.JURI::getInstance()->getHost().(JURI::getInstance()->getPort() == 80 ? '' : ':'.JURI::getInstance()->getPort()).JURI::root(true),$raw_items[$key]['value']), $template);
+                $template = str_replace('{webpath '.$key.'}', str_replace(array('{CBSite}','{cbsite}',JPATH_SITE),Uri::getInstance()->getScheme().'://'.Uri::getInstance()->getHost().(Uri::getInstance()->getPort() == 80 ? '' : ':'.Uri::getInstance()->getPort()).Uri::root(true),$raw_items[$key]['value']), $template);
             }
             
             $_template[$hash] = $template;
@@ -1210,7 +1211,7 @@ class contentbuilder{
             foreach($items As $key => $item){
                 $template = str_replace('{'.$key.':label}',$html ? htmlentities($item['label'],ENT_QUOTES,'UTF-8') : $item['label'], $template);
                 $template = str_replace('{'.$key.':value}',isset($allow_html[$item['id']]) && $html ? (contentbuilder_is_internal_path($item['value']) ? basename($item['value']) : $item['value']) : nl2br(strip_tags((contentbuilder_is_internal_path($item['value']) ? basename($item['value']) : $item['value']))), $template);
-                $template = str_replace('{webpath '.$key.'}', str_replace(array('{CBSite}','{cbsite}',JPATH_SITE),JURI::getInstance()->getScheme().'://'.JURI::getInstance()->getHost().(JURI::getInstance()->getPort() == 80 ? '' : ':'.JURI::getInstance()->getPort()).JURI::root(true),$item['value']), $template);
+                $template = str_replace('{webpath '.$key.'}', str_replace(array('{CBSite}','{cbsite}',JPATH_SITE),Uri::getInstance()->getScheme().'://'.Uri::getInstance()->getHost().(Uri::getInstance()->getPort() == 80 ? '' : ':'.Uri::getInstance()->getPort()).Uri::root(true),$item['value']), $template);
             }
             
             $_template[$hash] = $template;
@@ -1536,17 +1537,17 @@ class contentbuilder{
 
                          if(JFactory::getApplication()->isClient('site'))
                          {
-                            $captcha_url = JURI::root(true).'/components/com_contentbuilder/images/securimage/securimage_show.php';
+                            $captcha_url = Uri::root(true).'/components/com_contentbuilder/images/securimage/securimage_show.php';
                          }
                          else
                          {
-                            $captcha_url = JURI::root(true).'/administrator/components/com_contentbuilder/assets/images/securimage_show.php';
+                            $captcha_url = Uri::root(true).'/administrator/components/com_contentbuilder/assets/images/securimage_show.php';
                          }
                          
                          $the_item .= '<img width="250" height="80" id="cbCaptcha" alt="captcha" src="'.$captcha_url.'?rand='.rand(0, getrandmax()).'"/>';
                          $the_item .= '<div>';
                          $the_item .= '<input class="form-control form-control-sm mt-1" autocomplete="off" id="cb_'.$item['id'].'" name="cb_'.$item['id'].'" type="text" maxlength="12" />';
-                         $the_item .= '<img style="cursor: pointer; padding-left: 7px;" onclick="document.getElementById(\'cbCaptcha\').src = \''.$captcha_url.'?\' + Math.random(); blur(); return false" border="0" alt="refresh" src="'.JURI::root(true).'/components/com_contentbuilder/images/securimage/refresh-captcha.png"/>';
+                         $the_item .= '<img style="cursor: pointer; padding-left: 7px;" onclick="document.getElementById(\'cbCaptcha\').src = \''.$captcha_url.'?\' + Math.random(); blur(); return false" border="0" alt="refresh" src="'.Uri::root(true).'/components/com_contentbuilder/images/securimage/refresh-captcha.png"/>';
                          $the_item .= '</div>';
                          $the_item .= '</div>';
                          break;
@@ -1606,7 +1607,7 @@ class contentbuilder{
                     if($the_item){
                         $tip = 'hasTip';
                         $tip_prefix = htmlentities($item['label'],ENT_QUOTES,'UTF-8').'::';
-                        $template = str_replace('{'.$key.':label}','<label '.($element['hint'] ? 'class="editlinktip '.$tip.'" title="'.$tip_prefix.$element['hint'].'" ' : '').'for="cb_'.$item['id'].'">'.$item['label'].$asterisk.($element['hint'] ? ' <img style="cursor: pointer;" src="'.JURI::root(true).'/components/com_contentbuilder/images/icon_info.png" border="0"/>' : '').'</label>', $template);
+                        $template = str_replace('{'.$key.':label}','<label '.($element['hint'] ? 'class="editlinktip '.$tip.'" title="'.$tip_prefix.$element['hint'].'" ' : '').'for="cb_'.$item['id'].'">'.$item['label'].$asterisk.($element['hint'] ? ' <img style="cursor: pointer;" src="'.Uri::root(true).'/components/com_contentbuilder/images/icon_info.png" border="0"/>' : '').'</label>', $template);
                         $template = str_replace('{'.$key.':item}',$the_item, $template);
                     }
                 }

@@ -11,6 +11,7 @@ defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Factory;
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Uri\Uri;
 
 class bfRecordManagement {
 
@@ -569,7 +570,7 @@ class bfRecordManagement {
             JToolBarHelper::custom('archived', 'archive', 'archive', BFText::_('COM_BREEZINGFORMS_TOOLBAR_ARCHIVE'), false);
             JToolBarHelper::custom('remove', 'delete.png', 'delete_f2.png', BFText::_('COM_BREEZINGFORMS_TOOLBAR_DELETE'), false);
         } else {
-            JToolBarHelper::title('<img src="' . JURI::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/easymode/i/logo-breezingforms.png' . '" align="top"/>');
+            JToolBarHelper::title('<img src="' . Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/easymode/i/logo-breezingforms.png' . '" align="top"/>');
             JToolBarHelper::custom('exportPdf', 'ff_download', 'ff_download_f2', BFText::_('COM_BREEZINGFORMS_PDF'), false);
             JToolBarHelper::custom('exportCsv', 'ff_download', 'ff_download_f2', BFText::_('COM_BREEZINGFORMS_CSV'), false);
             JToolBarHelper::custom('exportXml', 'ff_download', 'ff_download_f2', BFText::_('COM_BREEZINGFORMS_XML'), false);
@@ -600,31 +601,31 @@ class bfRecordManagement {
             );
         }
 
-        //JFactory::getDocument()->addScript(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/jq.migrate.js');
-        //JFactory::getDocument()->addScript(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/jq.min.js');
+        //JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq.migrate.js');
+        //JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq.min.js');
         //JFactory::getDocument()->addScriptDeclaration('jQuery.noConflict();' . "\n");
-        JFactory::getDocument()->addScript(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/jq-ui.min.js');
-        JFactory::getDocument()->addScript(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/jq.jtable.js');
+        JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq-ui.min.js');
+        JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/jq.jtable.js');
 
         $lang = JFactory::getLanguage()->getTag();
         $lang = explode('-', $lang);
         $lang = strtolower($lang[0]);
         if (JFile::exists(JPATH_SITE . '/components/com_breezingforms/libraries/jquery/jtable/localization/jquery.jtable.' . $lang . '.js')) {
-            JFactory::getDocument()->addScript(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/localization/jquery.jtable.' . $lang . '.js');
+            JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/localization/jquery.jtable.' . $lang . '.js');
         }
 
-        JFactory::getDocument()->addScript(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.js');
-        JFactory::getDocument()->addScript(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.date.js');
-        JFactory::getDocument()->addScript(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.time.js');
-        JFactory::getDocument()->addScript(JURI::root(true) . '/administrator/components/com_breezingforms/libraries/jquery/plugins/json.js');
+        JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.js');
+        JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.date.js');
+        JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.time.js');
+        JFactory::getDocument()->addScript(Uri::root(true) . '/administrator/components/com_breezingforms/libraries/jquery/plugins/json.js');
 
-        JFactory::getDocument()->addStyleSheet(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/themes/metro/jq.ui.css');
-        JFactory::getDocument()->addStyleSheet(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/themes/metro/blue/jtable.css');
-        JFactory::getDocument()->addStyleSheet(JURI::root() . 'administrator/components/com_breezingforms/admin/style.css');
+        JFactory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/themes/metro/jq.ui.css');
+        JFactory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/themes/metro/blue/jtable.css');
+        JFactory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/admin/style.css');
 
-        JFactory::getDocument()->addStyleSheet(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/themes/default.css');
-        JFactory::getDocument()->addStyleSheet(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/themes/default.date.css');
-        JFactory::getDocument()->addStyleSheet(JURI::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/themes/default.time.css');
+        JFactory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/themes/default.css');
+        JFactory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/themes/default.date.css');
+        JFactory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/themes/default.time.css');
         ?>
         <script type="text/javascript">
             function ct_quote(str) {
@@ -893,7 +894,7 @@ class bfRecordManagement {
                         display: function (detail_data) {
                         
                             //Create an image that will be used to open child table
-                            var $img = jQuery("<img style=\"width: 16px !important; min-width: 16px !important; max-width: 16px !important; cursor: pointer;opacity: 0.5;\" onmouseover=\"this.style.opacity=\'1.0\'\" onmouseout=\"this.style.opacity=\'0.5\'\" src=\"' . JURI::root() . '/components/com_breezingforms/libraries/jquery/jtable/themes/metro/list_metro.png' . '\" title=\"\" />");
+                            var $img = jQuery("<img style=\"width: 16px !important; min-width: 16px !important; max-width: 16px !important; cursor: pointer;opacity: 0.5;\" onmouseover=\"this.style.opacity=\'1.0\'\" onmouseout=\"this.style.opacity=\'0.5\'\" src=\"' . Uri::root() . '/components/com_breezingforms/libraries/jquery/jtable/themes/metro/list_metro.png' . '\" title=\"\" />");
                             
                             //Open child table when user clicks the image
                             $img.click(function () {
@@ -2221,9 +2222,9 @@ class bfRecordManagement {
         }
         $image = @getimagesize($file);
         if ($image !== false) {
-            return '<a href="' . JURI::getInstance()->toString() . '&downloadFile=' . md5(basename($file) . $record_id . $element_id . $file_index) . '"><img src="' . JURI::getInstance()->toString() . '&renderFile=' . md5(basename($file) . $record_id . $element_id . $file_index) . '" border=\"0\"/></a><br/>';
+            return '<a href="' . Uri::getInstance()->toString() . '&downloadFile=' . md5(basename($file) . $record_id . $element_id . $file_index) . '"><img src="' . Uri::getInstance()->toString() . '&renderFile=' . md5(basename($file) . $record_id . $element_id . $file_index) . '" border=\"0\"/></a><br/>';
         } else {
-            return '<a href="' . JURI::getInstance()->toString() . '&downloadFile=' . md5(basename($file) . $record_id . $element_id . $file_index) . '">' . basename($file) . '</a><br />';
+            return '<a href="' . Uri::getInstance()->toString() . '&downloadFile=' . md5(basename($file) . $record_id . $element_id . $file_index) . '">' . basename($file) . '</a><br />';
         }
     }
 

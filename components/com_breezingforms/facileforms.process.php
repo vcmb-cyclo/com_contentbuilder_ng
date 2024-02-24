@@ -12,6 +12,7 @@ defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 use Joomla\CMS\Factory;
 use Joomla\Event\Event;
 use Joomla\Event\EventInterface;
+use Joomla\CMS\Uri\Uri;
 
 jimport('joomla.filesystem.file');
 jimport('joomla.filesystem.folder');
@@ -1614,7 +1615,7 @@ class HTML_facileFormsProcessor {
         if ($curr > 0)
             $code .= "    } // if" . nl();
         $code .= 'if(error != "" && document.getElementById(\'ff_capimgValue\')){
-                 document.getElementById(\'ff_capimgValue\').src = \'' . JURI::root(true) . (JFactory::getApplication()->isClient('administrator') ? '/administrator' : '') . '/components/com_breezingforms/images/captcha/securimage_show.php?bfMathRandom=\' + Math.random();
+                 document.getElementById(\'ff_capimgValue\').src = \'' . Uri::root(true) . (JFactory::getApplication()->isClient('administrator') ? '/administrator' : '') . '/components/com_breezingforms/images/captcha/securimage_show.php?bfMathRandom=\' + Math.random();
                  document.getElementById(\'bfCaptchaEntry\').value = "";
             }';
         $code .= 'if(error!="" && document.getElementById("bfSubmitButton")){document.getElementById("bfSubmitButton").disabled = false;}' . nl();
@@ -2110,7 +2111,7 @@ class HTML_facileFormsProcessor {
                 ($ff_config->compress ? $this->compressJavascript($code) : $code) .
                 '//-->' . nl() .
                 '</script>' . nl() .
-                '<script type="text/javascript" src="' . JURI::root(true) . '/components/com_breezingforms/facileforms.js"></script>' . nl();
+                '<script type="text/javascript" src="' . Uri::root(true) . '/components/com_breezingforms/facileforms.js"></script>' . nl();
     }
 
 // header
@@ -2376,7 +2377,7 @@ class HTML_facileFormsProcessor {
         $this->queryCols = array();
         $this->queryRows = array();
         if ($this->runmode == _FF_RUNMODE_PREVIEW) {
-            echo '<script type="text/javascript" src="' . JURI::root() . 'administrator/components/com_breezingforms/libraries/wz_dragdrop/wz_dragdrop.js"></script>';
+            echo '<script type="text/javascript" src="' . Uri::root() . 'administrator/components/com_breezingforms/libraries/wz_dragdrop/wz_dragdrop.js"></script>';
         }
         if (trim($this->formrow->template_code_processed) == 'QuickMode' && $this->legacy_wrap)
             echo '<table style="display:none;width:100%;" id="bfReCaptchaWrap"><tr><td><div id="bfReCaptchaDiv"></div></td></tr></table>';
@@ -2519,7 +2520,7 @@ class HTML_facileFormsProcessor {
                                                                                     bf_restore_submitbutton();
                                                                                 }
                                                                                 
-                                                                                        document.getElementById(\'ff_capimgValue\').src = \'' . JURI::root(true) . (JFactory::getApplication()->isClient('administrator') ? '/administrator' : '') . '/components/com_breezingforms/images/captcha/securimage_show.php?bfMathRandom=\' + Math.random();
+                                                                                        document.getElementById(\'ff_capimgValue\').src = \'' . Uri::root(true) . (JFactory::getApplication()->isClient('administrator') ? '/administrator' : '') . '/components/com_breezingforms/images/captcha/securimage_show.php?bfMathRandom=\' + Math.random();
                                                                                         document.getElementById(\'bfCaptchaEntry\').value = "";
                                                                                         if(ff_currentpage != ' . $row->page . ')ff_switchpage(' . $row->page . ');
                                                                                         document.getElementById(\'bfCaptchaEntry\').focus();
@@ -2999,7 +3000,7 @@ class HTML_facileFormsProcessor {
 
             jimport('joomla.version');
             $version = new JVersion();
-            $current_url = JURI::getInstance()->toString();
+            $current_url = Uri::getInstance()->toString();
             if (version_compare($version->getShortVersion(), '3.0', '<')) {
                 if (strstr($current_url, '?') !== false) {
                     $current_url_exploded = explode('?', $current_url);
@@ -3768,9 +3769,9 @@ class HTML_facileFormsProcessor {
                         break;
                     case 'Captcha':
                         if (JFactory::getApplication()->isClient('site')) {
-                            $captcha_url = JURI::root(true) . '/components/com_breezingforms/images/captcha/securimage_show.php';
+                            $captcha_url = Uri::root(true) . '/components/com_breezingforms/images/captcha/securimage_show.php';
                         } else {
-                            $captcha_url = JURI::root(true) . '/administrator/components/com_breezingforms/images/captcha/securimage_show.php';
+                            $captcha_url = Uri::root(true) . '/administrator/components/com_breezingforms/images/captcha/securimage_show.php';
                         }
                         echo indentc(1) . '<div id="ff_div' . $row->id . '" style="' . $attribs . '"' . $class1 . '>' . nlc();
                         $attribs = '';
@@ -3782,7 +3783,7 @@ class HTML_facileFormsProcessor {
                         echo '<br/>';
                         echo '<input type="text" style="' . $attribs . '" name="bfCaptchaEntry" id="bfCaptchaEntry" />';
                         //echo '<br/>';
-                        echo '<a href="#" onclick="document.getElementById(\'bfCaptchaEntry\').value=\'\';document.getElementById(\'bfCaptchaEntry\').focus();document.getElementById(\'ff_capimgValue\').src = \'' . $captcha_url . '?bfCaptcha=true&bfMathRandom=\' + Math.random(); return false"><img src="' . JURI::root() . 'components/com_breezingforms/images/captcha/refresh-captcha.png" border="0" /></a>';
+                        echo '<a href="#" onclick="document.getElementById(\'bfCaptchaEntry\').value=\'\';document.getElementById(\'bfCaptchaEntry\').focus();document.getElementById(\'ff_capimgValue\').src = \'' . $captcha_url . '?bfCaptcha=true&bfMathRandom=\' + Math.random(); return false"><img src="' . Uri::root() . 'components/com_breezingforms/images/captcha/refresh-captcha.png" border="0" /></a>';
                         echo indentc(1) . '</div>' . nl();
                         break;
                     case 'Query List':
@@ -4058,7 +4059,7 @@ class HTML_facileFormsProcessor {
             if ($is_mobile_type == 'choose') {
                 jimport('joomla.version');
                 $version = new JVersion();
-                $current_url = JURI::getInstance()->toString();
+                $current_url = Uri::getInstance()->toString();
                 if (version_compare($version->getShortVersion(), '3.0', '<')) {
                     if (strstr($current_url, '?') !== false) {
                         $current_url_exploded = explode('?', $current_url);
@@ -8174,7 +8175,7 @@ require_once JPATH_SITE . '/administrator/components/com_breezingforms/libraries
 \Stripe\Stripe::setApiKey($options['secretKey']);
 $stripeemail = strtolower(BFRequest::getVar('ff_nm_'.$options['emailfield'], '')[0]);
 //header('Content-Type: application/json');
-$returnurl = JURI::root() . "index.php?option=com_breezingforms&confirmStripe=true&form_id=" . $this->form . "&record_id=" . $this->record_id;
+$returnurl = Uri::root() . "index.php?option=com_breezingforms&confirmStripe=true&form_id=" . $this->form . "&record_id=" . $this->record_id;
                                                                 if(isset($options['emailfield']) && $options['emailfield'] !== '') {
                                                                         $stripeemail = strtolower(BFRequest::getVar('ff_nm_'.$options['emailfield'], '')[0]);
                                                                         JFactory::getSession()->set('emailfield', $stripeemail);
@@ -8239,7 +8240,7 @@ $checkout_session = \Stripe\Checkout\Session::create([
             $locale = strtolower($exploded[0]);
         }
 
-        $returnurl = JURI::root() . "index.php?option=com_breezingforms&confirmStripe=true&form_id=" . $this->form . "&record_id=" . $this->record_id;
+        $returnurl = Uri::root() . "index.php?option=com_breezingforms&confirmStripe=true&form_id=" . $this->form . "&record_id=" . $this->record_id;
         if (isset($options['emailfield']) && $options['emailfield'] !== '') {
             $stripeemail = strtolower(BFRequest::getVar('ff_nm_' . $options['emailfield'], '')[0]);
             JFactory::getSession()->set('emailfield', $stripeemail);
@@ -8254,7 +8255,7 @@ $checkout_session = \Stripe\Checkout\Session::create([
         
         var handler = StripeCheckout.configure({
             key: ' . json_encode($options['publishableKey']) . ',
-            image: ' . json_encode(JURI::root() . 'components/com_breezingforms/images/icon_card.png') . ',
+            image: ' . json_encode(Uri::root() . 'components/com_breezingforms/images/icon_card.png') . ',
             locale: ' . json_encode($locale) . ',
             token: function(token) {
             submitted_form = true;
@@ -8273,7 +8274,7 @@ $checkout_session = \Stripe\Checkout\Session::create([
 									    closed: function () { 
 									        if( !submitted_form ){
 									        
-									            location.href = ' . json_encode(JURI::root()) . '; 
+									            location.href = ' . json_encode(Uri::root()) . '; 
                                                                                 }
                                                                             },
                                                                             opened: function(){
@@ -8320,8 +8321,8 @@ $checkout_session = \Stripe\Checkout\Session::create([
                                         $business = $options['testBusiness'];
                                     }
 
-                                    $returnurl = htmlentities(JURI::root() . "index.php?option=com_breezingforms&confirmPayPal=true&form_id=" . $this->form . "&record_id=" . $this->record_id);
-                                    // $cancelurl = htmlentities(JURI::root() . "index.php?msg=" . BFText::_('Transaction Cancelled'));
+                                    $returnurl = htmlentities(Uri::root() . "index.php?option=com_breezingforms&confirmPayPal=true&form_id=" . $this->form . "&record_id=" . $this->record_id);
+                                    // $cancelurl = htmlentities(Uri::root() . "index.php?msg=" . BFText::_('Transaction Cancelled'));
                                     $cancelurl = $options['cancelURL'];
 
                                     $html = '';
@@ -8390,7 +8391,7 @@ $checkout_session = \Stripe\Checkout\Session::create([
                                     $html .= "<input type=\"hidden\" name=\"no_shipping\" value=\"" . ( $options['shipping'] == 1 ? 0 : 1 ) . "\"/>";
                                     $html .= "<input type=\"hidden\" name=\"no_note\" value=\"1\"/>";
                                     if ($options['useIpn']) {
-                                        $html .= "<input type=\"hidden\" name=\"notify_url\" value=\"" . htmlentities(JURI::root() . "index.php?option=com_breezingforms&confirmPayPalIpn=true&raw=true&form_id=" . $this->form . "&record_id=" . $this->record_id) . "\"/>";
+                                        $html .= "<input type=\"hidden\" name=\"notify_url\" value=\"" . htmlentities(Uri::root() . "index.php?option=com_breezingforms&confirmPayPalIpn=true&raw=true&form_id=" . $this->form . "&record_id=" . $this->record_id) . "\"/>";
                                         if ($options['testaccount']) {
                                             $html .= "<input type=\"hidden\" name=\"test_ipn\" value=\"1\"/>";
                                         }
@@ -8426,7 +8427,7 @@ $checkout_session = \Stripe\Checkout\Session::create([
 													this.setContent(handler,modalUrl);
 										   	};
 
-										    SqueezeBox.loadModal("' . JURI::root() . 'index.php?raw=true&option=com_breezingforms&showPayPalConnectMsg=true","iframe",300,100);
+										    SqueezeBox.loadModal("' . Uri::root() . 'index.php?raw=true&option=com_breezingforms&showPayPalConnectMsg=true","iframe",300,100);
 
 										 	
 
@@ -8542,7 +8543,7 @@ $checkout_session = \Stripe\Checkout\Session::create([
 													this.setContent(handler,modalUrl);
 										   	};
 
-										    SqueezeBox.loadModal("' . JURI::root() . 'index.php?raw=true&option=com_breezingforms&showPayPalConnectMsg=true","iframe",300,100);
+										    SqueezeBox.loadModal("' . Uri::root() . 'index.php?raw=true&option=com_breezingforms&showPayPalConnectMsg=true","iframe",300,100);
 
 										' . nl() .
                                                 indentc(1) . '// -->' . nl() .
@@ -8574,7 +8575,7 @@ $checkout_session = \Stripe\Checkout\Session::create([
                 $return = BFRequest::getVar('return', '');
                 if ($return) {
                     $return = bf_b64dec($return);
-                    if (JURI::isInternal($return)) {
+                    if (Uri::isInternal($return)) {
                         JFactory::getApplication()->redirect($return);
                     }
                 }

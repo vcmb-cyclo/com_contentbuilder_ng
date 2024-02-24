@@ -7,6 +7,9 @@
 * @license Released under the terms of the GNU General Public License
 **/
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
+
+use Joomla\CMS\Uri\Uri;
+
 $iconBase = '../administrator/components/com_breezingforms/libraries/jquery/themes/quickmode/i/';
 ?>
 this.createTextfield = function(id){
@@ -1032,7 +1035,7 @@ this.createSofortueberweisung = function(id){
 						thankYouPage: '',
 						language_id: 'DE',
 						currency_id: 'EUR',
-						image: '<?php echo JURI::root()?>components/com_breezingforms/images/200x65px.png',
+						image: '<?php echo Uri::root()?>components/com_breezingforms/images/200x65px.png',
 						mailback : false,
 						sendNotificationAfterPayment: false,
 
@@ -1161,7 +1164,7 @@ this.createSummarize = function(id){
 				amount: '',
 				thankYouPage: '',
 				currencyCode: 'USD',
-				image: '<?php echo JURI::root()?>components/com_breezingforms/images/stripe.png',
+				image: '<?php echo Uri::root()?>components/com_breezingforms/images/stripe.png',
 				sendNotificationAfterPayment: false,
 				emailfield: '',
 

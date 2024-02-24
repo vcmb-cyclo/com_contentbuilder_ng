@@ -12,7 +12,7 @@ defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\Folder;
-
+use Joomla\CMS\Uri\Uri;
 
 
 if (!function_exists('cb_b64enc')) {
@@ -737,10 +737,10 @@ class plgContentContentbuilder_image_scale extends JPlugin
 																$open_ = '';
 																$close_ = '';
 
-																$url = JURI::getInstance()->toString();
+																$url = Uri::getInstance()->toString();
 																//fixing downloads on other pages than page 1
 																if (CBRequest::getVar('controller', '') == 'list') {
-																	$url = JURI::getInstance()->base() . 'index.php?option=com_contentbuilder&amp;controller=list&amp;id=' . intval($form_id) . '&amp;limitstart=' . CBRequest::getInt('limitstart', 0);
+																	$url = Uri::getInstance()->base() . 'index.php?option=com_contentbuilder&amp;controller=list&amp;id=' . intval($form_id) . '&amp;limitstart=' . CBRequest::getInt('limitstart', 0);
 																}
 
 																if (trim($open) == 'true') {
@@ -748,7 +748,7 @@ class plgContentContentbuilder_image_scale extends JPlugin
 																		$open_ = JRoute::_($url . (strstr($url, '?') !== false ? '&' : '?') . 'contentbuilder_display_detail=1&contentbuilder_detail_file=' . sha1($field . $the_value));
 																	} else {
 																		$ex = explode(JPATH_SITE . DS, JPath::clean($the_value), 2);
-																		$open_ = JURI::root(true) . '/' . str_replace("\\", "/", $ex[count($ex) - 1]);
+																		$open_ = Uri::root(true) . '/' . str_replace("\\", "/", $ex[count($ex) - 1]);
 																	}
 																}
 																if ($open_) {
@@ -761,7 +761,7 @@ class plgContentContentbuilder_image_scale extends JPlugin
 																	$src = JRoute::_($url . (strstr($url, '?') !== false ? '&' : '?') . 'contentbuilder_display=1&contentbuilder_field=' . sha1($field . $filename));
 																} else {
 																	$ex = explode(JPATH_SITE . DS, $filename, 2);
-																	$src = JURI::root(true) . '/' . str_replace("\\", "/", $ex[count($ex) - 1]);
+																	$src = Uri::root(true) . '/' . str_replace("\\", "/", $ex[count($ex) - 1]);
 																}
 
 																$out .= $open_ . '<img border="0" ' . $the_image[3] . ' ' . ($align_ ? 'style="float: ' . $align_ . ';" ' : '') . 'alt="' . $alt . '" title="' . $title . '" src="' . $src . '"/>' . $close_;
@@ -787,7 +787,7 @@ class plgContentContentbuilder_image_scale extends JPlugin
 					}
 
 					if (trim($out) == '' && JFile::exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'plugins' . DS . 'image_scale' . DS . basename($default_image))) {
-						$out = '<img width="' . $default_image_width . '" height="' . $default_image_height . '" alt="" src="' . JURI::root(true) . '/media/contentbuilder/plugins/image_scale/' . basename($default_image) . '"/>';
+						$out = '<img width="' . $default_image_width . '" height="' . $default_image_height . '" alt="" src="' . Uri::root(true) . '/media/contentbuilder/plugins/image_scale/' . basename($default_image) . '"/>';
 					}
 
 					if ($is_series && $align && (strtolower($align) == 'left' || strtolower($align) == 'right')) {
@@ -842,60 +842,60 @@ class plgContentContentbuilder_image_scale extends JPlugin
 		return ((double) $a[0] + $a[1]) / 1000;
 	}
 	/*
-	   public function resize_image($source_image, $destination_width, $destination_height, $type = 0, $bgcolor = array(0,0,0)) {
-		   // $type (1=crop to fit, 2=letterbox)
-		   $source_width = imagesx($source_image);
-		   $source_height = imagesy($source_image);
-		   $source_ratio = $source_width / $source_height;
-		   $destination_ratio = $destination_width / $destination_height;
-		   if ($type == 1) {
-			   // crop to fit
-			   if ($source_ratio > $destination_ratio) {
-				   // source has a wider ratio
-				   $temp_width = (int) ($source_height * $destination_ratio);
-				   $temp_height = $source_height;
-				   $source_x = (int) (($source_width - $temp_width) / 2);
-				   $source_y = 0;
-			   } else {
-				   // source has a taller ratio
-				   $temp_width = $source_width;
-				   $temp_height = (int) ($source_width * $destination_ratio);
-				   $source_x = 0;
-				   $source_y = (int) (($source_height - $temp_height) / 2);
-			   }
-			   $destination_x = 0;
-			   $destination_y = 0;
-			   $source_width = $temp_width;
-			   $source_height = $temp_height;
-			   $new_destination_width = $destination_width;
-			   $new_destination_height = $destination_height;
-		   } else {
-			   // letterbox
-			   if ($source_ratio < $destination_ratio) {
-				   // source has a taller ratio
-				   $temp_width = (int) ($destination_height * $source_ratio);
-				   $temp_height = $destination_height;
-				   $destination_x = (int) (($destination_width - $temp_width) / 2);
-				   $destination_y = 0;
-			   } else {
-				   // source has a wider ratio
-				   $temp_width = $destination_width;
-				   $temp_height = (int) ($destination_width / $source_ratio);
-				   $destination_x = 0;
-				   $destination_y = (int) (($destination_height - $temp_height) / 2);
-			   }
-			   $source_x = 0;
-			   $source_y = 0;
-			   $new_destination_width = $temp_width;
-			   $new_destination_height = $temp_height;
-		   }
-		   $destination_image = imagecreatetruecolor($destination_width, $destination_height);
-		   if ($type > 1) {
-			   imagefill($destination_image, 0, 0, imagecolorallocate($destination_image, $bgcolor[0], $bgcolor[1], $bgcolor[2]));
-		   }
-		   imagecopyresampled($destination_image, $source_image, $destination_x, $destination_y, $source_x, $source_y, $new_destination_width, $new_destination_height, $source_width, $source_height);
-		   return $destination_image;
-	   }*/
+		  public function resize_image($source_image, $destination_width, $destination_height, $type = 0, $bgcolor = array(0,0,0)) {
+			  // $type (1=crop to fit, 2=letterbox)
+			  $source_width = imagesx($source_image);
+			  $source_height = imagesy($source_image);
+			  $source_ratio = $source_width / $source_height;
+			  $destination_ratio = $destination_width / $destination_height;
+			  if ($type == 1) {
+				  // crop to fit
+				  if ($source_ratio > $destination_ratio) {
+					  // source has a wider ratio
+					  $temp_width = (int) ($source_height * $destination_ratio);
+					  $temp_height = $source_height;
+					  $source_x = (int) (($source_width - $temp_width) / 2);
+					  $source_y = 0;
+				  } else {
+					  // source has a taller ratio
+					  $temp_width = $source_width;
+					  $temp_height = (int) ($source_width * $destination_ratio);
+					  $source_x = 0;
+					  $source_y = (int) (($source_height - $temp_height) / 2);
+				  }
+				  $destination_x = 0;
+				  $destination_y = 0;
+				  $source_width = $temp_width;
+				  $source_height = $temp_height;
+				  $new_destination_width = $destination_width;
+				  $new_destination_height = $destination_height;
+			  } else {
+				  // letterbox
+				  if ($source_ratio < $destination_ratio) {
+					  // source has a taller ratio
+					  $temp_width = (int) ($destination_height * $source_ratio);
+					  $temp_height = $destination_height;
+					  $destination_x = (int) (($destination_width - $temp_width) / 2);
+					  $destination_y = 0;
+				  } else {
+					  // source has a wider ratio
+					  $temp_width = $destination_width;
+					  $temp_height = (int) ($destination_width / $source_ratio);
+					  $destination_x = 0;
+					  $destination_y = (int) (($destination_height - $temp_height) / 2);
+				  }
+				  $source_x = 0;
+				  $source_y = 0;
+				  $new_destination_width = $temp_width;
+				  $new_destination_height = $temp_height;
+			  }
+			  $destination_image = imagecreatetruecolor($destination_width, $destination_height);
+			  if ($type > 1) {
+				  imagefill($destination_image, 0, 0, imagecolorallocate($destination_image, $bgcolor[0], $bgcolor[1], $bgcolor[2]));
+			  }
+			  imagecopyresampled($destination_image, $source_image, $destination_x, $destination_y, $source_x, $source_y, $new_destination_width, $new_destination_height, $source_width, $source_height);
+			  return $destination_image;
+		  }*/
 
 	public function resize_image($source_image, $destination_width, $destination_height, $type = 0, $bgcolor = array(0, 0, 0))
 	{

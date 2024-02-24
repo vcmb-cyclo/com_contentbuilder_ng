@@ -12,6 +12,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\Registry\Registry;
+use Joomla\CMS\Uri\Uri;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
@@ -58,7 +59,7 @@ class ContentbuilderModelList extends CBModel
         $this->frontend = class_exists('cbFeMarker');
 
         if($this->frontend){
-            JFactory::getDocument()->addStyleSheet(JURI::root(true).'/components/com_contentbuilder/assets/css/system.css');
+            JFactory::getDocument()->addStyleSheet(Uri::root(true).'/components/com_contentbuilder/assets/css/system.css');
         }
         
         if(CBRequest::getInt('Itemid',0)){
