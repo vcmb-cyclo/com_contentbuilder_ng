@@ -14,6 +14,7 @@ defined('_JEXEC') or die('Restricted access');
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\Database\DatabaseInterface;
+use Joomla\Registry\Registry;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'CBFile.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'CBFactory.php');
@@ -80,7 +81,7 @@ class CBCompat
 
     public static function getParams($attribs)
     {
-        $params = new JRegistry;
+        $params = new Registry;
         $params->loadString($attribs);
         return $params;
     }

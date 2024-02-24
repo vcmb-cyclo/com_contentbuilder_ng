@@ -11,6 +11,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
+use Joomla\Registry\Registry;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
@@ -545,7 +546,7 @@ class ContentbuilderModelList extends CBModel
                     $limitstart = CBRequest::getVar('limitstart', 0, '', 'int');
                     $start      = CBRequest::getVar('start', 0, '', 'int');
                     $table = JTable::getInstance('content');
-                    $registry = new JRegistry;
+                    $registry = new Registry;
 	                $registry->loadString($table->attribs);
                     JPluginHelper::importPlugin('content');
                     $table->text = $data->intro_text;

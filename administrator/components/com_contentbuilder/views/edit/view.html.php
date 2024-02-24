@@ -8,9 +8,11 @@
 
 // no direct access
 
-use Joomla\CMS\Factory;
-
 defined( '_JEXEC' ) or die( 'Restricted access' );
+
+use Joomla\CMS\Factory;
+use Joomla\Registry\Registry;
+
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'viewlegacy.php');
@@ -62,7 +64,7 @@ class ContentbuilderViewEdit extends CBView
 	        // we pass the slug with a flag in the end, and see in the end if the slug has been used in the output
 	        $table->slug = ($article > 0 ? $article : 0) . ':' . $alias . ':contentbuilder_slug_used';
 
-	        $registry = new JRegistry;
+	        $registry = new Registry;
 	        $registry->loadString($table->attribs);
 
 	        JPluginHelper::importPlugin('content', 'breezingforms');

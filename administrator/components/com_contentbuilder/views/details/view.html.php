@@ -10,6 +10,7 @@
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
+use Joomla\Registry\Registry;
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
@@ -63,7 +64,7 @@ class ContentbuilderViewDetails extends CBView
 	    // we pass the slug with a flag in the end, and see in the end if the slug has been used in the output
 	    $table->slug = ($article > 0 ? $article : 0) . ':' . $alias . ':contentbuilder_slug_used';
 
-	    $registry = new JRegistry;
+	    $registry = new Registry;
 	    $registry->loadString($table->attribs);
 	    JPluginHelper::importPlugin('content');
 

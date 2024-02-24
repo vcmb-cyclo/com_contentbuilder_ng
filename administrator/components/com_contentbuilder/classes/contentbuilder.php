@@ -14,6 +14,7 @@ use Joomla\CMS\Editor\Editor;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\Folder;
+use Joomla\Registry\Registry;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder_helpers.php');
@@ -394,7 +395,7 @@ class contentbuilder{
         $onContentPrepare = '';
 
 	    $onContentPrepare = 'onContentPrepare';
-	    $registry = new JRegistry;
+	    $registry = new Registry;
 	    $registry->loadString('{}');
         
         $db = Factory::getContainer()->get(DatabaseInterface::class);
@@ -1879,7 +1880,7 @@ class contentbuilder{
                 
                 // FULL
                 if (isset($config['attribs']) && is_array($config['attribs'])) {
-                    $registry = new JRegistry();
+                    $registry = new Registry();
                     $registry->loadArray($config['attribs']);
                     $attribs = (string) $registry;
                 }
@@ -1903,7 +1904,7 @@ class contentbuilder{
                        $xreference = $config['metadata']['xreference'];
                     }
                     
-                    $registry = new JRegistry();
+                    $registry = new Registry();
                     $registry->loadArray($config['metadata']);
                     $meta = (string) $registry;
                 }

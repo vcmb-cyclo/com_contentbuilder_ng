@@ -17,6 +17,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\Folder;
+use Joomla\Registry\Registry;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
@@ -269,18 +270,18 @@ class ContentbuilderModelEdit extends CBModel
 			                    $item = ArrayHelper::toObject($properties, 'JObject');
 
 			                    if (property_exists($item, 'params')) {
-				                    $registry = new JRegistry;
+				                    $registry = new Registry;
 				                    $registry->loadString($item->params);
 				                    $item->params = $registry->toArray();
 			                    }
 
 			                    // Convert the params field to an array.
-			                    $registry = new JRegistry;
+			                    $registry = new Registry;
 			                    $registry->loadString($item->attribs);
 			                    $item->attribs = $registry->toArray();
 
 			                    // Convert the params field to an array.
-			                    $registry = new JRegistry;
+			                    $registry = new Registry;
 			                    $registry->loadString($item->metadata);
 			                    $item->metadata = $registry->toArray();
 			                    $item->articletext = trim($item->fulltext) != '' ? $item->introtext . "<hr id=\"system-readmore\" />" . $item->fulltext : $item->introtext;
