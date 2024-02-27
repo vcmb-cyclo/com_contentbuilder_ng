@@ -1494,8 +1494,8 @@ $cbcompat = new CBCompat();
 
         echo $sliders->startPane("perm-pane");
 
-        /*  MODIF XDA - GILLES (REMOVE : PERMISSION - BACKEND BOTTON), 
-        /* Supprime le bouton PERMISSION - BACKEND, laisse FRONTEND seulement pour les droits 
+        /*  MODIF XDA - GILLES (REMOVE : PERMISSION - BACKEND BOTTON), */
+        /* Supprime le bouton PERMISSION - BACKEND, laisse FRONTEND seulement pour les droits */
         $title = Text::_( 'COM_CONTENTBUILDER_PERMISSIONS_BACKEND' );
         echo $sliders->startPanel( $title, "permtab0" );
         ?>
@@ -1604,7 +1604,7 @@ $cbcompat = new CBCompat();
         <?php 
 
         echo $sliders->endPanel();
-        FIN MODIF XDA - GILLES */
+        //FIN MODIF XDA - GILLES
         $title = Text::_('COM_CONTENTBUILDER_PERMISSIONS_FRONTEND');
         echo $sliders->startPanel($title, "permtab1");
         ?>
