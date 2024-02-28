@@ -83,7 +83,7 @@ class facileFormsPiece
 		if (count($ids)) {
 			$ids = implode(',', $ids);
 			$database->setQuery("delete from #__facileforms_pieces where id in ($ids)");
-			if (!$database->query()) {
+			if (!$database->execute()) {
 				echo "<script> alert('".$database->getErrorMsg()."'); window.history.go(-1); </script>\n";
 			} // if
 		} // if
@@ -98,7 +98,7 @@ class facileFormsPiece
 		$database->setQuery(
 			"update #__facileforms_pieces set published='$publish' where id in ($ids)"
 		);
-		if (!$database->query()) {
+		if (!$database->execute()) {
 			echo "<script> alert('".$database->getErrorMsg()."'); window.history.go(-1); </script>\n";
 			exit();
 		} // if
