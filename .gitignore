@@ -9,3 +9,5 @@ administrator/logs/
 administrator/cache/
 
 configuration.php
+
+facileforms.config.php
