@@ -476,16 +476,17 @@ function _ff_query($sql, $insert = 0)
     $id = null;
     $database->setQuery($sql);
 
+    $database->query();
+
     try {
         $database->execute();
     } catch (\Exception $e) {
-        try {
-            if (isset($errmode) && $errmode == 'log'){}
-                $errors[] = $e->getMessage();
-                Log::add(Text::sprintf('JLIB_DATABASE_ERROR_FUNCTION_FAILED', $e->getCode(), $e->getMessage()), Log::WARNING, 'jerror');
+        if (isset($errmode) && $errmode == 'log'){
+            $errors[] = $e->getMessage();
+            Log::add(Text::sprintf('JLIB_DATABASE_ERROR_FUNCTION_FAILED', $e->getCode(), $e->getMessage()), Log::WARNING, 'jerror');
         } else {
                 die($e->getMessage());
-        } // if
+        }
     }
 
     if ($insert)
@@ -501,8 +502,7 @@ function _ff_select($sql)
     try {
         $rows = $database->loadObjectList();
     } catch (\Exception $e) {
-        try {
-            if (isset($errmode) && $errmode == 'log'){}
+        if (isset($errmode) && $errmode == 'log'){
                 $errors[] = $e->getMessage();
                 Log::add(Text::sprintf('JLIB_DATABASE_ERROR_FUNCTION_FAILED', $e->getCode(), $e->getMessage()), Log::WARNING, 'jerror');
         } else {
