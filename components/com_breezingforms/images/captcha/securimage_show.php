@@ -9,6 +9,8 @@
  **/
 ob_start();
 
+use Joomla\CMS\Factory;
+
 define('_JEXEC', 1);
 
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -21,7 +23,7 @@ require_once dirname(__FILE__) . '/../../../../includes/app.php';
 require_once( JPATH_BASE . DS . 'libraries' . DS . 'src' . DS . 'Factory.php' );
 
 // Instantiate the application.
-$app = JFactory::getApplication('site');
+$app = Factory::getApplication('site');
 
 ob_end_clean();
 

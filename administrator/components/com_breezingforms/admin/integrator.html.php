@@ -9,6 +9,7 @@
  **/
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\Language\Text;
 
@@ -29,7 +30,7 @@ class BFIntegratorHtml{
         </script>
 
         <?php
-        JFactory::getDocument()->addScriptDeclaration('
+        Factory::getDocument()->addScriptDeclaration('
             Joomla.listItemTask = listItemTask;
         ');
         ?>
@@ -260,7 +261,7 @@ class BFIntegratorHtml{
             </script>
 
             <?php
-            JFactory::getDocument()->addScriptDeclaration('
+            Factory::getDocument()->addScriptDeclaration('
             Joomla.listItemTask = listItemTask;
             ');
             ?>

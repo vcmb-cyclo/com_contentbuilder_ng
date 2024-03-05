@@ -47,15 +47,15 @@ class BFQuickModeMobile
 	{
 
 		$default = JComponentHelper::getParams('com_languages')->get('site');
-		$this->language_tag = JFactory::getApplication()->getLanguage()->getTag() != $default ? JFactory::getApplication()->getLanguage()->getTag() : 'zz-ZZ';
+		$this->language_tag = Factory::getApplication()->getLanguage()->getTag() != $default ? Factory::getApplication()->getLanguage()->getTag() : 'zz-ZZ';
 
-		$head = JFactory::getDocument()->getHeadData();
+		$head = Factory::getDocument()->getHeadData();
 		$head['styleSheets'] = array();
 		$head['style'] = array();
 		$head['scripts'] = array();
 		$head['script'] = array();
 		$head['custom'] = array();
-		JFactory::getDocument()->setHeadData($head);
+		Factory::getDocument()->setHeadData($head);
 
 		$this->p = $p;
 		$this->dataObject = Zend_Json::decode(bf_b64dec($this->p->formrow->template_code));
@@ -66,7 +66,7 @@ class BFQuickModeMobile
 			/* translatables */
 			if (isset($this->rootMdata['title_translation' . $this->language_tag]) && $this->rootMdata['title_translation' . $this->language_tag] != '') {
 				$this->rootMdata['title'] = $this->rootMdata['title_translation' . $this->language_tag];
-				JFactory::getDocument()->setTitle($this->rootMdata['title']);
+				Factory::getDocument()->setTitle($this->rootMdata['title']);
 			}
 			/* translatables end */
 		}
@@ -128,11 +128,11 @@ class BFQuickModeMobile
 
 	public function fetchHead($head)
 	{
-		$app = JFactory::getApplication();
+		$app = Factory::getApplication();
 
 		// Get line endings
-		$lnEnd = JFactory::getDocument()->_getLineEnd();
-		$tab = JFactory::getDocument()->_getTab();
+		$lnEnd = Factory::getDocument()->_getLineEnd();
+		$tab = Factory::getDocument()->_getTab();
 		$tagEnd = ' />';
 		$buffer = '';
 
@@ -220,7 +220,7 @@ class BFQuickModeMobile
 			$this->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.js');
 			$this->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.date.js');
 
-			$lang = JFactory::getApplication()->getLanguage()->getTag();
+			$lang = Factory::getApplication()->getLanguage()->getTag();
 			$lang = explode('-', $lang);
 			$lang = strtolower($lang[0]);
 			if (file_exists(JPATH_SITE . '/components/com_breezingforms/libraries/jquery/pickadate/translations/' . $lang . '.js')) {
@@ -249,9 +249,9 @@ class BFQuickModeMobile
 		$this->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/tooltip.js');
 
 		if ($this->hasFlashUpload) {
-			$tickets = JFactory::getSession()->get('bfFlashUploadTickets', array());
+			$tickets = Factory::getSession()->get('bfFlashUploadTickets', array());
 			$tickets[$this->flashUploadTicket] = array(); // stores file info for later processing
-			JFactory::getSession()->set('bfFlashUploadTickets', $tickets);
+			Factory::getSession()->set('bfFlashUploadTickets', $tickets);
 			$this->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/center.js');
 			$this->addScriptDeclaration('
                         var bfUploaders = [];
@@ -1033,7 +1033,7 @@ function bfTriggerRules() {
 
 		//  data-position="fixed"
 		echo '<div data-role="header" class="ui-header ui-bar-inherit">';
-		echo '<h1>' . JFactory::getDocument()->getTitle() . '</h1>';
+		echo '<h1>' . Factory::getDocument()->getTitle() . '</h1>';
 		$current_url = Uri::getInstance()->toString();
 
 		$return_url = $current_url;
@@ -1115,7 +1115,7 @@ function bfTriggerRules() {
 
 					preg_match_all($regex, $introtext, $matches, PREG_SET_ORDER);
 
-					$document = JFactory::getDocument();
+					$document = Factory::getDocument();
 					$renderer = $document->loadRenderer('modules');
 					$options = array('style' => 'xhtml');
 
@@ -1175,7 +1175,7 @@ function bfTriggerRules() {
 
 					if ($matches) {
 
-						$document = JFactory::getDocument();
+						$document = Factory::getDocument();
 						$renderer = $document->loadRenderer('modules');
 						$options = array('style' => 'xhtml');
 
@@ -1787,7 +1787,7 @@ function bfTriggerRules() {
 
 								$lang = BFRequest::getVar('lang', '');
 
-								$getLangTag = JFactory::getApplication()->getLanguage()->getTag();
+								$getLangTag = Factory::getApplication()->getLanguage()->getTag();
 								$getLangSlug = explode('-', $getLangTag);
 								$reCaptchaLang = 'hl=' . $getLangSlug[0];
 
@@ -1885,7 +1885,7 @@ function bfTriggerRules() {
 						break;
 					case 'bfCaptcha':
 
-						if (JFactory::getApplication()->isClient('site')) {
+						if (Factory::getApplication()->isClient('site')) {
 							$captcha_url = Uri::root(true) . '/components/com_breezingforms/images/captcha/securimage_show.php';
 						} else {
 							$captcha_url = Uri::root(true) . '/administrator/components/com_breezingforms/images/captcha/securimage_show.php';

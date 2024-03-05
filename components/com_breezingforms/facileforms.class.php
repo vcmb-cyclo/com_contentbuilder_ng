@@ -178,7 +178,7 @@ function saveOtherParam($name)
 function initFacileForms()
 {
 	global $ff_mossite, $ff_comsite, $ff_config, $ff_otherparams, $mosConfig_live_site;
-	$mainframe = JFactory::getApplication();
+	$mainframe = Factory::getApplication();
 
 
 

@@ -27,10 +27,10 @@ class PlgSystemSysbreezingforms extends JPlugin
             return;
         }
 
-        $app = JFactory::getApplication();
+        $app = FactorytApplication();
 
         try {
-                $bNotValid = JFactory::getApplication()->isClient('administrator') &&
+                $bNotValid = FactorytApplication()->isClient('administrator') &&
                 (
                     (
                         $app->input->getString('option') == 'com_breezingforms' &&
@@ -87,7 +87,7 @@ class PlgSystemSysbreezingforms extends JPlugin
                         $breaks = '<br /><h4>BreezingForms Pro</h4>';
                         $breaks2 = '<br /><br />';
                     }
-                    JFactory::getApplication()->enqueueMessage($breaks . $message . $breaks2, 'warning');
+                    FactorytApplication()->enqueueMessage($breaks . $message . $breaks2, 'warning');
                 }
             }
 
@@ -105,26 +105,26 @@ class PlgSystemSysbreezingforms extends JPlugin
             return;
         }
 
-        $app = JFactory::getApplication();
+        $app = FactorytApplication();
 
         if ($app->input->getString('option') == 'com_menus' && $app->input->getString('view') == 'items') {
 
-            $body = JFactory::getApplication()->getBody();
+            $body = FactorytApplication()->getBody();
             $body = str_replace('&lt;img src=../administrator/components/com_breezingforms/images/icons/component-menu-icons/bf_icon.png width=23px; /&gt;', '', $body);
             $body = str_replace('&lt;img src=../administrator/components/com_breezingforms/images/icons/component-menu-icons/bf_icon.png width=23; /&gt;', '', $body);
-            JFactory::getApplication()->setBody($body);
+            FactorytApplication()->setBody($body);
         }
 
         if ($app->input->getString('option') == 'com_cpanel' && $app->input->getString('dashboard') == 'components') {
 
-            $body = JFactory::getApplication()->getBody();
+            $body = FactorytApplication()->getBody();
             $body = str_replace('&lt;img src=../administrator/components/com_breezingforms/images/icons/component-menu-icons/folder-open.png width=17; /&gt;', '', $body);
             $body = str_replace('&lt;img src=../administrator/components/com_breezingforms/images/icons/component-menu-icons/pencil-square.png width=17; /&gt;', '', $body);
             $body = str_replace('&lt;img src=../administrator/components/com_breezingforms/images/icons/component-menu-icons/code.png width=17; /&gt;', '', $body);
             $body = str_replace('&lt;img src=../administrator/components/com_breezingforms/images/icons/component-menu-icons/puzzle-pieces.png width=17; /&gt;', '', $body);
             $body = str_replace('&lt;img src=../administrator/components/com_breezingforms/images/icons/component-menu-icons/link.png width=17; /&gt;', '', $body);
             $body = str_replace('&lt;img src=../administrator/components/com_breezingforms/images/icons/component-menu-icons/cog.png width=17; /&gt;', '', $body);
-            JFactory::getApplication()->setBody($body);
+            FactorytApplication()->setBody($body);
         }
     }
 }

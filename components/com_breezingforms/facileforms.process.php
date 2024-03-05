@@ -563,10 +563,10 @@ class HTML_facileFormsProcessor
 
 
         $tz = 'UTC';
-        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
-        $submitted = JFactory::getDate();
-        $submitted = JFactory::getDate('now', $tz);
+        $submitted = Factory);
+        $submitted = Factory'now', $tz);
 
         $this->submitted = $submitted->format('Y-m-d H:i:s');
 
@@ -575,9 +575,9 @@ class HTML_facileFormsProcessor
           if ( !$format ) {
           $this->submitted = date('Y-m-d H:i:s');
           }else{
-          $config = JFactory::getConfig();
+          $config = Factoryg();
           $offset = $config->getValue('config.offset');
-          $instance = JFactory::getDate(date('Y-m-d H:i:s'));
+          $instance = Factorydate('Y-m-d H:i:s'));
           $instance->setOffset($offset);
           $this->submitted = $instance->toFormat($format);
           } */
@@ -1709,7 +1709,7 @@ class HTML_facileFormsProcessor
         if ($curr > 0)
             $code .= "    } // if" . nl();
         $code .= 'if(error != "" && document.getElementById(\'ff_capimgValue\')){
-                 document.getElementById(\'ff_capimgValue\').src = \'' . Uri::root(true) . (JFactory::getApplication()->isClient('administrator') ? '/administrator' : '') . '/components/com_breezingforms/images/captcha/securimage_show.php?bfMathRandom=\' + Math.random();
+                 document.getElementById(\'ff_capimgValue\').src = \'' . Uri::root(true) . (Factorycation()->isClient('administrator') ? '/administrator' : '') . '/components/com_breezingforms/images/captcha/securimage_show.php?bfMathRandom=\' + Math.random();
                  document.getElementById(\'bfCaptchaEntry\').value = "";
             }';
         $code .= 'if(error!="" && document.getElementById("bfSubmitButton")){document.getElementById("bfSubmitButton").disabled = false;}' . nl();
@@ -2247,22 +2247,22 @@ class HTML_facileFormsProcessor
             $path = str_replace('{field:' . strtolower($row->name) . '}', strtolower($row->name), $path);
         }
 
-        $path = str_replace('{userid}', JFactory::getUser()->get('id', 0), $path);
-        $path = str_replace('{username}', JFactory::getUser()->get('username', 'anonymous') . '_' . JFactory::getUser()->get('id', 0), $path);
-        $path = str_replace('{name}', JFactory::getUser()->get('name', 'Anonymous') . '_' . JFactory::getUser()->get('id', 0), $path);
+        $path = str_replace('{userid}', Factory)->get('id', 0), $path);
+        $path = str_replace('{username}', Factory)->get('username', 'anonymous') . '_' . FFFFFFFFFFFactory', 0), $path);
+        $path = str_replace('{name}', Factory)->get('name', 'Anonymous') . '_' . FFFFFFFFFFFactory', 0), $path);
         $path = str_replace('{field}', File::makeSafe(strtolower(trim($field_name))), $path);
 
         $is3 = false;
         $is3 = true;
 
         $tz = 'UTC';
-        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
         $date_stamp1 = date('Y_m_d');
         $date_stamp2 = date('H_i_s');
         $date_stamp3 = date('Y_m_d_H_i_s');
 
-        $date_ = JFactory::getDate($this->submitted, $tz);
+        $date_ = Factory$this->submitted, $tz);
         $offset = $date_->getOffsetFromGMT();
         if ($offset > 0) {
             $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -2274,7 +2274,7 @@ class HTML_facileFormsProcessor
         $date_stamp2 = $date_->format('H_i_s', true);
         $date_stamp3 = $date_->format('Y_m_d_H_i_s', true);
 
-        $_now = JFactory::getDate();
+        $_now = Factory);
         $path = str_replace('{date}', $date_stamp1, $path);
         $path = str_replace('{time}', $date_stamp2, $path);
         $path = str_replace('{datetime}', $date_stamp3, $path);
@@ -2313,14 +2313,14 @@ class HTML_facileFormsProcessor
 
         if (file_exists(JPATH_ADMINISTRATOR . DS . 'components' . DS . 'com_contentbuilder' . DS . 'contentbuilder.xml')) {
 
-            if (JFactory::getApplication()->isClient('administrator')) {
+            if (Factorycation()->isClient('administrator')) {
                 $cbFrontend = false;
             }
 
             if ($cbFrontend) {
-                JFactory::getApplication()->getLanguage()->load('com_contentbuilder');
+                Factorycation()->getLanguage()->load('com_contentbuilder');
             } else {
-                JFactory::getApplication()->getLanguage()->load('com_contentbuilder', JPATH_SITE . DS . 'administrator');
+                Factorycation()->getLanguage()->load('com_contentbuilder', JPATH_SITE . DS . 'administrator');
             }
 
             $db = Factory::getContainer()->get(DatabaseInterface::class);
@@ -2373,7 +2373,7 @@ class HTML_facileFormsProcessor
                 if (is_array($cbData)) {
                     $cbFull = $cbFrontend ? contentbuilder::authorizeFe('fullarticle') : contentbuilder::authorize('fullarticle');
                     $cbForm = contentbuilder::getForm('com_breezingforms', $cbData['reference_id']);
-                    $cbRecord = $cbForm->getRecord(BFRequest::getInt('cb_record_id', 0), $cbData['published_only'], $cbFrontend ? ($cbData['own_only_fe'] ? JFactory::getUser()->get('id', 0) : -1) : ($cbData['own_only'] ? JFactory::getUser()->get('id', 0) : -1), $cbFrontend ? $cbData['show_all_languages_fe'] : true);
+                    $cbRecord = $cbForm->getRecord(BFRequest::getInt('cb_record_id', 0), $cbData['published_only'], $cbFrontend ? ($cbData['own_only_fe'] ? Factory)->get('id', 0) : -1) : ($cbData['own_only'] ? FFFFFFFFFFFactory', 0) : -1), $cbFrontend ? $cbData['show_all_languages_fe'] : true);
 
                     if (!count($cbRecord) && !BFRequest::getBool('cbIsNew')) {
                         throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
@@ -2395,9 +2395,9 @@ class HTML_facileFormsProcessor
         if (trim($this->formrow->template_code_processed) == 'QuickMode') {
 
             if (isset($_GET['non_mobile']) && BFRequest::getBool('non_mobile', 0)) {
-                JFactory::getSession()->clear('com_breezingforms.mobile');
+                Factoryon()->clear('com_breezingforms.mobile');
             } else if (isset($_GET['mobile']) && BFRequest::getBool('mobile', 0)) {
-                JFactory::getSession()->set('com_breezingforms.mobile', true);
+                Factoryon()->set('com_breezingforms.mobile', true);
             }
 
             require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
@@ -2416,7 +2416,7 @@ class HTML_facileFormsProcessor
 
             if (BFRequest::getVar('ff_applic', '') != 'mod_facileforms' && BFRequest::getInt('ff_frame', 0) != 1 && bf_is_mobile()) {
                 $is_device = true;
-                $this->isMobile = isset($rootMdata['mobileEnabled']) && isset($rootMdata['forceMobile']) && $rootMdata['mobileEnabled'] && $rootMdata['forceMobile'] ? true : (isset($rootMdata['mobileEnabled']) && isset($rootMdata['forceMobile']) && $rootMdata['mobileEnabled'] && JFactory::getSession()->get('com_breezingforms.mobile', false) ? true : false);
+                $this->isMobile = isset($rootMdata['mobileEnabled']) && isset($rootMdata['forceMobile']) && $rootMdata['mobileEnabled'] && $rootMdata['forceMobile'] ? true : (isset($rootMdata['mobileEnabled']) && isset($rootMdata['forceMobile']) && $rootMdata['mobileEnabled'] && Factoryon()->get('com_breezingforms.mobile', false) ? true : false);
             } else {
                 $this->isMobile = false;
 
@@ -2457,7 +2457,7 @@ class HTML_facileFormsProcessor
         // CONTENTBUILDER END
 
         $database = Factory::getContainer()->get(DatabaseInterface::class);
-        $mainframe = JFactory::getApplication();
+        $mainframe = Factorycation();
         if (!$this->okrun)
             return;
         set_error_handler('_ff_errorHandler');
@@ -2609,7 +2609,7 @@ class HTML_facileFormsProcessor
                                                                                     bf_restore_submitbutton();
                                                                                 }
                                                                                 
-                                                                                        document.getElementById(\'ff_capimgValue\').src = \'' . Uri::root(true) . (JFactory::getApplication()->isClient('administrator') ? '/administrator' : '') . '/components/com_breezingforms/images/captcha/securimage_show.php?bfMathRandom=\' + Math.random();
+                                                                                        document.getElementById(\'ff_capimgValue\').src = \'' . Uri::root(true) . (Factorycation()->isClient('administrator') ? '/administrator' : '') . '/components/com_breezingforms/images/captcha/securimage_show.php?bfMathRandom=\' + Math.random();
                                                                                         document.getElementById(\'bfCaptchaEntry\').value = "";
                                                                                         if(ff_currentpage != ' . $row->page . ')ff_switchpage(' . $row->page . ');
                                                                                         document.getElementById(\'bfCaptchaEntry\').focus();
@@ -2635,7 +2635,7 @@ class HTML_facileFormsProcessor
                                 function bfCheckCaptcha(){
                                         if(checkFileExtensions()){
                                                var ao = new bfAjaxObject101();
-                                               ao.sndReq("get","' . Juri::root(true) . (JFactory::getApplication()->isClient('administrator') ? '/administrator' : '') . '/index.php?raw=true&option=com_breezingforms&checkCaptcha=true&Itemid=0&tmpl=component&value="+document.getElementById("bfCaptchaEntry").value,"");
+                                               ao.sndReq("get","' . Juri::root(true) . (Factorycation()->isClient('administrator') ? '/administrator' : '') . '/index.php?raw=true&option=com_breezingforms&checkCaptcha=true&Itemid=0&tmpl=component&value="+document.getElementById("bfCaptchaEntry").value,"");
                                         }
                                 }';
                 break;
@@ -3153,7 +3153,7 @@ class HTML_facileFormsProcessor
 
         if ($this->editable && $cbRecord === null) {
             $db = Factory::getContainer()->get(DatabaseInterface::class);
-            $db->setQuery("Select id, form From #__facileforms_records Where form = " . $db->Quote($this->form) . " And user_id = " . $db->Quote(JFactory::getUser()->get('id', -1)) . " And user_id <> 0 And archived = 0 Order By id Desc Limit 1");
+            $db->setQuery("Select id, form From #__facileforms_records Where form = " . $db->Quote($this->form) . " And user_id = " . $db->Quote(Factory)->get('id', -1)) . " And user_id <> 0 And archived = 0 Order By id Desc Limit 1");
             $recordsResult = $db->loadObjectList();
             if (count($recordsResult) != 0) {
                 $this->record_id = $recordsResult[0]->id;
@@ -3165,7 +3165,7 @@ class HTML_facileFormsProcessor
                     //$recordEntry->value = $this->removeDangerousHtml($recordEntry->value);
 
                     /*
-                      $input = JFactory::getApplication()->input;
+                      $input = Factorycation()->input;
                       $input->set('cbCleanVar', $recordEntry->value);
                       $recordEntry->value = $input->getHtml('cbCleanVar'); */
 
@@ -3264,7 +3264,7 @@ class HTML_facileFormsProcessor
                     //$cbEntry->recValue = $this->removeDangerousHtml($cbEntry->recValue);
 
                     /*
-                      $input = JFactory::getApplication()->input;
+                      $input = Factorycation()->input;
                       $input->set('cbCleanVar', $cbEntry->recValue);
                       $cbEntry->recValue = $input->getHtml('cbCleanVar'); */
 
@@ -3454,7 +3454,7 @@ class HTML_facileFormsProcessor
             require_once(JPATH_ADMINISTRATOR . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php');
             $cbNonEditableFields = contentbuilder::getListNonEditableElements($cbResult['data']['id']);
             if (count($cbNonEditableFields)) {
-                JFactory::getDocument()->addScriptDeclaration('<!--' . nl() . 'var bfDeactivateField = new Array();' . nl() . '//-->');
+                Factoryent()->addScriptDeclaration('<!--' . nl() . 'var bfDeactivateField = new Array();' . nl() . '//-->');
                 echo '<script type="text/javascript">' . nl();
                 echo '<!--' . nl();
                 echo 'function bfDisableContentBuilderFields(){' . nl();
@@ -3490,7 +3490,7 @@ class HTML_facileFormsProcessor
         if (trim($this->formrow->template_code_processed) == '') {
 
             // fixing J3 css
-            JFactory::getDocument()->addStyleDeclaration(
+            Factoryent()->addStyleDeclaration(
                 '
              .bfFormDiv input[type=checkbox][id^="ff_elem"], input[type=radio][id^="ff_elem"]{
                 vertical-align: text-bottom;
@@ -3884,7 +3884,7 @@ class HTML_facileFormsProcessor
                         echo indentc(1) . '</div>' . nl();
                         break;
                     case 'Captcha':
-                        if (JFactory::getApplication()->isClient('site')) {
+                        if (Factorycation()->isClient('site')) {
                             $captcha_url = Uri::root(true) . '/components/com_breezingforms/images/captcha/securimage_show.php';
                         } else {
                             $captcha_url = Uri::root(true) . '/administrator/components/com_breezingforms/images/captcha/securimage_show.php';
@@ -4467,11 +4467,11 @@ class HTML_facileFormsProcessor
             echo '<!DOCTYPE html> 
 <html> 
 <head> 
-<title>' . JFactory::getDocument()->getTitle() . '</title>
+<title>' . Factoryent()->getTitle() . '</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">';
             echo $quickMode->headers();
-            echo $quickMode->fetchHead(JFactory::getDocument()->getHeadData());
+            echo $quickMode->fetchHead(Factoryent()->getHeadData());
             echo '</head>' . "\n";
             echo '<body>' . "\n";
             echo $contents;
@@ -4491,7 +4491,7 @@ class HTML_facileFormsProcessor
             return;
 
         if (!is_object($cbResult['form']) && $this->editable && $this->editable_override) {
-            $database->setQuery("Select id From #__facileforms_records Where form = " . $database->Quote($this->form) . " And user_id = " . $database->Quote(JFactory::getUser()->get('id', 0)) . " And user_id <> 0");
+            $database->setQuery("Select id From #__facileforms_records Where form = " . $database->Quote($this->form) . " And user_id = " . $database->Quote(Factory)->get('id', 0)) . " And user_id <> 0");
             $records = $database->loadObjectList();
             foreach ($records as $record) {
                 $database->setQuery("Delete From #__facileforms_subrecords Where record = " . $record->id);
@@ -4513,12 +4513,12 @@ class HTML_facileFormsProcessor
         $record->viewed = 0;
         $record->exported = 0;
         $record->archived = 0;
-        if (JFactory::getUser()->get('id', 0) > 0) {
-            $record->user_id = JFactory::getUser()->get('id', 0);
-            $record->username = JFactory::getUser()->get('username', '');
-            $record->user_full_name = JFactory::getUser()->get('name', '');
+        if (Factory)->get('id', 0) > 0) {
+            $record->user_id = Factory)->get('id', 0);
+            $record->username = Factory)->get('username', '');
+            $record->user_full_name = Factory)->get('name', '');
         } else {
-            $record->user_id = JFactory::getUser()->get('id', 0);
+            $record->user_id = Factory)->get('id', 0);
             $record->username = '-';
             $record->user_full_name = '-';
         }
@@ -4534,14 +4534,14 @@ class HTML_facileFormsProcessor
             $record_return = $record->id;
 
             if ($record_return && file_exists(JPATH_ADMINISTRATOR . DS . 'components' . DS . 'com_contentbuilder' . DS . 'contentbuilder.xml')) {
-                $last_update = JFactory::getDate();
+                $last_update = Factory);
                 $is3 = true;
                 $last_update = $last_update->toSql();
                 $db = Factory::getContainer()->get(DatabaseInterface::class);
                 $db->setQuery("Select id From #__contentbuilder_records Where `type` = 'com_breezingforms' And `reference_id` = " . $db->Quote($this->form) . " And record_id = " . $db->Quote($record_return));
                 $res = $db->loadResult();
                 if (!$res) {
-                    $db->setQuery("Insert Into #__contentbuilder_records (session_id,`type`,last_update, published, record_id, reference_id) Values ('" . JFactory::getSession()->getId() . "','com_breezingforms'," . $db->Quote($last_update) . ",0, " . $db->Quote($record_return) . ", " . $db->Quote($this->form) . ")");
+                    $db->setQuery("Insert Into #__contentbuilder_records (session_id,`type`,last_update, published, record_id, reference_id) Values ('" . Factoryon()->getId() . "','com_breezingforms'," . $db->Quote($last_update) . ",0, " . $db->Quote($record_return) . ", " . $db->Quote($this->form) . ")");
                     $db->execute();
                 } else {
                     $db->setQuery("Update #__contentbuilder_records Set last_update = " . $db->Quote($last_update) . ",edited = edited + 1 Where `type` = 'com_breezingforms' And `reference_id` = " . $db->Quote($this->form) . " And record_id = " . $db->Quote($record_return));
@@ -4566,7 +4566,7 @@ class HTML_facileFormsProcessor
                 $db->setQuery('Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_forms Where id = ' . BFRequest::getInt('cb_form_id', 0) . ' And published = 1');
                 $_settings = $db->loadObject();
 
-                $_record = $cbResult['form']->getRecord(BFRequest::getInt('record_id', 0), $_settings->published_only, $cbResult['frontend'] ? ($_settings->own_only_fe ? JFactory::getUser()->get('id', 0) : -1) : ($_settings->own_only ? JFactory::getUser()->get('id', 0) : -1), true);
+                $_record = $cbResult['form']->getRecord(BFRequest::getInt('record_id', 0), $_settings->published_only, $cbResult['frontend'] ? ($_settings->own_only_fe ? Factory)->get('id', 0) : -1) : ($_settings->own_only ? FFFFFFFFFFFactory', 0) : -1), true);
                 foreach ($_record as $_rec) {
                     $_files_deleted = array();
                     if ($_rec->recType == 'File Upload') {
@@ -4757,7 +4757,7 @@ class HTML_facileFormsProcessor
 
                     $language = $cbResult['data']['default_lang_code_ignore'] ? $ignore_lang_code : $cbResult['data']['default_lang_code'];
                     $res = $db->loadResult();
-                    $last_update = JFactory::getDate();
+                    $last_update = Factory);
                     $is3 = true;
                     $last_update = $last_update->toSql();
                     if (!$res) {
@@ -4766,16 +4766,16 @@ class HTML_facileFormsProcessor
                         $created_up = $is3 ? $created_up->toSql() : $created_up->toMySQL();
                         if (intval($cbData->default_publish_up_days) != 0) {
                             $is_future = 1;
-                            $date = JFactory::getDate(strtotime('now +' . intval($cbData->default_publish_up_days) . ' days'));
+                            $date = Factorystrtotime('now +' . intval($cbData->default_publish_up_days) . ' days'));
                             $created_up = $is3 ? $date->toSql() : $date->toMySQL();
                         }
                         $created_down = '0000-00-00 00:00:00';
                         if (intval($cbData->default_publish_down_days) != 0) {
-                            $date = JFactory::getDate(strtotime($created_up . ' +' . intval($cbData->default_publish_down_days) . ' days'));
+                            $date = Factorystrtotime($created_up . ' +' . intval($cbData->default_publish_down_days) . ' days'));
                             $created_down = $date->toSql();
                         }
 
-                        $db->setQuery("Insert Into #__contentbuilder_records (session_id,`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id, publish_up, publish_down) Values ('" . JFactory::getSession()->getId() . "','com_breezingforms'," . $db->Quote($last_update) . ",$is_future, " . $db->Quote($language) . "," . $db->Quote(trim($sef)) . "," . $db->Quote($cbData->auto_publish && !$is_future ? 1 : 0) . ", " . $db->Quote($record_return) . ", " . $db->Quote($cbResult['form']->getReferenceId()) . ", " . $db->Quote($created_up) . ", " . $db->Quote($created_down) . ")");
+                        $db->setQuery("Insert Into #__contentbuilder_records (session_id,`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id, publish_up, publish_down) Values ('" . Factoryon()->getId() . "','com_breezingforms'," . $db->Quote($last_update) . ",$is_future, " . $db->Quote($language) . "," . $db->Quote(trim($sef)) . "," . $db->Quote($cbData->auto_publish && !$is_future ? 1 : 0) . ", " . $db->Quote($record_return) . ", " . $db->Quote($cbResult['form']->getReferenceId()) . ", " . $db->Quote($created_up) . ", " . $db->Quote($created_down) . ")");
                         $db->execute();
 
                     } else {
@@ -4793,8 +4793,8 @@ class HTML_facileFormsProcessor
                     BFRequest::setVar('cb_category_id', null);
                     BFRequest::setVar('cb_controller', null);
 
-                    if (JFactory::getApplication()->isClient('site') && BFRequest::getInt('Itemid', 0)) {
-                        $menu = JFactory::getApplication()->getMenu();
+                    if (Factorycation()->isClient('site') && BFRequest::getInt('Itemid', 0)) {
+                        $menu = Factorycation()->getMenu();
                         $item = $menu->getActive();
                         if (is_object($item)) {
                             BFRequest::setVar('cb_category_id', $item->getParams()->get('cb_category_id', null));
@@ -4817,7 +4817,7 @@ class HTML_facileFormsProcessor
                             $ids[] = $row['reference_id'];
                         }
                     }
-                    $cbData->items = $cbResult['form']->getRecord($record_return, $cbData->published_only, $cbResult['frontend'] ? ($cbData->own_only_fe ? JFactory::getUser()->get('id', 0) : -1) : ($cbData->own_only ? JFactory::getUser()->get('id', 0) : -1), true);
+                    $cbData->items = $cbResult['form']->getRecord($record_return, $cbData->published_only, $cbResult['frontend'] ? ($cbData->own_only_fe ? Factory)->get('id', 0) : -1) : ($cbData->own_only ? FFFFFFFFFFFactory', 0) : -1), true);
                     if (!count($cbData->items)) {
                         throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                     }
@@ -4831,9 +4831,9 @@ class HTML_facileFormsProcessor
                     $full = false;
                     $article_id = contentbuilder::createArticle(BFRequest::getInt('cb_form_id', 0), $record_return, $cbData->items, $ids, $cbData->title_field, $cbResult['form']->getRecordMetadata($record_return), $config, $full, true, BFRequest::getVar('cb_category_id', null));
 
-                    $cache = JFactory::getCache('com_content');
+                    $cache = Factory('com_content');
                     $cache->clean();
-                    $cache = JFactory::getCache('com_contentbuilder');
+                    $cache = Factory('com_contentbuilder');
                     $cache->clean();
                 }
 
@@ -4934,7 +4934,7 @@ class HTML_facileFormsProcessor
             } // if
         } catch (Exception $e) {
 
-            JFactory::getApplication()->enqueueMessage($e->getMessage(), 'error');
+            Factorycation()->enqueueMessage($e->getMessage(), 'error');
         }
     }
 
@@ -4950,7 +4950,7 @@ class HTML_facileFormsProcessor
         global $ff_compath;
 
         $tz = 'UTC';
-        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
         $file = JPATH_SITE . '/media/breezingforms/pdftpl/' . $this->formrow->name . '_pdf_attachment.php';
         if (!file_exists($file)) {
@@ -4991,7 +4991,7 @@ class HTML_facileFormsProcessor
 
         $date_stamp = date('YmdHis');
         $submitted = $this->submitted;
-        $date_ = JFactory::getDate($this->submitted, $tz);
+        $date_ = Factory$this->submitted, $tz);
         $offset = $date_->getOffsetFromGMT();
         if ($offset > 0) {
             $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -5003,7 +5003,7 @@ class HTML_facileFormsProcessor
         $date_stamp = $date_->format('YmdHis', true);
 
         $date_stamp2 = date('Ymd');
-        $date_ = JFactory::getDate($this->submitted, $tz);
+        $date_ = Factory$this->submitted, $tz);
         $offset = $date_->getOffsetFromGMT();
         if ($offset > 0) {
             $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -5120,9 +5120,9 @@ class HTML_facileFormsProcessor
             }
 
             $fm = str_replace('{filemask:_separator}', '_', $fm);
-            $fm = str_replace('{filemask:_username}', trim(JFactory::getUser()->get('username')), $fm);
-            $fm = str_replace('{filemask:_userid}', trim(JFactory::getUser()->get('id')), $fm);
-            $fm = str_replace('{filemask:_name}', trim(JFactory::getUser()->get('name')), $fm);
+            $fm = str_replace('{filemask:_username}', trim(Factory)->get('username')), $fm);
+            $fm = str_replace('{filemask:_userid}', trim(Factory)->get('id')), $fm);
+            $fm = str_replace('{filemask:_name}', trim(Factory)->get('name')), $fm);
             $fm = str_replace('{filemask:_datetime}', trim($date_stamp), $fm);
             $fm = str_replace('{filemask:_date}', trim($date_stamp2), $fm);
             $fm = str_replace('{filemask:_timestamp}', trim(time()), $fm);
@@ -5160,7 +5160,7 @@ class HTML_facileFormsProcessor
         $inverted = isset($ff_config->csvinverted) ? $ff_config->csvinverted : false;
 
         $tz = 'UTC';
-        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
         $csvdelimiter = stripslashes($ff_config->csvdelimiter);
         $csvquote = stripslashes($ff_config->csvquote);
@@ -5181,7 +5181,7 @@ class HTML_facileFormsProcessor
 
         $date_stamp = date('YmdHis');
         $submitted = $this->submitted;
-        $date_ = JFactory::getDate($this->submitted, $tz);
+        $date_ = Factory$this->submitted, $tz);
         $offset = $date_->getOffsetFromGMT();
         if ($offset > 0) {
             $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -5269,12 +5269,12 @@ class HTML_facileFormsProcessor
         global $ff_compath, $ff_version, $mosConfig_fileperms;
 
         $tz = 'UTC';
-        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
         $date_stamp = date('YmdHis');
         $submitted = $this->submitted;
         $date_file = date('Y-m-d H:i:s');
-        $date_ = JFactory::getDate($this->submitted, $tz);
+        $date_ = Factory$this->submitted, $tz);
         $offset = $date_->getOffsetFromGMT();
         if ($offset > 0) {
             $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -5355,7 +5355,7 @@ class HTML_facileFormsProcessor
     {
         global $ff_config;
 
-        $mainframe = JFactory::getApplication();
+        $mainframe = Factorycation();
 
         if ($this->dying)
             return;
@@ -5522,10 +5522,10 @@ class HTML_facileFormsProcessor
                 $PROCESS_SUBMITTEDAT = BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTEDAT');
 
                 $tz = 'UTC';
-                $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+                $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
                 $SUBMITTED = $this->submitted;
-                $date_ = JFactory::getDate($this->submitted, $tz);
+                $date_ = Factory$this->submitted, $tz);
                 $offset = $date_->getOffsetFromGMT();
                 if ($offset > 0) {
                     $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -5557,10 +5557,10 @@ class HTML_facileFormsProcessor
                 $PROCESS_SUBMITTERFULLNAME = BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERFULLNAME');
                 $SUBMITTERFULLNAME = '-';
 
-                if (JFactory::getUser()->get('id', 0) > 0) {
-                    $SUBMITTERID = JFactory::getUser()->get('id', 0);
-                    $SUBMITTERUSERNAME = JFactory::getUser()->get('username', '');
-                    $SUBMITTERFULLNAME = JFactory::getUser()->get('name', '');
+                if (Factory)->get('id', 0) > 0) {
+                    $SUBMITTERID = Factory)->get('id', 0);
+                    $SUBMITTERUSERNAME = Factory)->get('username', '');
+                    $SUBMITTERFULLNAME = Factory)->get('name', '');
                 }
 
                 $MAILDATA = array();
@@ -5582,10 +5582,10 @@ class HTML_facileFormsProcessor
                 // fallback if no template exists
 
                 $tz = 'UTC';
-                $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+                $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
                 $submitted = $this->submitted;
-                $date_ = JFactory::getDate($this->submitted, $tz);
+                $date_ = Factory$this->submitted, $tz);
                 $offset = $date_->getOffsetFromGMT();
                 if ($offset > 0) {
                     $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -5603,9 +5603,9 @@ class HTML_facileFormsProcessor
                     BFText::_('COM_BREEZINGFORMS_PROCESS_FORMNAME') . ": " . $this->formrow->name . nl() . nl() .
                     BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTEDAT') . ": " . $submitted . nl() .
                     BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERIP') . ": " . $this->ip . nl() .
-                    BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERID') . ": " . JFactory::getUser()->get('id', 0) . nl() .
-                    BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERUSERNAME') . ": " . JFactory::getUser()->get('username', '') . nl() .
-                    BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERFULLNAME') . ": " . JFactory::getUser()->get('name', '') . nl() .
+                    BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERID') . ": " . Factory)->get('id', 0) . nl() .
+                    BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERUSERNAME') . ": " . Factory)->get('username', '') . nl() .
+                    BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERFULLNAME') . ": " . Factory)->get('name', '') . nl() .
                     BFText::_('COM_BREEZINGFORMS_PROCESS_PROVIDER') . ": " . $this->provider . nl() .
                     BFText::_('COM_BREEZINGFORMS_PROCESS_BROWSER') . ": " . $this->browser . nl() .
                     BFText::_('COM_BREEZINGFORMS_PROCESS_OPSYS') . ": " . $this->opsys . nl() . nl();
@@ -5634,9 +5634,9 @@ class HTML_facileFormsProcessor
             $SUBMITTED = $this->submitted;
 
             $tz = 'UTC';
-            $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+            $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
-            $date_ = JFactory::getDate($this->submitted, $tz);
+            $date_ = Factory$this->submitted, $tz);
             $offset = $date_->getOffsetFromGMT();
             if ($offset > 0) {
                 $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -5654,10 +5654,10 @@ class HTML_facileFormsProcessor
             $SUBMITTERID = 0;
             $SUBMITTERUSERNAME = '-';
             $SUBMITTERFULLNAME = '-';
-            if (JFactory::getUser()->get('id', 0) > 0) {
-                $SUBMITTERID = JFactory::getUser()->get('id', 0);
-                $SUBMITTERUSERNAME = JFactory::getUser()->get('username', '');
-                $SUBMITTERFULLNAME = JFactory::getUser()->get('name', '');
+            if (Factory)->get('id', 0) > 0) {
+                $SUBMITTERID = Factory)->get('id', 0);
+                $SUBMITTERUSERNAME = Factory)->get('username', '');
+                $SUBMITTERFULLNAME = Factory)->get('name', '');
             }
 
             $body = str_replace('{BF_RECORD_ID:label}', BFText::_('COM_BREEZINGFORMS_PROCESS_RECORDSAVEDID'), $body);
@@ -5971,7 +5971,7 @@ class HTML_facileFormsProcessor
             $rootMdata = $dataObject['properties'];
 
             $default = JComponentHelper::getParams('com_languages')->get('site');
-            $language_tag = JFactory::getApplication()->getLanguage()->getTag() != $default ? JFactory::getApplication()->getLanguage()->getTag() : 'zz-ZZ';
+            $language_tag = Factorycation()->getLanguage()->getTag() != $default ? FFFFFFFFFFFactorygetLanguage()->getTag() : 'zz-ZZ';
 
             /* translatables */
             if (isset($rootMdata['title_translation' . $language_tag]) && $rootMdata['title_translation' . $language_tag] != '') {
@@ -6001,7 +6001,7 @@ class HTML_facileFormsProcessor
                     $language_tag = '';
                     jimport('joomla.application.component.helper');
                     $default = JComponentHelper::getParams('com_languages')->get('site');
-                    $language_tag = JFactory::getApplication()->getLanguage()->getTag() != $default ? JFactory::getApplication()->getLanguage()->getTag() : 'zz-ZZ';
+                    $language_tag = Factorycation()->getLanguage()->getTag() != $default ? FFFFFFFFFFFactorygetLanguage()->getTag() : 'zz-ZZ';
                     if (trim($name) == trim($dataObject['properties']['bfName']) && isset($dataObject['properties'][$field . '_translation' . $language_tag]) && $dataObject['properties'][$field . '_translation' . $language_tag] != '') {
                         $res = addslashes($dataObject['properties'][$field . '_translation' . $language_tag]);
                         return;
@@ -6023,7 +6023,7 @@ class HTML_facileFormsProcessor
 
         $signatures = array();
 
-        $mainframe = JFactory::getApplication();
+        $mainframe = Factorycation();
 
         if ($this->dying)
             return;
@@ -6285,9 +6285,9 @@ class HTML_facileFormsProcessor
                 $SUBMITTED = $this->submitted;
 
                 $tz = 'UTC';
-                $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+                $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
-                $date_ = JFactory::getDate($this->submitted, $tz);
+                $date_ = Factory$this->submitted, $tz);
                 $offset = $date_->getOffsetFromGMT();
                 if ($offset > 0) {
                     $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -6319,10 +6319,10 @@ class HTML_facileFormsProcessor
                 $PROCESS_SUBMITTERFULLNAME = BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERFULLNAME');
                 $SUBMITTERFULLNAME = '-';
 
-                if (JFactory::getUser()->get('id', 0) > 0) {
-                    $SUBMITTERID = JFactory::getUser()->get('id', 0);
-                    $SUBMITTERUSERNAME = JFactory::getUser()->get('username', '');
-                    $SUBMITTERFULLNAME = JFactory::getUser()->get('name', '');
+                if (Factory)->get('id', 0) > 0) {
+                    $SUBMITTERID = Factory)->get('id', 0);
+                    $SUBMITTERUSERNAME = Factory)->get('username', '');
+                    $SUBMITTERFULLNAME = Factory)->get('name', '');
                 }
 
                 $MAILDATA = array();
@@ -6359,10 +6359,10 @@ class HTML_facileFormsProcessor
                 $form_title_translated = $this->getFormTitleTranslated();
 
                 $tz = 'UTC';
-                $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+                $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
                 $submitted = $this->submitted;
-                $date_ = JFactory::getDate($this->submitted, $tz);
+                $date_ = Factory$this->submitted, $tz);
                 $offset = $date_->getOffsetFromGMT();
                 if ($offset > 0) {
                     $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -6378,9 +6378,9 @@ class HTML_facileFormsProcessor
                     BFText::_('COM_BREEZINGFORMS_PROCESS_FORMNAME') . ": " . $this->formrow->name . nl() . nl() .
                     BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTEDAT') . ": " . $submitted . nl() .
                     BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERIP') . ": " . $this->ip . nl() .
-                    BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERID') . ": " . JFactory::getUser()->get('id', 0) . nl() .
-                    BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERUSERNAME') . ": " . JFactory::getUser()->get('username', '') . nl() .
-                    BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERFULLNAME') . ": " . JFactory::getUser()->get('name', '') . nl() .
+                    BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERID') . ": " . Factory)->get('id', 0) . nl() .
+                    BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERUSERNAME') . ": " . Factory)->get('username', '') . nl() .
+                    BFText::_('COM_BREEZINGFORMS_PROCESS_SUBMITTERFULLNAME') . ": " . Factory)->get('name', '') . nl() .
                     BFText::_('COM_BREEZINGFORMS_PROCESS_PROVIDER') . ": " . $this->provider . nl() .
                     BFText::_('COM_BREEZINGFORMS_PROCESS_BROWSER') . ": " . $this->browser . nl() .
                     BFText::_('COM_BREEZINGFORMS_PROCESS_OPSYS') . ": " . $this->opsys . nl() . nl();
@@ -6421,10 +6421,10 @@ class HTML_facileFormsProcessor
             $SUBMITTED = $this->submitted;
 
             $tz = 'UTC';
-            $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+            $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
             $submitted = $this->submitted;
-            $date_ = JFactory::getDate($this->submitted, $tz);
+            $date_ = Factory$this->submitted, $tz);
             $offset = $date_->getOffsetFromGMT();
             if ($offset > 0) {
                 $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -6442,10 +6442,10 @@ class HTML_facileFormsProcessor
             $SUBMITTERID = 0;
             $SUBMITTERUSERNAME = '-';
             $SUBMITTERFULLNAME = '-';
-            if (JFactory::getUser()->get('id', 0) > 0) {
-                $SUBMITTERID = JFactory::getUser()->get('id', 0);
-                $SUBMITTERUSERNAME = JFactory::getUser()->get('username', '');
-                $SUBMITTERFULLNAME = JFactory::getUser()->get('name', '');
+            if (Factory)->get('id', 0) > 0) {
+                $SUBMITTERID = Factory)->get('id', 0);
+                $SUBMITTERUSERNAME = Factory)->get('username', '');
+                $SUBMITTERFULLNAME = Factory)->get('name', '');
             }
 
             $body = str_replace('{BF_RECORD_ID:label}', BFText::_('COM_BREEZINGFORMS_PROCESS_RECORDSAVEDID'), $body);
@@ -6717,7 +6717,7 @@ class HTML_facileFormsProcessor
     function sendMailChimpNotification()
     {
 
-        $mainframe = JFactory::getApplication();
+        $mainframe = Factorycation();
 
         // listSubscribe(string apikey, string id, string email_address, array merge_vars, string email_type, boolean double_optin, boolean update_existing, boolean replace_interests, boolean send_welcome)
 
@@ -6816,10 +6816,10 @@ class HTML_facileFormsProcessor
             return '';
 
         $tz = 'UTC';
-        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
         $date_stamp = date('Y_m_d_H_i_s');
-        $date_ = JFactory::getDate($this->submitted, $tz);
+        $date_ = Factory$this->submitted, $tz);
         $offset = $date_->getOffsetFromGMT();
         if ($offset > 0) {
             $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -6830,7 +6830,7 @@ class HTML_facileFormsProcessor
         $date_stamp = $date_->format('Y_m_d_H_i_s', true);
 
         $date_stamp2 = date('Y_m_d');
-        $date_ = JFactory::getDate($this->submitted, $tz);
+        $date_ = Factory$this->submitted, $tz);
         $offset = $date_->getOffsetFromGMT();
         if ($offset > 0) {
             $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -6867,9 +6867,9 @@ class HTML_facileFormsProcessor
                 }
             }
             $fm = str_replace('{filemask:_separator}', '_', $fm);
-            $fm = str_replace('{filemask:_username}', trim(JFactory::getUser()->get('username')), $fm);
-            $fm = str_replace('{filemask:_userid}', trim(JFactory::getUser()->get('id')), $fm);
-            $fm = str_replace('{filemask:_name}', trim(JFactory::getUser()->get('name')), $fm);
+            $fm = str_replace('{filemask:_username}', trim(Factory)->get('username')), $fm);
+            $fm = str_replace('{filemask:_userid}', trim(Factory)->get('id')), $fm);
+            $fm = str_replace('{filemask:_name}', trim(Factory)->get('name')), $fm);
             $fm = str_replace('{filemask:_datetime}', trim($date_stamp), $fm);
             $fm = str_replace('{filemask:_date}', trim($date_stamp2), $fm);
             $fm = str_replace('{filemask:_timestamp}', trim(time()), $fm);
@@ -6885,7 +6885,7 @@ class HTML_facileFormsProcessor
         //	$userfile_name = $date_stamp . '_' . $userfile_name;
         $path = $baseDir . DS . $userfile_name;
         //if ($timestamp) $path .= '.'.date('YmdHis');
-        if (file_exists($path) && JFactory::getSession()->get('bfFileUploadOverride', true)) {
+        if (file_exists($path) && Factoryon()->get('bfFileUploadOverride', true)) {
             $rnd = md5(mt_rand(0, mt_getrandmax()));
             $path = $baseDir . DS . $rnd . '_' . $userfile_name;
             //if ($timestamp) $path .= '.'.date('YmdHis');
@@ -6894,7 +6894,7 @@ class HTML_facileFormsProcessor
                 $this->message = BFText::_('COM_BREEZINGFORMS_PROCESS_FILEEXISTS');
                 return '';
             }
-        } else if (file_exists($path) && !JFactory::getSession()->get('bfFileUploadOverride', true)) {
+        } else if (file_exists($path) && !Factoryon()->get('bfFileUploadOverride', true)) {
             unlink($path);
         }
 
@@ -7294,17 +7294,17 @@ class HTML_facileFormsProcessor
                                 } // for
                             } // if
                             if (BFRequest::getVar('bfFlashUploadTicket', '') != '') {
-                                $tickets = JFactory::getSession()->get('bfFlashUploadTickets', array());
+                                $tickets = Factoryon()->get('bfFlashUploadTickets', array());
                                 mt_srand();
                                 if (isset($tickets[BFRequest::getVar('bfFlashUploadTicket', mt_rand(0, mt_getrandmax()))])) {
                                     $sourcePath = JPATH_SITE . '/components/com_breezingforms/uploads/';
                                     if (@file_exists($sourcePath) && @is_readable($sourcePath) && @is_dir($sourcePath)) {
 
                                         $tz = 'UTC';
-                                        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+                                        $tz = new DateTimeZone(Factorycation()->getCfg('offset'));
 
                                         $date_stamp = date('Y_m_d_H_i_s');
-                                        $date_ = JFactory::getDate($this->submitted, $tz);
+                                        $date_ = Factory$this->submitted, $tz);
                                         $offset = $date_->getOffsetFromGMT();
                                         if ($offset > 0) {
                                             $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -7315,7 +7315,7 @@ class HTML_facileFormsProcessor
                                         $date_stamp = $date_->format('Y_m_d_H_i_s', true);
 
                                         $date_stamp2 = date('Y_m_d');
-                                        $date_ = JFactory::getDate($this->submitted, $tz);
+                                        $date_ = Factory$this->submitted, $tz);
                                         $offset = $date_->getOffsetFromGMT();
                                         if ($offset > 0) {
                                             $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -7375,9 +7375,9 @@ class HTML_facileFormsProcessor
                                                                     }
 
                                                                     $fm = str_replace('{filemask:_separator}', '_', $fm);
-                                                                    $fm = str_replace('{filemask:_username}', trim(JFactory::getUser()->get('username')), $fm);
-                                                                    $fm = str_replace('{filemask:_userid}', trim(JFactory::getUser()->get('id')), $fm);
-                                                                    $fm = str_replace('{filemask:_name}', trim(JFactory::getUser()->get('name')), $fm);
+                                                                    $fm = str_replace('{filemask:_username}', trim(Factory)->get('username')), $fm);
+                                                                    $fm = str_replace('{filemask:_userid}', trim(Factory)->get('id')), $fm);
+                                                                    $fm = str_replace('{filemask:_name}', trim(Factory)->get('name')), $fm);
                                                                     $fm = str_replace('{filemask:_datetime}', trim($date_stamp), $fm);
                                                                     $fm = str_replace('{filemask:_date}', trim($date_stamp2), $fm);
                                                                     $fm = str_replace('{filemask:_timestamp}', trim(time()), $fm);
@@ -7393,7 +7393,7 @@ class HTML_facileFormsProcessor
                                                                 //	$userfile_name = $date_stamp . '_' . $userfile_name;
                                                                 $path = $baseDir . DS . $userfile_name;
                                                                 //if ($row->flag1) $path .= '.'.date('YmdHis');
-                                                                if (file_exists($path) && JFactory::getSession()->get('bfFileUploadOverride', true)) {
+                                                                if (file_exists($path) && Factoryon()->get('bfFileUploadOverride', true)) {
                                                                     $rnd = md5(mt_rand(0, mt_getrandmax()));
                                                                     $path = $baseDir . DS . $rnd . '_' . $userfile_name;
                                                                     //if ($row->flag1) $path .= '.'.date('YmdHis');
@@ -7402,7 +7402,7 @@ class HTML_facileFormsProcessor
                                                                         $this->message = BFText::_('COM_BREEZINGFORMS_PROCESS_FILEEXISTS');
                                                                         return '';
                                                                     }
-                                                                } else if (file_exists($path) && !JFactory::getSession()->get('bfFileUploadOverride', true)) {
+                                                                } else if (file_exists($path) && !Factoryon()->get('bfFileUploadOverride', true)) {
                                                                     unlink($path);
                                                                 }
 
@@ -7588,7 +7588,7 @@ class HTML_facileFormsProcessor
                                                 //$values[$html_i] = $this->removeDangerousHtml($values[$html_i]);
 
                                                 /*
-                                                  $input = JFactory::getApplication()->input;
+                                                  $input = Factorycation()->input;
                                                   $input->set('cbCleanVar', $values[$html_i]);
                                                   $values[$html_i] = $input->getHtml('cbCleanVar'); */
 
@@ -7816,7 +7816,7 @@ class HTML_facileFormsProcessor
 
             if (BFRequest::getVar('ff_applic', '') != 'mod_facileforms' && BFRequest::getInt('ff_frame', 0) != 1 && bf_is_mobile()) {
                 $is_device = true;
-                $this->isMobile = isset($rootMdata['mobileEnabled']) && isset($rootMdata['forceMobile']) && $rootMdata['mobileEnabled'] && $rootMdata['forceMobile'] ? true : (isset($rootMdata['mobileEnabled']) && isset($rootMdata['forceMobile']) && $rootMdata['mobileEnabled'] && JFactory::getSession()->get('com_breezingforms.mobile', false) ? true : false);
+                $this->isMobile = isset($rootMdata['mobileEnabled']) && isset($rootMdata['forceMobile']) && $rootMdata['mobileEnabled'] && $rootMdata['forceMobile'] ? true : (isset($rootMdata['mobileEnabled']) && isset($rootMdata['forceMobile']) && $rootMdata['mobileEnabled'] && Factoryon()->get('com_breezingforms.mobile', false) ? true : false);
             } else
                 $this->isMobile = false;
 
@@ -8010,11 +8010,11 @@ class HTML_facileFormsProcessor
                                 )
                             );
 
-                            $tickets = JFactory::getSession()->get('bfFlashUploadTickets', array());
+                            $tickets = Factoryon()->get('bfFlashUploadTickets', array());
                             mt_srand();
                             if (isset($tickets[BFRequest::getVar('bfFlashUploadTicket', mt_rand(0, mt_getrandmax()))])) {
                                 unset($tickets[BFRequest::getVar('bfFlashUploadTicket')]);
-                                JFactory::getSession()->set('bfFlashUploadTickets', $tickets);
+                                Factoryon()->set('bfFlashUploadTickets', $tickets);
                             }
                         }
                     } // if
@@ -8029,8 +8029,8 @@ class HTML_facileFormsProcessor
                 $uri = JUri::getInstance();
                 $domainAddress = $uri->toString(array('scheme', 'host', 'port', 'path'));
 
-                $mailer = JFactory::getMailer();
-                $config = JFactory::getConfig();
+                $mailer = Factoryr();
+                $config = Factoryg();
 
                 $recipient = '';
                 $email_field_name = $this->formrow->opt_mail;
@@ -8087,7 +8087,7 @@ class HTML_facileFormsProcessor
             Factory::getContainer()->get(DatabaseInterface::class)->setQuery("SELECT MAX(id) FROM #__facileforms_records");
             $lastid = Factory::getContainer()->get(DatabaseInterface::class)->loadResult();
             $_SESSION['virtuemart_bf_id'] = $lastid;
-            $session = JFactory::getSession();
+            $session = Factoryon();
             $session->set('virtuemart_bf_id', $lastid);
 
             $code = '';
@@ -8198,7 +8198,7 @@ class HTML_facileFormsProcessor
 
                                 $options['amount'] = round(floatval($options['amount']), 2) * 100;
 
-                                JFactory::getSession()->set('bf_stripe_last_payment_amount' . $this->record_id, $options['amount']);
+                                Factoryon()->set('bf_stripe_last_payment_amount' . $this->record_id, $options['amount']);
 
                                 $html = '';
 
@@ -8267,7 +8267,7 @@ transition: box-shadow .15s linear;
                                 $returnurl = Uri::root() . "index.php?option=com_breezingforms&confirmStripe=true&form_id=" . $this->form . "&record_id=" . $this->record_id;
                                 if (isset($options['emailfield']) && $options['emailfield'] !== '') {
                                     $stripeemail = strtolower(BFRequest::getVar('ff_nm_' . $options['emailfield'], '')[0]);
-                                    JFactory::getSession()->set('emailfield', $stripeemail);
+                                    Factoryon()->set('emailfield', $stripeemail);
                                 }
 
                                 // XDA BEGIN
@@ -8321,7 +8321,7 @@ transition: box-shadow .15s linear;
                                 $html .= header("HTTP/1.1 303 See Other");
                                 $html .= header("Location: " . $checkout_session->url);
 
-                                $current_tag = JFactory::getApplication()->getLanguage()->getTag();
+                                $current_tag = Factorycation()->getLanguage()->getTag();
                                 $exploded = explode('-', $current_tag);
 
                                 $locale = 'auto';
@@ -8334,7 +8334,7 @@ transition: box-shadow .15s linear;
                                 $returnurl = Uri::root() . "index.php?option=com_breezingforms&confirmStripe=true&form_id=" . $this->form . "&record_id=" . $this->record_id;
                                 if (isset($options['emailfield']) && $options['emailfield'] !== '') {
                                     $stripeemail = strtolower(BFRequest::getVar('ff_nm_' . $options['emailfield'], '')[0]);
-                                    JFactory::getSession()->set('emailfield', $stripeemail);
+                                    Factoryon()->set('emailfield', $stripeemail);
                                 }
 
                                 $html .= '
@@ -8355,7 +8355,7 @@ transition: box-shadow .15s linear;
                                                                 });
                             
                             var options = {
-                                        name: ' . json_encode(isset($head['properties']['title_translation' . JFactory::getApplication()->getLanguage()->getTag()]) ? $head['properties']['title_translation' . JFactory::getApplication()->getLanguage()->getTag()] : $this->formrow->title) . ',
+                                        name: ' . json_encode(isset($head['properties']['title_translation' . Factorycation()->getLanguage()->getTag()]) ? $head['properties']['title_translation' . FFFFFFFFFFFactorygetLanguage()->getTag()] : $this->formrow->title) . ',
                                         description: ' . json_encode($options['itemname']) . ',
                                         currency: ' . json_encode(strtolower($options['currencyCode'])) . ',
                                         amount: ' . json_encode($options['amount']) . ',
@@ -8667,7 +8667,7 @@ transition: box-shadow .15s linear;
                 if ($return) {
                     $return = bf_b64dec($return);
                     if (Uri::isInternal($return)) {
-                        JFactory::getApplication()->redirect($return);
+                        Factorycation()->redirect($return);
                     }
                 }
             }
@@ -8675,18 +8675,18 @@ transition: box-shadow .15s linear;
             if ($cbResult['data']['force_login']) {
                 $is15 = false;
 
-                if (!JFactory::getUser()->get('id', 0)) {
-                    JFactory::getApplication()->redirect(Route::_('index.php?option=com_users&view=login&Itemid=' . BFRequest::getInt('Itemid', 0), false));
+                if (!Factory)->get('id', 0)) {
+                    Factorycation()->redirect(Route::_('index.php?option=com_users&view=login&Itemid=' . BFRequest::getInt('Itemid', 0), false));
                 } else {
 
-                    JFactory::getApplication()->redirect(Route::_('index.php?option=com_users&view=profile&Itemid=' . BFRequest::getInt('Itemid', 0), false));
+                    Factorycation()->redirect(Route::_('index.php?option=com_users&view=profile&Itemid=' . BFRequest::getInt('Itemid', 0), false));
                 }
             } else if (trim($cbResult['data']['force_url'])) {
-                JFactory::getApplication()->redirect(trim($cbResult['data']['force_url']));
+                Factorycation()->redirect(trim($cbResult['data']['force_url']));
             }
 
             Factory::getApplication()->enqueueMessage(BFText::_('COM_CONTENTBUILDER_SAVED'), 'success');
-            JFactory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder&controller=details&Itemid=' . BFRequest::getInt('Itemid', 0) . '&backtolist=' . BFRequest::getInt('backtolist', 0) . '&id=' . $cbResult['data']['id'] . '&record_id=' . $cbRecordId . '&limitstart=' . BFRequest::getInt('limitstart', 0) . '&filter_order=' . BFRequest::getCmd('filter_order'), false));
+            Factorycation()->redirect(Route::_('index.php?option=com_contentbuilder&controller=details&Itemid=' . BFRequest::getInt('Itemid', 0) . '&backtolist=' . BFRequest::getInt('backtolist', 0) . '&id=' . $cbResult['data']['id'] . '&record_id=' . $cbRecordId . '&limitstart=' . BFRequest::getInt('limitstart', 0) . '&filter_order=' . BFRequest::getCmd('filter_order'), false));
         }
 
         if (!$paymentAction) {
@@ -8820,8 +8820,8 @@ transition: box-shadow .15s linear;
 
         unset($_SESSION['ff_editable_overridePlg' . BFRequest::getInt('ff_contentid', 0) . $this->form_id]);
         unset($_SESSION['ff_editablePlg' . BFRequest::getInt('ff_contentid', 0) . $this->form_id]);
-        JFactory::getSession()->set('ff_editableMod' . BFRequest::getInt('ff_module_id', 0) . $this->form_id, 0);
-        JFactory::getSession()->set('ff_editable_overrideMod' . BFRequest::getInt('ff_module_id', 0) . $this->form_id, 0);
+        Factoryon()->set('ff_editableMod' . BFRequest::getInt('ff_module_id', 0) . $this->form_id, 0);
+        Factoryon()->set('ff_editable_overrideMod' . BFRequest::getInt('ff_module_id', 0) . $this->form_id, 0);
 
         if (!defined('VMBFCF_RUNNING')) {
             exit;

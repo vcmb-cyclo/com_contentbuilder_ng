@@ -18,10 +18,10 @@
  * */
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Filesystem\File;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFFactory.php');
@@ -55,9 +55,9 @@ if (!function_exists('bf_b64dec')) {
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_breezingforms' . DS . 'libraries' . DS . 'crosstec' . DS . 'classes' . DS . 'BFJoomlaConfig.php');
 
-$mainframe = JFactory::getApplication();
+$mainframe = Factory::getApplication();
 
-$cache = JFactory::getCache();
+$cache = Factory::getCache();
 $cache->setCaching(false);
 
 jimport('joomla.filesystem.file');
@@ -177,8 +177,8 @@ if (
             addRequestParams($params->get('ff_mod_parpub', ''));
             $pagetitle = false;
 
-            JFactory::getSession()->set('ff_editableMod' . $xModuleId . $formname, intval($params->get('ff_mod_editable', $editable)));
-            JFactory::getSession()->set('ff_editable_overrideMod' . $xModuleId . $formname, intval($params->get('ff_mod_editable_override', $editable_override)));
+            Factory::getSession()->set('ff_editableMod' . $xModuleId . $formname, intval($params->get('ff_mod_editable', $editable)));
+            Factory::getSession()->set('ff_editable_overrideMod' . $xModuleId . $formname, intval($params->get('ff_mod_editable_override', $editable_override)));
         } else if (isset($ff_applic) && $ff_applic == 'plg_facileforms') {
 
             $formname = htmlentities(BFRequest::getVar('ff_name', ''), ENT_QUOTES, 'UTF-8');
@@ -198,7 +198,7 @@ if (
             // is this called with an Itemid?
             if (BFRequest::getInt('Itemid', 0) > 0 && BFRequest::getVar('ff_applic', '') != 'mod_facileforms' && BFRequest::getVar('ff_applic', '') != 'plg_facileforms') {
 
-                $menu = JFactory::getApplication()->getMenu()->getActive();
+                $menu = Factory::getApplication()->getMenu()->getActive();
                 $params = $menu->getParams();
 
                 if ($params !== null) {
@@ -212,15 +212,15 @@ if (
                     $menu_item_robots = $params->get('robots', '');
 
                     if ($menu_item_meta_description) {
-                        JFactory::getDocument()->setMetaData('description', $menu_item_meta_description);
+                        Factory::getDocument()->setMetaData('description', $menu_item_meta_description);
                     }
 
                     if ($menu_item_meta_keywords) {
-                        JFactory::getDocument()->setMetaData('keywords', $menu_item_meta_keywords);
+                        Factory::getDocument()->setMetaData('keywords', $menu_item_meta_keywords);
                     }
 
                     if ($menu_item_robots) {
-                        JFactory::getDocument()->setMetaData('robots', $menu_item_robots);
+                        Factory::getDocument()->setMetaData('robots', $menu_item_robots);
                     }
 
                     $formname = $params->get('ff_com_name');
@@ -317,27 +317,27 @@ if (
 
         // set by module
         if ((BFRequest::getVar('ff_applic') == 'mod_facileforms' || (isset($ff_applic) && $ff_applic == 'mod_facileforms'))) {
-            if (JFactory::getSession()->get('ff_editableMod' . $xModuleId . $form->name, 0) != 0) {
-                $editable = JFactory::getSession()->get('ff_editableMod' . $xModuleId . $form->name, 0);
-            } else if (JFactory::getSession()->get('ff_editableMod' . BFRequest::getInt('ff_module_id', 0) . $form->name, 0) != 0) {
-                $editable = JFactory::getSession()->get('ff_editableMod' . BFRequest::getInt('ff_module_id', 0) . $form->name, 0);
+            if (Factory::getSession()->get('ff_editableMod' . $xModuleId . $form->name, 0) != 0) {
+                $editable = Factory::getSession()->get('ff_editableMod' . $xModuleId . $form->name, 0);
+            } else if (Factory::getSession()->get('ff_editableMod' . BFRequest::getInt('ff_module_id', 0) . $form->name, 0) != 0) {
+                $editable = Factory::getSession()->get('ff_editableMod' . BFRequest::getInt('ff_module_id', 0) . $form->name, 0);
             }
         }
 
         // set by module
         if ((BFRequest::getVar('ff_applic') == 'mod_facileforms' || (isset($ff_applic) && $ff_applic == 'mod_facileforms'))) {
-            if (JFactory::getSession()->get('ff_editable_overrideMod' . $xModuleId . $form->name, 0) != 0) {
-                $editable_override = JFactory::getSession()->get('ff_editable_overrideMod' . $xModuleId . $form->name, 0);
-            } else if (JFactory::getSession()->get('ff_editable_overrideMod' . BFRequest::getInt('ff_module_id', 0) . $form->name, 0) != 0) {
-                $editable_override = JFactory::getSession()->get('ff_editable_overrideMod' . BFRequest::getInt('ff_module_id', 0) . $form->name, 0);
+            if (Factory::getSession()->get('ff_editable_overrideMod' . $xModuleId . $form->name, 0) != 0) {
+                $editable_override = Factory::getSession()->get('ff_editable_overrideMod' . $xModuleId . $form->name, 0);
+            } else if (Factory::getSession()->get('ff_editable_overrideMod' . BFRequest::getInt('ff_module_id', 0) . $form->name, 0) != 0) {
+                $editable_override = Factory::getSession()->get('ff_editable_overrideMod' . BFRequest::getInt('ff_module_id', 0) . $form->name, 0);
             }
         }
 
         if ((!isset($ff_applic) || $ff_applic != 'plg_facileforms') && $pagetitle && $form->title != '' && !(BFRequest::getInt('cb_form_id', 0) || BFRequest::getCmd('cb_record_id', ''))) {
             if ($menu_item_title != '') {
-                JFactory::getDocument()->setTitle($menu_item_title);
+                Factory::getDocument()->setTitle($menu_item_title);
             } else if ($pagetitle) { // being set by module, false implies no change at all
-                JFactory::getDocument()->setTitle($form->title);
+                Factory::getDocument()->setTitle($form->title);
             }
         }
 
@@ -410,9 +410,9 @@ if (
                 'allowtransparency="true" ' .
                 'scrolling="no" ';
             if ($form->autoheight == 1) {
-                JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq.min.js');
-                JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq.iframeautoheight.js');
-                JFactory::getDocument()->addScriptDeclaration("<!--
+                Factory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq.min.js');
+                Factory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq.iframeautoheight.js');
+                Factory::getDocument()->addScriptDeclaration("<!--
                             JQuery(document).ready(function() {
                                 //JQuery(\".breezingforms_iframe\").css(\"width\",\"100%\");
                                 JQuery(\".breezingforms_iframe\").iframeAutoHeight({heightOffset: 15, debug: false, diagnostics: false});
@@ -438,7 +438,7 @@ if (
             }
 
             // process inline
-            $myUser = JFactory::getUser();
+            $myUser = Factory::getUser();
 
             $database->setQuery("select id from #__users where lower(username)=lower('" . $myUser->get('username', '') . "')");
             $id = $database->loadResult();
@@ -935,7 +935,7 @@ if (
 
                     if (!$exists) {
 
-                        /* XDA if( JFactory::getSession()->get('bf_stripe_last_payment_amount'.$record_id, null) == null ){
+                        /* XDA if( Factory::getSession()->get('bf_stripe_last_payment_amount'.$record_id, null) == null ){
 
             BFRedirect(Uri::root(), BFText::_('COM_BREEZINGFORMS_COULD_NOT_FIND_STRIPE_AMOUNT'));
             exit;
@@ -943,7 +943,7 @@ if (
 
                         $stripearray = array();
                         $stripearray = [
-                            "amount" => JFactory::getSession()->get('bf_stripe_last_payment_amount' . $record_id, null),
+                            "amount" => Factory::getSession()->get('bf_stripe_last_payment_amount' . $record_id, null),
                             // amount in cents, again
                             "currency" => strtolower($options['currencyCode']),
                             "source" => $tx_token,
@@ -951,9 +951,9 @@ if (
                             "metadata" => array()
                             //,"metadata" => array("Order ID" => $_session_cart['order_id'])
                         ];
-                        if (JFactory::getSession()->get('emailfield', '') !== '') {
-                            $stripearray += ['receipt_email' => JFactory::getSession()->get('emailfield', '')];
-                            JFactory::getSession()->clear('emailfield');
+                        if (Factory::getSession()->get('emailfield', '') !== '') {
+                            $stripearray += ['receipt_email' => Factory::getSession()->get('emailfield', '')];
+                            Factory::getSession()->clear('emailfield');
                         }
                         //$charge = \Stripe\Charge::create( $stripearray );
                         /*
@@ -973,7 +973,7 @@ if (
                           ]);*/
 
 
-                        JFactory::getSession()->clear('bf_stripe_last_payment_amount' . $record_id);
+                        Factory::getSession()->clear('bf_stripe_last_payment_amount' . $record_id);
                     } else {
 
                         $exploded = explode(':', $exists);
@@ -1444,7 +1444,7 @@ if (
     $style = '<link rel="stylesheet" href="' . Uri::root() . 'templates/' . $mainframe->getTemplate() . '/css/template.css" type="text/css" />';
 
     echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="' . strtolower(JFactory::getApplication()->getLanguage()->getTag()) . '" lang="' . strtolower(JFactory::getApplication()->getLanguage()->getTag()) . '" >
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="' . strtolower(Factory::getApplication()->getLanguage()->getTag()) . '" lang="' . strtolower(FFFFactorypplication()->getLanguage()->getTag()) . '" >
 <head>' . $style . '</head>
 <div class="payPalConnectMsg">
 <div class="paymentConnectMsg">
@@ -1622,7 +1622,7 @@ if (
 
                             $recipients = explode('###', BFRequest::getVar('user_variable_2', ''));
                             $recipientsSize = count($recipients);
-                            $mailer = JFactory::getMailer();
+                            $mailer = Factory::getMailer();
                             $mailer->Subject = BFText::_('COM_BREEZINGFORMS_YOUR_PAYMENT_AT_SU');
                             $mailer->Body = BFText::_('COM_BREEZINGFORMS_HALLO') . "\n\n";
                             $mailer->Body .= BFText::_('COM_BREEZINGFORMS_YOUR_PAYMENT_SUCCEEDED') . "\n\n";
@@ -1808,11 +1808,11 @@ if (
             $tempFile = $_FILES['Filedata']['tmp_name'];
             $targetPath = JPATH_SITE . '/components/com_breezingforms/uploads/';
             if (@file_exists($targetPath) && @is_dir($targetPath)) {
-                $secureTicket = JFactory::getSession()->get('secure_ticket', '', 'com_breezingforms');
+                $secureTicket = Factory::getSession()->get('secure_ticket', '', 'com_breezingforms');
                 if ($secureTicket == '') {
                     mt_srand();
                     $secureTicket = md5(strtotime('now') . mt_rand(0, mt_getrandmax()));
-                    JFactory::getSession()->set('secure_ticket', $secureTicket, 'com_breezingforms');
+                    Factory::getSession()->set('secure_ticket', $secureTicket, 'com_breezingforms');
                 }
 
                 $targetFile = str_replace('//', '/', $targetPath) . 'chunks' . DS . BFRequest::getInt('offset', 0) . '_' . bf_sanitizeFilename(BFRequest::getVar('name', 'unknown')) . '_' . BFRequest::getVar('itemName', '') . '_' . BFRequest::getVar('bfFlashUploadTicket') . '_' . $secureTicket . '_chunktmp';
@@ -1865,7 +1865,7 @@ if (
 
     jimport('joomla.html.html');
 
-    $jinput = JFactory::getApplication()->input;
+    $jinput = Factory::getApplication()->input;
     $ip = $jinput->server->get('REMOTE_ADDR');
 
     $userSubmitedID = BFRequest::getVar('id');
@@ -1880,7 +1880,7 @@ if (
 
     jimport('joomla.html.html');
 
-    $jinput = JFactory::getApplication()->input;
+    $jinput = Factory::getApplication()->input;
     $ip = $jinput->server->get('REMOTE_ADDR');
 
     $userSubmitedID = BFRequest::getVar('id');

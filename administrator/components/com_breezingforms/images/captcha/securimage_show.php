@@ -16,13 +16,16 @@ ob_start();
 
 define('DS', DIRECTORY_SEPARATOR);
 
+use Joomla\CMS\Factory;
+
+
 require_once dirname(__FILE__) . '/../../../../includes/app.php';
 /* To use Joomla's Database Class */
 
 require_once( JPATH_SITE . DS . 'libraries' . DS . 'src' . DS . 'Factory.php' );
 
 // Instantiate the application.
-$app = JFactory::getApplication('administrator');
+$app = Factory::getApplication('administrator');
 
 ob_end_clean();
 

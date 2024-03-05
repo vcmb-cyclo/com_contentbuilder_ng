@@ -198,12 +198,12 @@ class facileFormsMenu
 			$msg = $result;
 			$type = 'error';
 		}
-		JFactory::getApplication()->redirect("index.php?option=$option&act=managemenus&pkg=$pkg", $msg, $type);
+		Factory::getApplication()->redirect("index.php?option=$option&act=managemenus&pkg=$pkg", $msg, $type);
 	} // save
 
 	static function cancel($option, $pkg)
 	{
-		JFactory::getApplication()->redirect("index.php?option=$option&act=managemenus&pkg=$pkg");
+		Factory::getApplication()->redirect("index.php?option=$option&act=managemenus&pkg=$pkg");
 	} // cancel
 
 	static function copy($option, $pkg, $ids)
@@ -234,7 +234,7 @@ class facileFormsMenu
 		if ($result != '') {
 			$msg = $result;
 		}
-		JFactory::getApplication()->redirect("index.php?option=$option&act=managemenus&pkg=$pkg&mosmsg=$msg");
+		Factory::getApplication()->redirect("index.php?option=$option&act=managemenus&pkg=$pkg&mosmsg=$msg");
 	} // copy
 
 	static function del($option, $pkg, $ids)
@@ -253,7 +253,7 @@ class facileFormsMenu
 			} // if
 		} // if
 		updateComponentMenus();
-		JFactory::getApplication()->redirect("index.php?option=$option&act=managemenus&pkg=$pkg");
+		Factory::getApplication()->redirect("index.php?option=$option&act=managemenus&pkg=$pkg");
 	} // del
 
 	static function order($option, $pkg, $ids, $inc)
@@ -264,7 +264,7 @@ class facileFormsMenu
 		$row->load($ids[0]);
 		$row->move($inc, "package=" . $database->Quote($pkg) . " and parent=" . $row->parent);
 		updateComponentMenus();
-		JFactory::getApplication()->redirect("index.php?option=$option&act=managemenus&pkg=$pkg");
+		Factory::getApplication()->redirect("index.php?option=$option&act=managemenus&pkg=$pkg");
 	} // order
 
 	static function publish($option, $pkg, $ids, $publish)
@@ -280,7 +280,7 @@ class facileFormsMenu
 			exit();
 		} // if
 		updateComponentMenus();
-		JFactory::getApplication()->redirect("index.php?option=$option&act=managemenus&pkg=$pkg");
+		Factory::getApplication()->redirect("index.php?option=$option&act=managemenus&pkg=$pkg");
 	} // publish
 
 	static function listitems($option, $pkg)

@@ -25,7 +25,7 @@ class bfRecordManagement
         jimport('joomla.filesystem.file');
         jimport('joomla.filesystem.folder');
 
-        $this->tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $this->tz = new DateTimeZone(Factory::getApplication()->getCfg('offset'));
 
         // bfRecordsTableContainer
     }
@@ -272,7 +272,7 @@ class bfRecordManagement
         global $ff_config;
 
         $form = BFRequest::getInt('form_selection');
-        JFactory::getSession()->set('form', $form);
+        Factory::getSession()->set('form', $form);
         if ($form == 0) {
             echo BFText::_('COM_BREEZINGFORMS_IMPORT_CSV_MSG');
             return;
@@ -357,7 +357,7 @@ class bfRecordManagement
 
         $db = BFFactory::getdbo();
 
-        $form = JFactory::getSession()->get('form');
+        $form = Factory::getSession()->get('form');
         $encoding = $_POST["encoding"];
         $file = $_FILES['csv_file']['tmp_name'];
 
@@ -487,10 +487,10 @@ class bfRecordManagement
                                 $value = $_SERVER['REMOTE_ADDR'];
                                 break;
                             case 'user_id':
-                                $value = JFactory::getUser()->get('id', 0);
+                                $value = Factory::getUser()->get('id', 0);
                                 break;
                             case 'username':
-                                $value = JFactory::getUser()->get('username', '');
+                                $value = Factory::getUser()->get('username', '');
                                 break;
                         }
 
@@ -582,31 +582,31 @@ class bfRecordManagement
         JToolBarHelper::custom('archived', 'archive', 'archive', BFText::_('COM_BREEZINGFORMS_TOOLBAR_ARCHIVE'), false);
         JToolBarHelper::custom('remove', 'delete.png', 'delete_f2.png', BFText::_('COM_BREEZINGFORMS_TOOLBAR_DELETE'), false);
 
-        //JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq.migrate.js');
-        //JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq.min.js');
-        //JFactory::getDocument()->addScriptDeclaration('jQuery.noConflict();' . "\n");
-        JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq-ui.min.js');
-        JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/jq.jtable.js');
+        //Factory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq.migrate.js');
+        //Factory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq.min.js');
+        //Factory::getDocument()->addScriptDeclaration('jQuery.noConflict();' . "\n");
+        Factory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jq-ui.min.js');
+        Factory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/jq.jtable.js');
 
-        $lang = JFactory::getLanguage()->getTag();
+        $lang = Factory::getLanguage()->getTag();
         $lang = explode('-', $lang);
         $lang = strtolower($lang[0]);
         if (file_exists(JPATH_SITE . '/components/com_breezingforms/libraries/jquery/jtable/localization/jquery.jtable.' . $lang . '.js')) {
-            JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/localization/jquery.jtable.' . $lang . '.js');
+            Factory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/localization/jquery.jtable.' . $lang . '.js');
         }
 
-        JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.js');
-        JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.date.js');
-        JFactory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.time.js');
-        JFactory::getDocument()->addScript(Uri::root(true) . '/administrator/components/com_breezingforms/libraries/jquery/plugins/json.js');
+        Factory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.js');
+        Factory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.date.js');
+        Factory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/picker.time.js');
+        Factory::getDocument()->addScript(Uri::root(true) . '/administrator/components/com_breezingforms/libraries/jquery/plugins/json.js');
 
-        JFactory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/themes/metro/jq.ui.css');
-        JFactory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/themes/metro/blue/jtable.css');
-        JFactory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/admin/style.css');
+        Factory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/themes/metro/jq.ui.css');
+        Factory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/jtable/themes/metro/blue/jtable.css');
+        Factory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/admin/style.css');
 
-        JFactory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/themes/default.css');
-        JFactory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/themes/default.date.css');
-        JFactory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/themes/default.time.css');
+        Factory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/themes/default.css');
+        Factory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/themes/default.date.css');
+        Factory::getDocument()->addStyleSheet(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/themes/default.time.css');
         ?>
         <script type="text/javascript">
             function ct_quote(str) {
@@ -627,7 +627,7 @@ class bfRecordManagement
         // faking an existing adminform for the toolbar
         echo '<form name="adminForm" id="adminForm"><input type="hidden" name="task" value=""/></form>';
 
-        JFactory::getDocument()->addScriptDeclaration('  
+        Factory::getDocument()->addScriptDeclaration('  
             Array.prototype.bfinsert = function (index, item) {
                 this.splice(index, 0, item);
             };
@@ -1776,10 +1776,10 @@ class bfRecordManagement
 
         // date search
         $tz = 'UTC';
-        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $tz = new DateTimeZone(Factory::getApplication()->getCfg('offset'));
 
-        $now = JFactory::getDate();
-        $now = JFactory::getDate('now', $tz);
+        $now = Factory::getDate();
+        $now = Factory::getDate('now', $tz);
 
         $now_date = '';
         $now_date = $now->toSql();
@@ -1789,15 +1789,15 @@ class bfRecordManagement
         $searchdatefrom = BFRequest::getVar('searchdatefrom', '');
         $searchtimefrom = BFRequest::getVar('searchtimefrom', '');
 
-        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $tz = new DateTimeZone(Factory::getApplication()->getCfg('offset'));
 
         if ($searchdatefrom != '') {
-            $searchdatefrom = JFactory::getDate($searchdatefrom, $tz);
+            $searchdatefrom = Factory::getDate($searchdatefrom, $tz);
             $searchdatefrom = $searchdatefrom->format('Y-m-d', true);
         }
 
         if ($searchtimefrom) {
-            $searchtimefrom = JFactory::getDate($searchtimefrom, $tz);
+            $searchtimefrom = Factory::getDate($searchtimefrom, $tz);
             $searchtimefrom = $searchtimefrom->format('H:i:s', true);
         }
 
@@ -1816,15 +1816,15 @@ class bfRecordManagement
         $searchdateto = BFRequest::getVar('searchdateto', '');
         $searchtimeto = BFRequest::getVar('searchtimeto', '');
 
-        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $tz = new DateTimeZone(Factory::getApplication()->getCfg('offset'));
 
         if ($searchdateto != '') {
-            $searchdateto = JFactory::getDate($searchdateto, $tz);
+            $searchdateto = Factory::getDate($searchdateto, $tz);
             $searchdateto = $searchdateto->format('Y-m-d', true);
         }
 
         if ($searchtimeto != '') {
-            $searchtimeto = JFactory::getDate($searchtimeto, $tz);
+            $searchtimeto = Factory::getDate($searchtimeto, $tz);
             $searchtimeto = $searchtimeto->format('H:i:s', true);
         }
 
@@ -1925,16 +1925,16 @@ class bfRecordManagement
 
 
         if ($searchdatefrom != '') {
-            $date_ = JFactory::getDate($searchdatefrom, $this->tz);
+            $date_ = Factory::getDate($searchdatefrom, $this->tz);
             $searchdatefrom = $date_->format('Y-m-d H:i:s');
         }
 
         if ($searchdateto != '') {
-            $date_ = JFactory::getDate($searchdateto, $this->tz);
+            $date_ = Factory::getDate($searchdateto, $this->tz);
             $searchdateto = $date_->format('Y-m-d H:i:s');
         }
 
-        //$now__ = JFactory::getDate('now', $this->tz);
+        //$now__ = Factory::getDate('now', $this->tz);
         //echo $now__->format('Y-m-d H:i:s', true);
         //echo $searchdate;
 
@@ -2050,7 +2050,7 @@ class bfRecordManagement
                             }
                     }
                 }
-                $date_ = JFactory::getDate($result['Records'][$i]['bfrecord_submitted'], $this->tz);
+                $date_ = Factory::getDate($result['Records'][$i]['bfrecord_submitted'], $this->tz);
                 $offset = $date_->getOffsetFromGMT();
                 if ($offset > 0) {
                     $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -2475,7 +2475,7 @@ class bfRecordManagement
         $i = 0;
         foreach ($recs as $rec) {
             $updIds[] = $rec->id;
-            $date_ = JFactory::getDate($rec->submitted, $this->tz);
+            $date_ = Factory::getDate($rec->submitted, $this->tz);
             $offset = $date_->getOffsetFromGMT();
             if ($offset > 0) {
                 $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -2501,10 +2501,10 @@ class bfRecordManagement
         }
 
         $tz = 'UTC';
-        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $tz = new DateTimeZone(Factory::getApplication()->getCfg('offset'));
 
         $date_stamp = date('YmdHis');
-        $date_ = JFactory::getDate('now', $tz);
+        $date_ = Factory::getDate('now', $tz);
         $offset = $date_->getOffsetFromGMT();
         if ($offset > 0) {
             $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -2716,7 +2716,7 @@ class bfRecordManagement
 
             $rec = $recs[$r];
 
-            $date_ = JFactory::getDate($rec->submitted, $this->tz);
+            $date_ = Factory::getDate($rec->submitted, $this->tz);
             $offset = $date_->getOffsetFromGMT();
             if ($offset > 0) {
                 $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -2847,10 +2847,10 @@ class bfRecordManagement
         }
 
         $tz = 'UTC';
-        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $tz = new DateTimeZone(Factory::getApplication()->getCfg('offset'));
 
         $date_stamp = date('YmdHis');
-        $date_ = JFactory::getDate('now', $tz);
+        $date_ = Factory::getDate('now', $tz);
         $offset = $date_->getOffsetFromGMT();
         if ($offset > 0) {
             $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -2925,11 +2925,11 @@ class bfRecordManagement
         ArrayHelper::toInteger($ids);
 
         $tz = 'UTC';
-        $tz = new DateTimeZone(JFactory::getApplication()->getCfg('offset'));
+        $tz = new DateTimeZone(Factory::getApplication()->getCfg('offset'));
 
         $date_stamp = date('YmdHis');
         $date_file = date('Y-m-d H:i:s');
-        $date_ = JFactory::getDate('now', $tz);
+        $date_ = Factory::getDate('now', $tz);
         $offset = $date_->getOffsetFromGMT();
         if ($offset > 0) {
             $date_->add(new DateInterval('PT' . $offset . 'S'));
@@ -2980,7 +2980,7 @@ class bfRecordManagement
         for ($r = 0; $r < count($recs); $r++) {
             $rec = $recs[$r];
 
-            $date_ = JFactory::getDate($rec->submitted, $this->tz);
+            $date_ = Factory::getDate($rec->submitted, $this->tz);
             $offset = $date_->getOffsetFromGMT();
             if ($offset > 0) {
                 $date_->add(new DateInterval('PT' . $offset . 'S'));

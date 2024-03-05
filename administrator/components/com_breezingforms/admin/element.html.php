@@ -19,7 +19,7 @@ class HTML_facileFormsElement
 {
 	static function newitem($option, $pkg, $form, $page)
 	{
-		$mainframe = JFactory::getApplication();
+		$mainframe = Factory::getApplication();
 		$ff_mossite = Uri::base();
 		?>
 
@@ -238,7 +238,7 @@ class HTML_facileFormsElement
 	static function edit($option, $tabpane, $pkg, &$row, &$lists)
 	{
 		global $ff_mossite, $ff_admsite, $ff_config;
-		$mainframe = JFactory::getApplication();
+		$mainframe = Factory::getApplication();
 		$ff_mossite = Uri::base();
 		$action = $row->id ? BFText::_('COM_BREEZINGFORMS_ELEMENTS_EDIT') : BFText::_('COM_BREEZINGFORMS_ELEMENTS_ADD');
 
@@ -320,7 +320,7 @@ class HTML_facileFormsElement
 						echo "\t\t\t\tsaveQueryList();\n";
 					if ($row->type == 'Static Text/HTML' && $ff_config->wysiwyg) {
 						jimport('joomla.html.editor');
-						$editor = JFactory::getEditor();
+						$editor = Factory::getEditor();
 						echo $editor->save('data1');
 					}
 					?>
@@ -2268,7 +2268,7 @@ class HTML_facileFormsElement
 											if ($ff_config->wysiwyg) {
 												echo '<br/>';
 												jimport('joomla.html.editor');
-												$editor = JFactory::getEditor();
+												$editor = Factory::getEditor();
 												echo $editor->display('data1', $row->data1, 'data1', '500', '100%', '45', '10');
 											} else {
 												echo '<a href="#" onClick="textAreaResize(\'data1\',' . $ff_config->areasmall . ');">[' . $ff_config->areasmall . ']</a> ' .
@@ -3251,7 +3251,7 @@ class HTML_facileFormsElement
 	{
 		global $ff_processor, $ff_mospath, $ff_mossite, $ff_admicon, $ff_comsite, $ff_config,
 		$ff_request, $ff_version, $database, $my;
-		$mainframe = JFactory::getApplication();
+		$mainframe = Factory::getApplication();
 		$database = Factory::getContainer()->get(DatabaseInterface::class);
 
 		$ff_mossite = Uri::root();
@@ -3893,7 +3893,7 @@ class HTML_facileFormsElement
 											<td>
 												<div style="position:relative;left:0px;top:0px;<?php echo $dstyle; ?>">
 													<?php
-													$myUser = JFactory::getUser();
+													$myUser = Factory::getUser();
 
 													$database->setQuery("select id from #__users where lower(username)=lower('" . $myUser->get('username', '') . "')");
 													$id = $database->loadResult();

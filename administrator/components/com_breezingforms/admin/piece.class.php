@@ -52,13 +52,13 @@ class facileFormsPiece
 			echo "<script> alert('".$row->getError()."'); window.history.go(-1); </script>\n";
 			exit();
 		} // if
-		JFactory::getApplication()->redirect(
+		Factory::getApplication()->redirect(
 			"index.php?option=$option&act=managepieces&pkg=$pkg");
 	} // save
 
 	static function cancel($option, $pkg)
 	{
-		JFactory::getApplication()->redirect("index.php?option=$option&act=managepieces&pkg=$pkg");
+		Factory::getApplication()->redirect("index.php?option=$option&act=managepieces&pkg=$pkg");
 	} // cancel
 
 	static function copy($option, $pkg, $ids)
@@ -73,7 +73,7 @@ class facileFormsPiece
 			$row->store();
 		} // foreach
 		$msg = $total.' '.BFText::_('COM_BREEZINGFORMS_PIECES_SUCCOPIED');
-		JFactory::getApplication()->redirect("index.php?option=$option&act=managepieces&pkg=$pkg&mosmsg=$msg");
+		Factory::getApplication()->redirect("index.php?option=$option&act=managepieces&pkg=$pkg&mosmsg=$msg");
 	} // copy
 
 	static function del($option, $pkg, $ids)
@@ -87,7 +87,7 @@ class facileFormsPiece
 				echo "<script> alert('".$database->getErrorMsg()."'); window.history.go(-1); </script>\n";
 			} // if
 		} // if
-		JFactory::getApplication()->redirect("index.php?option=$option&act=managepieces&pkg=$pkg");
+		Factory::getApplication()->redirect("index.php?option=$option&act=managepieces&pkg=$pkg");
 	} // del
 
 	static function publish($option, $pkg, $ids, $publish)
@@ -102,7 +102,7 @@ class facileFormsPiece
 			echo "<script> alert('".$database->getErrorMsg()."'); window.history.go(-1); </script>\n";
 			exit();
 		} // if
-		JFactory::getApplication()->redirect( "index.php?option=$option&act=managepieces&pkg=$pkg" );
+		Factory::getApplication()->redirect( "index.php?option=$option&act=managepieces&pkg=$pkg" );
 	} // publish
 
 	static function listitems($option, $pkg)

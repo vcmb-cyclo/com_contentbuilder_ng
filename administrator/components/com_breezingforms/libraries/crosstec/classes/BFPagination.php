@@ -5,12 +5,13 @@
  * @package     BreezingForms
  * @author      Markus Bopp
  * @link        http://www.crosstec.de
- * @copyright Copyright (C) 2024 by XDA+GIL 
+ * @copyright   Copyright (C) 2024 by XDA+GIL 
  * @license     GNU/GPL
  */
 
 defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Language\Text;
 
@@ -279,7 +280,7 @@ class BFPagination
 	 */
 	public function getPagesLinks()
 	{
-		$app = JFactory::getApplication();
+		$app = Factory::getApplication();
 
 		// Build the page navigation list.
 		$data = $this->_buildDataObject();
@@ -374,7 +375,7 @@ class BFPagination
 	 */
 	public function getListFooter()
 	{
-		$app = JFactory::getApplication();
+		$app = Factory::getApplication();
 
 		$list = array();
 		$list['prefix'] = $this->prefix;
@@ -409,7 +410,7 @@ class BFPagination
 	 */
 	public function getLimitBox()
 	{
-		$app = JFactory::getApplication();
+		$app = Factory::getApplication();
 		$limits = array();
 
 		// Make the option list.
@@ -553,7 +554,7 @@ class BFPagination
 	 */
 	protected function _item_active(JPaginationObject $item)
 	{
-		$app = JFactory::getApplication();
+		$app = Factory::getApplication();
 		if ($app->isClient('administrator')) {
 			if ($item->base > 0) {
 				return "<a title=\"" . $item->text . "\" onclick=\"document.adminForm." . $this->prefix . "limitstart.value=" . $item->base
@@ -578,7 +579,7 @@ class BFPagination
 	 */
 	protected function _item_inactive(JPaginationObject $item)
 	{
-		$app = JFactory::getApplication();
+		$app = Factory::getApplication();
 		if ($app->isClient('administrator')) {
 			return "<span>" . $item->text . "</span>";
 		} else {

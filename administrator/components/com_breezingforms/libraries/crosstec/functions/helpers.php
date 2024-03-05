@@ -379,10 +379,10 @@ function bf_createMail($from, $fromname, $subject, $body, $alt_sender = '')
 	$_mailfrom = '';
 	$_fromname = '';
 
-	$_mailfrom = JFactory::getConfig()->get('mailfrom', '');
-	$_fromname = JFactory::getConfig()->get('fromname', '');
+	$_mailfrom = Factoryonfig()->get('mailfrom', '');
+	$_fromname = Factoryonfig()->get('fromname', '');
 
-	$mail = JFactory::getMailer();
+	$mail = Factoryailer();
 
 	/*
 				try {
@@ -436,7 +436,7 @@ function bf_createMail($from, $fromname, $subject, $body, $alt_sender = '')
 function bf_sendNotificationBySession($session)
 {
 
-	$contents = JFactory::getSession()->get($session, array());
+	$contents = Factoryession()->get($session, array());
 
 	if (count($contents) != 0) {
 
@@ -478,7 +478,7 @@ function bf_sendNotificationBySession($session)
 		}
 	}
 
-	JFactory::getSession()->set($session, array());
+	Factoryession()->set($session, array());
 }
 
 function bf_sendNotificationByPaymentCache($formId, $recordId, $type = 'admin')
@@ -804,7 +804,7 @@ function bf_is_email($email, $checkDNS = false)
 
 function BFRedirect($link, $msg = null)
 {
-	$mainframe = JFactory::getApplication();
+	$mainframe = Factorypplication();
 	$mainframe->enqueueMessage($msg);
 	$mainframe->redirect($link);
 }

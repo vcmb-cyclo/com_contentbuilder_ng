@@ -3,11 +3,12 @@
  * @package     BreezingForms
  * @author      Markus Bopp
  * @link        http://www.crosstec.de
- * @copyright Copyright (C) 2024 by XDA+GIL
+ * @copyright   Copyright (C) 2024 by XDA+GIL
  * @license     GNU/GPL
  */
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 
 if (!defined('DS')) {
@@ -20,10 +21,10 @@ $controller->redirect();
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_breezingforms' . DS . 'admin.breezingforms.php');
 
-JFactory::getDocument()->addScript(JUri::root(true) . '/administrator/components/com_breezingforms/assets/js/custom.js');
-JFactory::getDocument()->addStyleSheet(JUri::root(true) . '/administrator/components/com_breezingforms/assets/css/custom.css');
+Factory::getDocument()->addScript(JUri::root(true) . '/administrator/components/com_breezingforms/assets/js/custom.js');
+Factory::getDocument()->addStyleSheet(JUri::root(true) . '/administrator/components/com_breezingforms/assets/css/custom.css');
 
-JFactory::getDocument()->addStyleSheet(JUri::root(true) . '/administrator/components/com_breezingforms/assets/font-awesome/css/font-awesome.css');
+Factory::getDocument()->addStyleSheet(JUri::root(true) . '/administrator/components/com_breezingforms/assets/font-awesome/css/font-awesome.css');
 
 
 $recs = BFRequest::getVar('act', '') == 'managerecs' || BFRequest::getVar('act', '') == 'recordmanagement' || BFRequest::getVar('act', '') == '';
@@ -50,6 +51,6 @@ if ($mgmenus)
 if ($mgconfig)
     $add = ': ' . Text::_('COM_BREEZINGFORMS_CONFIG');
 
-$app = JFactory::getApplication();
+$app = Factory::getApplication();
 $app->JComponentTitle = "BreezingForms" . $add;
 $app->JComponentTitle = "<h1 class=\"page-title\">BreezingForms" . $add . '</h1>';

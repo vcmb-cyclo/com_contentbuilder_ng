@@ -1,6 +1,13 @@
 <?php
+/**
+ *
+ * @copyright   Copyright (C) 2024 by XDA+GIL
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 
 /**
@@ -42,7 +49,7 @@ final class BFText
 	{
 		if (!(self::$bftext instanceof BFText)) {
 			self::$bftext = new BFText();
-			self::$bftext->language = JFactory::getApplication()->getLanguage();
+			self::$bftext->language = Factory::getApplication()->getLanguage();
 		}
 
 		return self::$bftext;

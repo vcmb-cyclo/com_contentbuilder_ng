@@ -9,6 +9,7 @@
 
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\HTML\HTMLHelper;
 
@@ -51,7 +52,7 @@ class HTML_facileFormsScript
 			} // submitbutton
 
 			<?php
-			JFactory::getDocument()->addScriptDeclaration('
+			Factory::getDocument()->addScriptDeclaration('
                     Joomla.submitbutton = submitbutton;  
                 ');
 			?>
@@ -338,7 +339,7 @@ class HTML_facileFormsScript
 					} // submitbutton
 
 			<?php
-			JFactory::getDocument()->addScriptDeclaration('
+			Factory::getDocument()->addScriptDeclaration('
             
                 Joomla.submitbutton = submitbutton;
             ');

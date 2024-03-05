@@ -52,14 +52,14 @@ class facileFormsScript
 			echo "<script> alert('".$row->getError()."'); window.history.go(-1); </script>\n";
 			exit();
 		} // if
-        JFactory::getApplication()->enqueueMessage(BFText::_('COM_BREEZINGFORMS_SCRIPTS_SAVED'));
-		JFactory::getApplication()->redirect(
+        Factory::getApplication()->enqueueMessage(BFText::_('COM_BREEZINGFORMS_SCRIPTS_SAVED'));
+		Factory::getApplication()->redirect(
 			"index.php?option=$option&act=managescripts&pkg=$pkg");
 	} // save
 
 	static function cancel($option, $pkg)
 	{
-		JFactory::getApplication()->redirect("index.php?option=$option&act=managescripts&pkg=$pkg");
+		Factory::getApplication()->redirect("index.php?option=$option&act=managescripts&pkg=$pkg");
 	} // cancel
 
 	static function copy($option, $pkg, $ids)
@@ -73,7 +73,7 @@ class facileFormsScript
 			$row->store();
 		} // foreach
 		$msg = $total.' '.BFText::_('COM_BREEZINGFORMS_SCRIPTS_SUCCOPIED');
-		JFactory::getApplication()->redirect("index.php?option=$option&act=managescripts&pkg=$pkg&mosmsg=$msg");
+		Factory::getApplication()->redirect("index.php?option=$option&act=managescripts&pkg=$pkg&mosmsg=$msg");
 	} // copy
 
 	static function del($option, $pkg, $ids)
@@ -86,7 +86,7 @@ class facileFormsScript
 				echo "<script> alert('".$database->getErrorMsg()."'); window.history.go(-1); </script>\n";
 			} // if
 		} // if
-		JFactory::getApplication()->redirect("index.php?option=$option&act=managescripts&pkg=$pkg");
+		Factory::getApplication()->redirect("index.php?option=$option&act=managescripts&pkg=$pkg");
 	} // del
 
 	static function publish($option, $pkg, $ids, $publish)
@@ -101,7 +101,7 @@ class facileFormsScript
 			echo "<script> alert('".$database->getErrorMsg()."'); window.history.go(-1); </script>\n";
 			exit();
 		} // if
-		JFactory::getApplication()->redirect( "index.php?option=$option&act=managescripts&pkg=$pkg" );
+		Factory::getApplication()->redirect( "index.php?option=$option&act=managescripts&pkg=$pkg" );
 	} // publish
 
 	static function listitems($option, $pkg)

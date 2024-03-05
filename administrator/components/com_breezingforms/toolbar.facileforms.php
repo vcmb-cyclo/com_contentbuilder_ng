@@ -4,9 +4,13 @@
 * @version 1.9
 * @package BreezingForms
 * @copyright (C) 2008-2020 by Markus Bopp
+* @copyright   Copyright (C) 2024 by XDA+GIL
 * @license Released under the terms of the GNU General Public License
 **/
 defined( '_JEXEC' ) or die( 'Direct Access to this location is not allowed.' );
+
+use Joomla\CMS\Factory;
+
 
 $act = isset($_REQUEST['act']) ? $_REQUEST['act'] : '';
 
@@ -14,7 +18,7 @@ global $ff_mospath, $ff_admpath, $ff_compath;
 global $ff_mossite, $ff_admsite, $ff_admicon, $ff_comsite;
 global $ff_config, $ff_compatible, $ff_install;
 
-$mainframe = JFactory::getApplication();
+$mainframe = Factory::getApplication();
 
 // load ff stuff and get config
 require_once($ff_compath.'/facileforms.class.php');

@@ -24,7 +24,7 @@ class HTML_facileFormsForm
     {
         global $ff_admsite, $ff_config;
 
-        //JFactory::getDocument()->addScript(Juri::root(true) . '/components/com_breezingforms/libraries/codemirror/mode/htmlmixed/htmlmixed.js');
+        //Factory::getDocument()->addScript(Juri::root(true) . '/components/com_breezingforms/libraries/codemirror/mode/htmlmixed/htmlmixed.js');
 
         ToolbarHelper::custom('save', 'save.png', 'save_f2.png', BFText::_('COM_BREEZINGFORMS_TOOLBAR_SAVE'), false);
         ToolbarHelper::custom('cancel', 'cancel.png', 'cancel_f2.png', BFText::_('COM_BREEZINGFORMS_TOOLBAR_QUICKMODE_CLOSE'), false);
@@ -2148,7 +2148,7 @@ class HTML_facileFormsForm
                     $k = 1 - $k;
                 } // for
         
-                $limit = JFactory::getApplication()->getUserStateFromRequest('global.list.limit', 'limit', JFactory::getApplication()->getCfg('list_limit'), 'int');
+                $limit = Factory::getApplication()->getUserStateFromRequest('global.list.limit', 'limit', Factory::getApplication()->getCfg('list_limit'), 'int');
                 $pagination = facileFormsForm::getPagination($total, $limit, BFRequest::getInt('limitstart', 0));
                 $pages_links = $pagination->getPagesLinks();
                 ?>

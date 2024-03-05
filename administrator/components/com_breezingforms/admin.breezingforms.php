@@ -21,7 +21,7 @@ require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFRequest.php');
 
 if (BFRequest::getVar('mosmsg', '') != '') {
-    JFactory::getApplication()->enqueueMessage(BFRequest::getVar('mosmsg', ''));
+    Factory::getApplication()->enqueueMessage(BFRequest::getVar('mosmsg', ''));
 }
 
 $db = Factory::getContainer()->get(DatabaseInterface::class);
@@ -69,9 +69,9 @@ $task = BFRequest::getCmd('task');
 jimport('joomla.filesystem.file');
 jimport('joomla.filesystem.folder');
 
-if (!JFactory::getUser()->authorise('core.manage', 'com_breezingforms')) {
-    JFactory::getApplication()->enqueueMessage(Text::_('JERROR_ALERTNOAUTHOR'), 'error');
-    JFactory::getApplication()->redirect('index.php', 403);
+if (!Factory::getUser()->authorise('core.manage', 'com_breezingforms')) {
+    Factory::getApplication()->enqueueMessage(Text::_('JERROR_ALERTNOAUTHOR'), 'error');
+    Factory::getApplication()->redirect('index.php', 403);
     return;
 }
 
@@ -296,9 +296,9 @@ if (BFRequest::getBool('checkCaptcha')) {
 
 }
 
-$mainframe = JFactory::getApplication();
+$mainframe = Factory::getApplication();
 
-$cache = JFactory::getCache('com_content');
+$cache = Factory::getCache('com_content');
 $cache->clean();
 
 // force jquery to be loaded after mootools but before any other js (since J! 3.4)
@@ -352,7 +352,7 @@ global $ff_mospath, $ff_admpath, $ff_compath, $ff_request;
 global $ff_mossite, $ff_admsite, $ff_admicon, $ff_comsite;
 global $ff_config, $ff_compatible, $ff_install;
 
-$my = JFactory::getUser();
+$my = Factory::getUser();
 
 if (!isset($ff_compath)) { // joomla!
     // get paths

@@ -16,7 +16,7 @@ class BreezingformsViewBreezingforms extends JViewLegacy
 	{
                 
             JToolbarHelper::title('BreezingForms');
-            JFactory::getDocument()->setTitle("BreezingForms");
+            Factory::getDocument()->setTitle("BreezingForms");
 
             require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFRequest.php');
             require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFText.php');
@@ -57,7 +57,7 @@ class BreezingformsViewBreezingforms extends JViewLegacy
             $this->sidebar = '<div id="bf-sidebar">' . JHtmlSidebar::render() . '</div>';
 
 
-            JFactory::getDocument()->addScriptDeclaration('
+            Factory::getDocument()->addScriptDeclaration('
             
             jQuery(document).ready(function(){
             

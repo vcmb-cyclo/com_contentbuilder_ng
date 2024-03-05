@@ -9,6 +9,7 @@
  * */
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
@@ -22,9 +23,9 @@ class QuickModeHtml
         HTMLHelper::_('bootstrap.tooltip', '.hasTooltip');
         JHTML::_('behavior.keepalive');
         $iconBase = '../administrator/components/com_breezingforms/libraries/jquery/themes/quickmode/i/';
-        JFactory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/quickmode/quickmode.all.css');
-        JFactory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/jtree/tree_component.css');
-        JFactory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/admin/style.css');
+        Factory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/quickmode/quickmode.all.css');
+        Factory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/jtree/tree_component.css');
+        Factory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/admin/style.css');
         ?>
 
         <script type="text/javascript"
@@ -3457,14 +3458,14 @@ class QuickModeHtml
         jimport('joomla.application.component.helper');
         $default = JComponentHelper::getParams('com_languages')->get('site');
 
-        JFactory::getDocument()->addScriptDeclaration('
+        Factory::getDocument()->addScriptDeclaration('
         jQuery(document).ready(function () {
             jQuery(\'.bfTrans\').css("display", "none");
         });
         ');
         if ($formId > 0 && count(JLanguageHelper::getLanguages()) > 1) {
             if ($active_language_code != '' && $active_language_code != $default) {
-                JFactory::getDocument()->addScriptDeclaration('
+                Factory::getDocument()->addScriptDeclaration('
                 jQuery(document).ready(function () {
                     jQuery(\'.bfTrans\').css("display", "block");
                 });

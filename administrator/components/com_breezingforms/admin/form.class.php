@@ -284,10 +284,10 @@ class facileFormsForm {
 
         if (trim($caller) == '') {
             $caller = "index.php?option=$option&act=manageforms&pkg=$pkg";
-            JFactory::getApplication()->redirect($caller);
+            Factory::getApplication()->redirect($caller);
         }
 
-        JFactory::getApplication()->redirect('index.php?option=com_breezingforms&task=editform&act=editpage&form=' . intval($_POST['id']) . ($quickmode ? '&pkg=QuickModeForms' : ''));
+        Factory::getApplication()->redirect('index.php?option=com_breezingforms&task=editform&act=editpage&form=' . intval($_POST['id']) . ($quickmode ? '&pkg=QuickModeForms' : ''));
     }
 
 // save
@@ -296,12 +296,12 @@ class facileFormsForm {
         if (!$nonclassic) {
             if (trim($caller) == '')
                 $caller = "index.php?option=$option&act=manageforms&pkg=$pkg";
-            JFactory::getApplication()->redirect($caller);
+            Factory::getApplication()->redirect($caller);
         } else {
             if (!$quickmode) {
-                JFactory::getApplication()->redirect('index.php?option=com_breezingforms&format=html&act=easymode&formName=' . BFRequest::getVar('name', '') . '&form=' . BFRequest::getInt('id', 0));
+                Factory::getApplication()->redirect('index.php?option=com_breezingforms&format=html&act=easymode&formName=' . BFRequest::getVar('name', '') . '&form=' . BFRequest::getInt('id', 0));
             } else {
-                JFactory::getApplication()->redirect('index.php?option=com_breezingforms&act=quickmode&formName=' . BFRequest::getVar('name', '') . '&form=' . BFRequest::getInt('id', 0));
+                Factory::getApplication()->redirect('index.php?option=com_breezingforms&act=quickmode&formName=' . BFRequest::getVar('name', '') . '&form=' . BFRequest::getInt('id', 0));
             }
         }
     }
@@ -379,7 +379,7 @@ class facileFormsForm {
                 // reset end
             } // foreach
         $msg = $total . ' ' . BFText::_('COM_BREEZINGFORMS_FORMS_SUCOPIED');
-        JFactory::getApplication()->redirect("index.php?option=$option&act=manageforms&pkg=$pkg&mosmsg=$msg");
+        Factory::getApplication()->redirect("index.php?option=$option&act=manageforms&pkg=$pkg&mosmsg=$msg");
     }
 
 // copy
@@ -399,7 +399,7 @@ class facileFormsForm {
                 echo "<script> alert('" . $database->getErrorMsg() . "'); window.history.go(-1); </script>\n";
             } // if
         } // if
-        JFactory::getApplication()->redirect("index.php?option=$option&act=manageforms&pkg=$pkg");
+        Factory::getApplication()->redirect("index.php?option=$option&act=manageforms&pkg=$pkg");
     }
 
 // del
@@ -411,7 +411,7 @@ class facileFormsForm {
         $row = new facileFormsForms($database);
         $row->load($ids[0]);
         $row->move($inc, "package=" . $database->Quote($pkg) . "");
-        JFactory::getApplication()->redirect("index.php?option=$option&act=manageforms&pkg=$pkg");
+        Factory::getApplication()->redirect("index.php?option=$option&act=manageforms&pkg=$pkg");
     }
 
 // order
@@ -428,7 +428,7 @@ class facileFormsForm {
             echo "<script> alert('" . $database->getErrorMsg() . "'); window.history.go(-1); </script>\n";
             exit();
         } // if
-        JFactory::getApplication()->redirect("index.php?option=$option&act=manageforms&pkg=$pkg");
+        Factory::getApplication()->redirect("index.php?option=$option&act=manageforms&pkg=$pkg");
     }
 
 // publish
@@ -474,7 +474,7 @@ class facileFormsForm {
             foreach ($pkgs as $p)
                 $pkglist[] = array($p->name == $pkg, $p->name);
 
-        $limit = JFactory::getApplication()->getUserStateFromRequest('global.list.limit', 'limit', JFactory::getApplication()->getCfg('list_limit'), 'int');
+        $limit = Factory::getApplication()->getUserStateFromRequest('global.list.limit', 'limit', Factory::getApplication()->getCfg('list_limit'), 'int');
         $limitstart = 0;
         if (isset($_REQUEST['limit']) && isset($_REQUEST['limitstart'])) {
             $limit = intval($_REQUEST['limit']);
@@ -513,7 +513,7 @@ class facileFormsForm {
         if (empty($pagination)) {
 
             // using a different chrome to bypass problems with pagination in frontend 
-            if (JFactory::getApplication()->isClient('site')) {
+            if (Factory::getApplication()->isClient('site')) {
                 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_breezingforms' . DS . 'libraries' . DS . 'crosstec' . DS . 'classes' . DS . 'BFPagination.php');
                 $pagination = new BFPagination($total, $limitstart, $limit);
             } else {

@@ -101,7 +101,7 @@ if ($inframe) {
 	/**
 	 * @var JUser
 	 */
-	$myUser = JFactory::getUser();
+	$myUser = Factory::getUser();
 	
 	$database->setQuery("select id from #__users where lower(username)=lower('".$myUser->get('username','')."')");
 	$id = $database->loadResult();

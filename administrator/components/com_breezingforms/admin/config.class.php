@@ -23,8 +23,8 @@ class facileFormsConfig extends facileFormsConf {
 
 	function cancel($option, $caller, $pkg)
 	{
-		if ($caller != 'index.php' && $pkg != '') JFactory::getApplication()->redirect($caller."&pkg=$pkg");
-		JFactory::getApplication()->redirect($caller);
+		if ($caller != 'index.php' && $pkg != '') Factory::getApplication()->redirect($caller."&pkg=$pkg");
+		Factory::getApplication()->redirect($caller);
 	} // cancel
 
 	function save($option, $caller, $pkg)
@@ -56,11 +56,11 @@ class facileFormsConfig extends facileFormsConf {
 		$this->bindRequest($_REQUEST);
 		$this->store();
 		if ($pkg != '') {
-                    JFactory::getApplication()->enqueueMessage(BFText::_('COM_BREEZINGFORMS_CONFIG_SAVED'));
-                    JFactory::getApplication()->redirect($caller."&pkg=$pkg", BFText::_('COM_BREEZINGFORMS_CONFIG_SAVED'));
+                    Factory::getApplication()->enqueueMessage(BFText::_('COM_BREEZINGFORMS_CONFIG_SAVED'));
+                    Factory::getApplication()->redirect($caller."&pkg=$pkg", BFText::_('COM_BREEZINGFORMS_CONFIG_SAVED'));
                 }
-		JFactory::getApplication()->enqueueMessage(BFText::_('COM_BREEZINGFORMS_CONFIG_SAVED'));
-                JFactory::getApplication()->redirect('index.php?option=com_breezingforms&act=configuration');
+		Factory::getApplication()->enqueueMessage(BFText::_('COM_BREEZINGFORMS_CONFIG_SAVED'));
+                Factory::getApplication()->redirect('index.php?option=com_breezingforms&act=configuration');
 	} // save
 
 	function addToAll(&$all, $row)

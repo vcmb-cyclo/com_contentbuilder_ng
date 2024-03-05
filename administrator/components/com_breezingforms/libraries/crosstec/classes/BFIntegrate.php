@@ -28,7 +28,7 @@ class BFIntegrate
 
     function __construct($formId)
     {
-        $this->db = Factory::getContainer()->get(DatabaseInterface::class);
+        $this->db = Factory:::getContainer()->get(DatabaseInterface::class);
         $this->rules = $this->getRules($formId);
         $this->formId = $formId;
     }
@@ -311,16 +311,16 @@ class BFIntegrate
 
                         switch ($crit->joomla_object) {
                             case 'Userid':
-                                $jobject = JFactory::getUser()->get('id', '');
+                                $jobject = Factory::getUser()->get('id', '');
                                 break;
                             case 'Username':
-                                $jobject = JFactory::getUser()->get('username', '');
+                                $jobject = Factory::getUser()->get('username', '');
                                 break;
                             case 'Language':
-                                $jobject = JFactory::getApplication()->getLanguage()->getName();
+                                $jobject = Factory::getApplication()->getLanguage()->getName();
                                 break;
                             case 'Date':
-                                $jobject = JFactory::getDate()->toSql();
+                                $jobject = Factory::getDate()->toSql();
                                 break;
                         }
 
