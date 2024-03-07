@@ -3,6 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL 
  * @license     GNU/GPL
  */
 
@@ -10,6 +11,7 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\HTML\HTMLHelper;
 
 ?>
 <style type="text/css">
@@ -79,29 +81,29 @@ use Joomla\CMS\Router\Route;
             <thead>
                 <tr>
                     <th width="5">
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_ID'), 'id', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ID'), 'id', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </th>
                     <th width="20">
                         <input class="form-check-input" type="checkbox" name="toggle" value=""
                             onclick="Joomla.checkAll(this);" />
                     </th>
                     <th>
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_NAME'), 'name', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NAME'), 'name', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </th>
                     <th>
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_USERNAME'), 'username', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_USERNAME'), 'username', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </th>
                     <th>
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW'), 'verified_view', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW'), 'verified_view', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </th>
                     <th>
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_NEW'), 'verified_new', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_NEW'), 'verified_new', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </th>
                     <th>
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT'), 'verified_edit', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT'), 'verified_edit', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </th>
                     <th width="5">
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_PUBLISHED'), 'published', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_PUBLISHED'), 'published', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </th>
                 </tr>
             </thead>
@@ -110,7 +112,7 @@ use Joomla\CMS\Router\Route;
             $n = count($this->items);
             for ($i = 0; $i < $n; $i++) {
                 $row = $this->items[$i];
-                $checked = JHTML::_('grid.id', $i, $row->id);
+                $checked = HTMLHelper::_('grid.id', $i, $row->id);
                 $link = Route::_('index.php?option=com_contentbuilder&controller=users&tmpl=' . CBRequest::getCmd('tmpl', '') . '&task=edit&form_id=' . CBRequest::getInt('form_id', 0) . '&joomla_userid=' . $row->id);
                 if ($row->published === null) {
                     $row->published = 1;
@@ -173,5 +175,5 @@ use Joomla\CMS\Router\Route;
     <input type="hidden" name="tmpl" value="<?php echo CBRequest::getWord('tmpl', ''); ?>" />
     <input type="hidden" name="filter_order" value="<?php echo $this->lists['order']; ?>" />
     <input type="hidden" name="filter_order_Dir" value="<?php echo $this->lists['order_Dir']; ?>" />
-    <?php echo JHtml::_('form.token'); ?>
+    <?php echo HTMLHelper::_('form.token'); ?>
 </form>

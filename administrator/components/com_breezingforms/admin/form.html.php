@@ -495,7 +495,7 @@ class HTML_facileFormsForm
                                             <?php echo BFText::_('COM_BREEZINGFORMS_FORMS_PUBLISHED'); ?>
                                         </td>
                                         <td valign="top">
-                                            <?php echo JHTML::_('select.booleanlist', "published", "", $row->published); ?>
+                                            <?php echo HTMLHelper::_('select.booleanlist', "published", "", $row->published); ?>
                                         </td>
                                         <td></td>
                                     </tr>
@@ -668,7 +668,7 @@ class HTML_facileFormsForm
                                             <?php echo BFText::_('COM_BREEZINGFORMS_FORMS_DOUBLE_OPT'); ?>
                                         </td>
                                         <td valign="top">
-                                            <?php echo JHTML::_('select.booleanlist', "double_opt", "", $row->double_opt); ?>
+                                            <?php echo HTMLHelper::_('select.booleanlist', "double_opt", "", $row->double_opt); ?>
                                         </td>
                                         <td></td>
                                     </tr>

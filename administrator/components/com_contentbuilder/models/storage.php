@@ -4,6 +4,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL * 
  * @license     GNU/GPL
  */
 
@@ -15,8 +16,9 @@ use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\File;
+use Joomla\CMS\HTML\HTMLHelper;
 
-JHTML::_('behavior.keepalive');
+HTMLHelper::_('behavior.keepalive');
 
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');

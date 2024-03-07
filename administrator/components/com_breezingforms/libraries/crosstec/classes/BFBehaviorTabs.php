@@ -11,7 +11,7 @@
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Factory;
-
+use Joomla\CMS\HTML\HTMLHelper;
 
 
 class BFBehaviorTabs
@@ -43,7 +43,7 @@ class BFBehaviorTabs
 
 		if (!array_key_exists((string) $group, $loaded)) {
 			// Include MooTools framework
-			///*** JHTML::_('behavior.framework', true); ***/
+			///*** HTMLHelper::_('behavior.framework', true); ***/
 
 			$opt['onActive'] = (isset($params['onActive'])) ? '\\' . $params['onActive'] : null;
 			$opt['onBackground'] = (isset($params['onBackground'])) ? '\\' . $params['onBackground'] : null;
@@ -72,7 +72,7 @@ class BFBehaviorTabs
 
 			$document = Factory::getDocument();
 			$document->addScriptDeclaration($js);
-			JHtml::_('script', 'system/tabs.js', false, true);
+			HTMLHelper::_('script', 'system/tabs.js', false, true);
 
 			$loaded[(string) $group] = true;
 		}

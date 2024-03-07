@@ -3,6 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL 
  * @license     GNU/GPL
  */
 
@@ -715,8 +716,8 @@ $cbcompat = new CBCompat();
                                 <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED'); ?>
                             </th>
                             <th width="120">
-                                <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering', 'desc', @$this->lists['order'], 'edit'); ?>
-                                <?php //TODO: dragndrop if ($this->ordering) echo JHTML::_('grid.order',  $this->elements );  ?>
+                                <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering', 'desc', @$this->lists['order'], 'edit'); ?>
+                                <?php //TODO: dragndrop if ($this->ordering) echo HTMLHelper::_('grid.order',  $this->elements );   ?>
                             </th>
                         </tr>
                     </thead>
@@ -725,7 +726,7 @@ $cbcompat = new CBCompat();
                     $n = count($this->elements);
                     for ($i = 0; $i < $n; $i++) {
                         $row = $this->elements[$i];
-                        $checked = JHTML::_('grid.id', $i, $row->id);
+                        $checked = HTMLHelper::_('grid.id', $i, $row->id);
                         $published = contentbuilder_helpers::listPublish($row, $i);
                         $list_include = contentbuilder_helpers::listIncludeInList($row, $i);
                         $search_include = contentbuilder_helpers::listIncludeInSearch($row, $i);
@@ -745,7 +746,8 @@ $cbcompat = new CBCompat();
                                     onclick="document.getElementById('itemLabels<?php echo $row->id ?>').style.display='block';this.style.display='none';document.getElementById('itemLabels<?php echo $row->id ?>').focus();">
                                     <b>
                                         <?php echo htmlentities($row->label, ENT_QUOTES, 'UTF-8'); ?>
-                                    </b></div>
+                                    </b>
+                                </div>
                                 <input class="form-control form-control-sm"
                                     onblur="if(this.value=='') {this.value = 'Unnamed';} this.style.display='none';document.getElementById('itemLabels_<?php echo $row->id ?>').innerHTML='<b>'+this.value+'<b/>';document.getElementById('itemLabels_<?php echo $row->id ?>').style.display='block';"
                                     id="itemLabels<?php echo $row->id ?>" type="text" style="display:none; width: 100%;"
@@ -1113,7 +1115,7 @@ $cbcompat = new CBCompat();
                 <td>
                     <?php
                     ?>
-                    <?php echo JHtml::_('access.level', 'default_access', $this->form->default_access, '', array(), 'default_access'); ?>
+                    <?php echo HTMLHelper::_('access.level', 'default_access', $this->form->default_access, '', array(), 'default_access'); ?>
                     <?php
                     ?>
                 </td>
@@ -1496,112 +1498,187 @@ $cbcompat = new CBCompat();
 
         /*  MODIF XDA - GILLES (REMOVE : PERMISSION - BACKEND BOTTON), */
         /* Supprime le bouton PERMISSION - BACKEND, laisse FRONTEND seulement pour les droits */
-        $title = Text::_( 'COM_CONTENTBUILDER_PERMISSIONS_BACKEND' );
-        echo $sliders->startPanel( $title, "permtab0" );
+        $title = Text::_('COM_CONTENTBUILDER_PERMISSIONS_BACKEND');
+        echo $sliders->startPanel($title, "permtab0");
         ?>
         <table class="adminlist table table-striped">
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="own_only">
-                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN_OWNLY_TIP'); ?>" >
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN_OWNLY'); ?>
+                        <span class="editlinktip hasTip"
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN_OWNLY_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN_OWNLY'); ?>
                         </span>:
                     </label>
                 </td>
                 <td>
-                    <input class="form-check-input" type="checkbox" name="own_only" id="own_only" value="1"<?php echo $this->form->own_only ? ' checked="checked"' : '';?>/>
+                    <input class="form-check-input" type="checkbox" name="own_only" id="own_only" value="1" <?php echo $this->form->own_only ? ' checked="checked"' : ''; ?> />
                 </td>
             </tr>
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="limited_article_options">
-                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_LIMITED_ARTICLE_OPTIONS_TIP'); ?>" >
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIMITED_ARTICLE_OPTIONS'); ?>
+                        <span class="editlinktip hasTip"
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_LIMITED_ARTICLE_OPTIONS_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIMITED_ARTICLE_OPTIONS'); ?>
                         </span>:
                     </label>
                 </td>
                 <td>
-                    <input class="form-check-input" type="checkbox" name="limited_article_options" id="limited_article_options" value="1"<?php echo $this->form->limited_article_options ? ' checked="checked"' : '';?>/>
+                    <input class="form-check-input" type="checkbox" name="limited_article_options"
+                        id="limited_article_options" value="1" <?php echo $this->form->limited_article_options ? ' checked="checked"' : ''; ?> />
                 </td>
             </tr>
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="own_view">
-                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN_TIP'); ?>" >
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN'); ?>
+                        <span class="editlinktip hasTip"
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN'); ?>
                         </span>:
                     </label>
                 </td>
                 <td>
-                    <input class="form-check-input" type="checkbox" name="own[listaccess]" id="own_listaccess" value="1"<?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['listaccess']) && $this->form->config['own']['listaccess'] ? ' checked="checked"' : '';?>/><label for="own_listaccess"> <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIST_ACCESS'); ?></label>
-                    <input class="form-check-input" type="checkbox" name="own[view]" id="own_view" value="1"<?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['view']) && $this->form->config['own']['view'] ? ' checked="checked"' : '';?>/><label for="own_view"> <?php echo Text::_('COM_CONTENTBUILDER_PERM_VIEW'); ?></label>
-                    <input class="form-check-input" type="checkbox" name="own[new]" id="own_new" value="1"<?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['new']) && $this->form->config['own']['new'] ? ' checked="checked"' : '';?>/><label for="own_new"> <?php echo Text::_('COM_CONTENTBUILDER_PERM_NEW'); ?></label>
-                    <input class="form-check-input" type="checkbox" name="own[edit]" id="own_edit" value="1"<?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['edit']) && $this->form->config['own']['edit'] ? ' checked="checked"' : '';?>/><label for="own_edit"> <?php echo Text::_('COM_CONTENTBUILDER_PERM_EDIT'); ?></label>
-                    <input class="form-check-input" type="checkbox" name="own[delete]" id="own_delete" value="1"<?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['delete']) && $this->form->config['own']['delete'] ? ' checked="checked"' : '';?>/> <label for="own_delete"><?php echo Text::_('COM_CONTENTBUILDER_PERM_DELETE'); ?></label>
-                    <input class="form-check-input" type="checkbox" name="own[state]" id="own_state" value="1"<?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['state']) && $this->form->config['own']['state'] ? ' checked="checked"' : '';?>/> <label for="own_state"><?php echo Text::_('COM_CONTENTBUILDER_PERM_STATE'); ?></label>
-                    <input class="form-check-input" type="checkbox" name="own[publish]" id="own_publish" value="1"<?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['publish']) && $this->form->config['own']['publish'] ? ' checked="checked"' : '';?>/> <label for="own_publish"><?php echo Text::_('PUBLISH'); ?></label>
-                    <input class="form-check-input" type="checkbox" name="own[fullarticle]" id="own_fullarticle" value="1"<?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['fullarticle']) && $this->form->config['own']['fullarticle'] ? ' checked="checked"' : '';?>/> <label for="own_fullarticle"><?php echo Text::_('COM_CONTENTBUILDER_PERM_FULL_ARTICLE'); ?></label>
-                    <input class="form-check-input" type="checkbox" name="own[language]" id="own_language" value="1"<?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['language']) && $this->form->config['own']['language'] ? ' checked="checked"' : '';?>/> <label for="own_language"><?php echo Text::_('COM_CONTENTBUILDER_PERM_CHANGE_LANGUAGE'); ?></label>
-                    <input class="form-check-input" type="checkbox" name="own[rating]" id="own_rating" value="1"<?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['rating']) && $this->form->config['own']['rating'] ? ' checked="checked"' : '';?>/> <label for="own_rating"><?php echo Text::_('COM_CONTENTBUILDER_PERM_RATING'); ?></label>
+                    <input class="form-check-input" type="checkbox" name="own[listaccess]" id="own_listaccess" value="1"
+                        <?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['listaccess']) && $this->form->config['own']['listaccess'] ? ' checked="checked"' : ''; ?> /><label for="own_listaccess">
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIST_ACCESS'); ?>
+                    </label>
+                    <input class="form-check-input" type="checkbox" name="own[view]" id="own_view" value="1" <?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['view']) && $this->form->config['own']['view'] ? ' checked="checked"' : ''; ?> /><label for="own_view">
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VIEW'); ?>
+                    </label>
+                    <input class="form-check-input" type="checkbox" name="own[new]" id="own_new" value="1" <?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['new']) && $this->form->config['own']['new'] ? ' checked="checked"' : ''; ?> /><label for="own_new">
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_NEW'); ?>
+                    </label>
+                    <input class="form-check-input" type="checkbox" name="own[edit]" id="own_edit" value="1" <?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['edit']) && $this->form->config['own']['edit'] ? ' checked="checked"' : ''; ?> /><label for="own_edit">
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_EDIT'); ?>
+                    </label>
+                    <input class="form-check-input" type="checkbox" name="own[delete]" id="own_delete" value="1" <?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['delete']) && $this->form->config['own']['delete'] ? ' checked="checked"' : ''; ?> /> <label for="own_delete">
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_DELETE'); ?>
+                    </label>
+                    <input class="form-check-input" type="checkbox" name="own[state]" id="own_state" value="1" <?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['state']) && $this->form->config['own']['state'] ? ' checked="checked"' : ''; ?> /> <label for="own_state">
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_STATE'); ?>
+                    </label>
+                    <input class="form-check-input" type="checkbox" name="own[publish]" id="own_publish" value="1" <?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['publish']) && $this->form->config['own']['publish'] ? ' checked="checked"' : ''; ?> /> <label for="own_publish">
+                        <?php echo Text::_('PUBLISH'); ?>
+                    </label>
+                    <input class="form-check-input" type="checkbox" name="own[fullarticle]" id="own_fullarticle"
+                        value="1" <?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['fullarticle']) && $this->form->config['own']['fullarticle'] ? ' checked="checked"' : ''; ?> /> <label for="own_fullarticle">
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_FULL_ARTICLE'); ?>
+                    </label>
+                    <input class="form-check-input" type="checkbox" name="own[language]" id="own_language" value="1"
+                        <?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['language']) && $this->form->config['own']['language'] ? ' checked="checked"' : ''; ?> /> <label for="own_language">
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_CHANGE_LANGUAGE'); ?>
+                    </label>
+                    <input class="form-check-input" type="checkbox" name="own[rating]" id="own_rating" value="1" <?php echo isset($this->form->config['own']) && isset($this->form->config['own']) && isset($this->form->config['own']['rating']) && $this->form->config['own']['rating'] ? ' checked="checked"' : ''; ?> /> <label for="own_rating">
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_RATING'); ?>
+                    </label>
                 </td>
             </tr>
         </table>
 
         <table class="adminlist table table-striped">
-                    <thead>
-                        <tr>
-                            <th><?php echo Text::_('COM_CONTENTBUILDER_PERM_GROUP')?></th>
-                            <th><?php echo Text::_('COM_CONTENTBUILDER_PERM_LIST_ACCESS')?></th>
-                            <th><?php echo Text::_('COM_CONTENTBUILDER_PERM_VIEW')?></th>
-                            <th><?php echo Text::_('COM_CONTENTBUILDER_PERM_NEW')?></th>
-                            <th><?php echo Text::_('COM_CONTENTBUILDER_PERM_EDIT')?></th>
-                            <th><?php echo Text::_('COM_CONTENTBUILDER_PERM_DELETE')?></th>
-                            <th><?php echo Text::_('COM_CONTENTBUILDER_PERM_STATE')?></th>
-                            <th><?php echo Text::_('PUBLISH')?></th>
-                            <th><?php echo Text::_('COM_CONTENTBUILDER_PERM_FULL_ARTICLE')?></th>
-                            <th><?php echo Text::_('COM_CONTENTBUILDER_PERM_CHANGE_LANGUAGE')?></th>
-                            <th><?php echo Text::_('COM_CONTENTBUILDER_PERM_RATING')?></th>
-                        </tr>
-                    </thead>
-                    <tr class="<?php echo "row0"; ?>">
-                        <td style="background-color: #F0F0F0"></td>
-                        <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox" onclick="contentbuilder_selectAll(this,'be')" value="listaccess"/></td>
-                        <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox" onclick="contentbuilder_selectAll(this,'be')" value="view"/></td>
-                        <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox" onclick="contentbuilder_selectAll(this,'be')" value="new"/></td>
-                        <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox" onclick="contentbuilder_selectAll(this,'be')" value="edit"/></td>
-                        <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox" onclick="contentbuilder_selectAll(this,'be')" value="delete"/></td>
-                        <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox" onclick="contentbuilder_selectAll(this,'be')" value="state"/></td>
-                        <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox" onclick="contentbuilder_selectAll(this,'be')" value="publish"/></td>
-                        <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox" onclick="contentbuilder_selectAll(this,'be')" value="fullarticle"/></td>
-                        <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox" onclick="contentbuilder_selectAll(this,'be')" value="language"/></td>
-                        <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox" onclick="contentbuilder_selectAll(this,'be')" value="rating"/></td>
-                    </tr>
-        <?php
-        foreach($this->gmap As $entry){
+            <thead>
+                <tr>
+                    <th>
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_GROUP') ?>
+                    </th>
+                    <th>
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIST_ACCESS') ?>
+                    </th>
+                    <th>
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VIEW') ?>
+                    </th>
+                    <th>
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_NEW') ?>
+                    </th>
+                    <th>
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_EDIT') ?>
+                    </th>
+                    <th>
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_DELETE') ?>
+                    </th>
+                    <th>
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_STATE') ?>
+                    </th>
+                    <th>
+                        <?php echo Text::_('PUBLISH') ?>
+                    </th>
+                    <th>
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_FULL_ARTICLE') ?>
+                    </th>
+                    <th>
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_CHANGE_LANGUAGE') ?>
+                    </th>
+                    <th>
+                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_RATING') ?>
+                    </th>
+                </tr>
+            </thead>
+            <tr class="<?php echo "row0"; ?>">
+                <td style="background-color: #F0F0F0"></td>
+                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
+                        onclick="contentbuilder_selectAll(this,'be')" value="listaccess" /></td>
+                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
+                        onclick="contentbuilder_selectAll(this,'be')" value="view" /></td>
+                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
+                        onclick="contentbuilder_selectAll(this,'be')" value="new" /></td>
+                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
+                        onclick="contentbuilder_selectAll(this,'be')" value="edit" /></td>
+                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
+                        onclick="contentbuilder_selectAll(this,'be')" value="delete" /></td>
+                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
+                        onclick="contentbuilder_selectAll(this,'be')" value="state" /></td>
+                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
+                        onclick="contentbuilder_selectAll(this,'be')" value="publish" /></td>
+                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
+                        onclick="contentbuilder_selectAll(this,'be')" value="fullarticle" /></td>
+                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
+                        onclick="contentbuilder_selectAll(this,'be')" value="language" /></td>
+                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
+                        onclick="contentbuilder_selectAll(this,'be')" value="rating" /></td>
+            </tr>
+            <?php
+            foreach ($this->gmap as $entry) {
 
-            $k = 0;
-        ?>
-                    <tr class="<?php echo "row$k"; ?>">
-                        <td>
-                            <?php echo $entry->text; ?>
-                        </td>
-                        <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][listaccess]" value="1"<?php echo !$this->form->id ? ' checked="checked"' : ( isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['listaccess']) && $this->form->config['permissions'][$entry->value]['listaccess'] ? ' checked="checked"' : '' );?>/></td>
-                        <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][view]" value="1"<?php echo !$this->form->id ? ' checked="checked"' : ( isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['view']) && $this->form->config['permissions'][$entry->value]['view'] ? ' checked="checked"' : '' );?>/></td>
-                        <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][new]" value="1"<?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['new']) && $this->form->config['permissions'][$entry->value]['new'] ? ' checked="checked"' : '';?>/></td>
-                        <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][edit]" value="1"<?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['edit']) && $this->form->config['permissions'][$entry->value]['edit'] ? ' checked="checked"' : '';?>/></td>
-                        <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][delete]" value="1"<?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['delete']) && $this->form->config['permissions'][$entry->value]['delete'] ? ' checked="checked"' : '';?>/></td>
-                        <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][state]" value="1"<?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['state']) && $this->form->config['permissions'][$entry->value]['state'] ? ' checked="checked"' : '';?>/></td>
-                        <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][publish]" value="1"<?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['publish']) && $this->form->config['permissions'][$entry->value]['publish'] ? ' checked="checked"' : '';?>/></td>
-                        <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][fullarticle]" value="1"<?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['fullarticle']) && $this->form->config['permissions'][$entry->value]['fullarticle'] ? ' checked="checked"' : '';?>/></td>
-                        <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][language]" value="1"<?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['language']) && $this->form->config['permissions'][$entry->value]['language'] ? ' checked="checked"' : '';?>/></td>
-                        <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][rating]" value="1"<?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['rating']) && $this->form->config['permissions'][$entry->value]['rating'] ? ' checked="checked"' : '';?>/></td>
-                    </tr>       
-        <?php
-            $k = 1 - $k;
-        }
-        ?>
+                $k = 0;
+                ?>
+                <tr class="<?php echo "row$k"; ?>">
+                    <td>
+                        <?php echo $entry->text; ?>
+                    </td>
+                    <td><input class="form-check-input" type="checkbox"
+                            name="perms[<?php echo $entry->value; ?>][listaccess]" value="1" <?php echo !$this->form->id ? ' checked="checked"' : (isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['listaccess']) && $this->form->config['permissions'][$entry->value]['listaccess'] ? ' checked="checked"' : ''); ?> /></td>
+                    <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][view]"
+                            value="1" <?php echo !$this->form->id ? ' checked="checked"' : (isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['view']) && $this->form->config['permissions'][$entry->value]['view'] ? ' checked="checked"' : ''); ?> />
+                    </td>
+                    <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][new]"
+                            value="1" <?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['new']) && $this->form->config['permissions'][$entry->value]['new'] ? ' checked="checked"' : ''; ?> /></td>
+                    <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][edit]"
+                            value="1" <?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['edit']) && $this->form->config['permissions'][$entry->value]['edit'] ? ' checked="checked"' : ''; ?> /></td>
+                    <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][delete]"
+                            value="1" <?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['delete']) && $this->form->config['permissions'][$entry->value]['delete'] ? ' checked="checked"' : ''; ?> />
+                    </td>
+                    <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][state]"
+                            value="1" <?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['state']) && $this->form->config['permissions'][$entry->value]['state'] ? ' checked="checked"' : ''; ?> />
+                    </td>
+                    <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][publish]"
+                            value="1" <?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['publish']) && $this->form->config['permissions'][$entry->value]['publish'] ? ' checked="checked"' : ''; ?> />
+                    </td>
+                    <td><input class="form-check-input" type="checkbox"
+                            name="perms[<?php echo $entry->value; ?>][fullarticle]" value="1" <?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['fullarticle']) && $this->form->config['permissions'][$entry->value]['fullarticle'] ? ' checked="checked"' : ''; ?> /></td>
+                    <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][language]"
+                            value="1" <?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['language']) && $this->form->config['permissions'][$entry->value]['language'] ? ' checked="checked"' : ''; ?> />
+                    </td>
+                    <td><input class="form-check-input" type="checkbox" name="perms[<?php echo $entry->value; ?>][rating]"
+                            value="1" <?php echo isset($this->form->config['permissions']) && isset($this->form->config['permissions'][$entry->value]) && isset($this->form->config['permissions'][$entry->value]['rating']) && $this->form->config['permissions'][$entry->value]['rating'] ? ' checked="checked"' : ''; ?> />
+                    </td>
+                </tr>
+                <?php
+                $k = 1 - $k;
+            }
+            ?>
         </table>
-        <?php 
+        <?php
 
         echo $sliders->endPanel();
         //FIN MODIF XDA - GILLES
@@ -2189,7 +2266,7 @@ $cbcompat = new CBCompat();
     <input type="hidden" name="email_admins"
         value="<?php echo Factory::getSession()->get('email_admins', '', 'com_contentbuilder'); ?>" />
 
-    <?php echo JHtml::_('form.token'); ?>
+    <?php echo HTMLHelper::_('form.token'); ?>
 
 </form>
 <?php

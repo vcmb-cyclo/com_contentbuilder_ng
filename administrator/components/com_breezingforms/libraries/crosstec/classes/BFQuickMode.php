@@ -4,6 +4,7 @@
  * @version 1.9
  * @package BreezingForms
  * @copyright (C) 2008-2020 by Markus Bopp
+ * @copyright Copyright (C) 2024 by XDA+GIL
  * @license Released under the terms of the GNU General Public License
  * */
 
@@ -70,7 +71,7 @@ class BFQuickMode {
 			Factoryment()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/plupload/moxie.js');
 			Factoryment()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/plupload/plupload.js');
 		}
-        JHtml::_('jquery.framework');
+        HTMLHelper::_('jquery.framework');
 		Factoryment()->addStyleDeclaration('
 
 .bfClearfix:after {
@@ -1915,7 +1916,7 @@ function bfTriggerRules() {
                         ];
 
 
-                        echo JHTML::_('calendar', $left, "ff_nm_" . $mdata['bfName'] . "[]" , "ff_elem" . $mdata['dbId'], $mdata['format'], $calAttr);
+                        echo HTMLHelper::_('calendar', $left, "ff_nm_" . $mdata['bfName'] . "[]" , "ff_elem" . $mdata['dbId'], $mdata['format'], $calAttr);
 
 
 						break;

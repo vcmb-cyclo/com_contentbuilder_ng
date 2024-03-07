@@ -472,7 +472,7 @@ class BFRequest
     /**
      * Checks for a form token in the request.
      *
-     * Use in conjunction with JHtml::_('form.token').
+     * Use in conjunction with HTMLHelper::_('form.token').
      *
      * @param   string  $method  The request method in which to look for the token key.
      *

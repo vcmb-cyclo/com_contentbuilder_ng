@@ -3,6 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL
  * @license     GNU/GPL
 */
 
@@ -10,6 +11,7 @@
 defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Factory;
+use Joomla\CMS\HTML\HTMLHelper;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
@@ -240,9 +242,9 @@ class ContentbuilderModelExport extends CBModel
                                     $val2 = $ex2[1];
                                   }
                                   if(strtolower(trim($ex[1])) == 'date'){
-                                      $val = JHTML::_('date', $ex2[0], Text::_('DATE_FORMAT_LC3'));
+                                      $val = HTMLHelper::_('date', $ex2[0], Text::_('DATE_FORMAT_LC3'));
                                       if(isset($ex2[1])){
-                                        $val2 = JHTML::_('date', $ex2[1], Text::_('DATE_FORMAT_LC3'));
+                                        $val2 = HTMLHelper::_('date', $ex2[1], Text::_('DATE_FORMAT_LC3'));
                                       }
                                   }
                                   if(count($ex2) == 2){

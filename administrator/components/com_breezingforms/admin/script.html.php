@@ -189,7 +189,7 @@ class HTML_facileFormsScript
 						<?php echo BFText::_('COM_BREEZINGFORMS_SCRIPTS_PUBLISHED'); ?>:
 					</td>
 					<td nowrap>
-						<?php echo JHTML::_('select.booleanlist', "published", "", $row->published); ?>
+						<?php echo HTMLHelper::_('select.booleanlist', "published", "", $row->published); ?>
 					</td>
 					<td></td>
 				</tr>

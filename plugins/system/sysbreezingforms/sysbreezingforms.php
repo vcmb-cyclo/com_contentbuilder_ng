@@ -12,6 +12,7 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
+use Joomla\CMS\HTML\HTMLHelper;
 
 /**
  * Joomla! System Logging Plugin.
@@ -58,7 +59,7 @@ class PlgSystemSysbreezingforms extends JPlugin
 
                         if ($exp[0] > 0) { // 0 = unlimited
 
-                            $time = strtotime(JHTML::_('date', 'now', 'Y-m-d H:i:s', false));
+                            $time = strtotime(HTMLHelper::_('date', 'now', 'Y-m-d H:i:s', false));
 
                             if ($time > $exp[0]) {
 

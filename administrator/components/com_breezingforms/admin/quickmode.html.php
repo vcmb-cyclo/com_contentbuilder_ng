@@ -21,7 +21,7 @@ class QuickModeHtml
     {
         $active_language_code = htmlentities(BFRequest::getVar('active_language_code', ''), ENT_QUOTES, 'UTF-8');
         HTMLHelper::_('bootstrap.tooltip', '.hasTooltip');
-        JHTML::_('behavior.keepalive');
+        HTMLHelper::_('behavior.keepalive');
         $iconBase = '../administrator/components/com_breezingforms/libraries/jquery/themes/quickmode/i/';
         Factory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/themes/quickmode/quickmode.all.css');
         Factory::getDocument()->addStyleSheet(Uri::root() . 'administrator/components/com_breezingforms/libraries/jquery/jtree/tree_component.css');
@@ -3408,7 +3408,7 @@ class QuickModeHtml
         </script>
 
         <?php
-        echo JHtmlBootstrap::renderModal(
+        echo HTMLHelperBootstrap::renderModal(
             'bfPreviewModal',
             array(
                 'url' => Uri::root() . "index.php?format=html&tmpl=component&option=com_breezingforms&ff_form=" . $formId . "&ff_page=1",
@@ -3417,7 +3417,7 @@ class QuickModeHtml
             )
         );
 
-        echo JHtmlBootstrap::renderModal(
+        echo HTMLHelperBootstrap::renderModal(
             'bfPreviewModal2',
             array(
                 'url' => Uri::root() . "index.php?format=html&option=com_breezingforms&ff_form=" . $formId . "&ff_page=1",
@@ -3768,7 +3768,7 @@ class QuickModeHtml
                                                 </label>
 
                                                 <?php
-                                                echo JHtmlBootstrap::renderModal(
+                                                echo HTMLHelperBootstrap::renderModal(
                                                     'bfPropertiesIntroModal',
                                                     array(
                                                         'url' => "index.php?option=com_breezingforms&tmpl=component&act=quickmode_editor",
@@ -3797,7 +3797,7 @@ class QuickModeHtml
 
 
                                                 <?php
-                                                echo JHtmlBootstrap::renderModal(
+                                                echo HTMLHelperBootstrap::renderModal(
                                                     'bfPropertiesIntroModal2',
                                                     array(
                                                         'url' => "index.php?option=com_breezingforms&tmpl=component&act=quickmode_editor&active_language_code=" . $active_language_code,
@@ -3892,7 +3892,7 @@ class QuickModeHtml
 
 
                                                 <?php
-                                                echo JHtmlBootstrap::renderModal(
+                                                echo HTMLHelperBootstrap::renderModal(
                                                     'bfPropertiesDescriptionModal',
                                                     array(
                                                         'url' => "index.php?option=com_breezingforms&tmpl=component&act=quickmode_editor",
@@ -3920,7 +3920,7 @@ class QuickModeHtml
                                                 </label>
 
                                                 <?php
-                                                echo JHtmlBootstrap::renderModal(
+                                                echo HTMLHelperBootstrap::renderModal(
                                                     'bfPropertiesDescriptionModal2',
                                                     array(
                                                         'url' => "index.php?option=com_breezingforms&tmpl=component&act=quickmode_editor&active_language_code=" . $active_language_code,

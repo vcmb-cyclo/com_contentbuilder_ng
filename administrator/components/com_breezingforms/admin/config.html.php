@@ -4,12 +4,14 @@
  * @version 1.9
  * @package BreezingForms
  * @copyright (C) 2008-2020 by Markus Bopp
+ * @copyright Copyright (C) 2024 by XDA+GIL
  * @license Released under the terms of the GNU General Public License
  **/
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
+use Joomla\CMS\HTML\HTMLHelper;
 
 if (BFRequest::getVar('act', '') == 'configuration') {
 	JToolBarHelper::preferences('com_breezingforms');
@@ -73,7 +75,7 @@ class HTML_facileFormsConf
 						</label></td>
 					<td nowrap colspan="3">
 						<?php
-						echo JHTML::_('select.booleanlist', "enable_classic", "", $ff_config->enable_classic);
+						echo HTMLHelper::_('select.booleanlist', "enable_classic", "", $ff_config->enable_classic);
 						?>
 					<td></td>
 				</tr>
@@ -85,7 +87,7 @@ class HTML_facileFormsConf
 						</label></td>
 					<td nowrap colspan="3">
 						<?php
-						echo JHTML::_('select.booleanlist', "disable_ip", "", $ff_config->disable_ip);
+						echo HTMLHelper::_('select.booleanlist', "disable_ip", "", $ff_config->disable_ip);
 						?>
 					<td></td>
 				</tr>
@@ -99,7 +101,7 @@ class HTML_facileFormsConf
 						</td>
 						<td nowrap colspan="3">
 							<?php
-							echo JHTML::_('select.booleanlist', "livesite", "", $ff_config->livesite);
+							echo HTMLHelper::_('select.booleanlist', "livesite", "", $ff_config->livesite);
 							?>
 						</td>
 						<td></td>
@@ -111,7 +113,7 @@ class HTML_facileFormsConf
 						</td>
 						<td nowrap colspan="3">
 							<?php
-							echo JHTML::_('select.booleanlist', "stylesheet", "", $ff_config->stylesheet);
+							echo HTMLHelper::_('select.booleanlist', "stylesheet", "", $ff_config->stylesheet);
 							?>
 						</td>
 						<td></td>
@@ -158,7 +160,7 @@ class HTML_facileFormsConf
 						</td>
 						<td nowrap colspan="3">
 							<?php
-							echo JHTML::_('select.booleanlist', "wysiwyg", "", $ff_config->wysiwyg);
+							echo HTMLHelper::_('select.booleanlist', "wysiwyg", "", $ff_config->wysiwyg);
 							?>
 						</td>
 						<td></td>
@@ -170,7 +172,7 @@ class HTML_facileFormsConf
 						</td>
 						<td nowrap colspan="3">
 							<?php
-							echo JHTML::_('select.booleanlist', "compress", "", $ff_config->compress);
+							echo HTMLHelper::_('select.booleanlist', "compress", "", $ff_config->compress);
 							?>
 						</td>
 						<td></td>
@@ -182,7 +184,7 @@ class HTML_facileFormsConf
 						</td>
 						<td nowrap colspan="3">
 							<?php
-							echo JHTML::_('select.booleanlist', "getprovider", "", $ff_config->getprovider);
+							echo HTMLHelper::_('select.booleanlist', "getprovider", "", $ff_config->getprovider);
 							?>
 						</td>
 						<td></td>
@@ -323,20 +325,20 @@ class HTML_facileFormsConf
 		$startdir = '{mospath}/administrator/components/com_breezingforms/packages/samples.english.xml';
 		?>
 		<script type="text/javascript">
-						<!--
-						function submitbutton(pressbutton)
-						{
-							var form = document.adminForm;
-							switch (pressbutton) {
-								case 'delpkgs':
-									if (form.boxchecked.value==0) {
-										alert("<?php echo BFText::_('COM_BREEZINGFORMS_INSTALLER_SELPKGSFIRST'); ?>");
+								<!--
+								function submitbutton(pressbutton)
+								{
+									var form = document.adminForm;
+									switch (pressbutton) {
+										case 'delpkgs':
+											if (form.boxchecked.value==0) {
+												alert("<?php echo BFText::_('COM_BREEZINGFORMS_INSTALLER_SELPKGSFIRST'); ?>");
 			return;
-									} // if
+											} // if
 			break;
-								default:
+										default:
 			break;
-							} // switch
+									} // switch
 			switch (pressbutton) {
 				case 'start':
 					if (form.uploadpackage.checked) {
@@ -366,7 +368,7 @@ class HTML_facileFormsConf
 					break;
 			} // switch
 			Joomla.submitform(pressbutton);
-						} // submitbutton
+								} // submitbutton
 
 			function clickInstMode(value) {
 				var form = document.adminForm;
@@ -424,8 +426,7 @@ class HTML_facileFormsConf
 
 			<table cellpadding="4" cellspacing="0" border="0" width="100%" class="adminlist table table-striped">
 				<tr>
-					<th nowrap align="center"><input type="checkbox" name="toggle" value=""
-							onclick='Joomla.checkAll(this);' />
+					<th nowrap align="center"><input type="checkbox" name="toggle" value="" onclick='Joomla.checkAll(this);' />
 					</th>
 					<th style="width: 70%" nowrap colspan="4" align="left">
 						<?php echo BFText::_('COM_BREEZINGFORMS_INSTALLER_PACKAGE'); ?>
@@ -447,8 +448,7 @@ class HTML_facileFormsConf
 					?>
 					<tr class="row<?php echo $k; ?>">
 						<td nowrap valign="top" align="center"><input type="checkbox" id="cb<?php echo $i; ?>" name="ids[]"
-								value="<?php echo $row->id; ?>"
-								onclick="Joomla.isChecked(this.checked);" />
+								value="<?php echo $row->id; ?>" onclick="Joomla.isChecked(this.checked);" />
 						</td>
 						<td nowrap valign="top" align="left">
 							<strong>
@@ -557,7 +557,7 @@ class HTML_facileFormsConf
 		echo "\t\t\t\tpkgChange('$selpkg');\n"
 			?>
 			form.pkg.focus();
-							} // onload
+									} // onload
 
 			function setSelection(topic, selected) {
 				var form = document.adminForm;

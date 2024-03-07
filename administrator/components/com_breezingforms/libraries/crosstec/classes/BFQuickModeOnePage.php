@@ -214,8 +214,8 @@ display:none;
 ');
 
         // force jquery to be loaded after mootools but before any other js (since J! 3.4)
-        JHtml::_('bootstrap.framework');
-        JHtml::_('jquery.framework');
+        HTMLHelper::_('bootstrap.framework');
+        HTMLHelper::_('jquery.framework');
         HTMLHelper::_('bootstrap.tooltip', '.hasTooltip');
         FactorytDocument()->addScriptDeclaration('
                 jQuery(document).ready(function()
@@ -1432,7 +1432,7 @@ function bfTriggerRules() {
                                 if (count($explodeHint) > 1 && trim($explodeHint[0]) != '') {
                                     $content = trim($explodeHint[1]);
                                 }
-                                $tipOpen = '<span class="hasTooltip" title="' . JHtml::tooltipText($content) . '">';
+                                $tipOpen = '<span class="hasTooltip" title="' . HTMLHelper::tooltipText($content) . '">';
                                 $tipClose = '</span>';
                             }
                         }
@@ -2296,7 +2296,7 @@ function bfTriggerRules() {
                             'firstDay' => (isset($mdata['firstDay']) && $mdata['firstDay'] != '') ? $mdata['firstDay'] : '7',
                         ];
 
-                        echo JHTML::_('calendar', $left, "ff_nm_" . $mdata['bfName'] . "[]", "ff_elem" . $mdata['dbId'], $mdata['format'], $calAttr);
+                        echo HTMLHelper::_('calendar', $left, "ff_nm_" . $mdata['bfName'] . "[]", "ff_elem" . $mdata['dbId'], $mdata['format'], $calAttr);
 
                         echo '</span>';
                         echo '</div>';

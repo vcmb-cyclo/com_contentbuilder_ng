@@ -4,12 +4,14 @@
  * @version 1.9
  * @package BreezingForms
  * @copyright (C) 2008-2020 by Markus Bopp
+ * @copyright Copyright (C) 2024 by XDA+GIL
  * @license Released under the terms of the GNU General Public License
  **/
 
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Editor\Editor;
+use Joomla\CMS\HTML\HTMLHelper;
 
 class HTML_facileFormsPiece
 {
@@ -22,18 +24,18 @@ class HTML_facileFormsPiece
 		?>
 		<script type="text/javascript" src="<?php echo $ff_admsite; ?>/admin/areautils.js"></script>
 		<script type="text/javascript">
-				<!--
-				function checkIdentifier(value)
-				{
-					var invalidChars = /\W/;
-					var error = '';
-					if (value == '')
-						error += "<?php echo BFText::_('COM_BREEZINGFORMS_PIECES_ENTERNAME'); ?>\n";
-					else
+						<!--
+						function checkIdentifier(value)
+						{
+							var invalidChars = /\W/;
+							var error = '';
+							if (value == '')
+								error += "<?php echo BFText::_('COM_BREEZINGFORMS_PIECES_ENTERNAME'); ?>\n";
+							else
 			if (invalidChars.test(value))
 				error += "<?php echo BFText::_('COM_BREEZINGFORMS_PIECES_ENTERIDENT'); ?>\n";
 			return error;
-				} // checkIdentifier
+						} // checkIdentifier
 
 			function submitbutton(pressbutton) {
 				var form = document.adminForm;
@@ -75,7 +77,7 @@ class HTML_facileFormsPiece
 						<?php echo BFText::_('COM_BREEZINGFORMS_PIECES_PUBLISHED'); ?>:
 					</td>
 					<td nowrap>
-						<?php echo JHTML::_('select.booleanlist', "published", "", $row->published); ?>
+						<?php echo HTMLHelper::_('select.booleanlist', "published", "", $row->published); ?>
 					</td>
 					<td></td>
 				</tr>
@@ -195,23 +197,23 @@ class HTML_facileFormsPiece
 		global $ff_config, $ff_version;
 		?>
 		<script type="text/javascript">
-					<!--
-					function submitbutton(pressbutton)
-					{
-						var form = document.adminForm;
-						switch (pressbutton) {
-							case 'copy':
-							case 'publish':
-							case 'unpublish':
-							case 'remove':
-								if (form.boxchecked.value==0) {
-									alert("<?php echo BFText::_('COM_BREEZINGFORMS_PIECES_SELPIECESFIRST'); ?>");
+							<!--
+							function submitbutton(pressbutton)
+							{
+								var form = document.adminForm;
+								switch (pressbutton) {
+									case 'copy':
+									case 'publish':
+									case 'unpublish':
+									case 'remove':
+										if (form.boxchecked.value==0) {
+											alert("<?php echo BFText::_('COM_BREEZINGFORMS_PIECES_SELPIECESFIRST'); ?>");
 			return;
-								} // if
+										} // if
 			break;
-							default:
+									default:
 			break;
-						} // switch
+								} // switch
 			if (pressbutton == 'remove')
 				if (!confirm("<?php echo BFText::_('COM_BREEZINGFORMS_PIECES_ASKDELETE'); ?>")) return;
 			if (pressbutton == '' && form.pkgsel.value == '')
@@ -219,7 +221,7 @@ class HTML_facileFormsPiece
 			else
 				form.pkg.value = form.pkgsel.value;
 			Joomla.submitform(pressbutton);
-					} // submitbutton
+							} // submitbutton
 
 			<?php
 

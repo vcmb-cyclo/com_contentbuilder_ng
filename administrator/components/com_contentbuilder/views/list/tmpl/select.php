@@ -3,6 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL
  * @license     GNU/GPL
  */
 
@@ -12,6 +13,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\HTML\HTMLHelper;
 
 require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'contentbuilder_helpers.php');
 
@@ -311,7 +313,7 @@ SELECT
                     if ($this->show_id_column) {
                         ?>
                         <th class="sectiontableheader" width="5">
-                            <?php echo JHTML::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ID', ENT_QUOTES, 'UTF-8'), 'colRecord', $this->lists['order_Dir'], $this->lists['order']); ?>
+                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ID', ENT_QUOTES, 'UTF-8'), 'colRecord', $this->lists['order_Dir'], $this->lists['order']); ?>
                         </th>
                         <?php
                     }
@@ -364,7 +366,7 @@ SELECT
                     if ($this->list_article) {
                         ?>
                         <th class="sectiontableheader" width="20">
-                            <?php echo JHTML::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ARTICLE', ENT_QUOTES, 'UTF-8'), 'colArticleId', $this->lists['order_Dir'], $this->lists['order']); ?>
+                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ARTICLE', ENT_QUOTES, 'UTF-8'), 'colArticleId', $this->lists['order_Dir'], $this->lists['order']); ?>
                         </th>
                         <?php
                     }
@@ -372,7 +374,7 @@ SELECT
                     if ($this->list_author) {
                         ?>
                         <th class="sectiontableheader" width="20">
-                            <?php echo JHTML::_('grid.sort', htmlentities('COM_CONTENTBUILDER_AUTHOR', ENT_QUOTES, 'UTF-8'), 'colAuthor', $this->lists['order_Dir'], $this->lists['order']); ?>
+                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_AUTHOR', ENT_QUOTES, 'UTF-8'), 'colAuthor', $this->lists['order_Dir'], $this->lists['order']); ?>
                         </th>
                         <?php
                     }
@@ -380,7 +382,7 @@ SELECT
                     if ($this->list_rating) {
                         ?>
                         <th class="sectiontableheader" width="20">
-                            <?php echo JHTML::_('grid.sort', htmlentities('COM_CONTENTBUILDER_RATING', ENT_QUOTES, 'UTF-8'), 'colRating', $this->lists['order_Dir'], $this->lists['order']); ?>
+                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_RATING', ENT_QUOTES, 'UTF-8'), 'colRating', $this->lists['order_Dir'], $this->lists['order']); ?>
                         </th>
                         <?php
                     }
@@ -389,7 +391,7 @@ SELECT
                         foreach ($this->labels as $reference_id => $label) {
                             ?>
                             <th class="sectiontableheader">
-                                <?php echo JHTML::_('grid.sort', nl2br(htmlentities(contentbuilder_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')), "col$reference_id", $this->lists['order_Dir'], $this->lists['order']); ?>
+                                <?php echo HTMLHelper::_('grid.sort', nl2br(htmlentities(contentbuilder_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')), "col$reference_id", $this->lists['order_Dir'], $this->lists['order']); ?>
                             </th>
                             <?php
                         }
@@ -600,5 +602,5 @@ SELECT
     <input type="hidden" name="id" value="<?php echo CBRequest::getInt('id', 0) ?>" />
     <input type="hidden" name="filter_order" value="<?php echo $this->lists['order']; ?>" />
     <input type="hidden" name="filter_order_Dir" value="<?php echo $this->lists['order_Dir']; ?>" />
-    <?php echo JHtml::_('form.token'); ?>
+    <?php echo HTMLHelper::_('form.token'); ?>
 </form>

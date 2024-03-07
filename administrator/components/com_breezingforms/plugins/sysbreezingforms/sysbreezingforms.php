@@ -12,6 +12,7 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
+use Joomla\CMS\HTML\HTMLHelper;
 
 /**
  * Joomla! System Logging Plugin.
@@ -58,7 +59,7 @@ class PlgSystemSysbreezingforms extends JPlugin
 
                         if ($exp[0] > 0) { // 0 = unlimited
 
-                            $time = strtotime(JHTML::_('date', 'now', 'Y-m-d H:i:s', false));
+                            $time = strtotime(HTMLHelper::_('date', 'now', 'Y-m-d H:i:s', false));
 
                             if ($time > $exp[0]) {
                                 $message = 'Your membership for the update key seems to be expired, you can renew it by <a style="font-weight: bold; text-decoration: underline;" target="_blank" href="https://crosstec.org/en/downloads/joomla-forms.html">purchasing a membership</a>.<br/>After purchase, please get the update key from My Account => My Downloads at Crosstec.org and enter it in the BreezingForms configuration.';

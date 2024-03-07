@@ -23,6 +23,7 @@ use Joomla\CMS\Uri\Uri;
 use Joomla\Filesystem\File;
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
+use Joomla\CMS\HTML\HTMLHelper;
 
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFFactory.php');
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFRequest.php');
@@ -1870,7 +1871,7 @@ if (
 
     $userSubmitedID = BFRequest::getVar('id');
     $token = BFRequest::getVar('token');
-    $database->setQuery("UPDATE #__facileforms_records SET opted=1, opt_ip = " . $database->quote($ip) . ", opt_date = " . $database->quote(JHtml::date('now', 'Y-m-d H:i:s')) . " WHERE opt_token = " . $database->quote($token) . " And id=" . $database->quote($userSubmitedID) . " And opted = 0");
+    $database->setQuery("UPDATE #__facileforms_records SET opted=1, opt_ip = " . $database->quote($ip) . ", opt_date = " . $database->quote(HTMLHelper::date('now', 'Y-m-d H:i:s')) . " WHERE opt_token = " . $database->quote($token) . " And id=" . $database->quote($userSubmitedID) . " And opted = 0");
     $database->execute();
 
     echo Text::_("COM_BREEZINGFORMS_FORMS_DOUBLE_OPT_EMAIL_THANK_YOU");
@@ -1885,7 +1886,7 @@ if (
 
     $userSubmitedID = BFRequest::getVar('id');
     $token = BFRequest::getVar('token');
-    $database->setQuery("UPDATE #__facileforms_records SET opted=0, opt_ip = " . $database->quote($ip) . ", opt_date = " . $database->quote(JHtml::date('now', 'Y-m-d H:i:s')) . " WHERE opt_token = " . $database->quote($token) . " And id=" . $database->quote($userSubmitedID) . " And opted = 1");
+    $database->setQuery("UPDATE #__facileforms_records SET opted=0, opt_ip = " . $database->quote($ip) . ", opt_date = " . $database->quote(HTMLHelper::date('now', 'Y-m-d H:i:s')) . " WHERE opt_token = " . $database->quote($token) . " And id=" . $database->quote($userSubmitedID) . " And opted = 1");
     $database->execute();
 
     echo Text::_("COM_BREEZINGFORMS_FORMS_DOUBLE_OPT_OUT_EMAIL_THANK_YOU");

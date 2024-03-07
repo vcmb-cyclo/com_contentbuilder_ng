@@ -5,6 +5,7 @@
  * @version 1.9
  * @package BreezingForms
  * @copyright (C) 2008-2020 by Markus Bopp
+ * @copyright Copyright (C) 2024 by XDA+GIL
  * @license Released under the terms of the GNU General Public License
  * */
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -15,10 +16,12 @@ use Joomla\Utilities\ArrayHelper;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
+use Joomla\CMS\HTML\HTMLHelper;
 
 require_once($ff_admpath . '/admin/form.html.php');
 
-function resetQuickModeDbId(&$dataObject) {
+function resetQuickModeDbId(&$dataObject)
+{
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
     if (isset($dataObject['attributes']) && isset($dataObject['properties'])) {
@@ -70,9 +73,11 @@ function resetQuickModeDbId(&$dataObject) {
     }
 }
 
-class facileFormsForm {
+class facileFormsForm
+{
 
-    static function edit($option, $tabpane, $pkg, $ids, $caller) {
+    static function edit($option, $tabpane, $pkg, $ids, $caller)
+    {
         global $database;
         ArrayHelper::toInteger($ids);
         $database = Factory::getContainer()->get(DatabaseInterface::class);
@@ -143,10 +148,10 @@ class facileFormsForm {
             try {
                 define("BF_SOAP_CLIENT_BASEDIR", JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_breezingforms' . DS . 'libraries' . DS . 'salesforce');
                 if (!class_exists('SforcePartnerClient')) {
-                    require_once (BF_SOAP_CLIENT_BASEDIR . '/SforcePartnerClient.php');
+                    require_once(BF_SOAP_CLIENT_BASEDIR . '/SforcePartnerClient.php');
                 }
                 if (!class_exists('SforceHeaderOptions')) {
-                    require_once (BF_SOAP_CLIENT_BASEDIR . '/SforceHeaderOptions.php');
+                    require_once(BF_SOAP_CLIENT_BASEDIR . '/SforceHeaderOptions.php');
                 }
                 $mySforceConnection = new SforcePartnerClient();
                 $mySoapClient = $mySforceConnection->createConnection(BF_SOAP_CLIENT_BASEDIR . '/partner.wsdl.xml');
@@ -172,77 +177,84 @@ class facileFormsForm {
         $lists = array();
 
         $database->setQuery(
-                "select id, concat(package,'::',name) as text " .
-                "from #__facileforms_scripts " .
-                "where published=1 and type='Form Init' " .
-                "order by text, id desc"
+            "select id, concat(package,'::',name) as text " .
+            "from #__facileforms_scripts " .
+            "where published=1 and type='Form Init' " .
+            "order by text, id desc"
         );
         $lists['init'] = $database->loadObjectList();
 
         $database->setQuery(
-                "select id, concat(package,'::',name) as text " .
-                "from #__facileforms_scripts " .
-                "where published=1 and type='Form Submitted' " .
-                "order by text, id desc"
+            "select id, concat(package,'::',name) as text " .
+            "from #__facileforms_scripts " .
+            "where published=1 and type='Form Submitted' " .
+            "order by text, id desc"
         );
         $lists['submitted'] = $database->loadObjectList();
 
         $database->setQuery(
-                "select id, concat(package,'::',name) as text " .
-                "from #__facileforms_pieces " .
-                "where published=1 and type='Before Form' " .
-                "order by text, id desc"
+            "select id, concat(package,'::',name) as text " .
+            "from #__facileforms_pieces " .
+            "where published=1 and type='Before Form' " .
+            "order by text, id desc"
         );
         $lists['piece1'] = $database->loadObjectList();
 
         $database->setQuery(
-                "select id, concat(package,'::',name) as text " .
-                "from #__facileforms_pieces " .
-                "where published=1 and type='After Form' " .
-                "order by text, id desc"
+            "select id, concat(package,'::',name) as text " .
+            "from #__facileforms_pieces " .
+            "where published=1 and type='After Form' " .
+            "order by text, id desc"
         );
         $lists['piece2'] = $database->loadObjectList();
 
         $database->setQuery(
-                "select id, concat(package,'::',name) as text " .
-                "from #__facileforms_pieces " .
-                "where published=1 and type='Begin Submit' " .
-                "order by text, id desc"
+            "select id, concat(package,'::',name) as text " .
+            "from #__facileforms_pieces " .
+            "where published=1 and type='Begin Submit' " .
+            "order by text, id desc"
         );
         $lists['piece3'] = $database->loadObjectList();
 
         $database->setQuery(
-                "select id, concat(package,'::',name) as text " .
-                "from #__facileforms_pieces " .
-                "where published=1 and type='End Submit' " .
-                "order by text, id desc"
+            "select id, concat(package,'::',name) as text " .
+            "from #__facileforms_pieces " .
+            "where published=1 and type='End Submit' " .
+            "order by text, id desc"
         );
         $lists['piece4'] = $database->loadObjectList();
 
-        $order = JHTML::_('list.genericordering',
-                        "select ordering as value, title as text " .
-                        "from #__facileforms_forms " .
-                        "where package = " . $database->quote($pkg) . " " .
-                        "order by ordering"
+        $order = HTMLHelper::_(
+            'list.genericordering',
+            "select ordering as value, title as text " .
+            "from #__facileforms_forms " .
+            "where package = " . $database->quote($pkg) . " " .
+            "order by ordering"
         );
-        $lists['ordering'] = JHTML::_('select.genericlist',
-                        $order, 'ordering', 'class="inputbox" size="1"',
-                        'value', 'text', intval($row->ordering)
+        $lists['ordering'] = HTMLHelper::_(
+            'select.genericlist',
+            $order,
+            'ordering',
+            'class="inputbox" size="1"',
+            'value',
+            'text',
+            intval($row->ordering)
         );
 
         HTML_facileFormsForm::edit($option, $tabpane, $pkg, $row, $lists, $caller);
     }
 
-// edit
+    // edit
 
-    static function save($option, $pkg, $caller, $nonclassic, $quickmode) {
+    static function save($option, $pkg, $caller, $nonclassic, $quickmode)
+    {
         global $database;
         $database = Factory::getContainer()->get(DatabaseInterface::class);
         $row = new facileFormsForms($database);
 
         if (isset($_POST['salesforce_fields']) && is_array($_POST['salesforce_fields'])) {
             $i = 0;
-            foreach ($_POST['salesforce_fields'] As $sfield) {
+            foreach ($_POST['salesforce_fields'] as $sfield) {
                 if ($sfield == '') {
                     unset($_POST['salesforce_fields'][$i]);
                 }
@@ -290,9 +302,10 @@ class facileFormsForm {
         Factory::getApplication()->redirect('index.php?option=com_breezingforms&task=editform&act=editpage&form=' . intval($_POST['id']) . ($quickmode ? '&pkg=QuickModeForms' : ''));
     }
 
-// save
+    // save
 
-    static function cancel($option, $pkg, $caller, $nonclassic, $quickmode) {
+    static function cancel($option, $pkg, $caller, $nonclassic, $quickmode)
+    {
         if (!$nonclassic) {
             if (trim($caller) == '')
                 $caller = "index.php?option=$option&act=manageforms&pkg=$pkg";
@@ -306,9 +319,10 @@ class facileFormsForm {
         }
     }
 
-// cancel
+    // cancel
 
-    static function copy($option, $pkg, $ids) {
+    static function copy($option, $pkg, $ids)
+    {
         global $database;
         ArrayHelper::toInteger($ids);
         require_once(JPATH_SITE . '/administrator/components/com_breezingforms/admin/quickmode.class.php');
@@ -346,9 +360,9 @@ class facileFormsForm {
                 if (trim($row_->template_code) != '') {
                     $areas = Zend_Json::decode($row_->template_areas);
                     $i = 0;
-                    foreach ($areas As $area) {
+                    foreach ($areas as $area) {
                         $j = 0;
-                        foreach ($area['elements'] As $element) {
+                        foreach ($area['elements'] as $element) {
                             $areas[$i]['elements'][$j]['dbId'] = 0;
                             $j++;
                         }
@@ -372,7 +386,8 @@ class facileFormsForm {
                     if ($row_ && $row_->template_code_processed == 'QuickMode') {
                         $quickMode = new QuickMode();
                         $quickMode->save(
-                                $row->id, Zend_Json::decode(bf_b64dec($template_code))
+                            $row->id,
+                            Zend_Json::decode(bf_b64dec($template_code))
                         );
                     }
                 }
@@ -382,9 +397,10 @@ class facileFormsForm {
         Factory::getApplication()->redirect("index.php?option=$option&act=manageforms&pkg=$pkg&mosmsg=$msg");
     }
 
-// copy
+    // copy
 
-    static function del($option, $pkg, $ids) {
+    static function del($option, $pkg, $ids)
+    {
         global $database;
         ArrayHelper::toInteger($ids);
         $database = Factory::getContainer()->get(DatabaseInterface::class);
@@ -402,9 +418,10 @@ class facileFormsForm {
         Factory::getApplication()->redirect("index.php?option=$option&act=manageforms&pkg=$pkg");
     }
 
-// del
+    // del
 
-    static function order($option, $pkg, $ids, $inc) {
+    static function order($option, $pkg, $ids, $inc)
+    {
         global $database;
         ArrayHelper::toInteger($ids);
         $database = Factory::getContainer()->get(DatabaseInterface::class);
@@ -414,15 +431,16 @@ class facileFormsForm {
         Factory::getApplication()->redirect("index.php?option=$option&act=manageforms&pkg=$pkg");
     }
 
-// order
+    // order
 
-    static function publish($option, $pkg, $ids, $publish) {
+    static function publish($option, $pkg, $ids, $publish)
+    {
         global $database, $my;
         ArrayHelper::toInteger($ids);
         $database = Factory::getContainer()->get(DatabaseInterface::class);
         $ids = implode(',', $ids);
         $database->setQuery(
-                "update #__facileforms_forms set published='$publish' where id in ($ids)"
+            "update #__facileforms_forms set published='$publish' where id in ($ids)"
         );
         if (!$database->execute()) {
             echo "<script> alert('" . $database->getErrorMsg() . "'); window.history.go(-1); </script>\n";
@@ -431,16 +449,17 @@ class facileFormsForm {
         Factory::getApplication()->redirect("index.php?option=$option&act=manageforms&pkg=$pkg");
     }
 
-// publish
+    // publish
 
-    static function listitems($option, $pkg) {
+    static function listitems($option, $pkg)
+    {
         global $database;
         $database = Factory::getContainer()->get(DatabaseInterface::class);
         $database->setQuery(
-                "select distinct package as name " .
-                "from #__facileforms_forms " .
-                "where package is not null and package!='' " .
-                "order by name"
+            "select distinct package as name " .
+            "from #__facileforms_forms " .
+            "where package is not null and package!='' " .
+            "order by name"
         );
 
 
@@ -482,20 +501,20 @@ class facileFormsForm {
         }
 
         $database->setQuery(
-                "select SQL_CALC_FOUND_ROWS * from #__facileforms_forms " .
-                "where package = " . $database->Quote($pkg) . " " .
-                "order by ordering",
-                $limitstart,
-                $limit
+            "select SQL_CALC_FOUND_ROWS * from #__facileforms_forms " .
+            "where package = " . $database->Quote($pkg) . " " .
+            "order by ordering",
+            $limitstart,
+            $limit
         );
         $rows = $database->loadObjectList();
 
         try {
-			$rows = $database->loadObjectList();
-		} catch (\Exception $e) {
-			echo $e->getMessage();
-			return false;
-		} // try
+            $rows = $database->loadObjectList();
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+            return false;
+        } // try
 
         $database->setQuery('SELECT FOUND_ROWS();');
         $total = $database->loadResult();
@@ -503,9 +522,10 @@ class facileFormsForm {
         HTML_facileFormsForm::listitems($option, $rows, $pkglist, $total);
     }
 
-// listitems
+    // listitems
 
-    static function getPagination($total, $limit, $limitstart) {
+    static function getPagination($total, $limit, $limitstart)
+    {
 
         static $pagination;
 

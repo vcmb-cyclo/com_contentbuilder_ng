@@ -3,6 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL 
  * @license     GNU/GPL
  */
 
@@ -11,6 +12,7 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\HTML\HTMLHelper;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'viewlegacy.php');
@@ -42,7 +44,7 @@ class ContentbuilderViewStorages extends CBView
         $state = $this->get('state');
         $lists['order_Dir'] = $state->get('storages_filter_order_Dir');
         $lists['order'] = $state->get('storages_filter_order');
-        $lists['state'] = JHTML::_('grid.state', $state->get('storages_filter_state'));
+        $lists['state'] = HTMLHelper::_('grid.state', $state->get('storages_filter_state'));
         $lists['limitstart'] = $state->get('limitstart');
 
         $ordering = ($lists['order'] == 'ordering');

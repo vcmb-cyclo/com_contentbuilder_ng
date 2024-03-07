@@ -11,6 +11,7 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\HTML\HTMLHelper;
 
 ?>
 <?php Factory::getDocument()->addStyleDeclaration($this->theme_css); ?>
@@ -34,7 +35,7 @@ if (CBRequest::getInt('cb_show_author', 1)) {
     <?php if ($this->created): ?>
         <span class="small created-by">
             <?php echo Text::_('COM_CONTENTBUILDER_CREATED_ON'); ?>
-            <?php echo JHTML::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?>
+            <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?>
         </span>
     <?php endif; ?>
 
@@ -68,7 +69,7 @@ if (CBRequest::getInt('cb_show_author', 1)) {
         <?php if ($this->modified): ?>
             <span class="small created-by">
                 <?php echo Text::_('COM_CONTENTBUILDER_LAST_UPDATED_ON'); ?>
-                <?php echo JHTML::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?>
+                <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?>
             </span>
         <?php endif; ?>
 

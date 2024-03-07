@@ -1,13 +1,12 @@
 <?php
 /**
  * BreezingForms - A Joomla Forms Application
- * @version 1.9
- * @package BreezingForms
- * @copyright (C) 2008-2020 by Markus Bopp
- * @copyright Copyright (C) 2024 by XDA+GIL
- * @license Released under the terms of the GNU General Public License
+ * @version     1.9
+ * @package     BreezingForms
+ * @copyright   (C) 2008-2020 by Markus Bopp
+ * @copyright   Copyright (C) 2024 by XDA+GIL 
+ * @license     Released under the terms of the GNU General Public License
  **/
-
 
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
@@ -16,6 +15,7 @@ use Joomla\Filesystem\File;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
+use Joomla\CMS\HTML\HTMLHelper;
 
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFFactory.php');
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFRequest.php');
@@ -302,7 +302,7 @@ $cache = Factory::getCache('com_content');
 $cache->clean();
 
 // force jquery to be loaded after mootools but before any other js (since J! 3.4)
-JHtml::_('jquery.framework');
+HTMLHelper::_('jquery.framework');
 
 // purge ajax save
 $sourcePath = JPATH_SITE . DS . 'media' . DS . 'breezingforms' . DS . 'ajax_cache' . DS;
@@ -481,11 +481,11 @@ function _ff_query($sql, $insert = 0)
     try {
         $database->execute();
     } catch (\Exception $e) {
-        if (isset($errmode) && $errmode == 'log'){
+        if (isset($errmode) && $errmode == 'log') {
             $errors[] = $e->getMessage();
             Log::add(Text::sprintf('JLIB_DATABASE_ERROR_FUNCTION_FAILED', $e->getCode(), $e->getMessage()), Log::WARNING, 'jerror');
         } else {
-                die($e->getMessage());
+            die($e->getMessage());
         }
     }
 
@@ -502,11 +502,11 @@ function _ff_select($sql)
     try {
         $rows = $database->loadObjectList();
     } catch (\Exception $e) {
-        if (isset($errmode) && $errmode == 'log'){
-                $errors[] = $e->getMessage();
-                Log::add(Text::sprintf('JLIB_DATABASE_ERROR_FUNCTION_FAILED', $e->getCode(), $e->getMessage()), Log::WARNING, 'jerror');
+        if (isset($errmode) && $errmode == 'log') {
+            $errors[] = $e->getMessage();
+            Log::add(Text::sprintf('JLIB_DATABASE_ERROR_FUNCTION_FAILED', $e->getCode(), $e->getMessage()), Log::WARNING, 'jerror');
         } else {
-                die($e->getMessage());
+            die($e->getMessage());
         } // if
     }
 

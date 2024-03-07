@@ -1,25 +1,26 @@
 <?php
 /**
  * BreezingForms - A Joomla Forms Application
- * @version 5.0
- * @package BreezingForms
+ * @version   5.0
+ * @package   BreezingForms
  * @copyright (C) 2008-2020 by Markus Bopp
  * @copyright (C) 2024 by XDA+GIL
- * @license Released under the terms of the GNU General Public License
+ * @license   Released under the terms of the GNU General Public License
  * */
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Editor\Editor;
 
 jimport('joomla.filesystem.file');
 
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
 
-use Joomla\CMS\HTML\HTMLHelper;
-use Joomla\CMS\Editor\Editor;
+
 
 class BFQuickModeBootstrap
 {
@@ -73,7 +74,7 @@ class BFQuickModeBootstrap
     function __construct(HTML_facileFormsProcessor $p)
     {
         $default = JComponentHelper::getParams('com_languages')->get('site');
-        $this->language_tag = Factory::getApplication()->getLanguage()->getTag() != $default ? FFFFFFFactorytion()->getLanguage()->getTag() : 'zz-ZZ';
+        $this->language_tag = Factory::getApplication()->getLanguage()->getTag() != $default ? Factory::getApplication()->getLanguage()->getTag() : 'zz-ZZ';
 
         Factory::getDocument()->addScriptDeclaration('<!--');
 
@@ -305,9 +306,9 @@ class BFQuickModeBootstrap
         }
 
         if ($this->hasFlashUpload) {
-            $tickets = Factoryession()->get('bfFlashUploadTickets', array());
+            $tickets = Factory::getSession()->get('bfFlashUploadTickets', array());
             $tickets[$this->flashUploadTicket] = array(); // stores file info for later processing
-            Factoryession()->set('bfFlashUploadTickets', $tickets);
+            Factory::getSession()->set('bfFlashUploadTickets', $tickets);
             echo '<input type="hidden" name="bfFlashUploadTicket" value="' . $this->flashUploadTicket . '"/>' . "\n";
             Factory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/jquery/center.js');
             Factory::getDocument()->addScriptDeclaration('
@@ -640,7 +641,7 @@ class BFQuickModeBootstrap
                                 if (count($explodeHint) > 1 && trim($explodeHint[0]) != '') {
                                     $content = trim($explodeHint[1]);
                                 }
-                                $tipOpen = '<span class="hasTooltip" title="' . JHtml::tooltipText($content) . '">';
+                                $tipOpen = '<span class="hasTooltip" title="' . HTMLHelper::tooltipText($content) . '">';
                                 $tipClose = '</span>';
                             }
                         }
@@ -1498,7 +1499,7 @@ class BFQuickModeBootstrap
                             'firstDay' => (isset($mdata['firstDay']) && $mdata['firstDay'] != '') ? $mdata['firstDay'] : '7',
                         ];
 
-                        echo JHTML::_('calendar', $left, "ff_nm_" . $mdata['bfName'] . "[]", "ff_elem" . $mdata['dbId'], $mdata['format'], $calAttr);
+                        echo HTMLHelper::_('calendar', $left, "ff_nm_" . $mdata['bfName'] . "[]", "ff_elem" . $mdata['dbId'], $mdata['format'], $calAttr);
 
                         echo '</span>';
                         echo '</div>';
@@ -1563,11 +1564,11 @@ class BFQuickModeBootstrap
                                                                                                                                                                                                     if (!JQuery("#bfCalExt" + fieldname).length) {
                                                                                                                                                                                                         // prev
                                                                                                                                                                                                         if (JQuery(".bfCalendarResponsiveContainer" + fieldname + " .picker__select--year").get(0).selectedIndex > 0) {
-                                                                                                                                                                                                            JQuery(".bfCalendarResponsiveContainer" + fieldname + " .picker__select--year").before('<img id="bfCalExt' + fieldname + '" onclick="JQuery(\'.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year\').get(0).selectedIndex=JQuery(\'.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year\').get(0).selectedIndex-1;JQuery(\'.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year\').trigger(\'change\')" border="0" src="<?php echo Juri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/minusyear.png' ?>" style="width: 30px; vertical - align: top; cursor: pointer; " />');
+                                                                                                                                                                                                            JQuery(".bfCalendarResponsiveContainer" + fieldname + " .picker__select--year").before('<img id="bfCalExt' + fieldname + '" onclick="JQuery(\'.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year\').get(0).selectedIndex=JQuery(\'.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year\').get(0).selectedIndex-1;JQuery(\'.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year\').trigger(\'change\')" border="0" src="<?php echo Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/minusyear.png' ?>" style="width: 30px; vertical - align: top; cursor: pointer; " />');
                                                                                                                                                                                                         }
                                         // next
                                         if (JQuery(".bfCalendarResponsiveContainer" + fieldname + " .picker__select--year").get(0).selectedIndex + 1 < JQuery(".bfCalendarResponsiveContainer" + fieldname + " .picker__select--year").get(0).options.length) {
-                                            JQuery(".bfCalendarResponsiveContainer" + fieldname + " .picker__select--year").after('<img id="bfCalExt' + fieldname + '" onclick="JQuery(\'.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year\').get(0).selectedIndex=JQuery(\'.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year\').get(0).selectedIndex+1;JQuery(\'.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year\').trigger(\'change\')" border="0" src="<?php echo Juri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/plusyear.png' ?>" style="width: 30px; vertical-align: top; cursor:pointer;" />');
+                                            JQuery(".bfCalendarResponsiveContainer" + fieldname + " .picker__select--year").after('<img id="bfCalExt' + fieldname + '" onclick="JQuery(\'.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year\').get(0).selectedIndex=JQuery(\'.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year\').get(0).selectedIndex+1;JQuery(\'.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year\').trigger(\'change\')" border="0" src="<?php echo Uri::root(true) . '/components/com_breezingforms/libraries/jquery/pickadate/plusyear.png' ?>" style="width: 30px; vertical-align: top; cursor:pointer;" />');
                                         }
 
                                         JQuery('.bfCalendarResponsiveContainer' + fieldname + ' .picker__select--year').on('change', function () {
@@ -1641,7 +1642,7 @@ class BFQuickModeBootstrap
 
                         $base = 'ba' . 'se' . '64';
 
-                        Factory::getDocument()->addScript(Juri::root(true) . '/components/com_breezingforms/libraries/js/signature.js');
+                        Factory::getDocument()->addScript(Uri::root(true) . '/components/com_breezingforms/libraries/js/signature.js');
                         Factory::getDocument()->addScriptDeclaration('
 						var bf_signaturePad' . $mdata['dbId'] . ' = null;
 						var bf_canvas' . $mdata['dbId'] . ' = null;
@@ -1941,8 +1942,8 @@ display:none;
 ');
 
         // force jquery to be loaded after mootools but before any other js (since J! 3.4)
-        JHtml::_('bootstrap.framework');
-        JHtml::_('jquery.framework');
+        HTMLHelper::_('bootstrap.framework');
+        HTMLHelper::_('jquery.framework');
         HTMLHelper::_('bootstrap.tooltip', '.hasTooltip');
         Factory::getDocument()->addScriptDeclaration('
                 jQuery(document).ready(function()

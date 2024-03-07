@@ -350,11 +350,11 @@ function bf_ToolTip($tooltip, $title = '', $width = '', $image = 'tooltip.png', 
 	// Initialize the toolips if required
 	static $init;
 	if (!$init) {
-		//JHTML::_( 'bootstrap.tooltip' );
+		//HTMLHelper::_( 'bootstrap.tooltip' );
 		$init = true;
 	}
 
-	return JHTML::_('tooltip', $tooltip, $title, $image, $text, $href, $link);
+	return HTMLHelper::_('tooltip', $tooltip, $title, $image, $text, $href, $link);
 }
 
 // used if copy is disabled

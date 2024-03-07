@@ -3,14 +3,17 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL 
  * @license     GNU/GPL
-*/
+ */
 
 // no direct access
 
-defined( '_JEXEC' ) or die( 'Restricted access' );
+defined('_JEXEC') or die('Restricted access');
 
-require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
+use Joomla\CMS\HTML\HTMLHelper;
+
+require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'viewlegacy.php');
 
 class ContentbuilderViewPublicforms extends CBView
@@ -18,26 +21,26 @@ class ContentbuilderViewPublicforms extends CBView
     function display($tpl = null)
     {
         // Get data from the model
-        $items = $this->get( 'Data');
-        $perms = $this->get( 'Permissions');
-        $page_heading = $this->get( 'ShowPageHeading');
-        $introtext = $this->get( 'ShowIntrotext');
-        $show_tags = $this->get( 'ShowTags');
-        $show_id = $this->get( 'ShowId');
-        $show_permissions = $this->get( 'ShowPermissions');
-        $show_permissions_new = $this->get( 'ShowPermissionsNew');
-        $show_permissions_edit = $this->get( 'ShowPermissionsEdit');
+        $items = $this->get('Data');
+        $perms = $this->get('Permissions');
+        $page_heading = $this->get('ShowPageHeading');
+        $introtext = $this->get('ShowIntrotext');
+        $show_tags = $this->get('ShowTags');
+        $show_id = $this->get('ShowId');
+        $show_permissions = $this->get('ShowPermissions');
+        $show_permissions_new = $this->get('ShowPermissionsNew');
+        $show_permissions_edit = $this->get('ShowPermissionsEdit');
         $pagination = $this->get('Pagination');
-        $tags = $this->get( 'Tags');
-        
-        $state = $this->get( 'state' );
-        
-        $lists['order_Dir'] = $state->get( 'forms_filter_order_Dir' );
-        $lists['order'] = $state->get( 'forms_filter_order' );
-        $lists['state']	= JHTML::_('grid.state', $state->get( 'forms_filter_state' ) );
-        $lists['limitstart'] = $state->get( 'limitstart' );
-        $lists['filter_tag'] = $state->get( 'forms_filter_tag' );
-        
+        $tags = $this->get('Tags');
+
+        $state = $this->get('state');
+
+        $lists['order_Dir'] = $state->get('forms_filter_order_Dir');
+        $lists['order'] = $state->get('forms_filter_order');
+        $lists['state'] = HTMLHelper::_('grid.state', $state->get('forms_filter_state'));
+        $lists['limitstart'] = $state->get('limitstart');
+        $lists['filter_tag'] = $state->get('forms_filter_tag');
+
         $ordering = ($lists['order'] == 'ordering');
 
         $this->show_permissions = $show_permissions;

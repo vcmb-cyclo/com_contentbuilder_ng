@@ -10,6 +10,8 @@
 
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\HTML\HTMLHelper;
+
 echo '
 <style type="text/css">
 label {
@@ -238,7 +240,7 @@ class HTML_facileFormsMenu
 						<?php echo BFText::_('COM_BREEZINGFORMS_MENUS_PUBLISHED'); ?>:
 					</td>
 					<td nowrap>
-						<?php echo JHTML::_('select.booleanlist', "published", "", $row->published); ?>
+						<?php echo HTMLHelper::_('select.booleanlist', "published", "", $row->published); ?>
 					</td>
 					<td></td>
 				</tr>
@@ -273,7 +275,7 @@ class HTML_facileFormsMenu
 						<?php echo BFText::_('COM_BREEZINGFORMS_MENUS_FRAME'); ?>:
 					</td>
 					<td nowrap>
-						<?php echo JHTML::_('select.booleanlist', "frame", "", $row->frame); ?>
+						<?php echo HTMLHelper::_('select.booleanlist', "frame", "", $row->frame); ?>
 					</td>
 					<td></td>
 				</tr>
@@ -283,7 +285,7 @@ class HTML_facileFormsMenu
 						<?php echo BFText::_('COM_BREEZINGFORMS_MENUS_BORDER'); ?>:
 					</td>
 					<td nowrap>
-						<?php echo JHTML::_('select.booleanlist', "border", "", $row->border); ?>
+						<?php echo HTMLHelper::_('select.booleanlist', "border", "", $row->border); ?>
 					</td>
 					<td></td>
 				</tr>

@@ -1,11 +1,11 @@
 <?php
 /**
  * BreezingForms - A Joomla Forms Application
- * @version 5.0
- * @package BreezingForms
- * @copyright (C) 2008-2020 by Markus Bopp
- * @copyright Copyright (C) 2024 by XDA+GIL
- * @license Released under the terms of the GNU General Public License
+ * @version     5.0
+ * @package     BreezingForms
+ * @copyright   (C) 2008-2020 by Markus Bopp
+ * @copyright   Copyright (C) 2024 by XDA+GIL
+ * @license     Released under the terms of the GNU General Public License
  **/
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
@@ -15,6 +15,7 @@ use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
+// use Joomla\CMS\HTML\HTMLHelper;
 
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
@@ -1958,7 +1959,7 @@ function bfTriggerRules() {
 						];
 
 
-						//echo JHTML::_('calendar', $left, "ff_nm_" . $mdata['bfName'] . "[]" , "ff_elem" . $mdata['dbId'], $mdata['format'], $calAttr);
+						//echo HTMLHelper::_('calendar', $left, "ff_nm_" . $mdata['bfName'] . "[]" , "ff_elem" . $mdata['dbId'], $mdata['format'], $calAttr);
 						echo $this->calendar($left, "ff_nm_" . $mdata['bfName'] . "[]", "ff_elem" . $mdata['dbId'], $mdata['format'], $calAttr);
 
 						echo '

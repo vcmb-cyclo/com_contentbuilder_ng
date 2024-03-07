@@ -4,7 +4,7 @@
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
  * @license     GNU/GPL
- * @copyright Copyright (C) 2024 by XDA+GIL
+ * @copyright   Copyright (C) 2024 by XDA+GIL
  */
 
 
@@ -18,7 +18,7 @@ use Joomla\Filesystem\File;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
-
+use Joomla\CMS\HTML\HTMLHelper;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder_helpers.php');
@@ -123,7 +123,8 @@ class contentbuilder
                     for ($i = $start; $i <= $stop; $i++) {
                         if ($i != $pages_current) {
                             ?>
-                            <li><a title="<?php echo $i; ?>" href="<?php echo $open; ?>start=<?php echo ($i - 1) * $limit; ?>" class="pagenav">
+                            <li><a title="<?php echo $i; ?>" href="<?php echo $open; ?>start=<?php echo ($i - 1) * $limit; ?>"
+                                    class="pagenav">
                                     <?php echo $i; ?>
                                 </a></li>
                             <?php
@@ -250,7 +251,8 @@ class contentbuilder
                             <div onmouseout="document.getElementById('cbVotingStars<?php echo $record_id; ?>').style.width=<?php echo $percentage; ?>+'px';"
                                 onmouseover="document.getElementById('cbVotingStars<?php echo $record_id; ?>').style.width=(<?php echo $x; ?>*20)+'px';"
                                 class="cbVotingStarButton" id="cbVotingStarButton_<?php echo $x; ?>"
-                                onclick="cbRate('<?php echo $rating_link . '&rate=' . $x; ?>','cbRatingMsg<?php echo $record_id; ?>');"></div>
+                                onclick="cbRate('<?php echo $rating_link . '&rate=' . $x; ?>','cbRatingMsg<?php echo $record_id; ?>');">
+                            </div>
                             <?php
                 } else if ($rating_slots == 2) {
                     ?>
@@ -1659,7 +1661,7 @@ class contentbuilder
                                 'firstDay' => '1',
                             ];
 
-                            $the_item .= JHTML::_('calendar', $calval, 'cb_' . $item['id'], 'cb_' . $item['id'], $options->format, $calAttr);
+                            $the_item .= HTMLHelper::_('calendar', $calval, 'cb_' . $item['id'], 'cb_' . $item['id'], $options->format, $calAttr);
 
                             $the_item .= '</div>
 								</div>

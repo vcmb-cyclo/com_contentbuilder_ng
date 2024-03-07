@@ -7,10 +7,11 @@ use Joomla\Database\DatabaseInterface;
 
 /**
  * BreezingForms - A Joomla Forms Application
- * @version 1.9
- * @package BreezingForms
- * @copyright (C) 2008-2020 by Markus Bopp
- * @license Released under the terms of the GNU General Public License
+ * @version     1.9
+ * @package     BreezingForms
+ * @copyright   (C) 2008-2020 by Markus Bopp
+ * @copyright   Copyright (C) 2024 by XDA+GIL
+ * @license     Released under the terms of the GNU General Public License
  **/
 class BFIntegrate
 {
@@ -28,7 +29,7 @@ class BFIntegrate
 
     function __construct($formId)
     {
-        $this->db = Factory:::getContainer()->get(DatabaseInterface::class);
+        $this->db = Factory::getContainer()->get(DatabaseInterface::class);
         $this->rules = $this->getRules($formId);
         $this->formId = $formId;
     }

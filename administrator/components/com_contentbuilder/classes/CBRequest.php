@@ -9,6 +9,7 @@
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Factory;
+// use Joomla\CMS\HTML\HTMLHelper;
 
 /**
  * Set the available masks for cleaning variables
@@ -476,7 +477,7 @@ if (!class_exists('CBRequest')) {
 		/**
 		 * Checks for a form token in the request.
 		 *
-		 * Use in conjunction with JHtml::_('form.token').
+		 * Use in conjunction with HTMLHelper::_('form.token').
 		 *
 		 * @param   string  $method  The request method in which to look for the token key.
 		 *

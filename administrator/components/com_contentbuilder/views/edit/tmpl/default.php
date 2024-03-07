@@ -11,7 +11,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
-
+use Joomla\CMS\HTML\HTMLHelper;
 
 $new_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('new') : contentbuilder::authorize('new');
 $edit_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('edit') : contentbuilder::authorize('edit');
@@ -108,7 +108,7 @@ if(CBRequest::getInt('cb_show_author',1)){
 ?>
 
 <?php if($this->created): ?>
-<span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_CREATED_ON');?> <?php echo JHTML::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?></span>
+<span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_CREATED_ON');?> <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?></span>
 <?php endif; ?>
 
 <?php if($this->created_by): ?>
@@ -123,7 +123,7 @@ if(CBRequest::getInt('cb_show_author',1)){
 <?php if($this->modified_by): ?>
 
 <?php if($this->modified): ?>
-<span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_LAST_UPDATED_ON');?> <?php echo JHTML::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?></span>
+<span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_LAST_UPDATED_ON');?> <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?></span>
 <?php endif; ?>
 
 <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_BY');?> <?php echo $this->modified_by; ?></span>
@@ -294,7 +294,7 @@ if(!$this->limited_options){
         <input type="hidden" name="task" id="contentbuilder_task" value="save"/>
         <input type="hidden" name="backtolist" value="<?php echo CBRequest::getInt('backtolist',0);?>"/>
         <input type="hidden" name="return" value="<?php echo CBRequest::getVar('return','');?>"/>
-        <?php echo JHtml::_('form.token'); ?>
+        <?php echo HTMLHelper::_('form.token'); ?>
         <?php
         if($this->edit_by_type){
         ?>
@@ -339,7 +339,7 @@ if(!$this->edit_by_type){
     <input type="hidden" name="task" id="contentbuilder_task" value="save"/>
     <input type="hidden" name="backtolist" value="<?php echo CBRequest::getInt('backtolist',0);?>"/>
     <input type="hidden" name="return" value="<?php echo CBRequest::getVar('return','');?>"/>
-    <?php echo JHtml::_('form.token'); ?>
+    <?php echo HTMLHelper::_('form.token'); ?>
     </form>
     <?php echo $this->event->beforeDisplayContent; ?>
     <?php echo $this->toc ?>
@@ -374,7 +374,7 @@ if(!$this->edit_by_type){
     <input type="hidden" name="task" id="contentbuilder_task" value="save"/>
     <input type="hidden" name="backtolist" value="<?php echo CBRequest::getInt('backtolist',0);?>"/>
     <input type="hidden" name="return" value="<?php echo CBRequest::getVar('return','');?>"/>
-    <?php echo JHtml::_('form.token'); ?>
+    <?php echo HTMLHelper::_('form.token'); ?>
     </form>
     <?php
     if( CBRequest::getInt('cb_show_bottom_bar', 1) ){

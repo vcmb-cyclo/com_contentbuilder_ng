@@ -15,6 +15,8 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Language\Text;
 
+defined('_JEXEC') or die('Direct Access to this location is not allowed.');
+
 /**
  * Pagination Class. Provides a common interface for content pagination for the
  * Joomla! Platform.
@@ -415,17 +417,17 @@ class BFPagination
 
 		// Make the option list.
 		for ($i = 5; $i <= 30; $i += 5) {
-			$limits[] = JHtml::_('select.option', "$i");
+			$limits[] = HTMLHelper::_('select.option', "$i");
 		}
-		$limits[] = JHtml::_('select.option', '50', Text::_('J50'));
-		$limits[] = JHtml::_('select.option', '100', Text::_('J100'));
-		$limits[] = JHtml::_('select.option', '0', Text::_('JALL'));
+		$limits[] = HTMLHelper::_('select.option', '50', Text::_('J50'));
+		$limits[] = HTMLHelper::_('select.option', '100', Text::_('J100'));
+		$limits[] = HTMLHelper::_('select.option', '0', Text::_('JALL'));
 
 		$selected = $this->viewall ? 0 : $this->limit;
 
 		// Build the select list.
 		if ($app->isClient('administrator')) {
-			$html = JHtml::_(
+			$html = HTMLHelper::_(
 				'select.genericlist',
 				$limits,
 				$this->prefix . 'limit',
@@ -435,7 +437,7 @@ class BFPagination
 				$selected
 			);
 		} else {
-			$html = JHtml::_(
+			$html = HTMLHelper::_(
 				'select.genericlist',
 				$limits,
 				$this->prefix . 'limit',
@@ -465,7 +467,7 @@ class BFPagination
 	public function orderUpIcon($i, $condition = true, $task = 'orderup', $alt = 'JLIB_HTML_MOVE_UP', $enabled = true, $checkbox = 'cb')
 	{
 		if (($i > 0 || ($i + $this->limitstart > 0)) && $condition) {
-			return JHtml::_('jgrid.orderUp', $i, $task, '', $alt, $enabled, $checkbox);
+			return HTMLHelper::_('jgrid.orderUp', $i, $task, '', $alt, $enabled, $checkbox);
 		} else {
 			return '&#160;';
 		}
@@ -489,7 +491,7 @@ class BFPagination
 	public function orderDownIcon($i, $n, $condition = true, $task = 'orderdown', $alt = 'JLIB_HTML_MOVE_DOWN', $enabled = true, $checkbox = 'cb')
 	{
 		if (($i < $n - 1 || $i + $this->limitstart < $this->total - 1) && $condition) {
-			return JHtml::_('jgrid.orderDown', $i, $task, '', $alt, $enabled, $checkbox);
+			return HTMLHelper::_('jgrid.orderDown', $i, $task, '', $alt, $enabled, $checkbox);
 		} else {
 			return '&#160;';
 		}

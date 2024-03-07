@@ -3,6 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL 
  * @license     GNU/GPL
  */
 
@@ -12,6 +13,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\HTML\HTMLHelper;
 
 require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'contentbuilder_helpers.php');
 
@@ -123,11 +125,11 @@ endif;
 	<?php
 	/*	2023-12-19 XDA / GIL - BEGIN - remove, hide NEW button */
 	/*  if ($new_allowed) {
-			   ?>
-			   <button class="button btn btn-sm btn-primary cbButton cbNewButton" onclick="location.href='<?php echo Route::_( 'index.php?option=com_contentbuilder&controller=edit&backtolist=1&id='.CBRequest::getInt('id', 0).(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&record_id=0&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>'"><?php echo Text::_('COM_CONTENTBUILDER_NEW'); ?></button>
-			   <?php
-		   } 
-		   2023-12-19 XDA / GIL */
+				  ?>
+				  <button class="button btn btn-sm btn-primary cbButton cbNewButton" onclick="location.href='<?php echo Route::_( 'index.php?option=com_contentbuilder&controller=edit&backtolist=1&id='.CBRequest::getInt('id', 0).(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&record_id=0&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>'"><?php echo Text::_('COM_CONTENTBUILDER_NEW'); ?></button>
+				  <?php
+			  } 
+			  2023-12-19 XDA / GIL */
 	?>
 
 	<?php
@@ -343,7 +345,7 @@ echo Route::_($szRoute); ?>" method="<?php echo $___getpost; ?>" name="adminForm
 					if ($this->show_id_column) {
 						?>
 						<th class="sectiontableheader hidden-phone" width="5">
-							<?php echo JHTML::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ID', ENT_QUOTES, 'UTF-8'), 'colRecord', $this->lists['order_Dir'], $this->lists['order']); ?>
+							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ID', ENT_QUOTES, 'UTF-8'), 'colRecord', $this->lists['order_Dir'], $this->lists['order']); ?>
 						</th>
 						<?php
 					}
@@ -392,7 +394,7 @@ echo Route::_($szRoute); ?>" method="<?php echo $___getpost; ?>" name="adminForm
 					if ($this->list_article) {
 						?>
 						<th class="sectiontableheader hidden-phone">
-							<?php echo JHTML::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ARTICLE', ENT_QUOTES, 'UTF-8'), 'colArticleId', $this->lists['order_Dir'], $this->lists['order']); ?>
+							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ARTICLE', ENT_QUOTES, 'UTF-8'), 'colArticleId', $this->lists['order_Dir'], $this->lists['order']); ?>
 						</th>
 						<?php
 					}
@@ -400,7 +402,7 @@ echo Route::_($szRoute); ?>" method="<?php echo $___getpost; ?>" name="adminForm
 					if ($this->list_author) {
 						?>
 						<th class="sectiontableheader hidden-phone">
-							<?php echo JHTML::_('grid.sort', htmlentities('COM_CONTENTBUILDER_AUTHOR', ENT_QUOTES, 'UTF-8'), 'colAuthor', $this->lists['order_Dir'], $this->lists['order']); ?>
+							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_AUTHOR', ENT_QUOTES, 'UTF-8'), 'colAuthor', $this->lists['order_Dir'], $this->lists['order']); ?>
 						</th>
 						<?php
 					}
@@ -408,7 +410,7 @@ echo Route::_($szRoute); ?>" method="<?php echo $___getpost; ?>" name="adminForm
 					if ($this->list_rating) {
 						?>
 						<th class="sectiontableheader hidden-phone">
-							<?php echo JHTML::_('grid.sort', htmlentities('COM_CONTENTBUILDER_RATING', ENT_QUOTES, 'UTF-8'), 'colRating', $this->lists['order_Dir'], $this->lists['order']); ?>
+							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_RATING', ENT_QUOTES, 'UTF-8'), 'colRating', $this->lists['order_Dir'], $this->lists['order']); ?>
 						</th>
 						<?php
 					}
@@ -424,7 +426,7 @@ echo Route::_($szRoute); ?>" method="<?php echo $___getpost; ?>" name="adminForm
 							}
 							?>
 							<th class="sectiontableheader<?php echo $hidden; ?>">
-								<?php echo JHTML::_('grid.sort', nl2br(htmlentities(contentbuilder_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')), "col$reference_id", $this->lists['order_Dir'], $this->lists['order']); ?>
+								<?php echo HTMLHelper::_('grid.sort', nl2br(htmlentities(contentbuilder_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')), "col$reference_id", $this->lists['order_Dir'], $this->lists['order']); ?>
 							</th>
 							<?php
 							$label_count++;
@@ -651,5 +653,5 @@ echo Route::_($szRoute); ?>" method="<?php echo $___getpost; ?>" name="adminForm
 	<input type="hidden" name="id" value="<?php echo CBRequest::getInt('id', 0) ?>" />
 	<input type="hidden" name="filter_order" value="<?php echo $this->lists['order']; ?>" />
 	<input type="hidden" name="filter_order_Dir" value="<?php echo $this->lists['order_Dir']; ?>" />
-	<?php echo JHtml::_('form.token'); ?>
+	<?php echo HTMLHelper::_('form.token'); ?>
 </form>

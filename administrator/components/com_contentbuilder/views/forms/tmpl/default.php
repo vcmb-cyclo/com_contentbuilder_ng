@@ -3,6 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL 
  * @license     GNU/GPL
  */
 
@@ -10,7 +11,7 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
-
+use Joomla\CMS\HTML\HTMLHelper;
 
 ?>
 <style type="text/css">
@@ -85,23 +86,23 @@ Joomla.tableOrdering = function( order, dir, task ) {
                         <input type="checkbox" name="toggle" value="" onclick="Joomla.checkAll(this);" />
                     </th>
                     <th>
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_VIEW_NAME'), 'name', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_VIEW_NAME'), 'name', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </th>
                     <th>
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_TAG'), 'tag', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_TAG'), 'tag', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </th>
                     <th>
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_FORM_SOURCE'), 'title', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_FORM_SOURCE'), 'title', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </th>
                     <th>
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_TYPE'), 'type', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_TYPE'), 'type', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </th>
                     <th>
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_DISPLAY'), 'display_in', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_DISPLAY'), 'display_in', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </th>
                     <th width="120">
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering', 'desc', @$this->lists['order']); ?>
-                        <?php // TODO: change to draganddrop if ($this->ordering) echo JHTML::_('grid.order',  $this->items );  ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering', 'desc', @$this->lists['order']); ?>
+                        <?php // TODO: change to draganddrop if ($this->ordering) echo HTMLHelper::_('grid.order',  $this->items );   ?>
                     </th>
                     <th width="5">
                         <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED'); ?>
@@ -113,7 +114,7 @@ Joomla.tableOrdering = function( order, dir, task ) {
             $n = count($this->items);
             for ($i = 0; $i < $n; $i++) {
                 $row = $this->items[$i];
-                $checked = JHTML::_('grid.id', $i, $row->id);
+                $checked = HTMLHelper::_('grid.id', $i, $row->id);
                 $link = Route::_('index.php?option=com_contentbuilder&controller=forms&task=edit&cid[]=' . $row->id);
                 $published = contentbuilder_helpers::listPublish($row, $i);
                 ?>
@@ -194,5 +195,5 @@ Joomla.tableOrdering = function( order, dir, task ) {
     <input type="hidden" name="controller" value="forms" />
     <input type="hidden" name="filter_order" value="<?php echo $this->lists['order']; ?>" />
     <input type="hidden" name="filter_order_Dir" value="<?php echo $this->lists['order_Dir']; ?>" />
-    <?php echo JHtml::_('form.token'); ?>
+    <?php echo HTMLHelper::_('form.token'); ?>
 </form>

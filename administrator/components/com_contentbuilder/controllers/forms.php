@@ -15,8 +15,9 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 
-require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+// use Joomla\CMS\HTML\HTMLHelper;
 
+require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'controllerlegacy.php');
 
 class ContentbuilderControllerForms extends CBController
@@ -25,7 +26,7 @@ class ContentbuilderControllerForms extends CBController
     {
         parent::__construct();
 
-        //JHtml::_('bootstrap.modal');
+        //HTMLHelper::_('bootstrap.modal');
 
         if (CBRequest::getInt('email_users', -1) != -1) {
             Factory::getSession()->set('email_users', CBRequest::getVar('email_users', 'none'), 'com_contentbuilder');

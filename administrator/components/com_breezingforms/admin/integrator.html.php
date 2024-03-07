@@ -12,6 +12,7 @@ defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 use Joomla\CMS\Factory;
 use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\HTML\HTMLHelper;
 
 class BFIntegratorHtml{
 
@@ -65,7 +66,7 @@ class BFIntegratorHtml{
                     $cnt = count( $rules );
                     for($i=0; $i < $cnt; $i++){
                     $rule        = $rules[$i];
-                    $checked     = JHTML::_( 'grid.id', $i, $rule->id );
+                    $checked     = HTMLHelper::_( 'grid.id', $i, $rule->id );
                     ?>
 
                     <tr class="<?php echo "row$k"; ?>">
@@ -324,7 +325,7 @@ class BFIntegratorHtml{
                     $k = 1;
 
                     foreach($items As $item){
-                        $published   = JHTML::_('grid.published', $item, $item->id );
+                        $published   = HTMLHelper::_('grid.published', $item, $item->id );
                         ?>
                         <tr class="<?php echo "row$k"; ?>">
 

@@ -12,6 +12,7 @@ defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
+use Joomla\CMS\HTML\HTMLHelper;
 
 require_once($ff_compath . '/facileforms.process.php');
 
@@ -1200,7 +1201,7 @@ class HTML_facileFormsElement
 								<?php echo BFText::_('COM_BREEZINGFORMS_ELEMENTS_SELECTED'); ?>:
 							</td>
 							<td>
-								<?php echo JHTML::_('select.booleanlist', "optionSelected", "", 0); ?>
+								<?php echo HTMLHelper::_('select.booleanlist', "optionSelected", "", 0); ?>
 							</td>
 							<td></td>
 						</tr>
@@ -1654,7 +1655,7 @@ class HTML_facileFormsElement
 									<?php echo BFText::_('COM_BREEZINGFORMS_ELEMENTS_PUBLISHED'); ?>:
 								</td>
 								<td nowrap>
-									<?php echo JHTML::_('select.booleanlist', "published", "", $row->published); ?>
+									<?php echo HTMLHelper::_('select.booleanlist', "published", "", $row->published); ?>
 								</td>
 								<td></td>
 							</tr>
@@ -1675,7 +1676,7 @@ class HTML_facileFormsElement
 											<?php echo BFText::_('COM_BREEZINGFORMS_ELEMENTS_INCINLOG'); ?>:
 										</td>
 										<td nowrap>
-											<?php echo JHTML::_('select.booleanlist', "logging", "", $row->logging); ?>
+											<?php echo HTMLHelper::_('select.booleanlist', "logging", "", $row->logging); ?>
 										</td>
 										<td></td>
 									</tr>
@@ -1853,7 +1854,7 @@ class HTML_facileFormsElement
 											<?php echo BFText::_('COM_BREEZINGFORMS_ELEMENTS_MAILBACK'); ?>:
 										</td>
 										<td nowrap>
-											<?php echo JHTML::_('select.booleanlist', "mailback", "", $row->mailback); ?>
+											<?php echo HTMLHelper::_('select.booleanlist', "mailback", "", $row->mailback); ?>
 										</td>
 										<td></td>
 									</tr>
@@ -2042,7 +2043,7 @@ class HTML_facileFormsElement
 											<?php echo BFText::_('COM_BREEZINGFORMS_ELEMENTS_CHECKED'); ?>:
 										</td>
 										<td nowrap>
-											<?php echo JHTML::_('select.booleanlist', "flag1", "", $row->flag1); ?>
+											<?php echo HTMLHelper::_('select.booleanlist', "flag1", "", $row->flag1); ?>
 										</td>
 										<td></td>
 									</tr>
@@ -2056,7 +2057,7 @@ class HTML_facileFormsElement
 											<?php echo BFText::_('COM_BREEZINGFORMS_ELEMENTS_MULTIPLE'); ?>:
 										</td>
 										<td nowrap>
-											<?php echo JHTML::_('select.booleanlist', "flag1", "", $row->flag1); ?>
+											<?php echo HTMLHelper::_('select.booleanlist', "flag1", "", $row->flag1); ?>
 										</td>
 										<td></td>
 									</tr>
@@ -2070,7 +2071,7 @@ class HTML_facileFormsElement
 											<?php echo BFText::_('COM_BREEZINGFORMS_ELEMENTS_SHOWHEADER'); ?>:
 										</td>
 										<td nowrap>
-											<?php echo JHTML::_('select.booleanlist', "flag1", "", $row->flag1); ?>
+											<?php echo HTMLHelper::_('select.booleanlist', "flag1", "", $row->flag1); ?>
 										</td>
 										<td></td>
 									</tr>
@@ -2084,7 +2085,7 @@ class HTML_facileFormsElement
 											<?php echo BFText::_('COM_BREEZINGFORMS_ELEMENTS_PASSWORD'); ?>:
 										</td>
 										<td nowrap>
-											<?php echo JHTML::_('select.booleanlist', "flag1", "", $row->flag1); ?>
+											<?php echo HTMLHelper::_('select.booleanlist', "flag1", "", $row->flag1); ?>
 										</td>
 										<td></td>
 									</tr>
@@ -2098,7 +2099,7 @@ class HTML_facileFormsElement
 											<?php echo BFText::_('COM_BREEZINGFORMS_ELEMENTS_UPLDTIMESTAMP'); ?>:
 										</td>
 										<td nowrap>
-											<?php echo JHTML::_('select.booleanlist', "flag1", "", $row->flag1); ?>
+											<?php echo HTMLHelper::_('select.booleanlist', "flag1", "", $row->flag1); ?>
 										</td>
 										<td></td>
 									</tr>
@@ -2168,7 +2169,7 @@ class HTML_facileFormsElement
 											<?php echo BFText::_('COM_BREEZINGFORMS_ELEMENTS_BORDER'); ?>:
 										</td>
 										<td nowrap>
-											<?php echo JHTML::_('select.booleanlist', "flag2", "", $row->flag2); ?>
+											<?php echo HTMLHelper::_('select.booleanlist', "flag2", "", $row->flag2); ?>
 										</td>
 										<td></td>
 									</tr>

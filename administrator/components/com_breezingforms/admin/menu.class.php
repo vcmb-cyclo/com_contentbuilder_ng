@@ -4,6 +4,7 @@
  * @version 1.9
  * @package BreezingForms
  * @copyright (C) 2008-2020 by Markus Bopp
+ * @copyright Copyright (C) 2024 by XDA+GIL
  * @license Released under the terms of the GNU General Public License
  **/
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -11,6 +12,7 @@ defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
+use Joomla\CMS\HTML\HTMLHelper;
 
 require_once($ff_admpath . '/admin/menu.html.php');
 
@@ -29,7 +31,7 @@ class facileFormsMenu
 		$lists['forms'] = $database->loadObjectList();
 
 		$parents = array();
-		$parents[] = JHTML::_('select.option', 0, BFText::_('COM_BREEZINGFORMS_MENUS_TOP'));
+		$parents[] = HTMLHelper::_('select.option', 0, BFText::_('COM_BREEZINGFORMS_MENUS_TOP'));
 		$database->setQuery(
 			"select id as value, title as text " .
 			"from #__facileforms_compmenus " .
@@ -41,7 +43,7 @@ class facileFormsMenu
 			foreach ($plist as $obj)
 				$parents[] = $obj;
 		$lists['parents'] =
-			JHTML::_(
+			HTMLHelper::_(
 				'select.genericlist',
 				$parents,
 				'parent',
@@ -80,7 +82,7 @@ class facileFormsMenu
 		$lists = array();
 
 		$parents = array();
-		$parents[] = JHTML::_('select.option', 0, BFText::_('COM_BREEZINGFORMS_MENUS_TOP'));
+		$parents[] = HTMLHelper::_('select.option', 0, BFText::_('COM_BREEZINGFORMS_MENUS_TOP'));
 		$database->setQuery(
 			"select id as value, title as text " .
 			"from #__facileforms_compmenus " .
@@ -92,7 +94,7 @@ class facileFormsMenu
 			foreach ($plist as $obj)
 				$parents[] = $obj;
 		$lists['parents'] =
-			JHTML::_(
+			HTMLHelper::_(
 				'select.genericlist',
 				$parents,
 				'parent',
@@ -103,7 +105,7 @@ class facileFormsMenu
 			);
 
 		$order =
-			JHTML::_(
+			HTMLHelper::_(
 				'list.genericordering',
 				"select ordering as value, title as text " .
 				"from #__facileforms_compmenus " .
@@ -111,7 +113,7 @@ class facileFormsMenu
 				"order by ordering"
 			);
 		$lists['ordering'] =
-			JHTML::_(
+			HTMLHelper::_(
 				'select.genericlist',
 				$order,
 				'ordering',

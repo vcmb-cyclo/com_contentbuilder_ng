@@ -13,6 +13,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\HTML\HTMLHelper;
 
 $th = 'th';
 if ($this->page_heading) {
@@ -57,7 +58,7 @@ if ($this->page_heading) {
 
                     <<?php echo $th; ?> width="5" class="sectiontableheader">
                         <?php echo Text::_('COM_CONTENTBUILDER_ID'); ?>
-                        <?php //echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_ID' ), 'id', $this->lists['order_Dir'], $this->lists['order'] );    ?>
+                        <?php //echo HTMLHelper::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_ID' ), 'id', $this->lists['order_Dir'], $this->lists['order'] );     ?>
                     </<?php echo $th; ?>>
 
                     <?php
@@ -66,7 +67,7 @@ if ($this->page_heading) {
 
                 <<?php echo $th; ?> style="width: 200px !important;" class="sectiontableheader">
                     <?php echo Text::_('COM_CONTENTBUILDER_VIEW_NAME'); ?>
-                    <?php // echo JHTML::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_VIEW_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] );    ?>
+                    <?php // echo HTMLHelper::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_VIEW_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] );     ?>
                 </<?php echo $th; ?>>
 
                 <?php
@@ -74,7 +75,7 @@ if ($this->page_heading) {
                     ?>
 
                     <<?php echo $th; ?> class="sectiontableheader">
-                        <?php echo JHTML::_('grid.sort', Text::_('COM_CONTENTBUILDER_TAG'), 'tag', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_TAG'), 'tag', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </<?php echo $th; ?>>
 
                     <?php
@@ -260,5 +261,5 @@ if ($this->page_heading) {
     <input type="hidden" name="view" id="view" value="publicforms" />
     <input type="hidden" name="filter_order" value="<?php echo $this->lists['order']; ?>" />
     <input type="hidden" name="filter_order_Dir" value="<?php echo $this->lists['order_Dir']; ?>" />
-    <?php echo JHtml::_('form.token'); ?>
+    <?php echo HTMLHelper::_('form.token'); ?>
 </form>

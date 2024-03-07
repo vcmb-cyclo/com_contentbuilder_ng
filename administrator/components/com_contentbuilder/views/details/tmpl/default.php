@@ -3,7 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
- * @copyright Copyright (C) 2024 by XDA+GIL
+ * @copyright   Copyright (C) 2024 by XDA+GIL
  * @license     GNU/GPL
  */
 defined('_JEXEC') or die('Restricted access');
@@ -12,6 +12,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\HTML\HTMLHelper;
 
 
 $edit_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('edit') : contentbuilder::authorize('edit');
@@ -138,7 +139,7 @@ if (CBRequest::getInt('cb_show_author', 1)) {
     <?php if ($this->created): ?>
         <span class="small created-by">
             <?php echo Text::_('COM_CONTENTBUILDER_CREATED_ON'); ?>
-            <?php echo JHTML::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?>
+            <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?>
         </span>
     <?php endif; ?>
 
@@ -178,7 +179,7 @@ if (CBRequest::getInt('cb_show_author', 1)) {
         <?php if ($this->modified): ?>
             <span class="small created-by">
                 <?php echo Text::_('COM_CONTENTBUILDER_LAST_UPDATED_ON'); ?>
-                <?php echo JHTML::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?>
+                <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?>
             </span>
         <?php endif; ?>
 

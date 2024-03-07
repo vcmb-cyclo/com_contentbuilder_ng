@@ -3,8 +3,8 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL 
  * @license     GNU/GPL
- * @copyright Copyright (C) 2024 by XDA+GIL
  */
 
 // no direct access
@@ -31,7 +31,7 @@ class ContentbuilderViewEdit extends CBView
 
 	function display($tpl = null)
 	{
-		//JHTML::_('bootstrap.tooltip');
+		//HTMLHelper::_('bootstrap.tooltip');
 
 		// Get data from the model
 		$subject = $this->get('Data');
