@@ -8,13 +8,14 @@
  * @license     GNU/GPL
  *
  * @copyright   Copyright (C) 2005 - 2012 Open Source Matters, Inc. All rights reserved.
- * @copyright Copyright (C) 2024 by XDA+GIL 
+ * @copyright   Copyright (C) 2024 by XDA+GIL 
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Pagination\PaginationObject;
 
 /**
  * This is a file to add template specific chrome to pagination rendering.
@@ -137,7 +138,7 @@ function bf_pagination_list_render($list)
 /**
  * Renders an active item in the pagination block
  *
- * @param   JPaginationObject  $item  The current pagination object
+ * @param   PaginationObject  $item  The current pagination object
  *
  * @return  string  HTML markup for active item
  *
@@ -182,7 +183,7 @@ function bf_pagination_item_active(&$item)
 /**
  * Renders an inactive item in the pagination block
  *
- * @param   JPaginationObject  $item  The current pagination object
+ * @param   PaginationObject  $item  The current pagination object
  *
  * @return  string  HTML markup for inactive item
  *

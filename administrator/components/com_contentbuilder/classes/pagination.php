@@ -22,6 +22,8 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Pagination\PaginationObject;
+use Joomla\CMS\Log\Log;
 
 /**
  * Pagination Class. Provides a common interface for content pagination for the
@@ -550,13 +552,13 @@ class CBPagination
 	/**
 	 * Method to create an active pagination link to the item
 	 *
-	 * @param   JPaginationObject  $item  The object with which to make an active link.
+	 * @param   PaginationObject  $item  The object with which to make an active link.
 	 *
 	 * @return   string  HTML link
 	 *
 	 * @since    11.1
 	 */
-	protected function _item_active(JPaginationObject $item)
+	protected function _item_active(PaginationObject $item)
 	{
 		$app = Factory::getApplication();
 		if ($app->isClient('administrator')) {
@@ -575,13 +577,13 @@ class CBPagination
 	/**
 	 * Method to create an inactive pagination string
 	 *
-	 * @param   JPaginationObject  $item  The item to be processed
+	 * @param   PaginationObject  $item  The item to be processed
 	 *
 	 * @return  string
 	 *
 	 * @since   11.1
 	 */
-	protected function _item_inactive(JPaginationObject $item)
+	protected function _item_inactive(PaginationObject $item)
 	{
 		$app = Factory::getApplication();
 		if ($app->isClient('administrator')) {
@@ -610,15 +612,15 @@ class CBPagination
 			}
 		}
 
-		$data->all = new JPaginationObject(Text::_('JLIB_HTML_VIEW_ALL'), $this->prefix);
+		$data->all = new PaginationObject(Text::_('JLIB_HTML_VIEW_ALL'), $this->prefix);
 		if (!$this->viewall) {
 			$data->all->base = '0';
 			$data->all->link = Route::_($params . '&' . $this->prefix . 'limitstart=');
 		}
 
 		// Set the start and previous data objects.
-		$data->start = new JPaginationObject(Text::_('JLIB_HTML_START'), $this->prefix);
-		$data->previous = new JPaginationObject(Text::_('JPREV'), $this->prefix);
+		$data->start = new PaginationObject(Text::_('JLIB_HTML_START'), $this->prefix);
+		$data->previous = new PaginationObject(Text::_('JPREV'), $this->prefix);
 
 		if ($this->pagesCurrent > 1) {
 			$page = ($this->pagesCurrent - 2) * $this->limit;
@@ -633,8 +635,8 @@ class CBPagination
 		}
 
 		// Set the next and end data objects.
-		$data->next = new JPaginationObject(Text::_('JNEXT'), $this->prefix);
-		$data->end = new JPaginationObject(Text::_('JLIB_HTML_END'), $this->prefix);
+		$data->next = new PaginationObject(Text::_('JNEXT'), $this->prefix);
+		$data->end = new PaginationObject(Text::_('JLIB_HTML_END'), $this->prefix);
 
 		if ($this->pagesCurrent < $this->pagesTotal) {
 			$next = $this->pagesCurrent * $this->limit;
@@ -654,7 +656,7 @@ class CBPagination
 			// Set the empty for removal from route
 			// @todo remove code: $offset = $offset == 0 ? '' : $offset;
 
-			$data->pages[$i] = new JPaginationObject($i, $this->prefix);
+			$data->pages[$i] = new PaginationObject($i, $this->prefix);
 			if ($i != $this->pagesCurrent || $this->viewall) {
 				$data->pages[$i]->base = $offset;
 				$data->pages[$i]->link = Route::_($params . '&' . $this->prefix . 'limitstart=' . $offset);
@@ -678,7 +680,7 @@ class CBPagination
 	 */
 	public function set($property, $value = null)
 	{
-		JLog::add('JPagination::set() is deprecated. Access the properties directly.', JLog::WARNING, 'deprecated');
+		Log::add('JPagination::set() is deprecated. Access the properties directly.', Log::WARNING, 'deprecated');
 
 		if (strpos($property, '.')) {
 			$prop = explode('.', $property);
@@ -701,7 +703,7 @@ class CBPagination
 	 */
 	public function get($property, $default = null)
 	{
-		JLog::add('JPagination::get() is deprecated. Access the properties directly.', JLog::WARNING, 'deprecated');
+		Log::add('JPagination::get() is deprecated. Access the properties directly.', Log::WARNING, 'deprecated');
 
 		if (strpos($property, '.')) {
 			$prop = explode('.', $property);
