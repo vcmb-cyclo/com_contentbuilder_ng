@@ -545,7 +545,7 @@ class HTML_facileFormsProcessor
         $this->editable = $editable;
         $this->editable_override = $editable_override;
 
-        if (!class_exists('Browser')) {
+        if (!class_exists('Joomla\CMS\Environment\Browser')) {
             require_once(JPATH_SITE . '/libraries/joomla/environment/browser.php');
         }
         $this->ip = $_SERVER['REMOTE_ADDR'];
