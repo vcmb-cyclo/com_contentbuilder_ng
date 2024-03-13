@@ -16,6 +16,7 @@ use Joomla\Registry\Registry;
 use Joomla\CMS\Router\Route;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Toolbar\ToolbarHelper;
+use Joomla\CMS\Plugin\PluginHelper;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'viewlegacy.php');
@@ -76,7 +77,7 @@ class ContentbuilderViewEdit extends CBView
 			$registry = new Registry;
 			$registry->loadString($table->attribs);
 
-			JPluginHelper::importPlugin('content', 'breezingforms');
+			PluginHelper::importPlugin('content', 'breezingforms');
 
 			// seems to be a joomla bug. if sef urls is enabled, "start" is used for paging in articles, else "limitstart" will be used
 			$limitstart = CBRequest::getVar('limitstart', 0, '', 'int');
@@ -152,12 +153,12 @@ class ContentbuilderViewEdit extends CBView
 			ToolBarHelper::title('<span style="display:inline-block; vertical-align:middle">' . $subject->page_title . '</span>', 'logo_left.png');
 		}
 
-		JPluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
+		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
 		$results = Factory::getApplication()->triggerEvent('onEditableTemplateCss', array());
 		$theme_css = implode('', $results);
 		$this->theme_css = $theme_css;
 
-		JPluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
+		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
 		$results = Factory::getApplication()->triggerEvent('onEditableTemplateJavascript', array());
 		$theme_js = implode('', $results);
 		$this->theme_js = $theme_js;

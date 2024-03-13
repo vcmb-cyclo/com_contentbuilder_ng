@@ -1,9 +1,10 @@
 <?php
 /**
- * @version 1.0
- * @package ContentBuilder Image Scale
- * @copyright (C) 2011 by Markus Bopp
- * @license Released under the terms of the GNU General Public License
+ * @version     1.0
+ * @package     ContentBuilder Image Scale
+ * @copyright   (C) 2011 by Markus Bopp
+ * @copyright   (C) 2024 by XDA+GIL
+ * @license     Released under the terms of the GNU General Public License
  **/
 
 /** ensure this file is being included by a parent file */

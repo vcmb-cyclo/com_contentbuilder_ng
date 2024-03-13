@@ -60,7 +60,7 @@ class ContentbuilderModelForm extends CBModel
             $this->setId(CBRequest::getInt('id', 0));
         }
 
-        $limit = $mainframe->getUserStateFromRequest('global.list.limit', 'limit', $mainframe->getCfg('list_limit'), 'int');
+        $limit = $mainframe->getUserStateFromRequest('global.list.limit', 'limit', $mainframe->get('list_limit'), 'int');
         $limitstart = CBRequest::getVar('limitstart', 0, '', 'int');
 
         // In case limit has been changed, adjust it

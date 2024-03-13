@@ -18,6 +18,7 @@ use Joomla\CMS\Uri\Uri;
 use Joomla\Filesystem\Folder;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Filter\OutputFilter;
+use Joomla\CMS\Plugin\PluginHelper;
 
 if(!function_exists('cb_b64enc')){
     
@@ -134,7 +135,7 @@ class plgContentContentbuilder_download extends JPlugin {
         
         $protect = false;
         
-        $plugin = JPluginHelper::getPlugin('content', 'contentbuilder_download');
+        $plugin = PluginHelper::getPlugin('content', 'contentbuilder_download');
         jimport( 'joomla.html.parameter' );
 	$pluginParams = CBCompat::getParams($plugin->params);
         

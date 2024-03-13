@@ -1,9 +1,10 @@
 <?php
 /**
- * @version 1.0
- * @package ContentBuilder Image Scale
- * @copyright (C) 2011 by Markus Bopp
- * @license Released under the terms of the GNU General Public License
+ * @version     1.0
+ * @package     ContentBuilder Image Scale
+ * @copyright   (C) 2011 by Markus Bopp
+ * @copyright   (C) 2024 by XDA+GIL
+ * @license     Released under the terms of the GNU General Public License
  **/
 
 
@@ -14,6 +15,7 @@ use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
+use Joomla\CMS\Plugin\PluginHelper;
 
 if (!function_exists('cb_b64enc')) {
 
@@ -60,7 +62,7 @@ class plgContentContentbuilder_rating extends JPlugin
 
         $protect = false;
 
-        $plugin = JPluginHelper::getPlugin('content', 'contentbuilder_rating');
+        $plugin = PluginHelper::getPlugin('content', 'contentbuilder_rating');
         jimport('joomla.html.parameter');
         $pluginParams = CBCompat::getParams($plugin->params);
 

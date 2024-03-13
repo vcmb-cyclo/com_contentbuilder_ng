@@ -1,11 +1,11 @@
 <?php
 /**
  * BreezingForms - A Joomla Forms Application
- * @version 1.9
- * @package BreezingForms
+ * @version   1.9
+ * @package   BreezingForms
  * @copyright (C) 2008-2020 by Markus Bopp
  * @copyright (C) 2024 by XDA+GIL
- * @license Released under the terms of the GNU General Public License
+ * @license   Released under the terms of the GNU General Public License
  * */
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
@@ -16,6 +16,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\Event\Event;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Plugin\PluginHelper;
 
 class HTML_facileFormsForm
 {
@@ -1896,7 +1897,7 @@ class HTML_facileFormsForm
         <?php
         echo HTMLHelper::_('uitab.endTab');
 
-        JPluginHelper::importPlugin('breezingforms_addons');
+        PluginHelper::importPlugin('breezingforms_addons');
         $addons = Factory::getApplication()->triggerEvent('onPropertiesDisplay', array(BFRequest::getInt('form', 0)));
 
         foreach ($addons as $addon) {

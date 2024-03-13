@@ -3,15 +3,18 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL 
  * @license     GNU/GPL
-*/
+ */
 
 // no direct access
-defined( '_JEXEC' ) or die( 'Restricted access' );
+defined('_JEXEC') or die('Restricted access');
 
-jimport( 'joomla.plugin.plugin' );
+use Joomla\CMS\Plugin\PluginHelper;
 
-require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
+jimport('joomla.plugin.plugin');
+
+require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 
 class plgContentbuilder_verifyPaypal extends JPlugin
 {
@@ -27,23 +30,23 @@ class plgContentbuilder_verifyPaypal extends JPlugin
     private $name = 'Item';
     private $amount = 0;
     private $cancel_url = '';
-    
-    function __construct( &$subject, $params )
+
+    function __construct(&$subject, $params)
     {
         parent::__construct($subject, $params);
 
-        $plugin = JPluginHelper::getPlugin('contentbuilder_verify', 'paypal');
-        jimport( 'joomla.html.parameter' );
+        $plugin = PluginHelper::getPlugin('contentbuilder_verify', 'paypal');
+        jimport('joomla.html.parameter');
         $pluginParams = CBCompat::getParams($plugin->params);
-        
-        if($pluginParams->def('test',0)){
-            $this->test     = true;
-            $this->business = $pluginParams->def('test_business','');
-            $this->token    = $pluginParams->def('test_token','');
-            $this->url      = 'https://www.sandbox.paypal.com';
+
+        if ($pluginParams->def('test', 0)) {
+            $this->test = true;
+            $this->business = $pluginParams->def('test_business', '');
+            $this->token = $pluginParams->def('test_token', '');
+            $this->url = 'https://www.sandbox.paypal.com';
         } else {
-            $this->business = $pluginParams->def('business','');
-            $this->token    = $pluginParams->def('token','');
+            $this->business = $pluginParams->def('business', '');
+            $this->token = $pluginParams->def('token', '');
         }
     }
 
@@ -57,11 +60,12 @@ class plgContentbuilder_verifyPaypal extends JPlugin
      * @param string $plugin_settings A query string with the plugin options
      * @return string empty for nothing (default) or a string to render instead of the default
      */
-    function onViewport($link, $plugin_settings){
-        
+    function onViewport($link, $plugin_settings)
+    {
+
         return '';
     }
-    
+
     /**
      * Will always be called by the verifier
      * 
@@ -69,20 +73,21 @@ class plgContentbuilder_verifyPaypal extends JPlugin
      * @param type $options
      * @return string empty if everything is ok, else a message describing the problem 
      */
-    function onSetup($return_url, $options){
-        
-        if(isset($options['plugin_options']) && isset($options['plugin_options']['amount']) && is_numeric($options['plugin_options']['amount'])){
-            
-            $this->amount  = $options['plugin_options']['amount'];
-            $this->name    = $options['verification_name'];
-            $this->locale  = isset($options['plugin_options']['locale']) && $options['plugin_options']['locale'] ? strtoupper($options['plugin_options']['locale']) : 'EN';
+    function onSetup($return_url, $options)
+    {
+
+        if (isset($options['plugin_options']) && isset($options['plugin_options']['amount']) && is_numeric($options['plugin_options']['amount'])) {
+
+            $this->amount = $options['plugin_options']['amount'];
+            $this->name = $options['verification_name'];
+            $this->locale = isset($options['plugin_options']['locale']) && $options['plugin_options']['locale'] ? strtoupper($options['plugin_options']['locale']) : 'EN';
             $this->curreny = isset($options['plugin_options']['currency-code']) && $options['plugin_options']['currency-code'] ? strtoupper($options['plugin_options']['currency-code']) : 'USD';
-            $this->tax     = isset($options['plugin_options']['tax']) && $options['plugin_options']['tax'] ? $options['plugin_options']['tax'] : 0;
-            $this->ipn     = isset($options['plugin_options']['use-ipn']) && $options['plugin_options']['use-ipn'] == 'true' ? true : false;
+            $this->tax = isset($options['plugin_options']['tax']) && $options['plugin_options']['tax'] ? $options['plugin_options']['tax'] : 0;
+            $this->ipn = isset($options['plugin_options']['use-ipn']) && $options['plugin_options']['use-ipn'] == 'true' ? true : false;
             $this->item_number = isset($options['plugin_options']['item-number']) && $options['plugin_options']['item-number'] ? $options['plugin_options']['item-number'] : 1;
-            $this->cancel_url = htmlentities(isset($options['plugin_options']['cancel-url']) && $options['plugin_options']['cancel-url'] ? $options['plugin_options']['cancel-url'] : str_replace('&verify=1','',$return_url) );
-            
-        }else{
+            $this->cancel_url = htmlentities(isset($options['plugin_options']['cancel-url']) && $options['plugin_options']['cancel-url'] ? $options['plugin_options']['cancel-url'] : str_replace('&verify=1', '', $return_url));
+
+        } else {
             return 'Please specify an amount (price) for PayPal payment';
         }
         return '';
@@ -94,43 +99,44 @@ class plgContentbuilder_verifyPaypal extends JPlugin
      * @param string $return_url
      * @param array $options 
      */
-    function onForward($return_url, $options){
+    function onForward($return_url, $options)
+    {
         ob_end_clean();
-        
+
         echo '
         <html>
         <head></head>
-        <body>'."\n";
-        
+        <body>' . "\n";
+
         $html = 'Please wait while we process your request...';
-        $html .= "<form name=\"cb_paypal_form\" action=\"" . $this->url . "/cgi-bin/webscr\" method=\"post\">"."\n";
-        $html .= "<input type=\"hidden\" name=\"cmd\" value=\"_xclick\"/>"."\n";
-        $html .= "<input type=\"hidden\" name=\"business\" value=\"" . $this->business . "\"/>"."\n";
-        $html .= "<input type=\"hidden\" name=\"item_name\" value=\"" . $this->name . "\"/>"."\n";
-        $html .= "<input type=\"hidden\" name=\"item_number\" value=\"" . $this->item_number . "\"/>"."\n";
-        $html .= "<input type=\"hidden\" name=\"amount\" value=\"" . $this->amount . "\"/>"."\n";
-        $html .= "<input type=\"hidden\" name=\"tax\" value=\"" . $this->tax . "\"/>"."\n";
-        $html .= "<input type=\"hidden\" name=\"no_shipping\" value=\"1\"/>"."\n";
-        $html .= "<input type=\"hidden\" name=\"no_note\" value=\"1\"/>"."\n";
+        $html .= "<form name=\"cb_paypal_form\" action=\"" . $this->url . "/cgi-bin/webscr\" method=\"post\">" . "\n";
+        $html .= "<input type=\"hidden\" name=\"cmd\" value=\"_xclick\"/>" . "\n";
+        $html .= "<input type=\"hidden\" name=\"business\" value=\"" . $this->business . "\"/>" . "\n";
+        $html .= "<input type=\"hidden\" name=\"item_name\" value=\"" . $this->name . "\"/>" . "\n";
+        $html .= "<input type=\"hidden\" name=\"item_number\" value=\"" . $this->item_number . "\"/>" . "\n";
+        $html .= "<input type=\"hidden\" name=\"amount\" value=\"" . $this->amount . "\"/>" . "\n";
+        $html .= "<input type=\"hidden\" name=\"tax\" value=\"" . $this->tax . "\"/>" . "\n";
+        $html .= "<input type=\"hidden\" name=\"no_shipping\" value=\"1\"/>" . "\n";
+        $html .= "<input type=\"hidden\" name=\"no_note\" value=\"1\"/>" . "\n";
         if ($this->ipn) {
-            $html .= "<input type=\"hidden\" name=\"notify_url\" value=\"" . $return_url.'&paypal_ipn=true' . "\"/>"."\n";
+            $html .= "<input type=\"hidden\" name=\"notify_url\" value=\"" . $return_url . '&paypal_ipn=true' . "\"/>" . "\n";
             if ($this->test) {
-                $html .= "<input type=\"hidden\" name=\"test_ipn\" value=\"1\"/>"."\n";
+                $html .= "<input type=\"hidden\" name=\"test_ipn\" value=\"1\"/>" . "\n";
             }
         }
-        $html .= "<input type=\"hidden\" name=\"return\" value=\"" . $return_url . "\"/>"."\n";
-        $html .= "<input type=\"hidden\" name=\"cancel_return\" value=\"" . $this->cancel_url . "\"/>"."\n";
-        $html .= "<input type=\"hidden\" name=\"rm\" value=\"2\"/>"."\n";
-        $html .= "<input type=\"hidden\" name=\"lc\" value=\"" . $this->locale . "\"/>"."\n";
-        $html .= "<input type=\"hidden\" name=\"currency_code\" value=\"" . $this->curreny . "\"/>"."\n";
-        $html .= '</form>'."\n";
-        $html .= '<script type="text/javascript">document.cb_paypal_form.submit();</script>'."\n";
-        
+        $html .= "<input type=\"hidden\" name=\"return\" value=\"" . $return_url . "\"/>" . "\n";
+        $html .= "<input type=\"hidden\" name=\"cancel_return\" value=\"" . $this->cancel_url . "\"/>" . "\n";
+        $html .= "<input type=\"hidden\" name=\"rm\" value=\"2\"/>" . "\n";
+        $html .= "<input type=\"hidden\" name=\"lc\" value=\"" . $this->locale . "\"/>" . "\n";
+        $html .= "<input type=\"hidden\" name=\"currency_code\" value=\"" . $this->curreny . "\"/>" . "\n";
+        $html .= '</form>' . "\n";
+        $html .= '<script type="text/javascript">document.cb_paypal_form.submit();</script>' . "\n";
+
         echo $html;
-        
+
         echo '</body>
         </html>
-        '."\n";
+        ' . "\n";
         exit;
     }
 
@@ -141,117 +147,117 @@ class plgContentbuilder_verifyPaypal extends JPlugin
      * @param array $options
      * @return mixed boolean false on errors or an array with the payment data 
      */
-    function onVerify($return_url, $options){
-        
+    function onVerify($return_url, $options)
+    {
+
         // the paypal_ipn parameter has been attached in onForward
         // so if PayPal returns with this parameter we should use verification through IPN
-        if($this->ipn && CBRequest::getVar('paypal_ipn','') == 'true'){
+        if ($this->ipn && CBRequest::getVar('paypal_ipn', '') == 'true') {
             return $this->verifyIpn($return_url, $options);
         }
-        
+
         $auth_token = $this->token;
-        
+
         $paypal = 'https://www.paypal.com';
-        if($this->test){
+        if ($this->test) {
             $paypal = 'https://www.sandbox.paypal.com';
         }
 
         $req = 'cmd=_notify-synch';
 
-        $tx_token = CBRequest::getVar('tx', 0 );
-        $req .= "&tx=".urlencode($tx_token)."&at=".urlencode($auth_token);
+        $tx_token = CBRequest::getVar('tx', 0);
+        $req .= "&tx=" . urlencode($tx_token) . "&at=" . urlencode($auth_token);
 
         $header = "POST /cgi-bin/webscr HTTP/1.0\r\n";
         $header .= "Content-Type: application/x-www-form-urlencoded\r\n";
         $header .= "Content-Length: " . strlen($req) . "\r\n\r\n";
 
         if (function_exists('curl_init')) {
-                $ch = curl_init();
+            $ch = curl_init();
 
-                curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,FALSE);
-                curl_setopt($ch,CURLOPT_URL, $paypal.'/cgi-bin/webscr');
-                curl_setopt($ch,CURLOPT_POST,1);
-                curl_setopt($ch,CURLOPT_POSTFIELDS,$req);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($ch, CURLOPT_URL, $paypal . '/cgi-bin/webscr');
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $req);
 
-                ob_start();
-                curl_exec($ch);
-                $res=ob_get_contents();
-                curl_close($ch);
-                ob_end_clean();
+            ob_start();
+            curl_exec($ch);
+            $res = ob_get_contents();
+            curl_close($ch);
+            ob_end_clean();
 
         } else {
-                // try fsockopen
-                $fp = fsockopen ($paypal, 80, $errno, $errstr, 30);
-                fputs ($fp, $header . $req);
-                $res = '';
-                $headerdone = false;
-                while (!feof($fp)) {
-                        $line = fgets ($fp, 1024);
-                        if (strcmp($line, "\r\n") == 0) {
-                                $headerdone = true;
-                        }
-                        else if ($headerdone)
-                        {
-                                $res .= $line;
-                        }
+            // try fsockopen
+            $fp = fsockopen($paypal, 80, $errno, $errstr, 30);
+            fputs($fp, $header . $req);
+            $res = '';
+            $headerdone = false;
+            while (!feof($fp)) {
+                $line = fgets($fp, 1024);
+                if (strcmp($line, "\r\n") == 0) {
+                    $headerdone = true;
+                } else if ($headerdone) {
+                    $res .= $line;
                 }
-                fclose ($fp);
+            }
+            fclose($fp);
         }
 
         $lines = explode("\n", $res);
         $keyarray = array();
 
-        if (strcmp ($lines[0], "SUCCESS") == 0) {
-            
-            for ($i=1; $i<count($lines);$i++){
+        if (strcmp($lines[0], "SUCCESS") == 0) {
+
+            for ($i = 1; $i < count($lines); $i++) {
                 if ($lines[$i] != "") {
-                        list($key,$val) = explode("=", $lines[$i]);
-                        $keyarray[urldecode($key)] = urldecode($val);
+                    list($key, $val) = explode("=", $lines[$i]);
+                    $keyarray[urldecode($key)] = urldecode($val);
                 }
             }
 
-            if ( $keyarray['mc_gross'] != (doubleval($this->amount)+doubleval($this->tax)) || $keyarray['mc_currency'] != strtoupper($this->curreny) ) {
+            if ($keyarray['mc_gross'] != (doubleval($this->amount) + doubleval($this->tax)) || $keyarray['mc_currency'] != strtoupper($this->curreny)) {
 
                 return false;
 
-            }else{
+            } else {
 
-                return array( 
-                    'tx' => $tx_token, 
-                    'msg' => '', 
+                return array(
+                    'tx' => $tx_token,
+                    'msg' => '',
                     'is_test' => $this->test ? 1 : 0,
                     'data' => $keyarray
                 );
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      *
      * @param string $return_url
      * @param array $options
      * @return mixed boolean false on error, else an array with information about the payment 
      */
-    function verifyIpn($return_url, $options){
-     
+    function verifyIpn($return_url, $options)
+    {
+
         $return = false;
-        
+
         $auth_token = $this->token;
-        
+
         $paypal = 'https://www.paypal.com';
-        if($this->test){
+        if ($this->test) {
             $paypal = 'https://www.sandbox.paypal.com';
         }
 
         $req = 'cmd=_notify-validate';
 
-        $tx_token = CBRequest::getVar('txn_id', 0 );
-        
+        $tx_token = CBRequest::getVar('txn_id', 0);
+
         $keyarray = array();
         $postback = $_REQUEST;
-        
+
         foreach ($postback as $key => $value) {
             $value = urlencode(stripslashes($value));
             $req .= "&$key=$value";
@@ -265,70 +271,66 @@ class plgContentbuilder_verifyPaypal extends JPlugin
         $res = '';
 
         if (function_exists('curl_init')) {
-                $ch = curl_init();
-                $pointer = $ch;
-                curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,FALSE);
-                curl_setopt($ch,CURLOPT_URL, $paypal.'/cgi-bin/webscr');
-                curl_setopt($ch,CURLOPT_POST,1);
-                curl_setopt($ch,CURLOPT_POSTFIELDS,$req);
+            $ch = curl_init();
+            $pointer = $ch;
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($ch, CURLOPT_URL, $paypal . '/cgi-bin/webscr');
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $req);
 
-                ob_start();
-                curl_exec($ch);
-                $res=ob_get_contents();
+            ob_start();
+            curl_exec($ch);
+            $res = ob_get_contents();
 
         } else {
-                // try fsockopen
-                $fp = fsockopen ($paypal, 80, $errno, $errstr, 30);
-                $pointer = $fp;
-                fputs ($fp, $header . $req);
-                $headerdone = false;
-                while (!feof($fp)) {
-                        $line = fgets ($fp, 1024);
-                        if (strcmp($line, "\r\n") == 0) {
-                                $headerdone = true;
-                        }
-                        else if ($headerdone)
-                        {
-                                $res .= $line;
-                        }
+            // try fsockopen
+            $fp = fsockopen($paypal, 80, $errno, $errstr, 30);
+            $pointer = $fp;
+            fputs($fp, $header . $req);
+            $headerdone = false;
+            while (!feof($fp)) {
+                $line = fgets($fp, 1024);
+                if (strcmp($line, "\r\n") == 0) {
+                    $headerdone = true;
+                } else if ($headerdone) {
+                    $res .= $line;
                 }
+            }
         }
 
         $lines = explode("\n", $res);
 
-        if (strcmp ($lines[0], "VERIFIED") == 0 ) {
-            
-            foreach($postback As $key => $value){
+        if (strcmp($lines[0], "VERIFIED") == 0) {
+
+            foreach ($postback as $key => $value) {
                 $keyarray[$key] = $value;
             }
 
-            if ( $keyarray['mc_gross'] != (doubleval($this->amount)+doubleval($this->tax)) || $keyarray['mc_currency'] != strtoupper($this->curreny) ) {
+            if ($keyarray['mc_gross'] != (doubleval($this->amount) + doubleval($this->tax)) || $keyarray['mc_currency'] != strtoupper($this->curreny)) {
 
-               // not good
-                
+                // not good
+
             } else {
-                
-                $return = array( 
-                    'tx' => $tx_token, 
+
+                $return = array(
+                    'tx' => $tx_token,
                     'exit' => true,
                     'header' => 'Status: 200 OK',
-                    'msg' => '', 
+                    'msg' => '',
                     'is_test' => $this->test ? 1 : 0,
                     'data' => $keyarray
                 );
             }
         }
-       
+
         // should be kept open until sending the status headers
         if (function_exists('curl_init')) {
             curl_close($pointer);
             ob_end_clean();
+        } else {
+            fclose($pointer);
         }
-        else
-        {
-            fclose ($pointer);
-        }
-        
+
         return $return;
     }
 }

@@ -16,6 +16,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Toolbar\ToolbarHelper;
+use Joomla\CMS\Plugin\PluginHelper;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'viewlegacy.php');
@@ -68,7 +69,7 @@ class ContentbuilderViewDetails extends CBView
 
 		$registry = new Registry;
 		$registry->loadString($table->attribs);
-		JPluginHelper::importPlugin('content');
+		PluginHelper::importPlugin('content');
 
 		// seems to be a joomla bug. if sef urls is enabled, "start" is used for paging in articles, else "limitstart" will be used
 		//$limitstart = CBRequest::getVar('limitstart', 0, '', 'int');
@@ -141,11 +142,11 @@ class ContentbuilderViewDetails extends CBView
 		$pattern = '#<hr\s+id=("|\')system-readmore("|\')\s*\/*>#i';
 		$subject->template = preg_replace($pattern, '', $subject->template);
 
-		JPluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
+		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
 		$results = Factory::getApplication()->triggerEvent('onContentTemplateCss', array());
 		$this->theme_css = implode('', $results);
 
-		JPluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
+		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
 		$results = Factory::getApplication()->triggerEvent('onContentTemplateJavascript', array());
 		$this->theme_js = implode('', $results);
 

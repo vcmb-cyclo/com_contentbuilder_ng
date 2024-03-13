@@ -24,6 +24,7 @@ use Joomla\CMS\Language\LanguageHelper;
 use Joomla\Filesystem\Path;
 use Joomla\CMS\Environment\Browser;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Plugin\PluginHelper;
 
 class bfMobile
 {
@@ -4695,7 +4696,7 @@ class HTML_facileFormsProcessor
             // CONTENTBUILDER BEGIN
             if (is_object($cbResult['form'])) {
 
-                JPluginHelper::importPlugin('contentbuilder_submit');
+                PluginHelper::importPlugin('contentbuilder_submit');
 
                 $is15 = false;
 
@@ -8002,7 +8003,7 @@ class HTML_facileFormsProcessor
                             $this->sendMailChimpNotification();
                             $this->sendSalesforceNotification();
 
-                            JPluginHelper::importPlugin('breezingforms_addons');
+                            PluginHelper::importPlugin('breezingforms_addons');
                             Factory::getApplication()->triggerEvent(
                                 'onPropertiesExecute',
                                 array(

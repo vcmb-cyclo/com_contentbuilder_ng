@@ -15,6 +15,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Plugin\PluginHelper;
 
 require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
@@ -71,7 +72,7 @@ class ContentbuilderModelList extends CBModel
         $this->setId(CBRequest::getInt('id',0));
 
         // Get pagination request variables
-        $limit = $mainframe->getUserStateFromRequest('global.list.limit', 'limit', CBRequest::getInt('cb_list_limit', 0) > 0 ? CBRequest::getInt('cb_list_limit', 0) : $mainframe->getCfg('list_limit'), 'int');
+        $limit = $mainframe->getUserStateFromRequest('global.list.limit', 'limit', CBRequest::getInt('cb_list_limit', 0) > 0 ? CBRequest::getInt('cb_list_limit', 0) : $mainframe->get('list_limit'), 'int');
         $limitstart = CBRequest::getVar('limitstart', 0, '', 'int');
 
         // In case limit has been changed, adjust it
@@ -551,7 +552,7 @@ class ContentbuilderModelList extends CBModel
                     $table = JTable::getInstance('content');
                     $registry = new Registry;
 	                $registry->loadString($table->attribs);
-                    JPluginHelper::importPlugin('content');
+                    PluginHelper::importPlugin('content');
                     $table->text = $data->intro_text;
                     $table->text .= "<!-- workaround for J! pagebreak bug: class=\"system-pagebreak\" -->\n";
 	                Factory::getApplication()->triggerEvent('onContentPrepare', array ('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start));

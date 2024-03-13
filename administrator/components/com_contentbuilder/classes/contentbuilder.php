@@ -19,6 +19,7 @@ use Joomla\Registry\Registry;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Plugin\PluginHelper;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder_helpers.php');
@@ -475,7 +476,7 @@ class contentbuilder
                             $w = explode('$', implode('$', $w));
 
                             if (count($w) == 2) {
-                                JPluginHelper::importPlugin('content');
+                                PluginHelper::importPlugin('content');
                             } else {
                                 $size = count($w) - 1;
                                 for ($j = 0; $j < $size; $j++) {
@@ -833,7 +834,7 @@ class contentbuilder
             return;
         }
 
-        JPluginHelper::importPlugin('contentbuilder_themes', $plugin);
+        PluginHelper::importPlugin('contentbuilder_themes', $plugin);
         $results = Factory::getApplication()->triggerEvent('onContentTemplateSample', array($contentbuilder_form_id, $form));
 
         return implode('', $results);
@@ -878,7 +879,7 @@ class contentbuilder
             return;
         }
 
-        JPluginHelper::importPlugin('contentbuilder_themes', $plugin);
+        PluginHelper::importPlugin('contentbuilder_themes', $plugin);
         $results = Factory::getApplication()->triggerEvent('onEditableTemplateSample', array($contentbuilder_form_id, $form));
 
         return implode('', $results);
@@ -2239,7 +2240,7 @@ class contentbuilder
         }
         Factory::getApplication()->triggerEvent('onContentAfterSave', array('com_content.article', &$table, $isNew));
 
-        JPluginHelper::importPlugin('contentbuilder_listaction');
+        PluginHelper::importPlugin('contentbuilder_listaction');
 
         $result = Factory::getApplication()->triggerEvent('onAfterArticleCreation', array($contentbuilder_form_id, $record_id, $article));
         $msg = implode('', $result);

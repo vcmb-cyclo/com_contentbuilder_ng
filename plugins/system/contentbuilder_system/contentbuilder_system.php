@@ -3,6 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL
  * @license     GNU/GPL
  */
 
@@ -13,7 +14,7 @@ use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
-
+use Joomla\CMS\Plugin\PluginHelper;
 
 if (!defined('DS')) {
     define('DS', DIRECTORY_SEPARATOR);
@@ -178,7 +179,7 @@ class plgSystemContentbuilder_system extends JPlugin
                 $themes = $db->loadColumn();
                 foreach ($themes as $theme) {
                     if ($theme) {
-                        JPluginHelper::importPlugin('contentbuilder_themes', $theme);
+                        PluginHelper::importPlugin('contentbuilder_themes', $theme);
                         $results_css = Factory::getApplication()->triggerEvent('onContentTemplateCss', array());
                         $results_js = Factory::getApplication()->triggerEvent('onContentTemplateJavascript', array());
                         Factory::getDocument()->addStyleDeclaration(implode('', $results_css));

@@ -17,6 +17,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Plugin\PluginHelper;
 
 require_once($ff_admpath . '/admin/form.html.php');
 
@@ -295,7 +296,7 @@ class facileFormsForm
 
         $row->reorder("");
 
-        JPluginHelper::importPlugin('breezingforms_addons');
+        PluginHelper::importPlugin('breezingforms_addons');
         Factory::getApplication()->triggerEvent('onPropertiesSave', array(BFRequest::getInt('id', 0)));
 
         if (trim($caller) == '') {

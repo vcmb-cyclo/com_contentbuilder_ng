@@ -1,10 +1,10 @@
 <?php
 /**
- * @version 1.0
- * @package ContentBuilder Image Scale
- * @copyright (C) 2011 by Markus Bopp
+ * @version     1.0
+ * @package     ContentBuilder Image Scale
+ * @copyright   (C) 2011 by Markus Bopp
  * @copyright   Copyright (C) 2024 by XDA+GIL 
- * @license Released under the terms of the GNU General Public License
+ * @license     Released under the terms of the GNU General Public License
  **/
 
 /** ensure this file is being included by a parent file */
@@ -17,6 +17,7 @@ use Joomla\Filesystem\Folder;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Filesystem\File;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Plugin\PluginHelper;
 
 if (!function_exists('cb_b64enc')) {
 
@@ -136,7 +137,7 @@ class plgContentContentbuilder_download extends JPlugin
 
         $protect = false;
 
-        $plugin = JPluginHelper::getPlugin('content', 'contentbuilder_download');
+        $plugin = PluginHelper::getPlugin('content', 'contentbuilder_download');
         jimport('joomla.html.parameter');
         $pluginParams = CBCompat::getParams($plugin->params);
 

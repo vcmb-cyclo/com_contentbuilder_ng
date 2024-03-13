@@ -18,6 +18,7 @@ use Joomla\Filesystem\File;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Filter\OutputFilter;
 use Joomla\Filesystem\Path;
+use Joomla\CMS\Plugin\PluginHelper;
 
 if (!function_exists('cb_b64enc')) {
 
@@ -106,7 +107,7 @@ class plgContentContentbuilder_image_scale extends JPlugin
 		}
 		$max_time = !empty($max_exec_time) ? intval($max_exec_time) / 2 : 15;
 
-		$plugin = JPluginHelper::getPlugin('content', 'contentbuilder_image_scale');
+		$plugin = PluginHelper::getPlugin('content', 'contentbuilder_image_scale');
 		jimport('joomla.html.parameter');
 		$pluginParams = CBCompat::getParams($plugin->params);
 

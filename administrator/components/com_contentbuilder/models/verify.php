@@ -16,6 +16,7 @@ use Joomla\CMS\User\UserFactoryInterface;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Plugin\PluginHelper;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
@@ -200,7 +201,7 @@ class ContentbuilderModelVerify extends CBModel
             $this_page = Uri::getInstance()->toString();
         }
 
-        JPluginHelper::importPlugin('contentbuilder_verify', $plugin);
+        PluginHelper::importPlugin('contentbuilder_verify', $plugin);
         $setup_result = Factory::getApplication()->triggerEvent('onSetup', array($this_page, $out));
 
         if (!implode('', $setup_result)) {
@@ -390,7 +391,7 @@ class ContentbuilderModelVerify extends CBModel
         }
 
         // Load the users plugin group.
-        JPluginHelper::importPlugin('user');
+        PluginHelper::importPlugin('user');
 
         $query = $db->getQuery(true);
 
@@ -473,7 +474,7 @@ class ContentbuilderModelVerify extends CBModel
         }
 
         // Load the users plugin group.
-        JPluginHelper::importPlugin('user');
+        PluginHelper::importPlugin('user');
 
         $query = $db->getQuery(true);
 

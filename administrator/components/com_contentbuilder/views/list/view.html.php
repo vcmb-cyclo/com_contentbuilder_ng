@@ -13,6 +13,7 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Toolbar\ToolbarHelper;
+use Joomla\CMS\Plugin\PluginHelper;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'viewlegacy.php');
@@ -46,12 +47,12 @@ class ContentbuilderViewList extends CBView
         $lists['filter_language'] = $state->get('formsd_filter_language');
         $lists['limitstart'] = $state->get('limitstart');
 
-        JPluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
+        PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
         $results = Factory::getApplication()->triggerEvent('onListViewCss', array());
         $theme_css = implode('', $results);
         $this->theme_css = $theme_css;
 
-        JPluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
+        PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
         $results = Factory::getApplication()->triggerEvent('onListViewJavascript', array());
         $theme_js = implode('', $results);
         $this->theme_js = $theme_js;
