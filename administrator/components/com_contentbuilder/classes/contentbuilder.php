@@ -20,6 +20,8 @@ use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Table\Table;
+use Joomla\CMS\Filesystem\Folder;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder_helpers.php');
@@ -447,7 +449,7 @@ class contentbuilder
     {
 
         require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper.php');
-        $article = JTable::getInstance('content');
+        $article = Table::getInstance('content');
         $registry = null;
         $onContentPrepare = '';
 
@@ -940,7 +942,7 @@ class contentbuilder
         jimport('joomla.filesystem.folder');
 
         if (!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')) {
-            JFolder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder');
+            Folder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder');
         }
 
         $def = '';
@@ -948,7 +950,7 @@ class contentbuilder
         if (!file_exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'index.html'))
             File::write(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'index.html', $def);
         if (!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'types')) {
-            JFolder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'types');
+            Folder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'types');
         }
 
         if (!file_exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'types' . DS . 'index.html'))
@@ -1989,7 +1991,7 @@ class contentbuilder
 
             // Trigger the onContentBeforeSave event.
             $isNew = true;
-            $table = JTable::getInstance('content');
+            $table = Table::getInstance('content');
 
             if ($article > 0) {
                 $table->load($article);
@@ -2210,7 +2212,7 @@ class contentbuilder
         }
 
         if ($article) {
-            $row = JTable::getInstance('content');
+            $row = Table::getInstance('content');
             if ($row->load($article)) {
                 $row->reorder('catid = ' . (int) $form['default_category'] . ' AND state >= 0');
             }
@@ -2232,7 +2234,7 @@ class contentbuilder
 
         //// trigger onContentAfterSave event
         $isNew = true;
-        $table = JTable::getInstance('content');
+        $table = Table::getInstance('content');
 
         if ($article > 0) {
             $table->load($article);
