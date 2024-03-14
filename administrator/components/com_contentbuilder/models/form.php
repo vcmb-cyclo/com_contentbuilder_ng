@@ -18,6 +18,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Table\Table;
 
 HTMLHelper::_('behavior.keepalive');
 
@@ -1015,17 +1016,17 @@ class ContentbuilderModelForm extends CBModel
                 $article_items = array();
                 foreach ($articles as $article) {
                     $article_items[] = $this->_db->Quote('com_content.article.' . $article);
-                    $table = JTable::getInstance('content');
+                    $table = Table::getInstance('content');
                     // Trigger the onContentBeforeDelete event.
                     if (!$is15 && $table->load($article)) {
-                        Factory::getApplication()->triggerEvent('onContentBeforeDelete', array('com_content.article', $table));
+                        Factory::getApplication()->getDispatcher()->dispatch('onContentBeforeDelete', array('com_content.article', $table));
                     }
                     $this->_db->setQuery("Delete From #__content Where id = " . intval($article));
                     $this->_db->execute();
                     // Trigger the onContentAfterDelete event.
                     $table->reset();
                     if (!$is15) {
-                        Factory::getApplication()->triggerEvent('onContentAfterDelete', array('com_content.article', $table));
+                        Factory::getApplication()->getDispatcher()->dispatch('onContentAfterDelete', array('com_content.article', $table));
                     }
                 }
                 $this->_db->setQuery("Delete From #__assets Where `name` In (" . implode(',', $article_items) . ")");

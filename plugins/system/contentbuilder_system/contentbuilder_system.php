@@ -180,8 +180,11 @@ class plgSystemContentbuilder_system extends JPlugin
                 foreach ($themes as $theme) {
                     if ($theme) {
                         PluginHelper::importPlugin('contentbuilder_themes', $theme);
-                        $results_css = Factory::getApplication()->triggerEvent('onContentTemplateCss', array());
-                        $results_js = Factory::getApplication()->triggerEvent('onContentTemplateJavascript', array());
+                        $dispatcher = Factory::getApplication()->getDispatcher();
+                        $eventresults_css = $dispatcher->dispatch('onContentTemplateCss', new Joomla\Event\Event('onContentTemplateCss', array()));
+                        $eventresults_js = $dispatcher->dispatch('onContentTemplateJavascript', new Joomla\Event\Event('onContentTemplateJavascript', array()));
+                        $results_css = $eventresults_css->getArgument('result');
+                        $results_js = $eventresults_js->getArgument('result');
                         Factory::getDocument()->addStyleDeclaration(implode('', $results_css));
                         Factory::getDocument()->addScriptDeclaration(implode('', $results_js));
                     }

@@ -177,7 +177,7 @@ class plgContentContentbuilder_verify extends JPlugin
 
                     $link = Uri::root(true) . '/index.php?option=com_contentbuilder&controller=verify&plugin=' . urlencode($plugin) . '&verification_name=' . urlencode($verification_name) . '&format=raw';
                     PluginHelper::importPlugin('contentbuilder_verify', $plugin);
-                    $viewport_result = Factory::getApplication()->triggerEvent('onViewport', array($link, $plugin_settings));
+                    $viewport_result = Factory::getApplication()->getDispatcher()->dispatch('onViewport', array($link, $plugin_settings));
                     $viewport_result = implode('', $viewport_result);
 
                     if ($viewport_result) {

@@ -26,6 +26,8 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Form\Form;
+use Joomla\CMS\Table\Table;
+use Joomla\CMS\User\UserHelper;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
@@ -272,7 +274,7 @@ class ContentbuilderModelEdit extends CBModel
 
                         if (is_array($article)) {
 
-                            $table = JTable::getInstance('content');
+                            $table = Table::getInstance('content');
                             $loaded = $table->load($article['id']);
                             if ($loaded) {
                                 // Convert to the JObject before adding other data.
@@ -300,7 +302,9 @@ class ContentbuilderModelEdit extends CBModel
                                 PluginHelper::importPlugin('content');
 
                                 // Trigger the form preparation event.
-                                $results = Factory::getApplication()->triggerEvent('onContentPrepareForm', array($form, $item));
+                                $dispatcher = Factory::getApplication()->getDispatcher();
+                                $eventResult = $dispatcher->dispatch('onContentPrepareForm', new Joomla\Event\Event('onContentPrepareForm', array($form, $item)));
+                                $results = $eventResult->getArgument('result') ?: [];
 
                                 // Check for errors encountered while preparing the form.
                                 /*
@@ -1061,8 +1065,10 @@ var contentbuilder = new function(){
                                         \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_validation', $validation);
                                     }
 
-                                    $results = Factory::getApplication()->triggerEvent('onValidate', array($the_upload_fields[$id], array_merge($the_upload_fields, $the_fields, $the_html_fields), CBRequest::getCmd('record_id', 0), $data->form, isset($values[$id]) ? $values[$id] : ''));
-                                    Factory::getApplication()->getDispatcher()->clearListeners('onValidate');
+                                    $dispatcher = Factory::getApplication()->getDispatcher();
+                                    $eventResult = $dispatcher->dispatch('onValidate', new Joomla\Event\Event('onValidate', array($the_upload_fields[$id], array_merge($the_upload_fields, $the_fields, $the_html_fields), CBRequest::getCmd('record_id', 0), $data->form, isset($values[$id]) ? $values[$id] : '')));
+                                    $results = $eventResult->getArgument('result') ?: [];
+                                    $dispatcher->clearListeners('onValidate');
 
                                     $all_errors = implode('', $results);
                                     if (!empty($all_errors)) {
@@ -1143,8 +1149,10 @@ var contentbuilder = new function(){
                                         \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_validation', $validation);
                                     }
 
-                                    $results = Factory::getApplication()->triggerEvent('onValidate', array($f, array_merge($the_upload_fields, $the_fields, $the_html_fields), CBRequest::getCmd('record_id', 0), $data->form, $value));
-                                    Factory::getApplication()->getDispatcher()->clearListeners('onValidate');
+                                    $dispatcher = Factory::getApplication()->getDispatcher();
+                                    $eventResult = $dispatcher->dispatch('onValidate', new Joomla\Event\Event('onValidate', array($f, array_merge($the_upload_fields, $the_fields, $the_html_fields), CBRequest::getCmd('record_id', 0), $data->form, $value)));
+                                    $results = $eventResult->getArgument('result') ?: [];
+                                    $dispatcher->clearListeners('onValidate');
 
                                     $all_errors = implode('', $results);
                                     $values[$id] = $value;
@@ -1160,8 +1168,11 @@ var contentbuilder = new function(){
 
                                         \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_form_elements', $f['type']);
 
-                                        $plugin_validations = Factory::getApplication()->triggerEvent('onAfterValidationSuccess', array($f, $m = array_merge($the_upload_fields, $the_fields, $the_html_fields), CBRequest::getCmd('record_id', 0), $data->form, $value));
-                                        Factory::getApplication()->getDispatcher()->clearListeners('onAfterValidationSuccess');
+                                        $dispatcher = Factory::getApplication()->getDispatcher();
+                                        $plugin_validations = $dispatcher->dispatch('onAfterValidationSuccess', 
+                                        new Joomla\Event\Event('onAfterValidationSuccess', 
+                                        array($f, $m = array_merge($the_upload_fields, $the_fields, $the_html_fields), CBRequest::getCmd('record_id', 0), $data->form, $value)));
+                                        $dispatcher->clearListeners('onAfterValidationSuccess');
 
                                         if (count($plugin_validations)) {
                                             $form_elements_objects[] = $plugin_validations[0];
@@ -1172,7 +1183,8 @@ var contentbuilder = new function(){
                         }
                     }
 
-                    $submit_before_result = Factory::getApplication()->triggerEvent('onBeforeSubmit', array(CBRequest::getCmd('record_id', 0), $data->form, $values));
+                    $dispatcher = Factory::getApplication()->getDispatcher();
+                    $submit_before_result = $dispatcher->dispatch('onBeforeSubmit', new Joomla\Event\Event('onBeforeSubmit', array(CBRequest::getCmd('record_id', 0), $data->form, $values)));
 
                     if (CBRequest::getVar('cb_submission_failed', 0)) {
                         Factory::getSession()->set('cb_failed_values', $values, 'com_contentbuilder.' . $this->_id);
@@ -1234,8 +1246,10 @@ var contentbuilder = new function(){
                                 $params = new stdClass();
 
                                 PluginHelper::importPlugin('content', 'contentbuilder_verify');
-                                $bypass_result = Factory::getApplication()->triggerEvent('onPrepareContent', array(&$bypass, &$params));
 
+                                $dispatcher = Factory::getApplication()->getDispatcher();
+                                $bypass_result = $dispatcher->dispatch('onPrepareContent', new Joomla\Event\Event('onPrepareContent', array(&$bypass, &$params)));
+                                
                                 $verification_id = '';
 
                                 if ($bypass->text != $orig_text) {
@@ -1465,7 +1479,8 @@ var contentbuilder = new function(){
                         }
                     }
 
-                    $submit_after_result = Factory::getApplication()->triggerEvent('onAfterSubmit', array($record_return, $article_id, $data->form, $cleanedValues));
+                    $dispatcher = Factory::getApplication()->getDispatcher();
+                    $submit_after_result = $dispatcher->dispatch('onAfterSubmit', new Joomla\Event\Event('onAfterSubmit', array($record_return, $article_id, $data->form, $cleanedValues)));
 
                     foreach ($fields as $actionField) {
                         if (trim($actionField['custom_action_script'])) {
@@ -1737,7 +1752,7 @@ var contentbuilder = new function(){
 
             $pw = '';
             if (!empty($the_password_field)) {
-                $crypt = JUserHelper::hashPassword($the_password_field);
+                $crypt = UserHelper::hashPassword($the_password_field);
                 $pw = $crypt;
             }
 
@@ -1770,7 +1785,7 @@ var contentbuilder = new function(){
 
         // Check if the user needs to activate their account.
         if (($useractivation == 1) || ($useractivation == 2)) {
-            $data['activation'] = ApplicationHelper::getHash(JUserHelper::genRandomPassword());
+            $data['activation'] = ApplicationHelper::getHash(UserHelper::genRandomPassword());
             $data['block'] = 1;
         }
 
@@ -2057,17 +2072,19 @@ var contentbuilder = new function(){
                                 foreach ($articles as $article) {
                                     $article_items[] = $this->_db->Quote('com_content.article.' . $article);
                                     $article_ids[] = $article;
-                                    $table = JTable::getInstance('content');
+                                    $table = Table::getInstance('content');
                                     // Trigger the onContentBeforeDelete event.
                                     if (!$this->is15 && $table->load($article)) {
-                                        Factory::getApplication()->triggerEvent('onContentBeforeDelete', array('com_content.article', $table));
+                                        $dispatcher = Factory::getApplication()->getDispatcher();
+                                        $dispatcher->dispatch('onContentBeforeDelete', new Joomla\Event\Event('onContentBeforeDelete', array('com_content.article', $table)));
                                     }
                                     $this->_db->setQuery("Delete From #__content Where id = " . intval($article));
                                     $this->_db->execute();
                                     // Trigger the onContentAfterDelete event.
                                     $table->reset();
                                     if (!$this->is15) {
-                                        Factory::getApplication()->triggerEvent('onContentAfterDelete', array('com_content.article', $table));
+                                        $dispatcher = Factory::getApplication()->getDispatcher();
+                                        $dispatcher->dispatch('onContentAfterDelete', new Joomla\Event\Event('onContentAfterDelete', array('com_content.article', $table)));
                                     }
                                 }
                                 $this->_db->setQuery("Delete From #__assets Where `name` In (" . implode(',', $article_items) . ")");
@@ -2121,7 +2138,9 @@ var contentbuilder = new function(){
         PluginHelper::importPlugin('contentbuilder_listaction', $res['action']);
         $items = CBRequest::getVar('cid', array(), 'request', 'array');
 
-        $result = Factory::getApplication()->triggerEvent('onBeforeAction', array($this->_id, $items));
+        $dispatcher = Factory::getApplication()->getDispatcher();
+        $dispatcher->dispatch('onBeforeAction', new Joomla\Event\Event('onBeforeAction', array($this->_id, $items)));
+        $results = $eventResult->getArgument('result') ?: [];
         $error = implode('', $result);
 
         if ($error) {
@@ -2140,8 +2159,10 @@ var contentbuilder = new function(){
             }
         }
 
-        $result = Factory::getApplication()->triggerEvent('onAfterAction', array($this->_id, $items, $error));
-        $error = implode('', $result);
+        $dispatcher = Factory::getApplication()->getDispatcher();
+        $eventResult = $dispatcher->dispatch('onAfterAction', new Joomla\Event\Event('onAfterAction', array($this->_id, $items, $error)));
+        $results = $eventResult->getArgument('result') ?: [];
+        $error = implode('', $results);
 
         if ($error) {
             Factory::getApplication()->enqueueMessage($error);
@@ -2233,7 +2254,8 @@ var contentbuilder = new function(){
         $cache->clean();
 
         // Trigger the onContentChangeState event.
-        $result = Factory::getApplication()->triggerEvent('onContentChangeState', array('com_content.article', $affected_articles, CBRequest::getInt('list_publish', 0)));
-
+        $dispatcher = Factory::getApplication()->getDispatcher();
+        $eventResult = $dispatcher->dispatch('onContentChangeState', new Joomla\Event\Event('onContentChangeState', array('com_content.article', $affected_articles, CBRequest::getInt('list_publish', 0))));
+        $result = $eventResult->getArgument('result') ?: [];
     }
 }

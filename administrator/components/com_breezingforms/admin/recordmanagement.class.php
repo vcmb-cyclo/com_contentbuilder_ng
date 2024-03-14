@@ -2124,7 +2124,8 @@ class bfRecordManagement
 
                             // Trigger the onContentBeforeDelete event.
                             if ($table->load($article)) {
-                                Factory::getApplication()->triggerEvent('onContentBeforeDelete', array('com_content.article', $table));
+                                $dispatcher = Factory::getApplication()->getDispatcher();
+                                $dispatcher->dispatch('onContentBeforeDelete', new Joomla\Event\Event('onContentBeforeDelete', array('com_content.article', $table)));
                             }
 
                             $db->setQuery("Delete From #__content Where id = " . intval($article));
@@ -2132,8 +2133,8 @@ class bfRecordManagement
                             // Trigger the onContentAfterDelete event.
                             $table->reset();
 
-                            Factory::getApplication()->triggerEvent('onContentAfterDelete', array('com_content.article', $table));
-
+                            $dispatcher = Factory::getApplication()->getDispatcher();
+                            $dispatcher->dispatch('onContentAfterDelete', new Joomla\Event\Event('onContentAfterDelete', array('com_content.article', $table)));
                         }
                         $db->setQuery("Delete From #__assets Where `name` In (" . implode(',', $article_items) . ")");
                         $db->execute();

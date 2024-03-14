@@ -84,17 +84,20 @@ class ContentbuilderViewEdit extends CBView
 			$limitstart = CBRequest::getVar('limitstart', 0, '', 'int');
 			$start = CBRequest::getVar('start', 0, '', 'int');
 
-			Factory::getApplication()->triggerEvent('onContentPrepare', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start));
+			$dispatcher = Factory::getApplication()->getDispatcher();
+			$dispatcher->dispatch('onContentPrepare', new Joomla\Event\Event('onContentPrepare', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start)));
 			$subject->template = $table->text;
 
-			$results = Factory::getApplication()->triggerEvent('onContentAfterTitle', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start));
+			$eventResult = $dispatcher->dispatch('onContentAfterTitle', new Joomla\Event\Event('onContentAfterTitle', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start)));
+			$results = $eventResult->getArgument('result') ?: [];
 			$event->afterDisplayTitle = trim(implode("\n", $results));
 
-			$results = Factory::getApplication()->triggerEvent('onContentBeforeDisplay', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start));
+			$eventResult = $dispatcher->dispatch('onContentBeforeDisplay', new Joomla\Event\Event('onContentBeforeDisplay', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start)));
+			$results = $eventResult->getArgument('result') ?: [];
 			$event->beforeDisplayContent = trim(implode("\n", $results));
 
-			$results = Factory::getApplication()->triggerEvent('onContentAfterDisplay', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start));
-			$event->afterDisplayContent = trim(implode("\n", $results));
+			$eventResult = $dispatcher->dispatch('onContentAfterDisplay', new Joomla\Event\Event('onContentAfterDisplay', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start)));
+			$results = $eventResult->getArgument('result') ?: [];
 
 			// if the slug has been used, we would like to stay in com_contentbuilder, so we re-arrange the resulting url a little
 			if (strstr($subject->template, 'contentbuilder_slug_used') !== false) {
@@ -155,12 +158,16 @@ class ContentbuilderViewEdit extends CBView
 		}
 
 		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
-		$results = Factory::getApplication()->triggerEvent('onEditableTemplateCss', array());
+		$dispatcher = Factory::getApplication()->getDispatcher();
+        $eventResult = $dispatcher->dispatch('onEditableTemplateCss', new Joomla\Event\Event('onEditableTemplateCss', array()));
+        $results = $eventResult->getArgument('result') ?: [];
 		$theme_css = implode('', $results);
 		$this->theme_css = $theme_css;
 
 		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
-		$results = Factory::getApplication()->triggerEvent('onEditableTemplateJavascript', array());
+		$dispatcher = Factory::getApplication()->getDispatcher();
+        $eventResult = $dispatcher->dispatch('onEditableTemplateJavascript', new Joomla\Event\Event('onEditableTemplateJavascript', array()));
+        $results = $eventResult->getArgument('result') ?: [];
 		$theme_js = implode('', $results);
 		$this->theme_js = $theme_js;
 

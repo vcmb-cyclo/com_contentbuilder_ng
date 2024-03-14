@@ -4715,14 +4715,13 @@ class HTML_facileFormsProcessor
                     }
                 }
 
-                Factory::getApplication()->triggerEvent(
-                    'onBeforeSubmit',
-                    array(
-                        BFRequest::getInt('cb_record_id', 0),
-                        $cbResult['form'],
-                        $values
-                    )
-                );
+                $dispatcher = Factory::getApplication()->getDispatcher();
+                $dispatcher->dispatch('onBeforeSubmit', new Joomla\Event\Event('onBeforeSubmit', array(
+                    BFRequest::getInt('cb_record_id', 0),
+                    $cbResult['form'],
+                    $values
+                )
+            ));
 
                 $record_return = $cbResult['form']->saveRecord(BFRequest::getInt('cb_record_id', 0), $values);
 
@@ -4838,15 +4837,15 @@ class HTML_facileFormsProcessor
                     $cache->clean();
                 }
 
-                Factory::getApplication()->triggerEvent(
-                    'onAfterSubmit',
+                $dispatcher = Factory::getApplication()->getDispatcher();
+                $dispatcher->dispatch('onAfterSubmit', new Joomla\Event\Event('onAfterSubmit', 
                     array(
                         $record_return,
                         $article_id,
                         $cbResult['form'],
                         $values
                     )
-                );
+                ));
             }
             // CONTENTBUILDER END
         }
@@ -8004,12 +8003,12 @@ class HTML_facileFormsProcessor
                             $this->sendSalesforceNotification();
 
                             PluginHelper::importPlugin('breezingforms_addons');
-                            Factory::getApplication()->triggerEvent(
-                                'onPropertiesExecute',
+                            $dispatcher = Factory::getApplication()->getDispatcher();
+                            $dispatcher->dispatch('onPropertiesExecute', new Joomla\Event\Event('onPropertiesExecute',
                                 array(
                                     $this
                                 )
-                            );
+                            ));
 
                             $tickets = Factory::getSession()->get('bfFlashUploadTickets', array());
                             mt_srand();

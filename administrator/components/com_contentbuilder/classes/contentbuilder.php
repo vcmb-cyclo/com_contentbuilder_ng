@@ -22,6 +22,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Filesystem\Folder;
+use Joomla\CMS\Event\Content\ContentPrepareEvent;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder_helpers.php');
@@ -494,9 +495,9 @@ class contentbuilder
                             $recc->recElementId = $wrapper['reference_id'];
                             $recc->colRecord = $item->colRecord;
 
-                            Factory::getApplication()->triggerEvent($onContentPrepare, array('com_content.article', &$article, &$registry, 0, true, $form, $recc));
-                            Factory::getApplication()->getDispatcher()->clearListeners($onContentPrepare);
-
+                            $dispatcher = Factory::getApplication()->getDispatcher();
+                            $dispatcher->dispatch($onContentPrepare, new ContentPrepareEvent($onContentPrepare, array('com_content.article', &$article, &$registry, 0, true, $form, $recc)));
+                            $dispatcher->clearListeners($onContentPrepare);
 
                             if ($article->text != $w[count($w) - 1]) {
                                 $item->$key = $article->text;
@@ -837,8 +838,10 @@ class contentbuilder
         }
 
         PluginHelper::importPlugin('contentbuilder_themes', $plugin);
-        $results = Factory::getApplication()->triggerEvent('onContentTemplateSample', array($contentbuilder_form_id, $form));
 
+        $dispatcher = Factory::getApplication()->getDispatcher();
+        $eventResult = $dispatcher->dispatch('onContentTemplateSample', new Joomla\Event\Event('onContentTemplateSample', array($contentbuilder_form_id, $form)));
+        $results = $eventResult->getArgument('result') ?: [];
         return implode('', $results);
     }
 
@@ -882,8 +885,10 @@ class contentbuilder
         }
 
         PluginHelper::importPlugin('contentbuilder_themes', $plugin);
-        $results = Factory::getApplication()->triggerEvent('onEditableTemplateSample', array($contentbuilder_form_id, $form));
 
+        $dispatcher = Factory::getApplication()->getDispatcher();
+        $eventResult = $dispatcher->dispatch('onEditableTemplateSample', new Joomla\Event\Event('onEditableTemplateSample', array($contentbuilder_form_id, $form)));
+        $results = $eventResult->getArgument('result') ?: [];
         return implode('', $results);
     }
 
@@ -1460,8 +1465,11 @@ class contentbuilder
 
 
                             \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_form_elements', $element['type']);
-                            $results = Factory::getApplication()->triggerEvent('onRenderElement', array($item, $element, $options, $failed_values, $result, $hasRecords));
-                            Factory::getApplication()->getDispatcher()->clearListeners('onRenderElement');
+
+                            $dispatcher = Factory::getApplication()->getDispatcher();
+                            $eventResult = $dispatcher->dispatch('onRenderElement', new Joomla\Event\Event('onRenderElement', array($item, $element, $options, $failed_values, $result, $hasRecords)));
+                            $results = $eventResult->getArgument('result') ?: [];
+                            $dispatcher->clearListeners('onRenderElement');
 
                             if (count($results)) {
                                 $results = $results[0];
@@ -1998,8 +2006,8 @@ class contentbuilder
                 $isNew = false;
             }
 
-            Factory::getApplication()->triggerEvent('onContentBeforeSave', array('com_content.article', &$table, $isNew));
-
+            $dispatcher = Factory::getApplication()->getDispatcher();
+            $dispatcher->dispatch('onContentBeforeSave', new Joomla\Event\Event('onContentBeforeSave', array('com_content.article', &$table, $isNew)));
         }
 
         $created_by = $created_by ? $created_by : $metadata->created_id;
@@ -2230,7 +2238,8 @@ class contentbuilder
         $cache = Factory::getCache('com_contentbuilder');
         $cache->clean();
 
-        Factory::getApplication()->triggerEvent('onContentCleanCache', $options);
+        $dispatcher = Factory::getApplication()->getDispatcher();
+        $dispatcher->dispatch('onContentCleanCache', new Joomla\Event\Event('onContentCleanCache', $options));
 
         //// trigger onContentAfterSave event
         $isNew = true;
@@ -2240,12 +2249,17 @@ class contentbuilder
             $table->load($article);
             $isNew = false;
         }
-        Factory::getApplication()->triggerEvent('onContentAfterSave', array('com_content.article', &$table, $isNew));
+
+        $dispatcher = Factory::getApplication()->getDispatcher();
+        $eventResult = $dispatcher->dispatch('onContentAfterSave', new Joomla\Event\Event('onContentAfterSave', array('com_content.article', &$table, $isNew)));
 
         PluginHelper::importPlugin('contentbuilder_listaction');
 
-        $result = Factory::getApplication()->triggerEvent('onAfterArticleCreation', array($contentbuilder_form_id, $record_id, $article));
-        $msg = implode('', $result);
+        $dispatcher = Factory::getApplication()->getDispatcher();
+        $eventResult = $dispatcher->dispatch('onAfterArticleCreation', new Joomla\Event\Event('onAfterArticleCreation', array($contentbuilder_form_id, $record_id, $article)));
+        $results = $eventResult->getArgument('result') ?: [];
+
+        $msg = implode('', $results);
 
         if ($msg) {
             Factory::getApplication()->enqueueMessage($msg);

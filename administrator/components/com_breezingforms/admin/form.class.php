@@ -297,7 +297,8 @@ class facileFormsForm
         $row->reorder("");
 
         PluginHelper::importPlugin('breezingforms_addons');
-        Factory::getApplication()->getDispatcher()->dispatch('onPropertiesSave', array(BFRequest::getInt('id', 0)));
+        $dispatcher = Factory::getApplication()->getDispatcher();
+        $dispatcher->dispatch('onPropertiesSave', new Joomla\Event\Event('onPropertiesSave', array(BFRequest::getInt('id', 0))));
 
         if (trim($caller) == '') {
             $caller = "index.php?option=$option&act=manageforms&pkg=$pkg";

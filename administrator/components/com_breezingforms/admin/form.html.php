@@ -1898,7 +1898,9 @@ class HTML_facileFormsForm
         echo HTMLHelper::_('uitab.endTab');
 
         PluginHelper::importPlugin('breezingforms_addons');
-        $addons = Factory::getApplication()->triggerEvent('onPropertiesDisplay', array(BFRequest::getInt('form', 0)));
+        $dispatcher = Factory::getApplication()->getDispatcher();
+        $eventResult = $dispatcher->dispatch('onPropertiesDisplay', new Joomla\Event\Event('onPropertiesDisplay', array(BFRequest::getInt('form', 0))));
+        $addons = $eventResult->getArgument('result') ?: [];
 
         foreach ($addons as $addon) {
             echo $addon;

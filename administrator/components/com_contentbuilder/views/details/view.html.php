@@ -79,16 +79,16 @@ class ContentbuilderViewDetails extends CBView
 		$limitstart = 0;
 
 		$table->text = "<!-- class=\"system-pagebreak\"  -->\n" . $table->text;
-		Factory::getApplication()->triggerEvent('onContentPrepare', array('com_content.article', &$table, &$registry, $limitstart));
+		Factory::getApplication()->getDispatcher()->dispatch('onContentPrepare', array('com_content.article', &$table, &$registry, $limitstart));
 		$subject->template = $table->text;
 
-		$results = Factory::getApplication()->triggerEvent('onContentAfterTitle', array('com_content.article', &$table, &$registry, $limitstart));
+		$results = Factory::getApplication()->getDispatcher()->dispatch('onContentAfterTitle', array('com_content.article', &$table, &$registry, $limitstart));
 		$event->afterDisplayTitle = trim(implode("\n", $results));
 
-		$results = Factory::getApplication()->triggerEvent('onContentBeforeDisplay', array('com_content.article', &$table, &$registry, $limitstart));
+		$results = Factory::getApplication()->getDispatcher()->dispatch('onContentBeforeDisplay', array('com_content.article', &$table, &$registry, $limitstart));
 		$event->beforeDisplayContent = trim(implode("\n", $results));
 
-		$results = Factory::getApplication()->triggerEvent('onContentAfterDisplay', array('com_content.article', &$table, &$registry, $limitstart));
+		$results = Factory::getApplication()->getDispatcher()->dispatch('onContentAfterDisplay', array('com_content.article', &$table, &$registry, $limitstart));
 		$event->afterDisplayContent = trim(implode("\n", $results));
 
 		// if the slug has been used, we would like to stay in com_contentbuilder, so we re-arrange the resulting url a little
@@ -144,11 +144,14 @@ class ContentbuilderViewDetails extends CBView
 		$subject->template = preg_replace($pattern, '', $subject->template);
 
 		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
-		$results = Factory::getApplication()->triggerEvent('onContentTemplateCss', array());
+		$dispatcher = Factory::getApplication()->getDispatcher();
+        $eventResult = $dispatcher->dispatch('onContentTemplateCss', new Joomla\Event\Event('onContentTemplateCss', array()));
+        $results = $eventResult->getArgument('result') ?: [];
 		$this->theme_css = implode('', $results);
 
 		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
-		$results = Factory::getApplication()->triggerEvent('onContentTemplateJavascript', array());
+        $eventResult = $dispatcher->dispatch('onContentTemplateJavascript', new Joomla\Event\Event('onContentTemplateJavascript', array()));
+        $results = $eventResult->getArgument('result') ?: [];
 		$this->theme_js = implode('', $results);
 
 		$this->toc = $table->toc;

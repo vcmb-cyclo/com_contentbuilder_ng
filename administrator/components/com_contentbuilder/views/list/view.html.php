@@ -48,12 +48,18 @@ class ContentbuilderViewList extends CBView
         $lists['limitstart'] = $state->get('limitstart');
 
         PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
-        $results = Factory::getApplication()->triggerEvent('onListViewCss', array());
+        
+        $dispatcher = Factory::getApplication()->getDispatcher();
+        $eventResult = $dispatcher->dispatch('onListViewCss', new Joomla\Event\Event('onListViewCss', array()));
+        $results = $eventResult->getArgument('result') ?: [];
+
         $theme_css = implode('', $results);
         $this->theme_css = $theme_css;
 
         PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
-        $results = Factory::getApplication()->triggerEvent('onListViewJavascript', array());
+        $eventResult = $dispatcher->dispatch('onListViewJavascript', new Joomla\Event\Event('onListViewJavascript', array()));
+        $results = $eventResult->getArgument('result') ?: [];
+
         $theme_js = implode('', $results);
         $this->theme_js = $theme_js;
 

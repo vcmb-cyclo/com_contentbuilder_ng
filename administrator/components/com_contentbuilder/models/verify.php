@@ -204,7 +204,7 @@ class ContentbuilderModelVerify extends CBModel
         }
 
         PluginHelper::importPlugin('contentbuilder_verify', $plugin);
-        $setup_result = Factory::getApplication()->triggerEvent('onSetup', array($this_page, $out));
+        $setup_result = Factory::getApplication()->getDispatcher()->dispatch('onSetup', array($this_page, $out));
 
         if (!implode('', $setup_result)) {
 
@@ -222,7 +222,7 @@ class ContentbuilderModelVerify extends CBModel
                     $this_page = $urlex[0] . '?' . http_build_query($data, '', '&') . '&verify=1&verification_id=' . $verification_id;
                 }
 
-                $forward_result = Factory::getApplication()->triggerEvent('onForward', array($this_page, $out));
+                $forward_result = Factory::getApplication()->getDispatcher()->dispatch('onForward', array($this_page, $out));
                 $forward = implode('', $forward_result);
 
                 if ($forward) {
@@ -234,7 +234,7 @@ class ContentbuilderModelVerify extends CBModel
 
                     $msg = '';
 
-                    $verify_result = Factory::getApplication()->triggerEvent('onVerify', array($this_page, $out));
+                    $verify_result = Factory::getApplication()->getDispatcher()->dispatch('onVerify', array($this_page, $out));
 
                     if (count($verify_result)) {
 

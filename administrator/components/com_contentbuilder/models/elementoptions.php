@@ -104,7 +104,9 @@ class ContentbuilderModelElementoptions extends CBModel
 
 	            \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_form_elements', CBRequest::getCmd('field_type',''));
 
-                $results = Factory::getApplication()->triggerEvent('onSettingsStore', array());
+                $dispatcher = Factory::getApplication()->getDispatcher();
+                $eventResult = $dispatcher->dispatch('onSettingsStore', new Joomla\Event\Event('onSettingsStore', array()));
+                $results = $eventResult->getArgument('result') ?: [];
 	            Factory::getApplication()->getDispatcher()->clearListeners('onSettingsStore');
 
                 if(count($results)){
