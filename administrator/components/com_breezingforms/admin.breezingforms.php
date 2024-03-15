@@ -353,7 +353,7 @@ global $ff_mospath, $ff_admpath, $ff_compath, $ff_request;
 global $ff_mossite, $ff_admsite, $ff_admicon, $ff_comsite;
 global $ff_config, $ff_compatible, $ff_install;
 
-$my = Factory::getUser();
+$my = Factory::getApplication()->getIdentity();
 
 if (!isset($ff_compath)) { // joomla!
     // get paths

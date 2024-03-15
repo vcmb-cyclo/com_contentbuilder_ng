@@ -101,7 +101,7 @@ if ($inframe) {
 	/**
 	 * @var JUser
 	 */
-	$myUser = Factory::getUser();
+	$myUser = Factory::getApplication()->getIdentity();
 	
 	$database->setQuery("select id from #__users where lower(username)=lower('".$myUser->get('username','')."')");
 	$id = $database->loadResult();

@@ -3895,7 +3895,7 @@ class HTML_facileFormsElement
 											<td>
 												<div style="position:relative;left:0px;top:0px;<?php echo $dstyle; ?>">
 													<?php
-													$myUser = Factory::getUser();
+													$myUser = Factory::getApplication()->getIdentity();
 
 													$database->setQuery("select id from #__users where lower(username)=lower('" . $myUser->get('username', '') . "')");
 													$id = $database->loadResult();
