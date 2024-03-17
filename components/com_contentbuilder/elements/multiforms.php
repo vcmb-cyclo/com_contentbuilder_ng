@@ -7,16 +7,16 @@
  * @copyright   Copyright (C) 2024 by XDA+GIL 
  * @license     GNU/GPL
  */
-defined('_JEXEC') or die('Restricted access');
+defined('_JEXEC') or die ('Restricted access');
 
 jimport('joomla.html.html');
-jimport('joomla.form.formfield');
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Form\FormField;
 
-class JFormFieldMultiforms extends JFormField
+class JFormFieldMultiforms extends FormField
 {
 
 	protected $type = 'Multiforms';

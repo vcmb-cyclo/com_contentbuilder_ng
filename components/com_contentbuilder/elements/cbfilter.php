@@ -4,55 +4,55 @@
  * @package     BreezingCommerce
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright (C) 2024 by XDA+GIL
  * @license     GNU/GPL
  */
-defined('_JEXEC') or die('Restricted access');
+defined('_JEXEC') or die ('Restricted access');
 
 jimport('joomla.html.html');
-jimport('joomla.form.formfield');
 
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Form\FormField;
 
-class JFormFieldCbfilter extends JFormField {
+class JFormFieldCbfilter extends FormField
+{
+    protected $type = 'Forms';
 
-	protected $type = 'Forms';
+    protected function getInput()
+    {
 
-	protected function getInput() {
+        $out = '<input type="hidden" name="' . $this->name . '" id="' . $this->id . '" value="' . htmlentities($this->value, ENT_QUOTES, 'UTF-8') . '"/>';
+        $out .= '<div id="cbElementsWrapper">';
+        $class = $this->element['class'] ? $this->element['class'] : "text_area";
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        if ($this->value) {
+            $db->setQuery("Select * From #__contentbuilder_elements Where published = 1 And form_id = " . intval($this->value));
+            $elements = $db->loadAssocList();
+            $i = 0;
 
-		$out = '<input type="hidden" name="'.$this->name.'" id="'.$this->id.'" value="'.htmlentities($this->value, ENT_QUOTES, 'UTF-8').'"/>';
-		$out .= '<div id="cbElementsWrapper">';
-		$class = $this->element['class'] ? $this->element['class'] : "text_area";
-		$db = Factory::getContainer()->get(DatabaseInterface::class);
-		if($this->value){
-			$db->setQuery("Select * From #__contentbuilder_elements Where published = 1 And form_id = " . intval($this->value));
-			$elements = $db->loadAssocList();
-			$i = 0;
+            foreach ($elements as $element) {
+                $out .= '<div class="mb-2"><label class="w-15">' . htmlentities($element['label'], ENT_QUOTES, 'UTF-8') . '</label> <input class="form-control w-25" style="display:inline-block;" value="" type="text" onchange="contentbuilder_addValue(\'' . $element['reference_id'] . '\',this.value);" name="element_' . $element['reference_id'] . '" id="element_' . $element['reference_id'] . '"/>';
+                $out .= ' <input class="form-control w-10" style="display: inline-block;" value="" type="text" onchange="contentbuilder_addOrderValue(\'' . $element['reference_id'] . '\',this.value);" name="element_' . $element['reference_id'] . '_order" id="element_' . $element['reference_id'] . '_order"/></div>';
 
-			foreach($elements As $element){
-				$out .= '<div class="mb-2"><label class="w-15">'.htmlentities($element['label'], ENT_QUOTES, 'UTF-8').'</label> <input class="form-control w-25" style="display:inline-block;" value="" type="text" onchange="contentbuilder_addValue(\''.$element['reference_id'].'\',this.value);" name="element_'.$element['reference_id'].'" id="element_'.$element['reference_id'].'"/>';
-				$out .= ' <input class="form-control w-10" style="display: inline-block;" value="" type="text" onchange="contentbuilder_addOrderValue(\''.$element['reference_id'].'\',this.value);" name="element_'.$element['reference_id'].'_order" id="element_'.$element['reference_id'].'_order"/></div>';
+                $i++;
+            }
 
-				$i++;
-			}
-
-		}
-		else
-		{
-			$out .= '<br/><br/>'.Text::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST');
-		}
-		$out .= '</div>';
-		$out .= '
+        } else {
+            $out .= '<br/><br/>' . Text::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST');
+        }
+        $out .= '</div>';
+        $out .= '
                 <script type="text/javascript">
                 <!--
                 var form_id = document.getElementById("jformparamsform_id").options[document.getElementById("jformparamsform_id").selectedIndex].value;
-                var curr_form_id = document.getElementById("'.$this->id.'").value;
+                var curr_form_id = document.getElementById("' . $this->id . '").value;
                
-                document.getElementById("'.$this->id.'").value = form_id;
+                document.getElementById("' . $this->id . '").value = form_id;
                 
                 if(curr_form_id != form_id){
-                    document.getElementById("cbElementsWrapper").innerHTML = "'.addslashes(Text::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST')).'";
+                    document.getElementById("cbElementsWrapper").innerHTML = "' . addslashes(Text::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST')) . '";
                     document.getElementById("jform_params_cb_list_filterhidden").value = "";
                     document.getElementById("jform_params_cb_list_orderhidden").value = "";
                 }
@@ -84,13 +84,13 @@ class JFormFieldCbfilter extends JFormField {
                 }
 
                 function contentbuilder_setFormId(form_id){
-                    document.getElementById("'.$this->id.'").value = form_id;
-                    document.getElementById("cbElementsWrapper").innerHTML = "'.addslashes(Text::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST')).'";
+                    document.getElementById("' . $this->id . '").value = form_id;
+                    document.getElementById("cbElementsWrapper").innerHTML = "' . addslashes(Text::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST')) . '";
                     document.getElementById("jform_params_cb_list_filterhidden").value = "";
                     document.getElementById("jform_params_cb_list_orderhidden").value = "";
                 }
                 //-->
                 </script>';
-		return $out;
-	}
+        return $out;
+    }
 }
