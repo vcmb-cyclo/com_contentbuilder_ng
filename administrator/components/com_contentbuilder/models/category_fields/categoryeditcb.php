@@ -10,6 +10,8 @@ defined('JPATH_BASE') or die;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Form\Field\ListField;
 use Joomla\CMS\Form\FormHelper;
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
 FormHelper::loadFieldClass('list');
 
@@ -48,7 +50,7 @@ class JFormFieldCategoryEditCb extends ListField
         // Initialise variables.
         $options = array();
 
-        $db = \Joomla\CMS\Factory::getDbo();
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $query = $db->getQuery(true);
 
         $query->select('a.id AS value, a.title AS text, a.level');

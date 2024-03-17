@@ -29,14 +29,15 @@ class ContentbuilderModelVerify extends CBModel
 {
 
     private $frontend = false;
+    var $mainframe;
 
     function __construct($config)
     {
         parent::__construct($config);
 
-        $this->frontend = Factory::getApplication()->isClient('site');
+        $this->mainframe = Factory::getApplication();
+        $this->frontend = $this->mainframe->isClient('site');
 
-        $mainframe = Factory::getApplication();
         $option = 'com_contentbuilder';
 
         $plugin = CBRequest::getVar('plugin', '');
@@ -52,8 +53,8 @@ class ContentbuilderModelVerify extends CBModel
         }
 
         if (!$verification_id) {
-            $user_id = Factory::getApplication()->getIdentity()->get('id', 0);
-            $setup = Factory::getApplication()->getSession()->get($plugin . $verification_name, '', 'com_contentbuilder.verify.' . $plugin . $verification_name);
+            $user_id = $this->mainframe->getIdentity()->get('id', 0);
+            $setup = $this->mainframe->getSession()->get($plugin . $verification_name, '', 'com_contentbuilder.verify.' . $plugin . $verification_name);
         } else {
             $this->_db->setQuery("Select `setup`,`user_id` From #__contentbuilder_verifications Where `verification_hash` = " . $this->_db->Quote($verification_id));
             $setup = $this->_db->loadAssoc();
@@ -72,8 +73,8 @@ class ContentbuilderModelVerify extends CBModel
         if (isset($out['plugin']) && $out['plugin'] && isset($out['verification_name']) && $out['verification_name'] && isset($out['verify_view']) && $out['verify_view']) {
             // alright 
         } else {
-            Factory::getApplication()->enqueueMessage('Spoofed data or invalid verification id', 'error');
-            Factory::getApplication()->redirect('index.php');
+            $this->mainframe->enqueueMessage('Spoofed data or invalid verification id', 'error');
+            $this->mainframe->redirect('index.php');
         }
 
         if (isset($out['plugin_options'])) {
@@ -106,9 +107,9 @@ class ContentbuilderModelVerify extends CBModel
 
         if (isset($out['require_view']) && is_numeric($out['require_view']) && intval($out['require_view']) > 0) {
 
-            if (Factory::getApplication()->getSession()->get('cb_last_record_user_id', 0, 'com_contentbuilder')) {
-                $user_id = Factory::getApplication()->getSession()->get('cb_last_record_user_id', 0, 'com_contentbuilder');
-                Factory::getApplication()->getSession()->clear('cb_last_record_user_id', 'com_contentbuilder');
+            if ($this->mainframe->getSession()->get('cb_last_record_user_id', 0, 'com_contentbuilder')) {
+                $user_id = $this->mainframe->getSession()->get('cb_last_record_user_id', 0, 'com_contentbuilder');
+                $this->mainframe->getSession()->clear('cb_last_record_user_id', 'com_contentbuilder');
             }
 
             $id = intval($out['require_view']);
@@ -130,7 +131,7 @@ class ContentbuilderModelVerify extends CBModel
             }
 
             if (intval($user_id) == 0) {
-                Factory::getApplication()->redirect('index.php?option=com_contentbuilder&lang=' . CBRequest::getCmd('lang', '') . '&return=' . cb_b64enc(Uri::getInstance()->toString()) . '&controller=edit&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
+                $this->mainframe->redirect('index.php?option=com_contentbuilder&lang=' . CBRequest::getCmd('lang', '') . '&return=' . cb_b64enc(Uri::getInstance()->toString()) . '&controller=edit&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
             }
 
             $rec = $form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, $user_id, 0, -1, -1, -1, -1, array(), true, null);
@@ -141,12 +142,12 @@ class ContentbuilderModelVerify extends CBModel
             }
 
             if (!$form->getListRecordsTotal($ids)) {
-                Factory::getApplication()->redirect('index.php?option=com_contentbuilder&lang=' . CBRequest::getCmd('lang', '') . '&return=' . cb_b64enc(Uri::getInstance()->toString()) . '&controller=edit&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
+                $this->mainframe->redirect('index.php?option=com_contentbuilder&lang=' . CBRequest::getCmd('lang', '') . '&return=' . cb_b64enc(Uri::getInstance()->toString()) . '&controller=edit&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
             }
         }
 
         // clearing session after possible required view to make re-visits possible
-        Factory::getApplication()->getSession()->clear($plugin . $verification_name, 'com_contentbuilder.verify.' . $plugin . $verification_name);
+        $this->mainframe->getSession()->clear($plugin . $verification_name, 'com_contentbuilder.verify.' . $plugin . $verification_name);
 
         $verification_data = '';
         if (is_array($rec) && count($rec)) {
@@ -188,7 +189,7 @@ class ContentbuilderModelVerify extends CBModel
         }
 
         /*
-         if(intval($out['client']) && !Factory::getApplication()->isClient('administrator')){
+         if(intval($out['client']) && !$this->mainframe->isClient('administrator')){
             parse_str(Uri::getInstance()->getQuery(), $data1);
             $this_page = Uri::getInstance()->base() . 'administrator/index.php?'.http_build_query($data1, '', '&');
         }else{
@@ -197,20 +198,20 @@ class ContentbuilderModelVerify extends CBModel
             $this_page = $urlex[0] . '?' . http_build_query($data1, '', '&');
         }
          */
-        if (intval($out['client']) && !Factory::getApplication()->isClient('administrator')) {
+        if (intval($out['client']) && !$this->mainframe->isClient('administrator')) {
             $this_page = Uri::getInstance()->base() . 'administrator/index.php?' . Uri::getInstance()->getQuery();
         } else {
             $this_page = Uri::getInstance()->toString();
         }
 
         PluginHelper::importPlugin('contentbuilder_verify', $plugin);
-        $setup_result = Factory::getApplication()->getDispatcher()->dispatch('onSetup', array($this_page, $out));
+        $setup_result = $this->mainframe->getDispatcher()->dispatch('onSetup', array($this_page, $out));
 
         if (!implode('', $setup_result)) {
 
             if (!CBRequest::getBool('verify', 0)) {
 
-                if (Factory::getApplication()->isClient('administrator')) {
+                if ($this->mainframe->isClient('administrator')) {
                     $local = explode('/', Uri::getInstance()->base());
                     unset($local[count($local) - 1]);
                     unset($local[count($local) - 1]);
@@ -222,11 +223,11 @@ class ContentbuilderModelVerify extends CBModel
                     $this_page = $urlex[0] . '?' . http_build_query($data, '', '&') . '&verify=1&verification_id=' . $verification_id;
                 }
 
-                $forward_result = Factory::getApplication()->getDispatcher()->dispatch('onForward', array($this_page, $out));
+                $forward_result = $this->mainframe->getDispatcher()->dispatch('onForward', array($this_page, $out));
                 $forward = implode('', $forward_result);
 
                 if ($forward) {
-                    Factory::getApplication()->redirect($forward);
+                    $this->mainframe->redirect($forward);
                 }
             } else {
 
@@ -234,7 +235,7 @@ class ContentbuilderModelVerify extends CBModel
 
                     $msg = '';
 
-                    $verify_result = Factory::getApplication()->getDispatcher()->dispatch('onVerify', array($this_page, $out));
+                    $verify_result = $this->mainframe->getDispatcher()->dispatch('onVerify', array($this_page, $out));
 
                     if (count($verify_result)) {
 
@@ -256,7 +257,7 @@ class ContentbuilderModelVerify extends CBModel
                             }
 
                             if ((!$out['client'] && (!isset($out['return-site']) || !$out['return-site'])) || ($out['client'] && (!isset($out['return-admin']) || !$out['return-admin']))) {
-                                if (intval($out['client']) && !Factory::getApplication()->isClient('administrator')) {
+                                if (intval($out['client']) && !$this->mainframe->isClient('administrator')) {
                                     $redirect_view = Uri::getInstance()->base() . 'administrator/index.php?option=com_contentbuilder&controller=list&lang=' . CBRequest::getCmd('lang', '') . '&id=' . $out['verify_view'];
                                 } else {
                                     $redirect_view = 'index.php?option=com_contentbuilder&controller=list&lang=' . CBRequest::getCmd('lang', '') . '&id=' . $out['verify_view'];
@@ -349,12 +350,12 @@ class ContentbuilderModelVerify extends CBModel
                     $msg = Text::_('COM_CONTENTBUILDER_VERIFICATION_NOT_EXECUTED');
                 }
 
-                Factory::getApplication()->enqueueMessage($msg, 'warning');
+                $this->mainframe->enqueueMessage($msg, 'warning');
 
                 if (!$out['client']) {
-                    Factory::getApplication()->redirect($redirect_view ? $redirect_view : (!$out['client'] && isset($out['return-site']) && $out['return-site'] ? cb_b64dec($out['return-site']) : 'index.php'));
+                    $this->mainframe->redirect($redirect_view ? $redirect_view : (!$out['client'] && isset($out['return-site']) && $out['return-site'] ? cb_b64dec($out['return-site']) : 'index.php'));
                 } else {
-                    Factory::getApplication()->redirect($redirect_view ? $redirect_view : ($out['client'] && isset($out['return-admin']) && $out['return-admin'] ? cb_b64dec($out['return-admin']) : 'index.php'));
+                    $this->mainframe->redirect($redirect_view ? $redirect_view : ($out['client'] && isset($out['return-admin']) && $out['return-admin'] ? cb_b64dec($out['return-admin']) : 'index.php'));
                 }
             }
         } else {
@@ -365,7 +366,7 @@ class ContentbuilderModelVerify extends CBModel
     public function activate_by_admin($token)
     {
 
-        $user = Factory::getApplication()->getIdentity();
+        $user = $this->mainframe->getIdentity();
 
         if (!$user->authorise('core.create', 'com_users')) {
 
@@ -449,8 +450,8 @@ class ContentbuilderModelVerify extends CBModel
         // Send the registration email.
         $return = Factory::getMailer()->sendMail($data['mailfrom'], $data['fromname'], $data['email'], $emailSubject, $emailBody);
 
-        Factory::getApplication()->enqueueMessage(Text::_('COM_USERS_REGISTRATION_ADMINACTIVATE_SUCCESS'));
-        Factory::getApplication()->redirect(Route::_('index.php?option=com_users', false));
+        $this->mainframe->enqueueMessage(Text::_('COM_USERS_REGISTRATION_ADMINACTIVATE_SUCCESS'));
+        $this->mainframe->redirect(Route::_('index.php?option=com_users', false));
     }
 
     public function activate($token)
@@ -495,7 +496,7 @@ class ContentbuilderModelVerify extends CBModel
             $data['activate'] = Uri::root() . 'index.php?option=com_contentbuilder&controller=verify&token=' . $data['activation'] . '&verify_by_admin=1&format=raw';
 
             // Remove administrator/ from activate url in case this method is called from admin
-            if (Factory::getApplication()->isClient('administrator')) {
+            if ($this->mainframe->isClient('administrator')) {
                 $adminPos = strrpos($data['activate'], 'administrator/');
                 $data['activate'] = substr_replace($data['activate'], '', $adminPos, 14);
             }
@@ -551,7 +552,7 @@ class ContentbuilderModelVerify extends CBModel
                 }
             }
 
-            Factory::getApplication()->enqueueMessage(Text::_('COM_USERS_REGISTRATION_VERIFY_SUCCESS'));
+            $this->mainframe->enqueueMessage(Text::_('COM_USERS_REGISTRATION_VERIFY_SUCCESS'));
         }
         // Admin activation is on and admin is activating the account
         elseif (($userParams->get('useractivation') == 2) && $user->getParam('activate', 0)) {
@@ -587,13 +588,13 @@ class ContentbuilderModelVerify extends CBModel
                 return false;
             }
 
-            Factory::getApplication()->enqueueMessage(Text::_('COM_USERS_REGISTRATION_VERIFY_SUCCESS'));
+            $this->mainframe->enqueueMessage(Text::_('COM_USERS_REGISTRATION_VERIFY_SUCCESS'));
         } else {
 
             $user->set('activation', '');
             $user->set('block', '0');
 
-            Factory::getApplication()->enqueueMessage(Text::_('COM_USERS_REGISTRATION_SAVE_SUCCESS'));
+            $this->mainframe->enqueueMessage(Text::_('COM_USERS_REGISTRATION_SAVE_SUCCESS'));
 
         }
 
