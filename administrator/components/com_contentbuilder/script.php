@@ -3,14 +3,16 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   (C) 2024 by XDA+GIL
  * @license     GNU/GPL
  */
-defined('_JEXEC') or die('Direct Access to this location is not allowed.');
+defined('_JEXEC') or die ('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Factory;
 use \Joomla\CMS\Filesystem\File;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\Folder;
+use Joomla\CMS\Installer\Installer;
 
 if (!class_exists('CBFactory')) {
 
@@ -21,9 +23,7 @@ if (!class_exists('CBFactory')) {
 
     public static function getDbo()
     {
-
       if (static::$dbo == null) {
-
         static::$dbo = new CBDbo();
       }
 
@@ -37,7 +37,6 @@ if (!class_exists('CBFactory')) {
 
     public static function read($file)
     {
-
       return file_get_contents($file);
     }
   }
@@ -434,13 +433,13 @@ if (!function_exists('contentbuilder_install_db')) {
   function contentbuilder_install_db()
   {
 
-    require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+    require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
     $tables = CBCompat::getTableFields($db->getTableList());
 
-    if (isset($tables[$db->getPrefix() . 'contentbuilder_forms'])) {
+    if (isset ($tables[$db->getPrefix() . 'contentbuilder_forms'])) {
 
       return true;
     }
@@ -793,7 +792,7 @@ class com_contentbuilderInstallerScript
   function installAndUpdate()
   {
 
-    require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+    require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
@@ -805,7 +804,7 @@ class com_contentbuilderInstallerScript
 
     $folders = Folder::folders($base_path);
 
-    $installer = new JInstaller();
+    $installer = new Installer();
 
     foreach ($folders as $folder) {
       echo 'Installing plugin <b>' . $folder . '</b><br/>';
@@ -836,7 +835,7 @@ class com_contentbuilderInstallerScript
       echo '<b style="color:red">WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 5.2.0, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!</b>';
     }
 
-    require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+    require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 
     //contentbuilder_install_db();
 
@@ -872,7 +871,7 @@ class com_contentbuilderInstallerScript
 
     $plugins = $this->getPlugins();
 
-    $installer = new JInstaller();
+    $installer = new Installer();
 
     foreach ($plugins as $folder => $subplugs) {
       foreach ($subplugs as $plugin) {
