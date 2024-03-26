@@ -23,6 +23,7 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Filesystem\Folder;
 use Joomla\CMS\Event\Content\ContentPrepareEvent;
+use Joomla\CMS\Access\Access;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder_helpers.php');
@@ -1031,7 +1032,6 @@ class contentbuilder
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select reference_id From #__contentbuilder_elements Where search_include = 1 And published = 1 And form_id = " . intval($contentbuilder_form_id));
-
         return $db->loadColumn();
     }
 
@@ -2688,7 +2688,7 @@ class contentbuilder
         if (!isset($permissions['own' . $suffix])) {
             $gids = array();
 
-            $groups = JAccess::getGroupsByUser(Factory::getApplication()->getIdentity()->get('id', 0));
+            $groups = Access::getGroupsByUser(Factory::getApplication()->getIdentity()->get('id', 0));
 
             foreach ($groups as $gid) {
                 $gids[] = $gid;
