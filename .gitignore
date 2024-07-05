@@ -11,3 +11,6 @@ administrator/cache/
 configuration.php
 
 facileforms.config.php
+
+.htaccess
+htaccess.txt
