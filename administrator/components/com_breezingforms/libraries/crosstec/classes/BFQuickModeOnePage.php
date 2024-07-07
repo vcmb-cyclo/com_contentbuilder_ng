@@ -9,8 +9,6 @@
  * */
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
-jimport('joomla.filesystem.file');
-
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
 
@@ -66,7 +64,6 @@ class BFQuickModeOnePage
 
     public static function getEditorContent($editor)
     {
-
         return 'Joomla.editors.instances[' . json_encode($editor) . '].getValue()';
     }
 

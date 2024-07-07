@@ -907,7 +907,6 @@ class contentbuilder_com_breezingforms{
                 $username = Factory::getApplication()->getIdentity()->get('username','');
                 $user_full_name = Factory::getApplication()->getIdentity()->get('name','');
             }
-            jimport('joomla.environment.browser');
             $now = Factory::getDate()->toSql();
             $db->setQuery("Insert Into #__facileforms_records (
                 `submitted`,
@@ -1059,7 +1058,6 @@ class contentbuilder_com_breezingforms{
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         ArrayHelper::toInteger($items);
         if(count($items)){
-            jimport('joomla.filesystem.file');
             $db->setQuery("Delete From #__facileforms_records Where id In (".implode(',',$items).")");
             $db->execute();
             $db->setQuery("Select `value` From #__facileforms_subrecords Where `type` = 'File Upload' And record In (".implode(',',$items).")");

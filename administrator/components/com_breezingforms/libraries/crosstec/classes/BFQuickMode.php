@@ -15,6 +15,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Editor\Editor;
 
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
 require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
@@ -1340,8 +1341,7 @@ function bfTriggerRules() {
 
 						if (isset($mdata['is_html']) && $mdata['is_html']) {
 							echo '<div style="display: inline-block; vertical-align: top; width: ' . strip_tags($mdata['width']) . ';">';
-							JImport('joomla.html.editor');
-							$editor = Factory::getEditor();
+							$editor = Editor::getInstance(Factory::getApplication()->get('editor'));
 							$this->htmltextareas[] = 'ff_nm_' . $mdata['bfName'] . '[]';
 							echo $editor->display('ff_nm_' . $mdata['bfName'] . '[]', htmlentities(trim($mdata['value']), ENT_QUOTES, 'UTF-8'), strip_tags($mdata['width']), strip_tags($mdata['height']), '75', '20', true, 'ff_elem' . $mdata['dbId']);
 							echo '<style type="text/css">.toggle-editor{display: none;}</style>';
@@ -2321,8 +2321,7 @@ function bfTriggerRules() {
 		// we gonna add a blank to each textarea, since the value is transferred upon submit
 		// requires a different mandatory validation than ff_valuenotempty
 		if (count($this->htmltextareas)) {
-			JImport('joomla.html.editor');
-			$editor = Factory::getEditor();
+			$editor = Editor::getInstance(Factory::getApplication()->get('editor'));
 			$htmltextarea_out = '';
 			foreach ($this->htmltextareas As $htmltextarea) {
 				$htmltextarea_out .= 'JQuery("[name=\"' . $htmltextarea . '\"]").val(JQuery.trim(JQuery("[name=\"' . $htmltextarea . '\"]").val())+" ");' . "\n";

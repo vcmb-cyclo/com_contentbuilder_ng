@@ -424,9 +424,6 @@ if (!defined('DS')) {
     define('DS', DIRECTORY_SEPARATOR);
 }
 
-jimport('joomla.filesystem.file');
-jimport('joomla.filesystem.folder');
-
 class com_breezingformsInstallerScript
 {
     /**
@@ -498,9 +495,6 @@ class com_breezingformsInstallerScript
      */
     function uninstall($parent)
     {
-
-        jimport('joomla.filesystem.file');
-        jimport('joomla.version');
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 

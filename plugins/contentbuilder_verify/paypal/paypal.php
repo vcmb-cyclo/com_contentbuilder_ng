@@ -35,7 +35,6 @@ class plgContentbuilder_verifyPaypal extends CMSPlugin
         parent::__construct($subject, $params);
 
         $plugin = PluginHelper::getPlugin('contentbuilder_verify', 'paypal');
-        jimport('joomla.html.parameter');
         $pluginParams = CBCompat::getParams($plugin->params);
 
         if ($pluginParams->def('test', 0)) {

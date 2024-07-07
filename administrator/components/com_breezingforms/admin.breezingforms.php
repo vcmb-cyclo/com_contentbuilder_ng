@@ -67,9 +67,6 @@ function bf_getTableFields($tables, $typeOnly = true)
 $option = BFRequest::getCmd('option');
 $task = BFRequest::getCmd('task');
 
-jimport('joomla.filesystem.file');
-jimport('joomla.filesystem.folder');
-
 if (!Factory::getApplication()->getIdentity()->authorise('core.manage', 'com_breezingforms')) {
     Factory::getApplication()->enqueueMessage(Text::_('JERROR_ALERTNOAUTHOR'), 'error');
     Factory::getApplication()->redirect('index.php', 403);

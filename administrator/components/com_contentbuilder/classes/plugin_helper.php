@@ -4,6 +4,7 @@
  * @subpackage  Plugin
  *
  * @copyright   Copyright (C) 2005 - 2011 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2024 by XDA+GIL
  * @license     GNU General Public License version 2 or later; see LICENSE
  */
 
@@ -133,7 +134,6 @@ abstract class CBPluginHelper
 			if ($pathExists || file_exists($legacypath)) {
 				$path = $pathExists ? $path : $legacypath;
 
-				jimport('joomla.plugin.plugin');
 				if (!isset($paths[$path])) {
 					require_once $path;
 				}

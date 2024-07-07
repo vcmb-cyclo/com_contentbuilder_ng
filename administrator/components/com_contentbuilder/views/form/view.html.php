@@ -10,8 +10,6 @@
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 
-jimport('joomla.html.pane');
-
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;

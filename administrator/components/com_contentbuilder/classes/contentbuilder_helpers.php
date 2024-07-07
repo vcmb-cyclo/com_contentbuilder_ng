@@ -3,6 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   (C) 2024 by XDA+GIL
  * @license     GNU/GPL
 */
 defined( '_JEXEC' ) or die( 'Restricted access' );
@@ -201,10 +202,6 @@ function contentbuilder_is_url($url=FALSE) {
 
 
 function contentbuilder_is_internal_path($path){
-    
-    jimport('joomla.filesystem.file');
-    jimport('joomla.filesystem.folder');
-    
     if(strpos(strtolower($path), '{cbsite}') === 0){
         $path = str_replace(array('{cbsite}','{CBSite}'), array(JPATH_SITE, JPATH_SITE), $path);
     }

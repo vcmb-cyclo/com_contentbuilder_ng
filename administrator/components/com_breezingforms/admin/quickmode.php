@@ -4,6 +4,7 @@
  * @version 1.9
  * @package BreezingForms
  * @copyright (C) 2008-2020 by Markus Bopp
+ * @copyright   Copyright (C) 2024 by XDA+GIL
  * @license Released under the terms of the GNU General Public License
  **/
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -12,10 +13,10 @@ use Joomla\Filesystem\File;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 
-require_once($ff_admpath . '/admin/quickmode.html.php');
-require_once($ff_admpath . '/admin/quickmode.class.php');
-require_once($ff_admpath . '/libraries/Zend/Json/Decoder.php');
-require_once($ff_admpath . '/libraries/Zend/Json/Encoder.php');
+require_once ($ff_admpath . '/admin/quickmode.html.php');
+require_once ($ff_admpath . '/admin/quickmode.class.php');
+require_once ($ff_admpath . '/libraries/Zend/Json/Decoder.php');
+require_once ($ff_admpath . '/libraries/Zend/Json/Encoder.php');
 $iconBase = '../administrator/components/com_breezingforms/libraries/jquery/themes/quickmode/i/';
 
 $quickMode = new QuickMode();
@@ -54,16 +55,14 @@ switch ($task) {
 			ob_start();
 
 			// CONTENTBUILDER
-			jimport('joomla.filesystem.file');
-			jimport('joomla.filesystem.folder');
 			if (file_exists(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php')) {
-				require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php');
+				require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php');
 				$cbForm = contentbuilder::getForm('com_breezingforms', $formId);
 				$db = Factory::getContainer()->get(DatabaseInterface::class);
 				$db->setQuery("Select id From #__contentbuilder_forms Where `type` = 'com_breezingforms' And `reference_id` = " . intval($formId));
 				$cbForms = $db->loadColumn();
 				if (is_object($cbForm) && count($cbForms)) {
-					require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'tables' . DS . 'elements.php');
+					require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'tables' . DS . 'elements.php');
 					foreach ($cbForms as $dataId) {
 						contentbuilder::synchElements($dataId, $cbForm);
 						$elements_table = new TableElements($db);

@@ -4,6 +4,7 @@
 * @package		Joomla.Framework
 * @subpackage	Plugin
 * @copyright	Copyright (C) 2005 - 2010 Open Source Matters. All rights reserved.
+* @copyright   Copyright (C) 2024 by XDA+GIL
 * @license		GNU/GPL, see LICENSE.php
 * Joomla! is free software. This version may have been modified pursuant
 * to the GNU General Public License, and as distributed it includes or
@@ -157,7 +158,6 @@ class CBPluginHelper
 				//needed for backwards compatibility
 				global $_MAMBOTS, $mainframe;
 
-				jimport('joomla.plugin.plugin');
 				require_once( $path );
 				$paths[$path] = true;
 
@@ -202,7 +202,6 @@ class CBPluginHelper
 			if ($pathExists || file_exists($legacypath)) {
 				$path = $pathExists ? $path : $legacypath;
 
-				jimport('joomla.plugin.plugin');
 				if (!isset($paths[$path])) {
 					require_once $path;
 				}
@@ -238,7 +237,6 @@ class CBPluginHelper
 	 */
 	function _load()
 	{
-		jimport('joomla.version');
     	$version = new JVersion();
 
 		if(version_compare($version->getShortVersion(), '1.6', '>=') && version_compare($version->getShortVersion(), '1.7', '<')){

@@ -10,6 +10,7 @@
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\HTML\HTMLHelper;
@@ -321,8 +322,7 @@ class HTML_facileFormsElement
 					if ($row->type == 'Query List')
 						echo "\t\t\t\tsaveQueryList();\n";
 					if ($row->type == 'Static Text/HTML' && $ff_config->wysiwyg) {
-						jimport('joomla.html.editor');
-						$editor = Factory::getEditor();
+						$editor = Editor::getInstance(Factory::getApplication()->get('editor'));
 						echo $editor->save('data1');
 					}
 					?>
@@ -2269,8 +2269,7 @@ class HTML_facileFormsElement
 											<?php
 											if ($ff_config->wysiwyg) {
 												echo '<br/>';
-												jimport('joomla.html.editor');
-												$editor = Factory::getEditor();
+												$editor = Editor::getInstance(Factory::getApplication()->get('editor'));
 												echo $editor->display('data1', $row->data1, 'data1', '500', '100%', '45', '10');
 											} else {
 												echo '<a href="#" onClick="textAreaResize(\'data1\',' . $ff_config->areasmall . ');">[' . $ff_config->areasmall . ']</a> ' .
@@ -3927,8 +3926,7 @@ class HTML_facileFormsElement
 					</div>
 
 					<script type="text/javascript">
-						<!-
-						-
+						<!--
 							SET_DHTML('SelectOptionDialog');
 							dd.elements.SelectOptionDialog.setDraggable(false);
 							//-->

@@ -26,8 +26,6 @@ class bfRecordManagement
 
     function __construct()
     {
-        jimport('joomla.filesystem.file');
-        jimport('joomla.filesystem.folder');
 
         $this->tz = new DateTimeZone(Factory::getApplication()->get('offset'));
 
@@ -1989,9 +1987,6 @@ class bfRecordManagement
         $result['Result'] = 'OK';
 
         try {
-            jimport('joomla.filesystem.file');
-            jimport('joomla.filesystem.folder');
-
             $result['Records'] = $db->loadAssocList();
             $i = 0;
 
@@ -2093,9 +2088,6 @@ class bfRecordManagement
 
         // CONTENTBUILDER
         $isContentBuilder = false;
-        jimport('joomla.filesystem.file');
-        jimport('joomla.filesystem.folder');
-        jimport('joomla.database.table');
 
         if (file_exists(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php')) {
             $isContentBuilder = true;

@@ -796,8 +796,6 @@ class com_contentbuilderInstallerScript
 
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-    jimport('joomla.filesystem.file');
-    jimport('joomla.filesystem.folder');
     $plugins = $this->getPlugins();
 
     $base_path = JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'plugins';

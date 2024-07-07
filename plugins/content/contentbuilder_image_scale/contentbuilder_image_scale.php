@@ -55,7 +55,6 @@ function fatalErrorShutdownHandler()
 	}
 }
 
-jimport('joomla.plugin.plugin');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder_helpers.php');
 
@@ -121,7 +120,6 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 		$max_time = !empty($max_exec_time) ? intval($max_exec_time) / 2 : 15;
 
 		$plugin = PluginHelper::getPlugin('content', 'contentbuilder_image_scale');
-		jimport('joomla.html.parameter');
 		$pluginParams = CBCompat::getParams($plugin->params);
 
 		$max_filesize = (8 * 8 * 8 * 1024 * 2) * intval($pluginParams->def('max_filesize', 4)); // 4M default

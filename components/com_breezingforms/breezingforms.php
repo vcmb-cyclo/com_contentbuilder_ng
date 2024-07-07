@@ -25,8 +25,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\HTML\HTMLHelper;
 
-require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFFactory.php');
-require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFRequest.php');
+require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFFactory.php');
+require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFRequest.php');
 
 if (!defined('DS')) {
     define('DS', DIRECTORY_SEPARATOR);
@@ -54,19 +54,17 @@ if (!function_exists('bf_b64dec')) {
 
 }
 
-require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_breezingforms' . DS . 'libraries' . DS . 'crosstec' . DS . 'classes' . DS . 'BFJoomlaConfig.php');
+require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_breezingforms' . DS . 'libraries' . DS . 'crosstec' . DS . 'classes' . DS . 'BFJoomlaConfig.php');
 
 $mainframe = Factory::getApplication();
 
 $cache = Factory::getCache();
 $cache->setCaching(false);
 
-jimport('joomla.filesystem.file');
-
-require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFText.php');
-require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFTableElements.php');
-require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/functions/helpers.php');
-require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/constants.php');
+require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFText.php');
+require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/classes/BFTableElements.php');
+require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/functions/helpers.php');
+require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/crosstec/constants.php');
 
 // declare global variables
 global
@@ -122,7 +120,7 @@ $ff_mospath = JPATH_SITE;
 $ff_compath = $ff_mospath . '/components/com_breezingforms';
 
 // load config and initialize globals
-require_once($ff_compath . '/facileforms.class.php');
+require_once ($ff_compath . '/facileforms.class.php');
 $ff_config = new facileFormsConf();
 initFacileForms();
 
@@ -445,7 +443,7 @@ if (
             $id = $database->loadResult();
             if ($id)
                 $myUser->get('id', -1);
-            require_once($ff_compath . '/facileforms.process.php');
+            require_once ($ff_compath . '/facileforms.process.php');
             if ($task == 'view') {
                 $div1style = '';
                 $div2style = '';
@@ -710,7 +708,7 @@ if (
 
     @ob_end_clean();
 
-    require_once(JPATH_SITE . '/components/com_breezingforms/images/captcha/securimage.php');
+    require_once (JPATH_SITE . '/components/com_breezingforms/images/captcha/securimage.php');
     $securimage = new Securimage();
     if (!$securimage->check(str_replace('?', '', BFRequest::getVar('value', '')))) {
         echo 'capResult=>false';
@@ -722,8 +720,8 @@ if (
 
     BFRequest::setVar('format', 'html');
 
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
 
     $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote(BFRequest::getInt('form_id', -1)));
     $list = $db->loadObjectList();
@@ -825,7 +823,7 @@ if (
 
                             // trigger a script after succeeded payment?
                             if (file_exists(JPATH_SITE . '/bf_paypalipn_success.php')) {
-                                require_once(JPATH_SITE . '/bf_paypalipn_success.php');
+                                require_once (JPATH_SITE . '/bf_paypalipn_success.php');
                             }
 
                             // send mail after succeeded payment?
@@ -883,8 +881,8 @@ if (
 
     BFRequest::setVar('format', 'html');
 
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
 
     $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote(BFRequest::getInt('form_id', -1)));
     $list = $db->loadObjectList();
@@ -993,7 +991,7 @@ if (
                         //echo $_GET['session_id'].'<br>bf dont understand new stripe and says it was diclined lol: <br>'.var_dump($session);
                         $msg = Text::_("COM_BREEZINGFORMS_STRIPE_DECLINED");
 
-                        require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
+                        require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
                     } else {
                         /** get payment intend id and creation time */
                         $stripe_pi_id = $session->payment_intent; //payment intent id from last session also replacing tx_token/charge->id with paymentIntents->id
@@ -1022,7 +1020,7 @@ if (
 
                         // trigger a script after succeeded payment?
                         if (file_exists(JPATH_SITE . '/bf_stripe_success.php')) {
-                            require_once(JPATH_SITE . '/bf_stripe_success.php');
+                            require_once (JPATH_SITE . '/bf_stripe_success.php');
                         }
 
                         // send mail after succeeded payment?
@@ -1036,7 +1034,7 @@ if (
                             $record_id = BFRequest::getInt('record_id', -1);
                             $tries = $options['downloadTries'];
                             $form_id = BFRequest::getInt('form_id', -1);
-                            require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/stripe_download.php');
+                            require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/stripe_download.php');
                         } else {
 
                             if ($options['thankYouPage'] != '') {
@@ -1049,7 +1047,7 @@ if (
                 } catch (\Stripe\Error\Card $e) {
 
                     $msg = Text::_("COM_BREEZINGFORMS_STRIPE_DECLINED");
-                    require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
+                    require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
                 }
 
                 break;
@@ -1060,8 +1058,8 @@ if (
 
     BFRequest::setVar('format', 'raw');
 
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
 
     $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote(BFRequest::getInt('form', -1)));
     $list = $db->loadObjectList();
@@ -1152,8 +1150,8 @@ if (
 
     BFRequest::setVar('format', 'html');
 
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
 
     $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote(BFRequest::getInt('form_id', -1)));
     $list = $db->loadObjectList();
@@ -1245,7 +1243,7 @@ if (
 
                         $success = false;
                         $msg = Text::_("Payment was not correct (amount/currency)");
-                        require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
+                        require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
                     } else {
 
                         $query = "SELECT * FROM #__facileforms_records WHERE id = '" . BFRequest::getInt('record_id', -1) . "' LIMIT 1";
@@ -1272,7 +1270,7 @@ if (
 
                                 // trigger a script after succeeded payment?
                                 if (file_exists(JPATH_SITE . '/bf_paypal_success.php')) {
-                                    require_once(JPATH_SITE . '/bf_paypal_success.php');
+                                    require_once (JPATH_SITE . '/bf_paypal_success.php');
                                 }
 
                                 // send mail after succeeded payment?
@@ -1286,7 +1284,7 @@ if (
                                     $record_id = BFRequest::getInt('record_id', -1);
                                     $tries = $options['downloadTries'];
                                     $form_id = BFRequest::getInt('form_id', -1);
-                                    require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/download.php');
+                                    require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/download.php');
                                 } else {
 
                                     if ($options['thankYouPage'] != '') {
@@ -1303,7 +1301,7 @@ if (
                                     $record_id = BFRequest::getInt('record_id', -1);
                                     $tries = $options['downloadTries'];
                                     $form_id = BFRequest::getInt('form_id', -1);
-                                    require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/download.php');
+                                    require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/download.php');
                                 } else {
                                     if ($options['useIpn']) {
                                         if ($options['thankYouPage'] != '') {
@@ -1314,24 +1312,24 @@ if (
                                     } else {
                                         $success = false;
                                         $msg = Text::_("This transaction was already processed");
-                                        require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
+                                        require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
                                     }
                                 }
                             }
                         } else {
                             $success = false;
                             $msg = Text::_("Could not find record!");
-                            require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
+                            require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
                         }
                     }
                 } else if (strcmp($lines[0], "FAIL") == 0) {
                     $success = false;
                     $msg = Text::_("Verification failed");
-                    require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
+                    require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
                 } else {
                     $success = false;
                     $msg = Text::_("Verification did not return any values");
-                    require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
+                    require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
                 }
 
                 break;
@@ -1342,8 +1340,8 @@ if (
 
     BFRequest::setVar('format', 'raw');
 
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
 
     $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote(BFRequest::getInt('form', -1)));
     $list = $db->loadObjectList();
@@ -1460,7 +1458,7 @@ if (
     $tx_token = BFRequest::getVar('tx', '');
     if ($tx_token == '') {
         $msg = Text::_("This transaction id is empty!");
-        require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
+        require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
     } else {
 
         $formId = BFRequest::getInt('user_variable_0', '');
@@ -1468,8 +1466,8 @@ if (
 
         if ($formId != '' && $recordId != '') {
 
-            require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
-            require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
+            require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
+            require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
 
             $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote($formId));
             $list = $db->loadObjectList();
@@ -1509,7 +1507,7 @@ if (
                                 $confirmed = true;
                             }
 
-                            require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/sofort_download.php');
+                            require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/sofort_download.php');
                         } else {
                             if ($options['thankYouPage'] != '') {
                                 BFRedirect($options['thankYouPage']);
@@ -1528,7 +1526,7 @@ if (
             if (BFRequest::getVar('tx', '') != '') {
                 $tx_token = BFRequest::getVar('tx', '');
             }
-            require_once(JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
+            require_once (JPATH_SITE . '/media/breezingforms/downloadtpl/error.php');
         }
     }
 } else if (BFRequest::getBool('confirmSofortueberweisung')) {
@@ -1538,8 +1536,8 @@ if (
     $formId = BFRequest::getInt('user_variable_0', -1);
     $recordId = BFRequest::getInt('user_variable_1', -1);
 
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
 
     $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote($formId));
     $list = $db->loadObjectList();
@@ -1664,7 +1662,7 @@ if (
 
                             // trigger a script after succeeded payment?
                             if (file_exists(JPATH_SITE . '/bf_sofortueberweisung_success.php')) {
-                                require_once(JPATH_SITE . '/bf_sofortueberweisung_success.php');
+                                require_once (JPATH_SITE . '/bf_sofortueberweisung_success.php');
                             }
 
                             // send mail after succeeded payment?
@@ -1684,8 +1682,8 @@ if (
 
     BFRequest::setVar('format', 'raw');
 
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
-    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
+    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
 
     $db->setQuery("Select * From #__facileforms_forms Where id = " . $db->Quote(BFRequest::getInt('form', -1)));
     $list = $db->loadObjectList();
@@ -1843,8 +1841,8 @@ if (
                         @File::write($finaltargetFile, $newbuf);
                     }
 
-                    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
-                    require_once(JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
+                    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Decoder.php');
+                    require_once (JPATH_SITE . '/administrator/components/com_breezingforms/libraries/Zend/Json/Encoder.php');
                     $dataObject = Zend_Json::decode(bf_b64dec($objectList[0]->template_code));
 
                     bfProcess($dataObject, $finaltargetFile);
@@ -1864,8 +1862,6 @@ if (
 
     // DOUBLE OPT IN
 
-    jimport('joomla.html.html');
-
     $jinput = Factory::getApplication()->input;
     $ip = $jinput->server->get('REMOTE_ADDR');
 
@@ -1878,8 +1874,6 @@ if (
 
     // DOUBLE OPT IN END
 } else if (BFRequest::getVar('opt_out') == 'true') {
-
-    jimport('joomla.html.html');
 
     $jinput = Factory::getApplication()->input;
     $ip = $jinput->server->get('REMOTE_ADDR');

@@ -5729,8 +5729,6 @@ class QuickModeHtml
                                                 </div>
 
                                                 <?php
-                                                jimport('joomla.filesystem.file');
-                                                jimport('joomla.filesystem.folder');
                                                 $dbObject = Zend_Json::decode($dataObjectString);
                                                 if (isset($dbObject['properties']['themebootstrap'])) {
                                                     $themeboostrapfolder = $dbObject['properties']['themebootstrap'];

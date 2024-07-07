@@ -944,9 +944,6 @@ class contentbuilder
         $types[] = 'com_contentbuilder';
 
         // Custom types
-        jimport('joomla.filesystem.file');
-        jimport('joomla.filesystem.folder');
-
         if (!is_dir(JPATH_SITE . DS . 'media' . DS . 'contentbuilder')) {
             Folder::create(JPATH_SITE . DS . 'media' . DS . 'contentbuilder');
         }

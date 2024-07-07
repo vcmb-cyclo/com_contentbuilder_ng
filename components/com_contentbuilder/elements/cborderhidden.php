@@ -9,9 +9,6 @@
  */
 defined('_JEXEC') or die ('Restricted access');
 
-jimport('joomla.html.html');
-
-
 use Joomla\CMS\Form\FormField;
 
 class JFormFieldCborderhidden extends FormField

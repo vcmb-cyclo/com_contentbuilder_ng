@@ -4,12 +4,10 @@
  * @package     BreezingCommerce
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   Copyright (C) 2024 by XDA+GIL
  * @license     GNU/GPL
  */
 defined('_JEXEC') or die('Restricted access');
-
-jimport('joomla.html.html');
-jimport('joomla.form.formfield');
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Factory;
@@ -47,9 +45,9 @@ class JFormFieldCategories extends JFormField
         // Check for a database error.
         try {
             $options = $db->loadObjectList();
-		} catch (\Exception $e) {
+        } catch (\Exception $e) {
             Factory::getApplication()->enqueueMessage($e->getMessage(), 'error');
-		} // try
+        } // try
 
         // Pad the option text with spaces using depth level as a multiplier.
         for ($i = 0, $n = count($options); $i < $n; $i++) {

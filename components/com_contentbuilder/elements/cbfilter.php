@@ -9,8 +9,6 @@
  */
 defined('_JEXEC') or die ('Restricted access');
 
-jimport('joomla.html.html');
-
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Factory;
@@ -22,7 +20,6 @@ class JFormFieldCbfilter extends FormField
 
     protected function getInput()
     {
-
         $out = '<input type="hidden" name="' . $this->name . '" id="' . $this->id . '" value="' . htmlentities($this->value, ENT_QUOTES, 'UTF-8') . '"/>';
         $out .= '<div id="cbElementsWrapper">';
         $class = $this->element['class'] ? $this->element['class'] : "text_area";

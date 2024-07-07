@@ -9,8 +9,6 @@
  */
 defined('_JEXEC') or die ('Restricted access');
 
-jimport('joomla.html.html');
-
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\HTML\HTMLHelper;

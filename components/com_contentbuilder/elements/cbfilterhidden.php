@@ -9,8 +9,6 @@
  */
 defined('_JEXEC') or die ('Restricted access');
 
-jimport('joomla.html.html');
-
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\FormField;

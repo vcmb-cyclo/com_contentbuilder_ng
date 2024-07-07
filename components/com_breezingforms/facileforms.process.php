@@ -2298,7 +2298,6 @@ class HTML_facileFormsProcessor
     function cbCheckPermissions()
     {
         // CONTENTBUILDER BEGIN
-        jimport('joomla.filesystem.file');
 
         $cbData = null;
         $cbForm = null;
@@ -5985,7 +5984,6 @@ class HTML_facileFormsProcessor
             if (isset($dataObject['attributes']) && isset($dataObject['properties'])) {
                 if ($dataObject['properties']['type'] == 'element' && isset($dataObject['properties']['bfName'])) {
                     $language_tag = '';
-                    jimport('joomla.application.component.helper');
                     $default = ComponentHelper::getParams('com_languages')->get('site');
                     $language_tag = $this->app->getLanguage()->getTag() != $default ? $this->app->getLanguage()->getTag() : 'zz-ZZ';
                     if (trim($name) == trim($dataObject['properties']['bfName']) && isset($dataObject['properties'][$field . '_translation' . $language_tag]) && $dataObject['properties'][$field . '_translation' . $language_tag] != '') {

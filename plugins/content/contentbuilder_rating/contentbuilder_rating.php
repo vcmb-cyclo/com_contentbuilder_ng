@@ -75,7 +75,6 @@ class plgContentContentbuilder_rating extends CMSPlugin
         $protect = false;
 
         $plugin = PluginHelper::getPlugin('content', 'contentbuilder_rating');
-        jimport('joomla.html.parameter');
         $pluginParams = CBCompat::getParams($plugin->params);
 
         if (!file_exists(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php')) {

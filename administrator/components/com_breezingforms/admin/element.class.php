@@ -296,9 +296,6 @@ class facileFormsElement
 		$row->reorder("form=$form and page=$page");
 
 		// CONTENTBUILDER
-		jimport('joomla.filesystem.file');
-		jimport('joomla.filesystem.folder');
-
 		if (file_exists(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php')) {
 			$formId = $form;
 			require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php');

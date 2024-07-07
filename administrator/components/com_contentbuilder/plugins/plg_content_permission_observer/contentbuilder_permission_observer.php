@@ -53,10 +53,6 @@ class plgContentContentbuilder_permission_observer extends CMSPlugin
 
     function onContentPrepare($context, &$article, &$params, $limitstart = 0)
     {
-
-        jimport('joomla.filesystem.file');
-        jimport('joomla.filesystem.folder');
-
         if (!file_exists(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php')) {
             return true;
         }

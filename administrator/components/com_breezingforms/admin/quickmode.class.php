@@ -167,9 +167,6 @@ class QuickMode
 
 			if ($mdata['type'] == 'root') {
 				if (isset ($mdata['themebootstrap']) && $mdata['themebootstrap'] && isset ($mdata['themebootstrapvars']) && $mdata['themebootstrapvars'] && isset ($mdata['themebootstrapbefore']) && $mdata['themebootstrapbefore'] == $mdata['themebootstrap']) {
-					jimport('joomla.filesystem.file');
-					jimport('joomla.filesystem.folder');
-
 					$folder = 'themes-bootstrap';
 
 					if (isset ($mdata['themebootstrapUse3']) && $mdata['themebootstrapUse3']) {

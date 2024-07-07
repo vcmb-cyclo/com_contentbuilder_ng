@@ -23,8 +23,6 @@ use Joomla\CMS\Pagination\Pagination;
 
 HTMLHelper::_('behavior.keepalive');
 
-jimport('joomla.filesystem.file');
-
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
 
@@ -575,9 +573,6 @@ class ContentbuilderModelForm extends CBModel
         //$data['upload_directory'] = JPATH_SITE . DS . 'media/contentbuilder/upload';
         //$data['protect_upload_directory'] = 1;
 
-        jimport('joomla.filesystem.file');
-        jimport('joomla.filesystem.folder');
-
         // determine if it contains a replacement
         $tokens = '';
 
@@ -999,9 +994,6 @@ class ContentbuilderModelForm extends CBModel
 
     function delete()
     {
-        jimport('joomla.database.table');
-        jimport('joomla.event.dispatcher');
-
         // Mode Joomla5
         $is15 = false;
 
@@ -1228,7 +1220,6 @@ class ContentbuilderModelForm extends CBModel
     {
         // Load the content if it doesn't already exist
         if (empty($this->_pagination)) {
-            jimport('joomla.html.pagination');
             $this->_pagination = new Pagination($this->getTotal(), $this->getState('limitstart'), $this->getState('limit'));
         }
         return $this->_pagination;

@@ -181,7 +181,6 @@ function initFacileForms()
 	$mainframe = Factory::getApplication();
 
 
-
 	if (!isset($ff_mossite)) {
 		if ($ff_config->livesite == 0) {
 			//$ff_mossite = str_replace('\\','/', Uri::root());

@@ -29,15 +29,15 @@ use Joomla\CMS\Form\Form;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\User\UserHelper;
 
-require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
-require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
+require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
 
-require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'contentbuilder.php');
-require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'contentbuilder_helpers.php');
+require_once (JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'contentbuilder.php');
+require_once (JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'contentbuilder_helpers.php');
 
 
-require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper.php');
-require_once(JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper4.php');
+require_once (JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper.php');
+require_once (JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'plugin_helper4.php');
 
 $pluginHelper4 = new \Joomla\CMS\Plugin\PluginHelper4();
 
@@ -266,8 +266,6 @@ class ContentbuilderModelEdit extends CBModel
                     $article = $this->_db->loadAssoc();
 
                     if ($data->create_articles) {
-
-                        jimport('joomla.form.form');
                         Form::addFormPath(JPATH_SITE . '/administrator/components/com_contentbuilder/models/forms');
                         Form::addFieldPath(JPATH_SITE . '/administrator/components/com_content/models/fields');
                         $form = Form::getInstance('com_content.article', 'article', array('control' => 'Form', 'load_data' => true));
@@ -576,14 +574,14 @@ var contentbuilder = new function(){
     public static function customValidate($code, $field, $fields, $record_id, $form, $value)
     {
         $msg = '';
-        eval($code);
+        eval ($code);
         return $msg;
     }
 
     public static function customAction($code, $record_id, $article_id, $form, $field, $fields, array $values)
     {
         $msg = '';
-        eval($code);
+        eval ($code);
         return $msg;
     }
 
@@ -638,9 +636,6 @@ var contentbuilder = new function(){
                     $the_captcha_field = null;
                     $the_failed_registration_fields = array();
 
-                    jimport('joomla.filesystem.file');
-                    jimport('joomla.filesystem.folder');
-
                     foreach ($fields as $special_field) {
                         switch ($special_field['type']) {
                             case 'text':
@@ -694,7 +689,7 @@ var contentbuilder = new function(){
                     if ($the_captcha_field !== null && !in_array($the_captcha_field['reference_id'], $noneditable_fields)) {
 
                         if (!class_exists('Securimage')) {
-                            require_once(JPATH_SITE . DS . 'components' . DS . 'com_contentbuilder' . DS . 'images' . DS . 'securimage' . DS . 'securimage.php');
+                            require_once (JPATH_SITE . DS . 'components' . DS . 'com_contentbuilder' . DS . 'images' . DS . 'securimage' . DS . 'securimage.php');
                         }
 
                         $securimage = new Securimage();
@@ -1169,9 +1164,13 @@ var contentbuilder = new function(){
                                         \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_form_elements', $f['type']);
 
                                         $dispatcher = Factory::getApplication()->getDispatcher();
-                                        $plugin_validations = $dispatcher->dispatch('onAfterValidationSuccess', 
-                                        new Joomla\Event\Event('onAfterValidationSuccess', 
-                                        array($f, $m = array_merge($the_upload_fields, $the_fields, $the_html_fields), CBRequest::getCmd('record_id', 0), $data->form, $value)));
+                                        $plugin_validations = $dispatcher->dispatch(
+                                            'onAfterValidationSuccess',
+                                            new Joomla\Event\Event(
+                                                'onAfterValidationSuccess',
+                                                array($f, $m = array_merge($the_upload_fields, $the_fields, $the_html_fields), CBRequest::getCmd('record_id', 0), $data->form, $value)
+                                            )
+                                        );
                                         $dispatcher->clearListeners('onAfterValidationSuccess');
 
                                         if (count($plugin_validations)) {
@@ -1249,7 +1248,7 @@ var contentbuilder = new function(){
 
                                 $dispatcher = Factory::getApplication()->getDispatcher();
                                 $bypass_result = $dispatcher->dispatch('onPrepareContent', new Joomla\Event\Event('onPrepareContent', array(&$bypass, &$params)));
-                                
+
                                 $verification_id = '';
 
                                 if ($bypass->text != $orig_text) {
@@ -1739,15 +1738,11 @@ var contentbuilder = new function(){
 
     function register($bypass_plugin, $bypass_verification_name, $verification_id, $user_id, $the_name_field, $the_username_field, $the_email_field, $the_password_field)
     {
-
         if ($the_name_field === null || $the_email_field === null || $the_password_field === null || $the_username_field === null) {
-
             return 0;
         }
 
         if ($user_id) {
-
-            jimport('joomla.user.helper');
             $db = Factory::getContainer()->get(DatabaseInterface::class);
 
             $pw = '';

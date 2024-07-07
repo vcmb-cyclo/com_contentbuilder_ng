@@ -38,8 +38,6 @@ if (!function_exists('cb_b64dec')) {
     }
 }
 
-jimport('joomla.plugin.plugin');
-
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 
 class plgContentContentbuilder_rating extends CMSPlugin
@@ -64,11 +62,7 @@ class plgContentContentbuilder_rating extends CMSPlugin
         $protect = false;
 
         $plugin = PluginHelper::getPlugin('content', 'contentbuilder_rating');
-        jimport('joomla.html.parameter');
         $pluginParams = CBCompat::getParams($plugin->params);
-
-        jimport('joomla.filesystem.file');
-        jimport('joomla.filesystem.folder');
 
         if (!file_exists(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php')) {
             return true;
