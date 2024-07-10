@@ -9,9 +9,7 @@ administrator/logs/
 administrator/cache/
 
 configuration.php
-
 facileforms.config.php
-
 .htaccess
-htaccess.txt
+
 administrator/.htaccess
