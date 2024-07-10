@@ -1,0 +1,30 @@
+a:8:{s:4:"from";s:22:"gilles.nedelec@vcmb.fr";s:8:"fromname";s:13:"Test Joomla 5";s:10:"recipients";a:0:{}s:7:"subject";s:20:"Form record received";s:4:"body";s:789:"
+Record saved to database with ID:  14
+
+Form ID: 3
+Form title: STRIPE Payment Test (2024)
+Form name: StripePayment
+Submitted at: 2024-07-10 22:52:26
+Submitter IP: 78.113.64.13
+User-ID: 978
+Username: test
+User full name: TEsT LicenCié
+Submitter provider: Unknown
+Submitter browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0
+Submitter operating system: win
+
+Date (record): 2024-07-10 22:49
+Number of records (N° +1): 12
+Stripe Amount: 5.00
+Stripe Status: -
+Stripe id: --
+Amount to pay (Euros) :: 5.00
+NAME: TEST
+Surname (Prénom): Licencié
+Email / Courriel: webmaster.cyclo@vcmb.fr
+Telephone: 06 06 07 07 88
+Additional infos selection: Profile
+N° et rue: 2 rue du club de vélo
+Code postal: 78188
+Ville: Montigny-le-Bx
+";s:10:"attachment";N;s:6:"isHtml";b:0;s:10:"alt_sender";s:0:"";}

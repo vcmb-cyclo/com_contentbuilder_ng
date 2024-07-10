@@ -1,0 +1,29 @@
+[10-Jul-2024 20:53:03 UTC] PHP Deprecated:  htmlentities(): Passing null to parameter #1 ($string) of type string is deprecated in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/administrator/components/com_contentbuilder/views/form/tmpl/form.php on line 810
+[10-Jul-2024 20:53:03 UTC] PHP Warning:  Undefined array key "perm-pane" in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:53:03 UTC] PHP Warning:  Trying to access array offset on null in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:53:03 UTC] PHP Warning:  Undefined array key "perm-pane" in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:53:03 UTC] PHP Warning:  Trying to access array offset on null in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:53:03 UTC] PHP Warning:  Undefined array key "perm-pane" in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:53:03 UTC] PHP Warning:  Trying to access array offset on null in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:53:45 UTC] PHP Deprecated:  strtolower(): Passing null to parameter #1 ($string) of type string is deprecated in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/vendor/joomla/filter/src/InputFilter.php on line 217
+[10-Jul-2024 20:54:50 UTC] PHP Warning:  Undefined array key "perm-pane" in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:54:50 UTC] PHP Warning:  Trying to access array offset on null in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:54:50 UTC] PHP Warning:  Undefined array key "perm-pane" in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:54:50 UTC] PHP Warning:  Trying to access array offset on null in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:54:50 UTC] PHP Warning:  Undefined array key "perm-pane" in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:54:50 UTC] PHP Warning:  Trying to access array offset on null in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:55:16 UTC] PHP Deprecated:  strtolower(): Passing null to parameter #1 ($string) of type string is deprecated in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/vendor/joomla/filter/src/InputFilter.php on line 217
+[10-Jul-2024 20:55:17 UTC] PHP Warning:  Undefined array key "perm-pane" in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:55:17 UTC] PHP Warning:  Trying to access array offset on null in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:55:17 UTC] PHP Warning:  Undefined array key "perm-pane" in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:55:17 UTC] PHP Warning:  Trying to access array offset on null in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:55:17 UTC] PHP Warning:  Undefined array key "perm-pane" in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:55:17 UTC] PHP Warning:  Trying to access array offset on null in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:57:04 UTC] PHP Deprecated:  strtolower(): Passing null to parameter #1 ($string) of type string is deprecated in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/vendor/joomla/filter/src/InputFilter.php on line 217
+[10-Jul-2024 20:57:04 UTC] PHP Warning:  Undefined array key "perm-pane" in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:57:04 UTC] PHP Warning:  Trying to access array offset on null in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:57:04 UTC] PHP Warning:  Undefined array key "perm-pane" in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:57:04 UTC] PHP Warning:  Trying to access array offset on null in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:57:04 UTC] PHP Warning:  Undefined array key "perm-pane" in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:57:04 UTC] PHP Warning:  Trying to access array offset on null in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/src/HTML/Helpers/UiTab.php on line 95
+[10-Jul-2024 20:58:53 UTC] PHP Deprecated:  strtolower(): Passing null to parameter #1 ($string) of type string is deprecated in /home/vfuz2145/SITES-BREEZINGFORMS/breezingforms/libraries/vendor/joomla/filter/src/InputFilter.php on line 217
