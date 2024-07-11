@@ -14,17 +14,11 @@ use Joomla\CMS\Language\Text;
 require_once (JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'contentbuilder_helpers.php');
 //require_once __DIR__ .'/../../../classes/PhpSpreadsheet/Spreadsheet.php';
 require __DIR__ . '/../../../librairies/PhpSpreadsheet/vendor/autoload.php';
-// require __DIR__ . '/var/www/html/joomla/administrator/components/com_contentbuilder/librairies/PhpSpreadsheet
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
-/// use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
-
 $spreadsheet = new Spreadsheet();
-
-$spreadsheet->getProperties()->setCreator("ContentBuilder")
-    ->setLastModifiedBy("ContentBuilder");
+$spreadsheet->getProperties()->setCreator("ContentBuilder")->setLastModifiedBy("ContentBuilder");
 
 // Freeze first line.
 $spreadsheet->getActiveSheet()->freezePane('A2');
@@ -39,112 +33,55 @@ $spreadsheet
     ->setARGB('c0c0c0');
 
 
+// 1 -- Labels.
+$labels = $this->data->visible_labels;
 
+// In case of show_id_column true -> First column reserved.
 if ($this->data->show_id_column) {
-    $spreadsheet->setActiveSheetIndex(0)
-        ->setCellValue('A1', Text::_('COM_CONTENTBUILDER_ID'));
+    array_unshift($labels , Text::_('COM_CONTENTBUILDER_ID'));
+}
 
+$col = 1;
+foreach ($labels as $label) {
+    $cell = [$col++, 1];
+    $spreadsheet->setActiveSheetIndex(0)->setCellValue($cell, $label);
+    $spreadsheet->getActiveSheet()->getStyle($cell)->getFont()->setBold(true);
+}
 
-    $c = 'B';
+// 2 -- Data.
+$raw = 2;
+foreach ($this->data->items as $item) {
     $i = 1;
-    foreach ($this->data->visible_labels as $label) {
-        $cell = "$c" . "$i";
-        $spreadsheet->setActiveSheetIndex(0)
-            ->setCellValue($cell, $label);
-        $c++;
+    if ($this->data->show_id_column) {
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue([$i++, $raw], $item->colRecord);
     }
-
-    $ch = 'B';
-    $i = 2;
-    foreach ($this->data->items as $item) {
-        for ($ch = 'B'; $ch <= $c; $ch++) {
-
-            $spreadsheet->setActiveSheetIndex(0)
-                ->setCellValue('A' . $i, $item->colRecord);
-            foreach ($item as $key => $value) {
-                if ($key != 'colRecord' && in_array(str_replace('col', '', $key), $this->data->visible_cols)) {
-                    $cell = "$ch" . "$i";
-                    $spreadsheet->setActiveSheetIndex(0)
-                        ->setCellValue($cell, $value);
-                    $ch++;
-                }
-
-            }
-            $i++;
+    foreach ($item as $key => $value) {
+        if ($key != 'colRecord' && in_array(str_replace('col', '', $key), $this->data->visible_cols)) {
+            $spreadsheet->setActiveSheetIndex(0)->setCellValue([$i++, $raw], $value);
         }
     }
-
-
-
-} else {
-    $c = 'A';
-    $i = 1;
-
-    foreach ($this->data->visible_labels as $label) {
-        $cell = "$c" . "$i";
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue($cell, $label);
-        $spreadsheet->getActiveSheet()->getStyle($cell)->getFont()->setBold(true);
-
-        $c++;
-    }
-
-    $ch = 'A';
-    $i = 2;
-    foreach ($this->data->items as $item) {
-
-        for ($ch = 'A'; $ch <= $c; $ch++) {
-            foreach ($item as $key => $value) {
-                if ($key != 'colRecord' && in_array(str_replace('col', '', $key), $this->data->visible_cols)) {
-                    $cell = "$ch" . "$i";
-                    $spreadsheet->setActiveSheetIndex(0)->setCellValue($cell, $value);
-                    $ch++;
-                }
-
-            }
-            $i++;
-        }
-    }
+    $raw++;
 }
 
 $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
-$cell_length = 0;
-for ($col = 'A'; $col < $ch; $col++) {
-    for ($row = 1; $row < $i; $row++) {
-        $cell = "$col" . "$row";
-        $length = strlen($spreadsheet->getActiveSheet()->getCell($cell)->getValue() ?? '');
-        if ($length > $cell_length) {
-            $cell_length = $length;
-        }
-        $spreadsheet->getActiveSheet()
-            ->getStyle($cell)
-            ->getNumberFormat()
-            ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
-    }
-    if ($cell_length < 1) {
-        $width = 15;
-    } else if ($cell_length <= 50) {
-        $width = $cell_length + 5;
-    } else {
-        $width = $cell_length / 3;
-    }
-    $spreadsheet->getActiveSheet()->getColumnDimension($col)->setWidth($width);
-    $cell_length = 0;
-}
-
-
-
 $spreadsheet->getActiveSheet()->setTitle("export-" . date('Y-m-d_Hi') . ".xlsx");
 
 // Name file.
-$filename = "export-" . date('Y-m-d_Hi') . ".xlsx";
+$filename = "export-" . date('Y-m-d_Hi', null) . ".xlsx";
 $spreadsheet->setActiveSheetIndex(0);
 
-// Autosizing
-foreach ($spreadsheet->getActiveSheet()->getColumnDimensions() as $columnDimension) {
-    $columnDimension->setAutoSize(true);
-}
-$spreadsheet->getActiveSheet()->calculateColumnWidths();
+// Auto size columns for each worksheet
+foreach ($spreadsheet->getWorksheetIterator() as $worksheet) {
+    $spreadsheet->setActiveSheetIndex($spreadsheet->getIndex($worksheet));
 
+    $sheet = $spreadsheet->getActiveSheet();
+    $cellIterator = $sheet->getRowIterator()->current()->getCellIterator();
+    $cellIterator->setIterateOnlyExistingCells(true);
+    /** @var PHPExcel_Cell $cell */
+    foreach ($cellIterator as $cell) {
+        $sheet->getColumnDimension($cell->getColumn())->setAutoSize(true);
+    }
+}
 
 
 // Redirect output to a client’s web browser (Excel5)

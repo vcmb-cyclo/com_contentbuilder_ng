@@ -1316,7 +1316,7 @@ class HTML_facileFormsProcessor
             try {
                 $ret = eval($code);
             } catch (Error $e) {
-                $this->app->enqueueMessage($e->getMessage() . "in $name.", 'error');
+                $this->app->enqueueMessage($e->getMessage() . " in $name.", 'error');
                 // Report error somehow
             }
         } // if
