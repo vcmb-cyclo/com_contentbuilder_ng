@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="component" version="4.0" method="upgrade">
  <name>Contentbuilder</name>
- <creationDate>2024-07-11</creationDate>
+ <creationDate>2024-07-13</creationDate>
  <author>XDA+GIL</author>
  <authorEmail>noreply@vcmb.fr</authorEmail>
  <authorUrl>https://breezingforms.vcmb.fr</authorUrl>
  <copyright>Copyright 2011 - 2024 by XDA+GIL</copyright>
  <license>GNU/GPL v2.0</license>
- <version>5.0.0-RC1 (build 1)</version>
+ <version>5.0.0-RC2<version>
  <description>A content construction kit and application framework extension for Joomla!</description>
 
  <scriptfile>script.php</scriptfile>
@@ -25,7 +25,7 @@
  </uninstall>
  
  <updateservers>
-    <server type="extension" name="ContentBuilder" priority="1">https://crosstec.org/updates/contentbuilder/contentbuilder_update.xml</server>
+    <server type="extension" name="ContentBuilder" priority="1">https://raw.githubusercontent.com/vcmb-cyclo/contentbuilder/main/contentbuilder_update.xml?raw=true</server>
  </updateservers>
 
  <files folder="site">
