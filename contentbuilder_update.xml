@@ -1,364 +1,358 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <updates>
-    
-    
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.91 (build 250)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.4"/>
-    </update>
-    
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.91 (build 250)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.5"/>
-    </update>
+	
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.91 (build 250)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.4"/>
+	</update>
+	
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.91 (build 250)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.5"/>
+	</update>
+
+
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.91 (build 251)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.4"/>
+	</update>
+
+
+
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.91 (build 251)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.5"/>
+	</update>
+
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.91 (build 251)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.6"/>
+	</update>
+
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.91 (build 251)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.7"/>
+	</update>
+
+
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.91 (build 252)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.5"/>
+	</update>
+
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.91 (build 252)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.6"/>
+	</update>
+
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.91 (build 252)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.7"/>
+	</update>
+
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.91 (build 252)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.8"/>
+	</update>
 
 
 
 
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.91 (build 251)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.4"/>
-    </update>
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.92 (build 253)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.5"/>
+	</update>
 
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.92 (build 253)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.6"/>
+	</update>
 
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.92 (build 253)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.7"/>
+	</update>
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.91 (build 251)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.5"/>
-    </update>
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.92 (build 253)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.8"/>
+	</update>
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.91 (build 251)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.6"/>
-    </update>
-
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.91 (build 251)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.7"/>
-    </update>
-
-
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.91 (build 252)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.5"/>
-    </update>
-
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.91 (build 252)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.6"/>
-    </update>
-
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.91 (build 252)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.7"/>
-    </update>
-
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.91 (build 252)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.8"/>
-    </update>
-
-
-
-
-
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.92 (build 253)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.5"/>
-    </update>
-
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.92 (build 253)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.6"/>
-    </update>
-
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.92 (build 253)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.7"/>
-    </update>
-
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.92 (build 253)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.8"/>
-    </update>
-
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.92 (build 253)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.9"/>
-    </update>
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.92 (build 253)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.9"/>
+	</update>
 
 
 
 
 
 
-    <update>
-    <name>ContentBuilder</name>
-    <description>ContentBuilder Update</description>
-    <element>com_contentbuilder</element>
-    <type>component</type>
-    <client>1</client>
-    <version>0.9.93 (build 254)</version>
-    <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-    <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-    <tags>
-        <tag>stable</tag>
-    </tags>
-    <maintainer>Markus Bopp</maintainer>
-    <maintainerurl>https://crosstec.org</maintainerurl>
-    <targetplatform name="joomla" version="3.5"/>
+	<update>
+	<name>ContentBuilder</name>
+	<description>ContentBuilder Update</description>
+	<element>com_contentbuilder</element>
+	<type>component</type>
+	<client>1</client>
+	<version>0.9.93 (build 254)</version>
+	<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+	<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+	<tags>
+		<tag>stable</tag>
+	</tags>
+	<maintainer>Markus Bopp</maintainer>
+	<maintainerurl>https://crosstec.org</maintainerurl>
+	<targetplatform name="joomla" version="3.5"/>
 </update>
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.93 (build 254)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.6"/>
-    </update>
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.93 (build 254)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.6"/>
+	</update>
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.93 (build 254)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.7"/>
-    </update>
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.93 (build 254)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.7"/>
+	</update>
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.93 (build 254)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.8"/>
-    </update>
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.93 (build 254)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.8"/>
+	</update>
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.93 (build 254)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.9"/>
-    </update>
-
-
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.93 (build 254)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.9"/>
+	</update>
 
 
 
@@ -371,109 +365,110 @@
 
 
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.94 (build 255)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.5"/>
-    </update>
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.94 (build 255)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.6"/>
-    </update>
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.94 (build 255)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.7"/>
-    </update>
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.94 (build 255)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.5"/>
+	</update>
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.94 (build 255)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.8"/>
-    </update>
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.94 (build 255)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.6"/>
+	</update>
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
-        <version>0.9.94 (build 255)</version>
-        <infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-        <downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>Markus Bopp</maintainer>
-        <maintainerurl>https://crosstec.org</maintainerurl>
-        <targetplatform name="joomla" version="3.9"/>
-    </update>
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.94 (build 255)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.7"/>
+	</update>
 
-    <update>
-        <name>ContentBuilder</name>
-        <description>ContentBuilder Update</description>
-        <element>com_contentbuilder</element>
-        <type>component</type>
-        <client>1</client>
- 	<version>5.0.0-RC2<version>
-        <infourl title="ContentBuilder">https://breezingforms.vcmb.fr/</infourl>
-        <downloads>
-        	<downloadurl type="full" format="zip">https://github.com/vcmb-cyclo/contentbuilder/releases/download/5.0.0-RC2/com_contentbuilder-5.0.0-RC2.zip</downloadurl>
-        </downloads>
-        <tags>
-            <tag>stable</tag>
-        </tags>
-        <maintainer>XDA+GIL</maintainer>
-        <maintainerurl>https://breezingforms.vcmb.fr</maintainerurl>
-        <targetplatform name="joomla" version="5.1"/>
-    </update>
-    
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.94 (build 255)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.8"/>
+	</update>
+
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>0.9.94 (build 255)</version>
+		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
+		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Markus Bopp</maintainer>
+		<maintainerurl>https://crosstec.org</maintainerurl>
+		<targetplatform name="joomla" version="3.9"/>
+	</update>
+
+	<update>
+		<name>ContentBuilder</name>
+		<description>ContentBuilder Update</description>
+		<element>com_contentbuilder</element>
+		<type>component</type>
+		<client>1</client>
+		<version>5.0.0-RC3<version>
+		<infourl title="ContentBuilder">https://breezingforms.vcmb.fr/</infourl>
+		<downloads>
+			<downloadurl type="full" format="zip">https://breezingforms.vcmb.fr/download/com_contentbuilder-5.0.0-RC3.zip</downloadurl>
+		</downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>XDA+GIL</maintainer>
+		<maintainerurl>https://breezingforms.vcmb.fr</maintainerurl>
+		<targetplatform name="joomla" version="5.1"/>
+	</update>
 
 </updates>

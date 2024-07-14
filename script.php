@@ -3,494 +3,387 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
+ * @copyright   (C) 2024 by XDA+GIL
  * @license     GNU/GPL
-*/
+ */
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
-use \Joomla\CMS\Filesystem\File;
-
-if(!class_exists('CBFactory'))
-{
-
-	class CBFactory
-	{
-
-		private static $dbo = null;
-
-		public static function getDbo()
-		{
-
-			if (static::$dbo == null)
-			{
-
-				static::$dbo = new CBDbo();
-			}
-
-			return static::$dbo;
-		}
-
-	}
-
-	class CBFile extends File
-	{
-
-		public static function read($file)
-		{
-
-			return file_get_contents($file);
-		}
-	}
-
-	class CBDbo
-	{
-
-		private $errNo = 0;
-		private $errMsg = '';
-		private $dbo = null;
-		private $last_query = true;
-		private $last_failed_query = '';
-
-		function __construct()
-		{
-			$this->dbo = JFactory::getDbo();
-		}
-
-		public function setQuery($query, $offset = 0, $limit = 0)
-		{
-
-			try
-			{
-
-				$this->dbo->setQuery($query, $offset, $limit);
-
-			}
-			catch (Exception $e)
-			{
-
-				$this->last_query        = false;
-				$this->last_failed_query = $query;
-				$this->errNo             = $e->getCode();
-				$this->errMsg            = $e->getMessage();
-			}
-
-		}
-
-		public function loadObjectList()
-		{
-
-			if (!$this->last_query) return array();
-
-			$this->errNo  = 0;
-			$this->errMsg = '';
-
-			try
-			{
-
-				return $this->dbo->loadObjectList();
-
-			}
-			catch (Exception $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}
-			catch (Error $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-			}
-
-			return array();
-		}
-
-		public function loadObject($class = 'stdClass')
-		{
-			if (!$this->last_query) return null;
-
-			$this->errNo  = 0;
-			$this->errMsg = '';
-
-			try
-			{
-
-				return $this->dbo->loadObject($class);
-
-			}
-			catch (Exception $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}
-			catch (Error $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-			}
-
-			return null;
-		}
-
-		public function loadColumn($offset = 0)
-		{
-			if (!$this->last_query) return null;
-
-			$this->errNo  = 0;
-			$this->errMsg = '';
-
-			try
-			{
-
-				return $this->dbo->loadColumn($offset);
-
-			}
-			catch (Exception $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}
-			catch (Error $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-			}
-
-			return null;
-		}
-
-		public function loadAssocList($key = null, $column = null)
-		{
-			if (!$this->last_query) return array();
-
-			$this->errNo  = 0;
-			$this->errMsg = '';
-
-			try
-			{
-
-				return $this->dbo->loadAssocList($key, $column);
-
-			}
-			catch (Exception $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}
-			catch (Error $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}
-
-			return array();
-		}
-
-		public function loadAssoc()
-		{
-			if (!$this->last_query) return null;
-
-			$this->errNo  = 0;
-			$this->errMsg = '';
-
-			try
-			{
-
-				return $this->dbo->loadAssoc();
-
-			}
-			catch (Exception $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}
-			catch (Error $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-			}
-
-			return null;
-		}
-
-		public function query()
-		{
-
-			return $this->execute();
-		}
-
-		public function execute()
-		{
-			$this->errNo  = 0;
-			$this->errMsg = '';
-
-			try
-			{
-
-				return $this->dbo->execute();
-
-			}
-			catch (Exception $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}
-			catch (Error $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-			}
-
-			return false;
-		}
-
-		public function updateObject($table, &$object, $key, $nulls = false)
-		{
-			$this->errNo  = 0;
-			$this->errMsg = '';
-
-			try
-			{
-
-				return $this->dbo->updateObject($table, $object, $key, $nulls);
-
-			}
-			catch (Exception $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}
-			catch (Error $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-			}
-
-			return false;
-		}
-
-		public function insertObject($table, &$object, $key = null)
-		{
-			$this->errNo  = 0;
-			$this->errMsg = '';
-
-			try
-			{
-
-				return $this->dbo->insertObject($table, $object, $key);
-
-			}
-			catch (Exception $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}
-			catch (Error $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-			}
-
-			return false;
-		}
-
-		public function quote($query, $esc = true)
-		{
-			return $this->dbo->quote($query, $esc);
-		}
-
-		public function getQuery($new = false)
-		{
-			if (!$this->last_query) return $this->last_failed_query;
-
-			return $this->dbo->getQuery($new);
-		}
-
-		public function getPrefix()
-		{
-			return $this->dbo->getPrefix();
-		}
-
-		public function getNullDate()
-		{
-			return $this->dbo->getNullDate();
-		}
-
-		public function getNumRows()
-		{
-			if (!$this->last_query) return 0;
-
-			return $this->dbo->getNumRows();
-		}
-
-		public function getCount()
-		{
-			if (!$this->last_query) return 0;
-
-			return $this->dbo->getCount();
-		}
-
-		public function getConnection()
-		{
-			return $this->dbo->getConnection();
-		}
-
-		public function getAffectedRows()
-		{
-			if (!$this->last_query) return array();
-
-			return $this->dbo->getAffectedRows();
-		}
-
-		public function getTableColumns($table, $typeOnly = true)
-		{
-			$this->errNo  = 0;
-			$this->errMsg = '';
-
-			try
-			{
-				return $this->dbo->getTableColumns($table, $typeOnly);
-			}
-			catch (Exception $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}
-			catch (Error $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-			}
-
-			return array();
-		}
-
-		public function getTableList()
-		{
-			$this->errNo  = 0;
-			$this->errMsg = '';
-
-			try
-			{
-				return $this->dbo->getTableList();
-			}
-			catch (Exception $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}
-			catch (Error $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-			}
-
-			return array();
-		}
-
-		public function loadResult()
-		{
-			if (!$this->last_query) return null;
-
-			$this->errNo  = 0;
-			$this->errMsg = '';
-
-			try
-			{
-				return $this->dbo->loadResult();
-			}
-			catch (Exception $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}
-			catch (Error $e)
-			{
-
-				$this->errNo  = $e->getCode();
-				$this->errMsg = $e->getMessage();
-			}
-
-			return null;
-		}
-
-		public function getErrorNum()
-		{
-			return $this->errNo;
-		}
-
-		public function getErrorMsg()
-		{
-			return $this->errMsg;
-		}
-
-		public function stderr()
-		{
-
-			return $this->errMsg;
-		}
-
-		public function insertid()
-		{
-
-			if (!$this->last_query) return 0;
-
-			return $this->dbo->insertid();
-		}
-	}
+use Joomla\Filesystem\File;
+use Joomla\CMS\Version;
+use Joomla\CMS\Factory;
+use Joomla\Filesystem\Folder;
+use Joomla\Database\DatabaseInterface;
+
+if (!class_exists('CBFactory')) {
+
+    class CBFactory
+    {
+        private static $dbo = null;
+
+        public static function getDbo()
+        {
+            if (static::$dbo == null) {
+                static::$dbo = new CBDbo();
+            }
+
+            return static::$dbo;
+        }
+
+    }
+
+    class CBFile extends File
+    {
+        public static function read($file)
+        {
+            return file_get_contents($file);
+        }
+    }
+
+    class CBDbo
+    {
+        private $errNo = 0;
+        private $errMsg = '';
+        private $dbo = null;
+        private $last_query = true;
+        private $last_failed_query = '';
+
+        function __construct()
+        {
+            $this->dbo = Factory::getContainer()->get(DatabaseInterface::class);
+        }
+
+        public function setQuery($query, $offset = 0, $limit = 0)
+        {
+            try {
+                $this->dbo->setQuery($query, $offset, $limit);
+            } catch (Exception $e) {
+                $this->last_query = false;
+                $this->last_failed_query = $query;
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            }
+        }
+
+        public function loadObjectList()
+        {
+            if (!$this->last_query)
+                return array();
+
+            $this->errNo = 0;
+            $this->errMsg = '';
+
+            try {
+                return $this->dbo->loadObjectList();
+            } catch (Exception $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+
+            } catch (Error $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            }
+
+            return array();
+        }
+
+        public function loadObject($class = 'stdClass')
+        {
+            if (!$this->last_query)
+                return null;
+
+            $this->errNo = 0;
+            $this->errMsg = '';
+
+            try {
+                return $this->dbo->loadObject($class);
+            } catch (Exception $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            } catch (Error $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            }
+
+            return null;
+        }
+
+        public function loadColumn($offset = 0)
+        {
+            if (!$this->last_query)
+                return null;
+
+            $this->errNo = 0;
+            $this->errMsg = '';
+
+            try {
+                return $this->dbo->loadColumn($offset);
+            } catch (Exception $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            } catch (Error $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            }
+
+            return null;
+        }
+
+        public function loadAssocList($key = null, $column = null)
+        {
+            if (!$this->last_query)
+                return array();
+
+            $this->errNo = 0;
+            $this->errMsg = '';
+
+            try {
+                return $this->dbo->loadAssocList($key, $column);
+            } catch (Exception $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            } catch (Error $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            }
+
+            return array();
+        }
+
+        public function loadAssoc()
+        {
+            if (!$this->last_query)
+                return null;
+
+            $this->errNo = 0;
+            $this->errMsg = '';
+
+            try {
+                return $this->dbo->loadAssoc();
+            } catch (Exception $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            } catch (Error $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            }
+
+            return null;
+        }
+
+        public function query()
+        {
+            return $this->execute();
+        }
+
+        public function execute()
+        {
+            $this->errNo = 0;
+            $this->errMsg = '';
+
+            try {
+                return $this->dbo->execute();
+            } catch (Exception $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            } catch (Error $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            }
+
+            return false;
+        }
+
+        public function updateObject($table, &$object, $key, $nulls = false)
+        {
+            $this->errNo = 0;
+            $this->errMsg = '';
+
+            try {
+                return $this->dbo->updateObject($table, $object, $key, $nulls);
+            } catch (Exception $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            } catch (Error $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            }
+
+            return false;
+        }
+
+        public function insertObject($table, &$object, $key = null)
+        {
+            $this->errNo = 0;
+            $this->errMsg = '';
+
+            try {
+                return $this->dbo->insertObject($table, $object, $key);
+            } catch (Exception $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            } catch (Error $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            }
+
+            return false;
+        }
+
+        public function quote($query, $esc = true)
+        {
+            return $this->dbo->quote($query, $esc);
+        }
+
+        public function getQuery($new = false)
+        {
+            if (!$this->last_query)
+                return $this->last_failed_query;
+
+            return $this->dbo->getQuery($new);
+        }
+
+        public function getPrefix()
+        {
+            return $this->dbo->getPrefix();
+        }
+
+        public function getNullDate()
+        {
+            return $this->dbo->getNullDate();
+        }
+
+        public function getNumRows()
+        {
+            if (!$this->last_query)
+                return 0;
+
+            return $this->dbo->getNumRows();
+        }
+
+        public function getCount()
+        {
+            if (!$this->last_query)
+                return 0;
+
+            return $this->dbo->getCount();
+        }
+
+        public function getConnection()
+        {
+            return $this->dbo->getConnection();
+        }
+
+        public function getAffectedRows()
+        {
+            if (!$this->last_query)
+                return array();
+
+            return $this->dbo->getAffectedRows();
+        }
+
+        public function getTableColumns($table, $typeOnly = true)
+        {
+            $this->errNo = 0;
+            $this->errMsg = '';
+
+            try {
+                return $this->dbo->getTableColumns($table, $typeOnly);
+            } catch (Exception $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            } catch (Error $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            }
+
+            return array();
+        }
+
+        public function getTableList()
+        {
+            $this->errNo = 0;
+            $this->errMsg = '';
+
+            try {
+                return $this->dbo->getTableList();
+            } catch (Exception $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            } catch (Error $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            }
+
+            return array();
+        }
+
+        public function loadResult()
+        {
+            if (!$this->last_query)
+                return null;
+
+            $this->errNo = 0;
+            $this->errMsg = '';
+
+            try {
+                return $this->dbo->loadResult();
+            } catch (Exception $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            } catch (Error $e) {
+                $this->errNo = $e->getCode();
+                $this->errMsg = $e->getMessage();
+            }
+
+            return null;
+        }
+
+        public function getErrorNum()
+        {
+            return $this->errNo;
+        }
+
+        public function getErrorMsg()
+        {
+            return $this->errMsg;
+        }
+
+        public function stderr()
+        {
+
+            return $this->errMsg;
+        }
+
+        public function insertid()
+        {
+            if (!$this->last_query)
+                return 0;
+
+            return $this->dbo->insertid();
+        }
+    }
 }
 
 
-if( !defined( 'DS' ) ){
+if (!defined('DS')) {
     define('DS', DIRECTORY_SEPARATOR);
 }
 
-if(!function_exists('contentbuilder_install_db')){
-function contentbuilder_install_db(){
-    
-    require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
-    
-    $db = CBFactory::getDBO();
-    
-    $tables = CBCompat::getTableFields( CBFactory::getDBO()->getTableList() );
+if (!function_exists('contentbuilder_install_db')) {
+    function contentbuilder_install_db()
+    {
 
-    if(isset($tables[CBFactory::getDBO()->getPrefix().'contentbuilder_forms'])){
+        require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 
-	    return true;
-    }
+        $db = CBFactory::getDBO();
 
-    $query1 = "
+        $tables = CBCompat::getTableFields(CBFactory::getDBO()->getTableList());
+
+        if (isset($tables[CBFactory::getDBO()->getPrefix() . 'contentbuilder_forms'])) {
+            return true;
+        }
+
+        $query1 = "
 
 CREATE TABLE `#__contentbuilder_articles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -505,7 +398,7 @@ CREATE TABLE `#__contentbuilder_articles` (
 )";
 
 
-$query2 = "
+        $query2 = "
 CREATE TABLE `#__contentbuilder_elements` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `form_id` int(11) NOT NULL DEFAULT '0',
@@ -535,7 +428,7 @@ CREATE TABLE `#__contentbuilder_elements` (
 )";
 
 
-$query3 = "
+        $query3 = "
 CREATE TABLE `#__contentbuilder_forms` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` varchar(255) NOT NULL DEFAULT '',
@@ -636,7 +529,7 @@ CREATE TABLE `#__contentbuilder_forms` (
 )";
 
 
-$query4 = "
+        $query4 = "
 CREATE TABLE `#__contentbuilder_list_records` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `form_id` int(11) NOT NULL DEFAULT '0',
@@ -649,7 +542,7 @@ CREATE TABLE `#__contentbuilder_list_records` (
 )";
 
 
-$query5 = "
+        $query5 = "
 CREATE TABLE `#__contentbuilder_list_states` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `form_id` int(11) NOT NULL DEFAULT '0',
@@ -661,7 +554,7 @@ CREATE TABLE `#__contentbuilder_list_states` (
 )";
 
 
-$query6 = "
+        $query6 = "
 CREATE TABLE `#__contentbuilder_records` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `record_id` varchar(255) NOT NULL DEFAULT '',
@@ -680,7 +573,7 @@ CREATE TABLE `#__contentbuilder_records` (
 )";
 
 
-$query7 = "
+        $query7 = "
 CREATE TABLE `#__contentbuilder_registered_users` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL DEFAULT '0',
@@ -691,7 +584,7 @@ CREATE TABLE `#__contentbuilder_registered_users` (
 )";
 
 
-$query8 = "
+        $query8 = "
 CREATE TABLE `#__contentbuilder_resource_access` (
   `form_id` int(11) NOT NULL DEFAULT '0',
   `element_id` varchar(100) NOT NULL DEFAULT '',
@@ -700,7 +593,7 @@ CREATE TABLE `#__contentbuilder_resource_access` (
   UNIQUE KEY `form_id` (`form_id`,`element_id`,`resource_id`)
 )";
 
-$query9 = "
+        $query9 = "
 CREATE TABLE `#__contentbuilder_storages` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL DEFAULT '',
@@ -711,7 +604,7 @@ CREATE TABLE `#__contentbuilder_storages` (
   UNIQUE KEY `name` (`name`)
 )";
 
-$query10 = "
+        $query10 = "
 
 CREATE TABLE `#__contentbuilder_storage_fields` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -726,7 +619,7 @@ CREATE TABLE `#__contentbuilder_storage_fields` (
   UNIQUE KEY `storage_id` (`storage_id`,`name`)
 )";
 
-$query11 = "
+        $query11 = "
 CREATE TABLE `#__contentbuilder_users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `userid` int(11) NOT NULL DEFAULT '0',
@@ -746,7 +639,7 @@ CREATE TABLE `#__contentbuilder_users` (
 )";
 
 
-$query12 = "
+        $query12 = "
 CREATE TABLE `#__contentbuilder_verifications` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `verification_hash` varchar(255) NOT NULL DEFAULT '',
@@ -764,294 +657,289 @@ CREATE TABLE `#__contentbuilder_verifications` (
   KEY `user_id` (`user_id`)
 )
 ";
-    
-    try{
-        $db->setQuery($query1);
-        $db->execute();
-        $db->setQuery($query2);
-        $db->execute();
-        $db->setQuery($query3);
-        $db->execute();
-        $db->setQuery($query4);
-        $db->execute();
-        $db->setQuery($query5);
-        $db->execute();
-        $db->setQuery($query6);
-        $db->execute();
-        $db->setQuery($query7);
-        $db->execute();
-        $db->setQuery($query8);
-        $db->execute();
-        $db->setQuery($query9);
-        $db->execute();
-        $db->setQuery($query10);
-        $db->execute();
-        $db->setQuery($query11);
-        $db->execute();
-        $db->setQuery($query12);
-        $db->execute();
-    }catch(Exception $e){
 
+        try {
+            $db->setQuery($query1);
+            $db->execute();
+            $db->setQuery($query2);
+            $db->execute();
+            $db->setQuery($query3);
+            $db->execute();
+            $db->setQuery($query4);
+            $db->execute();
+            $db->setQuery($query5);
+            $db->execute();
+            $db->setQuery($query6);
+            $db->execute();
+            $db->setQuery($query7);
+            $db->execute();
+            $db->setQuery($query8);
+            $db->execute();
+            $db->setQuery($query9);
+            $db->execute();
+            $db->setQuery($query10);
+            $db->execute();
+            $db->setQuery($query11);
+            $db->execute();
+            $db->setQuery($query12);
+            $db->execute();
+        } catch (Exception $e) {
+            echo $e->getMessage();
+        }
+
+        echo $db->getErrorMsg();
+        exit;
     }
-
-	echo $db->getErrorMsg();
-
-	exit;
-}
 }
 
 class com_contentbuilderInstallerScript
 {
-    
-        function getPlugins(){
-            $plugins = array();
-            $plugins['contentbuilder_verify'] = array();
-            $plugins['contentbuilder_verify'][] = 'paypal';
-            $plugins['contentbuilder_verify'][] = 'passthrough';
-            $plugins['contentbuilder_validation'] = array();
-            $plugins['contentbuilder_validation'][] = 'notempty';
-            $plugins['contentbuilder_validation'][] = 'equal';
-            $plugins['contentbuilder_validation'][] = 'email';
-            $plugins['contentbuilder_validation'][] = 'date_not_before';
-            $plugins['contentbuilder_validation'][] = 'date_is_valid';
-            $plugins['contentbuilder_themes'] = array();
-            $plugins['contentbuilder_themes'][] = 'khepri';
-            $plugins['contentbuilder_themes'][] = 'blank';
-            $plugins['contentbuilder_themes'][] = 'joomla3';
-            $plugins['system'] = array();
-            $plugins['system'][] = 'contentbuilder_system';
-            $plugins['contentbuilder_submit'] = array();
-            $plugins['contentbuilder_submit'][] = 'submit_sample';
-            $plugins['contentbuilder_listaction'] = array();
-            $plugins['contentbuilder_listaction'][] = 'trash';
-            $plugins['contentbuilder_listaction'][] = 'untrash';
-            $plugins['content'] = array();
-            $plugins['content'][] = 'contentbuilder_verify';
-            $plugins['content'][] = 'contentbuilder_permission_observer';
-            $plugins['content'][] = 'contentbuilder_image_scale';
-            $plugins['content'][] = 'contentbuilder_download';
-            $plugins['content'][] = 'contentbuilder_rating';
-            return $plugins;
+
+    function getPlugins()
+    {
+        $plugins = array();
+        $plugins['contentbuilder_verify'] = array();
+        $plugins['contentbuilder_verify'][] = 'paypal';
+        $plugins['contentbuilder_verify'][] = 'passthrough';
+        $plugins['contentbuilder_validation'] = array();
+        $plugins['contentbuilder_validation'][] = 'notempty';
+        $plugins['contentbuilder_validation'][] = 'equal';
+        $plugins['contentbuilder_validation'][] = 'email';
+        $plugins['contentbuilder_validation'][] = 'date_not_before';
+        $plugins['contentbuilder_validation'][] = 'date_is_valid';
+        $plugins['contentbuilder_themes'] = array();
+        $plugins['contentbuilder_themes'][] = 'khepri';
+        $plugins['contentbuilder_themes'][] = 'blank';
+        $plugins['contentbuilder_themes'][] = 'joomla3';
+        $plugins['system'] = array();
+        $plugins['system'][] = 'contentbuilder_system';
+        $plugins['contentbuilder_submit'] = array();
+        $plugins['contentbuilder_submit'][] = 'submit_sample';
+        $plugins['contentbuilder_listaction'] = array();
+        $plugins['contentbuilder_listaction'][] = 'trash';
+        $plugins['contentbuilder_listaction'][] = 'untrash';
+        $plugins['content'] = array();
+        $plugins['content'][] = 'contentbuilder_verify';
+        $plugins['content'][] = 'contentbuilder_permission_observer';
+        $plugins['content'][] = 'contentbuilder_image_scale';
+        $plugins['content'][] = 'contentbuilder_download';
+        $plugins['content'][] = 'contentbuilder_rating';
+        return $plugins;
+    }
+
+    function installAndUpdate()
+    {
+        require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+
+        $db = CBFactory::getDBO();
+
+        $version = new Version();
+        $plugins = $this->getPlugins();
+
+        $base_path = JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'plugins';
+
+        $folders = Folder::folders($base_path);
+
+        $installer = new JInstaller();
+
+        foreach ($folders as $folder) {
+            echo 'Installing plugin <b>' . $folder . '</b><br/>';
+            $success = $installer->install($base_path . DS . $folder);
+            if (!$success) {
+                echo 'Install failed for plugin <b>' . $folder . '</b><br/>';
+            }
+            echo '<hr/>';
         }
-        
-        function installAndUpdate(){
+
+        foreach ($plugins as $folder => $subplugs) {
+            foreach ($subplugs as $plugin) {
+                if (version_compare($version->getShortVersion(), '1.6', '>=')) {
+                    $db->setQuery('Update #__extensions Set `enabled` = 1 WHERE `type` = "plugin" AND `element` = "' . $plugin . '" AND `folder` = "' . $folder . '"');
+                } else {
+                    $db->setQuery('Update #__plugins Set `published` = 1 WHERE `element` = "' . $plugin . '" AND `folder` = "' . $folder . '"');
+                }
+                
+                $db->execute();
+                echo 'Published plugin ' . $plugin . '<hr/>';
+            }
+        }
+    }
+
+    /**
+     * method to install the component
+     *
+     * @return void
+     */
+    function install($parent)
+    {
+        if (!version_compare(PHP_VERSION, '5.2.0', '>=')) {
+            echo '<b style="color:red">WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 5.2.0, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!</b>';
+        }
+
+        require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+
+        //contentbuilder_install_db();
+
+        //exit;
+        $this->installAndUpdate();
+    }
+
+    /**
+     * method to update the component
+     *
+     * @return void
+     */
+    function update($parent)
+    {
+        if (!version_compare(PHP_VERSION, '5.2.0', '>=')) {
+            echo '<b style="color:red">WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 5.2.0, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!</b>';
+        }
+
+        $this->installAndUpdate();
+    }
+
+    /**
+     * method to uninstall the component
+     *
+     * @return void
+     */
+    function uninstall($parent)
+    {
+        $version = new Version();
+
+        $db = CBFactory::getDBO();
+
+        $db->setQuery("Delete From #__menu Where `link` Like 'index.php?option=com_contentbuilder%'");
+        $db->execute();
+
+        $plugins = $this->getPlugins();
+
+        $installer = new JInstaller();
+
+        foreach ($plugins as $folder => $subplugs) {
+            foreach ($subplugs as $plugin) {
+                if (version_compare($version->getShortVersion(), '1.6', '>=')) {
+                    $db->setQuery('SELECT `extension_id` FROM #__extensions WHERE `type` = "plugin" AND `element` = "' . $plugin . '" AND `folder` = "' . $folder . '"');
+                } else {
+                    $db->setQuery('SELECT `id` FROM #__plugins WHERE `element` = "' . $plugin . '" AND `folder` = "' . $folder . '"');
+                }
+
+                $id = $db->loadResult();
+
+                if ($id) {
+                    $installer->uninstall('plugin', $id, 1);
+                }
+            }
+        }
+
+        $db = CBFactory::getDBO();
+        $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
+        if (!$db->loadResult()) {
+            $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
+            $db->execute();
+        }
+    }
+
+    /**
+     * method to run before an install/update/uninstall method
+     *
+     * @return void
+     */
+    function preflight($type, $parent)
+    {
+        $db = CBFactory::getDBO();
+        $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
+        if (!$db->loadResult()) {
+            $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
+            $db->execute();
+        }
+    }
+
+    /**
+     * method to run after an install/update/uninstall method
+     *
+     * @return void
+     */
+    function postflight($type, $parent)
+    {
+        $db = CBFactory::getDBO();
+
+        /*
+                 $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
+                 if(!$db->loadResult()){
+                     $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
+                     $db->execute();
+                 }*/
+
+        $db->setQuery("Update #__menu Set `title` = 'COM_CONTENTBUILDER' Where `alias`='contentbuilder'");
+        $db->execute();
+
+        // try to restore the main menu items if they got lost
+        /*
+        $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder' And parent_id = 1");
+        $result = $db->loadResult();
+
+        if(!$result) {
             
-            require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
-
-                $db = CBFactory::getDBO();
-
-                jimport('joomla.filesystem.file');
-                jimport('joomla.filesystem.folder');
+            $db->setQuery("Select extension_id From #__extensions Where `type` = 'component' And `element` = 'com_contentbuilder'");
+            $comp_id = $db->loadResult();
+            
+            if($comp_id){
+                
                 jimport('joomla.version');
-
-                $version = new JVersion();
-                $plugins = $this->getPlugins();
-
-                $base_path = JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'plugins';
-
-                $folders = JFolder::folders($base_path);
-
-                $installer = new JInstaller();
-
-                foreach( $folders As $folder ){
-                    echo 'Installing plugin <b>' . $folder . '</b><br/>';
-                    $success = $installer->install( $base_path . DS . $folder );
-                    if(!$success){
-                        echo 'Install failed for plugin <b>' . $folder . '</b><br/>';
-                    }
-                    echo '<hr/>';
-                }
-
-                foreach($plugins As $folder => $subplugs){
-                    foreach($subplugs As $plugin){
-                        if(version_compare($version->getShortVersion(), '1.6', '>=')){
-                            $db->setQuery('Update #__extensions Set `enabled` = 1 WHERE `type` = "plugin" AND `element` = "'.$plugin.'" AND `folder` = "'.$folder.'"');
-                        } else {
-                            $db->setQuery('Update #__plugins Set `published` = 1 WHERE `element` = "'.$plugin.'" AND `folder` = "'.$folder.'"');
-                        }
-                        $db->execute();
-                        echo 'Published plugin ' . $plugin . '<hr/>';
-                    }
-                }
-        }
-        
-	/**
-	 * method to install the component
-	 *
-	 * @return void
-	 */
-	function install($parent) 
-	{
-            if(!version_compare(PHP_VERSION, '5.2.0', '>=')){
-                echo '<b style="color:red">WARNING: YOU ARE RUNNING PHP VERSION "'.PHP_VERSION.'". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 5.2.0, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!</b>';
-            }
-            
-            require_once(JPATH_SITE.DS.'administrator'.DS.'components'.DS.'com_contentbuilder'.DS.'classes'.DS.'joomla_compat.php');
-
-            //contentbuilder_install_db();
-
-			//exit;
-            $this->installAndUpdate();
-	}
-        
-        /**
-	 * method to update the component
-	 *
-	 * @return void
-	 */
-	function update($parent) 
-	{
-            if(!version_compare(PHP_VERSION, '5.2.0', '>=')){
-                echo '<b style="color:red">WARNING: YOU ARE RUNNING PHP VERSION "'.PHP_VERSION.'". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 5.2.0, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!</b>';
-            }
-            
-            $this->installAndUpdate();
-        }
- 
-	/**
-	 * method to uninstall the component
-	 *
-	 * @return void
-	 */
-	function uninstall($parent) 
-	{
-            jimport('joomla.version');
-            $version = new JVersion();
-            
-            $db = CBFactory::getDBO();
-            
-            $db->setQuery("Delete From #__menu Where `link` Like 'index.php?option=com_contentbuilder%'");
-            $db->execute();
-            
-            $plugins = $this->getPlugins();
-            
-            $installer = new JInstaller();
-            
-            foreach($plugins As $folder => $subplugs){
-                foreach($subplugs As $plugin){
-                    if(version_compare($version->getShortVersion(), '1.6', '>=')){
-                        $db->setQuery('SELECT `extension_id` FROM #__extensions WHERE `type` = "plugin" AND `element` = "'.$plugin.'" AND `folder` = "'.$folder.'"');
-                    } else {
-                        $db->setQuery('SELECT `id` FROM #__plugins WHERE `element` = "'.$plugin.'" AND `folder` = "'.$folder.'"');
-                    }
-
-                    $id = $db->loadResult();
-                    
-                    if($id)
-                    {
-                        $installer->uninstall('plugin',$id,1);
-                    } 
-                }
-            }
-            
-            $db = CBFactory::getDBO();
-            $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
-            if(!$db->loadResult()){
-                $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
-                $db->execute();
-            }
-	}
- 
-	/**
-	 * method to run before an install/update/uninstall method
-	 *
-	 * @return void
-	 */
-	function preflight($type, $parent) 
-	{
-            $db = CBFactory::getDBO();
-            $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
-            if(!$db->loadResult()){
-                $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
-                $db->execute();
-            }
-	}
- 
-	/**
-	 * method to run after an install/update/uninstall method
-	 *
-	 * @return void
-	 */
-	function postflight($type, $parent) 
-	{
-            $db = CBFactory::getDBO();
-
-			/*
-            $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
-            if(!$db->loadResult()){
-                $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
-                $db->execute();
-            }*/
-            
-            $db->setQuery("Update #__menu Set `title` = 'COM_CONTENTBUILDER' Where `alias`='contentbuilder'");
-            $db->execute();
-            
-            // try to restore the main menu items if they got lost
-            /*
-            $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder' And parent_id = 1");
-            $result = $db->loadResult();
-
-            if(!$result) {
+                $version = new Version();
                 
-                $db->setQuery("Select extension_id From #__extensions Where `type` = 'component' And `element` = 'com_contentbuilder'");
-                $comp_id = $db->loadResult();
+                if(version_compare($version->getShortVersion(), '3.0', '<')){
                 
-                if($comp_id){
+                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER', 'contentbuilder', '', 'contentbuilder', 'index.php?option=com_contentbuilder', 'component', 0, 1, 1, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+                    $db->execute();
+                    $parent_id = $db->insertid();
+
+                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER_STORAGES', 'comcontentbuilderstorages', '', 'contentbuilder/comcontentbuilderstorages', 'index.php?option=com_contentbuilder&controller=storages', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+                    $db->execute();
+
+                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_LIST', 'comcontentbuilderlist', '', 'contentbuilder/comcontentbuilderlist', 'index.php?option=com_contentbuilder&controller=forms', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+                    $db->execute();
+
+                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'Try BreezingForms!', 'try-breezingforms', '', 'contentbuilder/try-breezingforms', 'index.php?option=com_contentbuilder&view=contentbuilder&market=true', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+                    $db->execute();
+
+                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_ABOUT', 'comcontentbuilderabout', '', 'contentbuilder/comcontentbuilderabout', 'index.php?option=com_contentbuilder&view=contentbuilder', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+                    $db->execute();
+
+                    $db->setQuery("Select max(mrgt.rgt)+1 From #__menu As mrgt");
+                    $rgt = $db->loadResult();
+
+                    $db->setQuery("Update `#__menu` Set rgt = ".$rgt." Where `title` = 'Menu_Item_Root' And `alias` = 'root'");
+                    $db->execute();
+                
+                } else {
                     
-                    jimport('joomla.version');
-                    $version = new JVersion();
+                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER', 'contentbuilder', '', 'contentbuilder', 'index.php?option=com_contentbuilder', 'component', 0, 1, 1, ".$comp_id.", 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+                    $db->execute();
+                    $parent_id = $db->insertid();
+
+                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER_STORAGES', 'comcontentbuilderstorages', '', 'contentbuilder/comcontentbuilderstorages', 'index.php?option=com_contentbuilder&controller=storages', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+                    $db->execute();
+
+                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_LIST', 'comcontentbuilderlist', '', 'contentbuilder/comcontentbuilderlist', 'index.php?option=com_contentbuilder&controller=forms', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+                    $db->execute();
+
+                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'Try BreezingForms!', 'try-breezingforms', '', 'contentbuilder/try-breezingforms', 'index.php?option=com_contentbuilder&view=contentbuilder&market=true', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, '0000-00-00 00:00:00', 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+                    $db->execute();
+
+                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_ABOUT', 'comcontentbuilderabout', '', 'contentbuilder/comcontentbuilderabout', 'index.php?option=com_contentbuilder&view=contentbuilder', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, '0000-00-00 00:00:00', 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+                    $db->execute();
+
+                    $db->setQuery("Select max(mrgt.rgt)+1 From #__menu As mrgt");
+                    $rgt = $db->loadResult();
+
+                    $db->setQuery("Update `#__menu` Set rgt = ".$rgt." Where `title` = 'Menu_Item_Root' And `alias` = 'root'");
+                    $db->execute();
                     
-                    if(version_compare($version->getShortVersion(), '3.0', '<')){
-                    
-                        $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER', 'contentbuilder', '', 'contentbuilder', 'index.php?option=com_contentbuilder', 'component', 0, 1, 1, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                        $db->execute();
-                        $parent_id = $db->insertid();
-
-                        $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER_STORAGES', 'comcontentbuilderstorages', '', 'contentbuilder/comcontentbuilderstorages', 'index.php?option=com_contentbuilder&controller=storages', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                        $db->execute();
-
-                        $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_LIST', 'comcontentbuilderlist', '', 'contentbuilder/comcontentbuilderlist', 'index.php?option=com_contentbuilder&controller=forms', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                        $db->execute();
-
-                        $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'Try BreezingForms!', 'try-breezingforms', '', 'contentbuilder/try-breezingforms', 'index.php?option=com_contentbuilder&view=contentbuilder&market=true', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                        $db->execute();
-
-                        $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_ABOUT', 'comcontentbuilderabout', '', 'contentbuilder/comcontentbuilderabout', 'index.php?option=com_contentbuilder&view=contentbuilder', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                        $db->execute();
-
-                        $db->setQuery("Select max(mrgt.rgt)+1 From #__menu As mrgt");
-                        $rgt = $db->loadResult();
-
-                        $db->setQuery("Update `#__menu` Set rgt = ".$rgt." Where `title` = 'Menu_Item_Root' And `alias` = 'root'");
-                        $db->execute();
-                    
-                    } else {
-                        
-                        $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER', 'contentbuilder', '', 'contentbuilder', 'index.php?option=com_contentbuilder', 'component', 0, 1, 1, ".$comp_id.", 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                        $db->execute();
-                        $parent_id = $db->insertid();
-
-                        $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER_STORAGES', 'comcontentbuilderstorages', '', 'contentbuilder/comcontentbuilderstorages', 'index.php?option=com_contentbuilder&controller=storages', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                        $db->execute();
-
-                        $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_LIST', 'comcontentbuilderlist', '', 'contentbuilder/comcontentbuilderlist', 'index.php?option=com_contentbuilder&controller=forms', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                        $db->execute();
-
-                        $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'Try BreezingForms!', 'try-breezingforms', '', 'contentbuilder/try-breezingforms', 'index.php?option=com_contentbuilder&view=contentbuilder&market=true', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, '0000-00-00 00:00:00', 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                        $db->execute();
-
-                        $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_ABOUT', 'comcontentbuilderabout', '', 'contentbuilder/comcontentbuilderabout', 'index.php?option=com_contentbuilder&view=contentbuilder', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, '0000-00-00 00:00:00', 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                        $db->execute();
-
-                        $db->setQuery("Select max(mrgt.rgt)+1 From #__menu As mrgt");
-                        $rgt = $db->loadResult();
-
-                        $db->setQuery("Update `#__menu` Set rgt = ".$rgt." Where `title` = 'Menu_Item_Root' And `alias` = 'root'");
-                        $db->execute();
-                        
-                    }
                 }
-            }*/
-	}
+            }
+        }*/
+    }
 }
 

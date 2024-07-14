@@ -15,7 +15,7 @@
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
-
+use Joomla\CMS\Version;
 
 // Check to ensure this file is within the rest of the framework
 defined('JPATH_BASE') or die();
@@ -237,7 +237,7 @@ class CBPluginHelper
 	 */
 	function _load()
 	{
-    	$version = new JVersion();
+    	$version = new Version();
 
 		if(version_compare($version->getShortVersion(), '1.6', '>=') && version_compare($version->getShortVersion(), '1.7', '<')){
 			return CBPluginHelper::_load16();
