@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension type="component" version="4.0" method="upgrade">
+<extension type="component" version="5.0" method="upgrade">
  <name>Contentbuilder</name>
  <creationDate>2024-07-14</creationDate>
  <author>XDA+GIL</author>
@@ -7,7 +7,7 @@
  <authorUrl>https://breezingforms.vcmb.fr</authorUrl>
  <copyright>Copyright 2011 - 2024 by XDA+GIL</copyright>
  <license>GNU/GPL v2.0</license>
- <version>5.0.0-RC3</version>
+ <version>5.0.0-RC4</version>
  <description>A content construction kit and application framework extension for Joomla!</description>
 
  <scriptfile>script.php</scriptfile>
@@ -45,6 +45,7 @@
  <languages folder="admin">
     <language tag="en-GB">languages/en-GB/site/en-GB.com_contentbuilder.ini</language>
     <language tag="de-DE">languages/de-DE/site/de-DE.com_contentbuilder.ini</language>
+    <language tag="fr-FR">languages/fr-FR/site/fr-FR.com_contentbuilder.ini</language>
  </languages>
 
  <administration>
@@ -81,6 +82,9 @@
     <language tag="de-DE">languages/de-DE/admin/de-DE.com_contentbuilder.ini</language>
     <language tag="de-DE">languages/de-DE/admin/de-DE.com_contentbuilder.menu.ini</language>
     <language tag="de-DE">languages/de-DE/admin/de-DE.com_contentbuilder.sys.ini</language>
+    <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilder.ini</language>
+    <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilder.menu.ini</language>
+    <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilder.sys.ini</language>
  </languages>
 
  </administration>
