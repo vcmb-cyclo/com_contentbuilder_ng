@@ -25,7 +25,7 @@ class plgContentbuilder_validationEqual extends CMSPlugin
         
         function onValidate($field, $fields, $record_id, $form, $value){
             
-            $lang = Factory::getLanguage();
+            $lang = Factory::getApplication()->getLanguage();
             $lang->load('plg_contentbuilder_validation_equal', JPATH_ADMINISTRATOR);
 
             foreach($fields As $other_field){

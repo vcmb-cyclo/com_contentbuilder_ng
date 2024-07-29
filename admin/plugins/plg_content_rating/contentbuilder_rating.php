@@ -70,7 +70,7 @@ class plgContentContentbuilder_rating extends CMSPlugin
 
         require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php');
 
-        $lang = Factory::getLanguage();
+        $lang = Factory::getApplication()->getLanguage();
         $lang->load('plg_content_contentbuilder_rating', JPATH_ADMINISTRATOR);
 
         /*

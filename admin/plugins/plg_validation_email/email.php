@@ -26,7 +26,7 @@ class plgContentbuilder_validationEmail extends CMSPlugin
     function onValidate($field, $fields, $record_id, $form, $value)
     {
 
-        $lang = Factory::getLanguage();
+        $lang = Factory::getApplication()->getLanguage();
         $lang->load('plg_contentbuilder_validation_email', JPATH_ADMINISTRATOR);
 
         $msg = '';

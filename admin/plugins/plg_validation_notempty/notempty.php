@@ -25,7 +25,7 @@ class plgContentbuilder_validationNotempty extends CMSPlugin
     function onValidate($field, $fields, $record_id, $form, $value)
     {
 
-        $lang = Factory::getLanguage();
+        $lang = Factory::getApplication()->getLanguage();
         $lang->load('plg_contentbuilder_validation_notempty', JPATH_ADMINISTRATOR);
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);

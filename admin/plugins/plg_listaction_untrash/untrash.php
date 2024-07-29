@@ -31,7 +31,7 @@ class plgContentbuilder_listactionUntrash extends CMSPlugin
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-        $lang = Factory::getLanguage();
+        $lang = Factory::getApplication()->getLanguage();
         $lang->load('plg_contentbuilder_listaction_untrash', JPATH_ADMINISTRATOR);
 
         foreach ($record_ids as $record_id) {

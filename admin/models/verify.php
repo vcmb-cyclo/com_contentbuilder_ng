@@ -375,7 +375,7 @@ class ContentbuilderModelVerify extends CBModel
             throw new Exception('You are not allowed to perform this action.', 500);
         }
 
-        Factory::getLanguage()->load('com_users', JPATH_SITE);
+        Factory::getApplication()->getLanguage()->load('com_users', JPATH_SITE);
 
         $config = Factory::getConfig();
         $userParams = ComponentHelper::getParams('com_users');

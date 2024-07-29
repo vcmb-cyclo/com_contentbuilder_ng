@@ -204,10 +204,10 @@ class ContentbuilderModelEdit extends CBModel
         $this->setIds(CBRequest::getInt('id', 0), CBRequest::getCmd('record_id', 0));
 
         if (!$this->frontend) {
-            Factory::getLanguage()->load('com_content');
+            Factory::getApplication()->getLanguage()->load('com_content');
         } else {
-            Factory::getLanguage()->load('com_content', JPATH_SITE . DS . 'administrator');
-            Factory::getLanguage()->load('joomla', JPATH_SITE . DS . 'administrator');
+            Factory::getApplication()->getLanguage()->load('com_content', JPATH_SITE . DS . 'administrator');
+            Factory::getApplication()->getLanguage()->load('joomla', JPATH_SITE . DS . 'administrator');
         }
     }
 
@@ -1758,7 +1758,7 @@ var contentbuilder = new function(){
         }
 
         // else execute the registration
-        Factory::getLanguage()->load('com_users', JPATH_SITE);
+        Factory::getApplication()->getLanguage()->load('com_users', JPATH_SITE);
 
         $config = Factory::getConfig();
         $params = ComponentHelper::getParams('com_users');
