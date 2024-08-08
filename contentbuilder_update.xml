@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <updates>
-
 	<update>
 		<name>ContentBuilder</name>
 		<description>ContentBuilder Update</description>
 		<element>com_contentbuilder</element>
 		<type>component</type>
 		<client>1</client>
-		<version>5.0.0-RC5</version>
+		<version>5.0.0-RC6</version>
 		<infourl title="ContentBuilder">https://breezingforms.vcmb.fr/</infourl>
 		<downloads>
-			<downloadurl type="full" format="zip">https://breezingforms.vcmb.fr/download/com_contentbuilder-5.0.0-RC5.zip</downloadurl>
+			<downloadurl type="full" format="zip">https://breezingforms.vcmb.fr/download/com_contentbuilder-5.0.0-RC6.zip</downloadurl>
 		</downloads>
 		<tags>
 			<tag>stable</tag>
@@ -19,22 +18,4 @@
 		<maintainerurl>https://breezingforms.vcmb.fr</maintainerurl>
 		<targetplatform name="joomla" version="5.1"/>
 	</update>
-
-	<update>
-		<name>ContentBuilder</name>
-		<description>ContentBuilder Update</description>
-		<element>com_contentbuilder</element>
-		<type>component</type>
-		<client>1</client>
-		<version>0.9.94 (build 255)</version>
-		<infourl title="ContentBuilder">https://crosstec.org/en/downloads/contentbuilder-cck-for-joomla.html</infourl>
-		<downloads><downloadurl type="full" format="zip">https://crosstec.org/media/contentbuilder/upload/com_contentbuilder_joomla30.zip</downloadurl></downloads>
-		<tags>
-			<tag>stable</tag>
-		</tags>
-		<maintainer>Markus Bopp</maintainer>
-		<maintainerurl>https://crosstec.org</maintainerurl>
-		<targetplatform name="joomla" version="3.9"/>
-	</update>
-
 </updates>
