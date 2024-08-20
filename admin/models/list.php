@@ -553,7 +553,7 @@ class ContentbuilderModelList extends CBModel
                     $start      = CBRequest::getVar('start', 0, '', 'int');
                     $table = Table::getInstance('content');
                     $registry = new Registry;
-	                $registry->loadString($table->attribs);
+	                $registry->loadString($table->attribs ?? '');
                     PluginHelper::importPlugin('content');
                     $table->text = $data->intro_text;
                     $table->text .= "<!-- workaround for J! pagebreak bug: class=\"system-pagebreak\" -->\n";
