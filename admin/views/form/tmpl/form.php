@@ -1244,7 +1244,7 @@ $cbcompat = new CBCompat();
             echo Text::_('COM_CONTENTBUILDER_EDITABLE_TEMPLATE_PROVIDED_BY_BREEZINGFORMS');
             echo '<input type="hidden" name="editable_prepare" value="' . htmlentities($this->form->editable_prepare ?? '', ENT_QUOTES, 'UTF-8') . '"/>';
         } else {
-            if (trim($this->form->editable_prepare) == '') {
+            if (trim($this->form->editable_prepare ?? '') == '') {
                 $this->form->editable_prepare = '// Here you may alter labels and values for each item before it gets rendered through your editable template.' . "\n";
                 $this->form->editable_prepare .= '// For example:' . "\n";
                 $this->form->editable_prepare .= '// $items["ITEMNAME"]["value"] = $items["ITEMNAME"]["value"];' . "\n";
