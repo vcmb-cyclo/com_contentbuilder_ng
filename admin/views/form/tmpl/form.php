@@ -1262,7 +1262,7 @@ $cbcompat = new CBCompat();
 
         if ($this->form->edit_by_type) {
             echo Text::_('COM_CONTENTBUILDER_EDITABLE_TEMPLATE_PROVIDED_BY_BREEZINGFORMS');
-            echo '<input type="hidden" name="email_admin_template" value="' . htmlentities($this->form->email_admin_template, ENT_QUOTES, 'UTF-8') . '"/>';
+            echo '<input type="hidden" name="email_admin_template" value="' . htmlentities($this->form->email_admin_template ?? '', ENT_QUOTES, 'UTF-8') . '"/>';
             echo '<input type="hidden" name="email_template" value="' . htmlentities($this->form->email_template ?? '', ENT_QUOTES, 'UTF-8') . '"/>';
             echo '<input type="hidden" name="email_admin_subject" value="' . htmlentities($this->form->email_admin_subject ?? '', ENT_QUOTES, 'UTF-8') . '"/>';
             echo '<input type="hidden" name="email_admin_alternative_from" value="' . htmlentities($this->form->email_admin_alternative_from ?? '', ENT_QUOTES, 'UTF-8') . '"/>';
