@@ -573,7 +573,7 @@ class contentbuilder
                             $item->$key = $value;
                         } else if (trim($wrapper['item_wrapper']) != '') {
                             $item->$key = str_replace('{value}', $new_value, trim($wrapper['item_wrapper']));
-                            $item->$key = str_replace('{webpath}', str_replace(array('{CBSite}', '{cbsite}', JPATH_SITE), Uri::getInstance()->getScheme() . '://' . Uri::getInstance()->getHost() . (Uri::getInstance()->getPort() == 80 ? '' : ':' . Uri::getInstance()->getPort()) . Uri::root(true), $value), $item->$key);
+                            $item->$key = str_replace('{webpath}', str_replace(array('{CBSite}', '{cbsite}', JPATH_SITE), Uri::getInstance()->getScheme() . '://' . Uri::getInstance()->getHost() . (Uri::getInstance()->getPort() == 80 ? '' : ':' . Uri::getInstance()->getPort()) . Uri::root(true), $value ?? ''), $item->$key);
                         } else {
                             $item->$key = $new_value;
                         }
