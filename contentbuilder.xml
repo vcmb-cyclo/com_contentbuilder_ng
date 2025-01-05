@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="component" version="5.1" method="upgrade">
  <name>Contentbuilder</name>
- <creationDate>2024-09-10</creationDate>
+ <creationDate>2025-01-04</creationDate>
  <author>XDA+GIL</author>
  <authorEmail>noreply@vcmb.fr</authorEmail>
  <authorUrl>https://breezingforms.vcmb.fr</authorUrl>
- <copyright>Copyright 2011 - 2024 by XDA+GIL</copyright>
+ <copyright>Copyright 2011 - 2025 by XDA+GIL</copyright>
  <license>GNU/GPL v2.0</license>
- <version>5.0.0-RC7</version>
+ <version>5.0.0-RC8</version>
  <description>A content construction kit and application framework extension for Joomla!</description>
 
  <scriptfile>script.php</scriptfile>
