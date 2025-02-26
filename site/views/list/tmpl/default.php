@@ -122,6 +122,7 @@ endif;
 <?php endif; ?>
 <?php echo $this->intro_text; ?>
 <div style="float: right; text-align: right;">
+	/** XDA+GN / BEGIN Hide NEW button
 	<?php
 	if ($new_allowed) {
 		?>
@@ -130,6 +131,7 @@ endif;
 		<?php
 	}
 	?>
+	*/
 
 	<?php
 	if ($delete_allowed) {
