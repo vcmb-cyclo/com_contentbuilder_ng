@@ -147,7 +147,7 @@ if (!$userTimezone) {
 // Créer la date avec le fuseau horaire
 $date = Factory::getDate('now', $userTimezone);
 
-$filename = "export-" . $this->data->form->name .'-' .$date->format('Y-m-d_Hi', true) . ".xlsx";
+$filename = "export-" . $this->form->name .'-' .$date->format('Y-m-d_Hi', true) . ".xlsx";
 $spreadsheet->setActiveSheetIndex(0);
 
 // Auto size columns for each worksheet
