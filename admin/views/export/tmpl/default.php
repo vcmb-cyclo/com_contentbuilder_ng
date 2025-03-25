@@ -1,4 +1,4 @@
-<?php
+F<?php
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
@@ -17,6 +17,8 @@ require __DIR__ . '/../../../librairies/PhpSpreadsheet/vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Joomla\CMS\Factory;
+
+$database = Factory::getDbo();
 
 $spreadsheet = new Spreadsheet();
 $spreadsheet->getProperties()->setCreator("ContentBuilder")->setLastModifiedBy("ContentBuilder");
@@ -87,10 +89,8 @@ foreach ($this->data->items as $item) {
         $worksheet1->setCellValue([$i++, $row], $item->colRecord);
     }
 
-
     // Si on veut mettre la colonne d'état.
     if ($col_state > 0) {
-        $database = Factory::getDbo();
         // Sécuriser la requête
         $recordId = $database->quote($item->colRecord);
         $sql = "SELECT title, color 
@@ -109,7 +109,9 @@ foreach ($this->data->items as $item) {
             // Convertir $i en lettre de colonne
             $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i);
             $cell = $columnLetter . $row; // Ex. 'B2'
-
+            
+            // Retrait de la couleur dans l'export.
+            /*
             if ($result[1] !== 'FFFFFF') { // !== pour cohérence avec chaînes
                 $worksheet1->getStyle($cell)->applyFromArray([
                     'fill' => [
@@ -117,11 +119,19 @@ foreach ($this->data->items as $item) {
                         'startColor' => ['rgb' => $result[1]]
                     ]
                 ]);
-            }
+            }*/
             $worksheet1->setCellValue([$i++, $row], $result[0]);
+        }
+        else {
+            $i++;
         }
     }
 
+    // Si on veut mettre la colonne d'état.
+    if ($col_publish > 0) {
+        $i++;
+    }
+ 
     // Les autres colonnes.
     foreach($this->data->visible_cols as $id) {
         $worksheet1->setCellValue([$i++, $row], $item->{"col$id"});          
@@ -147,7 +157,18 @@ if (!$userTimezone) {
 // Créer la date avec le fuseau horaire
 $date = Factory::getDate('now', $userTimezone);
 
-$filename = "export-" . $this->form->name .'-' .$date->format('Y-m-d_Hi', true) . ".xlsx";
+$query = $database->getQuery(true)
+    ->select($database->quoteName('name'))
+    ->from($database->quoteName('#__facileforms_forms'))
+    ->where($database->quoteName('id') . ' = ' . (int) $this->data->reference_id);
+
+$database->setQuery($query);
+$name = $database->loadResult() ?: 'Formulaire_inconnu';
+
+
+$filename = "CB_export_" . $name. '_' .$date->format('Y-m-d_Hi', true) . ".xlsx";
+
+
 $spreadsheet->setActiveSheetIndex(0);
 
 // Auto size columns for each worksheet
