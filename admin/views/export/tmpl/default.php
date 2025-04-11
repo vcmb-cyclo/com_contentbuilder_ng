@@ -1,4 +1,4 @@
-F<?php
+<?php
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
@@ -26,7 +26,8 @@ $spreadsheet->getProperties()->setCreator("ContentBuilder")->setLastModifiedBy("
 // Create "Sheet 1" tab as the first worksheet.
 // https://phpspreadsheet.readthedocs.io/en/latest/topics/worksheets/adding-a-new-worksheet
 $spreadsheet->removeSheetByIndex(0);
-$worksheet1 = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, $this->data->title ?? 'default');
+
+$worksheet1 = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, substr($this->data->title ?? 'default', 0, 31));
 $spreadsheet->addSheet($worksheet1, 0);
 
 // LETTER -> A4.
