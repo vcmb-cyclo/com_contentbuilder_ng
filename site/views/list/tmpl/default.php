@@ -11,9 +11,11 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
-use Joomla\Uri\Uri;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\Application\ApplicationInterface;
+
 
 require_once (JPATH_COMPONENT_ADMINISTRATOR . DS . 'classes' . DS . 'contentbuilder_helpers.php');
 
@@ -26,13 +28,13 @@ $state_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('state
 $publish_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('publish') : contentbuilder::authorize('publish');
 $rating_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('rating') : contentbuilder::authorize('rating');
 
-Factory::getContainer()->get(ApplicationInterface::class)->getDocument()->addScript(Uri::root(true) . '/components/com_contentbuilder/assets/js/contentbuilder.js');
+Factory::getApplication()->getDocument()->addScript(Uri::root(true) . '/components/com_contentbuilder/assets/js/contentbuilder.js');
 
 $___getpost = 'post';
 $___tableOrdering = "Joomla.tableOrdering = function";
 ?>
-<?php Factory::getContainer()->get(ApplicationInterface::class)->getDocument()->addStyleDeclaration($this->theme_css); ?>
-<?php Factory::getContainer()->get(ApplicationInterface::class)->getDocument()->addScriptDeclaration($this->theme_js); ?>
+<?php Factory::getApplication()->getDocument()->addStyleDeclaration($this->theme_css); ?>
+<?php Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js); ?>
 <style type="text/css">
 	.cbPagesCounter {
 		float: left;

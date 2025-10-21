@@ -26,7 +26,7 @@ class plgContentbuilder_validationDate_is_valid extends CMSPlugin
     function onValidate($field, $fields, $record_id, $form, $value)
     {
 
-        $lang = Factory::getContainer()->get(ApplicationInterface::class)->getLanguage();
+        $lang = Factory::getApplication()->getLanguage();
         $lang->load('plg_contentbuilder_validation_date_is_valid', JPATH_ADMINISTRATOR);
 
         $options = $field['options'];

@@ -152,7 +152,7 @@ $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
 
 // Name file.
 // Récupérer le fuseau horaire du client (via POST, GET, ou autre)
-$input = Factory::getContainer()->get(ApplicationInterface::class)->input;
+$input = Factory::getApplication()->input;
 $userTimezone = $input->get('user_timezone', null, 'string');
 
 // Si aucun fuseau horaire client n'est fourni, utiliser celui de Joomla

@@ -60,7 +60,7 @@ class plgContentContentbuilder_permission_observer extends CMSPlugin
         if (isset ($article->id) && $article->id) {
 
             $frontend = true;
-            if (Factory::getContainer()->get(ApplicationInterface::class)->isClient('administrator')) {
+            if (Factory::getApplication()->isClient('administrator')) {
                 $frontend = false;
             }
 
@@ -77,7 +77,7 @@ class plgContentContentbuilder_permission_observer extends CMSPlugin
 
             if ($form && !(CBRequest::getVar('option', '') == 'com_contentbuilder' && CBRequest::getVar('controller', '') == 'edit')) {
 
-                Factory::getContainer()->get(ApplicationInterface::class)->getLanguage()->load('com_contentbuilder');
+                Factory::getApplication()->getLanguage()->load('com_contentbuilder');
                 contentbuilder::setPermissions($data['form_id'], $data['record_id'], $frontend ? '_fe' : '');
 
                 if (CBRequest::getCmd('view') == 'article') {

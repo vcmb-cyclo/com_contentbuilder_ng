@@ -12,7 +12,7 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
-use Joomla\Uri\Uri;
+use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\MVC\View\HtmlView;
@@ -28,9 +28,9 @@ class ContentbuilderViewForm extends HtmlView
 {
     function display($tpl = null)
     {
-        Factory::getContainer()->get(ApplicationInterface::class)->input->set('hidemainmenu', true);
+        Factory::getApplication()->input->set('hidemainmenu', true);
 
-        $document = Factory::getContainer()->get(ApplicationInterface::class)->getDocument();
+        $document = Factory::getApplication()->getDocument();
         $document->addScript(Uri::root(true) . '/administrator/components/com_contentbuilder/assets/js/jscolor/jscolor.js');
 
         echo '

@@ -29,9 +29,9 @@ class ContentbuilderModelAjax extends CBModel
     {
         parent::__construct($config);
 
-        $this->frontend = Factory::getContainer()->get(ApplicationInterface::class)->isClient('site');
+        $this->frontend = Factory::getApplication()->isClient('site');
 
-        $mainframe = Factory::getContainer()->get(ApplicationInterface::class);
+        $mainframe = Factory::getApplication();
         $option = 'com_contentbuilder';
 
         $this->_id = CBRequest::getInt('id', 0);
@@ -151,12 +151,12 @@ class ContentbuilderModelAjax extends CBModel
                     // test if already voted
                     $this->_db->setQuery("Select `form_id` From #__contentbuilder_rating_cache Where `record_id` = " . $this->_db->Quote(CBRequest::getCmd('record_id', '')) . " And `form_id` = " . $this->_id . " And `ip` = " . $this->_db->Quote($_SERVER['REMOTE_ADDR']));
                     $cached = $this->_db->loadResult();
-                    $rated = Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('rated' . $this->_id . CBRequest::getCmd('record_id', ''), false, 'com_contentbuilder.rating');
+                    $rated = Factory::getApplication()->getSession()->get('rated' . $this->_id . CBRequest::getCmd('record_id', ''), false, 'com_contentbuilder.rating');
 
                     if ($rated || $cached) {
                         return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDER_RATED_ALREADY')));
                     } else {
-                        Factory::getContainer()->get(ApplicationInterface::class)->getSession()->set('rated' . $this->_id . CBRequest::getCmd('record_id', ''), true, 'com_contentbuilder.rating');
+                        Factory::getApplication()->getSession()->set('rated' . $this->_id . CBRequest::getCmd('record_id', ''), true, 'com_contentbuilder.rating');
                     }
 
                     // adding vote

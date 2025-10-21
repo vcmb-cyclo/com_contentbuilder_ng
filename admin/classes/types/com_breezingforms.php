@@ -904,9 +904,9 @@ class contentbuilder_com_breezingforms{
         if(!$record_id){
             $username = '-';
             $user_full_name = '-';
-            if(Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id',0) > 0){
-                $username = Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('username','');
-                $user_full_name = Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('name','');
+            if(Factory::getApplication()->getIdentity()->get('id',0) > 0){
+                $username = Factory::getApplication()->getIdentity()->get('username','');
+                $user_full_name = Factory::getApplication()->getIdentity()->get('name','');
             }
             $now = Factory::getDate()->toSql();
             $db->setQuery("Insert Into #__facileforms_records (
@@ -928,7 +928,7 @@ class contentbuilder_com_breezingforms{
                 ".$db->Quote($_SERVER['REMOTE_ADDR']).",
                 ".$db->Quote(Browser::getInstance()->getAgentString()).",
                 ".$db->Quote(Browser::getInstance()->getPlatform()).",
-                ".$db->Quote(Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id',0)).",
+                ".$db->Quote(Factory::getApplication()->getIdentity()->get('id',0)).",
                 ".$db->Quote($username).",
                 ".$db->Quote($user_full_name)."
             )");

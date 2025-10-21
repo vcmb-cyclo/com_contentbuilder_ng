@@ -70,7 +70,7 @@ class plgContentContentbuilder_rating extends CMSPlugin
 
         require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'contentbuilder.php');
 
-        $lang = Factory::getContainer()->get(ApplicationInterface::class)->getLanguage();
+        $lang = Factory::getApplication()->getLanguage();
         $lang->load('plg_content_contentbuilder_rating', JPATH_ADMINISTRATOR);
 
         /*
@@ -126,7 +126,7 @@ class plgContentContentbuilder_rating extends CMSPlugin
                 $record_id = 0;
 
                 $frontend = true;
-                if (Factory::getContainer()->get(ApplicationInterface::class)->isClient('administrator')) {
+                if (Factory::getApplication()->isClient('administrator')) {
                     $frontend = false;
                 }
 

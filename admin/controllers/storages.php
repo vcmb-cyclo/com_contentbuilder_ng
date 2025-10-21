@@ -41,7 +41,7 @@ class ContentbuilderControllerStorages extends CBController
     {
         $model = $this->getModel('storage');
         $model->listDelete();
-        Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage(Text::_('COM_CONTENTBUILDER_DELETED'));
+        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_DELETED'));
         CBRequest::setVar('view', 'storage');
         CBRequest::setVar('layout', 'form');
         CBRequest::setVar('hidemainmenu', 0);

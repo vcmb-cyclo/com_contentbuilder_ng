@@ -14,8 +14,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
 
 ?>
-<?php Factory::getContainer()->get(ApplicationInterface::class)->getDocument()->addStyleDeclaration($this->theme_css); ?>
-<?php Factory::getContainer()->get(ApplicationInterface::class)->getDocument()->addScriptDeclaration($this->theme_js); ?>
+<?php Factory::getApplication()->getDocument()->addStyleDeclaration($this->theme_css); ?>
+<?php Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js); ?>
 <div align="center">
     <button class="button" onclick="window.print()">
         <?php echo Text::_('COM_CONTENTBUILDER_PRINT') ?>

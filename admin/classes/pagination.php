@@ -416,7 +416,7 @@ class CBPagination
 	 */
 	public function getLimitBox()
 	{
-		$app = Factory::getContainer()->get(ApplicationInterface::class);
+		$app = Factory::getApplication();
 		$limits = array();
 
 		// Make the option list.
@@ -560,7 +560,7 @@ class CBPagination
 	 */
 	protected function _item_active(PaginationObject $item)
 	{
-		$app = Factory::getContainer()->get(ApplicationInterface::class);
+		$app = Factory::getApplication();
 		if ($app->isClient('administrator')) {
 			if ($item->base > 0) {
 				return "<a title=\"" . $item->text . "\" onclick=\"document.adminForm." . $this->prefix . "limitstart.value=" . $item->base
@@ -585,7 +585,7 @@ class CBPagination
 	 */
 	protected function _item_inactive(PaginationObject $item)
 	{
-		$app = Factory::getContainer()->get(ApplicationInterface::class);
+		$app = Factory::getApplication();
 		if ($app->isClient('administrator')) {
 			return "<span>" . $item->text . "</span>";
 		} else {

@@ -48,7 +48,7 @@ class JFormFieldCategories extends FormField
         try {
             $options = $db->loadObjectList();
         } catch (\Exception $e) {
-            Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage($e->getMessage(), 'error');
+            Factory::getApplication()->enqueueMessage($e->getMessage(), 'error');
         } // try
 
         // Pad the option text with spaces using depth level as a multiplier.
@@ -62,7 +62,7 @@ class JFormFieldCategories extends FormField
         }
 
         // Initialise variables.
-        $user = Factory::getContainer()->get(ApplicationInterface::class)->getIdentity();
+        $user = Factory::getApplication()->getIdentity();
 
         if (empty($id)) {
             // New item, only have to check core.create.

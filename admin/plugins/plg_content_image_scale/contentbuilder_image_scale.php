@@ -11,7 +11,7 @@
 defined('_JEXEC') or die ('Direct Access to this location is not allowed.');
 
 use Joomla\Filesystem\Folder;
-use Joomla\Uri\Uri;
+use Joomla\CMS\Uri\Uri;
 use Joomla\Filesystem\File;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Filter\OutputFilter;

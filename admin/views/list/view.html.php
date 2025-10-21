@@ -51,7 +51,7 @@ class ContentbuilderViewList extends HtmlView
 
         PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
 
-        $dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+        $dispatcher = Factory::getApplication()->getDispatcher();
         $eventResult = $dispatcher->dispatch('onListViewCss', new Joomla\Event\Event('onListViewCss', array()));
         $results = $eventResult->getArgument('result') ?: [];
 
@@ -101,7 +101,7 @@ class ContentbuilderViewList extends HtmlView
         $this->items = $subject->items;
         $this->pagination = $pagination;
         $this->total = $total;
-        $own_only = Factory::getContainer()->get(ApplicationInterface::class)->isClient('site') ? $subject->own_only_fe : $subject->own_only;
+        $own_only = Factory::getApplication()->isClient('site') ? $subject->own_only_fe : $subject->own_only;
         $this->own_only = $own_only;
         parent::display($tpl);
     }

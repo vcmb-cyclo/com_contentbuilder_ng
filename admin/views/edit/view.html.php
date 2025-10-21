@@ -84,7 +84,7 @@ class ContentbuilderViewEdit extends HtmlView
 			$limitstart = CBRequest::getVar('limitstart', 0, '', 'int');
 			$start = CBRequest::getVar('start', 0, '', 'int');
 
-			$dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+			$dispatcher = Factory::getApplication()->getDispatcher();
 			$dispatcher->dispatch('onContentPrepare', new Joomla\Event\Event('onContentPrepare', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start)));
 			$subject->template = $table->text;
 
@@ -158,14 +158,14 @@ class ContentbuilderViewEdit extends HtmlView
 		}
 
 		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
-		$dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+		$dispatcher = Factory::getApplication()->getDispatcher();
         $eventResult = $dispatcher->dispatch('onEditableTemplateCss', new Joomla\Event\Event('onEditableTemplateCss', array()));
         $results = $eventResult->getArgument('result') ?: [];
 		$theme_css = implode('', $results);
 		$this->theme_css = $theme_css;
 
 		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
-		$dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+		$dispatcher = Factory::getApplication()->getDispatcher();
         $eventResult = $dispatcher->dispatch('onEditableTemplateJavascript', new Joomla\Event\Event('onEditableTemplateJavascript', array()));
         $results = $eventResult->getArgument('result') ?: [];
 		$theme_js = implode('', $results);

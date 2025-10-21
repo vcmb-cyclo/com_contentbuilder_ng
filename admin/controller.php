@@ -26,7 +26,7 @@ class ContentbuilderController extends CBController
         parent::display();
 
 	    if(CBRequest::getVar('market','') == 'true'){
-            Factory::getContainer()->get(ApplicationInterface::class)->redirect('https://crosstec.org/joomla-forms-download.html');
+            Factory::getApplication()->redirect('https://crosstec.org/joomla-forms-download.html');
         }
     }
 

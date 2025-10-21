@@ -596,7 +596,7 @@ $cbcompat = new CBCompat();
     <input type="hidden" name="filter_order" value="" />
     <input type="hidden" name="filter_order_Dir" value="" />
     <input type="hidden" name="boxchecked" value="0" />
-    <input type="hidden" name="tabStartOffset" value="<?php echo Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('tabStartOffset', 0); ?>" />
+    <input type="hidden" name="tabStartOffset" value="<?php echo Factory::getApplication()->getSession()->get('tabStartOffset', 0); ?>" />
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
 

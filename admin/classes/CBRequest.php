@@ -11,7 +11,7 @@ defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 use Joomla\CMS\Factory;
 // use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Filter\InputFilter;
-use Joomla\Uri\Uri;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Session\Session;
 
 /**
@@ -333,7 +333,7 @@ if (!class_exists('CBRequest')) {
 		 */
 		public static function setVar($name, $value = null, $hash = 'method', $overwrite = true)
 		{
-			Factory::getContainer()->get(ApplicationInterface::class)->input->set($name, $value);
+			Factory::getApplication()->input->set($name, $value);
 
 			// If overwrite is true, makes sure the variable hasn't been set yet
 			if (!$overwrite && array_key_exists($name, $_REQUEST)) {
@@ -466,7 +466,7 @@ if (!class_exists('CBRequest')) {
 		public static function set($array, $hash = 'default', $overwrite = true)
 		{
 			foreach ($array as $key => $value) {
-				Factory::getContainer()->get(ApplicationInterface::class)->input->set($key, $value);
+				Factory::getApplication()->input->set($key, $value);
 				self::setVar($key, $value, $hash, $overwrite);
 			}
 		}
@@ -537,7 +537,7 @@ if (!class_exists('CBRequest')) {
 		}
 	}
 
-	$cb_request = Factory::getContainer()->get(ApplicationInterface::class)->input->getArray(array(), null, 'RAW');
+	$cb_request = Factory::getApplication()->input->getArray(array(), null, 'RAW');
 	foreach ($cb_request as $cb_request_item_key => $cb_request_item_value) {
 		CBRequest::setVar($cb_request_item_key, $cb_request_item_value);
 	}

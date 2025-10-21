@@ -742,10 +742,10 @@ class contentbuilder_com_contentbuilder
             }
         }
 
-        if (Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0) > 0) {
-            $username = Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('username', '');
-            $user_full_name = Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('name', '');
-            $user_id = Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0);
+        if (Factory::getApplication()->getIdentity()->get('id', 0) > 0) {
+            $username = Factory::getApplication()->getIdentity()->get('username', '');
+            $user_full_name = Factory::getApplication()->getIdentity()->get('name', '');
+            $user_id = Factory::getApplication()->getIdentity()->get('id', 0);
         }
 
         $date = Factory::getDate();

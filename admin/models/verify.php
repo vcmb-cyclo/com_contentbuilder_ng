@@ -19,6 +19,7 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\User\UserHelper;
 use Joomla\CMS\Application\ApplicationHelper;
+use Joomla\CMS\Mail\MailerFactoryInterface;
 
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'modellegacy.php');
@@ -35,7 +36,7 @@ class ContentbuilderModelVerify extends CBModel
     {
         parent::__construct($config);
 
-        $this->mainframe = Factory::getContainer()->get(ApplicationInterface::class);
+        $this->mainframe = Factory::getApplication();
         $this->frontend = $this->mainframe->isClient('site');
 
         $option = 'com_contentbuilder';
@@ -375,7 +376,7 @@ class ContentbuilderModelVerify extends CBModel
             throw new Exception('You are not allowed to perform this action.', 500);
         }
 
-        Factory::getContainer()->get(ApplicationInterface::class)->getLanguage()->load('com_users', JPATH_SITE);
+        Factory::getApplication()->getLanguage()->load('com_users', JPATH_SITE);
 
         $config = Factory::getConfig();
         $userParams = ComponentHelper::getParams('com_users');
@@ -450,7 +451,7 @@ class ContentbuilderModelVerify extends CBModel
 
 
         // Send the registration email.
-        $return = Factory::getMailer()->sendMail($data['mailfrom'], $data['fromname'], $data['email'], $emailSubject, $emailBody);
+        $return = Factory::getContainer()->get(MailerFactoryInterface::class)->createMailer()->sendMail($data['mailfrom'], $data['fromname'], $data['email'], $emailSubject, $emailBody);
 
         $this->mainframe->enqueueMessage(Text::_('COM_USERS_REGISTRATION_ADMINACTIVATE_SUCCESS'));
         $this->mainframe->redirect(Route::_('index.php?option=com_users', false));
@@ -543,7 +544,7 @@ class ContentbuilderModelVerify extends CBModel
                 $usercreator = Factory::getUser($row->id);
 
                 if ($usercreator->authorise('core.create', 'com_users')) {
-                    $return = Factory::getMailer()->sendMail($data['mailfrom'], $data['fromname'], $row->email, $emailSubject, $emailBody);
+                    $return = Factory::getContainer()->get(MailerFactoryInterface::class)->createMailer()->sendMail($data['mailfrom'], $data['fromname'], $row->email, $emailSubject, $emailBody);
 
                     // Check for an error.
                     if ($return !== true) {
@@ -581,7 +582,7 @@ class ContentbuilderModelVerify extends CBModel
                 $data['username']
             );
 
-            $return = Factory::getMailer()->sendMail($data['mailfrom'], $data['fromname'], $data['email'], $emailSubject, $emailBody);
+            $return = Factory::getContainer()->get(MailerFactoryInterface::class)->createMailer()->sendMail($data['mailfrom'], $data['fromname'], $data['email'], $emailSubject, $emailBody);
 
             // Check for an error.
             if ($return !== true) {

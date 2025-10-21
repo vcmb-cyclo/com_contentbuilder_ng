@@ -11,7 +11,7 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
-use Joomla\Uri\Uri;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 
@@ -19,7 +19,7 @@ $th = 'th';
 if ($this->page_heading) {
     ?>
     <h1 class="contentheading">
-        <?php echo Factory::getContainer()->get(ApplicationInterface::class)->getDocument()->getTitle(); ?>
+        <?php echo Factory::getApplication()->getDocument()->getTitle(); ?>
     </h1>
     <?php
 }

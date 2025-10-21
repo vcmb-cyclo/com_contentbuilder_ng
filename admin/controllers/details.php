@@ -27,7 +27,7 @@ class ContentbuilderControllerDetails extends CBController
             $option = 'com_contentbuilder';
 
             // try menu item
-            $menu = Factory::getContainer()->get(ApplicationInterface::class)->getMenu();
+            $menu = Factory::getApplication()->getMenu();
             $item = $menu->getActive();
             if (is_object($item)) {
                 if ($item->getParams()->get('record_id', null) !== null) {
@@ -60,7 +60,7 @@ class ContentbuilderControllerDetails extends CBController
                 }
             }
 
-            $rec = $form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0), 0, -1, -1, -1, -1, array(), true, null);
+            $rec = $form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, Factory::getApplication()->getIdentity()->get('id', 0), 0, -1, -1, -1, -1, array(), true, null);
 
             if (count($rec) > 0) {
 
@@ -79,10 +79,10 @@ class ContentbuilderControllerDetails extends CBController
                 $auth = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('new') : contentbuilder::authorize('new');
 
                 if ($auth) {
-                    Factory::getContainer()->get(ApplicationInterface::class)->redirect(Route::_('index.php?option=com_contentbuilder&controller=edit&latest=1&backtolist=' . CBRequest::getInt('backtolist', 0) . '&id=' . CBRequest::getInt('id', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&record_id=&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getVar('filter_order', ''), false));
+                    Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder&controller=edit&latest=1&backtolist=' . CBRequest::getInt('backtolist', 0) . '&id=' . CBRequest::getInt('id', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&record_id=&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getVar('filter_order', ''), false));
                 } else {
-                    Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage(Text::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
-                    Factory::getContainer()->get(ApplicationInterface::class)->redirect('index.php');
+                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
+                    Factory::getApplication()->redirect('index.php');
                 }
             }
         }

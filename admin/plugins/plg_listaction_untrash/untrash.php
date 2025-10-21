@@ -31,7 +31,7 @@ class plgContentbuilder_listactionUntrash extends CMSPlugin
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-        $lang = Factory::getContainer()->get(ApplicationInterface::class)->getLanguage();
+        $lang = Factory::getApplication()->getLanguage();
         $lang->load('plg_contentbuilder_listaction_untrash', JPATH_ADMINISTRATOR);
 
         foreach ($record_ids as $record_id) {
@@ -40,7 +40,7 @@ class plgContentbuilder_listactionUntrash extends CMSPlugin
             $db->execute();
         }
 
-        Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage(Text::_('COM_CONTENTBUILDER_UNTRASH_SUCCESSFULL'));
+        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_UNTRASH_SUCCESSFULL'));
 
         return ''; // no error
     }

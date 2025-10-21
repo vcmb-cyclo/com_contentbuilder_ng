@@ -11,7 +11,7 @@
 
 defined('_JEXEC') or die ('Direct Access to this location is not allowed.');
 
-use Joomla\Uri\Uri;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Plugin\PluginHelper;
 

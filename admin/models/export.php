@@ -30,14 +30,14 @@ class ContentbuilderModelExport extends CBModel
     function  __construct($config) {
         parent::__construct($config);
 
-        $this->frontend = Factory::getContainer()->get(ApplicationInterface::class)->isClient('site');
+        $this->frontend = Factory::getApplication()->isClient('site');
         
-        $mainframe = Factory::getContainer()->get(ApplicationInterface::class);
+        $mainframe = Factory::getApplication();
         $option = 'com_contentbuilder';
 
         $this->setId(CBRequest::getInt('id',0));
 
-        if(Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get($option.'formsd_id', 0) == 0 || Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get($option.'formsd_id', 0) == $this->_id ){
+        if(Factory::getApplication()->getSession()->get($option.'formsd_id', 0) == 0 || Factory::getApplication()->getSession()->get($option.'formsd_id', 0) == $this->_id ){
             $filter_order     = $mainframe->getUserStateFromRequest(  $option.'formsd_filter_order', 'filter_order', '', 'cmd' );
             $filter_order_Dir = $mainframe->getUserStateFromRequest( $option.'formsd_filter_order_Dir', 'filter_order_Dir', 'desc', 'cmd' );
             $filter           = $mainframe->getUserStateFromRequest(  $option.'formsd_filter', 'filter', '', 'string' );
@@ -99,7 +99,7 @@ class ContentbuilderModelExport extends CBModel
         
         @natsort($this->_menu_filter_order);
         
-        Factory::getContainer()->get(ApplicationInterface::class)->getSession()->set($option.'forms_id', $this->_id);
+        Factory::getApplication()->getSession()->set($option.'forms_id', $this->_id);
     }
 
     function setId($id) {
@@ -157,7 +157,7 @@ class ContentbuilderModelExport extends CBModel
                     $data->labels = $data->form->getElementLabels();
                     
                     if(
-                            Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('com_contentbuilder.filter_signal.'.$this->_id, false) 
+                            Factory::getApplication()->getSession()->get('com_contentbuilder.filter_signal.'.$this->_id, false) 
                                 
                             && $data->allow_external_filter){
                         
@@ -167,12 +167,12 @@ class ContentbuilderModelExport extends CBModel
                         $filters_to = array();
                         $calendar_formats = array();
                         
-                        $filters = Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('com_contentbuilder.filter.'.$this->_id, array());
-                        $filters_from = Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('com_contentbuilder.calendar_filter_from.'.$this->_id, array());
-                        $filters_to = Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('com_contentbuilder.calendar_filter_to.'.$this->_id, array());
-                        $calendar_formats = Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('com_contentbuilder.calendar_formats.'.$this->_id, array());
-                        $filter_keywords = Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('com_contentbuilder.filter_keywords.'.$this->_id, '');
-                        $filter_cats = Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('com_contentbuilder.filter_article_categories.'.$this->_id, -1);
+                        $filters = Factory::getApplication()->getSession()->get('com_contentbuilder.filter.'.$this->_id, array());
+                        $filters_from = Factory::getApplication()->getSession()->get('com_contentbuilder.calendar_filter_from.'.$this->_id, array());
+                        $filters_to = Factory::getApplication()->getSession()->get('com_contentbuilder.calendar_filter_to.'.$this->_id, array());
+                        $calendar_formats = Factory::getApplication()->getSession()->get('com_contentbuilder.calendar_formats.'.$this->_id, array());
+                        $filter_keywords = Factory::getApplication()->getSession()->get('com_contentbuilder.filter_keywords.'.$this->_id, '');
+                        $filter_cats = Factory::getApplication()->getSession()->get('com_contentbuilder.filter_article_categories.'.$this->_id, -1);
 
                         if($filter_keywords != ''){
                             $this->setState('formsd_filter', $filter_keywords);

@@ -16,7 +16,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\File;
 use Joomla\Registry\Registry;
-use Joomla\Uri\Uri;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Plugin\PluginHelper;
@@ -42,8 +42,6 @@ class contentbuilder
 
     public static function getPagination($limitstart, $limit, $total)
     {
-        // XDA+GIL 08/JAN/2024 - PHP 8.3 Fix (double declaration of static bar)
-        static $typeref;
         $pages_total = 0;
         $pages_current = 0;
 
@@ -167,7 +165,7 @@ class contentbuilder
 
         if (!$cssLoaded) {
 
-            Factory::getContainer()->get(ApplicationInterface::class)->getDocument()->addStyleDeclaration('.cbVotingDisplay, .cbVotingStarButtonWrapper {
+            Factory::getApplication()->getDocument()->addStyleDeclaration('.cbVotingDisplay, .cbVotingStarButtonWrapper {
 	height: 20px;
 	width: 100px;
 }
@@ -244,8 +242,8 @@ class contentbuilder
         }
         $rating_link = '';
         if ($rating_allowed) {
-            if (Factory::getContainer()->get(ApplicationInterface::class)->isClient('site')) {
-                $rating_link = Uri::root(true) . (Factory::getContainer()->get(ApplicationInterface::class)->isClient('administrator') ? '/administrator' : (CBRequest::getCmd('lang', '') && CBCompat::getJoomlaConfig('config.sef') && CBCompat::getJoomlaConfig('config.sef_rewrite') ? '/' . CBRequest::getCmd('lang', '') : '')) . '/?option=com_contentbuilder&lang=' . $lang . '&controller=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
+            if (Factory::getApplication()->isClient('site')) {
+                $rating_link = Uri::root(true) . (Factory::getApplication()->isClient('administrator') ? '/administrator' : (CBRequest::getCmd('lang', '') && CBCompat::getJoomlaConfig('config.sef') && CBCompat::getJoomlaConfig('config.sef_rewrite') ? '/' . CBRequest::getCmd('lang', '') : '')) . '/?option=com_contentbuilder&lang=' . $lang . '&controller=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
             } else {
                 $rating_link = 'index.php?option=com_contentbuilder&lang=' . $lang . '&controller=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
             }
@@ -497,7 +495,7 @@ class contentbuilder
                             $recc->recElementId = $wrapper['reference_id'];
                             $recc->colRecord = $item->colRecord;
 
-                            $dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+                            $dispatcher = Factory::getApplication()->getDispatcher();
                             $dispatcher->dispatch($onContentPrepare, new ContentPrepareEvent($onContentPrepare, array('com_content.article', &$article, &$registry, 0, true, $form, $recc)));
                             $dispatcher->clearListeners($onContentPrepare);
 
@@ -841,7 +839,7 @@ class contentbuilder
 
         PluginHelper::importPlugin('contentbuilder_themes', $plugin);
 
-        $dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+        $dispatcher = Factory::getApplication()->getDispatcher();
         $eventResult = $dispatcher->dispatch('onContentTemplateSample', new Joomla\Event\Event('onContentTemplateSample', array($contentbuilder_form_id, $form)));
         $results = $eventResult->getArgument('result') ?: [];
         return implode('', $results);
@@ -888,7 +886,7 @@ class contentbuilder
 
         PluginHelper::importPlugin('contentbuilder_themes', $plugin);
 
-        $dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+        $dispatcher = Factory::getApplication()->getDispatcher();
         $eventResult = $dispatcher->dispatch('onEditableTemplateSample', new Joomla\Event\Event('onEditableTemplateSample', array($contentbuilder_form_id, $form)));
         $results = $eventResult->getArgument('result') ?: [];
         return implode('', $results);
@@ -1291,9 +1289,9 @@ class contentbuilder
             $item = null;
 
             $template = str_replace(array('{RECORD_ID}', '{record_id}'), $record_id, $template);
-            $template = str_replace(array('{USER_ID}', '{user_id}'), Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id'), $template);
-            $template = str_replace(array('{USERNAME}', '{username}'), Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('username'), $template);
-            $template = str_replace(array('{USER_FULL_NAME}', '{user_full_name}'), Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('name'), $template);
+            $template = str_replace(array('{USER_ID}', '{user_id}'), Factory::getApplication()->getIdentity()->get('id'), $template);
+            $template = str_replace(array('{USERNAME}', '{username}'), Factory::getApplication()->getIdentity()->get('username'), $template);
+            $template = str_replace(array('{USER_FULL_NAME}', '{user_full_name}'), Factory::getApplication()->getIdentity()->get('name'), $template);
             $template = str_replace(array('{VIEW_NAME}', '{view_name}'), $result['name'], $template);
             $template = str_replace(array('{VIEW_ID}', '{view_id}'), $contentbuilder_form_id, $template);
             $template = str_replace(array('{IP}', '{ip}'), $_SERVER['REMOTE_ADDR'], $template);
@@ -1315,10 +1313,10 @@ class contentbuilder
     public static function getEditableTemplate($contentbuilder_form_id, $record_id, array $record, array $elements_allowed, $execPrepare = true)
     {
 
-        $failed_values = Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('cb_failed_values', null, 'com_contentbuilder.' . $contentbuilder_form_id);
+        $failed_values = Factory::getApplication()->getSession()->get('cb_failed_values', null, 'com_contentbuilder.' . $contentbuilder_form_id);
 
         if ($failed_values !== null) {
-            Factory::getContainer()->get(ApplicationInterface::class)->getSession()->clear('cb_failed_values', 'com_contentbuilder.' . $contentbuilder_form_id);
+            Factory::getApplication()->getSession()->clear('cb_failed_values', 'com_contentbuilder.' . $contentbuilder_form_id);
         }
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
@@ -1334,8 +1332,8 @@ class contentbuilder
                     $meta = $form->getRecordMetadata($record_id);
                     $db->setQuery("Select * From #__users Where id = " . $meta->created_id);
                     $user = $db->loadObject();
-                } else if (Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0)) {
-                    $db->setQuery("Select * From #__users Where id = " . Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0));
+                } else if (Factory::getApplication()->getIdentity()->get('id', 0)) {
+                    $db->setQuery("Select * From #__users Where id = " . Factory::getApplication()->getIdentity()->get('id', 0));
                     $user = $db->loadObject();
                 }
             }
@@ -1464,7 +1462,7 @@ class contentbuilder
 
                             \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_form_elements', $element['type']);
 
-                            $dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+                            $dispatcher = Factory::getApplication()->getDispatcher();
                             $eventResult = $dispatcher->dispatch('onRenderElement', new Joomla\Event\Event('onRenderElement', array($item, $element, $options, $failed_values, $result, $hasRecords)));
                             $results = $eventResult->getArgument('result') ?: [];
                             $dispatcher->clearListeners('onRenderElement');
@@ -1513,7 +1511,7 @@ class contentbuilder
                                 $options->allow_raw = false;
                             }
                             if ($options->allow_html || $options->allow_raw) {
-                                $editor = Editor::getInstance(Factory::getContainer()->get(ApplicationInterface::class)->get('editor'));
+                                $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
                                 $the_item = '<div class="cbFormField cbTextArea">' . $editor->display('cb_' . $item['id'], htmlentities($failed_values !== null && isset($failed_values[$element['reference_id']]) ? $failed_values[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']), ENT_QUOTES, 'UTF-8'), $options->width ? $options->width : '100%', $options->height ? $options->height : '550', '75', '20') . '</div>';
                             } else {
                                 $the_item = '<div class="cbFormField cbTextArea form-control form-control-sm"><textarea class="form-control form-control-sm" ' . ($options->readonly ? 'readonly="readonly" ' : '') . 'style="' . ($options->width || $options->height ? ($options->width ? 'width:' . $options->width . ';' : '') . ($options->height ? 'height:' . $options->height . ';' : '') : '') . '" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '">' . htmlentities($failed_values !== null && isset($failed_values[$element['reference_id']]) ? $failed_values[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']), ENT_QUOTES, 'UTF-8') . '</textarea></div>';
@@ -1620,7 +1618,7 @@ class contentbuilder
 
                             $the_item = '<div class="cbFormField cbCaptchaField">';
 
-                            if (Factory::getContainer()->get(ApplicationInterface::class)->isClient('site')) {
+                            if (Factory::getApplication()->isClient('site')) {
                                 $captcha_url = Uri::root(true) . '/components/com_contentbuilder/images/securimage/securimage_show.php';
                             } else {
                                 $captcha_url = Uri::root(true) . '/administrator/components/com_contentbuilder/assets/images/securimage_show.php';
@@ -1700,7 +1698,7 @@ class contentbuilder
         } else {
             // JError::raiseError(404, Text::_('COM_CONTENTBUILDER_TEMPLATE_NOT_FOUND'));
             // throw new Exception(Text::_('COM_CONTENTBUILDER_TEMPLATE_NOT_FOUND'), 404);
-            Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage(Text::_('COM_CONTENTBUILDER_TEMPLATE_NOT_FOUND'), 'warning');
+            Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_TEMPLATE_NOT_FOUND'), 'warning');
         }
 
         return '';
@@ -1709,7 +1707,8 @@ class contentbuilder
     public static function createArticle($contentbuilder_form_id, $record_id, array $record, array $elements_allowed, $title_field = '', $metadata = null, $config = array(), $full = false, $limited_options = true, $menu_cat_id = null)
     {
 
-        $tz = new DateTimeZone(Factory::getContainer()->get(ApplicationInterface::class)->get('offset'));
+        $tz = new DateTimeZone(Factory::getApplication()->get('offset'));
+        $tz = new DateTimeZone(Factory::getApplication()->get('offset'));
 
         if (isset($config['publish_up']) && $config['publish_up'] && $config['publish_up'] != '0000-00-00 00:00:00') {
             $config['publish_up'] = Factory::getDate($config['publish_up'], $tz);
@@ -1764,8 +1763,8 @@ class contentbuilder
                 $meta = $form_->getRecordMetadata($record_id);
                 $db->setQuery("Select * From #__users Where id = " . $meta->created_id);
                 $user = $db->loadObject();
-            } else if (Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0)) {
-                $db->setQuery("Select * From #__users Where id = " . Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0));
+            } else if (Factory::getApplication()->getIdentity()->get('id', 0)) {
+                $db->setQuery("Select * From #__users Where id = " . Factory::getApplication()->getIdentity()->get('id', 0));
                 $user = $db->loadObject();
             }
         }
@@ -1955,7 +1954,7 @@ class contentbuilder
                 $created_article = isset($config['created']) ? $config['created'] : null;
 
                 // FULL
-                if (Factory::getContainer()->get(ApplicationInterface::class)->isClient('administrator')) {
+                if (Factory::getApplication()->isClient('administrator')) {
                     $created_by = isset($config['created_by']) ? $config['created_by'] : 0;
                 }
 
@@ -2003,7 +2002,7 @@ class contentbuilder
                 $isNew = false;
             }
 
-            $dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+            $dispatcher = Factory::getApplication()->getDispatcher();
             $dispatcher->dispatch('onContentBeforeSave', new Joomla\Event\Event('onContentBeforeSave', array('com_content.article', &$table, $isNew)));
         }
 
@@ -2076,9 +2075,9 @@ class contentbuilder
                           " . $db->Quote($state) . ",
                           " . intval($form['default_category']) . ",
                           " . $db->Quote($created) . ",
-                          " . $db->Quote($created_by ? $created_by : Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0)) . ",
+                          " . $db->Quote($created_by ? $created_by : Factory::getApplication()->getIdentity()->get('id', 0)) . ",
                           " . $db->Quote($created) . ",
-                          " . $db->Quote($created_by ? $created_by : Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0)) . ",
+                          " . $db->Quote($created_by ? $created_by : Factory::getApplication()->getIdentity()->get('id', 0)) . ",
                           NULL,
                           NULL,
                           " . ($publish_up != '' && $publish_up != '0000-00-00 00:00:00' ? $db->Quote($publish_up) : 'NULL') . ",
@@ -2134,7 +2133,7 @@ class contentbuilder
         } else {
             $___datenow = Factory::getDate()->toSql();
             $modified = $metadata->modified ? $metadata->modified : $___datenow;
-            $modified_by = $metadata->modified_id ? $metadata->modified_id : Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0);
+            $modified_by = $metadata->modified_id ? $metadata->modified_id : Factory::getApplication()->getIdentity()->get('id', 0);
 
             if ($full) {
 
@@ -2148,7 +2147,7 @@ class contentbuilder
                              `state` = " . $db->Quote($state) . ",
                              `catid` = " . intval($form['default_category']) . ",
                              `modified` = " . $db->Quote($modified) . ",
-                             `modified_by` = " . $db->Quote($modified_by ? $modified_by : Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0)) . ",
+                             `modified_by` = " . $db->Quote($modified_by ? $modified_by : Factory::getApplication()->getIdentity()->get('id', 0)) . ",
                              `attribs` = " . $db->Quote($attribs != '' ? $attribs : '{"article_layout":"","show_title":"","link_titles":"","show_tags":"","show_intro":"","info_block_position":"","info_block_show_title":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_hits":"","show_noauth":"","urls_position":"","alternative_readmore":"","article_page_title":"","show_publishing_options":"","show_article_options":"","show_urls_images_backend":"","show_urls_images_frontend":""}') . ",
                              `metakey` = " . $db->Quote($metakey) . ",
                              `metadesc` = " . $db->Quote($metadesc) . ",
@@ -2203,7 +2202,7 @@ class contentbuilder
                              `fulltext` = " . $db->Quote($fulltext . '<div style=\'display:none;\'><!--(cbArticleId:' . $article . ')--></div>') . ",
                              `state` = " . $db->Quote($state) . ",
                              `modified` = " . $db->Quote($modified) . ",
-                             `modified_by` = " . $db->Quote($modified_by ? $modified_by : Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0)) . ",
+                             `modified_by` = " . $db->Quote($modified_by ? $modified_by : Factory::getApplication()->getIdentity()->get('id', 0)) . ",
                              `version` = `version`+1,
                              language=" . $db->Quote($language) . "
                         Where id = $article
@@ -2235,7 +2234,7 @@ class contentbuilder
         $cache = Factory::getCache('com_contentbuilder');
         $cache->clean();
 
-        $dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+        $dispatcher = Factory::getApplication()->getDispatcher();
         $dispatcher->dispatch('onContentCleanCache', new Joomla\Event\Event('onContentCleanCache', $options));
 
         //// trigger onContentAfterSave event
@@ -2247,19 +2246,19 @@ class contentbuilder
             $isNew = false;
         }
 
-        $dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+        $dispatcher = Factory::getApplication()->getDispatcher();
         $eventResult = $dispatcher->dispatch('onContentAfterSave', new Joomla\Event\Event('onContentAfterSave', array('com_content.article', &$table, $isNew)));
 
         PluginHelper::importPlugin('contentbuilder_listaction');
 
-        $dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+        $dispatcher = Factory::getApplication()->getDispatcher();
         $eventResult = $dispatcher->dispatch('onAfterArticleCreation', new Joomla\Event\Event('onAfterArticleCreation', array($contentbuilder_form_id, $record_id, $article)));
         $results = $eventResult->getArgument('result') ?: [];
 
         $msg = implode('', $results);
 
         if ($msg) {
-            Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage($msg);
+            Factory::getApplication()->enqueueMessage($msg);
         }
 
         return $article;
@@ -2282,15 +2281,15 @@ class contentbuilder
                 require_once(JPATH_ADMINISTRATOR . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'types' . DS . $type . '.php');
                 $type = 'contentbuilder_' . $type;
                 if (class_exists($type)) {
-                    $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0));
-                    //$num_records_query = $type::getNumRecordsQuery($reference_id, Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0));
+                    $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, Factory::getApplication()->getIdentity()->get('id', 0));
+                    //$num_records_query = $type::getNumRecordsQuery($reference_id, Factory::getApplication()->getIdentity()->get('id', 0));
                 }
             } else if (file_exists(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'types' . DS . $type . '.php')) {
                 require_once(JPATH_SITE . DS . 'media' . DS . 'contentbuilder' . DS . 'types' . DS . $type . '.php');
                 $type = 'contentbuilder_' . $type;
                 if (class_exists($type)) {
-                    $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0));
-                    //$num_records_query = $type::getNumRecordsQuery($reference_id, Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0));
+                    $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, Factory::getApplication()->getIdentity()->get('id', 0));
+                    //$num_records_query = $type::getNumRecordsQuery($reference_id, Factory::getApplication()->getIdentity()->get('id', 0));
                 }
             }
         }
@@ -2343,7 +2342,7 @@ class contentbuilder
                 #__contentbuilder_forms As forms
                 Left Join 
                     #__contentbuilder_users As contentbuilder_users
-                On ( contentbuilder_users.form_id = forms.id And contentbuilder_users.userid = " . Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0) . " )
+                On ( contentbuilder_users.form_id = forms.id And contentbuilder_users.userid = " . Factory::getApplication()->getIdentity()->get('id', 0) . " )
                 " . ($record_id && !is_array($record_id) ? "Left Join 
                     #__contentbuilder_records As contentbuilder_records
                 On ( contentbuilder_records.`type` = " . $db->Quote(isset($_type) ? $_type : '') . " And contentbuilder_records.reference_id = forms.reference_id And contentbuilder_records.record_id = " . $db->Quote($record_id) . " )
@@ -2357,7 +2356,7 @@ class contentbuilder
 
         $config = unserialize(cb_b64dec($result['config']));
 
-        Factory::getContainer()->get(ApplicationInterface::class)->getSession()->clear('permissions' . $suffix, 'com_contentbuilder');
+        Factory::getApplication()->getSession()->clear('permissions' . $suffix, 'com_contentbuilder');
         $permissions = array();
 
         //if(!$exclude_own){
@@ -2580,7 +2579,7 @@ class contentbuilder
             }
         }
 
-        Factory::getContainer()->get(ApplicationInterface::class)->getSession()->set('permissions' . $suffix, $permissions, 'com_contentbuilder');
+        Factory::getApplication()->getSession()->set('permissions' . $suffix, $permissions, 'com_contentbuilder');
     }
 
     public static function stringURLUnicodeSlug($string)
@@ -2613,13 +2612,13 @@ class contentbuilder
     {
 
         $allowed = false;
-        $permissions = Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('permissions' . $suffix, array(), 'com_contentbuilder');
+        $permissions = Factory::getApplication()->getSession()->get('permissions' . $suffix, array(), 'com_contentbuilder');
 
         $published_return = $permissions['published'];
         if (!$published_return) {
             if (!$auth) {
-                Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage($error_msg, 'error');
-                Factory::getContainer()->get(ApplicationInterface::class)->redirect('index.php');
+                Factory::getApplication()->enqueueMessage($error_msg, 'error');
+                Factory::getApplication()->redirect('index.php');
             } else {
                 return false;
             }
@@ -2630,8 +2629,8 @@ class contentbuilder
                 $edit_return = $permissions['limit_edit'];
                 if (!$edit_return) {
                     if (!$auth) {
-                        Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage($error_msg, 'error');
-                        Factory::getContainer()->get(ApplicationInterface::class)->redirect('index.php');
+                        Factory::getApplication()->enqueueMessage($error_msg, 'error');
+                        Factory::getApplication()->redirect('index.php');
                     } else {
                         return false;
                     }
@@ -2644,8 +2643,8 @@ class contentbuilder
                 $add_return = $permissions['limit_add'];
                 if (!$add_return) {
                     if (!$auth) {
-                        Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage($error_msg, 'error');
-                        Factory::getContainer()->get(ApplicationInterface::class)->redirect('index.php');
+                        Factory::getApplication()->enqueueMessage($error_msg, 'error');
+                        Factory::getApplication()->redirect('index.php');
                     } else {
                         return false;
                     }
@@ -2666,14 +2665,14 @@ class contentbuilder
                     if ($verify_return === false) {
 
                         if (!$auth) {
-                            Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage($error_msg, 'error');
-                            Factory::getContainer()->get(ApplicationInterface::class)->redirect('index.php');
+                            Factory::getApplication()->enqueueMessage($error_msg, 'error');
+                            Factory::getApplication()->redirect('index.php');
                         } else {
                             return false;
                         }
                     } else if (is_string($verify_return)) {
                         if (!$auth) {
-                            Factory::getContainer()->get(ApplicationInterface::class)->redirect($verify_return);
+                            Factory::getApplication()->redirect($verify_return);
                         } else {
                             return false;
                         }
@@ -2685,7 +2684,7 @@ class contentbuilder
         if (!isset($permissions['own' . $suffix])) {
             $gids = array();
 
-            $groups = Access::getGroupsByUser(Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0));
+            $groups = Access::getGroupsByUser(Factory::getApplication()->getIdentity()->get('id', 0));
 
             foreach ($groups as $gid) {
                 $gids[] = $gid;
@@ -2706,9 +2705,9 @@ class contentbuilder
                     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
                     // XDA+GIL 08/JAN/2024 - PHP 8.3 Fix (double declaration of static bar)
-                    // static $typeref;
+                    static $typeref;
 
-                    if (is_array($typeref)) {
+                    if (isset($typeref) && is_array($typeref) && isset($typeref[intval($user_return['form_id'])])) {
                         $typerefid = $typeref[intval($user_return['form_id'])];
                     } else {
                         $db->setQuery("Select `type`, `reference_id` From #__contentbuilder_forms Where id = " . intval($user_return['form_id']));
@@ -2724,7 +2723,7 @@ class contentbuilder
                                 foreach ($user_return['record_id'] as $recid) {
                                     $db->setQuery("Select session_id From #__contentbuilder_records Where `record_id` = " . $db->Quote($recid) . " And `type` = " . $db->Quote($typerefid['type']) . " And `reference_id` = " . $db->Quote($typerefid['reference_id']) . "");
                                     $session_id = $db->loadResult();
-                                    if ($form && $session_id != Factory::getContainer()->get(ApplicationInterface::class)->getSession()->getId() && !$form->isOwner(Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0), $recid)) {
+                                    if ($form && $session_id != Factory::getApplication()->getSession()->getId() && !$form->isOwner(Factory::getApplication()->getIdentity()->get('id', 0), $recid)) {
                                         $allowed = false;
                                         break;
                                     } else {
@@ -2736,7 +2735,7 @@ class contentbuilder
                                 $db->setQuery("Select session_id From #__contentbuilder_records Where `record_id` = " . $db->Quote($user_return['record_id']) . " And `type` = " . $db->Quote($typerefid['type']) . " And `reference_id` = " . $db->Quote($typerefid['reference_id']) . "");
                                 $session_id = $db->loadResult();
 
-                                if ($form && ($user_return['record_id'] == false || $session_id == Factory::getContainer()->get(ApplicationInterface::class)->getSession()->getId() || ($form->isOwner(Factory::getContainer()->get(ApplicationInterface::class)->getIdentity()->get('id', 0), $user_return['record_id'])))) {
+                                if ($form && ($user_return['record_id'] == false || $session_id == Factory::getApplication()->getSession()->getId() || ($form->isOwner(Factory::getApplication()->getIdentity()->get('id', 0), $user_return['record_id'])))) {
                                     $allowed = true;
                                 }
                             }
@@ -2748,7 +2747,7 @@ class contentbuilder
 
         if (!$allowed) {
             if (!$auth) {
-                Factory::getContainer()->get(ApplicationInterface::class)->redirect('index.php', 403);
+                Factory::getApplication()->redirect('index.php', 403);
             } else {
                 return false;
             }

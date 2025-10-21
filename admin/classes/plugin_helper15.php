@@ -258,7 +258,7 @@ class CBPluginHelper
 		}
 
 		$db		=& Factory::getContainer()->get(DatabaseInterface::class);
-		$user	=& Factory::getContainer()->get(ApplicationInterface::class)->getIdentity();
+		$user	=& Factory::getApplication()->getIdentity();
 
 		if (isset($user))
 		{
@@ -281,7 +281,7 @@ class CBPluginHelper
 		$db->setQuery( $query );
 
 		if (!($plugins = $db->loadObjectList())) {
-			Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage("Error loading Plugins: " . $db->getErrorMsg(), 'error');
+			Factory::getApplication()->enqueueMessage("Error loading Plugins: " . $db->getErrorMsg(), 'error');
 			return false;
 		}
 
@@ -291,7 +291,7 @@ class CBPluginHelper
         function _load16(){
             static $plugins;
 
-		$user	= Factory::getContainer()->get(ApplicationInterface::class)->getIdentity();
+		$user	= Factory::getApplication()->getIdentity();
 		$cache 	= Factory::getCache('com_plugins', '');
 
 		$levels = implode(',', $user->getAuthorisedViewLevels());
@@ -313,7 +313,7 @@ class CBPluginHelper
 				->loadObjectList();
 
 			if ($error = $db->getErrorMsg()) {
-				Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage($error, 'error');
+				Factory::getApplication()->enqueueMessage($error, 'error');
 				return false;
 			}
 

@@ -57,7 +57,7 @@ class ContentbuilderModelPublicforms extends CBModel
     {
         parent::__construct($config);
 
-        $mainframe = Factory::getContainer()->get(ApplicationInterface::class);
+        $mainframe = Factory::getApplication();
         $option = 'com_contentbuilder';
 
         // Get pagination request variables
@@ -82,7 +82,7 @@ class ContentbuilderModelPublicforms extends CBModel
         $filter_tag = $mainframe->getUserStateFromRequest($option . 'forms_filter_tag', 'filter_tag', '', 'string');
         $this->setState('forms_filter_tag', $filter_tag);
 
-        $this->frontend = Factory::getContainer()->get(ApplicationInterface::class)->isClient('site');
+        $this->frontend = Factory::getApplication()->isClient('site');
 
         if ($this->frontend && CBRequest::getInt('Itemid', 0)) {
             $this->_menu_item = true;
@@ -90,7 +90,7 @@ class ContentbuilderModelPublicforms extends CBModel
             // try menu item
             $forms = null;
 
-            $menu = Factory::getContainer()->get(ApplicationInterface::class)->getMenu();
+            $menu = Factory::getApplication()->getMenu();
             $item = $menu->getActive();
             if (is_object($item)) {
 
@@ -148,7 +148,7 @@ class ContentbuilderModelPublicforms extends CBModel
 
     private function buildOrderBy()
     {
-        $mainframe = Factory::getContainer()->get(ApplicationInterface::class);
+        $mainframe = Factory::getApplication();
         $option = 'com_contentbuilder';
 
         $orderby = ' Order By ordering';

@@ -51,7 +51,7 @@ class ContentbuilderModelForm extends CBModel
 
         parent::__construct();
 
-        $mainframe = Factory::getContainer()->get(ApplicationInterface::class);
+        $mainframe = Factory::getApplication();
         $option = 'com_contentbuilder';
 
         $array = CBRequest::getVar('cid', 0, '', 'array');
@@ -412,8 +412,8 @@ class ContentbuilderModelForm extends CBModel
         if ($data->type && $data->reference_id) {
             $data->form = contentbuilder::getForm($data->type, $data->reference_id);
             if (!$data->form->exists) {
-                Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 'error');
-                Factory::getContainer()->get(ApplicationInterface::class)->redirect('index.php?option=com_contentbuilder&controller=forms&limitstart=' . $this->getState('limitstart', 0));
+                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 'error');
+                Factory::getApplication()->redirect('index.php?option=com_contentbuilder&controller=forms&limitstart=' . $this->getState('limitstart', 0));
             }
             if (isset($data->form->properties) && isset($data->form->properties->name)) {
                 $data->type_name = $data->form->properties->name;
@@ -474,7 +474,7 @@ class ContentbuilderModelForm extends CBModel
             $options = $db->loadObjectList();
         } catch (Exception $e) {
             // Check for a database error.
-            Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage($e->getMessage(), 'error');
+            Factory::getApplication()->enqueueMessage($e->getMessage(), 'error');
         }
 
         // Pad the option text with spaces using depth level as a multiplier.
@@ -500,7 +500,7 @@ class ContentbuilderModelForm extends CBModel
 
     private function buildOrderBy()
     {
-        $mainframe = Factory::getContainer()->get(ApplicationInterface::class);
+        $mainframe = Factory::getApplication();
         $option = 'com_contentbuilder';
 
         $orderby = '';
@@ -610,7 +610,7 @@ class ContentbuilderModelForm extends CBModel
                 $tmp_upload_directory = '{CBSite}' . DS . 'media' . DS . 'contentbuilder' . DS . 'upload';
             }
 
-            Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' (' . DS . 'media' . DS . 'contentbuilder' . DS . 'upload' . ')', 'warning');
+            Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' (' . DS . 'media' . DS . 'contentbuilder' . DS . 'upload' . ')', 'warning');
         }
 
         if (isset($upl_ex[1])) {
@@ -646,7 +646,7 @@ class ContentbuilderModelForm extends CBModel
         $data['show_all_languages_fe'] = CBRequest::getInt('show_all_languages_fe', 0);
 
         if (!$data['show_all_languages_fe'] && !$data['default_lang_code_ignore']) {
-            Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage(Text::_('COM_CONTENTBUILDER_LANGUAGE_WARNING'), 'warning');
+            Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_LANGUAGE_WARNING'), 'warning');
         }
 
         #### PERMISSIONS
@@ -834,7 +834,7 @@ class ContentbuilderModelForm extends CBModel
         $data['act_as_registration'] = CBRequest::getInt('act_as_registration', 0);
         if ($data['edit_by_type'] && $data['act_as_registration']) {
             $data['act_as_registration'] = 0;
-            Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage(Text::_('COM_CONTENTBUILDER_ACT_AS_REGISTRATION_WARNING'), 'warning');
+            Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ACT_AS_REGISTRATION_WARNING'), 'warning');
         }
 
         if (
@@ -847,7 +847,7 @@ class ContentbuilderModelForm extends CBModel
                 !$data['registration_password_repeat_field']
             )
         ) {
-            Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage(Text::_('COM_CONTENTBUILDER_ACT_AS_REGISTRATION_MISSING_FIELDS_WARNING'), 'warning');
+            Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ACT_AS_REGISTRATION_MISSING_FIELDS_WARNING'), 'warning');
         }
 
         $data['email_notifications'] = CBRequest::getInt('email_notifications', 0);
@@ -1012,14 +1012,14 @@ class ContentbuilderModelForm extends CBModel
                     $table = Table::getInstance('content');
                     // Trigger the onContentBeforeDelete event.
                     if (!$is15 && $table->load($article)) {
-                        Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher()->dispatch('onContentBeforeDelete', array('com_content.article', $table));
+                        Factory::getApplication()->getDispatcher()->dispatch('onContentBeforeDelete', array('com_content.article', $table));
                     }
                     $this->_db->setQuery("Delete From #__content Where id = " . intval($article));
                     $this->_db->execute();
                     // Trigger the onContentAfterDelete event.
                     $table->reset();
                     if (!$is15) {
-                        Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher()->dispatch('onContentAfterDelete', array('com_content.article', $table));
+                        Factory::getApplication()->getDispatcher()->dispatch('onContentAfterDelete', array('com_content.article', $table));
                     }
                 }
                 $this->_db->setQuery("Delete From #__assets Where `name` In (" . implode(',', $article_items) . ")");
@@ -1165,7 +1165,7 @@ class ContentbuilderModelForm extends CBModel
     {
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $mainframe = Factory::getContainer()->get(ApplicationInterface::class);
+        $mainframe = Factory::getApplication();
 
         $row = $this->getTable('form');
 
@@ -1184,7 +1184,7 @@ class ContentbuilderModelForm extends CBModel
 
     function listMove($direction)
     {
-        $mainframe = Factory::getContainer()->get(ApplicationInterface::class);
+        $mainframe = Factory::getApplication();
         $items = CBRequest::getVar('cid', array(), 'post', 'array');
         ArrayHelper::toInteger($items);
 

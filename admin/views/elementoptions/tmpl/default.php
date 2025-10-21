@@ -22,7 +22,7 @@ $plugins = contentbuilder::getFormElementsPlugins();
 
 $plgs = \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_form_elements', $this->element->type);
 
-$dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+$dispatcher = Factory::getApplication()->getDispatcher();
 $eventResult = $dispatcher->dispatch('onSettingsDisplay', new Joomla\Event\Event('onSettingsDisplay', array($this->element->options)));
 $results = $eventResult->getArgument('result') ?: [];
 $dispatcher->clearListeners('onSettingsDisplay');

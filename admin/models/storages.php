@@ -36,7 +36,7 @@ class ContentbuilderModelStorages extends CBModel
     {
         parent::__construct($config);
 
-        $mainframe = Factory::getContainer()->get(ApplicationInterface::class);
+        $mainframe = Factory::getApplication();
         $option = 'com_contentbuilder';
 
         // Get pagination request variables
@@ -86,7 +86,7 @@ class ContentbuilderModelStorages extends CBModel
 
     private function buildOrderBy()
     {
-        $mainframe = Factory::getContainer()->get(ApplicationInterface::class);
+        $mainframe = Factory::getApplication();
         $option = 'com_contentbuilder';
 
         $orderby = '';

@@ -869,7 +869,7 @@ $cbcompat = new CBCompat();
         $title = Text::_('COM_CONTENTBUILDER_LIST_INTRO_TEXT');
         echo HTMLHelper::_('uitab.endTab');
         echo $cbcompat->startPanel($title, "tab2");
-        $editor = Editor::getInstance(Factory::getContainer()->get(ApplicationInterface::class)->get('editor'));
+        $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
         echo $editor->display("intro_text", $this->form->intro_text, '100%', '550', '75', '20');
         ?>
 
@@ -1188,7 +1188,7 @@ $cbcompat = new CBCompat();
         </table>
 
         <?php
-        $editor = Editor::getInstance(Factory::getContainer()->get(ApplicationInterface::class)->get('editor'));
+        $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
         echo $editor->display("details_template", $this->form->details_template, '100%', '550', '75', '20');
 
         $title = Text::_('COM_CONTENTBUILDER_DETAILS_PREPARE');
@@ -1244,7 +1244,7 @@ $cbcompat = new CBCompat();
             <?php
         }
 
-        $editor = Editor::getInstance(Factory::getContainer()->get(ApplicationInterface::class)->get('editor'));
+        $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
         echo $editor->display("editable_template", $this->form->editable_template, '100%', '550', '75', '20');
         ?>
         <?php
@@ -1302,7 +1302,7 @@ $cbcompat = new CBCompat();
                 </h3>
             </div>
             <div id="email_admins_div"
-                style="display:<?php echo Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('email_admins', '', 'com_contentbuilder'); ?>">
+                style="display:<?php echo Factory::getApplication()->getSession()->get('email_admins', '', 'com_contentbuilder'); ?>">
                 <table width="100%" class="adminform table table-striped">
                     <tr>
                         <td width="20%">
@@ -1502,7 +1502,7 @@ $cbcompat = new CBCompat();
         $title = Text::_('COM_CONTENTBUILDER_PERMISSIONS');
         echo $cbcompat->startPanel($title, "tab8");
 
-        $sliders = CBTabs::getInstance('perm-pane', array('startOffset' => Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('slideStartOffset', 1), 'startTransition' => 0));
+        $sliders = CBTabs::getInstance('perm-pane', array('startOffset' => Factory::getApplication()->getSession()->get('slideStartOffset', 1), 'startTransition' => 0));
 
         echo $sliders->startPane("perm-pane");
 
@@ -2276,13 +2276,13 @@ $cbcompat = new CBCompat();
     <input type="hidden" name="filter_order_Dir" value="" />
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="hidemainmenu" value="0" />
-    <input type="hidden" name="tabStartOffset" value="<?php echo Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('tabStartOffset', 0); ?>" />
+    <input type="hidden" name="tabStartOffset" value="<?php echo Factory::getApplication()->getSession()->get('tabStartOffset', 0); ?>" />
     <input type="hidden" name="slideStartOffset"
-        value="<?php echo Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('slideStartOffset', 1); ?>" />
+        value="<?php echo Factory::getApplication()->getSession()->get('slideStartOffset', 1); ?>" />
     <input type="hidden" name="email_users"
-        value="<?php echo Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('email_users', 'none', 'com_contentbuilder'); ?>" />
+        value="<?php echo Factory::getApplication()->getSession()->get('email_users', 'none', 'com_contentbuilder'); ?>" />
     <input type="hidden" name="email_admins"
-        value="<?php echo Factory::getContainer()->get(ApplicationInterface::class)->getSession()->get('email_admins', '', 'com_contentbuilder'); ?>" />
+        value="<?php echo Factory::getApplication()->getSession()->get('email_admins', '', 'com_contentbuilder'); ?>" />
 
     <?php echo HTMLHelper::_('form.token'); ?>
 
@@ -2304,7 +2304,7 @@ $modalParams['bodyHeight'] = 400;
 $modalParams['modalWidth'] = 800;
 echo HTMLHelper::_('bootstrap.renderModal', 'edit-modal', $modalParams);
 
-$wa = Factory::getContainer()->get(ApplicationInterface::class)->getDocument()->getWebAssetManager();
+$wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 $wa->useScript('jquery');
 ?>
 

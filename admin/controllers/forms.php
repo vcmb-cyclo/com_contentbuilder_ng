@@ -29,16 +29,16 @@ class ContentbuilderControllerForms extends CBController
         //HTMLHelper::_('bootstrap.modal');
 
         if (CBRequest::getInt('email_users', -1) != -1) {
-            Factory::getContainer()->get(ApplicationInterface::class)->getSession()->set('email_users', CBRequest::getVar('email_users', 'none'), 'com_contentbuilder');
+            Factory::getApplication()->getSession()->set('email_users', CBRequest::getVar('email_users', 'none'), 'com_contentbuilder');
         }
         if (CBRequest::getInt('email_admins', -1) != -1) {
-            Factory::getContainer()->get(ApplicationInterface::class)->getSession()->set('email_admins', CBRequest::getVar('email_admins', ''), 'com_contentbuilder');
+            Factory::getApplication()->getSession()->set('email_admins', CBRequest::getVar('email_admins', ''), 'com_contentbuilder');
         }
         if (CBRequest::getInt('slideStartOffset', -1) != -1) {
-            Factory::getContainer()->get(ApplicationInterface::class)->getSession()->set('slideStartOffset', CBRequest::getInt('slideStartOffset', 1));
+            Factory::getApplication()->getSession()->set('slideStartOffset', CBRequest::getInt('slideStartOffset', 1));
         }
         if (CBRequest::getInt('tabStartOffset', -1) != -1) {
-            Factory::getContainer()->get(ApplicationInterface::class)->getSession()->set('tabStartOffset', CBRequest::getInt('tabStartOffset', 0));
+            Factory::getApplication()->getSession()->set('tabStartOffset', CBRequest::getInt('tabStartOffset', 0));
         }
         // Register Extra tasks
         $this->registerTask('add', 'edit');

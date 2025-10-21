@@ -108,10 +108,10 @@ class ContentbuilderModelElementoptions extends CBModel
 
                 \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_form_elements', CBRequest::getCmd('field_type', ''));
 
-                $dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+                $dispatcher = Factory::getApplication()->getDispatcher();
                 $eventResult = $dispatcher->dispatch('onSettingsStore', new Joomla\Event\Event('onSettingsStore', array()));
                 $results = $eventResult->getArgument('result') ?: [];
-                Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher()->clearListeners('onSettingsStore');
+                Factory::getApplication()->getDispatcher()->clearListeners('onSettingsStore');
 
                 if (count($results)) {
                     $results = $results[0];
@@ -252,7 +252,7 @@ class ContentbuilderModelElementoptions extends CBModel
                         $tokens = '|' . $upl_ex[1];
                     }
 
-                    Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' (' . DS . 'media' . DS . 'contentbuilder' . DS . 'upload' . ')', 'warning');
+                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' (' . DS . 'media' . DS . 'contentbuilder' . DS . 'upload' . ')', 'warning');
 
                 } else if (trim(CBRequest::getVar('upload_directory', '')) != '' && !is_dir(contentbuilder::makeSafeFolder(CBRequest::getVar('upload_directory', '')))) {
 
@@ -270,7 +270,7 @@ class ContentbuilderModelElementoptions extends CBModel
                         $tokens = '|' . $upl_ex2[1];
                     }
 
-                    Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' (' . $upload_directory . ')', 'warning');
+                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' (' . $upload_directory . ')', 'warning');
 
                 } else if (trim(CBRequest::getVar('upload_directory', '')) != '' && is_dir(contentbuilder::makeSafeFolder(CBRequest::getVar('upload_directory', '')))) {
 

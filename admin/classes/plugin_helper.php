@@ -144,7 +144,7 @@ abstract class CBPluginHelper
 					// Makes sure we have an event dispatcher
 
 					if (!is_object($dispatcher)) {
-						$dispatcher = Factory::getContainer()->get(ApplicationInterface::class)->getDispatcher();
+						$dispatcher = Factory::getApplication()->getDispatcher();
 					}
 
 					$className = 'plg'.$plugin->type.$plugin->name;
@@ -179,7 +179,7 @@ abstract class CBPluginHelper
 			return $plugins;
 		}
 
-		$user	= Factory::getContainer()->get(ApplicationInterface::class)->getIdentity();
+		$user	= Factory::getApplication()->getIdentity();
 		$cache 	= Factory::getCache('com_plugins', '');
 
 		$levels = implode(',', $user->getAuthorisedViewLevels());
@@ -201,7 +201,7 @@ abstract class CBPluginHelper
 			$plugins = $db->loadObjectList();
 
 			if ($error = $db->getErrorMsg()) {
-				Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage($error, 'error');
+				Factory::getApplication()->enqueueMessage($error, 'error');
 				return false;
 			}
 

@@ -11,7 +11,7 @@
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
-use Joomla\Uri\Uri;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\MVC\View\HtmlView;

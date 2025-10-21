@@ -12,15 +12,11 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
-use Joomla\Uri\Uri;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 
-if (!defined('DS')) {
-    define('DS', DIRECTORY_SEPARATOR);
-}
-
-require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+require_once(JPATH_ADMINISTRATOR . DIRECTORY_SEPARATOR . 'components' . DIRECTORY_SEPARATOR . 'com_contentbuilder' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'joomla_compat.php');
 
 class plgSystemContentbuilder_system extends CMSPlugin
 {

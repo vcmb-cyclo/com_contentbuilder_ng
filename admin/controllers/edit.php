@@ -12,7 +12,7 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
-use Joomla\Uri\Uri;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 
 
@@ -43,8 +43,8 @@ class ContentbuilderControllerEdit extends CBController
     function save($apply = false)
     {
 
-        if (Factory::getContainer()->get(ApplicationInterface::class)->isClient('site') && CBRequest::getInt('Itemid', 0)) {
-            $menu = Factory::getContainer()->get(ApplicationInterface::class)->getMenu();
+        if (Factory::getApplication()->isClient('site') && CBRequest::getInt('Itemid', 0)) {
+            $menu = Factory::getApplication()->getMenu();
             $item = $menu->getActive();
             if (is_object($item)) {
                 CBRequest::setVar('cb_controller', $item->getParams()->get('cb_controller', null));
@@ -77,12 +77,12 @@ class ContentbuilderControllerEdit extends CBController
                 $return = cb_b64dec($return);
 
                 if (!CBRequest::getBool('cbInternalCheck', 1)) {
-                    Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage($msg, 'warning');
-                    Factory::getContainer()->get(ApplicationInterface::class)->redirect($return);
+                    Factory::getApplication()->enqueueMessage($msg, 'warning');
+                    Factory::getApplication()->redirect($return);
                 }
                 if (Uri::isInternal($return)) {
-                    Factory::getContainer()->get(ApplicationInterface::class)->enqueueMessage($msg, 'warning');
-                    Factory::getContainer()->get(ApplicationInterface::class)->redirect($return);
+                    Factory::getApplication()->enqueueMessage($msg, 'warning');
+                    Factory::getApplication()->redirect($return);
                 }
             }
 

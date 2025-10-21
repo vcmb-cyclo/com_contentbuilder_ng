@@ -11,7 +11,7 @@
 
 defined('_JEXEC') or die ('Restricted access');
 
-use Joomla\Uri\Uri;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\MVC\View\HtmlView;
 
 require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
