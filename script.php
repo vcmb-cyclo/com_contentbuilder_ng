@@ -270,7 +270,7 @@ if (!class_exists('CBFactory')) {
 
         public function getConnection()
         {
-            return $this->dbo->getConnection();
+            return $this->dbo;
         }
 
         public function getAffectedRows()
@@ -753,9 +753,7 @@ class com_contentbuilderInstallerScript
 
         foreach ($plugins as $folder => $subplugs) {
             foreach ($subplugs as $plugin) {
-                $query = $version->getShortVersion() >= '1.6'
-                    ? 'UPDATE #__extensions SET `enabled` = 1 WHERE `type` = "plugin" AND `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder)
-                    : 'UPDATE #__plugins SET `published` = 1 WHERE `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder);
+                $query = 'UPDATE #__extensions SET `enabled` = 1 WHERE `type` = "plugin" AND `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder);
                 $db->setQuery($query);
                 $db->execute();
                 echo 'Published plugin ' . htmlspecialchars($plugin) . '<hr/>';
