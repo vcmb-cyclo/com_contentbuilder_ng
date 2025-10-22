@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
@@ -6,7 +7,7 @@
  * @copyright   (C) 2024 by XDA+GIL
  * @license     GNU/GPL
  */
-defined('_JEXEC') or die ('Direct Access to this location is not allowed.');
+defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Factory;
 use Joomla\Filesystem\File;
@@ -29,7 +30,6 @@ if (!class_exists('CBFactory')) {
 
       return static::$dbo;
     }
-
   }
 
   class CBFile extends File
@@ -61,7 +61,6 @@ if (!class_exists('CBFactory')) {
       try {
 
         $this->dbo->setQuery($query, $offset, $limit);
-
       } catch (Exception $e) {
 
         $this->last_query = false;
@@ -69,7 +68,6 @@ if (!class_exists('CBFactory')) {
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
       }
-
     }
 
     public function loadObjectList()
@@ -84,12 +82,10 @@ if (!class_exists('CBFactory')) {
       try {
 
         return $this->dbo->loadObjectList();
-
       } catch (Exception $e) {
 
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
-
       } catch (Error $e) {
 
         $this->errNo = $e->getCode();
@@ -110,12 +106,10 @@ if (!class_exists('CBFactory')) {
       try {
 
         return $this->dbo->loadObject($class);
-
       } catch (Exception $e) {
 
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
-
       } catch (Error $e) {
 
         $this->errNo = $e->getCode();
@@ -136,12 +130,10 @@ if (!class_exists('CBFactory')) {
       try {
 
         return $this->dbo->loadColumn($offset);
-
       } catch (Exception $e) {
 
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
-
       } catch (Error $e) {
 
         $this->errNo = $e->getCode();
@@ -162,17 +154,14 @@ if (!class_exists('CBFactory')) {
       try {
 
         return $this->dbo->loadAssocList($key, $column);
-
       } catch (Exception $e) {
 
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
-
       } catch (Error $e) {
 
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
-
       }
 
       return array();
@@ -189,12 +178,10 @@ if (!class_exists('CBFactory')) {
       try {
 
         return $this->dbo->loadAssoc();
-
       } catch (Exception $e) {
 
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
-
       } catch (Error $e) {
 
         $this->errNo = $e->getCode();
@@ -218,12 +205,10 @@ if (!class_exists('CBFactory')) {
       try {
 
         return $this->dbo->execute();
-
       } catch (Exception $e) {
 
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
-
       } catch (Error $e) {
 
         $this->errNo = $e->getCode();
@@ -241,12 +226,10 @@ if (!class_exists('CBFactory')) {
       try {
 
         return $this->dbo->updateObject($table, $object, $key, $nulls);
-
       } catch (Exception $e) {
 
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
-
       } catch (Error $e) {
 
         $this->errNo = $e->getCode();
@@ -264,12 +247,10 @@ if (!class_exists('CBFactory')) {
       try {
 
         return $this->dbo->insertObject($table, $object, $key);
-
       } catch (Exception $e) {
 
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
-
       } catch (Error $e) {
 
         $this->errNo = $e->getCode();
@@ -342,7 +323,6 @@ if (!class_exists('CBFactory')) {
 
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
-
       } catch (Error $e) {
 
         $this->errNo = $e->getCode();
@@ -363,7 +343,6 @@ if (!class_exists('CBFactory')) {
 
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
-
       } catch (Error $e) {
 
         $this->errNo = $e->getCode();
@@ -387,7 +366,6 @@ if (!class_exists('CBFactory')) {
 
         $this->errNo = $e->getCode();
         $this->errMsg = $e->getMessage();
-
       } catch (Error $e) {
 
         $this->errNo = $e->getCode();
@@ -433,13 +411,13 @@ if (!function_exists('contentbuilder_install_db')) {
   function contentbuilder_install_db()
   {
 
-    require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+    require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
     $tables = CBCompat::getTableFields($db->getTableList());
 
-    if (isset ($tables[$db->getPrefix() . 'contentbuilder_forms'])) {
+    if (isset($tables[$db->getPrefix() . 'contentbuilder_forms'])) {
 
       return true;
     }
@@ -745,7 +723,6 @@ CREATE TABLE `#__contentbuilder_verifications` (
       $db->setQuery($query12);
       $db->execute();
     } catch (Exception $e) {
-
     }
 
     echo $db->getErrorMsg();
@@ -791,11 +768,9 @@ class com_contentbuilderInstallerScript
 
   function installAndUpdate()
   {
+    require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 
-    require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
-
-    $db = Factory::getContainer()->get(DatabaseInterface::class);
-
+    $db = CBFactory::getDBO();
     $plugins = $this->getPlugins();
 
     $base_path = JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'plugins';
@@ -803,6 +778,7 @@ class com_contentbuilderInstallerScript
     $folders = Folder::folders($base_path);
 
     $installer = new Installer();
+    $installer->setDatabase($db->getConnection()); // Set the database connection
 
     foreach ($folders as $folder) {
       echo 'Installing plugin <b>' . $folder . '</b><br/>';
@@ -815,9 +791,12 @@ class com_contentbuilderInstallerScript
 
     foreach ($plugins as $folder => $subplugs) {
       foreach ($subplugs as $plugin) {
-        $db->setQuery('Update #__extensions Set `enabled` = 1 WHERE `type` = "plugin" AND `element` = "' . $plugin . '" AND `folder` = "' . $folder . '"');
+        $query = $version->getShortVersion() >= '1.6'
+          ? 'UPDATE #__extensions SET `enabled` = 1 WHERE `type` = "plugin" AND `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder)
+          : 'UPDATE #__plugins SET `published` = 1 WHERE `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder);
+        $db->setQuery($query);
         $db->execute();
-        echo 'Published plugin ' . $plugin . '<hr/>';
+        echo 'Published plugin ' . htmlspecialchars($plugin) . '<hr/>';
       }
     }
   }
@@ -833,7 +812,7 @@ class com_contentbuilderInstallerScript
       echo '<b style="color:red">WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 5.2.0, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!</b>';
     }
 
-    require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+    require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 
     //contentbuilder_install_db();
 
@@ -862,34 +841,33 @@ class com_contentbuilderInstallerScript
    */
   function uninstall($parent)
   {
-    $db = Factory::getContainer()->get(DatabaseInterface::class);
+      $db = CBFactory::getDBO();
 
-    $db->setQuery("Delete From #__menu Where `link` Like 'index.php?option=com_contentbuilder%'");
-    $db->execute();
-
-    $plugins = $this->getPlugins();
-
-    $installer = new Installer();
-
-    foreach ($plugins as $folder => $subplugs) {
-      foreach ($subplugs as $plugin) {
-        $db->setQuery('SELECT `extension_id` FROM #__extensions WHERE `type` = "plugin" AND `element` = "' . $plugin . '" AND `folder` = "' . $folder . '"');
-        $id = $db->loadResult();
-
-        if ($id) {
-          $installer->uninstall('plugin', $id, 1);
-        }
-      }
-    }
-
-    $db = Factory::getContainer()->get(DatabaseInterface::class);
-    $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
-    if (!$db->loadResult()) {
-      $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
+      $db->setQuery("DELETE FROM #__menu WHERE `link` LIKE 'index.php?option=com_contentbuilder%'");
       $db->execute();
-    }
-  }
 
+      $plugins = $this->getPlugins();
+      $installer = new Installer();
+      $installer->setDatabase($db->getConnection()); // Set the database connection
+
+      foreach ($plugins as $folder => $subplugs) {
+          foreach ($subplugs as $plugin) {
+              $query = 'SELECT `extension_id` FROM #__extensions WHERE `type` = "plugin" AND `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder);
+              $db->setQuery($query);
+              $id = $db->loadResult();
+
+              if ($id) {
+                  $installer->uninstall('plugin', $id, 1);
+              }
+          }
+      }
+
+      $db->setQuery("SELECT id FROM `#__menu` WHERE `alias` = 'root'");
+      if (!$db->loadResult()) {
+          $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, (SELECT MAX(mlft.rgt)+1 FROM #__menu AS mlft), 0, '*', 0)");
+          $db->execute();
+      }
+  }
   /**
    * method to run before an install/update/uninstall method
    *
@@ -962,4 +940,3 @@ class com_contentbuilderInstallerScript
     }*/
   }
 }
-

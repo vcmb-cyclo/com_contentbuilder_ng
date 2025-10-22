@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
@@ -29,7 +30,6 @@ if (!class_exists('CBFactory')) {
 
             return static::$dbo;
         }
-
     }
 
     class CBFile extends File
@@ -78,7 +78,6 @@ if (!class_exists('CBFactory')) {
             } catch (Exception $e) {
                 $this->errNo = $e->getCode();
                 $this->errMsg = $e->getMessage();
-
             } catch (Error $e) {
                 $this->errNo = $e->getCode();
                 $this->errMsg = $e->getMessage();
@@ -374,7 +373,7 @@ if (!function_exists('contentbuilder_install_db')) {
     function contentbuilder_install_db()
     {
 
-        require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+        require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 
         $db = CBFactory::getDBO();
 
@@ -730,10 +729,9 @@ class com_contentbuilderInstallerScript
 
     function installAndUpdate()
     {
-        require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+        require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 
         $db = CBFactory::getDBO();
-
         $version = new Version();
         $plugins = $this->getPlugins();
 
@@ -742,6 +740,7 @@ class com_contentbuilderInstallerScript
         $folders = Folder::folders($base_path);
 
         $installer = new Installer();
+        $installer->setDatabase($db->getConnection()); // Set the database connection
 
         foreach ($folders as $folder) {
             echo 'Installing plugin <b>' . $folder . '</b><br/>';
@@ -754,14 +753,12 @@ class com_contentbuilderInstallerScript
 
         foreach ($plugins as $folder => $subplugs) {
             foreach ($subplugs as $plugin) {
-                if (version_compare($version->getShortVersion(), '1.6', '>=')) {
-                    $db->setQuery('Update #__extensions Set `enabled` = 1 WHERE `type` = "plugin" AND `element` = "' . $plugin . '" AND `folder` = "' . $folder . '"');
-                } else {
-                    $db->setQuery('Update #__plugins Set `published` = 1 WHERE `element` = "' . $plugin . '" AND `folder` = "' . $folder . '"');
-                }
-                
+                $query = $version->getShortVersion() >= '1.6'
+                    ? 'UPDATE #__extensions SET `enabled` = 1 WHERE `type` = "plugin" AND `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder)
+                    : 'UPDATE #__plugins SET `published` = 1 WHERE `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder);
+                $db->setQuery($query);
                 $db->execute();
-                echo 'Published plugin ' . $plugin . '<hr/>';
+                echo 'Published plugin ' . htmlspecialchars($plugin) . '<hr/>';
             }
         }
     }
@@ -777,7 +774,7 @@ class com_contentbuilderInstallerScript
             echo '<b style="color:red">WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 5.2.0, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!</b>';
         }
 
-        require_once (JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
+        require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'joomla_compat.php');
 
         //contentbuilder_install_db();
 
@@ -807,24 +804,21 @@ class com_contentbuilderInstallerScript
     function uninstall($parent)
     {
         $version = new Version();
-
         $db = CBFactory::getDBO();
 
-        $db->setQuery("Delete From #__menu Where `link` Like 'index.php?option=com_contentbuilder%'");
+        $db->setQuery("DELETE FROM #__menu WHERE `link` LIKE 'index.php?option=com_contentbuilder%'");
         $db->execute();
 
         $plugins = $this->getPlugins();
-
         $installer = new Installer();
+        $installer->setDatabase($db->getConnection()); // Set the database connection
 
         foreach ($plugins as $folder => $subplugs) {
             foreach ($subplugs as $plugin) {
-                if (version_compare($version->getShortVersion(), '1.6', '>=')) {
-                    $db->setQuery('SELECT `extension_id` FROM #__extensions WHERE `type` = "plugin" AND `element` = "' . $plugin . '" AND `folder` = "' . $folder . '"');
-                } else {
-                    $db->setQuery('SELECT `id` FROM #__plugins WHERE `element` = "' . $plugin . '" AND `folder` = "' . $folder . '"');
-                }
-
+                $query = $version->getShortVersion() >= '1.6'
+                    ? 'SELECT `extension_id` FROM #__extensions WHERE `type` = "plugin" AND `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder)
+                    : 'SELECT `id` FROM #__plugins WHERE `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder);
+                $db->setQuery($query);
                 $id = $db->loadResult();
 
                 if ($id) {
@@ -833,14 +827,12 @@ class com_contentbuilderInstallerScript
             }
         }
 
-        $db = CBFactory::getDBO();
-        $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
+        $db->setQuery("SELECT id FROM `#__menu` WHERE `alias` = 'root'");
         if (!$db->loadResult()) {
-            $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
+            $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, (SELECT MAX(mlft.rgt)+1 FROM #__menu AS mlft), 0, '*', 0)");
             $db->execute();
         }
     }
-
     /**
      * method to run before an install/update/uninstall method
      *
@@ -890,32 +882,7 @@ class com_contentbuilderInstallerScript
                 jimport('joomla.version');
                 $version = new Version();
                 
-                if(version_compare($version->getShortVersion(), '3.0', '<')){
-                
-                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER', 'contentbuilder', '', 'contentbuilder', 'index.php?option=com_contentbuilder', 'component', 0, 1, 1, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                    $db->execute();
-                    $parent_id = $db->insertid();
-
-                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER_STORAGES', 'comcontentbuilderstorages', '', 'contentbuilder/comcontentbuilderstorages', 'index.php?option=com_contentbuilder&controller=storages', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                    $db->execute();
-
-                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_LIST', 'comcontentbuilderlist', '', 'contentbuilder/comcontentbuilderlist', 'index.php?option=com_contentbuilder&controller=forms', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                    $db->execute();
-
-                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'Try BreezingForms!', 'try-breezingforms', '', 'contentbuilder/try-breezingforms', 'index.php?option=com_contentbuilder&view=contentbuilder&market=true', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                    $db->execute();
-
-                    $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `ordering`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_ABOUT', 'comcontentbuilderabout', '', 'contentbuilder/comcontentbuilderabout', 'index.php?option=com_contentbuilder&view=contentbuilder', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, 0, '0000-00-00 00:00:00', 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
-                    $db->execute();
-
-                    $db->setQuery("Select max(mrgt.rgt)+1 From #__menu As mrgt");
-                    $rgt = $db->loadResult();
-
-                    $db->setQuery("Update `#__menu` Set rgt = ".$rgt." Where `title` = 'Menu_Item_Root' And `alias` = 'root'");
-                    $db->execute();
-                
-                } else {
-                    
+                 
                     $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER', 'contentbuilder', '', 'contentbuilder', 'index.php?option=com_contentbuilder', 'component', 0, 1, 1, ".$comp_id.", 0, '0000-00-00 00:00:00', 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
                     $db->execute();
                     $parent_id = $db->insertid();
@@ -937,10 +904,7 @@ class com_contentbuilderInstallerScript
 
                     $db->setQuery("Update `#__menu` Set rgt = ".$rgt." Where `title` = 'Menu_Item_Root' And `alias` = 'root'");
                     $db->execute();
-                    
-                }
             }
         }*/
     }
 }
-

@@ -24,6 +24,9 @@ require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_c
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'CBFactory.php');
 require_once(JPATH_SITE . DS . 'administrator' . DS . 'components' . DS . 'com_contentbuilder' . DS . 'classes' . DS . 'CBRequest.php');
 
+
+
+
 if (!function_exists('cb_b64enc')) {
 
     function cb_b64enc($str)
