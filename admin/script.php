@@ -299,11 +299,6 @@ if (!class_exists('CBFactory')) {
       return $this->dbo->getCount();
     }
 
-    public function getConnection()
-    {
-      return $this->dbo;
-    }
-
     public function getAffectedRows()
     {
       if (!$this->last_query)
@@ -778,8 +773,9 @@ class com_contentbuilderInstallerScript
     $folders = Folder::folders($base_path);
 
     $installer = new Installer();
-    $installer->setDatabase($db->getConnection()); // Set the database connection
-
+    // CORRECT : Utilise directement le driver Joomla
+    $installer->setDatabase(\Joomla\CMS\Factory::getContainer()->get('DatabaseDriver'));
+    
     foreach ($folders as $folder) {
       echo 'Installing plugin <b>' . $folder . '</b><br/>';
       $success = $installer->install($base_path . '/' .$folder);
@@ -846,7 +842,7 @@ class com_contentbuilderInstallerScript
 
       $plugins = $this->getPlugins();
       $installer = new Installer();
-      $installer->setDatabase($db->getConnection()); // Set the database connection
+      $installer->setDatabase(\Joomla\CMS\Factory::getContainer()->get('DatabaseDriver'));
 
       foreach ($plugins as $folder => $subplugs) {
           foreach ($subplugs as $plugin) {

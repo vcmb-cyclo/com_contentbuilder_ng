@@ -1,7 +1,8 @@
 <?php
 /**
- *
+ * @package     ContentBuilder
  * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   (C) 2025 by XDA+GIL
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -10,30 +11,30 @@ defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 
-if(!class_exists('CBFactory'))
-{
+if (!class_exists('CBFactory')) {
 
-	class CBFactory {
+	class CBFactory
+	{
 
 		private static $dbo = null;
 
-		public static function getDbo(){
+		public static function getDbo()
+		{
 
-			if(static::$dbo == null){
+			if (static::$dbo == null) {
 
 				static::$dbo = new CBDbo();
 			}
 
 			return static::$dbo;
 		}
-
 	}
 }
 
-if(!class_exists('CBDbo'))
-{
+if (!class_exists('CBDbo')) {
 
-	class CBDbo  {
+	class CBDbo
+	{
 
 		private $errNo = 0;
 		private $errMsg = '';
@@ -46,39 +47,37 @@ if(!class_exists('CBDbo'))
 			$this->dbo = Factory::getContainer()->get(DatabaseInterface::class);
 		}
 
-		public function setQuery($query, $offset = 0, $limit = 0){
+		public function setQuery($query, $offset = 0, $limit = 0)
+		{
 
-			try{
+			try {
 
 				$this->dbo->setQuery($query, $offset, $limit);
-
-			}catch(Exception $e){
+			} catch (Exception $e) {
 
 				$this->last_query = false;
 				$this->last_failed_query = $query;
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			}
-
 		}
 
-		public function loadObjectList(){
+		public function loadObjectList()
+		{
 
-			if(!$this->last_query) return array();
+			if (!$this->last_query) return array();
 
 			$this->errNo = 0;
 			$this->errMsg = '';
 
-			try{
+			try {
 
 				return $this->dbo->loadObjectList();
-
-			}catch(Exception $e){
+			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
-
-			}catch(Error $e){
+			} catch (Error $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
@@ -89,21 +88,19 @@ if(!class_exists('CBDbo'))
 
 		public function loadObject($class = 'stdClass')
 		{
-			if(!$this->last_query) return null;
+			if (!$this->last_query) return null;
 
 			$this->errNo = 0;
 			$this->errMsg = '';
 
-			try{
+			try {
 
 				return $this->dbo->loadObject($class);
-
-			}catch(Exception $e){
+			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
-
-			}catch(Error $e){
+			} catch (Error $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
@@ -114,21 +111,19 @@ if(!class_exists('CBDbo'))
 
 		public function loadColumn($offset = 0)
 		{
-			if(!$this->last_query) return null;
+			if (!$this->last_query) return null;
 
 			$this->errNo = 0;
 			$this->errMsg = '';
 
-			try{
+			try {
 
 				return $this->dbo->loadColumn($offset);
-
-			}catch(Exception $e){
+			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
-
-			}catch(Error $e){
+			} catch (Error $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
@@ -139,25 +134,22 @@ if(!class_exists('CBDbo'))
 
 		public function loadAssocList($key = null, $column = null)
 		{
-			if(!$this->last_query) return array();
+			if (!$this->last_query) return array();
 
 			$this->errNo = 0;
 			$this->errMsg = '';
 
-			try{
+			try {
 
 				return $this->dbo->loadAssocList($key, $column);
-
-			}catch(Exception $e){
-
-				$this->errNo = $e->getCode();
-				$this->errMsg = $e->getMessage();
-
-			}catch(Error $e){
+			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
+			} catch (Error $e) {
 
+				$this->errNo = $e->getCode();
+				$this->errMsg = $e->getMessage();
 			}
 
 			return array();
@@ -165,21 +157,19 @@ if(!class_exists('CBDbo'))
 
 		public function loadAssoc()
 		{
-			if(!$this->last_query) return null;
+			if (!$this->last_query) return null;
 
 			$this->errNo = 0;
 			$this->errMsg = '';
 
-			try{
+			try {
 
 				return $this->dbo->loadAssoc();
-
-			}catch(Exception $e){
+			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
-
-			}catch(Error $e){
+			} catch (Error $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
@@ -188,7 +178,8 @@ if(!class_exists('CBDbo'))
 			return null;
 		}
 
-		public function query(){
+		public function query()
+		{
 
 			return $this->execute();
 		}
@@ -198,16 +189,14 @@ if(!class_exists('CBDbo'))
 			$this->errNo = 0;
 			$this->errMsg = '';
 
-			try{
+			try {
 
 				return $this->dbo->execute();
-
-			}catch(Exception $e){
+			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
-
-			}catch(Error $e){
+			} catch (Error $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
@@ -221,16 +210,14 @@ if(!class_exists('CBDbo'))
 			$this->errNo = 0;
 			$this->errMsg = '';
 
-			try{
+			try {
 
-				return $this->dbo->updateObject($table,$object, $key, $nulls);
-
-			}catch(Exception $e){
+				return $this->dbo->updateObject($table, $object, $key, $nulls);
+			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
-
-			}catch(Error $e){
+			} catch (Error $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
@@ -244,16 +231,14 @@ if(!class_exists('CBDbo'))
 			$this->errNo = 0;
 			$this->errMsg = '';
 
-			try{
+			try {
 
-				return $this->dbo->insertObject($table,$object, $key);
-
-			}catch(Exception $e){
+				return $this->dbo->insertObject($table, $object, $key);
+			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
-
-			}catch(Error $e){
+			} catch (Error $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
@@ -269,7 +254,7 @@ if(!class_exists('CBDbo'))
 
 		public function getQuery($new = false)
 		{
-			if(!$this->last_query) return $this->last_failed_query;
+			if (!$this->last_query) return $this->last_failed_query;
 
 			return $this->dbo->getQuery($new);
 		}
@@ -286,24 +271,24 @@ if(!class_exists('CBDbo'))
 
 		public function getNumRows()
 		{
-			if(!$this->last_query) return 0;
+			if (!$this->last_query) return 0;
 			return $this->dbo->getNumRows();
 		}
 
 		public function getCount()
 		{
-			if(!$this->last_query) return 0;
+			if (!$this->last_query) return 0;
 			return $this->dbo->getCount();
 		}
 
 		public function getConnection()
 		{
-			return $this->dbo->getConnection();
+			return $this->dbo;
 		}
 
 		public function getAffectedRows()
 		{
-			if(!$this->last_query) return array();
+			if (!$this->last_query) return array();
 			return $this->dbo->getAffectedRows();
 		}
 
@@ -314,12 +299,11 @@ if(!class_exists('CBDbo'))
 
 			try {
 				return $this->dbo->getTableColumns($table, $typeOnly);
-			}catch(Exception $e){
+			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
-
-			}catch(Error $e){
+			} catch (Error $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
@@ -335,12 +319,11 @@ if(!class_exists('CBDbo'))
 
 			try {
 				return $this->dbo->getTableList();
-			}catch(Exception $e){
+			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
-
-			}catch(Error $e){
+			} catch (Error $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
@@ -351,19 +334,18 @@ if(!class_exists('CBDbo'))
 
 		public function loadResult()
 		{
-			if(!$this->last_query) return null;
+			if (!$this->last_query) return null;
 
 			$this->errNo = 0;
 			$this->errMsg = '';
 
 			try {
 				return $this->dbo->loadResult();
-			}catch(Exception $e){
+			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
-
-			}catch(Error $e){
+			} catch (Error $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
@@ -382,16 +364,17 @@ if(!class_exists('CBDbo'))
 			return $this->errMsg;
 		}
 
-		public function stderr(){
+		public function stderr()
+		{
 
 			return $this->errMsg;
 		}
 
-		public function insertid(){
+		public function insertid()
+		{
 
-			if(!$this->last_query) return 0;
+			if (!$this->last_query) return 0;
 			return $this->dbo->insertid();
 		}
 	}
-
 }
