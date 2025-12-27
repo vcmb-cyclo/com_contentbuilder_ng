@@ -7,7 +7,7 @@
  <authorUrl>https://breezingforms.vcmb.fr</authorUrl>
  <copyright>Copyright 2011 - 2026 by XDA+GIL</copyright>
  <license>GNU/GPL v2.0</license>
- <version>5.4.1-RC1</version>
+ <version>5.4.1-RC2</version>
  <description>A content construction kit and application framework extension for Joomla!</description>
 
  <scriptfile>script.php</scriptfile>
