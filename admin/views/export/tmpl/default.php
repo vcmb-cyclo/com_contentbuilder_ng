@@ -41,8 +41,6 @@ $worksheet1->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\Pa
 // Freeze first line.
 $worksheet1->freezePane('A2');
 
-$worksheet1->getDefaultRowDimension()->setRowHeight(-1); // auto-hauteur
-
 // First row in grey.
 // Appliquer le style à la première ligne
 $style = $worksheet1->getStyle('1:1');
@@ -186,42 +184,51 @@ $filename = "CB_export_" . $name. '_' .$date->format('Y-m-d_Hi', true) . ".xlsx"
 $spreadsheet->setActiveSheetIndex(0);
 
 foreach ($spreadsheet->getWorksheetIterator() as $worksheet) {
-    // Auto-size toutes les colonnes utilisées
-    foreach ($worksheet->getColumnDimensions() as $colDim) {
-        $colDim->setAutoSize(true);
+    // Active l'auto-size pour toutes les colonnes qui contiennent des données
+    foreach ($worksheet->getColumnIterator() as $column) {
+        $worksheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
     }
 
-    // Forcer le calcul
+    // Force le calcul des largeurs basées sur le contenu réel
     $worksheet->calculateColumnWidths();
 
-    // Limite max + petite correction pour enlever le padding excessif restant
-    foreach ($worksheet->getColumnDimensions() as $colDim) {
-        $calculatedWidth = $colDim->getWidth();
-        
-        if ($calculatedWidth > 70) {
-            $colDim->setAutoSize(false);
-            $colDim->setWidth(70);
-        } else {
-            // Optionnel : réduire légèrement pour un ajustement encore plus serré
-            // Testez avec 0.85 à 1.0 selon vos polices
-            $colDim->setWidth(max(3, $calculatedWidth - 0.9));
+    // Applique un plafond de 70 caractères de largeur
+    foreach ($worksheet->getColumnIterator() as $column) {
+        $dimension = $worksheet->getColumnDimension($column->getColumnIndex());
+
+        if ($dimension->getWidth() > 70) {
+            $dimension->setAutoSize(false);
+            $dimension->setWidth(70);
         }
     }
 }
 
 
+// Redirect output to a client’s web browser (Excel5)
+//header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+//header('Content-Disposition: attachment; filename=' . $filename);
+//header('Cache-Control: max-age=0');
+/*header('Pragma: public'); // HTTP/1.0
+header("Expires: 0");
+header("Cache-Control: must-revalidate, post-check=0, pre-check=0");// HTTP/1.1
+header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+header("Content-Type: application/download");;
+header('Content-Disposition: attachment; filename=' . $filename);
+header("Content-Transfer-Encoding: binary ");*/
 
-// Nettoyer tout buffer avant sortie
-while (ob_get_level() > 0) {
-    ob_end_clean();
-}
 
-// Headers corrects pour forcer le téléchargement Excel
+
+header("Pragma: public");
+header("Expires: 0");
+header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-header('Content-Disposition: attachment; filename="' . $filename . '"');
-header('Cache-Control: max-age=0, no-cache, must-revalidate');
-header('Pragma: public');
-header('Expires: 0');
+header("Content-Type: application/force-download");
+header("Content-Type: application/octet-stream");
+header("Content-Type: application/download");
+;
+header('Cache-Control: max-age=0');
+header('Content-Disposition: attachment; filename=' . $filename);
+header("Content-Transfer-Encoding: binary ");
 
 ob_end_clean();
 ob_start();
