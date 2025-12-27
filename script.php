@@ -799,7 +799,8 @@ class com_contentbuilderInstallerScript
     $folders = Folder::folders($base_path);
 
     $installer = new Installer();
-
+    $installer->setDatabase(\Joomla\CMS\Factory::getContainer()->get('DatabaseDriver'));
+    
     foreach ($folders as $folder) {
       Factory::getApplication()->enqueueMessage('Installing plugin <b>' . $folder . '</b>', 'message');
       $success = $installer->install($base_path . '/' . $folder);
@@ -931,23 +932,23 @@ class com_contentbuilderInstallerScript
     $phpexcelFile   = $classesPath . '/PHPExcel.php';
 
     if (Folder::exists($phpexcelFolder)) {
-      if (Folder::delete($phpexcelFolder)) {
-        file_put_contents($logFile, 'Ancien dossier PHPExcel supprimé avec succès'. FILE_APPEND);
-        $app->enqueueMessage('Ancien dossier PHPExcel supprimé avec succès.', 'message');
-      } else {
-        file_put_contents($logFile, 'Echec de suppression du dossier PHPExcel'. FILE_APPEND);
-        $app->enqueueMessage('Échec de suppression du dossier PHPExcel.', 'warning');
-      }
+        if (Folder::delete($phpexcelFolder)) {
+            file_put_contents($logFile, 'Old PHPExcel folder successfully deleted.' . PHP_EOL, FILE_APPEND);
+            $app->enqueueMessage('Old PHPExcel folder successfully deleted.', 'message');
+        } else {
+            file_put_contents($logFile, 'Failed to delete PHPExcel folder.' . PHP_EOL, FILE_APPEND);
+            $app->enqueueMessage('Failed to delete PHPExcel folder.', 'warning');
+        }
     }
 
     if (File::exists($phpexcelFile)) {
-      if (File::delete($phpexcelFile)) {
-        file_put_contents($logFile, 'Ancien fichier PHPExcel.php supprimé avec succès.'. FILE_APPEND);
-        $app->enqueueMessage('Ancien fichier PHPExcel.php supprimé avec succès.', 'message');
-      } else {
-        file_put_contents($logFile, 'Echec de suppression du fichier PHPExcel.php'. FILE_APPEND);
-        $app->enqueueMessage('Échec de suppression du fichier PHPExcel.php.', 'warning');
-      }
+        if (File::delete($phpexcelFile)) {
+            file_put_contents($logFile, 'Old PHPExcel.php file successfully deleted.' . PHP_EOL, FILE_APPEND);
+            $app->enqueueMessage('Old PHPExcel.php file successfully deleted.', 'message');
+        } else {
+            file_put_contents($logFile, 'Failed to delete PHPExcel.php file.' . PHP_EOL, FILE_APPEND);
+            $app->enqueueMessage('Failed to delete PHPExcel.php file.', 'warning');
+        }
     }
 
     // Suppression propre de l'ancienne librairie PhpSpreadsheet
