@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     ContentBuilder
  * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
@@ -22,7 +23,6 @@ if (!class_exists('CBFactory')) {
 		{
 
 			if (static::$dbo == null) {
-
 				static::$dbo = new CBDbo();
 			}
 
@@ -51,7 +51,6 @@ if (!class_exists('CBDbo')) {
 		{
 
 			try {
-
 				$this->dbo->setQuery($query, $offset, $limit);
 			} catch (Exception $e) {
 
@@ -71,7 +70,6 @@ if (!class_exists('CBDbo')) {
 			$this->errMsg = '';
 
 			try {
-
 				return $this->dbo->loadObjectList();
 			} catch (Exception $e) {
 
@@ -94,7 +92,6 @@ if (!class_exists('CBDbo')) {
 			$this->errMsg = '';
 
 			try {
-
 				return $this->dbo->loadObject($class);
 			} catch (Exception $e) {
 
@@ -117,14 +114,12 @@ if (!class_exists('CBDbo')) {
 			$this->errMsg = '';
 
 			try {
-
 				return $this->dbo->loadColumn($offset);
 			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			} catch (Error $e) {
-
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			}
@@ -140,14 +135,11 @@ if (!class_exists('CBDbo')) {
 			$this->errMsg = '';
 
 			try {
-
 				return $this->dbo->loadAssocList($key, $column);
 			} catch (Exception $e) {
-
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			} catch (Error $e) {
-
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			}
@@ -163,14 +155,12 @@ if (!class_exists('CBDbo')) {
 			$this->errMsg = '';
 
 			try {
-
 				return $this->dbo->loadAssoc();
 			} catch (Exception $e) {
 
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			} catch (Error $e) {
-
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			}
@@ -180,7 +170,6 @@ if (!class_exists('CBDbo')) {
 
 		public function query()
 		{
-
 			return $this->execute();
 		}
 
@@ -190,14 +179,11 @@ if (!class_exists('CBDbo')) {
 			$this->errMsg = '';
 
 			try {
-
 				return $this->dbo->execute();
 			} catch (Exception $e) {
-
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			} catch (Error $e) {
-
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			}
@@ -211,14 +197,11 @@ if (!class_exists('CBDbo')) {
 			$this->errMsg = '';
 
 			try {
-
 				return $this->dbo->updateObject($table, $object, $key, $nulls);
 			} catch (Exception $e) {
-
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			} catch (Error $e) {
-
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			}
@@ -232,14 +215,11 @@ if (!class_exists('CBDbo')) {
 			$this->errMsg = '';
 
 			try {
-
 				return $this->dbo->insertObject($table, $object, $key);
 			} catch (Exception $e) {
-
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			} catch (Error $e) {
-
 				$this->errNo = $e->getCode();
 				$this->errMsg = $e->getMessage();
 			}
@@ -366,13 +346,11 @@ if (!class_exists('CBDbo')) {
 
 		public function stderr()
 		{
-
 			return $this->errMsg;
 		}
 
 		public function insertid()
 		{
-
 			if (!$this->last_query) return 0;
 			return $this->dbo->insertid();
 		}
