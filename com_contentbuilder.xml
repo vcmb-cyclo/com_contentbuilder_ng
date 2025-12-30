@@ -62,10 +62,10 @@
     <language tag="fr-FR">languages/fr-FR/site/fr-FR.com_contentbuilder.ini</language>
  </languages>
 
-    <!-- ===================== -->
-    <!-- ADMINISTRATION -->
-    <!-- ===================== -->
- <administration>
+<!-- ===================== -->
+<!-- ADMINISTRATION -->
+<!-- ===================== -->
+<administration>
     <menu img="components/com_contentbuilder/views/logo_icon_cb.png">ContentBuilder</menu>
     <submenu>
         <menu controller="storages" img="components/com_contentbuilder/views/logo_icon_cb.png">COM_CONTENTBUILDER_STORAGES</menu>
@@ -74,12 +74,14 @@
         <menu view="contentbuilder">COM_CONTENTBUILDER_ABOUT</menu>
     </submenu>
 
+    <!-- Un seul bloc <files> avec folder="administrator" -->
     <files folder="administrator">
         <filename>controller.php</filename>
         <filename>contentbuilder.php</filename>
         <filename>access.xml</filename>
         <filename>config.xml</filename>
         <filename>index.html</filename>
+        
         <folder>controllers</folder>
         <folder>models</folder>
         <folder>tables</folder>
@@ -92,8 +94,10 @@
         <folder>services</folder>
         <folder>tmpl</folder>
         <folder>src</folder>
+        <folder>sql</folder>
     </files>
 
+    <!-- Languages admin (à laisser séparément, c'est correct) -->
     <languages folder="administrator">
         <language tag="en-GB">languages/en-GB/admin/en-GB.com_contentbuilder.ini</language>
         <language tag="en-GB">languages/en-GB/admin/en-GB.com_contentbuilder.menu.ini</language>
@@ -106,23 +110,6 @@
         <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilder.sys.ini</language>
     </languages>
 
-   <files folder="administrator/services">
-      <filename>provider.php</filename>
-   </files>
-
-   <files folder="administrator/src">
-      <folder>Extension</folder>
-      <folder>Service</folder>
-      <folder>Controller</folder>
-      <folder>View</folder>
-   </files>
-
- 
-   <!-- Puis dans une sous-section si besoin -->
-   <files folder="administrator/tmpl/test">
-      <filename>default.php</filename>
-      <filename>index.html</filename>
-   </files>
-
 </administration>
+
 </extension>

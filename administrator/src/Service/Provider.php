@@ -10,39 +10,40 @@
 
 namespace CB\Component\Contentbuilder\Administrator\Service;
 
-defined('_JEXEC') or die;
-
 use Joomla\CMS\Extension\ComponentInterface;
 use Joomla\CMS\Extension\Service\Provider\ComponentDispatcherFactory;
 use Joomla\CMS\Extension\Service\Provider\MVCFactory;
+use Joomla\CMS\Extension\Service\Provider\RouterFactory;
 use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
 use CB\Component\Contentbuilder\Administrator\Extension\ContentbuilderComponent;
-use Joomla\CMS\Factory;
 
-
-return new class implements ServiceProviderInterface {
-
+return new class implements ServiceProviderInterface
+{
     public function register(Container $container): void
     {
-        // MVC moderne disponible pour les nouvelles parties
         $container->registerServiceProvider(
-            new MVCFactory('\\CB\\Component\\Contentbuilder\\Administrator', $container)
+            new MVCFactory('CB\\Component\\Contentbuilder\\Administrator')
         );
 
-        Factory::getApplication()->enqueueMessage('MVCFactory enregistré', 'success');
-
-        // Dispatcher moderne (sans Extension Component)
         $container->registerServiceProvider(
-            new ComponentDispatcherFactory('com_contentbuilder')
+            new ComponentDispatcherFactory('CB\\Component\\Contentbuilder\\Administrator')
         );
 
-        
-        // $container->set(
-        //    ComponentInterface::class,
-        //   fn () => new ContentbuilderComponent()
-        //);
+        $container->registerServiceProvider(
+            new RouterFactory('CB\\Component\\Contentbuilder\\Administrator')
+        );
 
+        $container->set(
+            ComponentInterface::class,
+            function (Container $container) {
+                $component = new ContentbuilderComponent(
+                    $container->get(ComponentDispatcherFactory::class)
+                );
 
+                $component->setMVCFactory($container->get(MVCFactory::class));
+                  return $component;
+            }
+        );
     }
 };
