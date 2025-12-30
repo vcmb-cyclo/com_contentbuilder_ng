@@ -537,8 +537,28 @@ if (!class_exists('CBRequest')) {
 		}
 	}
 
-	$cb_request = Factory::getApplication()->input->getArray(array(), null, 'RAW');
+// Gil - BUG HTML J6 - Patch fait par Chatgpt (30/12/2025)
+    /* $cb_request = Factory::getApplication()->input->getArray(array(), null, 'RAW');
 	foreach ($cb_request as $cb_request_item_key => $cb_request_item_value) {
 		CBRequest::setVar($cb_request_item_key, $cb_request_item_value);
-	}
+	} */
+
+$app = Factory::getApplication();
+$option = $app->input->getCmd('option', '');
+
+// IMPORTANT : ne pas réécrire les variables pour tout Joomla
+// sinon on casse com_content / l'éditeur / les filtres.
+if ($option === 'com_contentbuilder') {
+    // En Joomla 6, getArray() n'a plus la même signature partout.
+    // On évite de forcer RAW via une signature incertaine.
+    $cb_request = $app->input->getArray(); // suffisant pour CB ici
+
+    if (is_array($cb_request)) {
+        foreach ($cb_request as $k => $v) {
+            CBRequest::setVar($k, $v);
+        }
+    }
+}
+// Gil - BUG HTML J6 - Fin de Patch
+
 }
