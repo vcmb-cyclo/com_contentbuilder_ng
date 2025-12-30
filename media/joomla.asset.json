@@ -1,0 +1,18 @@
+{
+    "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+    "name": "com_contentbuilder",
+    "version": "6.0.0",
+    "assets": [
+        {
+            "name": "monstyle",
+            "type": "style",
+            "uri": "com_contentbuilder/monstyle.css"
+        },
+        {
+            "name": "monscript",
+            "type": "script",
+            "uri": "com_contentbuilder/monscript.js",
+            "dependencies": ["core"]
+        }
+    ]
+}

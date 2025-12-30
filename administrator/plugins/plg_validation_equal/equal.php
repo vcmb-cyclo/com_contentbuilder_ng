@@ -13,8 +13,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
-
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder_helpers.php');
+use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
 
 class plgContentbuilder_validationEqual extends CMSPlugin
 {

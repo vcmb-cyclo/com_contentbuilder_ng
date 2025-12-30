@@ -10,11 +10,11 @@
 
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
-require_once(JPATH_SITE.'/administrator/' .'components/' .'com_contentbuilder/' .'classes/' .'joomla_compat.php');
+use Joomla\CMS\MVC\Controller\BaseController;
 
 require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/controllerlegacy.php');
 
-class ContentbuilderController extends CBController
+class ContentbuilderController extends BaseController
 {
     /**
      * Method to display the view

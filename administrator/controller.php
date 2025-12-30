@@ -7,15 +7,17 @@
  * @license     GNU/GPL
 */
 
-// No direct access
+namespace CB\Component\Contentbuilder\Administrator;
 
-defined( '_JEXEC' ) or die( 'Restricted access' );
+// no direct access
+defined('_JEXEC') or die('Direct Access to this location is not allowed.');
+
 Use Joomla\CMS\Factory;
+use Joomla\CMS\MVC\Controller\BaseController;
 
-require_once(JPATH_SITE.'/administrator/' .'components/' .'com_contentbuilder/' .'classes/' .'joomla_compat.php');
 require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/controllerlegacy.php');
 
-class ContentbuilderController extends CBController
+class ContentbuilderController extends BaseController
 {
     /**
      * Method to display the view

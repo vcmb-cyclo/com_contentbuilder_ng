@@ -107,7 +107,6 @@ class com_contentbuilderInstallerScript extends InstallerScript
 
   function installAndUpdate(): bool
   {
-    require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/joomla_compat.php');
     $db = Factory::getContainer()->get(DatabaseInterface::class);
     $plugins = $this->getPlugins();
     $base_path = JPATH_SITE . '/administrator/components/com_contentbuilder/plugins';
@@ -149,7 +148,6 @@ class com_contentbuilderInstallerScript extends InstallerScript
       Factory::getApplication()->enqueueMessage('"WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 8.1, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!"', 'error');
     }
 
-    require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/joomla_compat.php');
 
     return $this->installAndUpdate();
   }

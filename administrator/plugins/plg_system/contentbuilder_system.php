@@ -3,7 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
- * @copyright   (C) 2024 by XDA+GIL
+ * @copyright   (C) 2025 by XDA+GIL
  * @license     GNU/GPL
  */
 
@@ -15,8 +15,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
-
-require_once(JPATH_ADMINISTRATOR . DIRECTORY_SEPARATOR . 'components' . DIRECTORY_SEPARATOR . 'com_contentbuilder' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'joomla_compat.php');
+use CB\Component\Contentbuilder\Administrator;
 
 class plgSystemContentbuilder_system extends CMSPlugin
 {
@@ -46,7 +45,8 @@ class plgSystemContentbuilder_system extends CMSPlugin
 
     function onBeforeRender()
     {
-        $pluginParams = CBCompat::getPluginParams($this, 'system', 'contentbuilder_system');
+        $pluginParams = $this->params;
+//        CBCompat::getPluginParams($this, 'system', 'contentbuilder_system');
 
         if ($pluginParams->def('nocache', 1)) {
             $this->app->getConfig()->set('config.caching', $this->caching);
@@ -55,7 +55,7 @@ class plgSystemContentbuilder_system extends CMSPlugin
 
     function onAfterDispatch()
     {
-        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php')) {
+        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/src/contentbuilder.php')) {
             return;
         }
 
@@ -63,7 +63,7 @@ class plgSystemContentbuilder_system extends CMSPlugin
 
         if (CBRequest::getVar('option') == 'com_kunena' || CBRequest::getVar('option') == 'com_contentbuilder') {
 
-            $pluginParams = CBCompat::getPluginParams($this, 'system', 'contentbuilder_system');
+            $pluginParams = $this->params;
 
             if (intval($pluginParams->get('is_auto_groups', 0)) == 1 && count($pluginParams->get('auto_groups', array()))) {
                 $operateViews = array();
@@ -202,7 +202,7 @@ class plgSystemContentbuilder_system extends CMSPlugin
             $a_id = explode(':', $a_id);
             $a_id = intval($a_id[0]);
 
-            $pluginParams = CBCompat::getPluginParams($this, 'system', 'contentbuilder_system');
+            $pluginParams = $this->params;
 
             // if somebody tries to submit an article through the built-in joomla content submit
             if ($pluginParams->def('disable_new_articles', 0) && trim(CBRequest::getCmd('option', '')) == 'com_content' && (trim(CBRequest::getCmd('task', '')) == 'new' || trim(CBRequest::getCmd('task', '')) == 'article.add' || (trim(CBRequest::getCmd('view', '')) == 'article' && trim(CBRequest::getCmd('layout', '')) == 'form') || (trim(CBRequest::getCmd('view', '')) == 'form' && trim(CBRequest::getCmd('layout', '')) == 'edit') && $a_id <= 0)) {
@@ -225,13 +225,13 @@ class plgSystemContentbuilder_system extends CMSPlugin
 
     function onAfterRoute()
     {
-        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php')) {
+        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/src/contentbuilder.php')) {
             return;
         }
 
         // register non-existent records
         if (in_array(CBRequest::getVar('option', ''), array('com_contentbuilder', 'com_content'))) {
-            require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php');
+            require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/src/contentbuilder.php');
             $this->db->setQuery("Select `type`, `reference_id` From #__contentbuilder_forms Where published = 1");
             $views = $this->db->loadAssocList();
             $typeview = array();
@@ -285,10 +285,10 @@ class plgSystemContentbuilder_system extends CMSPlugin
 
         if (in_array(CBRequest::getVar('option'), array('com_content'))) {
 
-            $pluginParams = CBCompat::getPluginParams($this, 'system', 'contentbuilder_system');
+            $pluginParams = $this->params;
 
             if ($pluginParams->def('nocache', 1)) {
-                $this->caching = CBCompat::getJoomlaConfig('config.caching');
+                $this->caching = Factory::getConfig()->get(preg_replace("/^config./", '', 'config.caching', 1), null);
                 $this->app->getConfig()->set('config.caching', 0);
             }
         }
@@ -362,7 +362,7 @@ class plgSystemContentbuilder_system extends CMSPlugin
 
     function onAfterInitialize()
     {
-        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php')) {
+        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/src/contentbuilder.php')) {
             return;
         }
 
@@ -441,9 +441,9 @@ class plgSystemContentbuilder_system extends CMSPlugin
                     ");
             $this->db->execute();
 
-            $pluginParams = CBCompat::getPluginParams($this, 'system', 'contentbuilder_system');
+            $pluginParams = $this->params;
 
-            require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php');
+            require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/src/contentbuilder.php');
 
             $this->db->setQuery("
                 Select 

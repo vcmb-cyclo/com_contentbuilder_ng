@@ -13,8 +13,7 @@ defined('_JEXEC') or die('Restricted access');
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
-
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder_helpers.php');
+use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
 
 class plgContentbuilder_validationEmail extends CMSPlugin
 {
@@ -32,12 +31,12 @@ class plgContentbuilder_validationEmail extends CMSPlugin
         $msg = '';
 
         if (!is_array($value)) {
-            if (!contentbuilder_is_email($value)) {
+            if (!ContentbuilderHelper::isEmail($value)) {
                 return Text::_('COM_CONTENTBUILDER_VALIDATION_EMAIL_INVALID') . ': ' . $field['label'];
             }
         } else {
             foreach ($value as $val) {
-                if (!contentbuilder_is_email($val)) {
+                if (!ContentbuilderHelper::isEmail($val)) {
                     $msg .= $val;
                 }
             }

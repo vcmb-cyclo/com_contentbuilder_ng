@@ -12,7 +12,8 @@
 // Vue simple de test.
 namespace CB\Component\Contentbuilder\Administrator\View\Test;
 
-defined('_JEXEC') or die;
+// no direct access
+defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\Database\DatabaseInterface;

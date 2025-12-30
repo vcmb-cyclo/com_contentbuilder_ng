@@ -18,6 +18,8 @@ use Joomla\CMS\Filter\OutputFilter;
 use Joomla\Filesystem\Path;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\Registry\Registry;
+use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
 
 if (!function_exists('cb_b64enc')) {
 
@@ -53,9 +55,6 @@ function fatalErrorShutdownHandler()
 		myErrorHandler(E_ERROR, $last_error['message'], $last_error['file'], $last_error['line']);
 	}
 }
-
-require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder_helpers.php');
 
 // some hosting providers think it is a good idea not to compile in exif with php...
 if (!function_exists('exif_imagetype')) {
@@ -122,12 +121,13 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 		$max_time = !empty ($max_exec_time) ? intval($max_exec_time) / 2 : 15;
 
 		$plugin = PluginHelper::getPlugin('content', 'contentbuilder_image_scale');
-		$pluginParams = CBCompat::getParams($plugin->params);
+		$pluginParams = (new Registry)->loadString($plugin->params);
+
 
 		$max_filesize = (8 * 8 * 8 * 1024 * 2) * intval($pluginParams->def('max_filesize', 4)); // 4M default
 
 		
-		if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php')) {
+		if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/src/contentbuilder.php')) {
 			return true;
 		}
 
@@ -201,7 +201,7 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 					$this->db->setQuery("Select form.`title_field`,form.`protect_upload_directory`,form.`reference_id`,article.`record_id`,article.`form_id`,form.`type`,form.`published_only`,form.`own_only`,form.`own_only_fe` From #__contentbuilder_articles As article, #__contentbuilder_forms As form Where form.`published` = 1 And form.id = article.`form_id` And article.`article_id` = " . $this->db->quote($article->id));
 					$data = $this->db->loadAssoc();
 
-					require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php');
+					require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/src/contentbuilder.php');
 					$form = contentbuilder::getForm($data['type'], $data['reference_id']);
 					if (!$form || !$form->exists) {
 						return true;
@@ -381,7 +381,7 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 
 						if (!$use_form) {
 
-							require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php');
+							require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/src/contentbuilder.php');
 							$use_form = contentbuilder::getForm($ref_type, $ref_id);
 						}
 
@@ -394,7 +394,7 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 
 								foreach ($use_record as $use_item) {
 									if ($default_title == $use_item->recElementId) {
-										$default_title = cbinternal($item->recValue);
+										$default_title = ContentbuilderHelper::cbinternal($item->recValue);
 										if (!$is_list && $alt == 'USE-TITLE') {
 											$alt = $default_title;
 											$title = $default_title;
@@ -411,8 +411,8 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 
 						}
 					} else if ($is_list && trim($alt) == '') {
-						$alt = cbinternal($article->cbrecord->items[0]->recValue);
-						$title = cbinternal($article->cbrecord->items[0]->recValue);
+						$alt = ContentbuilderHelper::cbinternal($article->cbrecord->items[0]->recValue);
+						$title = ContentbuilderHelper::cbinternal($article->cbrecord->items[0]->recValue);
 					}
 
 					$is_series = false;
@@ -425,7 +425,7 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 
 								foreach ($record as $item) {
 									if ($default_title == $item->recElementId) {
-										$default_title = cbinternal($item->recValue);
+										$default_title = ContentbuilderHelper::cbinternal($item->recValue);
 										if (!$is_list && $alt == 'USE-TITLE') {
 											$alt = $default_title;
 											$title = $default_title;
@@ -439,8 +439,8 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 									if ($item->recName == $field) {
 
 										if (trim($alt) == '') {
-											$alt = cbinternal($item->recValue);
-											$title = cbinternal($item->recValue);
+											$alt = ContentbuilderHelper::cbinternal($item->recValue);
+											$title = ContentbuilderHelper::cbinternal($item->recValue);
 										}
 
 										$the_files = explode("\n", str_replace("\r", '', $item->recValue));

@@ -13,8 +13,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
-
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder_helpers.php');
+use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
 
 class plgContentbuilder_validationDate_not_before extends CMSPlugin
 {
@@ -36,8 +35,8 @@ class plgContentbuilder_validationDate_not_before extends CMSPlugin
                     }
                     
                     $other_value = $other_field['value'];
-                    $other_value = contentbuilder_convert_date($other_value, $other_field['options']->transfer_format, 'YYYY-MM-DD');
-                    $value = contentbuilder_convert_date($value, $field['options']->transfer_format, 'YYYY-MM-DD');
+                    $other_value = ContentbuilderHelper::convertDate($other_value, $other_field['options']->transfer_format, 'YYYY-MM-DD');
+                    $value = ContentbuilderHelper::convertDate($value, $field['options']->transfer_format, 'YYYY-MM-DD');
                     
                     if(is_array($other_value)){
                         return Text::_('COM_CONTENTBUILDER_VALIDATION_DATE_NOT_BEFORE_GROUPS');

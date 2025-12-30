@@ -6,7 +6,12 @@
  * @license     GNU/GPL
 */
 
-defined('_JEXEC') or die('Restricted access');
+namespace CB\Component\Contentbuilder\Administrator\Views\ContentBuilder\Tmpl;
+
+// no direct access
+defined('_JEXEC') or die('Direct Access to this location is not allowed.');
+
+
 use Joomla\CMS\Language\Text;
 
 ?>

@@ -39,7 +39,6 @@ if (!function_exists('cb_b64dec')) {
     }
 }
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
 
 class plgContentContentbuilder_download extends CMSPlugin
 {
@@ -151,9 +150,11 @@ class plgContentContentbuilder_download extends CMSPlugin
         $protect = false;
 
         $plugin = PluginHelper::getPlugin('content', 'contentbuilder_download');
-        $pluginParams = CBCompat::getParams($plugin->params);
+    //    $params = new Registry;
+    //    $pluginParams = $params->loadString($plugin->params);
 
-        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php')) {
+
+        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/src/contentbuilder.php')) {
             return true;
         }
 
@@ -233,7 +234,7 @@ class plgContentContentbuilder_download extends CMSPlugin
                     $this->db->setQuery("Select form.`title_field`,form.`protect_upload_directory`,form.`reference_id`,article.`record_id`,article.`form_id`,form.`type`,form.`published_only`,form.`own_only`,form.`own_only_fe` From #__contentbuilder_articles As article, #__contentbuilder_forms As form Where form.`published` = 1 And form.id = article.`form_id` And article.`article_id` = " . $this->db->quote($article->id));
                     $data = $this->db->loadAssoc();
 
-                    require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php');
+                    require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/src/contentbuilder.php');
                     $form = contentbuilder::getForm($data['type'], $data['reference_id']);
                     if (!$form || !$form->exists) {
                         return true;

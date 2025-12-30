@@ -8,8 +8,10 @@
  * @license     GNU/GPL
  */
 
-// No direct access
-defined('_JEXEC') or die('Restricted access');
+namespace CB\Component\Contentbuilder\Administrator;
+
+// no direct access
+defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
@@ -44,7 +46,7 @@ if (!(CBRequest::getCmd('controller', '') == 'elementoptions' || CBRequest::getC
     Factory::getApplication()->enqueueMessage(Text::_('JERROR_ALERTNOAUTHOR'), 'warning');
 }
 
-require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/contentbuilder.php');
+require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/src/contentbuilder.php');
 
 $db     = Factory::getContainer()->get(DatabaseInterface::class);
 $db->setQuery("Select `id`,`name` From #__contentbuilder_forms Where display_in In (1,2) And published = 1");

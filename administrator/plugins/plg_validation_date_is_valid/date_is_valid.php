@@ -13,8 +13,7 @@ defined('_JEXEC') or die('Restricted access');
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
-
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder_helpers.php');
+use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
 
 class plgContentbuilder_validationDate_is_valid extends CMSPlugin
 {
@@ -42,7 +41,7 @@ class plgContentbuilder_validationDate_is_valid extends CMSPlugin
         }
 
         foreach ($values as $val) {
-            if (!contentbuilder_is_valid_date($val, isset($options->transfer_format) ? $options->transfer_format : 'YYYY-mm-dd')) {
+            if (!ContentbuilderHelper::isValidDate($val, isset($options->transfer_format) ? $options->transfer_format : 'YYYY-mm-dd')) {
                 return Text::_('COM_CONTENTBUILDER_VALIDATION_DATE_IS_VALID') . ': ' . $field['label'] . ($val ? ' (' . $val . ')' : '');
             }
         }

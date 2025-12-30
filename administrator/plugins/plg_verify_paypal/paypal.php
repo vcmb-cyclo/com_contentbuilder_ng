@@ -12,8 +12,7 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
-
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
+use Joomla\Registry\Registry;
 
 class plgContentbuilder_verifyPaypal extends CMSPlugin
 {
@@ -35,7 +34,7 @@ class plgContentbuilder_verifyPaypal extends CMSPlugin
         parent::__construct($subject, $params);
 
         $plugin = PluginHelper::getPlugin('contentbuilder_verify', 'paypal');
-        $pluginParams = CBCompat::getParams($plugin->params);
+        $pluginParams = (new Registry)->loadString($plugin->params);
 
         if ($pluginParams->def('test', 0)) {
             $this->test = true;

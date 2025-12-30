@@ -7,16 +7,15 @@
  * @license     GNU/GPL
  */
 
-// no direct access
+namespace CB\Component\Contentbuilder\Administrator\Views\ContentBuilder;
 
-defined('_JEXEC') or die('Restricted access');
+// no direct access
+defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\MVC\View\HtmlView;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/viewlegacy.php');
 
 class ContentbuilderViewContentbuilder extends HtmlView
 {

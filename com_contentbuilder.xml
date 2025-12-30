@@ -7,7 +7,7 @@
     <authorUrl>https://breezingforms.vcmb.fr</authorUrl>
     <copyright>Copyright 2011 - 2026 by XDA+GIL</copyright>
     <license>GNU/GPL v2.0</license>
-    <version>6.0.0-RC1</version>
+    <version>6.0.0-RC2</version>
     <description>COM_CONTENTBUILDER_XML_DESCRIPTION</description>
 
     <!-- ===================== -->
@@ -47,13 +47,7 @@
     <filename>contentbuilder.php</filename>
     <filename>controller.php</filename>
     <filename>router.php</filename>
-    <folder>views</folder>
-    <folder>tables</folder>
-    <folder>models</folder>
-    <folder>controllers</folder>
-    <folder>images</folder>
-    <folder>elements</folder>
-    <folder>assets</folder>
+    <folder>src</folder>
  </files>
 
  <languages folder="administrator">
@@ -82,19 +76,15 @@
         <filename>config.xml</filename>
         <filename>index.html</filename>
         
-        <folder>controllers</folder>
-        <folder>models</folder>
-        <folder>tables</folder>
-        <folder>views</folder>
-        <folder>classes</folder>
+        <folder>helpers</folder>
         <folder>languages</folder>
-        <folder>assets</folder>
-        <folder>plugins</folder>
         <folder>librairies</folder>
+        <folder>plugins</folder>
         <folder>services</folder>
-        <folder>tmpl</folder>
         <folder>src</folder>
         <folder>sql</folder>
+        <folder>tmpl</folder>
+        <folder>views</folder>
     </files>
 
     <!-- Languages admin (à laisser séparément, c'est correct) -->
@@ -111,5 +101,13 @@
     </languages>
 
 </administration>
+
+<media folder="media" destination="com_contentbuilder">
+    <folder>css</folder>
+    <folder>js</folder>
+    <folder>images</folder>
+    <filename>joomla.asset.json</filename>  <!-- Optionnel mais recommandé -->
+</media>
+
 
 </extension>
