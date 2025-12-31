@@ -2,11 +2,11 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder\Site\View\Ajax\Tmpl;
+
 
 // no direct access
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');

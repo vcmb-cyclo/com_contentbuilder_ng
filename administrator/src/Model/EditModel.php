@@ -3,7 +3,7 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @copyright   (C) 2024 by XDA+GIL
  * @license     GNU/GPL
  */
@@ -33,8 +33,7 @@ use Joomla\CMS\Mail\MailerFactoryInterface;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
-
-require_once(JPATH_COMPONENT_ADMINISTRATOR . '/classes/contentbuilder.php');
+use CB\Component\Contentbuilder\Administrator\contentbuilder;
 
 $pluginHelper4 = new \Joomla\CMS\Plugin\PluginHelper4();
 
@@ -1806,7 +1805,7 @@ var contentbuilder = new function(){
 
             $siteurl = $data['siteurl'] . 'index.php?option=com_users&task=registration.activate&token=' . $data['activation'];
             if ($bypass_plugin) {
-                $siteurl = $data['siteurl'] . 'index.php?option=com_contentbuilder&controller=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $data['activation'] . '&verification_id=' . $verification_id . '&format=raw';
+                $siteurl = $data['siteurl'] . 'index.php?option=com_contentbuilder&view=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $data['activation'] . '&verification_id=' . $verification_id . '&format=raw';
             }
 
             $emailBody = Text::_('COM_USERS_EMAIL_REGISTERED_WITH_ADMIN_ACTIVATION_BODY');
@@ -1828,7 +1827,7 @@ var contentbuilder = new function(){
 
             $siteurl = $data['siteurl'] . 'index.php?option=com_users&task=registration.activate&token=' . $data['activation'];
             if ($bypass_plugin) {
-                $siteurl = $data['siteurl'] . 'index.php?option=com_contentbuilder&controller=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $data['activation'] . '&verification_id=' . $verification_id . '&format=raw';
+                $siteurl = $data['siteurl'] . 'index.php?option=com_contentbuilder&view=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $data['activation'] . '&verification_id=' . $verification_id . '&format=raw';
             }
 
             $emailBody = Text::_('COM_USERS_EMAIL_REGISTERED_WITH_ACTIVATION_BODY');
@@ -1966,7 +1965,7 @@ var contentbuilder = new function(){
 
         $siteurl_ = $siteURL . "index.php?option=com_user&task=activate&activation=" . $user->get('activation');
         if ($bypass_plugin) {
-            $siteurl_ = $siteURL . 'index.php?option=com_contentbuilder&controller=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $user->get('activation') . '&verification_id=' . $verification_id . '&format=raw';
+            $siteurl_ = $siteURL . 'index.php?option=com_contentbuilder&view=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $user->get('activation') . '&verification_id=' . $verification_id . '&format=raw';
         }
 
         if ($useractivation == 1) {

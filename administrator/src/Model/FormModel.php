@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     GNU/GPL
  */
@@ -23,11 +23,10 @@ use Joomla\CMS\Table\Table;
 use Joomla\CMS\Pagination\Pagination;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\contentbuilder;
 
 HTMLHelper::_('behavior.keepalive');
 
-
-require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
 
 class FormModel extends BaseDatabaseModel
 {
@@ -50,7 +49,7 @@ class FormModel extends BaseDatabaseModel
     {
         $this->_db = Factory::getContainer()->get(DatabaseInterface::class);
 
-        parent::__construct();
+        parent::__construct($config);
 
         $mainframe = Factory::getApplication();
         $option = 'com_contentbuilder';
@@ -414,7 +413,7 @@ class FormModel extends BaseDatabaseModel
             $data->form = contentbuilder::getForm($data->type, $data->reference_id);
             if (!$data->form->exists) {
                 Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 'error');
-                Factory::getApplication()->redirect('index.php?option=com_contentbuilder&controller=forms&limitstart=' . $this->getState('limitstart', 0));
+                Factory::getApplication()->redirect('index.php?option=com_contentbuilder&view=forms&limitstart=' . $this->getState('limitstart', 0));
             }
             if (isset($data->form->properties) && isset($data->form->properties->name)) {
                 $data->type_name = $data->form->properties->name;
@@ -1090,9 +1089,9 @@ class FormModel extends BaseDatabaseModel
 
             $this->getTable('elements')->reorder('form_id = ' . $cid);
 
-            $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&controller=list&id=" . intval($cid) . "'");
+            $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&view=list&id=" . intval($cid) . "'");
             $this->_db->execute();
-            $this->_db->setQuery("Select count(id) From #__menu Where `link` Like 'index.php?option=com_contentbuilder&controller=list&id=%'");
+            $this->_db->setQuery("Select count(id) From #__menu Where `link` Like 'index.php?option=com_contentbuilder&view=list&id=%'");
             $amount = $this->_db->loadResult();
             if (!$amount) {
                 $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&viewcontainer=true'");

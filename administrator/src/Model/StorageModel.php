@@ -3,7 +3,7 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL * 
  * @license     GNU/GPL
  */
@@ -20,21 +20,25 @@ use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\File;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Pagination\Pagination;
-use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+use Joomla\CMS\MVC\Model\AdminModel;
+use Joomla\CMS\Table\Table;
+use CB\Component\Contentbuilder\Administrator\contentbuilder;
 
 HTMLHelper::_('behavior.keepalive');
 
-
-
-require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
-
-class StorageModel extends BaseDatabaseModel
+class StorageModel extends AdminModel
 {
     private $_storage_data = null;
 
-    function __construct($config)
+    public function getTable($type = 'Storage', $prefix = 'Administrator', $config = [])
     {
-        parent::__construct();
+        return Table::getInstance($type, $prefix, $config);
+    }
+
+
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
 
         $this->_db = Factory::getContainer()->get(DatabaseInterface::class);
 
@@ -543,7 +547,7 @@ class StorageModel extends BaseDatabaseModel
         // table
         // create or update the corresponding table, field synch below
 
-        $last_update = Factory::getDate()->toSql;
+        $last_update = Factory::getDate()->toSql();
 
         $tables = CBCompat::getTableFields(Factory::getContainer()->get(DatabaseInterface::class)->getTableList());
 
@@ -750,30 +754,27 @@ class StorageModel extends BaseDatabaseModel
         }
     }
 
-    function delete()
+    public function delete(&$pks)
     {
-        $storage = $this->getStorage();
-        $cids = CBRequest::getVar('cid', array(0), 'post', 'array');
-        ArrayHelper::toInteger($cids);
+        $pks = (array) $pks;
+        ArrayHelper::toInteger($pks);
+
         $row = $this->getTable();
 
-        foreach ($cids as $cid) {
+        foreach ($pks as $pk) {
+            // Charger le storage correspondant AU PK (important)
+            $this->setId($pk);
+            $storage = $this->getStorage();
 
-            $this->_db->setQuery("
-                Delete
-                    `elements`.*
-                From
-                    #__contentbuilder_storage_fields As `elements`
-                Where
-                    `elements`.storage_id = " . $cid);
-
-
+            $this->_db->setQuery(
+                "DELETE FROM #__contentbuilder_storage_fields WHERE storage_id = " . (int) $pk
+            );
             $this->_db->execute();
 
-            $this->getTable('storage_fields')->reorder('storage_id = ' . $cid);
+            $this->getTable('storage_fields')->reorder('storage_id = ' . (int) $pk);
 
-            if (!$row->delete($cid)) {
-                $this->setError($row->getErrorMsg());
+            if (!$row->delete((int) $pk)) {
+                $this->setError($row->getError());
                 return false;
             }
 
@@ -781,15 +782,14 @@ class StorageModel extends BaseDatabaseModel
                 try {
                     $this->_db->setQuery("DROP TABLE `#__" . $storage->name . "`");
                     $this->_db->execute();
-                } catch (Exception $e) {
-                }
+                } catch (\Throwable $e) {}
             }
         }
 
         $row->reorder();
-
         return true;
     }
+
 
     function listDelete()
     {

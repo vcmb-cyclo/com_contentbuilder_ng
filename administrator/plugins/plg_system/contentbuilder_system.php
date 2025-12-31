@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @copyright   (C) 2025 by XDA+GIL
  * @license     GNU/GPL
  */
@@ -216,7 +216,7 @@ class plgSystemContentbuilder_system extends CMSPlugin
                 $this->db->setQuery("Select article.record_id, article.form_id From #__contentbuilder_articles As article, #__content As content Where content.id = " . intval($id) . " And (content.state = 0 Or content.state = 1) And article.article_id = content.id");
                 $article = $this->db->loadAssoc();
                 if (is_array($article)) {
-                    $this->app->redirect('index.php?option=com_contentbuilder&controller=edit&id=' . $article['form_id'] . "&record_id=" . $article['record_id'] . "&jsback=1&Itemid=" . CBRequest::getInt('Itemid', 0));
+                    $this->app->redirect('index.php?option=com_contentbuilder&view=edit&id=' . $article['form_id'] . "&record_id=" . $article['record_id'] . "&jsback=1&Itemid=" . CBRequest::getInt('Itemid', 0));
                 }
             }
         }

@@ -105,7 +105,7 @@ class Csv extends BaseReader
      */
     public function __construct()
     {
-        parent::__construct();
+        parent::__construct($config);
         $callback = self::$constructorCallback;
         if ($callback !== null) {
             $callback($this);

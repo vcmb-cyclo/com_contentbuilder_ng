@@ -174,7 +174,7 @@ class Workbook extends BIFFwriter
     public function __construct(Spreadsheet $spreadsheet, int &$str_total, int &$str_unique, array &$str_table, array &$colors, Parser $parser)
     {
         // It needs to call its parent's constructor explicitly
-        parent::__construct();
+        parent::__construct($config);
 
         $this->parser = $parser;
         //$this->biffSize = 0;

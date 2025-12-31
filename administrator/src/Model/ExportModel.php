@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
 */
@@ -17,8 +17,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
-
-require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
+use CB\Component\Contentbuilder\Administrator\contentbuilder;
 
 class ExportModel extends BaseDatabaseModel
 {

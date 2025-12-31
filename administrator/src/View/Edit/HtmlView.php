@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     GNU/GPL
  */
@@ -21,7 +21,7 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\MVC\View\HtmlView;
 
-require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
+
 
 class ContentbuilderViewEdit extends HtmlView
 {
@@ -117,7 +117,7 @@ class ContentbuilderViewEdit extends HtmlView
 							}
 						}
 					}
-					$subject->template = str_replace($match, Route::_('index.php?option=com_contentbuilder&controller=details&id=' . CBRequest::getInt('id') . '&record_id=' . CBRequest::getCmd('record_id', '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . $sub), $subject->template);
+					$subject->template = str_replace($match, Route::_('index.php?option=com_contentbuilder&view=details&id=' . CBRequest::getInt('id') . '&record_id=' . CBRequest::getCmd('record_id', '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . $sub), $subject->template);
 				}
 			}
 
@@ -139,7 +139,7 @@ class ContentbuilderViewEdit extends HtmlView
 							}
 						}
 					}
-					$table->toc = str_replace($match, Route::_('index.php?option=com_contentbuilder&controller=details&id=' . CBRequest::getInt('id') . '&record_id=' . CBRequest::getCmd('record_id', '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . $sub), $table->toc);
+					$table->toc = str_replace($match, Route::_('index.php?option=com_contentbuilder&view=details&id=' . CBRequest::getInt('id') . '&record_id=' . CBRequest::getCmd('record_id', '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . $sub), $table->toc);
 				}
 			}
 

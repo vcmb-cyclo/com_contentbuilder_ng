@@ -3,7 +3,7 @@
 /**
  * @package     BreezingCommerce
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */

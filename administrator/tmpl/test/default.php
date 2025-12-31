@@ -11,7 +11,7 @@
 // administrator/src/View/Test/tmpl/default.php
 // Layout vide
 
-namespace CB\Component\Contentbuilder\Administrator\Views\Contentbuilder;
+
 
 // no direct access
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');

@@ -12,7 +12,7 @@ class AxisText extends Properties
 
     public function __construct()
     {
-        parent::__construct();
+        parent::__construct($config);
         $this->font = new Font();
         $this->font->setSize(null, true);
     }

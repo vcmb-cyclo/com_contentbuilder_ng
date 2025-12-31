@@ -51,7 +51,7 @@ class TrendLine extends Properties
         ?float $intercept = null,
         ?string $name = null
     ) {
-        parent::__construct();
+        parent::__construct($config);
         $this->setTrendLineProperties(
             $trendLineType,
             $order,

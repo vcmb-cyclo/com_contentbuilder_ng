@@ -180,7 +180,7 @@ class Worksheet extends BIFFwriter
     public function __construct(int &$str_total, int &$str_unique, array &$str_table, array &$colors, Parser $parser, bool $preCalculateFormulas, \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $phpSheet, ?Workbook $writerWorkbook = null)
     {
         // It needs to call its parent's constructor explicitly
-        parent::__construct();
+        parent::__construct($config);
 
         $this->preCalculateFormulas = $preCalculateFormulas;
         $this->stringTotal = &$str_total;

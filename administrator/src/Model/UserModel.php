@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @license     GNU/GPL
 */
 
@@ -14,8 +14,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
-
-require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
+use CB\Component\Contentbuilder\Administrator\contentbuilder;
 
 class UserModel extends BaseDatabaseModel
 {
@@ -23,7 +22,7 @@ class UserModel extends BaseDatabaseModel
 
     function  __construct($config)
     {
-        parent::__construct();
+        parent::__construct($config);
 
         $this->setIds(CBRequest::getInt('joomla_userid',  0), CBRequest::getInt('form_id',  ''));
         

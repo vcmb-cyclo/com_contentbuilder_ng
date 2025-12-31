@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
@@ -19,8 +19,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\MVC\Model\ListModel;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
-
-require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
+use CB\Component\Contentbuilder\Administrator\contentbuilder;
 
 class DetailsModel extends ListModel
 {
@@ -46,7 +45,7 @@ class DetailsModel extends ListModel
 
     function __construct($config)
     {
-        parent::__construct();
+        parent::__construct($config);
 
         $option = 'com_contentbuilder';
 
@@ -204,7 +203,7 @@ class DetailsModel extends ListModel
                             $auth = $this->frontend ? contentbuilder::authorizeFe('new') : contentbuilder::authorize('new');
 
                             if ($auth) {
-                                Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder&controller=edit&latest=1&backtolist=' . CBRequest::getInt('backtolist', 0) . '&id=' . $this->_id . '&record_id=&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getVar('filter_order', ''), false));
+                                Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder&view=edit&latest=1&backtolist=' . CBRequest::getInt('backtolist', 0) . '&id=' . $this->_id . '&record_id=&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getVar('filter_order', ''), false));
                             } else {
                                 Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
                                 Factory::getApplication()->redirect('index.php');

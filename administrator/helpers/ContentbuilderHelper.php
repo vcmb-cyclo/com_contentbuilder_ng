@@ -3,7 +3,7 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @copyright   (C) 2025 by XDA+GIL
  * @license     GNU/GPL
  */

@@ -18,7 +18,6 @@ if (!class_exists('CBFile'))
 	class CBFile extends File {
 
 		public static function read($file){
-
 			return file_get_contents($file);
 		}
 	}

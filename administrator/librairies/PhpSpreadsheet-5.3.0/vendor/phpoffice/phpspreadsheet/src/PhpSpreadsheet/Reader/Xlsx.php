@@ -79,7 +79,7 @@ class Xlsx extends BaseReader
      */
     public function __construct()
     {
-        parent::__construct();
+        parent::__construct($config);
         $this->referenceHelper = ReferenceHelper::getInstance();
         $this->securityScanner = XmlScanner::getInstance($this);
     }

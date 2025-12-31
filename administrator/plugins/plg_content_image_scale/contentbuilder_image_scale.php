@@ -736,7 +736,7 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 																$url = Uri::getInstance()->toString();
 																//fixing downloads on other pages than page 1
 																if (CBRequest::getVar('controller', '') == 'list') {
-																	$url = Uri::getInstance()->base() . 'index.php?option=com_contentbuilder&amp;controller=list&amp;id=' . intval($form_id) . '&amp;limitstart=' . CBRequest::getInt('limitstart', 0);
+																	$url = Uri::getInstance()->base() . 'index.php?option=com_contentbuilder&amp;view=list&amp;id=' . intval($form_id) . '&amp;limitstart=' . CBRequest::getInt('limitstart', 0);
 																}
 
 																if (trim($open) == 'true') {

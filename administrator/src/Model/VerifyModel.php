@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @copyright   (C) 2024 by XDA+GIL
  * @license     GNU/GPL
  */
@@ -24,8 +24,7 @@ use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Mail\MailerFactoryInterface;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
-
-require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
+use CB\Component\Contentbuilder\Administrator\contentbuilder;
 
 class VerifyModel extends BaseDatabaseModel
 {
@@ -133,7 +132,7 @@ class VerifyModel extends BaseDatabaseModel
             }
 
             if (intval($user_id) == 0) {
-                $this->mainframe->redirect('index.php?option=com_contentbuilder&lang=' . CBRequest::getCmd('lang', '') . '&return=' . base64_decode(Uri::getInstance()->toString()) . '&controller=edit&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
+                $this->mainframe->redirect('index.php?option=com_contentbuilder&lang=' . CBRequest::getCmd('lang', '') . '&return=' . base64_decode(Uri::getInstance()->toString()) . '&view=edit&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
             }
 
             $rec = $form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, $user_id, 0, -1, -1, -1, -1, array(), true, null);
@@ -144,7 +143,7 @@ class VerifyModel extends BaseDatabaseModel
             }
 
             if (!$form->getListRecordsTotal($ids)) {
-                $this->mainframe->redirect('index.php?option=com_contentbuilder&lang=' . CBRequest::getCmd('lang', '') . '&return=' . base64_decode(Uri::getInstance()->toString()) . '&controller=edit&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
+                $this->mainframe->redirect('index.php?option=com_contentbuilder&lang=' . CBRequest::getCmd('lang', '') . '&return=' . base64_decode(Uri::getInstance()->toString()) . '&view=edit&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
             }
         }
 
@@ -262,9 +261,9 @@ class VerifyModel extends BaseDatabaseModel
 
                             if ((!$out['client'] && (!isset($out['return-site']) || !$out['return-site'])) || ($out['client'] && (!isset($out['return-admin']) || !$out['return-admin']))) {
                                 if (intval($out['client']) && !$this->mainframe->isClient('administrator')) {
-                                    $redirect_view = Uri::getInstance()->base() . 'administrator/index.php?option=com_contentbuilder&controller=list&lang=' . CBRequest::getCmd('lang', '') . '&id=' . $out['verify_view'];
+                                    $redirect_view = Uri::getInstance()->base() . 'administrator/index.php?option=com_contentbuilder&view=list&lang=' . CBRequest::getCmd('lang', '') . '&id=' . $out['verify_view'];
                                 } else {
-                                    $redirect_view = 'index.php?option=com_contentbuilder&controller=list&lang=' . CBRequest::getCmd('lang', '') . '&id=' . $out['verify_view'];
+                                    $redirect_view = 'index.php?option=com_contentbuilder&view=list&lang=' . CBRequest::getCmd('lang', '') . '&id=' . $out['verify_view'];
                                 }
                             }
 
@@ -497,7 +496,7 @@ class VerifyModel extends BaseDatabaseModel
             $data['activation'] = ApplicationHelper::getHash(UserHelper::genRandomPassword());
             $user->set('activation', $data['activation']);
             $data['siteurl'] = Uri::root();
-            $data['activate'] = Uri::root() . 'index.php?option=com_contentbuilder&controller=verify&token=' . $data['activation'] . '&verify_by_admin=1&format=raw';
+            $data['activate'] = Uri::root() . 'index.php?option=com_contentbuilder&view=verify&token=' . $data['activation'] . '&verify_by_admin=1&format=raw';
 
             // Remove administrator/ from activate url in case this method is called from admin
             if ($this->mainframe->isClient('administrator')) {

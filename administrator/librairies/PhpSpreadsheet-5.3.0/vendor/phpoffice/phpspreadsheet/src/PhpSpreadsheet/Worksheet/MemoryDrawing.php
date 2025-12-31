@@ -59,7 +59,7 @@ class MemoryDrawing extends BaseDrawing
         $this->uniqueName = md5(mt_rand(0, 9999) . time() . mt_rand(0, 9999));
 
         // Initialize parent
-        parent::__construct();
+        parent::__construct($config);
     }
 
     public function __destruct()

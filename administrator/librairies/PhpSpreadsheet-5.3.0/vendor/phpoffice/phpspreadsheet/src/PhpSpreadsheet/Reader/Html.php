@@ -137,7 +137,7 @@ class Html extends BaseReader
      */
     public function __construct()
     {
-        parent::__construct();
+        parent::__construct($config);
         $this->securityScanner = XmlScanner::getInstance($this);
     }
 

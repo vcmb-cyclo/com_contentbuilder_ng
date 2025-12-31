@@ -20,7 +20,7 @@ class Axis extends Properties
 
     public function __construct()
     {
-        parent::__construct();
+        parent::__construct($config);
         $this->fillColor = new ChartColor();
     }
 

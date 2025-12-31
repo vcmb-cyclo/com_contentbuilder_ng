@@ -16,8 +16,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
-
-require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/src/contentbuilder.php');
+use CB\Component\Contentbuilder\Administrator\contentbuilder;
 
 class AjaxModel extends BaseDatabaseModel
 {

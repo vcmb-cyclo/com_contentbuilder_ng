@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @license     GNU/GPL
  * @copyright   Copyright (C) 2026 by XDA+GIL
  */
@@ -27,7 +27,6 @@ use Joomla\CMS\Table\Table;
 use Joomla\Filesystem\Folder;
 use Joomla\CMS\Event\Content\ContentPrepareEvent;
 use Joomla\CMS\Access\Access;
-use Joomla\Application\ApplicationInterface;
 use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
 
 class contentbuilder
@@ -239,9 +238,9 @@ class contentbuilder
         if ($rating_allowed) {
             if (Factory::getApplication()->isClient('site')) {
                 $rating_link = Uri::root(true) . (Factory::getApplication()->isClient('administrator') ? '/administrator' : (CBRequest::getCmd('lang', '') && 
-                Factory::getConfig()->get('sef') && Factory::getConfig()->get('sef_rewrite') ? '/' . CBRequest::getCmd('lang', '') : '')) . '/?option=com_contentbuilder&lang=' . $lang . '&controller=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
+                Factory::getConfig()->get('sef') && Factory::getConfig()->get('sef_rewrite') ? '/' . CBRequest::getCmd('lang', '') : '')) . '/?option=com_contentbuilder&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
             } else {
-                $rating_link = 'index.php?option=com_contentbuilder&lang=' . $lang . '&controller=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
+                $rating_link = 'index.php?option=com_contentbuilder&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
             }
         }
         for ($x = 1; $x <= $rating_slots; $x++) {
@@ -612,7 +611,7 @@ class contentbuilder
             $db->execute();
             $parent_id = $db->insertid();
         }
-        $db->setQuery("Select id From #__components Where admin_menu_link = 'option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'");
+        $db->setQuery("Select id From #__components Where admin_menu_link = 'option=com_contentbuilder&view=list&id=" . intval($contentbuilder_form_id) . "'");
         $menuitem = $db->loadResult();
         if (!$update)
             return;
@@ -633,7 +632,7 @@ class contentbuilder
                      Values
                      (
                         " . $db->Quote($name) . ",
-                        'option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "',
+                        'option=com_contentbuilder&view=list&id=" . intval($contentbuilder_form_id) . "',
                         " . $db->Quote($name) . ",
                         'com_contentbuilder',
                         'components/com_contentbuilder/views/logo_icon_cb.png',
@@ -692,7 +691,7 @@ class contentbuilder
                 $db->execute();
             }
 
-            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder&view=list&id=" . intval($contentbuilder_form_id) . "'");
             $menuitem = $db->loadResult();
 
             if (!$update)
@@ -700,7 +699,7 @@ class contentbuilder
             if (!$result)
                 die("ContentBuilder main menu item not found!");
 
-            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder&controller=list&id=%' And link <> 'index.php?option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder&view=list&id=%' And link <> 'index.php?option=com_contentbuilder&view=list&id=" . intval($contentbuilder_form_id) . "'");
             $name_exists = $db->loadResult();
 
             if ($name_exists) {
@@ -717,7 +716,7 @@ class contentbuilder
                     ",lft,rgt) " .
                     "values (" .
                     "" . $db->Quote($name) . ", " . $db->Quote($name) . ", 'main', '$parent_id', " .
-                    "'index.php?option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'," .
+                    "'index.php?option=com_contentbuilder&view=list&id=" . intval($contentbuilder_form_id) . "'," .
                     "'0', 1, " . intval($result) . ", 1, 'components/com_contentbuilder/views/logo_icon_cb.png'" .
                     ",( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone), ( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet))"
                 );
@@ -778,7 +777,7 @@ class contentbuilder
                 $db->execute();
             }
 
-            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder&view=list&id=" . intval($contentbuilder_form_id) . "'");
             $menuitem = $db->loadResult();
 
             if (!$update)
@@ -786,7 +785,7 @@ class contentbuilder
             if (!$result)
                 die("ContentBuilder main menu item not found!");
 
-            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder&controller=list&id=%' And link <> 'index.php?option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder&view=list&id=%' And link <> 'index.php?option=com_contentbuilder&view=list&id=" . intval($contentbuilder_form_id) . "'");
             $name_exists = $db->loadResult();
 
             if ($name_exists) {
@@ -803,7 +802,7 @@ class contentbuilder
                     ",lft,rgt) " .
                     "values (" .
                     "''," . "''," . $db->Quote($name) . ", " . $db->Quote($name) . ", 'main', 'component', '$parent_id', " .
-                    "'index.php?option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'," .
+                    "'index.php?option=com_contentbuilder&view=list&id=" . intval($contentbuilder_form_id) . "'," .
                     "1, " . intval($result) . ", 1, 'components/com_contentbuilder/views/logo_icon_cb.png'" .
                     ",( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone), ( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet))"
                 );

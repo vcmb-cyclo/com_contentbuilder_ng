@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
- * @link        https://www.crosstec.org
+ * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
@@ -19,16 +19,14 @@ use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
-
-require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/src/contentbuilder.php');
-
+use CB\Component\Contentbuilder\Administrator\contentbuilder;
 class ElementoptionsModel extends BaseDatabaseModel
 {
     private $_element_id = 0;
 
     function __construct($config)
     {
-        parent::__construct();
+        parent::__construct($config);
 
         $this->setIds(CBRequest::getInt('id', 0), CBRequest::getInt('element_id', ''));
     }

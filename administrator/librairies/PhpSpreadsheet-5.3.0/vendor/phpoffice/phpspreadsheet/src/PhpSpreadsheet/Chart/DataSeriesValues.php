@@ -90,7 +90,7 @@ class DataSeriesValues extends Properties
         null|ChartColor|array|string $fillColor = null,
         int|string $pointSize = 3
     ) {
-        parent::__construct();
+        parent::__construct($config);
         $this->markerFillColor = new ChartColor();
         $this->markerBorderColor = new ChartColor();
         $this->setDataType($dataType);

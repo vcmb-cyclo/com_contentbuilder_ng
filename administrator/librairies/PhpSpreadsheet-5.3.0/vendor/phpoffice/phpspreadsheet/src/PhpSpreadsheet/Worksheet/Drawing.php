@@ -34,7 +34,7 @@ class Drawing extends BaseDrawing
         $this->isUrl = false;
 
         // Initialize parent
-        parent::__construct();
+        parent::__construct($config);
     }
 
     /**
