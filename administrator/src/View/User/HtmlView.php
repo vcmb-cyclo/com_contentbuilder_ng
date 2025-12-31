@@ -3,7 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
- * @copyright   (C) 2024 by XDA+GIL
+ * @copyright   (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
 
@@ -13,11 +13,9 @@ namespace CB\Component\Contentbuilder\Administrator\View\User;
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Uri\Uri;
-use Joomla\CMS\MVC\View\HtmlView;
+use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 
-require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/viewlegacy.php');
-
-class ContentbuilderViewUser extends HtmlView
+class HtmlView extends BaseHtmlView
 {
     function display($tpl = null)
     {

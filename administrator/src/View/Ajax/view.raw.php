@@ -11,10 +11,9 @@ namespace CB\Component\Contentbuilder\Administrator\View\Ajax;
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
-use Joomla\CMS\MVC\View\HtmlView;
+use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 
-
-class ContentbuilderViewAjax extends HtmlView
+class HtmlView extends BaseHtmlView
 {
     function display($tpl = null)
     {

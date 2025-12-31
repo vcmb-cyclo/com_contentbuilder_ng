@@ -13,10 +13,9 @@ namespace CB\Component\Contentbuilder\Administrator\View\PublicForms;
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\HTML\HTMLHelper;
-use Joomla\CMS\MVC\View\HtmlView;
+use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 
-
-class ContentbuilderViewPublicforms extends HtmlView
+class HtmlView extends BaseHtmlView
 {
     function display($tpl = null)
     {

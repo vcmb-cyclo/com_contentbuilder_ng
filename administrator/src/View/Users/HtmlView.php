@@ -15,12 +15,9 @@ defined('_JEXEC') or die('Restricted access');
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Toolbar\ToolbarHelper;
-use Joomla\CMS\MVC\View\HtmlView;
-use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
+use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 
-
-
-class ContentbuilderViewUsers extends HtmlView
+class HtmlView extends BaseHtmlView
 {
     function display($tpl = null)
     {

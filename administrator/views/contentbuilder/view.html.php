@@ -14,10 +14,9 @@ defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Toolbar\ToolbarHelper;
-use Joomla\CMS\MVC\View\HtmlView;
+use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 
-
-class ContentbuilderViewContentbuilder extends HtmlView
+class HtmlView extends BaseHtmlView
 {
     function display($tpl = null)
     {

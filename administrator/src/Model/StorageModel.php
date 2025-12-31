@@ -2,7 +2,7 @@
 
 /**
  * @package     ContentBuilder
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA + GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL * 
  * @license     GNU/GPL
@@ -20,17 +20,25 @@ use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\File;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Pagination\Pagination;
-use Joomla\CMS\MVC\Model\AdminModel;
+use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Table\Table;
-use CB\Component\Contentbuilder\Administrator\contentbuilder;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 HTMLHelper::_('behavior.keepalive');
 
-class StorageModel extends AdminModel
+class StorageModel extends BaseDatabaseModel
 {
     private $_storage_data = null;
+    protected DatabaseInterface $_db;
+    protected int $_id = 0;
+    protected ?object $_data = null;
 
-    public function getTable($type = 'Storage', $prefix = 'Administrator', $config = [])
+    protected int $_total = 0;
+    protected ?Pagination $_pagination = null;
+
+
+
+    public function getTable($type = 'Storage', $prefix = 'CB\\Component\\Contentbuilder\\Administrator\\Table\\', $config = [])
     {
         return Table::getInstance($type, $prefix, $config);
     }
@@ -802,14 +810,9 @@ class StorageModel extends AdminModel
             $this->_db->setQuery("Select `name` From #__contentbuilder_storage_fields Where id = " . $cid);
             $field_name = $this->_db->loadResult();
 
-            $this->_db->setQuery("
-                Delete
-                    `elements`.*
-                From
-                    #__contentbuilder_storage_fields As `elements`
-                Where
-                    `elements`.id = " . $cid);
-
+            $this->_db->setQuery(
+                "DELETE FROM #__contentbuilder_storage_fields WHERE id = " . (int) $cid
+            );
             $this->_db->execute();
 
             if (!$storage->bytable) {

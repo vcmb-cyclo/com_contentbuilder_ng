@@ -19,11 +19,10 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Table\Table;
-use Joomla\CMS\MVC\View\HtmlView;
+use CB\Component\Contentbuilder\Administrator\contentbuilder;
+use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 
-
-
-class ContentbuilderViewEdit extends HtmlView
+class HtmlView extends BaseHtmlView
 {
 	protected $sectioncategories;
 	protected $lists;

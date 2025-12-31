@@ -3,7 +3,7 @@
  * @version     1.0
  * @package     ContentBuilder Image Scale
  * @copyright   (C) 2011 by Markus Bopp
- * @copyright   (C) 2024 by XDA+GIL
+ * @copyright   (C) 2026 by XDA+GIL
  * @license     Released under the terms of the GNU General Public License
  **/
 

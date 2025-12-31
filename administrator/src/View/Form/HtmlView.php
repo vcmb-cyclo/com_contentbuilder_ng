@@ -3,7 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
- * @copyright   (C) 2024 by XDA+GIL
+ * @copyright   (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
 
@@ -17,14 +17,15 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Toolbar\ToolbarHelper;
-use Joomla\CMS\MVC\View\HtmlView;
+use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
+use CB\Component\Contentbuilder\Administrator\contentbuilder;
+
 
 require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/pane/CBTabs.php');
 
 
-
-class ContentbuilderViewForm extends HtmlView
+class HtmlView extends BaseHtmlView
 {
     function display($tpl = null)
     {
