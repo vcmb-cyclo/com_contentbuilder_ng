@@ -1,18 +1,37 @@
 {
     "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
     "name": "com_contentbuilder",
-    "version": "6.0.0",
+    "version": "6.0.0-RC2",
+    "description": "Assets pour le composant ContentBuilder",
     "assets": [
+        {
+            "name": "com_contentbuilder.admin-toolbar",
+            "type": "style",
+            "uri": "com_contentbuilder/admin-toolbar.css"
+        },
+        {
+            "name": "com_contentbuilder.bluestork-fix",
+            "type": "style",
+            "uri": "com_contentbuilder/bluestork.fix.css"
+        },
         {
             "name": "monstyle",
             "type": "style",
-            "uri": "com_contentbuilder/monstyle.css"
+            "uri": "com_contentbuilder/monstyle.css",
+            "dependencies": [
+                "core"
+            ]
         },
         {
             "name": "monscript",
             "type": "script",
             "uri": "com_contentbuilder/monscript.js",
-            "dependencies": ["core"]
+            "dependencies": [
+                "core"
+            ],
+            "attributes": {
+                "defer": true
+            }
         }
     ]
 }

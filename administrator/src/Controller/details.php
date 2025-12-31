@@ -15,7 +15,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\BaseController;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/controllerlegacy.php');
+
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
 
 class ContentbuilderControllerDetails extends BaseController

@@ -164,8 +164,8 @@ class ContentbuilderHelper
         $index = strrpos($email, '@');
 
         if ($index === false)           return false;   //      No at-sign
-        if ($index === 0)                       return false;   //      No local part
-        if ($index > 64)                        return false;   //      Local part too long
+        if ($index === 0)               return false;   //      No local part
+        if ($index > 64)                return false;   //      Local part too long
 
         $localPart              = substr($email, 0, $index);
         $domain                 = substr($email, $index + 1);

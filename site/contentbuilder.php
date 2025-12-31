@@ -3,7 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
- * @copyright   Copyright (C) 2024 by XDA+GIL
+ * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
 
@@ -14,25 +14,8 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 
-if (!function_exists('cb_b64enc')) {
 
-	function cb_b64enc($str)
-	{
-		$base = 'base';
-		$sixty_four = '64_encode';
-		return call_user_func($base . $sixty_four, $str);
-	}
 
-}
-
-if (!function_exists('cb_b64dec')) {
-	function cb_b64dec($str)
-	{
-		$base = 'base';
-		$sixty_four = '64_decode';
-		return call_user_func($base . $sixty_four, $str);
-	}
-}
 
 class cbFeMarker
 {

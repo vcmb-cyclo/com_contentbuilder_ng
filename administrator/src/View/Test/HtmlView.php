@@ -4,11 +4,11 @@
  * @package     Extension
  * @author      Xavier DANO
  * @link        
- * @copyright   Copyright (C) 2025 by XDA+GIL
+ * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
 
-// admin/src/View/Test/HtmlView.php
+// administrator/src/View/Test/HtmlView.php
 // Vue simple de test.
 namespace CB\Component\Contentbuilder\Administrator\View\Test;
 

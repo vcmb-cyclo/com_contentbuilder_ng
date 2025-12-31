@@ -3,7 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
- * @copyright   Copyright (C) 2024 by XDA+GIL
+ * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
 
@@ -16,7 +16,7 @@ use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\BaseController;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/controllerlegacy.php');
+
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
 
 class ContentbuilderControllerEdit extends BaseController
@@ -73,7 +73,7 @@ class ContentbuilderControllerEdit extends BaseController
             $msg = Text::_('COM_CONTENTBUILDER_SAVED');
             $return = CBRequest::getVar('return', '');
             if ($return) {
-                $return = cb_b64dec($return);
+                $return = base64_decode($return);
 
                 if (!CBRequest::getBool('ContentbuilderHelper::cbinternalCheck', 1)) {
                     Factory::getApplication()->enqueueMessage($msg, 'warning');

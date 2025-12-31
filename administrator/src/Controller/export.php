@@ -12,7 +12,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\MVC\Controller\BaseController;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/controllerlegacy.php');
+
 
 class ContentbuilderControllerExport extends BaseController
 {

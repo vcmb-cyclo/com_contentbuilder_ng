@@ -19,25 +19,9 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Registry\Registry;
 
-if (!function_exists('cb_b64enc')) {
 
-    function cb_b64enc($str)
-    {
-        $base = 'base';
-        $sixty_four = '64_encode';
-        return call_user_func($base . $sixty_four, $str);
-    }
 
-}
 
-if (!function_exists('cb_b64dec')) {
-    function cb_b64dec($str)
-    {
-        $base = 'base';
-        $sixty_four = '64_decode';
-        return call_user_func($base . $sixty_four, $str);
-    }
-}
 
 
 class plgContentContentbuilder_rating extends CMSPlugin

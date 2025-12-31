@@ -4,7 +4,7 @@
  * @package     BreezingCommerce
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
- * @copyright (C) 2024 by XDA+GIL
+ * @Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
 

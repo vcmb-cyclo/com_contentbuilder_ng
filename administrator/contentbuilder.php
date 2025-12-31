@@ -2,7 +2,7 @@
 
 /**
  * @package     ContentBuilder
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://www.crosstec.org
  * @copyright   (C) 2025 by XDA+GIL
  * @license     GNU/GPL
@@ -16,33 +16,20 @@ defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
-use Joomla\Application\ApplicationInterface;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Controller\TestController;
 
-
-if (!function_exists('cb_b64enc')) {
-
-    function cb_b64enc($str)
-    {
-        $base = 'base';
-        $sixty_four = '64_encode';
-        return call_user_func($base . $sixty_four, $str);
-    }
-}
-
-if (!function_exists('cb_b64dec')) {
-    function cb_b64dec($str)
-    {
-        $base = 'base';
-        $sixty_four = '64_decode';
-        return call_user_func($base . $sixty_four, $str);
-    }
-}
-
-if ((CBRequest::getCmd('controller', '') == 'elementoptions' || CBRequest::getCmd('controller', '') == 'storages' || CBRequest::getCmd('controller', '') == 'forms' || CBRequest::getCmd('controller', '') == 'users') && !Factory::getApplication()->getIdentity()->authorise('contentbuilder.manage', 'com_contentbuilder')) {
+if ((CBRequest::getCmd('controller', '') == 'elementoptions' || 
+    CBRequest::getCmd('controller', '') == 'storages' || 
+    CBRequest::getCmd('controller', '') == 'forms' || 
+    CBRequest::getCmd('controller', '') == 'users') && !Factory::getApplication()->getIdentity()->authorise('contentbuilder.manage', 'com_contentbuilder')) {
     Factory::getApplication()->enqueueMessage(Text::_('JERROR_ALERTNOAUTHOR'), 'warning');
 }
 
-if (!(CBRequest::getCmd('controller', '') == 'elementoptions' || CBRequest::getCmd('controller', '') == 'storages' || CBRequest::getCmd('controller', '') == 'forms' || CBRequest::getCmd('controller', '') == 'users') && !Factory::getApplication()->getIdentity()->authorise('contentbuilder.admin', 'com_contentbuilder')) {
+if (!(CBRequest::getCmd('controller', '') == 'elementoptions' ||
+    CBRequest::getCmd('controller', '') == 'storages' ||
+    CBRequest::getCmd('controller', '') == 'forms' ||
+    CBRequest::getCmd('controller', '') == 'users') && !Factory::getApplication()->getIdentity()->authorise('contentbuilder.admin', 'com_contentbuilder')) {
     Factory::getApplication()->enqueueMessage(Text::_('JERROR_ALERTNOAUTHOR'), 'warning');
 }
 
@@ -73,7 +60,7 @@ if (CBRequest::getWord('task') === 'test') {
     $db = $container->get(\Joomla\Database\DatabaseInterface::class);
     $factory = $container->get(\Joomla\CMS\MVC\Factory\MVCFactoryInterface::class);
 
-    $controller = new \CB\Component\Contentbuilder\Administrator\Controller\TestController([], $db, $factory);
+    $controller = new TestController([], $db, $factory);
     $controller->display();
 
     // Stoppe le reste du legacy dispatcher

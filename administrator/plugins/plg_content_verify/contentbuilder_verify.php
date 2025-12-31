@@ -15,25 +15,9 @@ use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Plugin\PluginHelper;
 
-if (!function_exists('cb_b64enc')) {
 
-    function cb_b64enc($str)
-    {
-        $base = 'base';
-        $sixty_four = '64_encode';
-        return call_user_func($base . $sixty_four, $str);
-    }
 
-}
 
-if (!function_exists('cb_b64dec')) {
-    function cb_b64dec($str)
-    {
-        $base = 'base';
-        $sixty_four = '64_decode';
-        return call_user_func($base . $sixty_four, $str);
-    }
-}
 
 class plgContentContentbuilder_verify extends CMSPlugin
 {
@@ -182,7 +166,7 @@ class plgContentContentbuilder_verify extends CMSPlugin
 
                 if ($plugin && $verification_name && $verify_view) {
 
-                    $plugin_settings = 'return-site=' . ($return_site ? cb_b64enc($return_site) : '') . '&return-admin=' . ($return_admin ? cb_b64enc($return_admin) : '') . '&client=' . ($this->app->isClient('site') ? 0 : 1) . '&plugin=' . $plugin . '&verification_msg=' . urlencode($verification_msg) . '&verification_name=' . urlencode($verification_name) . '&verify_view=' . $verify_view . '&verify_levels=' . $verify_levels . '&require_view=' . $require_view . '&plugin_options=' . cb_b64enc($this->buildStr($plugin_options));
+                    $plugin_settings = 'return-site=' . ($return_site ? base64_decode($return_site) : '') . '&return-admin=' . ($return_admin ? base64_decode($return_admin) : '') . '&client=' . ($this->app->isClient('site') ? 0 : 1) . '&plugin=' . $plugin . '&verification_msg=' . urlencode($verification_msg) . '&verification_name=' . urlencode($verification_name) . '&verify_view=' . $verify_view . '&verify_levels=' . $verify_levels . '&require_view=' . $require_view . '&plugin_options=' . base64_decode($this->buildStr($plugin_options));
 
                     $this->app->getSession()->clear($plugin . $verification_name, 'com_contentbuilder.verify.' . $plugin . $verification_name);
                     $this->app->getSession()->set($plugin . $verification_name, $plugin_settings, 'com_contentbuilder.verify.' . $plugin . $verification_name);

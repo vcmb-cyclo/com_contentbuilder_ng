@@ -4,11 +4,11 @@
  * @package     Extension
  * @author      Xavier DANO
  * @link        
- * @copyright   Copyright (C) 2025 by XDA+GIL
+ * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
 
-// admin/src/Extension/ContentbuilderComponent.php
+// administrator/src/Extension/ContentbuilderComponent.php
 
 namespace CB\Component\Contentbuilder\Administrator\Extension;
 

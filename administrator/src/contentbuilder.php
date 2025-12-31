@@ -4,7 +4,7 @@
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
  * @license     GNU/GPL
- * @copyright   Copyright (C) 2024 by XDA+GIL
+ * @copyright   Copyright (C) 2026 by XDA+GIL
  */
 
 
@@ -30,8 +30,6 @@ use Joomla\CMS\Access\Access;
 use Joomla\Application\ApplicationInterface;
 use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
 
-require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/plugin_helper.php');
-require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/plugin_helper4.php');
 class contentbuilder
 {
 
@@ -200,13 +198,9 @@ class contentbuilder
 }
 
 .cbRating{ width: 30px; }
-
 .cbRatingUpDown{text-align: center; width: 90px; }
-
 .cbRatingImage {margin: auto; display: block;}
-
 .cbRatingCount {text-align: center; font-size: 11px;}
-
 .cbRatingVotes {text-align: center; font-size: 11px;} 
 
 .cbRatingImage2{
@@ -451,7 +445,6 @@ class contentbuilder
     public static function applyItemWrappers($contentbuilder_form_id, array $items, $form)
     {
 
-        require_once(JPATH_COMPONENT_ADMINISTRATOR . '/classes/plugin_helper.php');
         $article = Table::getInstance('content');
         $registry = null;
         $onContentPrepare = '';
@@ -511,7 +504,7 @@ class contentbuilder
                         }
 
                         $allow_html = false;
-                        $options = unserialize(cb_b64dec($wrapper['options']));
+                        $options = unserialize(base64_decode($wrapper['options']));
 
                         if ($options instanceof stdClass) {
                             if (isset($options->allow_html) && $options->allow_html) {
@@ -921,7 +914,7 @@ class contentbuilder
                 $db->setQuery("Select Max(ordering) + 1 From #__contentbuilder_elements Where form_id = " . intval($contentbuilder_form_id));
                 $ordering = $db->loadResult();
 
-                $db->setQuery("Insert Into #__contentbuilder_elements (`label`,`form_id`,`reference_id`,`type`,`options`, `ordering`) Values (" . $db->Quote($title) . "," . $db->Quote($contentbuilder_form_id) . "," . $db->Quote($reference_id) . ",'text','" . cb_b64enc(serialize($options)) . "', " . ($ordering ? $ordering : 0) . ")");
+                $db->setQuery("Insert Into #__contentbuilder_elements (`label`,`form_id`,`reference_id`,`type`,`options`, `ordering`) Values (" . $db->Quote($title) . "," . $db->Quote($contentbuilder_form_id) . "," . $db->Quote($reference_id) . ",'text','" . base64_decode(serialize($options)) . "', " . ($ordering ? $ordering : 0) . ")");
                 $db->execute();
             }
         }
@@ -1087,7 +1080,7 @@ class contentbuilder
 
             foreach ($labels_ as $label_) {
                 $labels[$label_['reference_id']] = $label_['label'];
-                $opts = unserialize(cb_b64dec($label_['options']));
+                $opts = unserialize(base64_decode($label_['options']));
                 if ($opts && ((isset($opts->allow_html) && $opts->allow_html) || (isset($opts->allow_raw) && $opts->allow_raw))) {
                     $allow_html[$label_['reference_id']] = $opts;
                 }
@@ -1227,7 +1220,7 @@ class contentbuilder
 
             foreach ($labels_ as $label_) {
                 $labels[$label_['reference_id']] = $label_['label'];
-                $opts = unserialize(cb_b64dec($label_['options']));
+                $opts = unserialize(base64_decode($label_['options']));
                 if ($opts && isset($opts->allow_html) && $opts->allow_html) {
                     $allow_html[$label_['reference_id']] = $opts;
                 }
@@ -1454,7 +1447,7 @@ class contentbuilder
                         $asterisk = ' <span class="cbRequired" style="color:red;">*</span>';
                     }
 
-                    $options = unserialize(cb_b64dec($element['options']));
+                    $options = unserialize(base64_decode($element['options']));
 
                     $the_item = '';
 
@@ -2386,7 +2379,7 @@ class contentbuilder
         ");
         $result = $db->loadAssoc();
 
-        $config = unserialize(cb_b64dec($result['config']));
+        $config = unserialize(base64_decode($result['config']));
 
         Factory::getApplication()->getSession()->clear('permissions' . $suffix, 'com_contentbuilder');
         $permissions = array();

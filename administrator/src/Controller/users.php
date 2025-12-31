@@ -14,7 +14,7 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\BaseController;
 
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/controllerlegacy.php');
+
 
 class ContentbuilderControllerUsers extends BaseController
 {

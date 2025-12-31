@@ -4,7 +4,7 @@
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
  * @license     GNU/GPL
- * @copyright   Copyright (C) 2024 by XDA+GIL
+ * @copyright   Copyright (C) 2026 by XDA+GIL
  */
 
 namespace CB\Component\Contentbuilder\Administrator\Table\Types;
@@ -776,7 +776,7 @@ class contentbuilder_com_contentbuilder
                 //$options = null;
 
                 if (isset($element['options'])) {
-                    $options = unserialize(cb_b64dec($element['options']));
+                    $options = unserialize(base64_decode($element['options']));
                 }
 
                 if (!isset($options->seperator)) {

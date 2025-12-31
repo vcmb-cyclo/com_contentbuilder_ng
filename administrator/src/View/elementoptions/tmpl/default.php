@@ -3,7 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
- * @copyright   Copyright (C) 2024 by XDA+GIL 
+ * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     GNU/GPL
  */
 
@@ -18,8 +18,6 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
 
-require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/plugin_helper.php');
-require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/plugin_helper4.php');
 
 $plugins = contentbuilder::getFormElementsPlugins();
 

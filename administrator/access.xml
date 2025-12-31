@@ -1,7 +1,29 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <access component="com_contentbuilder">
-	<section name="component">
-		<action name="contentbuilder.admin" title="JACTION_ADMIN" description="JACTION_ADMIN_COMPONENT_DESC" />
-                <action name="contentbuilder.manage" title="JACTION_MANAGE" description="JACTION_MANAGE_COMPONENT_DESC" />
-	</section>
+    <section name="component">
+
+        <action
+            name="core.manage"
+            title="JACTION_MANAGE"
+            description="JACTION_MANAGE_COMPONENT_DESC"
+        />
+
+        <action
+            name="core.admin"
+            title="JACTION_ADMIN"
+            description="JACTION_ADMIN_COMPONENT_DESC"
+        />
+		<action
+			name="contentbuilder.manage"
+			title="COM_CONTENTBUILDER_ACTION_MANAGE"
+			description="COM_CONTENTBUILDER_ACTION_MANAGE_DESC"
+		/>
+
+		<action
+			name="contentbuilder.admin"
+			title="JACTION_ADMIN"
+			description="JACTION_ADMIN_COMPONENT_DESC"
+		/>
+
+    </section>
 </access>

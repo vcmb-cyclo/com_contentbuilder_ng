@@ -3,7 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
- * @copyright Copyright (C) 2024 by XDA+GIL 
+ * @copyright Copyright (C) 2026 by XDA+GIL 
  * @license     GNU/GPL
  */
 
@@ -17,7 +17,7 @@ use Joomla\Filesystem\File;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\BaseController;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/controllerlegacy.php');
+
 
 class ContentbuilderControllerStorages extends BaseController
 {

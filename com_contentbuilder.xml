@@ -11,15 +11,9 @@
     <description>COM_CONTENTBUILDER_XML_DESCRIPTION</description>
 
     <!-- ===================== -->
-    <!-- PSR-4 NAMESPACES -->
+    <!-- PSR-4 NAMESPACE -->
     <!-- ===================== -->
-    <namespace path="administrator/src">
-        CB\Component\Contentbuilder\Administrator
-    </namespace>
-
-    <namespace path="site/src">
-        CB\Component\Contentbuilder\Site
-    </namespace>
+    <namespace path="src">CB\Component\Contentbuilder</namespace>
 
     <!-- ===================== -->
     <!-- INSTALL / UNINSTALL -->
@@ -62,16 +56,14 @@
 <administration>
     <menu img="components/com_contentbuilder/views/logo_icon_cb.png">ContentBuilder</menu>
     <submenu>
-        <menu controller="storages" img="components/com_contentbuilder/views/logo_icon_cb.png">COM_CONTENTBUILDER_STORAGES</menu>
-        <menu controller="forms" img="components/com_contentbuilder/views/logo_icon_cb.png">COM_CONTENTBUILDER_LIST</menu>
+        <menu view="storages" img="components/com_contentbuilder/views/logo_icon_cb.png">COM_CONTENTBUILDER_STORAGES</menu>
+        <menu view="forms" img="components/com_contentbuilder/views/logo_icon_cb.png">COM_CONTENTBUILDER_LIST</menu>
         <menu link="option=com_contentbuilder&amp;view=contentbuilder&amp;market=true">Try BreezingForms!</menu>
         <menu view="contentbuilder">COM_CONTENTBUILDER_ABOUT</menu>
     </submenu>
 
     <!-- Un seul bloc <files> avec folder="administrator" -->
     <files folder="administrator">
-        <filename>controller.php</filename>
-        <filename>contentbuilder.php</filename>
         <filename>access.xml</filename>
         <filename>config.xml</filename>
         <filename>index.html</filename>
@@ -106,7 +98,7 @@
     <folder>css</folder>
     <folder>js</folder>
     <folder>images</folder>
-    <filename>joomla.asset.json</filename>  <!-- Optionnel mais recommandé -->
+    <filename>joomla.asset.json</filename>
 </media>
 
 

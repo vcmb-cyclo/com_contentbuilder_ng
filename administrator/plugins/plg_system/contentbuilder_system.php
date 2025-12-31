@@ -15,7 +15,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
-use CB\Component\Contentbuilder\Administrator;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 class plgSystemContentbuilder_system extends CMSPlugin
 {
@@ -60,7 +60,6 @@ class plgSystemContentbuilder_system extends CMSPlugin
         }
 
         // managing auto-groups
-
         if (CBRequest::getVar('option') == 'com_kunena' || CBRequest::getVar('option') == 'com_contentbuilder') {
 
             $pluginParams = $this->params;
@@ -263,9 +262,7 @@ class plgSystemContentbuilder_system extends CMSPlugin
         // J! is then trying to redirect to com_content (for non-obvious reasons), using the view variable orginally used in contentbuilder and then it will 
         // throw an error 500, view not found
         // this will get rid of the view parameter and pass the rest of the url to the return parameter
-        $base = 'base';
-        $sixty_four = '64';
-        $enc = cb_b64dec(CBRequest::getVar('return', '', 'method', $base . $sixty_four));
+        $enc = base64_decode(CBRequest::getVar('return', ''));
         if (is_string($enc)) {
             $enc = explode('?', $enc);
             count($enc) > 1 ? parse_str($enc[1], $out) : $out = array();
@@ -279,7 +276,7 @@ class plgSystemContentbuilder_system extends CMSPlugin
                     }
                     $i++;
                 }
-                CBRequest::setVar('return', cb_b64enc('index.php' . ($return ? '?' : '') . $return));
+                CBRequest::setVar('return', base64_decode('index.php' . ($return ? '?' : '') . $return));
             }
         }
 

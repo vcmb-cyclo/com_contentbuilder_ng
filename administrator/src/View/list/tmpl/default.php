@@ -4,7 +4,7 @@
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
  * @license     GNU/GPL
- * @copyright Copyright (C) 2024 by XDA+GIL
+ * @copyright Copyright (C) 2026 by XDA+GIL
  */
 
 namespace CB\Component\Contentbuilder\Administrator\View\List\Tmpl;
@@ -16,7 +16,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 $language_allowed = contentbuilder::authorize('language');
 $edit_allowed = contentbuilder::authorize('edit');

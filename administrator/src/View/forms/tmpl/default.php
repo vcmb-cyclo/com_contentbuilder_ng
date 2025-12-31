@@ -3,7 +3,7 @@
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
- * @copyright   Copyright (C) 2024 by XDA+GIL 
+ * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     GNU/GPL
  */
 
@@ -15,6 +15,8 @@ defined('_JEXEC') or die('Restricted access');
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
+
 
 ?>
 <style type="text/css">

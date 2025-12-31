@@ -1,9 +1,9 @@
 <?php
 /**
  * @package     ContentBuilder
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://www.crosstec.org
- * @copyright   Copyright (C) 2025 by XDA+GIL 
+ * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     GNU/GPL
  */
 
@@ -17,8 +17,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
-use Joomla\Application\ApplicationInterface;
-use CB\Component\Contentbuilder\Administrator\ContentbuilderHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 $language_allowed = contentbuilder::authorizeFe('language');
 $edit_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('edit') : contentbuilder::authorize('edit');

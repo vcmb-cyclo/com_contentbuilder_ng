@@ -1,0 +1,8 @@
+.icon-contentbuilder {
+    background-image: url(../views/logo_left.png);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 48px 48px;
+    padding-left: 58px !important;
+    line-height: 48px !important;
+}

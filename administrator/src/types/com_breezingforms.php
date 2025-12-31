@@ -4,7 +4,7 @@
  * @author      Markus Bopp
  * @link        https://www.crosstec.org
  * @license     GNU/GPL
- * @copyright   Copyright (C) 2024 by XDA+GIL 
+ * @copyright   Copyright (C) 2026 by XDA+GIL 
 */
 
 namespace CB\Component\Contentbuilder\Administrator\Table\Types;

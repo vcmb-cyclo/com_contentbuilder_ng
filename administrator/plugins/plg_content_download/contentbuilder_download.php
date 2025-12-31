@@ -3,7 +3,7 @@
  * @version     1.0
  * @package     ContentBuilder Image Scale
  * @copyright   (C) 2011 by Markus Bopp
- * @copyright   Copyright (C) 2024 by XDA+GIL 
+ * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     Released under the terms of the GNU General Public License
  **/
 
@@ -19,25 +19,7 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 
-if (!function_exists('cb_b64enc')) {
 
-    function cb_b64enc($str)
-    {
-        $base = 'base';
-        $sixty_four = '64_encode';
-        return call_user_func($base . $sixty_four, $str);
-    }
-
-}
-
-if (!function_exists('cb_b64dec')) {
-    function cb_b64dec($str)
-    {
-        $base = 'base';
-        $sixty_four = '64_decode';
-        return call_user_func($base . $sixty_four, $str);
-    }
-}
 
 
 class plgContentContentbuilder_download extends CMSPlugin
