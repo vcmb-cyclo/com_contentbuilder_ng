@@ -551,7 +551,7 @@ class contentbuilder_com_contentbuilder
         ", $limitstart, $limit);
 
         $return = $db->loadObjectList();
-        //echo $db->getErrorMsg();
+        //echo $db->getErrorMessage();
         //exit;
         $db->setQuery('SELECT FOUND_ROWS();');
         $this->total = $db->loadResult();

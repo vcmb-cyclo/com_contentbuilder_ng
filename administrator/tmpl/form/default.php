@@ -118,7 +118,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                 Joomla.submitform(task);
                 break;
             case 'save':
-            case 'saveNew':
+            case 'save2New':
             case 'apply':
                 var error = false;
                 var nodes = document.adminForm['cid[]'];

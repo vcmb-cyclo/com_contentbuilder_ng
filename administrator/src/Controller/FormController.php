@@ -1,7 +1,7 @@
 <?php
 /**
  * @package     ContentBuilder
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
@@ -13,10 +13,10 @@ namespace CB\Component\Contentbuilder\Administrator\Controller;
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\MVC\Controller\FormController as CoreFormController;
+use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 
-final class FormController extends CoreFormController
+class FormController extends BaseController
 {
     /**
      * Vue item et vue liste utilisées par les redirects du core
@@ -24,143 +24,90 @@ final class FormController extends CoreFormController
     protected $view_item = 'form';
     protected $view_list = 'forms';
 
-    /**
-     * Tu peux laisser le core gérer add/edit/apply/save/save2new/cancel/remove/publish/unpublish/orderup/orderdown/saveorder.
-     * Mais tu as des actions custom "list*" (listpublish, listorderup, etc.).
-     * On les conserve ici en appelant tes méthodes de modèle.
-     */
-
-    public function listorderup(): void
+    public function save()
     {
         $model = $this->getModel('Form');
-        $model->listMove(-1);
+        $id = $model->store();
 
-        // Après une action mutative : redirect (PRG), pas display()
+        if (!$id) {
+            $this->setRedirect(
+                Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&id=' . (int) $this->input->getInt('id', 0), false),
+                $model->getError() ?: 'Store failed (no id returned)',
+                'error'
+            );
+            return false;
+        }
+
         $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
+            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&id=' . (int) $id, false),
+            'Saved',
+            'message'
         );
+        return true;
+    }
+    
+
+    public function apply()
+    {
+        $model = $this->getModel('Form');
+        $id = $model->store();
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms&layout=edit&id=' . (int) $id, false), 
+            'Saved');
+        return true;
     }
 
-    public function listorderdown(): void
+    public function cancel()
     {
-        $model = $this->getModel('Form');
-        $model->listMove(1);
-
         $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
-        );
+            Route::_('index.php?option=com_contentbuilder&view=forms', false));
+        return true;
     }
 
-    public function listsaveorder(): void
-    {
-        $model = $this->getModel('Form');
-        $model->listSaveOrder();
+    public function save2new(){
+        $model = $this->getModel('storage');
+        $model->store();
 
-        $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
-        );
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&id=0', false));
+        return true;
     }
 
-    public function listpublish(): void
+    public function edit()
     {
-        $model = $this->getModel('Form');
-        $model->setListPublished();
+        $cid = (array) $this->input->get('cid', [], 'array');
+        $id = (int) ($cid[0] ?? 0);
 
-        $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false),
-            Text::_('COM_CONTENTBUILDER_PUBLISHED')
-        );
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&id=' . $id, false));
+        return true;
     }
 
-    public function listunpublish(): void
+    public function add()
     {
-        $model = $this->getModel('Form');
-        $model->setListUnpublished();
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&id=0', false));
+        return true;
+    }
+   
+    public function publish()
+    {
+        $id = $this->input->getInt('id', 0);
+        $model = $this->getModel('Storage');
+        $model->setPublished([$id]); // ou $model->setId($id) + méthode single
 
         $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false),
-            Text::_('COM_CONTENTBUILDER_UNPUBLISHED')
-        );
+            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&id=' . $id, false),
+            Text::_('COM_CONTENTBUILDER_PUBLISHED'));
     }
 
-    public function linkable(): void
+    public function unpublish()
     {
-        $model = $this->getModel('Form');
-        $model->setListLinkable();
+        $id = $this->input->getInt('id', 0);
+        $model = $this->getModel('Storage');
+        $model->setUnpublished([$id]); // ou $model->setId($id) + méthode single
 
         $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
-        );
-    }
-
-    public function not_linkable(): void
-    {
-        $model = $this->getModel('Form');
-        $model->setListNotLinkable();
-
-        $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
-        );
-    }
-
-    public function editable(): void
-    {
-        $model = $this->getModel('Form');
-        $model->setListEditable();
-
-        $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
-        );
-    }
-
-    public function not_editable(): void
-    {
-        $model = $this->getModel('Form');
-        $model->setListNotEditable();
-
-        $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
-        );
-    }
-
-    public function list_include(): void
-    {
-        $model = $this->getModel('Form');
-        $model->setListListInclude();
-
-        $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
-        );
-    }
-
-    public function no_list_include(): void
-    {
-        $model = $this->getModel('Form');
-        $model->setListNoListInclude();
-
-        $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
-        );
-    }
-
-    public function search_include(): void
-    {
-        $model = $this->getModel('Form');
-        $model->setListSearchInclude();
-
-        $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
-        );
-    }
-
-    public function no_search_include(): void
-    {
-        $model = $this->getModel('Form');
-        $model->setListNoSearchInclude();
-
-        $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
-        );
+            Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&id=' . $id, false),
+            Text::_('COM_CONTENTBUILDER_UNPUBLISHED'));
     }
 
     public function editable_include(): void

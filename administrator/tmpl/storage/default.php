@@ -112,13 +112,12 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                 Joomla.submitform(task);
                 break;
             case 'save':
-            case 'saveNew':
+            case 'save2New':
             case 'apply':
                 var error = false;
                 var nodes = document.adminForm['cid[]'];
 
                 if (document.getElementById('bytable').selectedIndex == 0) {
-
                     if (document.getElementById('name').value == '') {
                         error = true;
                         alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_ERROR_ENTER_STORAGENAME')); ?>");

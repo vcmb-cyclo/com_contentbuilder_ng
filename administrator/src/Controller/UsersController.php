@@ -26,7 +26,7 @@ class UsersController extends BaseController
         $this->registerTask( 'add', 'edit' );
     }
     
-    function verified_view() {
+    public function verified_view() {
         $cid = CBRequest::getVar('cid', array(), '', 'array');
 
         $model = $this->getModel( 'user' );
@@ -42,7 +42,7 @@ class UsersController extends BaseController
         parent::display();
     }
     
-    function not_verified_view() {
+    public function not_verified_view() {
         $cid = CBRequest::getVar('cid', array(), '', 'array');
 
         $model = $this->getModel( 'user' );
@@ -58,7 +58,7 @@ class UsersController extends BaseController
         parent::display();
     }
     
-    function verified_new() {
+    public function verified_new() {
         $cid = CBRequest::getVar('cid', array(), '', 'array');
 
         $model = $this->getModel( 'user' );
@@ -74,7 +74,7 @@ class UsersController extends BaseController
         parent::display();
     }
     
-    function not_verified_new() {
+    public function not_verified_new() {
         $cid = CBRequest::getVar('cid', array(), '', 'array');
 
         $model = $this->getModel( 'user' );
@@ -90,7 +90,7 @@ class UsersController extends BaseController
         parent::display();
     }
     
-    function verified_edit() {
+    public function verified_edit() {
         $cid = CBRequest::getVar('cid', array(), '', 'array');
 
         $model = $this->getModel( 'user' );
@@ -106,7 +106,7 @@ class UsersController extends BaseController
         parent::display();
     }
     
-    function not_verified_edit() {
+    public function not_verified_edit() {
         $cid = CBRequest::getVar('cid', array(), '', 'array');
 
         $model = $this->getModel( 'user' );
@@ -122,7 +122,7 @@ class UsersController extends BaseController
         parent::display();
     }
     
-    function edit()
+    public function edit()
     {
         CBRequest::setVar( 'view', 'user' );
         CBRequest::setVar( 'layout', 'default'  );
@@ -132,12 +132,12 @@ class UsersController extends BaseController
         parent::display();
     }
 
-    function apply()
+    public function apply()
     {
         $this->save(true);
     }
 
-    function publish() {
+    public function publish() {
         $cid = CBRequest::getVar('cid', array(), '', 'array');
 
         if(count($cid) == 1)
@@ -154,7 +154,7 @@ class UsersController extends BaseController
         $this->setRedirect( Route::_('index.php?option=com_contentbuilder&view=users&form_id='.CBRequest::getInt('form_id',0).'&tmpl='.CBRequest::getCmd('tmpl','').'&limitstart='.CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_PUBLISHED') );
     }
     
-    function unpublish() {
+    public function unpublish() {
         $cid = CBRequest::getVar('cid', array(), '', 'array');
 
         if(count($cid) == 1)
@@ -171,7 +171,7 @@ class UsersController extends BaseController
         $this->setRedirect( Route::_('index.php?option=com_contentbuilder&view=users&form_id='.CBRequest::getInt('form_id',0).'&tmpl='.CBRequest::getCmd('tmpl','').'&limitstart='.CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_UNPUBLISHED') );
     }
     
-    function save($keep_task = false)
+    public function save($keep_task = false)
     {
         $model = $this->getModel('user');
         $id = $model->store();
@@ -196,13 +196,13 @@ class UsersController extends BaseController
         $this->setRedirect(Route::_($link, false), $msg);
     }
 
-    function cancel()
+    public function cancel()
     {
         $msg = Text::_( 'COM_CONTENTBUILDER_CANCELLED' );
         $this->setRedirect( Route::_('index.php?option=com_contentbuilder&view=users&form_id='.CBRequest::getInt('form_id',0).'&tmpl='.CBRequest::getCmd('tmpl','').'&limitstart=0', false), $msg );
     }
 
-    function display($cachable = false, $urlparams = array())
+    public function display($cachable = false, $urlparams = array())
     {
         CBRequest::setVar('tmpl', CBRequest::getWord('tmpl',null));
         CBRequest::setVar('layout', CBRequest::getWord('layout',null));

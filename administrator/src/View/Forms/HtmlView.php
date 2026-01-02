@@ -35,6 +35,8 @@ class HtmlView extends BaseHtmlView
         ToolBarHelper::addNew('form.add');
         ToolBarHelper::custom('form.copy', 'copy', '', Text::_('COM_CONTENTBUILDER_COPY'));
         ToolBarHelper::editList('form.edit');
+        ToolBarHelper::custom('forms.publish', 'publish', '', Text::_('COM_CONTENTBUILDER_PUBLISH'), false);
+        ToolBarHelper::custom('forms.unpublish', 'unpublish', '', Text::_('COM_CONTENTBUILDER_UNPUBLISH'), false);
         ToolbarHelper::deleteList('JGLOBAL_CONFIRM_DELETE', 'forms.delete');
         ToolBarHelper::preferences('com_contentbuilder');
 

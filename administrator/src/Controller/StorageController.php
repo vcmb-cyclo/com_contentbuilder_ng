@@ -14,13 +14,14 @@ namespace CB\Component\Contentbuilder\Administrator\Controller;
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\MVC\Controller\FormController;
+use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Factory;
 use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
 
-class StorageController extends FormController
+
+class StorageController extends BaseController
 {
     protected $view_list = 'storages';
 
@@ -124,4 +125,74 @@ class StorageController extends FormController
 
         return $ok;
     }
+
+    public function save2new(){
+        $model = $this->getModel('storage');
+        $model->store();
+
+        $this->setRedirect('index.php?option=com_contentbuilder&view=storage&layout=edit&id=0');
+        return true;
+    }
+
+    public function edit()
+    {
+        $cid = (array) $this->input->get('cid', [], 'array');
+        $id = (int) ($cid[0] ?? 0);
+
+        $this->setRedirect('index.php?option=com_contentbuilder&view=storage&layout=edit&id=' . $id);
+        return true;
+    }
+
+    public function add()
+    {
+        $this->setRedirect('index.php?option=com_contentbuilder&view=storage&layout=edit&id=0');
+        return true;
+    }
+   
+    public function publish()
+    {
+        $app = Factory::getApplication();
+        $input = $app->getInput();
+        $cid = $input->get('cid', [], 'array');
+        ArrayHelper::toInteger($cid);
+
+        if (count($cid) == 1) {
+            $model = $this->getModel('storage');
+            $model->setPublished();
+        } else if (count($cid) > 1) {
+            $model = $this->getModel('storage');
+            $model->setPublished();
+        }
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=storage&limitstart=' . $this->input->getInt('limitstart'), false),
+            Text::_('COM_CONTENTBUILDER_PUBLISHED'));
+    }
+
+    public function unpublish()
+    {
+        $app = Factory::getApplication();
+        $input = $app->getInput();
+        $cid = $input->get('cid', [], 'array');
+        ArrayHelper::toInteger($cid);
+
+        if (count($cid) == 1) {
+            $model = $this->getModel('storage');
+            $model->setUnpublished();
+        } else if (count($cid) > 1) {
+            $model = $this->getModel('storage');
+            $model->setUnpublished();
+        }
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=storage&limitstart=' . $this->input->getInt('limitstart'), false),
+            Text::_('COM_CONTENTBUILDER_UNPUBLISHED'));
+    }
+
+
+    public function apply()
+    {
+        $this->save(true);
+    }
+
 }

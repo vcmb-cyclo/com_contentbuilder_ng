@@ -64,7 +64,7 @@ class FormsModel extends ListModel
 
     function copy()
     {
-        $table = $this->getTable('form');
+        $table = $this->getTable('Form');
         $cids = CBRequest::getVar('cid', array(), '', 'array');
         ArrayHelper::toInteger($cids);
 
@@ -194,7 +194,7 @@ class FormsModel extends ListModel
         ArrayHelper::toInteger($items);
 
         $total = count($items);
-        $row = $this->getTable('form');
+        $row = $this->getTable('Form');
         $groupings = array();
 
         $order = CBRequest::getVar('order', array(), 'post', 'array');

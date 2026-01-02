@@ -136,7 +136,7 @@ class StoragesModel extends ListModel
         ArrayHelper::toInteger($items);
 
         $total = count($items);
-        $row = $this->getTable('storage');
+        $row = $this->getTable('Storage');
         $groupings = array();
 
         $order = CBRequest::getVar('order', array(), 'post', 'array');

@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @package     ContentBuilder
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     GNU/GPL
@@ -48,7 +49,6 @@ class FormModel extends BaseDatabaseModel
     function __construct($config)
     {
         $this->_db = Factory::getContainer()->get(DatabaseInterface::class);
-
         parent::__construct($config);
 
         $mainframe = Factory::getApplication();
@@ -77,7 +77,6 @@ class FormModel extends BaseDatabaseModel
 
         $filter_state = $mainframe->getUserStateFromRequest($option . 'elements_filter_state', 'filter_state', '', 'word');
         $this->setState('elements_filter_state', $filter_state);
-
     }
 
     function setPublished()
@@ -260,8 +259,13 @@ class FormModel extends BaseDatabaseModel
         $this->_data = null;
     }
 
-    function getForm()
+    public function getItem($pk = null)
     {
+        // Optionnel: si $pk est fourni, mets à jour l'id
+        if ($pk !== null) {
+            $this->setId((int) $pk);
+        }
+
         $query = ' Select * From #__contentbuilder_forms ' .
             '  Where id = ' . $this->_id;
         $this->_db->setQuery($query);
@@ -315,7 +319,7 @@ class FormModel extends BaseDatabaseModel
             $data->email_update_notifications = 0;
             $data->limited_article_options = 1;
             $data->limited_article_options_fe = 1;
-            $data->upload_directory = JPATH_SITE .'/media/contentbuilder/upload';
+            $data->upload_directory = JPATH_SITE . '/media/contentbuilder/upload';
             $data->protect_upload_directory = 1;
             $data->limit_add = 0;
             $data->limit_edit = 0;
@@ -423,7 +427,7 @@ class FormModel extends BaseDatabaseModel
             $data->title = $data->form->getPageTitle();
             if (is_object($data->form)) {
                 ContentbuilderLegacyHelper::synchElements($data->id, $data->form);
-                $elements_table = $this->getTable('elements');
+                $elements_table = $this->getTable('Elements');
                 $elements_table->reorder('form_id=' . $data->id);
             }
         }
@@ -551,8 +555,8 @@ class FormModel extends BaseDatabaseModel
     function store()
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $row = $this->getTable();
-        $form = $this->getForm();
+        $row = $this->getTable('Form');
+        $form = $this->getItem();
         $form_id = 0;
 
         $data = CBRequest::get('post');
@@ -587,24 +591,24 @@ class FormModel extends BaseDatabaseModel
 
         $protect = $data['protect_upload_directory'];
 
-        // if not exissting, we create the fallback directory
+        // if not existing, we create the fallback directory
         if (!is_dir($upload_directory)) {
 
-            if (!is_dir(JPATH_SITE .'/media/contentbuilder')) {
-                Folder::create(JPATH_SITE .'/media/contentbuilder');
-                File::write(JPATH_SITE .'/media/contentbuilder/index.html', $def = '');
+            if (!is_dir(JPATH_SITE . '/media/contentbuilder')) {
+                Folder::create(JPATH_SITE . '/media/contentbuilder');
+                File::write(JPATH_SITE . '/media/contentbuilder/index.html', $def = '');
             }
 
-            if (!is_dir(JPATH_SITE .'/media/contentbuilder/upload')) {
-                Folder::create(JPATH_SITE .'/media/contentbuilder/upload');
-                File::write(JPATH_SITE .'/media/contentbuilder/upload/index.html', $def = '');
+            if (!is_dir(JPATH_SITE . '/media/contentbuilder/upload')) {
+                Folder::create(JPATH_SITE . '/media/contentbuilder/upload');
+                File::write(JPATH_SITE . '/media/contentbuilder/upload/index.html', $def = '');
 
                 if ($protect) {
-                    File::write(JPATH_SITE .'/media/contentbuilder/upload/.htaccess', $def = 'deny from all');
+                    File::write(JPATH_SITE . '/media/contentbuilder/upload/.htaccess', $def = 'deny from all');
                 }
             }
 
-            $data['upload_directory'] = JPATH_SITE .'/media/contentbuilder/upload';
+            $data['upload_directory'] = JPATH_SITE . '/media/contentbuilder/upload';
 
             if ($is_relative) {
                 $tmp_upload_directory = '{CBSite}/media/contentbuilder/upload';
@@ -618,20 +622,18 @@ class FormModel extends BaseDatabaseModel
         }
 
         if ($data['protect_upload_directory'] && is_dir(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']))) {
-            if (!file_exists(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']) .'/index.html'))
-                File::write(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']) .'/index.html', $def = '');
+            if (!file_exists(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']) . '/index.html'))
+                File::write(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']) . '/index.html', $def = '');
         }
 
         if ($data['protect_upload_directory'] && is_dir(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']))) {
 
-            if (!file_exists(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']) .'/.htaccess'))
-                File::write(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']) .'/.htaccess', $def = 'deny from all');
-
+            if (!file_exists(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']) . '/.htaccess'))
+                File::write(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']) . '/.htaccess', $def = 'deny from all');
         } else {
 
-            if (file_exists(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']) .'/.htaccess'))
-                File::delete(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']) .'/.htaccess');
-
+            if (file_exists(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']) . '/.htaccess'))
+                File::delete(ContentbuilderLegacyHelper::makeSafeFolder($data['upload_directory']) . '/.htaccess');
         }
 
         // reverting back to possibly including cbsite replacement
@@ -650,7 +652,6 @@ class FormModel extends BaseDatabaseModel
         }
 
         #### PERMISSIONS
-
         $gmap = array();
         $config = array();
         $config['permissions'] = array();
@@ -658,8 +659,7 @@ class FormModel extends BaseDatabaseModel
         $config['own'] = array();
         $config['own_fe'] = array();
 
-        // backend
-
+        // Backend
         if (isset($data['own']) && isset($data['own']['view']) && intval($data['own']['view']) == 1) {
             $config['own']['view'] = true;
         }
@@ -691,8 +691,7 @@ class FormModel extends BaseDatabaseModel
             $config['own']['rating'] = true;
         }
 
-        // frontend
-
+        // Frontend
         if (isset($data['own_fe']) && isset($data['own_fe']['view']) && intval($data['own_fe']['view']) == 1) {
             $config['own_fe']['view'] = true;
         }
@@ -734,9 +733,7 @@ class FormModel extends BaseDatabaseModel
         $gmap = $db->loadObjectList();
 
         foreach ($gmap as $entry) {
-
-            // backend
-
+            // Backend
             if (isset($data['perms'][$entry->value]) && isset($data['perms'][$entry->value]['listaccess']) && intval($data['perms'][$entry->value]['listaccess']) == 1) {
                 $config['permissions'][$entry->value]['listaccess'] = true;
             }
@@ -769,8 +766,7 @@ class FormModel extends BaseDatabaseModel
             }
 
 
-            // frontend
-
+            // Frontend
             if (isset($data['perms_fe'][$entry->value]) && isset($data['perms_fe'][$entry->value]['listaccess']) && intval($data['perms_fe'][$entry->value]['listaccess']) == 1) {
                 $config['permissions_fe'][$entry->value]['listaccess'] = true;
             }
@@ -858,7 +854,7 @@ class FormModel extends BaseDatabaseModel
         $data['own_only'] = CBRequest::getInt('own_only', 0);
         $data['own_only_fe'] = CBRequest::getInt('own_only_fe', 0);
 
-        $data['config'] = base64_decode(serialize($config));
+        $data['config'] = base64_encode(serialize($config));
 
         //ContentbuilderLegacyHelper::createBackendMenuItem($form->id, $form->name, CBRequest::getInt('display_in',0));
 
@@ -913,65 +909,71 @@ class FormModel extends BaseDatabaseModel
         $data['last_update'] = $last_update;
 
         if (!$row->bind($data)) {
-            $this->setError($this->_db->getErrorMsg());
+            $this->setError($row->getError());
             return false;
         }
 
         if (!$row->check()) {
-            $this->setError($this->_db->getErrorMsg());
+            $this->setError($row->getError());
             return false;
         }
 
         $form_id = 0;
-        $storeRes = $row->store();
 
-        if (!$storeRes) {
-            $this->setError($this->_db->getErrorMsg());
+        try {
+            if (!$row->store()) {
+                $this->setError($row->getError());
+                return false;
+            }
+        } catch (\Throwable $e) {
+            // En debug tu peux garder le message brut
+            $this->setError($e->getMessage());
             return false;
-        } else {
-            if (intval($data['id']) != 0) {
-                $form_id = intval($data['id']);
-                foreach ($list_states as $state_id => $item) {
-                    if (intval($state_id)) {
-                        $db->setQuery("Update #__contentbuilder_list_states Set published = " . $db->Quote(isset($item['published']) && $item['published'] ? 1 : 0) . ", `title` = " . $db->Quote(stripslashes(strip_tags($item['title']))) . ", color = " . $db->Quote(stripslashes(strip_tags($item['color']))) . ", action = " . $db->Quote($item['action']) . " Where form_id = $form_id And id = " . intval($state_id));
-                        $db->execute();
-                    }
-                }
+        }
 
-                // FALLBACK IF SOMEHOW REMOVED FROM DATABASE
-                if (count($list_states) < count($this->_default_list_states)) {
-                    $add_count = count($this->_default_list_states) - count($list_states);
-                    for ($i = 0; $i <= $add_count; $i++) {
-                        $db->setQuery("Insert Into #__contentbuilder_list_states (form_id,`title`,color,action) Values ($form_id," . $db->Quote('State') . "," . $db->Quote('FFFFFF') . "," . $db->Quote('') . ")");
-                        $db->execute();
-                    }
-                }
-            } else {
-                $form_id = $this->_db->insertid();
-                foreach ($list_states as $item) {
-                    $db->setQuery("Insert Into #__contentbuilder_list_states (form_id,`title`,color,action, published) Values ($form_id," . $db->Quote(stripslashes(strip_tags($item['title']))) . "," . $db->Quote($item['color']) . "," . $db->Quote($item['action']) . "," . $db->Quote(isset($item['published']) && $item['published'] ? 1 : 0) . ")");
+
+        $form_id = (int) $row->{$row->getKeyName()};
+        if ($form_id) {
+            foreach ($list_states as $state_id => $item) {
+                if (intval($state_id)) {
+                    $db->setQuery("Update #__contentbuilder_list_states Set published = " . $db->Quote(isset($item['published']) && $item['published'] ? 1 : 0) . ", `title` = " . $db->Quote(stripslashes(strip_tags($item['title']))) . ", color = " . $db->Quote(stripslashes(strip_tags($item['color']))) . ", action = " . $db->Quote($item['action']) . " Where form_id = $form_id And id = " . intval($state_id));
                     $db->execute();
-                }
-
-                // FALLBACK IF SOMEHOW REMOVED FROM DATABASE
-                if (count($list_states) < count($this->_default_list_states)) {
-                    $add_count = count($this->_default_list_states) - count($list_states);
-                    for ($i = 0; $i <= $add_count; $i++) {
-                        $db->setQuery("Insert Into #__contentbuilder_list_states (form_id,`title`,color,action) Values ($form_id," . $db->Quote('State') . "," . $db->Quote('FFFFFF') . "," . $db->Quote('') . ")");
-                        $db->execute();
-                    }
                 }
             }
 
-            // is the list states empty?
-            $db->setQuery("Select id From #__contentbuilder_list_states Where form_id = " . $form_id . " Limit 1");
-            $has_states = $db->loadResult();
-            if (!$has_states) {
-                $add_count = count($this->_default_list_states);
+            // FALLBACK IF SOMEHOW REMOVED FROM DATABASE
+            if (count($list_states) < count($this->_default_list_states)) {
+                $add_count = count($this->_default_list_states) - count($list_states);
                 for ($i = 0; $i <= $add_count; $i++) {
                     $db->setQuery("Insert Into #__contentbuilder_list_states (form_id,`title`,color,action) Values ($form_id," . $db->Quote('State') . "," . $db->Quote('FFFFFF') . "," . $db->Quote('') . ")");
                     $db->execute();
                 }
+            }
+        } else {
+            $form_id = $this->_db->insertid();
+            foreach ($list_states as $item) {
+                $db->setQuery("Insert Into #__contentbuilder_list_states (form_id,`title`,color,action, published) Values ($form_id," . $db->Quote(stripslashes(strip_tags($item['title']))) . "," . $db->Quote($item['color']) . "," . $db->Quote($item['action']) . "," . $db->Quote(isset($item['published']) && $item['published'] ? 1 : 0) . ")");
+                $db->execute();
+            }
+
+            // FALLBACK IF SOMEHOW REMOVED FROM DATABASE
+            if (count($list_states) < count($this->_default_list_states)) {
+                $add_count = count($this->_default_list_states) - count($list_states);
+                for ($i = 0; $i <= $add_count; $i++) {
+                    $db->setQuery("Insert Into #__contentbuilder_list_states (form_id,`title`,color,action) Values ($form_id," . $db->Quote('State') . "," . $db->Quote('FFFFFF') . "," . $db->Quote('') . ")");
+                    $db->execute();
+                }
+            }
+        }
+
+        // is the list states empty?
+        $db->setQuery("Select id From #__contentbuilder_list_states Where form_id = " . $form_id . " Limit 1");
+        $has_states = $db->loadResult();
+        if (!$has_states) {
+            $add_count = count($this->_default_list_states);
+            for ($i = 0; $i <= $add_count; $i++) {
+                $db->setQuery("Insert Into #__contentbuilder_list_states (form_id,`title`,color,action) Values ($form_id," . $db->Quote('State') . "," . $db->Quote('FFFFFF') . "," . $db->Quote('') . ")");
+                $db->execute();
             }
         }
 
@@ -999,10 +1001,9 @@ class FormModel extends BaseDatabaseModel
 
         $cids = CBRequest::getVar('cid', array(0), 'post', 'array');
         ArrayHelper::toInteger($cids);
-        $row = $this->getTable();
+        $row = $this->getTable('Form');
 
         foreach ($cids as $cid) {
-
             $this->_db->setQuery("Select article.article_id From #__contentbuilder_articles As article, #__contentbuilder_forms As form Where form.delete_articles > 0 And form.id = article.form_id And article.form_id = " . intval($cid));
             $articles = Factory::getContainer()->get(DatabaseInterface::class)->loadColumn();
             if (count($articles)) {
@@ -1087,7 +1088,7 @@ class FormModel extends BaseDatabaseModel
 
             $this->_db->execute();
 
-            $this->getTable('elements')->reorder('form_id = ' . $cid);
+            $this->getTable('Elements')->reorder('form_id = ' . $cid);
 
             $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&view=list&id=" . intval($cid) . "'");
             $this->_db->execute();
@@ -1157,7 +1158,7 @@ class FormModel extends BaseDatabaseModel
                     `elements`.id = " . $cid);
 
             $this->_db->execute();
-            $this->getTable('elements')->reorder('form_id = ' . $this->_id);
+            $this->getTable('Elements')->reorder('form_id = ' . $this->_id);
         }
     }
 
@@ -1167,15 +1168,15 @@ class FormModel extends BaseDatabaseModel
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $mainframe = Factory::getApplication();
 
-        $row = $this->getTable('form');
+        $row = $this->getTable('Form');
 
         if (!$row->load($this->_id)) {
-            $this->setError($db->getErrorMsg());
+            $this->setError($db->getErrorMessage());
             return false;
         }
 
         if (!$row->move($direction)) {
-            $this->setError($db->getErrorMsg());
+            $this->setError($db->getErrorMessage());
             return false;
         }
 
@@ -1190,15 +1191,15 @@ class FormModel extends BaseDatabaseModel
 
         if (count($items)) {
             $db = Factory::getContainer()->get(DatabaseInterface::class);
-            $row = $this->getTable('elements');
+            $row = $this->getTable('Elements');
 
             if (!$row->load($items[0])) {
-                $this->setError($db->getErrorMsg());
+                $this->setError($db->getErrorMessage());
                 return false;
             }
 
             if (!$row->move($direction, 'form_id=' . $this->_id)) {
-                $this->setError($db->getErrorMsg());
+                $this->setError($db->getErrorMessage());
                 return false;
             }
         }
@@ -1231,7 +1232,7 @@ class FormModel extends BaseDatabaseModel
         ArrayHelper::toInteger($items);
 
         $total = count($items);
-        $row = $this->getTable('elements');
+        $row = $this->getTable('Elements');
         $groupings = array();
 
         $order = CBRequest::getVar('order', array(), 'post', 'array');

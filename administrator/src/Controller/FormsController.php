@@ -16,6 +16,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\AdminController;
+use Joomla\Utilities\ArrayHelper;
 
 final class FormsController extends AdminController
 {
@@ -50,6 +51,7 @@ final class FormsController extends AdminController
         }
     }
 
+   
     /**
      * Copie (custom)
      */
@@ -68,19 +70,158 @@ final class FormsController extends AdminController
         );
     }
 
-    /**
-     * Si tu avais une raison de forcer la vue dans display(), tu peux l’enlever :
-     * AdminController::display() gère déjà la vue liste.
-     * (On la laisse quand même pour coller à ton comportement.)
-     */
     public function display($cachable = false, $urlparams = []): void
     {
         $this->input->set('view', $this->view_list);
         parent::display($cachable, $urlparams);
     }
 
+
     /**
-     * Si tu avais un vieux mapping add->edit, le core le gère déjà.
-     * Donc registerTask('add','edit') n’est plus nécessaire.
+     * Task: forms.delete (au lieu de remove)
+     * Joomla va passer cid[] dans l’input.
      */
+    public function delete()
+    {
+        $this->checkToken();
+
+        $app = Factory::getApplication();
+        $input = $app->getInput();
+
+        $cid = $input->get('cid', [], 'array');
+        ArrayHelper::toInteger($cid);
+
+        if (!$cid) {
+            $this->setRedirect(
+                Route::_('index.php?option=com_contentbuilder&view=forms', false),
+                Text::_('JERROR_NO_ITEMS_SELECTED'),
+                'warning'
+            );
+            return false;
+        }
+
+        $model = $this->getModel('Form');
+        $ok = $model->delete($cid);
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms', false),
+            $ok ? Text::_('COM_CONTENTBUILDER_DELETED') : Text::_('COM_CONTENTBUILDER_ERROR'),
+            $ok ? 'message' : 'error'
+        );
+
+        return $ok;
+    }
+
+
+    public function listorderup(): void
+    {
+        $model = $this->getModel('Forms');
+        $model->listMove(-1);
+
+        // Après une action mutative : redirect (PRG), pas display()
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
+        );
+    }
+
+    public function listorderdown(): void
+    {
+        $model = $this->getModel('Forms');
+        $model->listMove(1);
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
+        );
+    }
+
+    public function listsaveorder(): void
+    {
+        $model = $this->getModel('Forms');
+        $model->listSaveOrder();
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
+        );
+    }
+
+ 
+    public function linkable(): void
+    {
+        $model = $this->getModel('Forms');
+        $model->setListLinkable();
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
+        );
+    }
+
+    public function not_linkable(): void
+    {
+        $model = $this->getModel('Forms');
+        $model->setListNotLinkable();
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
+        );
+    }
+
+    public function editable(): void
+    {
+        $model = $this->getModel('Forms');
+        $model->setListEditable();
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
+        );
+    }
+
+    public function not_editable(): void
+    {
+        $model = $this->getModel('Forms');
+        $model->setListNotEditable();
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
+        );
+    }
+
+    public function list_include(): void
+    {
+        $model = $this->getModel('Forms');
+        $model->setListListInclude();
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
+        );
+    }
+
+    public function no_list_include(): void
+    {
+        $model = $this->getModel('Forms');
+        $model->setListNoListInclude();
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
+        );
+    }
+
+    public function search_include(): void
+    {
+        $model = $this->getModel('Forms');
+        $model->setListSearchInclude();
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
+        );
+    }
+
+    public function no_search_include(): void
+    {
+        $model = $this->getModel('Forms');
+        $model->setListNoSearchInclude();
+
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=forms&layout=edit&cid[]=' . $this->input->getInt('id', 0), false)
+        );
+    }
 }

@@ -1,7 +1,7 @@
 <?php
 /**
  * @package     ContentBuilder
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   (C) 2026 by XDA+GIL
  * @license     GNU/GPL
@@ -18,6 +18,7 @@ use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
+
 class HtmlView extends BaseHtmlView
 {
     function display($tpl = null)
@@ -35,7 +36,7 @@ class HtmlView extends BaseHtmlView
 
         echo '<link rel="stylesheet" href="' . Uri::root(true) . '/administrator/components/com_contentbuilder/views/bluestork.fix.css" type="text/css" />';
 
-        $form = $this->get('Form');
+        $form = $this->get('Item');
         $elements = $this->get('Data');
         $all_elements = $this->get('AllElements');
         $pagination = $this->get('Pagination');
@@ -48,10 +49,10 @@ class HtmlView extends BaseHtmlView
         //ToolBarHelper::customX('linkable', 'default', '', Text::_('COM_CONTENTBUILDER_LINKABLE'), false);
         //ToolBarHelper::customX('not_linkable', 'default', '', Text::_('COM_CONTENTBUILDER_NOT_LINKABLE'), false);
 
-        ToolBarHelper::apply('form.apply');
-        ToolBarHelper::save('form.save');
+        ToolBarHelper::apply('form.apply'); // Save
+        ToolBarHelper::save('form.save');   // Save & Close
 
-        ToolBarHelper::custom('form.saveNew', 'save', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
+        ToolBarHelper::custom('form.save2New', 'save', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
         ToolBarHelper::custom('form.list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_LIST_INCLUDE'), false);
         ToolBarHelper::custom('form.no_list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_NO_LIST_INCLUDE'), false);
         ToolBarHelper::custom('form.editable', 'edit', '', Text::_('COM_CONTENTBUILDER_EDITABLE'), false);

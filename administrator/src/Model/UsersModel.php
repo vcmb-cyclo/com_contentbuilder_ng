@@ -148,7 +148,7 @@ class UsersModel extends ListModel
         if (empty($this->_data)) {
             $query = $this->_buildQuery();
             $this->_data = $this->_getList($query, $this->getState('limitstart'), $this->getState('limit'));
-            echo $this->_db->getErrorMsg();
+            echo $this->_db->getErrorMessage();
         }
 
         return $this->_data;

@@ -49,7 +49,7 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::apply('storage.apply');
         ToolbarHelper::save('storage.save');
 
-        ToolbarHelper::custom('storage.saveNew', 'save', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
+        ToolbarHelper::custom('storage.save2New', 'save', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
         ToolbarHelper::custom('storage.listpublish', 'publish', '', Text::_('COM_CONTENTBUILDER_PUBLISH'), false);
         ToolbarHelper::custom('storage.listunpublish', 'unpublish', '', Text::_('COM_CONTENTBUILDER_UNPUBLISH'), false);
         ToolbarHelper::custom('storage.listdelete', 'delete', '', Text::_('COM_CONTENTBUILDER_DELETE_FIELDS'), false);

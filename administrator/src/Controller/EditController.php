@@ -41,7 +41,7 @@ class EditController extends BaseController
         parent::__construct($config);
     }
 
-    function save($apply = false)
+    public function save($apply = false)
     {
 
         if (Factory::getApplication()->isClient('site') && CBRequest::getInt('Itemid', 0)) {
@@ -102,12 +102,12 @@ class EditController extends BaseController
         $this->setRedirect($link, $msg, $type);
     }
 
-    function apply()
+    public function apply()
     {
         $this->save(true);
     }
 
-    function delete()
+    public function delete()
     {
 
         ContentbuilderLegacyHelper::checkPermissions('delete', Text::_('COM_CONTENTBUILDER_PERMISSIONS_DELETE_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
@@ -119,7 +119,7 @@ class EditController extends BaseController
         $this->setRedirect($link, $msg, 'message');
     }
 
-    function state()
+    public function state()
     {
 
         ContentbuilderLegacyHelper::checkPermissions('state', Text::_('COM_CONTENTBUILDER_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
@@ -131,7 +131,7 @@ class EditController extends BaseController
         $this->setRedirect($link, $msg, 'message');
     }
 
-    function publish()
+    public function publish()
     {
 
         ContentbuilderLegacyHelper::checkPermissions('publish', Text::_('COM_CONTENTBUILDER_PERMISSIONS_PUBLISHING_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
@@ -147,7 +147,7 @@ class EditController extends BaseController
         $this->setRedirect($link, $msg, 'message');
     }
 
-    function language()
+    public function language()
     {
 
         ContentbuilderLegacyHelper::checkPermissions('language', Text::_('COM_CONTENTBUILDER_PERMISSIONS_CHANGE_LANGUAGE_NOT_ALLOWED'), class_exists('cbFeMarker') ? '_fe' : '');
@@ -159,7 +159,7 @@ class EditController extends BaseController
         $this->setRedirect($link, $msg, 'message');
     }
 
-    function display($cachable = false, $urlparams = array())
+    public function display($cachable = false, $urlparams = array())
     {
 
         if (CBRequest::getCmd('record_id', '')) {

@@ -400,7 +400,7 @@ class StorageModel extends BaseDatabaseModel
     {
         $isNew = false;
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $row = $this->getTable();
+        $row = $this->getTable('Storage');
         $storage = $this->getStorage();
         $storage_id = 0;
 
@@ -528,9 +528,8 @@ class StorageModel extends BaseDatabaseModel
         if (!$storeRes) {
             return false;
         } else {
-            if (intval($data['id']) != 0) {
-                $storage_id = intval($data['id']);
-            } else {
+            $storage_id = (int) $row->{$row->getKeyName()};
+            if (!$storage_id) {
                 $isNew = true;
                 $storage_id = $this->_db->insertid();
                 $this->_id = $storage_id;
@@ -778,7 +777,7 @@ class StorageModel extends BaseDatabaseModel
         $pks = (array) $pks;
         ArrayHelper::toInteger($pks);
 
-        $row = $this->getTable();
+        $row = $this->getTable('Storage');
 
         foreach ($pks as $pk) {
             // Charger le storage correspondant AU PK (important)
@@ -790,7 +789,7 @@ class StorageModel extends BaseDatabaseModel
             );
             $this->_db->execute();
 
-            $this->getTable('storage_fields')->reorder('storage_id = ' . (int) $pk);
+            $this->getTable('Storage_fields')->reorder('storage_id = ' . (int) $pk);
 
             if (!$row->delete((int) $pk)) {
                 $this->setError($row->getError());
@@ -834,7 +833,8 @@ class StorageModel extends BaseDatabaseModel
                 }
             }
 
-            $this->getTable('storage_fields')->reorder('storage_id = ' . $this->_id);
+            $table = $this->getTable('StorageFields');
+            $table->reorder('storage_id = ' . (int) $this->_id);
         }
     }
 
@@ -844,7 +844,7 @@ class StorageModel extends BaseDatabaseModel
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $mainframe = Factory::getApplication();
 
-        $row = $this->getTable('storage');
+        $row = $this->getTable('Storage');
 
         if (!$row->load($this->_id)) {
             $this->setError($db->getErrorMsg());
@@ -867,7 +867,7 @@ class StorageModel extends BaseDatabaseModel
 
         if (count($items)) {
             $db = Factory::getContainer()->get(DatabaseInterface::class);
-            $row = $this->getTable('storage_fields');
+            $row = $this->getTable('StorageFields');
 
             if (!$row->load($items[0])) {
                 $this->setError($db->getErrorMsg());
@@ -908,7 +908,7 @@ class StorageModel extends BaseDatabaseModel
         ArrayHelper::toInteger($items);
 
         $total = count($items);
-        $row = $this->getTable('storage_fields');
+        $row = $this->getTable('StorageFields');
         $groupings = array();
 
         $order = CBRequest::getVar('order', array(), 'post', 'array');

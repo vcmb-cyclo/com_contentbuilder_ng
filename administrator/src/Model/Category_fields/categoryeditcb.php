@@ -73,7 +73,7 @@ class JFormFieldCategoryEditCb extends ListField
 
         // Check for a database error.
         //if ($db->getErrorNum()) {
-        //    JError::raiseWarning(500, $db->getErrorMsg());
+        //    JError::raiseWarning(500, $db->getErrorMessage());
         //}
 
         // Pad the option text with spaces using depth level as a multiplier.

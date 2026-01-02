@@ -14,7 +14,6 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class UserModel extends BaseDatabaseModel
 {
@@ -215,22 +214,22 @@ class UserModel extends BaseDatabaseModel
         $data['verified_edit'] = CBRequest::getInt('verified_edit',0);
         $data['published'] = CBRequest::getInt('published',0);
         
-        $row = $this->getTable('cbuser');
+        $row = $this->getTable('Cbuser');
         
         if (!$row->bind($data)) {
-            $this->setError($this->_db->getErrorMsg());
+            $this->setError($this->_db->getErrorMessage());
             return false;
         }
 
         if (!$row->check()) {
-            $this->setError($this->_db->getErrorMsg());
+            $this->setError($this->_db->getErrorMessage());
             return false;
         }
         
         $storeRes = $row->store();
 
         if (!$storeRes) {
-            $this->setError($this->_db->getErrorMsg());
+            $this->setError($this->_db->getErrorMessage());
             return false;
         }
         
