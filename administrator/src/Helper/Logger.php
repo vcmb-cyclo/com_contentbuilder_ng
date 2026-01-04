@@ -33,15 +33,21 @@ final class Logger
         }
 
         Log::addLogger(
-            ['text_file' => 'com_contentbuilder.admin.log'],
+            [
+                'text_file'         => 'com_contentbuilder.admin.log',
+                'text_entry_format' => "{DATETIME} {PRIORITY}\t{CATEGORY}\t{MESSAGE}", // pas d'IP, pas de category
+            ],
             Log::ALL,
-            ['com_contentbuilder.admin']
+            ['cb.admin']
         );
 
         Log::addLogger(
-            ['text_file' => 'com_contentbuilder.site.log'],
+            [
+                'text_file'         => 'com_contentbuilder.site.log',
+                'text_entry_format' => "{DATETIME}\t{PRIORITY}\t{CATEGORY}\t{MESSAGE}",
+            ],
             Log::ALL,
-            ['com_contentbuilder.site']
+            ['cb.site']
         );
 
         self::$registered = true;
@@ -51,14 +57,61 @@ final class Logger
     {
         $app = Factory::getApplication();
 
-        return $app->isClient('administrator')
-            ? 'com_contentbuilder.admin'
-            : 'com_contentbuilder.site';
+        return $app->isClient('administrator') ? 'cb.admin' : 'cb.site';
     }
 
+    private static function callerAt(): ?string
+    {
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 30);
+
+        for ($i = 0; $i < count($trace); $i++) {
+            $frame = $trace[$i];
+
+            // On trouve la frame Logger::<level>()
+            if (($frame['class'] ?? null) !== self::class) {
+                continue;
+            }
+
+            $fn = $frame['function'] ?? '';
+            if (!in_array($fn, ['debug', 'info', 'warning', 'error', 'exception'], true)) {
+                continue;
+            }
+
+            // file/line du point d'appel (là où Logger::info(...) est écrit)
+            $file = $frame['file'] ?? null;
+            $line = $frame['line'] ?? null;
+
+            // La frame suivante est l'appelant réel (StorageModel::store)
+            $caller = $trace[$i + 1] ?? [];
+
+            $callerClass = $caller['class'] ?? null;
+            $callerFunc  = $caller['function'] ?? null;
+
+            $shortClass = $callerClass
+                ? substr($callerClass, strrpos($callerClass, '\\') + 1)
+                : null;
+
+            $fileBase = $file ? pathinfo($file, PATHINFO_FILENAME) : null;
+
+            // Exemple voulu: StorageModel::store (StorageModel:411)
+            $where = $shortClass ?? $fileBase ?? 'unknown';
+            $what  = $callerFunc ? ($where . '::' . $callerFunc) : $where;
+
+            if ($fileBase && $line) {
+                return $what . ' (' . $fileBase . ':' . (int) $line . ')';
+            }
+
+            return $what;
+        }
+
+        return null;
+    }
+
+
+
     /**
-     * Contexte automatique (component/view/task), + quelques infos utiles.
-     * Tu peux enlever ce que tu ne veux pas.
+     * Contexte JSON = uniquement ce que tu veux “métier”
+     * (pas at, pas priorité, pas date, etc.)
      */
     private static function baseContext(): array
     {
@@ -66,21 +119,29 @@ final class Logger
         $input = $app->getInput();
 
         return [
-            'client'    => $app->isClient('administrator') ? 'admin' : 'site',
-            'component' => $input->getCmd('option', ''),
-            'view'      => $input->getCmd('view', ''),
-            'task'      => $input->getCmd('task', ''),
-            'userId'    => (int) Factory::getUser()->id,
+            'client' => $app->isClient('administrator') ? 'admin' : 'site',
+            'view'   => $input->getCmd('view', ''),
+            'task'   => $input->getCmd('task', ''),
+            'userId' => (int) Factory::getUser()->id,
         ];
     }
 
     private static function format(string $message, array $context = []): string
     {
+        $at = self::callerAt();
+        if ($at) {
+            $message = "$at\t$message";
+        }
+
         $merged = self::baseContext();
 
-        // Le contexte explicite fourni à l'appel prend le dessus
         foreach ($context as $k => $v) {
             $merged[$k] = $v;
+        }
+
+        // Si tu veux : ne pas afficher de JSON si le contexte est vide
+        if (!$merged) {
+            return $message;
         }
 
         $json = json_encode($merged, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

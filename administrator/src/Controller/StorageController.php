@@ -1,29 +1,38 @@
 <?php
-
 /**
+ * ContentBuilder Storage controller.
+ *
+ * Handles actions for storage in the admin interface.
+ *
  * @package     ContentBuilder
+ * @subpackage  Administrator.Controller
  * @author      Xavier DANO
+ * @copyright   Copyright (C) 2011–2026 by XDA+GIL
+ * @license     GNU/GPL v2 or later
  * @link        https://breezingforms.vcmb.fr
- * @copyright   Copyright (C) 2026 by XDA+GIL 
- * @license     GNU/GPL
+ * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
-
 namespace Component\Contentbuilder\Administrator\Controller;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\MVC\Controller\BaseController;
+use Joomla\CMS\MVC\Controller\AdminController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Factory;
 use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
+use Component\Contentbuilder\Administrator\Helper\Logger;
 
 
-class StorageController extends BaseController
+class StorageController extends AdminController
 {
+    /**
+     * Vue item et vue liste utilisées par les redirects du core
+     */
     protected $view_list = 'storages';
+    protected $view_item = 'storage';
 
     /**
      * Surcharge save pour rester compatible avec ton modèle legacy (store/storeCsv).
@@ -34,18 +43,53 @@ class StorageController extends BaseController
         // Sécurité token
         $this->checkToken();
 
-        /** @var \Component\Contentbuilder\Administrator\Model\StorageModel $model */
-        $model = $this->getModel('Storage', 'Contentbuilder');
+        Logger::info('save called', ['key' => $key, 'urlVar' => $urlVar]);
+
+        $model = $this->getModel('Storage', '', ['ignore_request' => true]);
+        if (!$model) {
+            throw new \RuntimeException('FormModel introuvable');
+        }
 
         // Lecture fichier upload (legacy)
         $file = Factory::getApplication()->getInput()->files->get('csv_file', null, 'array');
 
         if (!is_array($file) || empty($file['name']) || (int) ($file['size'] ?? 0) <= 0) {
-            $id = $model->store();
+            try {
+                $id = $model->store(); // Méthode legacy
+
+                if (!$id) {
+                    $this->setRedirect(
+                        Route::_('index.php?option=com_contentbuilder&task=storage.edit&cid=' . (int) $this->input->getInt('id', 0), false),
+                        $model->getError() ?: 'Store failed (no id returned)',
+                        'error'
+                    );
+                    return false;
+                }
+            } catch (\Throwable $e) {
+                Logger::exception($e);
+                $this->setMessage($e->getMessage(), 'warning');
+                return false;
+            }
         } else {
             // sécurise le nom
             $file['name'] = File::makeSafe($file['name']);
-            $id = $model->storeCsv($file);
+
+            try {
+                $id = $model->storeCsv($file); // Méthode legacy
+
+                if (!$id) {
+                    $this->setRedirect(
+                        Route::_('index.php?option=com_contentbuilder&task=storage.edit&cid=' . (int) $this->input->getInt('id', 0), false),
+                        $model->getError() ?: 'Store failed (no id returned)',
+                        'error'
+                    );
+                    return false;
+                }
+            } catch (\Throwable $e) {
+                Logger::exception($e);
+                $this->setMessage($e->getMessage(), 'warning');
+                return false;
+            }
         }
 
         // Message
@@ -115,12 +159,26 @@ class StorageController extends BaseController
         $model = $this->getModel('Storage', 'Contentbuilder');
 
         // IMPORTANT : ton model delete() doit utiliser $pks, pas CBRequest (je t’ai donné le patch)
-        $ok = $model->delete($cid);
+        try {
+            $ok = $model->delete($cid);
+            if (!$ok) {
+                $this->setRedirect(
+                    Route::_('index.php?option=com_contentbuilder&view=storages', false),
+                    Text::_('COM_CONTENTBUILDER_ERROR'),
+                    'error'
+                );
+                return false;
+            }
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+            $this->setMessage($e->getMessage(), 'warning');
+            return false;
+        }
 
         $this->setRedirect(
             Route::_('index.php?option=com_contentbuilder&view=storages', false),
-            $ok ? Text::_('COM_CONTENTBUILDER_DELETED') : Text::_('COM_CONTENTBUILDER_ERROR'),
-            $ok ? 'message' : 'error'
+            Text::_('COM_CONTENTBUILDER_DELETED'),
+            'message'
         );
 
         return $ok;

@@ -26,7 +26,7 @@ final class StoragesController extends BaseAdminController
     /**
      * Nom de la vue liste et item (convention Joomla 6).
      */
-    protected $view_list = 'Storage';
+    protected $view_list = 'storages';
     protected $view_item = 'storage';
 
 

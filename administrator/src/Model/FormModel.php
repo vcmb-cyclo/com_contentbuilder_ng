@@ -476,6 +476,7 @@ class FormModel extends BaseDatabaseModel
         try {
             $options = $db->loadObjectList();
         } catch (Exception $e) {
+            Logger::exception($e);
             // Check for a database error.
             Factory::getApplication()->enqueueMessage($e->getMessage(), 'error');
         }
@@ -879,6 +880,7 @@ class FormModel extends BaseDatabaseModel
                 return false;
             }
         } catch (\Throwable $e) {
+            Logger::exception($e);
             // En debug tu peux garder le message brut
             $this->setError($e->getMessage());
             return false;
@@ -1239,7 +1241,7 @@ class FormModel extends BaseDatabaseModel
         ArrayHelper::toInteger($pks);
         $pks = array_filter($pks);
 
-        Logger::info('Publish change', [
+        Logger::info('DB publish', [
             'value' => $value,
             'pks'   => $pks,
         ]);
@@ -1256,6 +1258,7 @@ class FormModel extends BaseDatabaseModel
         try {
             $db->execute();
         } catch (\Throwable $e) {
+            Logger::exception($e);
             $this->setError($e->getMessage());
             return false;
         }
@@ -1265,6 +1268,7 @@ class FormModel extends BaseDatabaseModel
             $table = $this->getTable('Form', '');
             $table->reorder();
         } catch (\Throwable $e) {
+            Logger::exception($e);
             // pas bloquant
         }
 

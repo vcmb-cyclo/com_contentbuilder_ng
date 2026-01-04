@@ -44,5 +44,8 @@ class ListTable extends Table
     function __construct(DatabaseDriver $db)
     {
         parent::__construct('#__contentbuilder_forms', 'id', $db);
+
+        // Joomla attend un champ "state" pour publish/unpublish au lieu de "published"
+        $this->setColumnAlias('state', 'published');
     }
 }

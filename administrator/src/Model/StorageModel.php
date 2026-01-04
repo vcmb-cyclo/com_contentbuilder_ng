@@ -22,6 +22,7 @@ use Joomla\CMS\Pagination\Pagination;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Table\Table;
 use Component\Contentbuilder\Administrator\CBRequest;
+use Component\Contentbuilder\Administrator\Helper\Logger;
 
 class StorageModel extends BaseDatabaseModel
 {
@@ -235,7 +236,7 @@ class StorageModel extends BaseDatabaseModel
             unset($data['bytable']);
         }
 
-        $dest = JPATH_SITE .'/tmp/' . md5(mt_rand(0, mt_getrandmax())) . '_' . $file['name'];
+        $dest = JPATH_SITE . '/tmp/' . md5(mt_rand(0, mt_getrandmax())) . '_' . $file['name'];
         $uploaded = File::upload($file['tmp_name'], $dest, false, true);
 
         if ($uploaded) {
@@ -407,6 +408,14 @@ class StorageModel extends BaseDatabaseModel
             $data = $post_replace;
         }
 
+        Logger::info('In StorageModel::store', [
+            'storageId'     => $this->_id,
+            'postReplace'   => $post_replace !== null,
+            'hasByTable'    => isset($data['bytable']) ? (int) $data['bytable'] : null,
+            'name'          => $data['name'] ?? null,
+        ]);
+
+
         $bytable = isset($data['bytable']) ? $data['bytable'] : '';
 
         if (isset($data['bytable'])) {
@@ -492,6 +501,8 @@ class StorageModel extends BaseDatabaseModel
         try {
             $rr = $row->bind($data);
         } catch (\RuntimeException $e) {
+            Logger::exception($e);
+            // throw $e; // optionnel : si tu veux laisser Joomla gérer l'erreur
             $this->setError($e->getMessage());
             return false;
         } finally {
@@ -500,10 +511,10 @@ class StorageModel extends BaseDatabaseModel
             }
         }
 
-
         try {
             $r = $row->check();
         } catch (\RuntimeException $e) {
+            Logger::exception($e);
             $this->setError($e->getMessage());
             return false;
         } finally {
@@ -512,15 +523,13 @@ class StorageModel extends BaseDatabaseModel
             }
         }
 
-
-
         try {
             $storeRes = $row->store();
         } catch (\RuntimeException $e) {
+            Logger::exception($e);
             $this->setError($e->getMessage());
             return false;
         }
-
 
         if (!$storeRes) {
             return false;
@@ -592,6 +601,7 @@ class StorageModel extends BaseDatabaseModel
                     $this->_db->setQuery("ALTER TABLE `#__" . $data['name'] . "` ADD INDEX ( `modified` )");
                     $this->_db->execute();
                 } catch (\Exception $e) {
+                    Logger::exception($e);
                 }
             }
         } else if ($bytable) {
@@ -657,6 +667,7 @@ class StorageModel extends BaseDatabaseModel
                         }
                     }
                 } catch (Exception $e) {
+                    Logger::exception($e);
                 }
 
                 // importing records
@@ -701,7 +712,7 @@ class StorageModel extends BaseDatabaseModel
             }
         }
 
-        
+
         $tableList = $db->getTableList();
         $tables = array_combine(
             $tableList,
@@ -739,7 +750,7 @@ class StorageModel extends BaseDatabaseModel
             }
         }
 
-        $this->getTable('storage_fields')->reorder('storage_id = ' . $this->_id);
+        $this->getTable('StorageFields')->reorder('storage_id = ' . $this->_id);
 
         if (!$bytable) {
 
@@ -757,6 +768,7 @@ class StorageModel extends BaseDatabaseModel
                         $this->_db->setQuery("ALTER TABLE `#__" . $data['name'] . "` ADD `" . $fieldname . "` TEXT NULL ");
                         $this->_db->execute();
                     } catch (Exception $e) {
+                        Logger::exception($e);
                     }
                 }
             }
@@ -786,7 +798,7 @@ class StorageModel extends BaseDatabaseModel
             );
             $this->_db->execute();
 
-            $this->getTable('Storage_fields')->reorder('storage_id = ' . (int) $pk);
+            $this->getTable('StorageFields')->reorder('storage_id = ' . (int) $pk);
 
             if (!$row->delete((int) $pk)) {
                 $this->setError($row->getError());
@@ -797,7 +809,9 @@ class StorageModel extends BaseDatabaseModel
                 try {
                     $this->_db->setQuery("DROP TABLE `#__" . $storage->name . "`");
                     $this->_db->execute();
-                } catch (\Throwable $e) {}
+                } catch (\Throwable $e) {
+                    Logger::exception($e);
+                }
             }
         }
 
@@ -827,6 +841,7 @@ class StorageModel extends BaseDatabaseModel
                     $this->_db->setQuery("ALTER TABLE `#__" . $storage->name . "` DROP `" . $field_name . "`");
                     $this->_db->execute();
                 } catch (Exception $e) {
+                    Logger::exception($e);
                 }
             }
 

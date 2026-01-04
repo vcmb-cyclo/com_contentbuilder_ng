@@ -52,10 +52,10 @@ class HtmlView extends BaseHtmlView
                 $this->elementsPagination = $elementsModel->getPagination();
             }
         } else {
+            $elementsModel = null;
             $this->elements = [];
             $this->elementsPagination = null;
         }
-
         
         $this->pagination = $elementsModel ? $elementsModel->getPagination() : null;
         $this->state = $elementsModel ? $elementsModel->getState() : null;
@@ -72,8 +72,8 @@ class HtmlView extends BaseHtmlView
         ToolBarHelper::custom('form.no_list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_NO_LIST_INCLUDE'), false);
         ToolBarHelper::custom('form.editable', 'edit', '', Text::_('COM_CONTENTBUILDER_EDITABLE'), false);
         ToolBarHelper::custom('form.not_editable', 'edit', '', Text::_('COM_CONTENTBUILDER_NOT_EDITABLE'), false);
-        ToolBarHelper::custom('form.listpublish', 'publish', '', Text::_('COM_CONTENTBUILDER_PUBLISH'), false);
-        ToolBarHelper::custom('form.listunpublish', 'unpublish', '', Text::_('COM_CONTENTBUILDER_UNPUBLISH'), false);
+        ToolBarHelper::publish('form.publish', 'publish', '', Text::_('COM_CONTENTBUILDER_PUBLISH'), false);
+        ToolBarHelper::unpublish('form.unpublish', 'unpublish', '', Text::_('COM_CONTENTBUILDER_UNPUBLISH'), false);
 
         if ($isNew) {
             ToolBarHelper::cancel('form.cancel', 'JTOOLBAR_CLOSE');

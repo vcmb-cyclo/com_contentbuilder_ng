@@ -1,11 +1,16 @@
 <?php
-
 /**
+ * ContentBuilder Forms controller.
+ *
+ * Handles actions (copy, delete, publish, ...) for forms list in the admin interface.
+ *
  * @package     ContentBuilder
+ * @subpackage  Administrator.Controller
  * @author      Markus Bopp / XDA+GIL
+ * @copyright   Copyright (C) 2011–2026 by XDA+GIL
+ * @license     GNU/GPL v2 or later
  * @link        https://breezingforms.vcmb.fr
- * @copyright   Copyright (C) 2026 by XDA+GIL
- * @license     GNU/GPL
+ * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
 namespace Component\Contentbuilder\Administrator\Controller;
@@ -85,7 +90,7 @@ final class FormsController extends BaseAdminController
         $cid = array_values(array_filter(array_map('intval', $cid)));
         $task = $this->input->getCmd('task'); // forms.publish / forms.unpublish
 
-        Logger::debug('[Un]Publish action clicked', [
+        Logger::debug('Click [Un]Publish action', [
             'task' => $task,
             'cid'  => $cid,
         ]);
@@ -129,7 +134,7 @@ final class FormsController extends BaseAdminController
         $cid = (array) $this->input->get('cid', [], 'array');
         $cid = array_values(array_filter(array_map('intval', $cid)));
 
-        Logger::debug('Delete action clicked', [
+        Logger::debug('Click Delete action', [
             'task' => $this->input->getCmd('task'),
             'cid'  => $cid,
         ]);
@@ -166,7 +171,7 @@ final class FormsController extends BaseAdminController
         $cid = (array) $this->input->get('cid', [], 'array');
         $cid = array_values(array_filter(array_map('intval', $cid)));
 
-        Logger::debug('Copy action clicked', [
+        Logger::debug('Click Copy action', [
             'task' => $this->input->getCmd('task'),
             'cid'  => $cid,
         ]);

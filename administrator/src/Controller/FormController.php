@@ -1,11 +1,11 @@
 <?php
 /**
- * ContentBuilder Form Model.
+ * ContentBuilder Form controller.
  *
  * Handles CRUD and publish state for form in the admin interface.
  *
  * @package     ContentBuilder
- * @subpackage  Administrator.Model
+ * @subpackage  Administrator.Controller
  * @author      Markus Bopp / XDA+GIL
  * @copyright   Copyright (C) 2011–2026 by XDA+GIL
  * @license     GNU/GPL v2 or later
@@ -38,7 +38,7 @@ class FormController extends AdminController
         }
 
         try {
-            $id = $model->store(); // ta méthode legacy
+            $id = $model->store(); // Méthode legacy
 
             if (!$id) {
                 $this->setRedirect(
@@ -142,6 +142,7 @@ class FormController extends AdminController
         $this->setRedirect(
             Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&id=' . $id, false),
             Text::_('COM_CONTENTBUILDER_PUBLISHED'));
+        return true;
     }
 
     public function unpublish(): bool
@@ -153,6 +154,7 @@ class FormController extends AdminController
         $this->setRedirect(
             Route::_('index.php?option=com_contentbuilder&view=form&layout=edit&id=' . $id, false),
             Text::_('COM_CONTENTBUILDER_UNPUBLISHED'));
+        return true;
     }
 
     public function editable_include(): void
