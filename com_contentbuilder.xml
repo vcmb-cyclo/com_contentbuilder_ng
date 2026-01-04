@@ -44,7 +44,7 @@
  </uninstall>
  
  <updateservers>
-    <server type="extension" name="ContentBuilder" priority="1">https://breezingforms.vcmb.fr/download/contentbuilder_update.xml</server>
+    <server type="extension" name="ContentBuilder" priority="1">https://breezingforms.vcmb.fr/download/com_contentbuilder_update.xml</server>
  </updateservers>
 
  <files folder="site">
