@@ -507,7 +507,7 @@ final class ContentbuilderLegacyHelper
                         $allow_html = false;
                         $options = unserialize(base64_decode($wrapper['options']));
 
-                        if ($options instanceof stdClass) {
+                        if ($options instanceof \stdClass) {
                             if (isset($options->allow_html) && $options->allow_html) {
                                 $allow_html = true;
                             }
@@ -990,7 +990,6 @@ final class ContentbuilderLegacyHelper
 
     public static function getForm($type, $reference_id)
     {
-
         static $forms;
 
         Logger::info('Instanciation Legacy', [

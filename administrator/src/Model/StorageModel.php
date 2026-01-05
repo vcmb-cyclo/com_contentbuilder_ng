@@ -666,7 +666,7 @@ class StorageModel extends BaseDatabaseModel
                             }
                         }
                     }
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     Logger::exception($e);
                 }
 
@@ -767,7 +767,7 @@ class StorageModel extends BaseDatabaseModel
                     try {
                         $this->_db->setQuery("ALTER TABLE `#__" . $data['name'] . "` ADD `" . $fieldname . "` TEXT NULL ");
                         $this->_db->execute();
-                    } catch (Exception $e) {
+                    } catch (\Exception $e) {
                         Logger::exception($e);
                     }
                 }
@@ -840,7 +840,7 @@ class StorageModel extends BaseDatabaseModel
                 try {
                     $this->_db->setQuery("ALTER TABLE `#__" . $storage->name . "` DROP `" . $field_name . "`");
                     $this->_db->execute();
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     Logger::exception($e);
                 }
             }

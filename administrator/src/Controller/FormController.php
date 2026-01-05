@@ -22,6 +22,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\FormController as BaseFormController;
 use Joomla\CMS\Router\Route;
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
 class FormController extends BaseFormController
 {
@@ -268,7 +270,7 @@ class FormController extends BaseFormController
 
     private function getElementsModel()
     {
-        return $this->getModel('Elementoptions', 'Contentbuilder');
+        return $this->getModel('Elementoption', 'Contentbuilder');
     }
 
     public function listorderup(): void
@@ -335,23 +337,27 @@ class FormController extends BaseFormController
         $this->batchElementUpdate('search_include', 0);
     }
 
+    // Devrait migrer dans Element*Controller.
     private function batchElementUpdate(string $field, int $value): void
     {
         $cids = $this->input->get('cid', [], 'array');
         ArrayHelper::toInteger($cids);
 
         if ($cids) {
-            $db = $this->getDatabase();
-            $db->setQuery(
-                $db->getQuery(true)
-                    ->update($db->quoteName('#__contentbuilder_elements'))
-                    ->set($db->quoteName($field) . ' = ' . $value)
-                    ->where($db->quoteName('id') . ' IN (' . implode(',', $cids) . ')')
-            );
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+            $query = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilder_elements'))
+                ->set($db->quoteName($field) . ' = ' . (int) $value)
+                ->where($db->quoteName('id') . ' IN (' . implode(',', $cids) . ')');
+
+            $db->setQuery($query);
             $db->execute();
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=' . $this->view_item . '&id=' . $this->input->getInt('id'), false));
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&view=' . $this->view_item . '&id=' . $this->input->getInt('id'), false)
+        );
     }
     
 }

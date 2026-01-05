@@ -41,10 +41,17 @@ class HtmlView extends BaseHtmlView
         ToolBarHelper::preferences('com_contentbuilder');
 
         // Get data from the model
-        $items = $this->getModel()->getData();
+        /*$items = $this->getModel()->getData();
         $pagination = $this->getModel()->getPagination();
-        $tags = $this->getModel()->getTags();
         $state = $this->getModel()->getState();
+        */
+
+        $items      = $this->getModel()->getItems();
+        $pagination = $this->getModel()->getPagination();
+        $state      = $this->get('State');
+
+        $tags = $this->getModel()->getTags();
+
 
         $lists['order_Dir'] = $state->get('forms_filter_order_Dir');
         $lists['order'] = $state->get('forms_filter_order');

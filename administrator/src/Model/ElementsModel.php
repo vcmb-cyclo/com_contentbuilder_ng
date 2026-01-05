@@ -224,17 +224,27 @@ class ElementsModel extends ListModel
             $filter_state .= ' And published = ' . $published;
         }
 
-        return "Select * From #__contentbuilder_elements Where form_id = " . $this->_id . $filter_state . $this->buildOrderBy();
+        return "Select * From #__contentbuilder_elements Where form_id = " . $this->formId . $filter_state . $this->buildOrderBy();
     }
 
-    /*
-    function getData()
+    // Legacy
+    function getData(int $formId)
     {
+        $this->formId = $formId;
         $this->_db->setQuery($this->_buildQuery(), $this->getState('limitstart'), $this->getState('limit'));
-        $entries = $this->_db->loadObjectList();
+        $elements = $this->_db->loadObjectList();
 
-        return $entries;
-    }*/
+        return $elements;
+    }
+
+    // Legacy : pas utilisé ?
+    function getAllElements(int $formId)
+    {
+        $this->formId = $formId;
+        $this->_db->setQuery($this->_buildQuery());
+        $elements = $this->_db->loadObjectList();
+        return $elements;
+    }
 
     /**
      * Retourne le nombre de pages d'éléments (utilisé pour la pagination dans l'interface)

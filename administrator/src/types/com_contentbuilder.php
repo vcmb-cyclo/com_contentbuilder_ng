@@ -36,7 +36,7 @@ class contentbuilder_com_contentbuilder
         $this->form_id = intval($id);
         $db->setQuery("Select * From #__contentbuilder_storages Where id = " . intval($id) . " And published = 1 Order By `ordering`");
         $this->properties = $db->loadObject();
-        if ($this->properties instanceof stdClass) {
+        if ($this->properties instanceof \stdClass) {
             $this->exists = true;
             $this->bytable = $this->properties->bytable == 1 ? '' : '#__';
 
@@ -161,7 +161,7 @@ class contentbuilder_com_contentbuilder
         try {
             $db->setQuery("Select * From " . $this->bytable . $this->properties->name . " Where id = " . $record_id);
             $obj = $db->loadObject();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
         }
         $data->created_id = 0;

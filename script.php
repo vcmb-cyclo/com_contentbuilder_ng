@@ -18,7 +18,6 @@ use Joomla\Filesystem\Folder;
 use Joomla\CMS\Installer\Installer;
 use Joomla\CMS\Log\Log;
 
-
 class com_contentbuilderInstallerScript extends InstallerScript
 {
   protected $minimumPhp = '8.1';
@@ -329,7 +328,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
     foreach ($alterQueries as $query) {
       try {
         $db->setQuery($query)->execute();
-      } catch (Exception $e) {
+      } catch (\Exception $e) {
         // Silencieux si la colonne est déjà correcte ou table inexistante
         $msg = '[WARNING] Could not alter date column: ' . $e->getMessage() . '.';
         $this->log($msg, Log::WARNING);

@@ -37,7 +37,7 @@ class contentbuilder_com_breezingforms
 
         $db->setQuery("Select * From #__facileforms_forms Where id = " . intval($id) . " " . ($published ? 'And published = 1' : '') . " Order By `ordering`");
         $this->properties = $db->loadObject();
-        if ($this->properties instanceof stdClass) {
+        if ($this->properties instanceof \stdClass) {
             $this->exists = true;
             $db->setQuery("Select * From #__facileforms_elements Where `type` <> 'Sofortueberweisung' And `type` <> 'PayPal' And `type` <> 'Static Text/HTML' And `type` <> 'Rectangle' And `type` <> 'Image' And `type` <> 'Tooltip' And `type` <> 'Query List' And `type` <> 'Icon' And `type` <> 'Graphic Button' And `type` <> 'Regular Button' And `type`<> 'Unknown' And `type` <> 'Summarize' And `type` <> 'ReCaptcha' And form = " . intval($id) . " And published = 1 Order By `ordering`");
             $this->elements = $db->loadAssocList();
@@ -194,7 +194,7 @@ class contentbuilder_com_breezingforms
         try {
             $db->setQuery("Select * From #__facileforms_records Where id = " . $record_id);
             $obj = $db->loadObject();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $obj = null;
         }
 
@@ -292,7 +292,7 @@ class contentbuilder_com_breezingforms
         $colValues = null;
         try {
             $colValues = $db->loadAssoc();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
 
         if ($colValues) {
@@ -690,7 +690,7 @@ class contentbuilder_com_breezingforms
 
         try {
             $return = $db->loadObjectList();
-        } catch (RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             echo "<br/>" . $e->getMessage();
             exit;
         }

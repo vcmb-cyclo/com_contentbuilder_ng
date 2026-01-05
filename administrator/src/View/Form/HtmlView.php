@@ -62,7 +62,9 @@ class HtmlView extends BaseHtmlView
                 }
 
                 // Récupération sécurisée des données
-                $items = $elementsModel->getItems();
+                // $items = $elementsModel->getItems();
+
+                $items = $elementsModel->getData($formId);
                 $this->elements = is_array($items) ? $items : [];  // Force tableau
 
                 $this->elementsPagination = $elementsModel->getPagination() ?? null;

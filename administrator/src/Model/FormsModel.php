@@ -17,6 +17,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Pagination\Pagination;
 use Joomla\CMS\MVC\Model\ListModel;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
+use Joomla\Database\QueryInterface;
 
 class FormsModel extends ListModel
 {
@@ -112,40 +113,7 @@ class FormsModel extends ListModel
     }
 
 
-    /**
-     * @return string The query
-     */
-    public function _buildQuery()
-    {
 
-        $where = '';
-
-        // PUBLISHED FILTER SELECTED?
-        $filter_state = '';
-        if ($this->getState('forms_filter_state') == 'P' || $this->getState('forms_filter_state') == 'U') {
-            $published = 0;
-            if ($this->getState('forms_filter_state') == 'P') {
-                $published = 1;
-            }
-
-            $filter_state .= ' published = ' . $published;
-        }
-
-
-        if ($this->getState('forms_filter_tag') != '') {
-            if ($filter_state != '') {
-                $filter_state .= ' And ';
-            }
-            $filter_state .= ' Lower(`tag`) Like ' . $this->_db->Quote(strtolower($this->getState('forms_filter_tag')));
-        }
-
-
-        if ($filter_state != '') {
-            $where = ' Where ';
-        }
-
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_forms ' . $where . $filter_state . $this->buildOrderBy();
-    }
 
     public function saveOrder()
     {
@@ -189,10 +157,85 @@ class FormsModel extends ListModel
         return $db->loadObjectList();
     }
 
+
+    protected function getListQuery(): QueryInterface
+    {
+        $db    = $this->getDatabase();
+        $query = $db->getQuery(true)
+            ->select('*')
+            ->from($db->quoteName('#__contentbuilder_forms'));
+
+        // Filtre published (tes clés custom)
+        $filterState = $this->getState('forms_filter_state');
+
+        if ($filterState === 'P') {
+            $query->where($db->quoteName('published') . ' = 1');
+        } elseif ($filterState === 'U') {
+            $query->where($db->quoteName('published') . ' = 0');
+        }
+
+        // Filtre tag
+        $tag = (string) $this->getState('forms_filter_tag');
+        if ($tag !== '') {
+            $query->where('LOWER(' . $db->quoteName('tag') . ') LIKE ' . $db->quote('%' . strtolower($tag) . '%'));
+        }
+
+        // Order
+        $order    = (string) $this->getState('forms_filter_order', 'name');
+        $orderDir = strtoupper((string) $this->getState('forms_filter_order_Dir', 'DESC'));
+
+        $allowedDir = ['ASC', 'DESC'];
+        if (!in_array($orderDir, $allowedDir, true)) {
+            $orderDir = 'DESC';
+        }
+
+        // ⚠️ idéalement whitelister les colonnes triables
+        $query->order($db->escape($order) . ' ' . $orderDir);
+
+        return $query;
+    }
+
+        /**
+     * @return string The query
+     */
+    /*
+    public function _buildQuery()
+    {
+        $where = '';
+
+        // PUBLISHED FILTER SELECTED?
+        $filter_state = '';
+        if ($this->getState('forms_filter_state') == 'P' || $this->getState('forms_filter_state') == 'U') {
+            $published = 0;
+            if ($this->getState('forms_filter_state') == 'P') {
+                $published = 1;
+            }
+
+            $filter_state .= ' published = ' . $published;
+        }
+
+
+        if ($this->getState('forms_filter_tag') != '') {
+            if ($filter_state != '') {
+                $filter_state .= ' And ';
+            }
+            $filter_state .= ' Lower(`tag`) Like ' . $this->_db->Quote(strtolower($this->getState('forms_filter_tag')));
+        }
+
+
+        if ($filter_state != '') {
+            $where = ' Where ';
+        }
+
+        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_forms ' . $where . $filter_state . $this->buildOrderBy();
+    }*/
+
+
     /**
      * Gets the currencies
      * @return array List of products
      */
+    /*
     public function getData()
     {
         // Lets load the data if it doesn't already exist
@@ -221,7 +264,7 @@ class FormsModel extends ListModel
             $this->_pagination = new Pagination($this->getTotal(), $this->getState('limitstart'), $this->getState('limit'));
         }
         return $this->_pagination;
-    }
+    }*/
 
 }
 

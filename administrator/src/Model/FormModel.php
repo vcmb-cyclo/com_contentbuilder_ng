@@ -108,7 +108,7 @@ class FormModel extends BaseDatabaseModel
             case 'Form':
                 return new FormTable($this->_db);
 
-            case 'Elementoptions':
+            case 'Elementoption':
                 return new ElementoptionTable($this->_db);
         }
 
@@ -419,7 +419,7 @@ class FormModel extends BaseDatabaseModel
             /*
             if (is_object($data->form)) {
                 ContentbuilderLegacyHelper::synchElements($data->id, $data->form);
-                $elements_table = $this->getTable('Elementoptions');
+                $elements_table = $this->getTable('Elementoption');
                 $elements_table->reorder('form_id=' . $data->id);
             }*/
         }
@@ -475,7 +475,7 @@ class FormModel extends BaseDatabaseModel
 
         try {
             $options = $db->loadObjectList();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Logger::exception($e);
             // Check for a database error.
             Factory::getApplication()->enqueueMessage($e->getMessage(), 'error');
@@ -1056,7 +1056,7 @@ class FormModel extends BaseDatabaseModel
 
             $this->_db->execute();
 
-            $this->getTable('Elementoptions')->reorder('form_id = ' . $cid);
+            $this->getTable('Elementoption')->reorder('form_id = ' . $cid);
 
             $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&view=list&id=" . intval($cid) . "'");
             $this->_db->execute();
@@ -1127,7 +1127,7 @@ class FormModel extends BaseDatabaseModel
                     `elements`.id = " . $cid);
 
             $this->_db->execute();
-            $this->getTable('Elementoptions')->reorder('form_id = ' . $this->_id);
+            $this->getTable('Elementoption')->reorder('form_id = ' . $this->_id);
         }
     }*/
 
@@ -1161,7 +1161,7 @@ class FormModel extends BaseDatabaseModel
 
         if (count($items)) {
             $db = Factory::getContainer()->get(DatabaseInterface::class);
-            $row = $this->getTable('Elementoptions');
+            $row = $this->getTable('Elementoptions);
 
             if (!$row->load($items[0])) {
                 $this->setError($db->getErrorMessage());
@@ -1202,7 +1202,7 @@ class FormModel extends BaseDatabaseModel
         ArrayHelper::toInteger($items);
 
         $total = count($items);
-        $row = $this->getTable('Elementoptions');
+        $row = $this->getTable('Elementoption');
         $groupings = array();
 
         $order = CBRequest::getVar('order', array(), 'post', 'array');

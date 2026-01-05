@@ -533,7 +533,7 @@ class VerifyModel extends BaseDatabaseModel
 
             try {
                 $rows = $db->loadObjectList();
-            } catch (RuntimeException $e) {
+            } catch (\RuntimeException $e) {
                 $this->setError(Text::sprintf('COM_USERS_DATABASE_ERROR', $e->getMessage()), 500);
 
                 return false;

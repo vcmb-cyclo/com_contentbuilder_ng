@@ -357,7 +357,7 @@ class DetailsModel extends ListModel
                         }
 
                         $metadata = $data->form->getRecordMetadata($this->_record_id);
-                        if ($metadata instanceof stdClass && $data->metadata) {
+                        if ($metadata instanceof \stdClass && $data->metadata) {
                             $data->created = $metadata->created ? $metadata->created : '';
                             $data->created_by = $metadata->created_by ? $metadata->created_by : '';
                             $data->modified = $metadata->modified ? $metadata->modified : '';

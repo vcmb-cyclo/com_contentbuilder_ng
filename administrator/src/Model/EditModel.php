@@ -1857,7 +1857,7 @@ var contentbuilder = new function(){
 
         try {
             $return = Factory::getContainer()->get(MailerFactoryInterface::class)->createMailer()->sendMail($data['mailfrom'], $data['fromname'], $data['email'], $emailSubject, $emailBody);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
 
         // Send Notification mail to administrators
@@ -1882,7 +1882,7 @@ var contentbuilder = new function(){
 
             try {
                 $rows = Factory::getContainer()->get(DatabaseInterface::class)->loadObjectList();
-            } catch (RuntimeException $e) {
+            } catch (\RuntimeException $e) {
                 $this->setError(Text::sprintf('COM_USERS_DATABASE_ERROR', $e->getMessage()), 500);
 
                 return false;
