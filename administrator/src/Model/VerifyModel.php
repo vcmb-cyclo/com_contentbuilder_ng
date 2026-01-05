@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -23,8 +23,8 @@ use Joomla\CMS\User\UserHelper;
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Mail\MailerFactoryInterface;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
-use Component\Contentbuilder\Administrator\CBRequest;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class VerifyModel extends BaseDatabaseModel
 {
@@ -119,7 +119,7 @@ class VerifyModel extends BaseDatabaseModel
             $formsettings = $this->_db->loadAssoc();
 
             if (!is_array($formsettings)) {
-                throw new Exception('Verification Setup failed. Reason: View id ' . $out['require_view'] . ' has been requested but is not available (not existent or unpublished). Please update your content template or publish the view.', 500);
+                throw new \Exception('Verification Setup failed. Reason: View id ' . $out['require_view'] . ' has been requested but is not available (not existent or unpublished). Please update your content template or publish the view.', 500);
             }
 
             $form = ContentbuilderLegacyHelper::getForm($formsettings['type'], $formsettings['reference_id']);
@@ -362,7 +362,7 @@ class VerifyModel extends BaseDatabaseModel
                 }
             }
         } else {
-            throw new Exception('Verification Setup failed. Reason: ' . implode('', $setup_result), 500);
+            throw new \Exception('Verification Setup failed. Reason: ' . implode('', $setup_result), 500);
         }
     }
 
@@ -373,7 +373,7 @@ class VerifyModel extends BaseDatabaseModel
 
         if (!$user->authorise('core.create', 'com_users')) {
 
-            throw new Exception('You are not allowed to perform this action.', 500);
+            throw new \Exception('You are not allowed to perform this action.', 500);
         }
 
         Factory::getApplication()->getLanguage()->load('com_users', JPATH_SITE);
@@ -393,7 +393,7 @@ class VerifyModel extends BaseDatabaseModel
 
         // Check for a valid user id.
         if (!$userId) {
-            throw new Exception(Text::_('COM_USERS_ACTIVATION_TOKEN_NOT_FOUND'), 500);
+            throw new \Exception(Text::_('COM_USERS_ACTIVATION_TOKEN_NOT_FOUND'), 500);
         }
 
         // Load the users plugin group.
@@ -410,7 +410,7 @@ class VerifyModel extends BaseDatabaseModel
 
         // Store the user object.
         if (!$user->save()) {
-            throw new Exception(Text::sprintf('COM_USERS_REGISTRATION_ACTIVATION_SAVE_FAILED', $user->getError()), 500);
+            throw new \Exception(Text::sprintf('COM_USERS_REGISTRATION_ACTIVATION_SAVE_FAILED', $user->getError()), 500);
         }
 
         $params = ComponentHelper::getParams('com_users');
@@ -476,7 +476,7 @@ class VerifyModel extends BaseDatabaseModel
 
         // Check for a valid user id.
         if (!$userId) {
-            throw new Exception(Text::_('COM_USERS_ACTIVATION_TOKEN_NOT_FOUND'), 500);
+            throw new \Exception(Text::_('COM_USERS_ACTIVATION_TOKEN_NOT_FOUND'), 500);
         }
 
         // Load the users plugin group.
@@ -603,7 +603,7 @@ class VerifyModel extends BaseDatabaseModel
 
         // Store the user object.
         if (!$user->save()) {
-            throw new Exception(Text::sprintf('COM_USERS_REGISTRATION_ACTIVATION_SAVE_FAILED', $user->getError()), 500);
+            throw new \Exception(Text::sprintf('COM_USERS_REGISTRATION_ACTIVATION_SAVE_FAILED', $user->getError()), 500);
         }
 
         return true;

@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace Component\Contentbuilder\Site\View\Details\Tmpl;
+namespace CB\Component\Contentbuilder\Site\View\Details\Tmpl;
 
 // no direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');

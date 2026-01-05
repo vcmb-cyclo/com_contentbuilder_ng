@@ -15,7 +15,7 @@
 use Joomla\CMS\Language\Text;
 use PhpOffice\PhpSpreadsheet\Shared\Font;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
 
 @ob_end_clean();
 

@@ -7,7 +7,7 @@
  * @copyright   Copyright (C) 2026 by XDA+GIL
  */
 
-namespace Component\Contentbuilder\Administrator\Table\Types;
+namespace CB\Component\Contentbuilder\Administrator\Table\Types;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -16,7 +16,7 @@ use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
-use Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 class contentbuilder_com_contentbuilder
 {

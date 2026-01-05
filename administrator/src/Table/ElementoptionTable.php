@@ -1,20 +1,26 @@
 <?php
 /**
+ * ContentBuilder Elementoption table.
+ *
+ * Table description.
+ *
  * @package     ContentBuilder
- * @author      Markus Bopp
+ * @subpackage  Administrator.Tables
+ * @author      Markus Bopp / XDA+GIL
+ * @copyright   Copyright (C) 2011–2026 by XDA+GIL
+ * @license     GNU/GPL v2 or later
  * @link        https://breezingforms.vcmb.fr
- * @copyright   (C) 2026 by XDA+GIL
- * @license     GNU/GPL
-*/
+ * @since       6.0.0  Joomla 6 compatibility rewrite.
+ */
 
-namespace Component\Contentbuilder\Administrator\Table;
+namespace CB\Component\Contentbuilder\Administrator\Table;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
 use Joomla\CMS\Table\Table;
 use Joomla\Database\DatabaseDriver;
 
-class ElementsTable extends Table
+class ElementoptionTable extends Table
 {
     /**
      * Primary Key

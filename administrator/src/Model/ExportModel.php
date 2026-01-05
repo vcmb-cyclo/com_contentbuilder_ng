@@ -7,7 +7,7 @@
  * @license     GNU/GPL
 */
 
-namespace Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder\Administrator\Model;
 
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
@@ -15,9 +15,9 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
-use Component\Contentbuilder\Administrator\CBRequest;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class ExportModel extends BaseDatabaseModel
 {
@@ -135,24 +135,24 @@ class ExportModel extends BaseDatabaseModel
             $this->_data = $this->_getList($query, 0, 1);
 
             if(!count($this->_data)){
-				throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+				throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
             }
 
             foreach($this->_data As $data){
                 if(!$this->frontend && $data->display_in == 0){
-	                throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+	                throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                 }else if($this->frontend && $data->display_in == 1){
-	                throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+	                throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                 }
 
                 if(is_array($data->export_xls) && !count($data->export_xls)){
-	                throw new Exception(Text::_('Not exportable error'), 404);
+	                throw new \Exception(Text::_('Not exportable error'), 404);
                 }
                 $data->form_id = $this->_id;
                 if($data->type && $data->reference_id){
                     $data->form = ContentbuilderLegacyHelper::getForm($data->type, $data->reference_id);
                     if(!$data->form->exists){
-	                    throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+	                    throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                     }
                     $searchable_elements = ContentbuilderLegacyHelper::getListSearchableElements($this->_id);
                     $data->labels = $data->form->getElementLabels();

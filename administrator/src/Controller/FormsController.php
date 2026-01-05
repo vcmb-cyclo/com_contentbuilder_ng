@@ -13,7 +13,7 @@
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
-namespace Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder\Administrator\Controller;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -21,9 +21,8 @@ namespace Component\Contentbuilder\Administrator\Controller;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
-use Component\Contentbuilder\Administrator\Controller\BaseAdminController;
-use Joomla\Utilities\ArrayHelper;
-use Component\Contentbuilder\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder\Administrator\Controller\BaseAdminController;
+use CB\Component\Contentbuilder\Administrator\Helper\Logger;
 
 final class FormsController extends BaseAdminController
 {
@@ -200,98 +199,4 @@ final class FormsController extends BaseAdminController
     }
 
 
-    // ==================================================================
-    // Toutes les tâches sur les ÉLÉMENTS (champs du formulaire)
-    // ==================================================================
-
-    // Ces tâches agissent sur les éléments sélectionnés dans l'édition d'un form
-    // Elles doivent utiliser ElementsModel
-
-    private function getElementsModel()
-    {
-        return $this->getModel('Elements', 'Contentbuilder');
-    }
-
-    public function listorderup(): void
-    {
-        $model = $this->getElementsModel();
-        $model->move(-1); // ou utilise reorder si tu préfères
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=' . $this->view_item . '&id=' . $this->input->getInt('id'), false));
-    }
-
-    public function listorderdown(): void
-    {
-        $model = $this->getElementsModel();
-        $model->move(1);
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=' . $this->view_item . '&id=' . $this->input->getInt('id'), false));
-    }
-
-    public function listsaveorder(): void
-    {
-        $model = $this->getElementsModel();
-        $model->saveorder($this->input->get('cid', [], 'array'), $this->input->get('order', [], 'array'));
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=' . $this->view_item . '&id=' . $this->input->getInt('id'), false));
-    }
-
-    // Les tâches batch sur les éléments (linkable, editable, etc.)
-    // Tu peux les factoriser ou les garder séparées
-
-    public function linkable(): void
-    {
-        $this->batchElementUpdate('linkable', 1);
-    }
-
-    public function not_linkable(): void
-    {
-        $this->batchElementUpdate('linkable', 0);
-    }
-
-    public function editable(): void
-    {
-        $this->batchElementUpdate('editable', 1);
-    }
-
-    public function not_editable(): void
-    {
-        $this->batchElementUpdate('editable', 0);
-    }
-
-    public function list_include(): void
-    {
-        $this->batchElementUpdate('list_include', 1);
-    }
-
-    public function no_list_include(): void
-    {
-        $this->batchElementUpdate('list_include', 0);
-    }
-
-    public function search_include(): void
-    {
-        $this->batchElementUpdate('search_include', 1);
-    }
-
-    public function no_search_include(): void
-    {
-        $this->batchElementUpdate('search_include', 0);
-    }
-
-    private function batchElementUpdate(string $field, int $value): void
-    {
-        $cids = $this->input->get('cid', [], 'array');
-        ArrayHelper::toInteger($cids);
-
-        if ($cids) {
-            $db = $this->getDatabase();
-            $db->setQuery(
-                $db->getQuery(true)
-                    ->update($db->quoteName('#__contentbuilder_elements'))
-                    ->set($db->quoteName($field) . ' = ' . $value)
-                    ->where($db->quoteName('id') . ' IN (' . implode(',', $cids) . ')')
-            );
-            $db->execute();
-        }
-
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=' . $this->view_item . '&id=' . $this->input->getInt('id'), false));
-    }
 }

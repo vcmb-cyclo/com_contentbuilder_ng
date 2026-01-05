@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder\Administrator\Controller;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -17,8 +17,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\BaseController;
-use Component\Contentbuilder\Administrator\CBRequest;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class EditController extends BaseController
 {

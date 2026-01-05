@@ -1,12 +1,20 @@
 <?php
 /**
+ * ContentBuilder Elements Model.
+ *
+ * Handles CRUD and publish state for element in the admin interface.
+ *
  * @package     ContentBuilder
+ * @subpackage  Administrator.Model
  * @author      Xavier DANO
- * @copyright   Copyright (C) 2026 by XDA+GIL
- * @license     GNU/GPL
+ * @copyright   Copyright (C) 2011–2026 by XDA+GIL
+ * @license     GNU/GPL v2 or later
+ * @link        https://breezingforms.vcmb.fr
+ * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
-namespace Component\Contentbuilder\Administrator\Model;
+
+namespace CB\Component\Contentbuilder\Administrator\Model;
 
 \defined('_JEXEC') or die;
 
@@ -16,6 +24,7 @@ error_reporting(E_ALL);
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Table\Table;
+use Joomla\Database\DatabaseQuery;
 
 class ElementsModel extends ListModel
 {
@@ -74,45 +83,48 @@ class ElementsModel extends ListModel
     /**
      * Construction de la requête pour récupérer la liste des éléments
      */
-    protected function getListQuery()
+
+    protected function getListQuery(): DatabaseQuery
     {
         $db    = $this->getDatabase();
         $query = $db->getQuery(true);
 
+        // Sélectionner les colonnes pertinentes de #__contentbuilder_elements
         $query->select([
-            $db->quoteName(['id', 'form_id', 'reference_id', 'type', 'change_type', 'options',
-                           'custom_init_script', 'custom_action_script', 'custom_validation_script',
-                           'validation_message', 'default_value', 'hint', 'label', 'list_include',
-                           'search_include', 'item_wrapper', 'wordwrap', 'linkable', 'editable',
-                           'validations', 'published', 'order_type', 'ordering'])
+            $db->quoteName([
+                'id', 'form_id', 'reference_id', 'type', 'change_type', 'options',
+                'custom_init_script', 'custom_action_script', 'custom_validation_script',
+                'validation_message', 'default_value', 'hint', 'label', 'list_include',
+                'search_include', 'item_wrapper', 'wordwrap', 'linkable', 'editable',
+                'validations', 'published', 'order_type', 'ordering'
+            ])
         ])
         ->from($db->quoteName('#__contentbuilder_elements'))
-        ->where($db->quoteName('form_id') . ' = ' . (int) $this->formId);
+        ->where($db->quoteName('form_id') . ' = ' . (int) $this->getState('form.id'));  // Filtre par form_id
 
-        // Filtre published
+        // Filtre publié (si défini)
         $published = $this->getState('filter.published');
         if (is_numeric($published)) {
             $query->where($db->quoteName('published') . ' = ' . (int) $published);
         }
 
-        // Recherche sur label ou type
+        // Recherche sur le label ou le type (si défini)
         $search = $this->getState('filter.search');
         if (!empty($search)) {
             $search = $db->quote('%' . $db->escape($search, true) . '%');
             $query->where('(' . $db->quoteName('label') . ' LIKE ' . $search .
-                          ' OR ' . $db->quoteName('type') . ' LIKE ' . $search . ')');
+                        ' OR ' . $db->quoteName('type') . ' LIKE ' . $search . ')');
         }
 
         // Tri sécurisé (grâce à filter_fields)
         $orderCol  = $this->getState('list.ordering', 'ordering');
         $orderDirn = $this->getState('list.direction', 'asc');
 
-        // Protection supplémentaire : on force ordering comme colonne de secours
+        // Application du tri (tri principal + ordre de secours sur "ordering")
         $query->order($db->escape($orderCol) . ' ' . $db->escape($orderDirn) . ', ' . $db->escape('ordering') . ' ASC');
 
         return $query;
     }
-
 
     
     /**
@@ -120,7 +132,7 @@ class ElementsModel extends ListModel
      */
     public function reorder($pks = null, $delta = 0, $where = '')
     {
-        $table = Table::getInstance('Elements', 'Component\\Contentbuilder\\Administrator\\Table\\');
+        $table = Table::getInstance('ElementOption', 'CB\\Component\\Contentbuilder\\Administrator\\Table\\');
 
         $condition = 'form_id = ' . (int) $this->formId;
 
@@ -132,7 +144,7 @@ class ElementsModel extends ListModel
      */
     public function saveorder($pks = null, $order = null)
     {
-        $table = Table::getInstance('Elements', 'Component\\Contentbuilder\\Administrator\\Table\\');
+        $table = Table::getInstance('ElementOption', 'CB\\Component\\Contentbuilder\\Administrator\\Table\\');
 
         $conditions = ['form_id = ' . (int) $this->formId];
 
@@ -144,7 +156,7 @@ class ElementsModel extends ListModel
      */
     public function move($direction)
     {
-        $table = Table::getInstance('Elements', 'Component\\Contentbuilder\\Administrator\\Table\\');
+        $table = Table::getInstance('ElementOption', 'CB\\Component\\Contentbuilder\\Administrator\\Table\\');
 
         if (!$table->load($this->getState('element.id'))) {
             return false;
@@ -188,13 +200,14 @@ class ElementsModel extends ListModel
         return "Select * From #__contentbuilder_elements Where form_id = " . $this->_id . $filter_state . $this->buildOrderBy();
     }
 
+    /*
     function getData()
     {
         $this->_db->setQuery($this->_buildQuery(), $this->getState('limitstart'), $this->getState('limit'));
         $entries = $this->_db->loadObjectList();
 
         return $entries;
-    }
+    }*/
 
     /**
      * Retourne le nombre de pages d'éléments (utilisé pour la pagination dans l'interface)

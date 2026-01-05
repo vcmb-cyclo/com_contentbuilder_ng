@@ -13,7 +13,7 @@
     <!-- ===================== -->
     <!-- PSR-4 NAMESPACE -->
     <!-- ===================== -->
-    <namespace path="src">Component\Contentbuilder</namespace>
+    <namespace path="src">CB\Component\Contentbuilder</namespace>
 
     <!-- ===================== -->
     <!-- INSTALL / UNINSTALL -->

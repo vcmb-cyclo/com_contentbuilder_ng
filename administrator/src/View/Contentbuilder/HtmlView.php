@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace Component\Contentbuilder\Administrator\View\Contentbuilder;
+namespace CB\Component\Contentbuilder\Administrator\View\Contentbuilder;
 
 \defined('_JEXEC') or die('Restricted access');
 

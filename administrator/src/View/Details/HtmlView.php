@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\View\Details;
+namespace CB\Component\Contentbuilder\Administrator\View\Details;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -21,8 +21,8 @@ use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
-use Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 class HtmlView extends BaseHtmlView
 {

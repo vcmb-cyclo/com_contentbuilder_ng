@@ -13,7 +13,7 @@
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Registry\Registry;
-use Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 class plgContentbuilder_verifyPaypal extends CMSPlugin
 {

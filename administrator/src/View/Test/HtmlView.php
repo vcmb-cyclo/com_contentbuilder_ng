@@ -10,7 +10,7 @@
 
 // administrator/src/View/Test/HtmlView.php
 // Vue simple de test.
-namespace Component\Contentbuilder\Administrator\View\Test;
+namespace CB\Component\Contentbuilder\Administrator\View\Test;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');

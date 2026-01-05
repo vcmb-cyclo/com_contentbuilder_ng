@@ -11,7 +11,7 @@
 
 \defined('_JEXEC') or die;
 
-use Component\Contentbuilder\Administrator\Extension\ContentbuilderComponent;
+use CB\Component\Contentbuilder\Administrator\Extension\ContentbuilderComponent;
 use Joomla\CMS\Dispatcher\ComponentDispatcherFactoryInterface;
 use Joomla\CMS\Extension\ComponentInterface;
 use Joomla\CMS\Extension\Service\Provider\ComponentDispatcherFactory;
@@ -24,7 +24,7 @@ return new class implements ServiceProviderInterface
 {
     public function register(Container $container): void
     {
-        $namespace = 'Component\\Contentbuilder';
+        $namespace = 'CB\\Component\\Contentbuilder';
 
         $container->registerServiceProvider(new MVCFactory($namespace));
         $container->registerServiceProvider(new ComponentDispatcherFactory($namespace));

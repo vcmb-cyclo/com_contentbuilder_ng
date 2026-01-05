@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder\Administrator\Controller;
 
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
@@ -14,7 +14,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\BaseController;
-use Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 class UsersController extends BaseController
 {

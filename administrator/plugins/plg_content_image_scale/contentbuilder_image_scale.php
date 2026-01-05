@@ -18,9 +18,9 @@ use Joomla\Filesystem\Path;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Registry\Registry;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
-use Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 
 set_error_handler('myErrorHandler');

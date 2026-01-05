@@ -6,7 +6,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\View\Storages;
+namespace CB\Component\Contentbuilder\Administrator\View\Storages;
 
 \defined('_JEXEC') or die('Restricted access');
 
@@ -87,7 +87,7 @@ class HtmlView extends BaseHtmlView
     {
         // Chargement d'un CSS fixe pour bluestork si nécessaire (sinon à supprimer)
         $document = Factory::getDocument();
-        $document->addStyleSheet(Uri::root(true) . '/media/contentbuilder/css/bluestork.fix.css');
+        $document->addStyleSheet(Uri::root(true) . '/media/com_ontentbuilder/css/bluestork.fix.css');
     }
 
     /**

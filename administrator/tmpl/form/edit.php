@@ -14,9 +14,9 @@ use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
-use Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 $___tableOrdering = "Joomla.tableOrdering = function";
 
@@ -731,9 +731,11 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                                 <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED'); ?>
                             </th>
                             <th width="120">
-                                <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering', 'desc', @$this->lists['order'], 'edit'); ?>
-                                <?php //TODO: dragndrop if ($this->ordering) echo HTMLHelper::_('grid.order',  $this->elements );   ?>
-                                <?php if ($this->ordering) echo HTMLHelper::_('grid.order',  $this->elements ); ?>
+                                <?php if (!empty($this->elements) && is_array($this->elements)) : ?>
+                                    <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering', 'desc', @$this->lists['order'], 'edit'); ?>
+                                    <?php //TODO: dragndrop if ($this->ordering) echo HTMLHelper::_('grid.order',  $this->elements );   ?>
+                                    <?php echo HTMLHelper::_('grid.order', $this->elements); ?>
+                                <?php endif; ?>
                             </th>
                            
                         </tr>

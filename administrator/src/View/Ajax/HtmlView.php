@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace Component\Contentbuilder\Administrator\View\Ajax;
+namespace CB\Component\Contentbuilder\Administrator\View\Ajax;
 
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );

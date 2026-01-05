@@ -15,8 +15,8 @@
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
-use Component\Contentbuilder\Administrator\CBRequest;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
 
 
 ?>
@@ -121,7 +121,7 @@ Joomla.tableOrdering = function( order, dir, task ) {
             for ($i = 0; $i < $n; $i++) {
                 $row = $this->items[$i];
                 $checked = HTMLHelper::_('grid.id', $i, $row->id);
-                $link = Route::_('index.php?option=com_contentbuilder&task=form.edit&cid[]=' . $row->id);
+                $link = Route::_('index.php?option=com_contentbuilder&task=form.edit&id=' . $row->id);
                 $published = ContentbuilderHelper::listPublish($row, $i);
                 ?>
                 <tr class="<?php echo "row$k"; ?>">

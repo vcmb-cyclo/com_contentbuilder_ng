@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\View\Details\Tmpl;
+namespace CB\Component\Contentbuilder\Administrator\View\Details\Tmpl;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -16,7 +16,7 @@ namespace Component\Contentbuilder\Administrator\View\Details\Tmpl;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
-use Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 Factory::getApplication()->getDocument()->addStyleDeclaration($this->theme_css);
 Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js);

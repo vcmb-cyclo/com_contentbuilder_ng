@@ -11,7 +11,7 @@
  * com_ontentbuilder au lieu de com_contentbuilder.
  */
 
-namespace Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder\Administrator\Controller;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');

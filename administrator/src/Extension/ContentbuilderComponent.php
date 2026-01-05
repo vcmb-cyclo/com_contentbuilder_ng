@@ -14,7 +14,7 @@
 
 // administrator/src/Extension/ContentbuilderComponent.php
 
-namespace Component\Contentbuilder\Administrator\Extension;
+namespace CB\Component\Contentbuilder\Administrator\Extension;
 
 \defined('_JEXEC') or die;
 

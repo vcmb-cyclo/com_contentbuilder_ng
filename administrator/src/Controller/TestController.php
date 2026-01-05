@@ -8,7 +8,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder\Administrator\Controller;
 
 use Joomla\CMS\MVC\Controller\BaseController;
 

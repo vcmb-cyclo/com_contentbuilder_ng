@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace Component\Contentbuilder\Site\Publicforms\List;
+namespace CB\Component\Contentbuilder\Site\Publicforms\List;
 
 // no direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');

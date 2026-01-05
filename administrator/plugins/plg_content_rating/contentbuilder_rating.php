@@ -17,8 +17,8 @@ use Joomla\Filesystem\File;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Registry\Registry;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
-use Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 class plgContentContentbuilder_rating extends CMSPlugin
 {

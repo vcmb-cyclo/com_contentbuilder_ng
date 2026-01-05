@@ -6,7 +6,7 @@
  * @copyright   Copyright (C) 2026 by XDA+GIL
  */
 
-namespace Component\Contentbuilder\Administrator\Model\CategoryFields;
+namespace CB\Component\Contentbuilder\Administrator\Model\CategoryFields;
 
 defined('JPATH_BASE') or die;
 use Joomla\CMS\Language\Text;

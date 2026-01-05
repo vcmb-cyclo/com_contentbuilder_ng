@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\View\Verify;
+namespace CB\Component\Contentbuilder\Administrator\View\Verify;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');

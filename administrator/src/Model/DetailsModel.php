@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -17,9 +17,9 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\MVC\Model\ListModel;
-use Component\Contentbuilder\Administrator\CBRequest;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class DetailsModel extends ListModel
 {
@@ -149,15 +149,15 @@ class DetailsModel extends ListModel
             $this->_data = $this->_getList($query, 0, 1);
 
             if (!count($this->_data)) {
-                throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
             }
 
             foreach ($this->_data as $data) {
 
                 if (!$this->frontend && $data->display_in == 0) {
-                    throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                 } else if ($this->frontend && $data->display_in == 1) {
-                    throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                 }
 
                 $data->form_id = $this->_id;
@@ -212,7 +212,7 @@ class DetailsModel extends ListModel
 
                     $data->show_page_heading = $this->_show_page_heading;
                     if (!$data->form->exists) {
-                        throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                     }
                     $data->page_title = '';
                     if (CBRequest::getInt('cb_prefix_in_title', 1)) {
@@ -381,7 +381,7 @@ class DetailsModel extends ListModel
                             $data->xreference = '';
                         }
                     } else {
-                        throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                     }
                 }
                 return $data;

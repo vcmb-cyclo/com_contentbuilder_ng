@@ -8,7 +8,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -31,9 +31,9 @@ use Joomla\CMS\Table\Table;
 use Joomla\CMS\User\UserHelper;
 use Joomla\CMS\Mail\MailerFactoryInterface;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
-use Component\Contentbuilder\Administrator\CBRequest;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
 $pluginHelper4 = new \Joomla\CMS\Plugin\PluginHelper4();
 
@@ -243,15 +243,15 @@ class EditModel extends BaseDatabaseModel
             $this->_data = $this->_getList($query, 0, 1);
 
             if (!count($this->_data)) {
-                throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
             }
 
             foreach ($this->_data as $data) {
 
                 if (!$this->frontend && $data->display_in == 0) {
-                    throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                 } else if ($this->frontend && $data->display_in == 1) {
-                    throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                 }
 
                 $data->show_page_heading = $this->_show_page_heading;
@@ -311,7 +311,7 @@ class EditModel extends BaseDatabaseModel
 
                                              // Convert to a JException if necessary.
                                              if (!JError::isError($error)) {
-                                                 throw new Exception($error);
+                                                 throw new \Exception($error);
                                              }
                                          }*/
 
@@ -350,7 +350,7 @@ class EditModel extends BaseDatabaseModel
                     $data->frontend = $this->frontend;
                     $data->form = ContentbuilderLegacyHelper::getForm($data->type, $data->reference_id);
                     if (!$data->form->exists) {
-                        throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                     }
                     $data->page_title = '';
                     if (CBRequest::getInt('cb_prefix_in_title', 1)) {
@@ -595,15 +595,15 @@ var contentbuilder = new function(){
         $this->_data = $this->_getList($query, 0, 1);
 
         if (!count($this->_data)) {
-            throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+            throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
         }
 
         foreach ($this->_data as $data) {
 
             if (!$this->frontend && $data->display_in == 0) {
-                throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
             } else if ($this->frontend && $data->display_in == 1) {
-                throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
             }
 
             $data->form_id = $this->_id;
@@ -1225,7 +1225,7 @@ var contentbuilder = new function(){
                                 // rollback upon registration problems
                                 $data->form->clearDirtyRecordUserData($record_return);
 
-                                throw new Exception('Failed attempt to register user');
+                                throw new \Exception('Failed attempt to register user');
                             }
                         } else {
 
@@ -1274,7 +1274,7 @@ var contentbuilder = new function(){
                                     // rollback upon registration problems
                                     $data->form->clearDirtyRecordUserData($record_return);
 
-                                    throw new Exception('Failed attempt to register user');
+                                    throw new \Exception('Failed attempt to register user');
                                 }
 
                                 if ($bypass->text != $orig_text && intval($user_id) > 0) {
@@ -2017,14 +2017,14 @@ var contentbuilder = new function(){
             $this->_data = $this->_getList($query, 0, 1);
 
             if (!count($this->_data)) {
-                throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
             }
 
             foreach ($this->_data as $data) {
                 if (!$this->frontend && $data->display_in == 0) {
-                    throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                 } else if ($this->frontend && $data->display_in == 1) {
-                    throw new Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
                 }
                 $data->form_id = $this->_id;
                 if ($data->type && $data->reference_id) {

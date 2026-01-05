@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -18,8 +18,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
-use Component\Contentbuilder\Administrator\CBRequest;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class ElementoptionsModel extends BaseDatabaseModel
 {
@@ -121,7 +121,7 @@ class ElementoptionsModel extends BaseDatabaseModel
 
                 $the_item = $results;
 
-                $query = " `options`='" . base64_decode(serialize($the_item['options'])) . "', `type`=" . $this->_db->Quote(CBRequest::getCmd('field_type', '')) . ", `change_type`=" . $this->_db->Quote(CBRequest::getCmd('field_type', '')) . ", `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($the_item['default_value']) . " ";
+                $query = " `options`='" . base64_encode(serialize($the_item['options'])) . "', `type`=" . $this->_db->Quote(CBRequest::getCmd('field_type', '')) . ", `change_type`=" . $this->_db->Quote(CBRequest::getCmd('field_type', '')) . ", `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($the_item['default_value']) . " ";
 
                 break;
             case '':
@@ -145,7 +145,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                 $options->allow_raw = $allow_raw;
                 $options->allow_html = $allow_html;
 
-                $query = " `options`='" . base64_decode(serialize($options)) . "', `type`='text', `change_type`='text', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
+                $query = " `options`='" . base64_encode(serialize($options)) . "', `type`='text', `change_type`='text', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
 
                 break;
             case 'textarea':
@@ -168,7 +168,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                 $options->allow_raw = $allow_raw;
                 $options->allow_html = $allow_html;
 
-                $query = " `options`='" . base64_decode(serialize($options)) . "', `type`='textarea', `change_type`='textarea', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
+                $query = " `options`='" . base64_encode(serialize($options)) . "', `type`='textarea', `change_type`='textarea', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
                 break;
             case 'checkboxgroup':
             case 'radiogroup':
@@ -202,7 +202,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                     $options->horizontal_length = CBRequest::getVar('horizontal_length', '');
                 }
 
-                $query = " `options`='" . base64_decode(serialize($options)) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
+                $query = " `options`='" . base64_encode(serialize($options)) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
                 break;
             case 'upload':
                 $this->_db->setQuery("Select upload_directory, protect_upload_directory From #__contentbuilder_forms Where id = " . $this->_id);
@@ -312,7 +312,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                 $options->allowed_file_extensions = CBRequest::getVar('allowed_file_extensions', '');
                 $options->max_filesize = CBRequest::getVar('max_filesize', '');
 
-                $query = " `options`='" . base64_decode(serialize($options)) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
+                $query = " `options`='" . base64_encode(serialize($options)) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
                 break;
             case 'captcha':
                 $default_value = CBRequest::getVar('default_value', '');
@@ -320,7 +320,7 @@ class ElementoptionsModel extends BaseDatabaseModel
 
                 $options = new \stdClass();
 
-                $query = " `options`='" . base64_decode(serialize($options)) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
+                $query = " `options`='" . base64_encode(serialize($options)) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
                 break;
             case 'calendar':
                 $length = CBRequest::getVar('length', '');
@@ -338,7 +338,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                 $options->format = $format;
                 $options->transfer_format = $transfer_format;
 
-                $query = " `options`='" . base64_decode(serialize($options)) . "', `type`='calendar', `change_type`='calendar', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
+                $query = " `options`='" . base64_encode(serialize($options)) . "', `type`='calendar', `change_type`='calendar', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
 
                 break;
             case 'hidden':
@@ -351,7 +351,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                 $options->allow_raw = $allow_raw;
                 $options->allow_html = $allow_html;
 
-                $query = " `options`='" . base64_decode(serialize($options)) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
+                $query = " `options`='" . base64_encode(serialize($options)) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->_db->Quote($hint) . ", `default_value`=" . $this->_db->Quote($default_value) . " ";
                 break;
         }
         if ($query) {

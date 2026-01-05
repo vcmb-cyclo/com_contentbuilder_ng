@@ -8,7 +8,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -22,9 +22,9 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Event\Content\ContentPrepareEvent;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
-use Component\Contentbuilder\Administrator\CBRequest;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class ListModel extends BaseDatabaseModel
 {
@@ -225,14 +225,14 @@ class ListModel extends BaseDatabaseModel
             $this->_data = $this->_getList($query, 0, 1);
 
             if (!count($this->_data)) {
-                throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
             }
 
             foreach ($this->_data as $data) {
                 if (!$this->frontend && $data->display_in == 0) {
-                    throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                 } else if ($this->frontend && $data->display_in == 1) {
-                    throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                 }
 
                 // filter by category if requested by menu item
@@ -250,7 +250,7 @@ class ListModel extends BaseDatabaseModel
                 if ($data->type && $data->reference_id) {
                     $data->form = ContentbuilderLegacyHelper::getForm($data->type, $data->reference_id);
                     if (!$data->form->exists) {
-                        throw new Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
                     }
                     $data->page_title = '';
                     if (CBRequest::getInt('cb_prefix_in_title', 1)) {
@@ -511,7 +511,7 @@ class ListModel extends BaseDatabaseModel
 
                     if ($data->items === null) {
                         $mainframe->setUserState($option . 'formsd_filter_order', '');
-                        throw new Exception(Text::_('Stale list setup detected. Please reload view.'), 500);
+                        throw new \Exception(Text::_('Stale list setup detected. Please reload view.'), 500);
                     }
                     $data->items = ContentbuilderLegacyHelper::applyItemWrappers($this->_id, $data->items, $data);
                     $this->_total = $data->form->getListRecordsTotal($ids, $this->getState('formsd_filter'), $searchable_elements);

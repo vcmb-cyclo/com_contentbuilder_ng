@@ -7,7 +7,7 @@
  * @license     GNU/GPL
 */
 
-namespace Component\Contentbuilder\Administrator\View\Storage;
+namespace CB\Component\Contentbuilder\Administrator\View\Storage;
 
 \defined('_JEXEC') or die;
 
@@ -30,7 +30,7 @@ class HtmlView extends BaseHtmlView
         Factory::getApplication()->input->set('hidemainmenu', true);
 
         $document = Factory::getApplication()->getDocument();
-        $document->addScript(Uri::root(true) . '/media//js/jscolor/jscolor.js');
+        $document->addScript(Uri::root(true) . '/media/com_contentbuilder/js/jscolor/jscolor.js');
 
         $this->tables     = $this->get('DbTables');
         $this->form       = $this->get('Storage');

@@ -8,7 +8,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Site\Element;
+namespace CB\Component\Contentbuilder\Site\Element;
 
 // no direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');

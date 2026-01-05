@@ -14,7 +14,7 @@
  */
 
 
-namespace Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -30,11 +30,11 @@ use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
-use Component\Contentbuilder\Administrator\CBRequest;
-use Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
-use Component\Contentbuilder\Administrator\Helper\Logger;
-use Component\Contentbuilder\Administrator\Table\FormTable;
-use Component\Contentbuilder\Administrator\Table\ElementsTable;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder\Administrator\Table\FormTable;
+use CB\Component\Contentbuilder\Administrator\Table\ElementoptionsTable;
 
 class FormModel extends BaseDatabaseModel
 {
@@ -108,8 +108,8 @@ class FormModel extends BaseDatabaseModel
             case 'Form':
                 return new FormTable($this->_db);
 
-            case 'Elements':
-                return new ElementsTable($this->_db);
+            case 'Elementoptions':
+                return new ElementoptionsTable($this->_db);
         }
 
         return parent::getTable($name, $prefix, $options);
@@ -419,7 +419,7 @@ class FormModel extends BaseDatabaseModel
             /*
             if (is_object($data->form)) {
                 ContentbuilderLegacyHelper::synchElements($data->id, $data->form);
-                $elements_table = $this->getTable('Elements');
+                $elements_table = $this->getTable('Elementoptions');
                 $elements_table->reorder('form_id=' . $data->id);
             }*/
         }
@@ -1056,7 +1056,7 @@ class FormModel extends BaseDatabaseModel
 
             $this->_db->execute();
 
-            $this->getTable('Elements')->reorder('form_id = ' . $cid);
+            $this->getTable('Elementoptions')->reorder('form_id = ' . $cid);
 
             $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&view=list&id=" . intval($cid) . "'");
             $this->_db->execute();
@@ -1127,7 +1127,7 @@ class FormModel extends BaseDatabaseModel
                     `elements`.id = " . $cid);
 
             $this->_db->execute();
-            $this->getTable('Elements')->reorder('form_id = ' . $this->_id);
+            $this->getTable('Elementoptions')->reorder('form_id = ' . $this->_id);
         }
     }*/
 
@@ -1161,7 +1161,7 @@ class FormModel extends BaseDatabaseModel
 
         if (count($items)) {
             $db = Factory::getContainer()->get(DatabaseInterface::class);
-            $row = $this->getTable('Elements');
+            $row = $this->getTable('Elementoptions');
 
             if (!$row->load($items[0])) {
                 $this->setError($db->getErrorMessage());
@@ -1202,7 +1202,7 @@ class FormModel extends BaseDatabaseModel
         ArrayHelper::toInteger($items);
 
         $total = count($items);
-        $row = $this->getTable('Elements');
+        $row = $this->getTable('Elementoptions');
         $groupings = array();
 
         $order = CBRequest::getVar('order', array(), 'post', 'array');

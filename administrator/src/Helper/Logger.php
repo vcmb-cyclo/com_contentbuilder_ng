@@ -15,7 +15,7 @@
 
 declare(strict_types=1);
 
-namespace Component\Contentbuilder\Administrator\Helper;
+namespace CB\Component\Contentbuilder\Administrator\Helper;
 
 \defined('_JEXEC') or die;
 
@@ -35,7 +35,7 @@ final class Logger
         Log::addLogger(
             [
                 'text_file'         => 'com_contentbuilder.admin.log',
-                'text_entry_format' => "{DATETIME} {PRIORITY}\t{CATEGORY}\t{MESSAGE}", // pas d'IP, pas de category
+                'text_entry_format' => "{DATE} {TIME} {PRIORITY}\t{CATEGORY}\t{MESSAGE}", // pas d'IP.
             ],
             Log::ALL,
             ['cb.admin']
@@ -44,7 +44,7 @@ final class Logger
         Log::addLogger(
             [
                 'text_file'         => 'com_contentbuilder.site.log',
-                'text_entry_format' => "{DATETIME}\t{PRIORITY}\t{CATEGORY}\t{MESSAGE}",
+                'text_entry_format' => "{DATE} {TIME} {PRIORITY}\t{CATEGORY}\t{MESSAGE}",
             ],
             Log::ALL,
             ['cb.site']

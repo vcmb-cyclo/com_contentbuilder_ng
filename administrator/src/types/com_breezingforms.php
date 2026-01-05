@@ -7,7 +7,7 @@
  * @copyright   Copyright (C) 2026 by XDA+GIL 
 */
 
-namespace Component\Contentbuilder\Administrator\Table\Types;
+namespace CB\Component\Contentbuilder\Administrator\Table\Types;
 
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
@@ -17,7 +17,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\Filesystem\File;
 use Joomla\CMS\Environment\Browser;
-use Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 class contentbuilder_com_breezingforms{
 

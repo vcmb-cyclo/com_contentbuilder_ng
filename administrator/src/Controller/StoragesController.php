@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder\Administrator\Controller;
 
 
 // no direct access
@@ -17,8 +17,8 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\BaseController;
-use Component\Contentbuilder\Administrator\CBRequest;
-use Component\Contentbuilder\Administrator\Controller\BaseAdminController;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Controller\BaseAdminController;
 
 final class StoragesController extends BaseAdminController
 {
@@ -50,7 +50,7 @@ final class StoragesController extends BaseAdminController
     public function getModel($name = 'Storage', $prefix = '', $config = ['ignore_request' => true])
     {
         // On force explicitement le bon namespace complet
-        $className = 'Component\\Contentbuilder\\Administrator\\Model\\StorageModel';
+        $className = 'CB\\Component\\Contentbuilder\\Administrator\\Model\\StorageModel';
 
         if (!class_exists($className)) {
             // Si la classe n'existe pas, on laisse le parent essayer (mais ça plantera proprement)

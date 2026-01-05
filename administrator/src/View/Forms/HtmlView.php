@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\View\Forms;
+namespace CB\Component\Contentbuilder\Administrator\View\Forms;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -28,7 +28,7 @@ class HtmlView extends BaseHtmlView
         .icon-48-logo_left { background-image: url(../media/com_contentbuilder/images/logo_left.png); }
         </style>
         ';
-        echo '<link rel="stylesheet" href="' . Uri::root(true) . '/media/contentbuilder/css/bluestork.fix.css" type="text/css" />';
+        echo '<link rel="stylesheet" href="' . Uri::root(true) . '/media/com_contentbuilder/css/bluestork.fix.css" type="text/css" />';
 
         ToolBarHelper::title('ContentBuilder :: ' . Text::_('COM_CONTENTBUILDER_FORMS') . '</span>', 'logo_left.png');
         ToolBarHelper::addNew('form.add');

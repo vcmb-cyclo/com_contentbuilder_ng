@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\Table;
+namespace CB\Component\Contentbuilder\Administrator\Table;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');

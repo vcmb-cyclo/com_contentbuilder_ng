@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace Component\Contentbuilder\Administrator\View\Elementoptions;
+namespace CB\Component\Contentbuilder\Administrator\View\Elementoptions;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');

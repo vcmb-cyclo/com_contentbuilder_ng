@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace Component\Contentbuilder\Site\Publicforms\List\Tmpl;
+namespace CB\Component\Contentbuilder\Site\Publicforms\List\Tmpl;
 
 // no direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');

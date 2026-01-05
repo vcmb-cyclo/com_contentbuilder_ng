@@ -12,21 +12,21 @@
  * @link        https://breezingforms.vcmb.fr
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
-namespace Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder\Administrator\Controller;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\MVC\Controller\AdminController;
+use Joomla\CMS\MVC\Controller\FormController as BaseFormController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Factory;
 use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
-use Component\Contentbuilder\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder\Administrator\Helper\Logger;
 
 
-class StorageController extends AdminController
+class StorageController extends BaseFormController
 {
     /**
      * Vue item et vue liste utilisées par les redirects du core
@@ -59,7 +59,7 @@ class StorageController extends AdminController
 
                 if (!$id) {
                     $this->setRedirect(
-                        Route::_('index.php?option=com_contentbuilder&task=storage.edit&cid=' . (int) $this->input->getInt('id', 0), false),
+                        Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . (int) $this->input->getInt('id', 0), false),
                         $model->getError() ?: 'Store failed (no id returned)',
                         'error'
                     );
@@ -79,7 +79,7 @@ class StorageController extends AdminController
 
                 if (!$id) {
                     $this->setRedirect(
-                        Route::_('index.php?option=com_contentbuilder&task=storage.edit&cid=' . (int) $this->input->getInt('id', 0), false),
+                        Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . (int) $this->input->getInt('id', 0), false),
                         $model->getError() ?: 'Store failed (no id returned)',
                         'error'
                     );
@@ -106,7 +106,7 @@ class StorageController extends AdminController
         $task = $this->getTask();
         if ($task === 'apply' && is_numeric($id) && (int) $id > 0) {
             // Retour en édition
-            $link = Route::_('index.php?option=com_contentbuilder&task=storage.edit&cid[]=' . (int) $id, false);
+            $link = Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . (int) $id, false);
         } else {
             // Retour liste
             $link = Route::_('index.php?option=com_contentbuilder&view=storages', false);
@@ -117,20 +117,6 @@ class StorageController extends AdminController
         return true;
     }
 
-    /**
-     * Task: storage.cancel (signature compatible)
-     */
-    public function cancel($key = null)
-    {
-        $this->checkToken();
-
-        $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&view=storages', false),
-            Text::_('COM_CONTENTBUILDER_CANCELLED')
-        );
-
-        return true;
-    }
 
     /**
      * Task: storage.delete (au lieu de remove)
@@ -155,7 +141,7 @@ class StorageController extends AdminController
             return false;
         }
 
-        /** @var \Component\Contentbuilder\Administrator\Model\StorageModel $model */
+        /** @var \CB\Component\Contentbuilder\Administrator\Model\StorageModel $model */
         $model = $this->getModel('Storage', 'Contentbuilder');
 
         // IMPORTANT : ton model delete() doit utiliser $pks, pas CBRequest (je t’ai donné le patch)
@@ -192,15 +178,7 @@ class StorageController extends AdminController
         return true;
     }
 
-    public function edit()
-    {
-        $cid = (array) $this->input->get('cid', [], 'array');
-        $id = (int) ($cid[0] ?? 0);
-
-        $this->setRedirect('index.php?option=com_contentbuilder&view=storage&layout=edit&id=' . $id);
-        return true;
-    }
-
+ 
     public function add()
     {
         $this->setRedirect('index.php?option=com_contentbuilder&view=storage&layout=edit&id=0');

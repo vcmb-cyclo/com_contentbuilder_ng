@@ -9,7 +9,7 @@
  * Description de la table __contentbuilder_forms.
  */
 
-namespace Component\Contentbuilder\Administrator\Table;
+namespace CB\Component\Contentbuilder\Administrator\Table;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
