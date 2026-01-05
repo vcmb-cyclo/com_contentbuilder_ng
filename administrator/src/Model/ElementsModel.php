@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ContentBuilder Elements Model.
  *
@@ -40,8 +41,16 @@ class ElementsModel extends ListModel
     {
         // Colonnes autorisées pour le filtrage et le tri (très important pour la sécurité)
         $this->filter_fields = [
-            'id', 'type', 'label', 'published', 'linkable', 'editable',
-            'list_include', 'search_include', 'ordering', 'order_type'
+            'id',
+            'type',
+            'label',
+            'published',
+            'linkable',
+            'editable',
+            'list_include',
+            'search_include',
+            'ordering',
+            'order_type'
         ];
 
         parent::__construct($config);
@@ -90,17 +99,35 @@ class ElementsModel extends ListModel
         $query = $db->getQuery(true);
 
         // Sélectionner les colonnes pertinentes de #__contentbuilder_elements
-        $query->select([
+        $query->select(
             $db->quoteName([
-                'id', 'form_id', 'reference_id', 'type', 'change_type', 'options',
-                'custom_init_script', 'custom_action_script', 'custom_validation_script',
-                'validation_message', 'default_value', 'hint', 'label', 'list_include',
-                'search_include', 'item_wrapper', 'wordwrap', 'linkable', 'editable',
-                'validations', 'published', 'order_type', 'ordering'
+                'id',
+                'form_id',
+                'reference_id',
+                'type',
+                'change_type',
+                'options',
+                'custom_init_script',
+                'custom_action_script',
+                'custom_validation_script',
+                'validation_message',
+                'default_value',
+                'hint',
+                'label',
+                'list_include',
+                'search_include',
+                'item_wrapper',
+                'wordwrap',
+                'linkable',
+                'editable',
+                'validations',
+                'published',
+                'order_type',
+                'ordering'
             ])
-        ])
-        ->from($db->quoteName('#__contentbuilder_elements'))
-        ->where($db->quoteName('form_id') . ' = ' . (int) $this->getState('form.id'));  // Filtre par form_id
+        )
+            ->from($db->quoteName('#__contentbuilder_elements'))
+            ->where($db->quoteName('form_id') . ' = ' . (int) $this->getState('form.id'));  // Filtre par form_id
 
         // Filtre publié (si défini)
         $published = $this->getState('filter.published');
@@ -113,7 +140,7 @@ class ElementsModel extends ListModel
         if (!empty($search)) {
             $search = $db->quote('%' . $db->escape($search, true) . '%');
             $query->where('(' . $db->quoteName('label') . ' LIKE ' . $search .
-                        ' OR ' . $db->quoteName('type') . ' LIKE ' . $search . ')');
+                ' OR ' . $db->quoteName('type') . ' LIKE ' . $search . ')');
         }
 
         // Tri sécurisé (grâce à filter_fields)
@@ -126,7 +153,7 @@ class ElementsModel extends ListModel
         return $query;
     }
 
-    
+
     /**
      * Méthode pour réordonner les éléments (utilisée par listorderup/down/saveorder)
      */
@@ -165,7 +192,7 @@ class ElementsModel extends ListModel
         return $table->move($direction, 'form_id = ' . (int) $this->formId);
     }
 
-        private function buildOrderBy()
+    private function buildOrderBy()
     {
         $mainframe = Factory::getApplication();
         $option = 'com_contentbuilder';
@@ -223,5 +250,4 @@ class ElementsModel extends ListModel
         }
         return (int) ceil($total / $limit);
     }
-
 }

@@ -12,9 +12,8 @@ namespace CB\Component\Contentbuilder\Administrator;
 
 use Joomla\Filesystem\File ;
 
-if (!class_exists('CBFile'))
+if (!class_exists(__NAMESPACE__ . '\\CBFile'))
 {
-
 	class CBFile extends File {
 
 		public static function read($file){

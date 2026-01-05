@@ -53,7 +53,7 @@ class EditController extends BaseController
     public function getModel($name = 'Storage', $prefix = '', $config = ['ignore_request' => true])
     {
         // On force explicitement le bon namespace complet
-        $className = 'Component\\Contentbuilder\\Administrator\\Model\\EditModel';
+        $className = 'CB\\Component\\Contentbuilder\\Administrator\\Model\\EditModel';
 
         if (!class_exists($className)) {
             // Si la classe n'existe pas, on laisse le parent essayer (mais ça plantera proprement)

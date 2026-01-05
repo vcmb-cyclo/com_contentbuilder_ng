@@ -34,7 +34,7 @@ if (!defined('CBREQUEST_ALLOWHTML')) {
 	define('CBREQUEST_ALLOWHTML', 4);
 }
 
-if (!class_exists('CBRequest')) {
+if (!class_exists(__NAMESPACE__ . '\\CBRequest'))
 
 	/**
 	 * Create the request global object

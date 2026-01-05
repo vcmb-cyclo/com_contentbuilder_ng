@@ -29,6 +29,7 @@ use Joomla\CMS\Event\Content\ContentPrepareEvent;
 use Joomla\CMS\Access\Access;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder\Administrator\Helper\Logger;
 
 final class ContentbuilderLegacyHelper
 {
@@ -969,9 +970,10 @@ final class ContentbuilderLegacyHelper
 
     public static function getForms($type)
     {
-        if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/types/' . $type . '.php')) {
-            require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/types/' . $type . '.php');
-            $class = 'contentbuilder_' . $type;
+        if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/src/types/' . $type . '.php')) {
+            require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/src/types/' . $type . '.php');
+            $namespace = 'CB\\Component\\Contentbuilder\\Administrator\\types\\';
+            $class     = $namespace . 'contentbuilder_' . $type;
             if (class_exists($class)) {
                 return call_user_func(array($class, "getFormsList"));
             }
@@ -991,14 +993,28 @@ final class ContentbuilderLegacyHelper
 
         static $forms;
 
-        if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/types/' . $type . '.php')) {
-            require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/types/' . $type . '.php');
+        Logger::info('Instanciation Legacy', [
+            'type' => $type,
+            'reference_id'   => $reference_id,
+        ]);
+        
+        
+        if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/src/types/' . $type . '.php')) {
+            require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/src/types/' . $type . '.php');
             if (isset($forms[$type][$reference_id])) {
                 return $forms[$type][$reference_id];
             }
-            $class = 'contentbuilder_' . $type;
+
+            $namespace = 'CB\\Component\\Contentbuilder\\Administrator\\types\\';
+            $class     = $namespace . 'contentbuilder_' . $type;
             if (class_exists($class)) {
-                $form = new $class($reference_id);
+                try {
+                    $form = new $class($reference_id);
+                } catch (\Throwable $e) {
+                    Logger::exception($e);
+                    throw $e;
+                }
+
                 $forms = array();
                 $forms[$type][$reference_id] = $form;
                 return $form;
@@ -1008,9 +1024,15 @@ final class ContentbuilderLegacyHelper
             if (isset($forms[$type][$reference_id])) {
                 return $forms[$type][$reference_id];
             }
-            $class = 'contentbuilder_' . $type;
+            $namespace = '';
+            $class     = $namespace . 'contentbuilder_' . $type;
             if (class_exists($class)) {
-                $form = new $class($reference_id);
+                try {
+                    $form = new $class($reference_id);
+                } catch (\Throwable $e) {
+                    Logger::exception($e);
+                    throw $e;
+                }
                 $forms = array();
                 $forms[$type][$reference_id] = $form;
                 return $form;
@@ -2302,16 +2324,18 @@ final class ContentbuilderLegacyHelper
             $reference_id = $type['reference_id'];
             $type = $type['type'];
             $_type = $type;
-            if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/types/' . $type . '.php')) {
-                require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/types/' . $type . '.php');
-                $type = 'contentbuilder_' . $type;
+            if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/src/types/' . $type . '.php')) {
+                require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/src/types/' . $type . '.php');
+                $namespace = 'CB\\Component\\Contentbuilder\\Administrator\\types\\';
+                $type     = $namespace . 'contentbuilder_' . $type;
                 if (class_exists($type)) {
                     $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, Factory::getApplication()->getIdentity()->get('id', 0));
                     //$num_records_query = $type::getNumRecordsQuery($reference_id, Factory::getApplication()->getIdentity()->get('id', 0));
                 }
             } else if (file_exists(JPATH_SITE . '/media/contentbuilder/types/' . $type . '.php')) {
                 require_once(JPATH_SITE . '/media/contentbuilder/types/' . $type . '.php');
-                $type = 'contentbuilder_' . $type;
+                $namespace = '';
+                $type     = $namespace . 'contentbuilder_' . $type;
                 if (class_exists($type)) {
                     $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, Factory::getApplication()->getIdentity()->get('id', 0));
                     //$num_records_query = $type::getNumRecordsQuery($reference_id, Factory::getApplication()->getIdentity()->get('id', 0));

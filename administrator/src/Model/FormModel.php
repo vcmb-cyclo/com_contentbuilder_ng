@@ -34,7 +34,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilder\Administrator\Helper\Logger;
 use CB\Component\Contentbuilder\Administrator\Table\FormTable;
-use CB\Component\Contentbuilder\Administrator\Table\ElementoptionsTable;
+use CB\Component\Contentbuilder\Administrator\Table\ElementoptionTable;
 
 class FormModel extends BaseDatabaseModel
 {
@@ -109,7 +109,7 @@ class FormModel extends BaseDatabaseModel
                 return new FormTable($this->_db);
 
             case 'Elementoptions':
-                return new ElementoptionsTable($this->_db);
+                return new ElementoptionTable($this->_db);
         }
 
         return parent::getTable($name, $prefix, $options);

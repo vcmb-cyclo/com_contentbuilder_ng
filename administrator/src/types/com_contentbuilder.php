@@ -7,7 +7,7 @@
  * @copyright   Copyright (C) 2026 by XDA+GIL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Table\Types;
+namespace CB\Component\Contentbuilder\Administrator\types;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');

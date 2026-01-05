@@ -50,7 +50,8 @@ final class StoragesController extends BaseAdminController
     public function getModel($name = 'Storage', $prefix = '', $config = ['ignore_request' => true])
     {
         // On force explicitement le bon namespace complet
-        $className = 'CB\\Component\\Contentbuilder\\Administrator\\Model\\StorageModel';
+        $namespace = 'CB\\Component\\Contentbuilder\\Administrator\\Model\\';
+        $className = $namespace .'StorageModel';
 
         if (!class_exists($className)) {
             // Si la classe n'existe pas, on laisse le parent essayer (mais ça plantera proprement)

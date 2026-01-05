@@ -15,8 +15,7 @@ namespace CB\Component\Contentbuilder\Administrator;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 
-if (!class_exists('CBFactory')) {
-
+if (!class_exists(__NAMESPACE__ . '\\CBFactory')) {
 	class CBFactory
 	{
 
@@ -34,8 +33,7 @@ if (!class_exists('CBFactory')) {
 	}
 }
 
-if (!class_exists('CBDbo')) {
-
+if (!class_exists(__NAMESPACE__ . '\\CBDbo')) {
 	class CBDbo
 	{
 
