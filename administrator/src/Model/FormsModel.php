@@ -20,46 +20,77 @@ use Joomla\Database\QueryInterface;
 
 class FormsModel extends ListModel
 {
-    /**
-     * Items total
-     * @var integer
-     */
-    private $_total = null;
-
-    /**
-     * Pagination object
-     * @var object
-     */
-    private $_pagination = null;
-
     public function __construct($config = [])
     {
+        if (empty($config['filter_fields'])) {
+            $config['filter_fields'] = [
+                'a.id', 'id',
+                'a.name', 'name',
+                'a.tag', 'tag',
+                'a.title', 'title',
+                'a.type', 'type',
+                'a.display_in', 'display_in',
+                'a.published', 'published'
+            ];
+        }
+
         parent::__construct($config);
+    }
 
-        $mainframe = Factory::getApplication();
-        $option = 'com_contentbuilder';
+    protected function populateState($ordering = 'a.ordering', $direction = 'ASC')
+    {
+        $app = Factory::getApplication();
 
-        // Get pagination request variables
-        $limit = $mainframe->getUserStateFromRequest('global.list.limit', 'limit', $mainframe->get('list_limit'), 'int');
-        $limitstart = CBRequest::getVar('limitstart', 0, '', 'int');
+        // ✅ appels standard ListModel
+        parent::populateState($ordering, $direction);
 
-        // In case limit has been changed, adjust it
-        $limitstart = ($limit != 0 ? (floor($limitstart / $limit) * $limit) : 0);
+        // ✅ tes filtres custom, mais stockés dans l’état
+        $filterState = $app->getUserStateFromRequest($this->context . '.filter.state', 'filter_state', '', 'cmd');
+        $this->setState('filter.state', $filterState);
 
-        $this->setState('limit', $limit);
-        $this->setState('limitstart', $limitstart);
+        $filterTag = $app->getUserStateFromRequest($this->context . '.filter.tag', 'filter_tag', '', 'string');
+        $this->setState('filter.tag', $filterTag);
+    }
 
-        $filter_order = $mainframe->getUserStateFromRequest($option . 'forms_filter_order', 'filter_order', '`name`', 'cmd');
-        $filter_order_Dir = $mainframe->getUserStateFromRequest($option . 'forms_filter_order_Dir', 'filter_order_Dir', 'desc', 'word');
+    protected function getListQuery(): QueryInterface
+    {
+        $db = $this->getDatabase();
+        $query = $db->getQuery(true)
+            ->select('a.*')
+            ->from($db->quoteName('#__contentbuilder_forms', 'a'));
 
-        $this->setState('forms_filter_order', $filter_order);
-        $this->setState('forms_filter_order_Dir', $filter_order_Dir);
+        // Filtre published
+        $filterState = (string) $this->getState('filter.state', '');
+        if ($filterState === 'P') {
+            $query->where($db->quoteName('a.published') . ' = 1');
+        } elseif ($filterState === 'U') {
+            $query->where($db->quoteName('a.published') . ' = 0');
+        }
 
-        $filter_state = $mainframe->getUserStateFromRequest($option . 'forms_filter_state', 'filter_state', '', 'word');
-        $this->setState('forms_filter_state', $filter_state);
+        // Filtre tag
+        $tag = (string) $this->getState('filter.tag', '');
+        if ($tag !== '') {
+            $query->where('LOWER(' . $db->quoteName('a.tag') . ') LIKE ' . $db->quote('%' . strtolower($tag) . '%'));
+        }
 
-        $filter_tag = $mainframe->getUserStateFromRequest($option . 'forms_filter_tag', 'filter_tag', '', 'string');
-        $this->setState('forms_filter_tag', $filter_tag);
+        // ✅ tri standard piloté par list.ordering/list.direction
+        $orderCol  = (string) $this->getState('list.ordering', 'a.ordering');
+        $orderDir = strtoupper((string) $this->getState('list.direction', 'ASC'));
+
+        // Sécurise la direction
+        if (!in_array($orderDir, ['ASC', 'DESC'], true)) {
+            $orderDir = 'ASC';
+        }
+
+        // Sécurise la colonne (Joomla la valide via filter_fields, mais on recheck)
+        $allowed = $this->filter_fields ?? [];
+        if (!in_array($orderCol, $allowed, true)) {
+            $orderCol = 'a.ordering';
+        }
+
+        $query->order($db->escape($orderCol) . ' ' . $orderDir);
+
+        return $query;
     }
 
     
@@ -93,7 +124,7 @@ class FormsModel extends ListModel
      * MAIN LIST AREA
      * 
      */
-
+/*
     public function buildOrderBy()
     {
         $mainframe = Factory::getApplication();
@@ -103,13 +134,13 @@ class FormsModel extends ListModel
         $filter_order = $this->getState('forms_filter_order');
         $filter_order_Dir = $this->getState('forms_filter_order_Dir');
 
-        /* Error handling is never a bad thing*/
+        // Error handling is never a bad thing.
         if (!empty($filter_order) && !empty($filter_order_Dir)) {
             $orderby = ' ORDER BY ' . $filter_order . ' ' . $filter_order_Dir;
         }
 
         return $orderby;
-    }
+    }*/
 
     public function saveOrder()
     {
@@ -151,44 +182,6 @@ class FormsModel extends ListModel
             ->order('tag DESC');
         $db->setQuery($query);
         return $db->loadObjectList();
-    }
-
-
-    protected function getListQuery(): QueryInterface
-    {
-        $db    = $this->getDatabase();
-        $query = $db->getQuery(true)
-            ->select('*')
-            ->from($db->quoteName('#__contentbuilder_forms'));
-
-        // Filtre published (tes clés custom)
-        $filterState = $this->getState('forms_filter_state');
-
-        if ($filterState === 'P') {
-            $query->where($db->quoteName('published') . ' = 1');
-        } elseif ($filterState === 'U') {
-            $query->where($db->quoteName('published') . ' = 0');
-        }
-
-        // Filtre tag
-        $tag = (string) $this->getState('forms_filter_tag');
-        if ($tag !== '') {
-            $query->where('LOWER(' . $db->quoteName('tag') . ') LIKE ' . $db->quote('%' . strtolower($tag) . '%'));
-        }
-
-        // Order
-        $order    = (string) $this->getState('forms_filter_order', 'name');
-        $orderDir = strtoupper((string) $this->getState('forms_filter_order_Dir', 'DESC'));
-
-        $allowedDir = ['ASC', 'DESC'];
-        if (!in_array($orderDir, $allowedDir, true)) {
-            $orderDir = 'DESC';
-        }
-
-        // ⚠️ idéalement whitelister les colonnes triables
-        $query->order($db->escape($order) . ' ' . $orderDir);
-
-        return $query;
     }
 
         /**

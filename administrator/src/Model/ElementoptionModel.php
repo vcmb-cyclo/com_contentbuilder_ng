@@ -21,7 +21,7 @@ use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
-class ElementoptionsModel extends BaseDatabaseModel
+class ElementoptionModel extends BaseDatabaseModel
 {
     private $_element_id = 0;
 

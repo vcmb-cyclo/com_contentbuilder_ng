@@ -416,12 +416,12 @@ class FormModel extends BaseDatabaseModel
             }
             $data->title = $data->form->getPageTitle();
 
-            /*
+            // En charge de la sauvegarde de la partie Element
             if (is_object($data->form)) {
                 ContentbuilderLegacyHelper::synchElements($data->id, $data->form);
                 $elements_table = $this->getTable('Elementoption');
                 $elements_table->reorder('form_id=' . $data->id);
-            }*/
+            }
         }
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);

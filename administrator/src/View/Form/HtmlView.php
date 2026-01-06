@@ -15,7 +15,6 @@ error_reporting(E_ALL);
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\CBHtmlView as BaseHtmlView;
@@ -28,11 +27,9 @@ class HtmlView extends BaseHtmlView
         $app = Factory::getApplication();
         $app->input->set('hidemainmenu', true);
 
-        $document = $app->getDocument();
-
         // JS
-        $document->addScript(Uri::root(true) . '/media/js/com_contentbuilder/jscolor/jscolor.js');
-
+        $wa = $app->getDocument()->getWebAssetManager();
+        $wa->useScript('com_contentbuilder.jscolor');
 
         // Charge le form.
         $this->form = $this->getModel()->getItem();

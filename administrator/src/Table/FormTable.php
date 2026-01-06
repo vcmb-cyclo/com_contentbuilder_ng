@@ -81,7 +81,7 @@ class FormTable extends Table
     public $email_update_notifications = 0;
     public $limited_article_options = 1;
     public $limited_article_options_fe = 1;
-    public $upload_directory = 'media/contentbuilder/upload';
+    public $upload_directory = 'media/com_contentbuilder/upload';
     public $protect_upload_directory = 1;
     public $last_update = null;
     public $limit_add = 0;

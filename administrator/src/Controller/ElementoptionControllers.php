@@ -17,7 +17,7 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\BaseController;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 
-class ElementoptionController extends BaseController
+class ElementoptionsController extends BaseController
 {
     public function __construct($config = [])
     {

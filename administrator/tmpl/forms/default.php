@@ -158,10 +158,10 @@ Joomla.tableOrdering = function( order, dir, task ) {
                     </td>
                     <td class="order" nowrap="nowrap">
                         <span>
-                            <?php echo $this->pagination->orderUpIcon($i, true, 'orderup', 'Move Up', $this->ordering); ?>
+                            <?php echo $this->pagination->orderUpIcon($i, true, 'forms.orderup', 'Move Up', $this->ordering); ?>
                         </span>
                         <span>
-                            <?php echo $this->pagination->orderDownIcon($i, $n, true, 'orderdown', 'Move Down', $this->ordering); ?>
+                            <?php echo $this->pagination->orderDownIcon($i, $n, true, 'forms.orderdown', 'Move Down', $this->ordering); ?>
                         </span>
                         <?php $disabled = $this->ordering ? '' : 'disabled="disabled"'; ?>
                     </td>

@@ -13,7 +13,6 @@ namespace CB\Component\Contentbuilder\Administrator\View\Storage;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\CBHtmlView as BaseHtmlView;
 
@@ -26,11 +25,13 @@ class HtmlView extends BaseHtmlView
     public $ordering;
 
     public function display($tpl = null): void
-    {
-        Factory::getApplication()->input->set('hidemainmenu', true);
+    {         
+        $app = Factory::getApplication();
+        $app->input->set('hidemainmenu', true);
 
-        $document = Factory::getApplication()->getDocument();
-        $document->addScript(Uri::root(true) . '/media/com_contentbuilder/js/jscolor/jscolor.js');
+        // JS
+        $wa = $app->getDocument()->getWebAssetManager();
+        $wa->useScript('com_contentbuilder.jscolor');
 
         $this->tables     = $this->get('DbTables');
         $this->form       = $this->get('Storage');

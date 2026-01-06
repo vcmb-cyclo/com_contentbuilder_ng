@@ -828,13 +828,13 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                             </td>
                             <td class="order" width="150" valign="top">
                                 <span>
-                                    <?php echo $this->pagination->orderUpIcon($i, true, 'orderup', 'Move Up', $this->ordering); ?>
+                                    <?php echo $this->pagination->orderUpIcon($i, true, 'form.orderup', 'Move Up', $this->ordering); ?>
                                 </span>
                                 <span>
-                                    <?php echo $this->pagination->orderDownIcon($i, $n, true, 'orderdown', 'Move Down', $this->ordering); ?>
+                                    <?php echo $this->pagination->orderDownIcon($i, $n, true, 'form.orderdown', 'Move Down', $this->ordering); ?>
                                 </span>
                                 <?php $disabled = $this->ordering ? '' : 'disabled="disabled"'; ?>
-                                <input type="text" name="order[]" size="5" style="width: 20px;"
+                                <input type="text" name="order[]" size="3" style="width: 30px;"
                                     value="<?php echo $row->ordering; ?>" <?php echo $disabled ?> class="text_area"
                                     style="text-align: center" />
                             </td>
@@ -871,7 +871,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
         echo HTMLHelper::_('uitab.endTab');
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', Text::_('COM_CONTENTBUILDER_LIST_INTRO_TEXT'));
         $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
-        echo $editor->display("intro_text", $this->form->intro_text, '100%', '550', '75', '20');
+        echo $editor->display('intro_text', $this->form->intro_text, '100%', '550', '75', '20', true, 'intro_text');
         ?>
 
         <?php
@@ -1189,7 +1189,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 
         <?php
         $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
-        echo $editor->display("details_template", $this->form->details_template, '100%', '550', '75', '20');
+        echo $editor->display('details_template', $this->form->details_template, '100%', '550', '75', '20', true, 'details_template');
 
         echo HTMLHelper::_('uitab.endTab');
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab4', Text::_('COM_CONTENTBUILDER_DETAILS_PREPARE'));
@@ -1202,7 +1202,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 
         $params = array('syntax' => 'php');
         $editor = Editor::getInstance('codemirror');
-        echo $editor->display("details_prepare", $this->form->details_prepare, '100%', '550', '75', '20', false, null, null, null, $params);
+        echo $editor->display("details_prepare", $this->form->details_prepare, '100%', '550', '75', '20', false, 'details_prepare', null, null, $params);
 
         //echo '<textarea name="details_prepare" style="width:100%;height: 500px;">'.htmlentities($this->form->details_prepare, ENT_QUOTES, 'UTF-8').'</textarea>';
         ?>
@@ -1244,7 +1244,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
         }
 
         $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
-        echo $editor->display("editable_template", $this->form->editable_template, '100%', '550', '75', '20');
+        echo $editor->display('editable_template', $this->form->editable_template, '100%', '550', '75', '20', true, 'editable_template');
         ?>
         <?php
         echo HTMLHelper::_('uitab.endTab');
@@ -1263,7 +1263,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 
             $params = array('syntax' => 'php');
             $editor = Editor::getInstance('codemirror');
-            echo $editor->display("editable_prepare", $this->form->editable_prepare, '100%', '550', '75', '20', false, null, null, null, $params);
+            echo $editor->display('editable_prepare', $this->form->editable_prepare, '100%', '550', '75', '20', false, 'editable_prepare', null, null, $params);
         }
 
         echo HTMLHelper::_('uitab.endTab');
@@ -1390,7 +1390,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                 <?php
                 $params = array('syntax' => 'html');
                 $editor = Editor::getInstance('codemirror');
-                echo $editor->display("email_admin_template", $this->form->email_admin_template, '100%', '550', '75', '20', false, null, null, null, $params);
+                echo $editor->display('email_admin_template', $this->form->email_admin_template, '100%', '550', '75', '20', false, 'email_admin_template', null, null, $params);
                 ?>
             </div>
             <?php
@@ -1490,7 +1490,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                 <?php
                 $params = array('syntax' => 'html');
                 $editor = Editor::getInstance('codemirror');
-                echo $editor->display("email_template", $this->form->email_template, '100%', '550', '75', '20', false, null, null, null, $params);
+                echo $editor->display('email_template', $this->form->email_template, '100%', '550', '75', '20', false, 'email_template', null, null, $params);
                 ?>
             </div>
             <?php

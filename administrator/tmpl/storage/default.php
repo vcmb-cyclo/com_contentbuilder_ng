@@ -547,10 +547,10 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                                 </td>
                                 <td class="order" nowrap="nowrap" width="100">
                                     <span>
-                                        <?php echo $this->pagination->orderUpIcon($i, true, 'orderup', 'Move Up', $this->ordering); ?>
+                                        <?php echo $this->pagination->orderUpIcon($i, true, 'storage.orderup', 'Move Up', $this->ordering); ?>
                                     </span>
                                     <span>
-                                        <?php echo $this->pagination->orderDownIcon($i, $n, true, 'orderdown', 'Move Down', $this->ordering); ?>
+                                        <?php echo $this->pagination->orderDownIcon($i, $n, true, 'storage.orderdown', 'Move Down', $this->ordering); ?>
                                     </span>
                                     <?php $disabled = $this->ordering ? '' : 'disabled="disabled"'; ?>
 

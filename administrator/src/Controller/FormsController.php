@@ -57,6 +57,20 @@ final class FormsController extends BaseAdminController
         }
     }
 
+    
+        // Temporaire.
+        public function reorder()
+        {
+            $model = $this->getModel();
+
+            if (!$model) {
+                \Joomla\CMS\Factory::getApplication()->enqueueMessage('getModel() = false', 'error');
+            } else {
+                \Joomla\CMS\Factory::getApplication()->enqueueMessage('Reorder model = ' . get_class($model), 'warning');
+            }
+
+        }
+
     /**
      * Method to get a model object, loading it if required.
      *

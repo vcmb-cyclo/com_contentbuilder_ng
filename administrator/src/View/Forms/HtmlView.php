@@ -46,14 +46,12 @@ class HtmlView extends BaseHtmlView
 
         $tags = $this->getModel()->getTags();
 
+        $lists['order']      = (string) $state->get('list.ordering', 'a.ordering');
+        $lists['order_Dir']  = (string) $state->get('list.direction', 'ASC');
+        $lists['state']      = HTMLHelper::_('grid.state', (string) $state->get('filter.state', ''));
+        $lists['filter_tag'] = (string) $state->get('filter.tag', '');
 
-        $lists['order_Dir'] = $state->get('forms_filter_order_Dir');
-        $lists['order'] = $state->get('forms_filter_order');
-        $lists['state'] = HTMLHelper::_('grid.state', $state->get('forms_filter_state'));
-        $lists['limitstart'] = $state->get('limitstart');
-        $lists['filter_tag'] = $state->get('forms_filter_tag');
-
-        $ordering = ($lists['order'] == 'ordering');
+        $ordering = ($lists['order'] === 'a.ordering');
 
         $this->ordering = $ordering;
         $this->tags = $tags;

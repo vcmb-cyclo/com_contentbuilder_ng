@@ -115,10 +115,10 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                     </td>
                     <td class="order" nowrap="nowrap">
                         <span>
-                            <?php echo $this->pagination->orderUpIcon($i, true, 'orderup', 'Move Up', $this->ordering); ?>
+                            <?php echo $this->pagination->orderUpIcon($i, true, 'storages.orderup', 'Move Up', $this->ordering); ?>
                         </span>
                         <span>
-                            <?php echo $this->pagination->orderDownIcon($i, $n, true, 'orderdown', 'Move Down', $this->ordering); ?>
+                            <?php echo $this->pagination->orderDownIcon($i, $n, true, 'storages.orderdown', 'Move Down', $this->ordering); ?>
                         </span>
                         <?php $disabled = $this->ordering ? '' : 'disabled="disabled"'; ?>
 

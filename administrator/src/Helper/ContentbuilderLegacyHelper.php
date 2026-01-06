@@ -915,7 +915,7 @@ final class ContentbuilderLegacyHelper
                 $db->setQuery("Select Max(ordering) + 1 From #__contentbuilder_elements Where form_id = " . intval($contentbuilder_form_id));
                 $ordering = $db->loadResult();
 
-                $db->setQuery("Insert Into #__contentbuilder_elements (`label`,`form_id`,`reference_id`,`type`,`options`, `ordering`) Values (" . $db->Quote($title) . "," . $db->Quote($contentbuilder_form_id) . "," . $db->Quote($reference_id) . ",'text','" . base64_decode(serialize($options)) . "', " . ($ordering ? $ordering : 0) . ")");
+                $db->setQuery("Insert Into #__contentbuilder_elements (`label`,`form_id`,`reference_id`,`type`,`options`, `ordering`) Values (" . $db->Quote($title) . "," . $db->Quote($contentbuilder_form_id) . "," . $db->Quote($reference_id) . ",'text','" . base64_encode(serialize($options)) . "', " . ($ordering ? $ordering : 0) . ")");
                 $db->execute();
             }
         }
