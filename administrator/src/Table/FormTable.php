@@ -160,4 +160,12 @@ class FormTable extends Table
         // Joomla attend un champ "state" pour publish/unpublish au lieu de "published"
         $this->setColumnAlias('state', 'published');
     }
+
+    protected function getReorderConditions($table)
+    {
+        return [
+            'id = ' . (int) $table->id
+        ];
+    }
+
 }

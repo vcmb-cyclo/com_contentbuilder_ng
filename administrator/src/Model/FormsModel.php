@@ -20,6 +20,10 @@ use Joomla\Database\QueryInterface;
 
 class FormsModel extends ListModel
 {
+
+    // Optionnel mais recommandé : définir le nom de la table
+    protected $table = 'Form'; // Nom de la classe Table (sans prefix)
+    
     public function __construct($config = [])
     {
         if (empty($config['filter_fields'])) {
@@ -124,23 +128,7 @@ class FormsModel extends ListModel
      * MAIN LIST AREA
      * 
      */
-/*
-    public function buildOrderBy()
-    {
-        $mainframe = Factory::getApplication();
-        $option = 'com_contentbuilder';
 
-        $orderby = '';
-        $filter_order = $this->getState('forms_filter_order');
-        $filter_order_Dir = $this->getState('forms_filter_order_Dir');
-
-        // Error handling is never a bad thing.
-        if (!empty($filter_order) && !empty($filter_order_Dir)) {
-            $orderby = ' ORDER BY ' . $filter_order . ' ' . $filter_order_Dir;
-        }
-
-        return $orderby;
-    }*/
 
     public function saveOrder()
     {
@@ -183,78 +171,6 @@ class FormsModel extends ListModel
         $db->setQuery($query);
         return $db->loadObjectList();
     }
-
-        /**
-     * @return string The query
-     */
-    /*
-    public function _buildQuery()
-    {
-        $where = '';
-
-        // PUBLISHED FILTER SELECTED?
-        $filter_state = '';
-        if ($this->getState('forms_filter_state') == 'P' || $this->getState('forms_filter_state') == 'U') {
-            $published = 0;
-            if ($this->getState('forms_filter_state') == 'P') {
-                $published = 1;
-            }
-
-            $filter_state .= ' published = ' . $published;
-        }
-
-
-        if ($this->getState('forms_filter_tag') != '') {
-            if ($filter_state != '') {
-                $filter_state .= ' And ';
-            }
-            $filter_state .= ' Lower(`tag`) Like ' . $this->_db->Quote(strtolower($this->getState('forms_filter_tag')));
-        }
-
-
-        if ($filter_state != '') {
-            $where = ' Where ';
-        }
-
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_forms ' . $where . $filter_state . $this->buildOrderBy();
-    }*/
-
-
-    /**
-     * Gets the currencies
-     * @return array List of products
-     */
-    /*
-    public function getData()
-    {
-        // Lets load the data if it doesn't already exist
-        if (empty($this->_data)) {
-            $query = $this->_buildQuery();
-            $this->_data = $this->_getList($query, $this->getState('limitstart'), $this->getState('limit'));
-        }
-
-        return $this->_data;
-    }
-
-    public function getTotal()
-    {
-        // Load the content if it doesn't already exist
-        if (empty($this->_total)) {
-            $query = $this->_buildQuery();
-            $this->_total = $this->_getListCount($query);
-        }
-        return $this->_total;
-    }
-
-    public function getPagination()
-    {
-        // Load the content if it doesn't already exist
-        if (empty($this->_pagination)) {
-            $this->_pagination = new Pagination($this->getTotal(), $this->getState('limitstart'), $this->getState('limit'));
-        }
-        return $this->_pagination;
-    }*/
-
 }
 
 

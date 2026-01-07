@@ -116,6 +116,24 @@ class FormModel extends BaseDatabaseModel
     }
 
 
+    public function reorder($pks = null, $delta = 0)
+    {
+        $table = $this->getTable();
+
+        // Sécurité : clés primaires
+        $pks = (array) $pks;
+
+        foreach ($pks as $pk) {
+            $table->load((int) $pk);
+
+            // Réordonne à l'intérieur du même id
+            $table->move($delta);
+        }
+
+        return true;
+    }
+
+
     function setListEditable()
     {
         $items = CBRequest::getVar('cid', array(), 'post', 'array');

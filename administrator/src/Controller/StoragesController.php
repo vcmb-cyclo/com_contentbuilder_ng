@@ -16,11 +16,10 @@ namespace CB\Component\Contentbuilder\Administrator\Controller;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
-use Joomla\CMS\MVC\Controller\BaseController;
+use Joomla\CMS\MVC\Controller\AdminController;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
-use CB\Component\Contentbuilder\Administrator\Controller\BaseAdminController;
 
-final class StoragesController extends BaseAdminController
+final class StoragesController extends AdminController
 {
     
     /**

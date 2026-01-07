@@ -21,10 +21,10 @@ namespace CB\Component\Contentbuilder\Administrator\Controller;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
-use CB\Component\Contentbuilder\Administrator\Controller\BaseAdminController;
+use Joomla\CMS\MVC\Controller\AdminController;
 use CB\Component\Contentbuilder\Administrator\Helper\Logger;
 
-final class FormsController extends BaseAdminController
+final class FormsController extends AdminController
 {
     /**
      * Nom de la vue liste et item (convention Joomla 6).
@@ -58,19 +58,6 @@ final class FormsController extends BaseAdminController
     }
 
     
-        // Temporaire.
-        public function reorder()
-        {
-            $model = $this->getModel();
-
-            if (!$model) {
-                \Joomla\CMS\Factory::getApplication()->enqueueMessage('getModel() = false', 'error');
-            } else {
-                \Joomla\CMS\Factory::getApplication()->enqueueMessage('Reorder model = ' . get_class($model), 'warning');
-            }
-
-        }
-
     /**
      * Method to get a model object, loading it if required.
      *
@@ -80,12 +67,20 @@ final class FormsController extends BaseAdminController
      *
      * @return  \Joomla\CMS\MVC\Model\BaseDatabaseModel|false  Model object on success; otherwise false on failure.
      */
-/*
-    public function getModel($name = 'Form', $prefix = 'Administrator', $config = ['ignore_request' => true])
+    public function getModel($name = 'Form', $prefix = 'Contentbuilder', $config = ['ignore_request' => true])
     {
         return parent::getModel($name, $prefix, $config);
     }
-*/
+
+    /**
+     * Méthode REQUISE par ReorderTrait
+     * Retourne les conditions pour limiter le reorder aux enregistrements du même groupe
+     * Si tu veux que TOUS les forms soient réordonnés ensemble (pas de groupe), retourne un tableau vide ou ['1 = 1']
+     */
+    protected function getReorderConditions($table): array
+    {
+        return [];
+    }
 
     public function display($cachable = false, $urlparams = []): void
     {
