@@ -30,20 +30,6 @@ $___tableOrdering = "Joomla.tableOrdering = function";
     }
 </style>
 <script type="text/javascript">
-    function saveorder(n, task) {
-        console.log('saveorder called with n=', n, 'task=', task);
-        Joomla.checkAll(n, 'form.listsaveorder');
-
-        var form = document.adminForm;
-
-        // Ensure the task is set correctly
-        // form.task.value = task || 'saveorder';
-
-
-        // Submit the form using Joomla's submitform
-        // Joomla.submitform(form.task.value);
-    }
-
     <?php echo $___tableOrdering; ?>(order, dir, task) {
         var form = document.adminForm;
         form.limitstart.value = <?php echo CBRequest::getInt('limitstart', 0) ?>;
@@ -835,9 +821,14 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                                     <?php echo $this->pagination->orderDownIcon($i, $n, true, 'form.orderdown', 'Move Down', $this->ordering); ?>
                                 </span>
                                 <?php $disabled = $this->ordering ? '' : 'disabled="disabled"'; ?>
-                                <input type="text" name="order[]" size="3" style="width: 30px;"
-                                    value="<?php echo $row->ordering; ?>" <?php echo $disabled ?> class="text_area"
-                                    style="text-align: center" />
+                                <input
+                                    type="text"
+                                    name="order[<?php echo (int) $row->id; ?>]"
+                                    size="3"
+                                    style="width:30px;text-align:center"
+                                    value="<?php echo (int) $row->ordering; ?>"
+                                    <?php echo $disabled; ?>
+                                    class="text_area" />
                             </td>
                         </tr>
                     <?php
@@ -2262,7 +2253,9 @@ $___tableOrdering = "Joomla.tableOrdering = function";
     <div class="clr"></div>
 
     <input type="hidden" name="option" value="com_contentbuilder" />
-    <input type="hidden" name="id" value="<?php echo $this->form->id; ?>" />
+    <input type="hidden" name="view" value="form">
+    <input type="hidden" name="layout" value="edit">
+    <input type="hidden" name="id" value="<?php echo (int) $this->form->id; ?>">
     <input type="hidden" name="task" value="" />
     <input type="hidden" name="limitstart" value="" />
     <input type="hidden" name="ordering" value="<?php echo $this->form->ordering; ?>" />

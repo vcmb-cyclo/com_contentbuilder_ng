@@ -1267,35 +1267,6 @@ class FormModel extends AdminModel
     }
 
 
-    function listSaveOrder()
-    {
-        $items = CBRequest::getVar('cid', array(), 'post', 'array');
-        ArrayHelper::toInteger($items);
-
-        $total = count($items);
-        $row = $this->getTable('Elementoption');
-        $groupings = array();
-
-        $order = CBRequest::getVar('order', array(), 'post', 'array');
-        ArrayHelper::toInteger($order);
-
-        // update ordering values
-        for ($i = 0; $i < $total; $i++) {
-            $row->load($items[$i]);
-            if ($row->ordering != $order[$i]) {
-                $row->ordering = $order[$i];
-                if (!$row->store()) {
-                    $this->setError($row->getError());
-                    return false;
-                }
-            } // if
-        } // for
-
-
-        $row->reorder("form_id = " . $this->_id);
-    }*/
-
-
     /**
      * Publie ou dépublie plusieurs formulaires
      */

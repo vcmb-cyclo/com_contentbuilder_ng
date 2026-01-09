@@ -1,12 +1,16 @@
 <?php
 /**
+ * ContentBuilder Form table.
+ *
+ * Table description.
+ *
  * @package     ContentBuilder
+ * @subpackage  Administrator.Tables
  * @author      Markus Bopp / XDA+GIL
+ * @copyright   Copyright (C) 2011–2026 by XDA+GIL
+ * @license     GNU/GPL v2 or later
  * @link        https://breezingforms.vcmb.fr
- * @copyright   (C) 2026 by XDA+GIL
- * @license     GNU/GPL
- * 
- * Description de la table __contentbuilder_forms.
+ * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
 namespace CB\Component\Contentbuilder\Administrator\Table;
@@ -18,7 +22,13 @@ use Joomla\Database\DatabaseDriver;
 
 class FormTable extends Table
 {
+    /**
+     * Primary Key
+     *
+     * @var int
+     */
     public $id = 0;
+    
     public $type = '';
     public $reference_id = 0;
     public $name = '';

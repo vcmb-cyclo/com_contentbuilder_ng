@@ -19,13 +19,11 @@ namespace CB\Component\Contentbuilder\Administrator\Model;
 
 \defined('_JEXEC') or die;
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Table\Table;
 use Joomla\Database\DatabaseQuery;
+use Joomla\Utilities\ArrayHelper;
+use CB\Component\Contentbuilder\Administrator\Table\ElementoptionTable;
 
 class ElementsModel extends ListModel
 {
@@ -54,6 +52,20 @@ class ElementsModel extends ListModel
         ];
 
         parent::__construct($config);
+    }
+
+
+    public function getTable($name = 'Elementoption', $prefix = 'CB\\Component\\Contentbuilder\\Administrator\\Table\\', $options = [])
+    {
+        $db = $this->getDatabase();
+
+        // Instanciation directe (fiable en Joomla 4/5/6)
+        if ($name === 'Elementoption') {
+            return new ElementoptionTable($db);
+        }
+
+        // Fallback standard Joomla si tu as d'autres tables ailleurs
+        return parent::getTable($name, $prefix, $options);
     }
 
 
@@ -162,43 +174,130 @@ class ElementsModel extends ListModel
     }
 
 
-    /**
-     * Méthode pour réordonner les éléments (utilisée par listorderup/down/saveorder)
-     */
-    public function reorder($pks = null, $delta = 0, $where = '')
+
+    public function move($direction): bool
     {
-        $table = Table::getInstance('ElementOption', 'CB\\Component\\Contentbuilder\\Administrator\\Table\\');
-
-        $condition = 'form_id = ' . (int) $this->formId;
-
-        return $table->reorder($condition);
-    }
-
-    /**
-     * Méthode pour sauvegarder l'ordre (task listsaveorder)
-     */
-    public function saveorder($pks = null, $order = null)
-    {
-        $table = Table::getInstance('ElementOption', 'CB\\Component\\Contentbuilder\\Administrator\\Table\\');
-
-        $conditions = ['form_id = ' . (int) $this->formId];
-
-        return $table->saveorder($pks, $order, $conditions);
-    }
-
-    /**
-     * Optionnel : méthode pour déplacer un élément (listorderup/down)
-     */
-    public function move($direction)
-    {
-        $table = Table::getInstance('ElementOption', 'CB\\Component\\Contentbuilder\\Administrator\\Table\\');
-
-        if (!$table->load($this->getState('element.id'))) {
+        // Assure formId même si populateState n’a pas tourné
+        $formId = (int) Factory::getApplication()->input->getInt('id', 0);
+        if (!$formId) {
+            $formId = (int) $this->getState('form.id', 0);
+        }
+        if (!$formId) {
+            $this->setError('Missing form id');
             return false;
         }
 
-        return $table->move($direction, 'form_id = ' . (int) $this->formId);
+        $cid = Factory::getApplication()->input->get('cid', [], 'array');
+        ArrayHelper::toInteger($cid);
+        $pk = (int) ($cid[0] ?? 0);
+
+        if (!$pk) {
+            $this->setError('No item selected');
+            return false;
+        }
+
+        $table = $this->getTable('Elementoption');
+
+        if (!$table->load($pk)) {
+            $this->setError($table->getError());
+            return false;
+        }
+
+        // Grouper le déplacement dans le formulaire
+        return (bool) $table->move((int) $direction, 'form_id = ' . (int) $formId);
     }
+
+    public function saveorder($pks = null, $order = null): bool
+    {
+        $formId = (int) Factory::getApplication()->input->getInt('id', 0);
+        if (!$formId) {
+            $formId = (int) $this->getState('form.id', 0);
+        }
+        if (!$formId) {
+            $this->setError('Missing form id');
+            return false;
+        }
+
+        $pks   = array_values((array) ($pks ?? []));
+        $order = array_values((array) ($order ?? []));
+
+        ArrayHelper::toInteger($pks);
+        ArrayHelper::toInteger($order);
+
+        if (count($pks) !== count($order)) {
+            $this->setError('Invalid order payload');
+            return false;
+        }
+
+        // 1) Pairing id -> ordre saisi
+        $pairs = [];
+        foreach ($pks as $i => $id) {
+            if ($id > 0) {
+                $pairs[] = ['id' => $id, 'o' => (int) ($order[$i] ?? 0)];
+            }
+        }
+
+        // 2) Tri par ordre saisi, puis par id (stabilité si doublons)
+        usort($pairs, function ($a, $b) {
+            // 0 passe en premier
+            if ($a['o'] === 0 && $b['o'] !== 0) return -1;
+            if ($b['o'] === 0 && $a['o'] !== 0) return 1;
+
+            // ensuite tri normal
+            if ($a['o'] === $b['o']) {
+                return $a['id'] <=> $b['id']; // stabilité si doublons
+            }
+
+            return $a['o'] <=> $b['o'];
+        });
+
+
+        $table = $this->getTable('Elementoption');
+
+        // 3) Réassignation séquentielle 1..N dans le groupe
+        $n = 1;
+        foreach ($pairs as $row) {
+            if (!$table->load((int) $row['id'])) {
+                $this->setError($table->getError());
+                return false;
+            }
+
+            // sécurité : ne touche que ce form_id
+            if ((int) $table->form_id !== $formId) {
+                continue;
+            }
+
+            $table->ordering = $n++;
+
+            if (!$table->store()) {
+                $this->setError($table->getError());
+                return false;
+            }
+        }
+
+        // 4) Normalisation finale (optionnelle mais propre)
+        $table->reorder('form_id = ' . (int) $formId);
+
+        return true;
+    }
+
+
+    public function reorder($pks = null, $delta = 0, $where = ''): bool
+    {
+        $formId = (int) Factory::getApplication()->input->getInt('id', 0);
+        if (!$formId) {
+            $formId = (int) $this->getState('form.id', 0);
+        }
+        if (!$formId) {
+            $this->setError('Missing form id');
+            return false;
+        }
+
+        $table = $this->getTable('Elementoption');
+        return (bool) $table->reorder('form_id = ' . (int) $formId);
+    }
+
+
 
     private function buildOrderBy()
     {

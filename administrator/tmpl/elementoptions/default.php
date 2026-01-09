@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
@@ -76,11 +77,11 @@ $is_plugin = false;
         </option>
         <?php
         foreach ($plugins as $plugin) {
-            ?>
+        ?>
             <option value="<?php echo $plugin; ?>" <?php echo $this->element->type == $plugin ? ' selected="selected"' : ''; ?>>
                 <?php echo $plugin; ?>
             </option>
-            <?php
+        <?php
         }
         ?>
     </select>
@@ -105,7 +106,7 @@ $is_plugin = false;
         switch ($this->element->type) {
             case is_array($the_item) && in_array($this->element->type, $plugins):
                 $is_plugin = true;
-                ?>
+        ?>
                 <fieldset class="adminform">
                     <legend>
                         <?php echo $the_item['element_type']; ?>
@@ -113,7 +114,7 @@ $is_plugin = false;
                     <table class="admintable" width="95%">
                         <?php
                         if (isset($the_item['has_hint']) && $the_item['has_hint']) {
-                            ?>
+                        ?>
                             <tr>
                                 <td width="100" align="left" class="key">
                                     <label for="hint">
@@ -125,7 +126,7 @@ $is_plugin = false;
                                         id="hint"><?php echo isset($this->element->hint) ? htmlentities($this->element->hint, ENT_QUOTES, 'UTF-8') : ''; ?></textarea>
                                 </td>
                             </tr>
-                            <?php
+                        <?php
                         }
                         ?>
                     </table>
@@ -134,10 +135,10 @@ $is_plugin = false;
                     ?>
                 </fieldset>
                 <input type="hidden" name="field_type" value="<?php echo $this->element->type; ?>" />
-                <?php
+            <?php
                 break;
             case 'captcha':
-                ?>
+            ?>
                 <fieldset class="adminform">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_ELEMENT_TYPE_CAPTCHA'); ?>
@@ -157,10 +158,10 @@ $is_plugin = false;
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="captcha" />
-                <?php
+            <?php
                 break;
             case 'upload':
-                ?>
+            ?>
                 <fieldset class="adminform">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_ELEMENT_TYPE_UPLOAD'); ?>
@@ -216,12 +217,12 @@ $is_plugin = false;
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="upload" />
-                <?php
+            <?php
                 break;
             case 'checkboxgroup':
             case 'radiogroup':
             case 'select':
-                ?>
+            ?>
                 <fieldset class="adminform">
                     <legend>
                         <?php echo $this->element->type == 'checkboxgroup' ? Text::_('COM_CONTENTBUILDER_ELEMENT_TYPE_CHECKBOXGROUP') : ($this->element->type == 'select' ? Text::_('COM_CONTENTBUILDER_ELEMENT_TYPE_SELECT') : Text::_('COM_CONTENTBUILDER_ELEMENT_TYPE_RADIO')); ?>
@@ -254,10 +255,9 @@ $is_plugin = false;
                                 } else {
                                     $def = explode($this->element->options->seperator, $this->element->default_value);
                                 }
-
                             }
 
-                            ?>
+                        ?>
 
                             <tr>
                                 <td width="100" align="left" class="key">
@@ -268,7 +268,7 @@ $is_plugin = false;
                                 <td align="left">
                                     <?php
                                     foreach ($this->group_definition as $key => $value) {
-                                        ?>
+                                    ?>
                                         <input class="form-check-input" <?php echo in_array($key, $def) ? 'checked="checked" ' : ''; ?>type="checkbox" name="default_value[]"
                                             id="default_value<?php echo htmlentities($key, ENT_QUOTES, 'UTF-8'); ?>"
                                             value="<?php echo htmlentities($key, ENT_QUOTES, 'UTF-8'); ?>" />
@@ -276,17 +276,17 @@ $is_plugin = false;
                                             <?php echo htmlentities($value, ENT_QUOTES, 'UTF-8'); ?>
                                         </label>
                                         <br />
-                                        <?php
+                                    <?php
                                     }
                                     ?>
                                 </td>
                             </tr>
 
-                            <?php
+                        <?php
                         }
 
                         if ($this->element->type == 'select') {
-                            ?>
+                        ?>
                             <tr>
                                 <td width="100" align="left" class="key">
                                     <label for="multiple">
@@ -309,10 +309,10 @@ $is_plugin = false;
                                         value="<?php echo isset($this->element->options->length) ? $this->element->options->length : ''; ?>" />
                                 </td>
                             </tr>
-                            <?php
+                        <?php
                         }
                         if ($this->element->type == 'checkboxgroup' || $this->element->type == 'radiogroup') {
-                            ?>
+                        ?>
                             <tr>
                                 <td width="100" align="left" class="key">
                                     <label for="horizontal">
@@ -336,7 +336,7 @@ $is_plugin = false;
                                         value="<?php echo isset($this->element->options->horizontal_length) ? $this->element->options->horizontal_length : ''; ?>" />
                                 </td>
                             </tr>
-                            <?php
+                        <?php
                         }
                         ?>
                         <tr>
@@ -390,10 +390,10 @@ $is_plugin = false;
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="<?php echo $this->element->type; ?>" />
-                <?php
+            <?php
                 break;
             case 'textarea':
-                ?>
+            ?>
                 <fieldset class="adminform">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_ELEMENT_TYPE_TEXTAREA'); ?>
@@ -507,10 +507,10 @@ $is_plugin = false;
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="textarea" />
-                <?php
+            <?php
                 break;
             case 'calendar':
-                ?>
+            ?>
 
                 <fieldset class="adminform">
                     <legend>
@@ -602,11 +602,11 @@ $is_plugin = false;
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="calendar" />
-                <?php
+            <?php
                 break;
             case '':
             case 'text':
-                ?>
+            ?>
 
                 <fieldset class="adminform">
                     <legend>
@@ -721,10 +721,10 @@ $is_plugin = false;
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="text" />
-                <?php
+            <?php
                 break;
             case 'hidden':
-                ?>
+            ?>
 
                 <fieldset class="adminform">
                     <legend>
@@ -770,7 +770,7 @@ $is_plugin = false;
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="hidden" />
-                <?php
+            <?php
                 break;
         }
 
@@ -783,7 +783,7 @@ $is_plugin = false;
             </h3>
             <?php
             if (($is_plugin && $the_item['show_validation_settings']) || !$is_plugin) {
-                ?>
+            ?>
                 <fieldset class="adminform">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_ELEMENT_VALIDATION'); ?> (PHP)
@@ -813,11 +813,11 @@ $is_plugin = false;
                                     <?php
                                     $selected_validations = explode(',', $this->element->validations);
                                     foreach ($this->validations as $validation) {
-                                        ?>
+                                    ?>
                                         <option <?php echo in_array($validation, $selected_validations) ? 'selected="selected" ' : ''; ?>value="<?php echo htmlentities($validation, ENT_QUOTES, 'UTF-8'); ?>">
                                             <?php echo htmlentities($validation, ENT_QUOTES, 'UTF-8'); ?>
                                         </option>
-                                        <?php
+                                    <?php
                                     }
                                     ?>
                                 </select>
@@ -839,11 +839,11 @@ $is_plugin = false;
                         </tr>
                     </table>
                 </fieldset>
-                <?php
+            <?php
             }
 
             if (($is_plugin && $the_item['show_init_code_settings']) || !$is_plugin) {
-                ?>
+            ?>
                 <fieldset class="adminform">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_ELEMENT_INIT'); ?> (JS)
@@ -865,10 +865,10 @@ $is_plugin = false;
                         </tr>
                     </table>
                 </fieldset>
-                <?php
+            <?php
             }
             if (($is_plugin && $the_item['show_action_code_settings']) || !$is_plugin) {
-                ?>
+            ?>
                 <fieldset class="adminform">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_ELEMENT_ACTION'); ?> (PHP)
@@ -890,10 +890,10 @@ $is_plugin = false;
                         </tr>
                     </table>
                 </fieldset>
-                <?php
+            <?php
             }
             ?>
-            <?php
+        <?php
             echo HTMLHelper::_('uitab.endTab');
         }
         echo HTMLHelper::_('uitab.endTabSet');
@@ -912,5 +912,3 @@ $is_plugin = false;
     <input type="hidden" name="published" value="<?php echo $this->element->published; ?>" />
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
-
-

@@ -23,6 +23,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\FormController as BaseFormController;
 use Joomla\CMS\Router\Route;
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 
 class FormController extends BaseFormController
 {
@@ -254,20 +255,32 @@ class FormController extends BaseFormController
         $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=' . $this->view_item . '&id=' . $this->input->getInt('id'), false));
     }
 
-
     // ==================================================================
     // Toutes les tâches sur les ÉLÉMENTS (champs du formulaire)
     // ==================================================================
     // Ces tâches agissent sur les éléments sélectionnés dans l'édition d'un form
     // Elles doivent utiliser ElementoptionModel
-
-
-    public function listsaveorder(): void
+ 
+    protected function postSaveHook(BaseDatabaseModel $model, $validData = [])
     {
-        $model = $this->getModel('Elementoption', 'Administrator');
-        $model->saveorder($this->input->get('cid', [], 'array'), $this->input->get('order', [], 'array'));
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=' . $this->view_item . '&id=' . $this->input->getInt('id'), false));
+        $model = $this->getModel('Elements', 'Administrator', ['ignore_request' => true]);
+
+        $orderMap = $this->input->post->get('order', [], 'array'); // [id => ordering]
+        if (empty($orderMap)) {
+            return;
+        }
+
+        $pks   = array_keys($orderMap);
+        $order = array_values($orderMap);
+
+        ArrayHelper::toInteger($pks);
+        ArrayHelper::toInteger($order);
+
+        if (!$model->saveorder($pks, $order)) {
+            $this->enqueueMessage($model->getError() ?: 'Saveorder failed', 'warning');
+        }
     }
+
 
     // Les tâches batch sur les éléments (linkable, editable, etc.)
     public function linkable(): void

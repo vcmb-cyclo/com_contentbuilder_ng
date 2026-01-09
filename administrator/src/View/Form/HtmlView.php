@@ -43,7 +43,7 @@ class HtmlView extends BaseHtmlView
             $formId = (int) ($formId ?? 0);
             if ($formId > 0) {
                 $factory = $app->bootComponent('com_contentbuilder')->getMVCFactory();
-                $elementsModel = $factory->createModel('Elements', 'Administrator', ['ignore_request' => true]);
+                $elementsModel = $factory->createModel('Elements', 'Administrator');
 
                 if (!$elementsModel) {
                     throw new \RuntimeException('Modèle Elements introuvable (factory)');
@@ -73,6 +73,7 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::apply('form.apply');
         ToolbarHelper::save('form.save');
         ToolbarHelper::custom('form.save2new', 'save', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
+        ToolbarHelper::custom('form.saveorder', 'saveorder', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
 
         ToolbarHelper::custom('form.list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_LIST_INCLUDE'), false);
         ToolbarHelper::custom('form.no_list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_NO_LIST_INCLUDE'), false);
