@@ -95,9 +95,16 @@
     <field name="details_template" type="editor"
            hiddenLabel="true"
            label="COM_CONTENTBUILDER_FIELD_DETAILS_TEMPLATE"
-           filter="raw" rows="12" />
+           filter="raw"
+           buttons="true"
+           width="100%"
+           height="550"
+           rows="20"
+           cols="75"
+       />
 
-    <field name="details_prepare" type="textarea"
+    <field name="details_prepare" type="editor"
+           hiddenLabel="true"
            label="COM_CONTENTBUILDER_FIELD_DETAILS_PREPARE"
            filter="raw" rows="10" />
 
@@ -106,9 +113,14 @@
            label="COM_CONTENTBUILDER_FIELD_EDITABLE_TEMPLATE"
            filter="raw" rows="12" />
 
-    <field name="editable_prepare" type="textarea"
+    <field name="editable_prepare" type="editor"
            label="COM_CONTENTBUILDER_FIELD_EDITABLE_PREPARE"
-           filter="raw" rows="10" />
+           filter="raw"
+            width="100%"
+            height="550"
+            rows="20"
+            cols="75"
+    />
 
   </fieldset>
 
@@ -264,9 +276,14 @@
       <option value="1">JYES</option>
     </field>
 
-    <field name="email_template" type="textarea"
+    <field name="email_template" type="editor"
            label="COM_CONTENTBUILDER_FIELD_EMAIL_TEMPLATE"
-           filter="raw" rows="12" />
+           filter="raw" 
+           width="100%"
+           height="550"
+           rows="20"
+           cols="75"
+           />
 
     <!-- Admin email -->
     <field name="email_admin_subject" type="text"
@@ -295,9 +312,14 @@
       <option value="1">JYES</option>
     </field>
 
-    <field name="email_admin_template" type="textarea"
+    <field name="email_admin_template" type="editor"
            label="COM_CONTENTBUILDER_FIELD_EMAIL_ADMIN_TEMPLATE"
-           filter="raw" rows="12" />
+           filter="raw" 
+           width="100%"
+           height="550"
+           rows="20"
+           cols="75"
+           />
 
   </fieldset>
 

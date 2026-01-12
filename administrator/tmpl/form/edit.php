@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp / XDA + GIL
@@ -28,7 +29,6 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
     }
 </style>
 <script type="text/javascript">
-
     function listItemTask(id, task) {
 
         var f = document.adminForm;
@@ -1175,8 +1175,8 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
 
         <?php
         echo $this->form->renderField('details_template');
-//        $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
-//        echo $editor->display('details_template', $this->item->details_template, '100%', '550', '75', '20', true, 'details_template');
+        //        $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
+        //        echo $editor->display('details_template', $this->item->details_template, '100%', '550', '75', '20', true, 'details_template');
 
         echo HTMLHelper::_('uitab.endTab');
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab4', Text::_('COM_CONTENTBUILDER_DETAILS_PREPARE'));
@@ -1188,8 +1188,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
         }
 
         $params = array('syntax' => 'php');
-        $editor = Editor::getInstance('codemirror');
-        echo $editor->display("details_prepare", $this->item->details_prepare, '100%', '550', '75', '20', false, 'details_prepare', null, null, $params);
+        echo $this->form->renderField('details_prepare');
 
         //echo '<textarea name="jform[details_prepare]" style="width:100%;height: 500px;">'.htmlentities($this->item->details_prepare, ENT_QUOTES, 'UTF-8').'</textarea>';
         ?>
@@ -1230,8 +1229,9 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
         <?php
         }
 
-        $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
-        echo $editor->display('editable_template', $this->item->editable_template, '100%', '550', '75', '20', true, 'editable_template');
+        echo $this->form->renderField('editable_template');
+        //      $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
+        //      echo $editor->display('editable_template', $this->item->editable_template, '100%', '550', '75', '20', true, 'editable_template');
         ?>
         <?php
         echo HTMLHelper::_('uitab.endTab');
@@ -1249,8 +1249,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
             }
 
             $params = array('syntax' => 'php');
-            $editor = Editor::getInstance('codemirror');
-            echo $editor->display('editable_prepare', $this->item->editable_prepare, '100%', '550', '75', '20', false, 'editable_prepare', null, null, $params);
+            echo $this->form->renderField('editable_prepare');
         }
 
         echo HTMLHelper::_('uitab.endTab');
@@ -1374,8 +1373,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
 
                 <?php
                 $params = array('syntax' => 'html');
-                $editor = Editor::getInstance('codemirror');
-                echo $editor->display('email_admin_template', $this->item->email_admin_template, '100%', '550', '75', '20', false, 'email_admin_template', null, null, $params);
+                echo $this->form->renderField('email_admin_template');
                 ?>
             </div>
             <?php
@@ -1474,8 +1472,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
 
                 <?php
                 $params = array('syntax' => 'html');
-                $editor = Editor::getInstance('codemirror');
-                echo $editor->display('email_template', $this->item->email_template, '100%', '550', '75', '20', false, 'email_template', null, null, $params);
+                echo $this->form->renderField('email_template');
                 ?>
             </div>
         <?php

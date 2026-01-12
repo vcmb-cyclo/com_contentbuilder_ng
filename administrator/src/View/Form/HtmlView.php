@@ -54,7 +54,7 @@ class HtmlView extends BaseHtmlView
                 }
 
                 // IMPORTANT : fournir le form id au ListModel
-                $elementsModel->setState('form.id', $formId);
+                $elementsModel->setFormId($formId);
 
                 // charge les items
                 $this->elements   = $elementsModel->getItems();

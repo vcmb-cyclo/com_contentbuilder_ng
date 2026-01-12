@@ -1037,23 +1037,21 @@ class FormModel extends AdminModel
             $wrap      = $wordwrap[$elementId]    ?? 0;
             $otype     = $order_types[$elementId] ?? '';
             $wrapper   = $item_wrapper[$elementId] ?? ''; // peut ne pas exister
+            $ord       = isset($order[$elementId]) ? (int) $order[$elementId] : null;
 
-            // ⚠️ si tu veux "ne pas écraser" wrapper quand il manque :
-            // - soit tu laisses la ligne item_wrapper hors UPDATE
-            // - soit tu gardes wrapper actuel via une requête préalable
-            // Ici on écrase avec '' si absent (comportement simple).
             $db->setQuery(
                 "UPDATE #__contentbuilder_elements
-                SET `order_type` = " . $db->quote($otype) . ",
-                    `label`      = " . $db->quote($label) . ",
-                    `wordwrap`   = " . (int) $wrap . ",
-                    `item_wrapper` = " . $db->quote(trim($wrapper)) . "
+                SET `order_type`    = " . $db->quote($otype) . ",
+                    `label`         = " . $db->quote($label) . ",
+                    `wordwrap`      = " . (int) $wrap . ",
+                    `item_wrapper`  = " . $db->quote(trim($wrapper)) . ",
+                    `ordering`      = " . (int) ($ord ?? 0) . "
                 WHERE form_id = " . (int) $form_id . "
-                AND id = " . (int) $elementId
+                AND id      = " . (int) $elementId
             );
             $db->execute();
-        }
 
+        }
 
         if ($form_id > 0) {
             $this->setState($this->getName() . '.id', $form_id);
