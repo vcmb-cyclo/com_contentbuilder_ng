@@ -69,6 +69,13 @@ class ElementsModel extends ListModel
     }
 
 
+    
+    public function setFormId($formid)
+    {
+        $this->formId = $formid;
+    }
+
+
     /**
      * Méthode pour initialiser les états (filtres, pagination, tri)
      */
@@ -77,14 +84,23 @@ class ElementsModel extends ListModel
         $app = Factory::getApplication();
 
         // Récupération du form_id depuis l'input (obligatoire pour cette vue)
-        $formId = $app->input->getInt('id', 0);
+            // 1) priorité à la propriété (injectée depuis la vue)
+        $formId = (int) $this->formId;
 
         // Fallback si on arrive sans id dans l'URL (cas après save)
+        // 2) Sinon URL (admin)
         if (!$formId) {
-            $jform = $app->input->post->get('jform', [], 'array');
+            $formId = $app->input->getInt('id', 0);
+        }
+
+        // 3) Sinon POST
+        if (!$formId) {
+            $jform  = $app->input->post->get('jform', [], 'array');
             $formId = (int) ($jform['id'] ?? 0);
         }
 
+
+        $this->formId = $formId;        
         $this->setState('form.id', $formId);
         $this->formId = $formId;
 
@@ -357,6 +373,7 @@ class ElementsModel extends ListModel
      * Retourne le nombre de pages d'éléments (utilisé pour la pagination dans l'interface)
      * À adapter selon la logique originale (souvent basé sur le total d'éléments)
      */
+    /*
     public function getPagesCounter()
     {
         // Exemple simple : total d'éléments / limite par page, arrondi au supérieur
@@ -366,5 +383,5 @@ class ElementsModel extends ListModel
             return 1;
         }
         return (int) ceil($total / $limit);
-    }
+    }*/
 }

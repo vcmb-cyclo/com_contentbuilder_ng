@@ -42,6 +42,12 @@ class StorageModel extends AdminModel
     protected ?Pagination $_pagination = null;
 
 
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
+        $this->option = 'com_contentbuilder';
+    }
+
 
     public function getTable($type = 'Storage', $prefix = 'CB\\Component\\Contentbuilder\\Administrator\\Table\\', $config = [])
     {
@@ -78,7 +84,7 @@ class StorageModel extends AdminModel
         $data = $this->getItem();
 
         // Permet d’injecter aussi une session “edit.storage.data” si tu en as
-        $app  = \Joomla\CMS\Factory::getApplication();
+        $app  = Factory::getApplication();
         $data = $app->getUserState($this->option . '.edit.storage.data', $data);
 
         return $data;

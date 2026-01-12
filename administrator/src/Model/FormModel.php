@@ -35,8 +35,6 @@ use CB\Component\Contentbuilder\Administrator\Table\ElementoptionTable;
 
 class FormModel extends AdminModel
 {
-    private $_form_data = null;
-
     private $_default_list_states = array(
         array('id' => -1, 'action' => '', 'title' => 'State 1', 'color' => '60E309', 'published' => 1),
         array('id' => -2, 'action' => '', 'title' => 'State 2', 'color' => 'FCFC00', 'published' => 1),
@@ -55,28 +53,6 @@ class FormModel extends AdminModel
         parent::__construct($config);
         $this->option = 'com_contentbuilder';
     }
-
-    protected function populateState()
-    {
-        parent::populateState();
-
-        $app   = Factory::getApplication();
-        $input = $app->input;
-
-        // D'abord id explicite
-        $id = $input->getInt('id', 0);
-
-        // Dinon depuis le formulaire posté
-        if (!$id) {
-            $jform = $input->post->get('jform', [], 'array');
-            $id = (int) ($jform['id'] ?? 0);
-        }
-
-        // IMPORTANT: pour un FormModel, getName() renvoie souvent "Form"
-        // donc state = "form.id" si getName() est "form" (selon Joomla), sinon "Form.id".
-        $this->setState($this->getName() . '.id', $id);
-    }
-
 
     /**
      * Joomla 6 compatibility:
@@ -107,11 +83,36 @@ class FormModel extends AdminModel
         );
     }
 
+
+    protected function populateState(): void
+    {
+        // Déjà le parent.
+        parent::populateState();
+
+        // 2) ID depuis l'URL (standard Joomla en admin)
+        $app   = Factory::getApplication();
+        $input = $app->input;
+        $formId = $input->getInt('id', 0);
+
+        // 3) Fallback si on arrive via POST (save/apply etc.)
+        if (!$formId) {
+            $jform = $input->post->get('jform', [], 'array');
+            $formId = (int) ($jform['id'] ?? 0);
+        }
+
+        // 4) État standard Joomla pour un AdminModel
+        $this->setState($this->getName() . '.id', $formId);
+    }
+
+
     protected function loadFormData()
     {
-        // Si tu veux rester legacy, tu peux renvoyer ton item
-        return (array) $this->getItem();
+        $app = Factory::getApplication();
+        $data = $app->getUserState('com_contentbuilder.edit.form.data', []);
+
+        return !empty($data) ? $data : (array) $this->getItem();
     }
+
 
     public function reorder($pks = null, $delta = 0)
     {
@@ -133,84 +134,127 @@ class FormModel extends AdminModel
 
     function setListEditable()
     {
+        $formId = (int) $this->getState($this->getName() . '.id');
+        $formId = (int) $this->getState($this->getName() . '.id');
+        if ($formId <= 0) {
+            return;
+        }
+
+
         $db = $this->getDatabase();
         $items = CBRequest::getVar('cid', array(), 'post', 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
             $db->setQuery(' Update #__contentbuilder_elements ' .
-                '  Set editable = 1 Where form_id = ' . $this->_id . ' And id In ( ' . implode(',', $items) . ')');
+                '  Set editable = 1 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
     }
 
     function setListListInclude()
     {
+        $formId = (int) $this->getState($this->getName() . '.id');
+        $formId = (int) $this->getState($this->getName() . '.id');
+        if ($formId <= 0) {
+            return;
+        }
+
         $db = $this->getDatabase();
         $items = CBRequest::getVar('cid', array(), 'post', 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
             $db->setQuery(' Update #__contentbuilder_elements ' .
-                '  Set list_include = 1 Where form_id = ' . $this->_id . ' And id In ( ' . implode(',', $items) . ')');
+                '  Set list_include = 1 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
     }
 
     function setListSearchInclude()
     {
+        $formId = (int) $this->getState($this->getName() . '.id');
+        $formId = (int) $this->getState($this->getName() . '.id');
+        if ($formId <= 0) {
+            return;
+        }
+
         $db = $this->getDatabase();
         $items = CBRequest::getVar('cid', array(), 'post', 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
             $db->setQuery(' Update #__contentbuilder_elements ' .
-                '  Set search_include = 1 Where form_id = ' . $this->_id . ' And id In ( ' . implode(',', $items) . ')');
+                '  Set search_include = 1 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
     }
 
     function setListNotLinkable()
     {
+        $formId = (int) $this->getState($this->getName() . '.id');
+        $formId = (int) $this->getState($this->getName() . '.id');
+        if ($formId <= 0) {
+            return;
+        }
+
         $db = $this->getDatabase();
         $items = CBRequest::getVar('cid', array(), 'post', 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
             $db->setQuery(' Update #__contentbuilder_elements ' .
-                '  Set linkable = 0 Where form_id = ' . $this->_id . ' And id In ( ' . implode(',', $items) . ')');
+                '  Set linkable = 0 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
     }
 
     function setListNotEditable()
     {
+        $formId = (int) $this->getState($this->getName() . '.id');
+        $formId = (int) $this->getState($this->getName() . '.id');
+        if ($formId <= 0) {
+            return;
+        }
+
         $db = $this->getDatabase();
         $items = CBRequest::getVar('cid', array(), 'post', 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
             $db->setQuery(' Update #__contentbuilder_elements ' .
-                '  Set editable = 0 Where form_id = ' . $this->_id . ' And id In ( ' . implode(',', $items) . ')');
+                '  Set editable = 0 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
     }
 
     function setListNoListInclude()
     {
+        $formId = (int) $this->getState($this->getName() . '.id');
+        $formId = (int) $this->getState($this->getName() . '.id');
+        if ($formId <= 0) {
+            return;
+        }
+
         $db = $this->getDatabase();
         $items = CBRequest::getVar('cid', array(), 'post', 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
             $db->setQuery(' Update #__contentbuilder_elements ' .
-                '  Set list_include = 0 Where form_id = ' . $this->_id . ' And id In ( ' . implode(',', $items) . ')');
+                '  Set list_include = 0 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
     }
 
     function setListNoSearchInclude()
     {
+        $formId = (int) $this->getState($this->getName() . '.id');
+        $formId = (int) $this->getState($this->getName() . '.id');
+        if ($formId <= 0) {
+            return;
+        }
+
         $db = $this->getDatabase();
         $items = CBRequest::getVar('cid', array(), 'post', 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
             $db->setQuery(' Update #__contentbuilder_elements ' .
-                '  Set search_include = 0 Where form_id = ' . $this->_id . ' And id In ( ' . implode(',', $items) . ')');
+                '  Set search_include = 0 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
     }
@@ -256,33 +300,17 @@ class FormModel extends AdminModel
      * MAIN DETAILS AREA
      */
 
-    /**
-     *
-     * @param int $id
-     */
-    function setId($id)
+    public function getItem($formId = null)
     {
-        // Set id and wipe data
-        $this->_id = $id;
-        $this->_data = null;
-    }
-
-    public function getItem($pk = null)
-    {
-        if ($pk === null) {
-            $pk = (int) $this->getState($this->getName() . '.id');
-        }
-
-        // Optionnel: si $pk est fourni, mets à jour l'id
-        if ($pk !== null) {
-            $this->setId((int) $pk);
+        if ($formId === null) {
+            $formId = (int) $this->getState($this->getName() . '.id');
         }
 
         $db = $this->getDatabase();
         $query = $db->getQuery(true)
             ->select('*')
             ->from($db->quoteName('#__contentbuilder_forms'))
-            ->where($db->quoteName('id') . ' = ' . (int)$this->_id);
+            ->where($db->quoteName('id') . ' = ' . (int)$formId);
 
         $db->setQuery($query);
         $data = $db->loadObject();
@@ -454,7 +482,7 @@ class FormModel extends AdminModel
             $db->getQuery(true)
                 ->select('*')
                 ->from($db->quoteName('#__contentbuilder_list_states'))
-                ->where($db->quoteName('form_id') . ' = ' . (int)$this->_id)
+                ->where($db->quoteName('form_id') . ' = ' . $formId)
                 ->order('id ASC')
         );
 
@@ -470,8 +498,6 @@ class FormModel extends AdminModel
 
         $data->sectioncategories = $this->getOptions();
         $data->accesslevels = array();
-
-        $this->_form_data = $data;
 
         return $data;
     }
@@ -545,7 +571,7 @@ class FormModel extends AdminModel
 
         $jform    = (array) $app->input->post->get('jform', [], 'array');
         $jformRaw = (array) $app->input->post->getRaw('jform');
-        $jformHtml= (array) $app->input->post->getHtml('jform');
+        $jformHtml = (array) $app->input->post->getHtml('jform');
 
         // Override champs sensibles
         $jform['details_template']     = $jformRaw['details_template'] ?? '';
@@ -554,10 +580,10 @@ class FormModel extends AdminModel
         $jform['editable_prepare']     = $jformRaw['editable_prepare'] ?? '';
         $jform['email_admin_template'] = $jformRaw['email_admin_template'] ?? '';
         $jform['email_template']       = $jformRaw['email_template'] ?? '';
-        
+
         $jform['intro_text']           = $jformHtml['intro_text'] ?? '';
         $jform['editable']             = $jformHtml['editable'] ?? '';
-               
+
         $data = $jform;
 
         #### SETTINGS
@@ -1040,7 +1066,6 @@ class FormModel extends AdminModel
 
         // ✅ IMPORTANT : respecter la signature attendue (bool)
         return $form_id > 0;
-
     }
 
 
@@ -1189,25 +1214,25 @@ class FormModel extends AdminModel
         return true;
     }
 
-    function move($direction)
+    public function move($direction): bool
     {
-        $db = $this->getDatabase();
-        $mainframe = Factory::getApplication();
+        $pk = (int) $this->getState($this->getName() . '.id');
 
         $row = $this->getTable('Form', '');
 
-        if (!$row->load($this->_id)) {
-            $this->setError($db->getErrorMessage());
+        if (!$row->load($pk)) {
+            $this->setError($row->getError());
             return false;
         }
 
-        if (!$row->move($direction)) {
-            $this->setError($db->getErrorMessage());
+        if (!$row->move((int) $direction)) {
+            $this->setError($row->getError());
             return false;
         }
 
         return true;
     }
+
 
 
     public function copy(array $pks): bool

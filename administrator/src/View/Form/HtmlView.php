@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package ContentBuilder
  * @author Markus Bopp / XDA+GIL
@@ -6,6 +7,7 @@
  * @copyright (C) 2026 by XDA+GIL
  * @license GNU/GPL
  */
+
 namespace CB\Component\Contentbuilder\Administrator\View\Form;
 
 \defined('_JEXEC') or die;
@@ -27,7 +29,7 @@ class HtmlView extends BaseHtmlView
         // JS
         $wa = $app->getDocument()->getWebAssetManager();
         $wa->useScript('com_contentbuilder.jscolor');
-  
+
         // Formulaire JForm
         $this->form = $this->getModel()->getForm();
 
@@ -35,10 +37,9 @@ class HtmlView extends BaseHtmlView
         $this->item = $this->getModel()->getItem();
 
         // Chargement sécurisé des éléments
-        $formId = (int) ($this->item->id ?? 0);
+        $formId = (int) ($this->item->id ?? $app->input->getInt('id', 0));
 
         $this->elements = [];
-        $this->elementsPagination = null;
         $this->pagination = null;
         $this->state = null;
 
@@ -52,10 +53,13 @@ class HtmlView extends BaseHtmlView
                     throw new \RuntimeException('Modèle Elements introuvable (factory)');
                 }
 
-                $this->elements   = (array) $elementsModel->getData($formId);
-                $this->elementsPagination   = $elementsModel->getPagination() ?? null;
-                $this->pagination           = $elementsModel->getPagination() ?? null;
-                $this->state                = $elementsModel->getState();
+                // IMPORTANT : fournir le form id au ListModel
+                $elementsModel->setState('form.id', $formId);
+
+                // charge les items
+                $this->elements   = $elementsModel->getItems();
+                $this->pagination = $elementsModel->getPagination();
+                $this->state      = $elementsModel->getState();
             }
         } catch (\Throwable $e) {
             Factory::getApplication()->enqueueMessage(
@@ -69,7 +73,7 @@ class HtmlView extends BaseHtmlView
 
         ToolbarHelper::title(
             'ContentBuilder :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_FORM') : ($this->item->name ?? '')) .
-            ' : <small><small>[ ' . $text . ' ]</small></small>',
+                ' : <small><small>[ ' . $text . ' ]</small></small>',
             'logo_left.png'
         );
 
@@ -89,10 +93,12 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::cancel('form.cancel', $isNew ? 'JTOOLBAR_CLOSE' : 'JTOOLBAR_CLOSE');
 
         // Compat template / listes
-        $this->lists['order_Dir']   = $this->state ? $this->state->get('list.direction', 'asc') : 'asc';
-        $this->lists['order']       = $this->state ? $this->state->get('list.ordering', 'ordering') : 'ordering';
-        $this->lists['limitstart']  = $this->state ? $this->state->get('list.start', 0) : 0;
-        $this->ordering = true;
+        $listOrder = $this->state?->get('list.ordering', 'ordering') ?? 'ordering';
+        $listDirn  = $this->state?->get('list.direction', 'asc') ?? 'asc';
+
+        // ordering actif seulement si on est trié par "ordering"
+        $this->ordering = ($listOrder === 'ordering');
+
 
         // Données additionnelles
         $db = Factory::getContainer()->get(DatabaseInterface::class);

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp / XDA + GIL
@@ -19,7 +18,6 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 
-$___tableOrdering = "Joomla.tableOrdering = function";
 
 ?>
 <style type="text/css">
@@ -30,13 +28,6 @@ $___tableOrdering = "Joomla.tableOrdering = function";
     }
 </style>
 <script type="text/javascript">
-    <?php echo $___tableOrdering; ?>(order, dir, task) {
-        var form = document.adminForm;
-        form.limitstart.value = <?php echo CBRequest::getInt('limitstart', 0) ?>;
-        form.filter_order.value = order;
-        form.filter_order_Dir.value = dir;
-        document.adminForm.submit(task);
-    };
 
     function listItemTask(id, task) {
 
@@ -713,7 +704,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                             </th>
                             <th width="120">
                                 <?php if (!empty($this->elements) && is_array($this->elements)) : ?>
-                                    <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering', 'desc', @$this->lists['order'], 'edit'); ?>
+                                    <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering', $listDirn, $listOrder); ?>
                                     <?php //TODO: dragndrop if ($this->ordering) echo HTMLHelper::_('grid.order',  $this->elements );   
                                     ?>
                                     <?php echo HTMLHelper::_('grid.order', $this->elements); ?>
@@ -2259,8 +2250,8 @@ $___tableOrdering = "Joomla.tableOrdering = function";
     <input type="hidden" name="limitstart" value="" />
     <input type="hidden" name="jform[ordering]" value="<?php echo $this->item->ordering; ?>" />
     <input type="hidden" name="jform[published]" value="<?php echo $this->item->published; ?>" />
-    <input type="hidden" name="filter_order" value="" />
-    <input type="hidden" name="filter_order_Dir" value="" />
+    <input type="hidden" name="list[ordering]" value="<?php echo htmlspecialchars($listOrder, ENT_QUOTES, 'UTF-8'); ?>" />
+    <input type="hidden" name="list[direction]" value="<?php echo htmlspecialchars($listDirn, ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="hidemainmenu" value="0" />
     <input type="hidden" name="tabStartOffset" value="<?php echo Factory::getApplication()->getSession()->get('tabStartOffset', 0); ?>" />
