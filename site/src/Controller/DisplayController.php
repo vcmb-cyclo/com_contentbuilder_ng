@@ -5,15 +5,12 @@ namespace CB\Component\Contentbuilder\Site\Controller;
 
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Factory;
-
 class DisplayController extends BaseController
 {
+    protected $default_view = 'forms';
+
     public function display($cachable = false, $urlparams = [])
     {
-        // Option 1: retourner un 404 propre
-        throw new \Exception('Page not found', 404);
-
-        // Option 2: rediriger vers l’admin (si c’est volontairement admin-only)
-        // Factory::getApplication()->redirect('administrator/index.php?option=com_contentbuilder');
+        return parent::display($cachable, $urlparams);
     }
 }

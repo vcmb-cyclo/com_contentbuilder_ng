@@ -6,8 +6,9 @@
  * @license     GNU/GPL
 */
 
-// no direct access
+namespace CB\Component\Contentbuilder\Site\View\Export;
 
-defined( '_JEXEC' ) or die( 'Restricted access' );
+// no direct access
+\defined( '_JEXEC' ) or die( 'Restricted access' );
 
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/views/export/view.raw.php');
