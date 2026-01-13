@@ -26,29 +26,18 @@ use Joomla\Utilities\ArrayHelper;
 
 class FormsModel extends ListModel
 {
-    // Optionnel mais recommandé : définir le nom de la table (sans postfix)
-    protected $table = 'Form';
-
     public function __construct($config = [])
     {
         if (empty($config['filter_fields'])) {
             $config['filter_fields'] = [
                 'a.id',
-                'id',
                 'a.name',
-                'name',
                 'a.tag',
-                'tag',
                 'a.title',
-                'title',
                 'a.type',
-                'type',
                 'a.display_in',
-                'display_in',
                 'a.published',
-                'published',
-                'a.modified',
-                'modified'
+                'a.modified'
             ];
         }
 
@@ -79,12 +68,18 @@ class FormsModel extends ListModel
         $query->select('a.*')
             ->from($db->quoteName('#__contentbuilder_forms', 'a'));
 
-        // Published filter (forms_filter_state: 'P' or 'U')
-        $filterState = (string) $this->getState('forms_filter_state');
+        // Published filter (filter.state : 'P' or 'U')
+        $filterState = (string) $this->getState('filter.state');
 
         if ($filterState === 'P' || $filterState === 'U') {
             $published = ($filterState === 'P') ? 1 : 0;
             $query->where($db->quoteName('a.published') . ' = ' . (int) $published);
+        }
+
+        // Tag filter.
+        $filterTag = (string) $this->getState('filter.tag');
+        if ($filterTag !== '') {
+            $query->where($db->quoteName('a.tag') . ' = ' . $db->quote($filterTag));
         }
 
         // Ordering (equivalent à ton buildOrderBy())
@@ -154,10 +149,11 @@ class FormsModel extends ListModel
         $db = $this->getDatabase();
 
         $query = $db->getQuery(true)
-            ->select('DISTINCT tag AS tag')
-            ->from('#__contentbuilder_forms')
-            ->where('tag <> ""')
-            ->order('tag DESC');
+            ->select('DISTINCT ' . $db->quoteName('tag') . ' AS ' . $db->quoteName('tag'))
+            ->from($db->quoteName('#__contentbuilder_forms'))
+            ->where($db->quoteName('tag') . ' <> ' . $db->quote(''))
+            ->order($db->quoteName('tag') . ' ASC');
+
         $db->setQuery($query);
         return $db->loadObjectList();
     }
