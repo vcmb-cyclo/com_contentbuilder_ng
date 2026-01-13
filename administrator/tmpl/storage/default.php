@@ -89,7 +89,7 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                 Joomla.submitform(task);
                 break;
             case 'storage.save':
-            case 'storage.save2New':
+            case 'storage.save2new':
             case 'storage.apply':
                 var error = false;
                 var nodes = document.adminForm['cid[]'];
@@ -180,20 +180,20 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                             <tr>
                                 <td>
                                     <?php
-                                    if (!$this->form->bytable) {
+                                    if (!$this->item->bytable) {
                                         ?>
-                                        <input class="form-control form-control-sm w-100" type="text" id="name" name="name"
-                                            value="<?php echo htmlentities($this->form->name ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+                                        <input class="form-control form-control-sm w-100" type="text" id="name" name="jform[name]"
+                                            value="<?php echo htmlentities($this->item->name ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                                         <br /><br />
                                         <?php
                                     } else {
                                         ?>
-                                        <input type="hidden" id="name" name="name"
-                                            value="<?php echo htmlentities($this->form->name, ENT_QUOTES, 'UTF-8'); ?>" />
+                                        <input type="hidden" id="name" name="jform[name]"
+                                            value="<?php echo htmlentities($this->item->name, ENT_QUOTES, 'UTF-8'); ?>" />
                                         <?php
                                     }
 
-                                    if (!$this->form->id) {
+                                    if (!$this->item->id) {
                                         ?>
                                         <b>
                                             <?php echo Text::_('COM_CONTENTBUILDER_CHOOSE_TABLE'); ?>
@@ -201,7 +201,7 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                                         <br />
                                         <select class="form-select-sm"
                                             onchange="if(this.selectedIndex != 0){ document.getElementById('name').disabled = true; document.getElementById('csvUploadHead').style.display = 'none'; document.getElementById('csvUpload').style.display = 'none'; alert('<?php echo addslashes(Text::_('COM_CONTENTBUILDER_CUSTOM_STORAGE_MSG')); ?>'); }else{ document.getElementById('name').disabled = false; document.getElementById('csvUploadHead').style.display = ''; document.getElementById('csvUpload').style.display = ''; }"
-                                            name="bytable" id="bytable" style="max-width: 150px;">
+                                            name="jform[bytable]" id="bytable" style="max-width: 150px;">
                                             <option value=""> -
                                                 <?php echo Text::_('COM_CONTENTBUILDER_NONE'); ?> -
                                             </option>
@@ -216,15 +216,15 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                                             ?>
                                         </select>
                                         <?php
-                                    } else if ($this->form->bytable) {
+                                    } else if ($this->item->bytable) {
                                         ?>
-                                            <input type="hidden" id="bytable" name="bytable"
-                                                value="<?php echo htmlentities($this->form->name, ENT_QUOTES, 'UTF-8'); ?>" />
-                                        <?php echo htmlentities($this->form->name, ENT_QUOTES, 'UTF-8'); ?>
+                                            <input type="hidden" id="bytable" name="jform[bytable]"
+                                                value="<?php echo htmlentities($this->item->name, ENT_QUOTES, 'UTF-8'); ?>" />
+                                        <?php echo htmlentities($this->item->name, ENT_QUOTES, 'UTF-8'); ?>
                                         <?php
-                                    } else if (!$this->form->bytable) {
+                                    } else if (!$this->item->bytable) {
                                         ?>
-                                                <input type="hidden" id="bytable" name="bytable" value="" />
+                                                <input type="hidden" id="bytable" name="jform[bytable]" value="" />
                                         <?php
                                     }
                                     ?>
@@ -242,8 +242,8 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                             <tr>
                                 <td>
                                     <input class="form-control form-control-sm w-100" type="text" id="title"
-                                        name="title"
-                                        value="<?php echo htmlentities($this->form->title ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+                                        name="jform[title]"
+                                        value="<?php echo htmlentities($this->item->title ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                                 </td>
                             </tr>
                             <tr id="csvUploadHead">
@@ -288,17 +288,17 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                                     <label for="csv_drop_records">
                                         <?php echo Text::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_DROP_RECORDS'); ?>
                                     </label> <input class="form-check-input" type="checkbox" id="csv_drop_records"
-                                        name="csv_drop_records" value="1" checked="checked" />
+                                        name="jform[csv_drop_records]" value="1" checked="checked" />
                                     <br />
                                     <label for="csv_published">
                                         <?php echo Text::_('COM_CONTENTBUILDER_AUTO_PUBLISH'); ?>
                                     </label> <input class="form-check-input" type="checkbox" id="csv_published"
-                                        name="csv_published" value="1" checked="checked" />
+                                        name="jform[csv_published]" value="1" checked="checked" />
                                     <br />
                                     <label for="csv_delimiter">
                                         <?php echo Text::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_DELIMITER'); ?>
                                     </label> <input class="form-control form-control-sm" maxlength="3" type="text"
-                                        size="1" id="csv_delimiter" name="csv_delimiter" value="," />
+                                        size="1" id="csv_delimiter" name="jform[csv_delimiter]" value="," />
                                     <br />
                                     <br />
                                     <label class="editlinktip hasTip"
@@ -307,7 +307,7 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                                         <?php echo Text::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_REPAIR_ENCODING'); ?>*
                                     </label>
                                     <br />
-                                    <select class="form-select-sm" style="width: 150px;" name="csv_repair_encoding"
+                                    <select class="form-select-sm" style="width: 150px;" name="jform[csv_repair_encoding]"
                                         id="csv_repair_encoding">
                                         <option value=""> -
                                             <?php echo Text::_('COM_CONTENTBUILDER_STORAGE_UPDATE_FROM_CSV_NO_REPAIR_ENCODING'); ?>
@@ -361,7 +361,7 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                         </table>
                     </fieldset>
                     <?php
-                    if (!$this->form->bytable) {
+                    if (!$this->item->bytable) {
                         ?>
                         <fieldset class="adminform">
                             <legend>
@@ -380,7 +380,7 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                                 <tr>
                                     <td>
                                         <input class="form-control form-control-sm w-100" type="text" id="fieldname"
-                                            name="fieldname" value="" />
+                                            name="jform[fieldname]" value="" />
                                     </td>
                                 </tr>
                                 <tr>
@@ -395,7 +395,7 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                                 <tr>
                                     <td>
                                         <input class="form-control form-control-sm w-100" type="text" id="fieldtitle"
-                                            name="fieldtitle" value="" />
+                                            name="jform[fieldtitle]" value="" />
                                     </td>
                                 </tr>
                                 <tr>
@@ -409,11 +409,11 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                                 </tr>
                                 <tr>
                                     <td>
-                                        <input class="form-check-input" type="radio" id="is_group" name="is_group"
+                                        <input class="form-check-input" type="radio" id="is_group" name="jform[is_group]"
                                             value="1" /> <label for="is_group">
                                             <?php echo Text::_('COM_CONTENTBUILDER_YES'); ?>
                                         </label>
-                                        <input class="form-check-input" type="radio" id="is_group_no" name="is_group"
+                                        <input class="form-check-input" type="radio" id="is_group_no" name="jform[is_group]"
                                             value="0" checked="checked" /> <label for="is_group_no">
                                             <?php echo Text::_('COM_CONTENTBUILDER_NO'); ?>
                                         </label>
@@ -431,7 +431,7 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                                 <tr>
                                     <td align="right">
                                         <textarea class="form-control form-control-sm" style="width: 100%; height: 100px;"
-                                            id="group_definition" name="group_definition">Label 1;value1
+                                            id="group_definition" name="jform[group_definition]">Label 1;value1
     Label 2;value2
     Label 3;value3</textarea>
                                     </td>
@@ -490,7 +490,7 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
                                 <td width="100">
                                     <div style="cursor:pointer;width: 100%;display:block;"
                                         id="itemNames_<?php echo $row->id ?>"
-                                        onclick="if(<?php echo $this->form->bytable ? 'true' : 'false'; ?>){ return; }document.getElementById('itemNames<?php echo $row->id ?>').style.display='block';this.style.display='none';document.getElementById('itemNames<?php echo $row->id ?>').focus();">
+                                        onclick="if(<?php echo $this->item->bytable ? 'true' : 'false'; ?>){ return; }document.getElementById('itemNames<?php echo $row->id ?>').style.display='block';this.style.display='none';document.getElementById('itemNames<?php echo $row->id ?>').focus();">
                                         <?php echo htmlentities($row->name, ENT_QUOTES, 'UTF-8'); ?>
                                     </div>
                                     <input class="form-control form-control-sm w-100"
@@ -586,14 +586,13 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
     <div class="clr"></div>
 
     <input type="hidden" name="option" value="com_contentbuilder" />
-    <input type="hidden" name="id" value="<?php echo $this->form->id; ?>" />
+    <input type="hidden" name="id" value="<?php echo $this->item->id; ?>" />
     <input type="hidden" name="jform[id]" value="<?php echo (int) $this->item->id; ?>" />
-    <input type="hidden" name="task" value="storage.edit" />
+    <input type="hidden" name="task" value="" />
     <input type="hidden" name="jform[ordering]" value="<?php echo $this->item->ordering; ?>" />
     <input type="hidden" name="jform[published]" value="<?php echo $this->item->published; ?>" />
     <input type="hidden" name="list[ordering]" value="<?php echo htmlspecialchars($listOrder, ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="list[direction]" value="<?php echo htmlspecialchars($listDirn, ENT_QUOTES, 'UTF-8'); ?>" />
-    <input type="hidden" name="published" value="<?php echo $this->form->published; ?>" />
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="tabStartOffset" value="<?php echo Factory::getApplication()->getSession()->get('tabStartOffset', 0); ?>" />
     <?php echo HTMLHelper::_('form.token'); ?>

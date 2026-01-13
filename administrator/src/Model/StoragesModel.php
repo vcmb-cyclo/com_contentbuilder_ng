@@ -30,11 +30,6 @@ class StoragesModel extends ListModel
     // Optionnel mais recommandé : définir le nom de la table (sans postfix)
     protected $table = 'Storage';
 
-    /**
-     * Pagination object
-     * @var object
-     */
-
     public function __construct($config = [])
     {
         if (empty($config['filter_fields'])) {
@@ -52,9 +47,7 @@ class StoragesModel extends ListModel
             ];
         }
 
-        $mainframe = Factory::getApplication();
-        $option = 'com_contentbuilder';
-
+        $this->option = 'com_contentbuilder';
 
         parent::__construct($config);
     }
@@ -74,7 +67,7 @@ class StoragesModel extends ListModel
 
     protected function getListQuery(): QueryInterface
     {
-        $db    = $this->getDatabase();          // Joomla 4/5/6
+        $db    = $this->getDatabase();
         $query = $db->getQuery(true);
 
         // Base query
@@ -190,6 +183,7 @@ class StoragesModel extends ListModel
     /**
      * @return string The query
      */
+    /*
     private function _buildQuery()
     {
         $where = '';
@@ -212,7 +206,7 @@ class StoragesModel extends ListModel
         }
 
         return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_storages ' . $where . $filter_state . $this->buildOrderBy();
-    }
+    }*/
 
 
     function saveOrder()
@@ -232,7 +226,7 @@ class StoragesModel extends ListModel
             $row->load($items[$i]);
             if ($row->ordering != $order[$i]) {
                 $row->ordering = $order[$i];
-                if (!$row->store()) {
+                if (!$row->save()) {
                     $this->setError($row->getError());
                     return false;
                 }

@@ -20,26 +20,22 @@ namespace CB\Component\Contentbuilder\Administrator\Model;
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
 
-use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Factory;
-use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
-use Joomla\Filesystem\File;
-use Joomla\CMS\Pagination\Pagination;
 use Joomla\CMS\MVC\Model\AdminModel;
-use Joomla\CMS\Table\Table;
+use Joomla\Database\DatabaseInterface;
+use Joomla\Filesystem\File;
+use Joomla\Utilities\ArrayHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\Logger;
 
 class StorageModel extends AdminModel
 {
-    protected DatabaseInterface $_db;
-    protected int $storageId = 0;
-    protected ?object $_data = null;
+    /** @var object|null */
+    protected ?object $oldItem = null;
 
-    protected int $_total = 0;
-    protected ?Pagination $_pagination = null;
-
+    /** Required for CSV file */
+    private string $target_table = '';
 
     public function __construct($config = [])
     {
@@ -47,198 +43,601 @@ class StorageModel extends AdminModel
         $this->option = 'com_contentbuilder';
     }
 
-
-    public function getTable($type = 'Storage', $prefix = 'Contentbuilder', $config = [])
+    public function getTable($type = 'Storage', $prefix = 'Administrator', $config = [])
     {
-        return $this->getMVCFactory()->createTable($type, $prefix, $config);
-    }
+        // Méthode moderne via MVCFactory du composant
+        $table = $this->getMVCFactory()->createTable($type, $prefix, $config);
 
-    /**
-     * Retourne le JForm pour l’édition d’un storage
-     */
-    public function getForm($data = [], $loadData = true)
-    {
-        // form name = storage -> fichier: administrator/components/com_contentbuilder/forms/storage.xml
-        $form = $this->loadForm(
-            $this->option . '.storage', // ex: com_contentbuilder.storage
-            'storage',                  // storage.xml
-            [
-                'control'   => 'jform',
-                'load_data' => $loadData,
-            ]
-        );
+        // Fallback (déprécié mais utile en dépannage)
+        // if (!$table) {
+        //    $table = Table::getInstance($type, 'CB\\Component\\Contentbuilder\\Administrator\\Table\\', $config);
+        // }
 
-        if (empty($form)) {
-            return false;
+        if (!$table) {
+            throw new \RuntimeException(
+                'Table introuvable: ' . $type . ' / ' . $prefix . ' (vérifie src/Table et le mapping <namespace> du manifest)',
+                500
+            );
         }
 
-        return $form;
+        return $table;
     }
 
-    /**
-     * Données injectées dans le formulaire quand on édite
-     */
+
+    public function getForm($data = [], $loadData = true)
+    {
+        $form = $this->loadForm(
+            $this->option . '.storage',
+            'storage',
+            ['control' => 'jform', 'load_data' => $loadData]
+        );
+
+        return $form ?: false;
+    }
+
     protected function loadFormData()
     {
         $data = $this->getItem();
-
-        // Permet d’injecter aussi une session “edit.storage.data” si tu en as
         $app  = Factory::getApplication();
-        $data = $app->getUserState($this->option . '.edit.storage.data', $data);
-
-        return $data;
+        return $app->getUserState($this->option . '.edit.storage.data', $data);
     }
-
 
     protected function populateState()
     {
         parent::populateState();
-
-        $app   = Factory::getApplication();
-        $input = $app->input;
-
-        // D'abord id explicite
-        $id = $input->getInt('id', 0);
-
-        // Dinon depuis le formulaire posté
-        if (!$id) {
-            $jform = $input->post->get('jform', [], 'array');
-            $id = (int) ($jform['id'] ?? 0);
-        }
-
-        // IMPORTANT: pour un FormModel, getName() renvoie souvent "Form"
-        // donc state = "form.id" si getName() est "form" (selon Joomla), sinon "Form.id".
+        $id = (int) Factory::getApplication()->input->getInt('id', 0);
         $this->setState($this->getName() . '.id', $id);
     }
 
-    function setListPublished()
-    {
-        $items = CBRequest::getVar('cid', array(), 'post', 'array');
-        ArrayHelper::toInteger($items);
-        if (count($items)) {
-            $this->getDatabase()->setQuery(' Update #__contentbuilder_storage_fields ' .
-                '  Set published = 1 Where id In ( ' . implode(',', $items) . ')');
-            $this->getDatabase()->execute();
-        }
-    }
-
-    function setListUnpublished()
-    {
-        $items = CBRequest::getVar('cid', array(), 'post', 'array');
-        ArrayHelper::toInteger($items);
-        if (count($items)) {
-            $this->getDatabase()->setQuery(' Update #__contentbuilder_storage_fields ' .
-                '  Set published = 0 Where id In ( ' . implode(',', $items) . ')');
-            $this->getDatabase()->execute();
-        }
-    }
-
-    /*
-     * MAIN DETAILS AREA
+    /**
+     * On charge l'ancien item avant save (utile pour rename de table)
      */
+    protected function preSaveHook(\Joomla\CMS\Table\Table $table, $data = [])
+    {
+        $id = (int) ($data['id'] ?? 0);
+        $this->oldItem = $id > 0 ? $this->getItem($id) : null;
+
+        Logger::info('StorageModel preSaveHook', [
+            'id' => $id,
+            'oldName' => $this->oldItem->name ?? null,
+            'oldBytable' => $this->oldItem->bytable ?? null,
+            'incomingKeys' => array_keys((array) $data),
+        ]);
+
+        return parent::preSaveHook($table, $data);
+    }
 
     /**
-     *
-     * @param int $id
+     * Normalisation name/title/bytable.
      */
-    function setId($id)
+    protected function prepareTable($table)
     {
-        // Set id and wipe data
-        $this->_id = $id;
-        $this->_data = null;
-    }
+        parent::prepareTable($table);
 
-    function getDbTables()
-    {
+        $bytable = (string) ($table->bytable ?? '');
+        $name    = (string) ($table->name ?? '');
+        $title   = (string) ($table->title ?? '');
 
-        $tables = Factory::getContainer()->get(DatabaseInterface::class)->getTableList();
-        return $tables;
-    }
+        // forcing to lower
+        $name = strtolower($name);
 
-    function getStorage()
-    {
-        $query = ' Select * From #__contentbuilder_storages ' .
-            '  Where id = ' . $this->_id;
-        $this->getDatabase()->setQuery($query);
-        $data = $this->getDatabase()->loadObject();
-
-        if (!$data) {
-            $data = new \stdClass();
-            $data->id = 0;
-            $data->name = null;
-            $data->title = null;
-            $data->bytable = 0;
-            $data->published = null;
-            $data->ordering = 0;
-        }
-
-        return $data;
-    }
-
-    /*
-    function getFields()
-    {
-        $query = ' Select * From #__contentbuilder_storage_fields ' .
-            '  Where storage_id = ' . $this->_id;
-        $this->getDatabase()->setQuery($query);
-        $data = $this->getDatabase()->loadObjectList();
-
-        if (!$data) {
-            $data = new \stdClass();
-            $data->id = 0;
-            $data->storage_id = 0;
-            $data->name = null;
-            $data->title = null;
-            $data->is_group = 0;
-            $data->group_definition = "Label 1;value1\nLabel 2;value2\nLabel 3;value3";
-            $data->published = null;
-            $data->ordering = 0;
-        }
-
-        return $data;
-    }*/
-    /*
-    private function buildOrderBy()
-    {
-        $mainframe = Factory::getApplication();
-        $option = 'com_contentbuilder';
-
-        $orderby = '';
-        $filter_order = $this->getState('fields_filter_order');
-        $filter_order_Dir = $this->getState('fields_filter_order_Dir');
-
-        // Error handling is never a bad thing.
-        if (!empty($filter_order) && !empty($filter_order_Dir)) {
-            $orderby = ' ORDER BY ' . $filter_order . ' ' . $filter_order_Dir . ' , ordering ';
+        if (!empty($bytable)) {
+            // bytable = table externe choisie
+            $table->bytable = 1;
+            $table->name = $bytable;
+            $table->title = trim($title) !== '' ? trim($title) : $bytable;
         } else {
-            $orderby = ' ORDER BY ordering ';
+            $table->bytable = 0;
+
+            $newname = preg_replace("/[^a-zA-Z0-9_\s]/isU", "_", trim($name));
+            $newname = str_replace([' ', "\n", "\r", "\t"], [''], $newname);
+            $newname = preg_replace("/^([0-9\s])/isU", "field$1$2", $newname);
+            $newname = $newname === '' ? ('field' . mt_rand(0, mt_getrandmax())) : $newname;
+
+            $this->target_table = $newname; // csv helper si besoin
+            $table->name  = $newname;
+            $table->title = trim($title) !== '' ? trim($title) : $newname;
         }
 
-        return $orderby;
-    } */
+        Logger::info('StorageModel prepareTable', [
+            'name' => $table->name,
+            'title' => $table->title,
+            'bytable' => (int) $table->bytable,
+        ]);
+    }
 
-    /*
-    function _buildQuery()
+    /**
+     * Toute la logique legacy (table, champs, rename, sync...) APRES le save core
+     */
+    protected function postSaveHook(\Joomla\CMS\Table\Table $table, $validData = [])
     {
-        $filter_state = '';
-        if ($this->getState('fields_filter_state') == 'P' || $this->getState('fields_filter_state') == 'U') {
-            $published = 0;
-            if ($this->getState('fields_filter_state') == 'P') {
-                $published = 1;
+        parent::postSaveHook($table, $validData);
+
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+        $storageId = (int) $table->id;
+        $isNew     = empty($validData['id']) || (int) $validData['id'] === 0;
+        $bytable   = (int) ($table->bytable ?? 0);
+
+        Logger::info('StorageModel postSaveHook', [
+            'storageId' => $storageId,
+            'isNew' => $isNew,
+            'name' => $table->name ?? null,
+            'bytable' => $bytable,
+        ]);
+
+        // 1) Ajouter un nouveau champ si demandé (jform[fieldname], etc.)
+        $this->maybeAddNewField($storageId, $bytable);
+
+        // 2) Créer/renommer la table de données (si !bytable) OU sync bytable (si bytable)
+        $this->syncStorageDataTableOrBytable($storageId, $isNew, $table);
+
+        // 3) Appliquer les modifs sur les champs existants (itemNames/itemTitles/itemIsGroup/itemGroupDefinitions)
+        $this->syncEditedFields($storageId, $bytable, $table);
+
+        // 4) Reorder
+        try {
+            $this->getTable('Storage')->reorder();
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+        }
+
+        try {
+            $fieldsTable = $this->getTable('StorageFields');
+            $fieldsTable->reorder('storage_id = ' . (int) $storageId);
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+        }
+    }
+
+    /**
+     * Ajout d’un nouveau champ si jform[fieldname] rempli (ancienne logique "case of new field")
+     */
+    private function maybeAddNewField(int $storageId, int $bytable): void
+    {
+        if ($bytable) {
+            return;
+        }
+
+        $input = Factory::getApplication()->input;
+        $jform = $input->post->get('jform', [], 'array');
+
+        $fieldname = trim((string)($jform['fieldname'] ?? ''));
+        if ($fieldname === '') {
+            return;
+        }
+
+        $fieldtitle = trim((string)($jform['fieldtitle'] ?? ''));
+        $isGroup    = (int)($jform['is_group'] ?? 0);
+        $groupDef   = (string)($jform['group_definition'] ?? '');
+
+        // Normalisation comme ton legacy
+        $newfieldname = preg_replace("/[^a-zA-Z0-9_\s]/isU", "_", trim($fieldname));
+        $newfieldname = str_replace([' ', "\n", "\r", "\t"], ['_'], $newfieldname);
+        $newfieldname = preg_replace("/^([0-9\s])/isU", "field$1$2", $newfieldname);
+        $newfieldname = $newfieldname === '' ? ('field' . mt_rand(0, mt_getrandmax())) : $newfieldname;
+
+        $newfieldtitle = $fieldtitle !== '' ? $fieldtitle : $newfieldname;
+
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+        // ordering max+1
+        $db->setQuery("SELECT COALESCE(MAX(ordering), 0) + 1 FROM #__contentbuilder_storage_fields WHERE storage_id = " . (int) $storageId);
+        $max = (int) $db->loadResult();
+
+        // unicité
+        $db->setQuery(
+            "SELECT `name` FROM #__contentbuilder_storage_fields WHERE `name` = " . $db->quote($newfieldname) .
+            " AND storage_id = " . (int) $storageId
+        );
+        $exists = $db->loadResult();
+
+        if ($exists) {
+            Logger::info('maybeAddNewField skipped (exists)', ['storageId' => $storageId, 'field' => $newfieldname]);
+            return;
+        }
+
+        Logger::info('maybeAddNewField insert', [
+            'storageId' => $storageId,
+            'name' => $newfieldname,
+            'title' => $newfieldtitle,
+            'is_group' => $isGroup,
+        ]);
+
+        $db->setQuery(
+            "INSERT INTO #__contentbuilder_storage_fields (ordering, storage_id, `name`, `title`, `is_group`, `group_definition`)
+             VALUES (" . (int)$max . "," . (int)$storageId . "," . $db->quote($newfieldname) . "," . $db->quote($newfieldtitle) . "," . (int)$isGroup . "," . $db->quote($groupDef) . ")"
+        );
+        $db->execute();
+
+        // colonne dans table data (si table existe déjà)
+        $storage = $this->getItem($storageId);
+        if (!empty($storage->name)) {
+            try {
+                $db->setQuery("ALTER TABLE `#__" . $storage->name . "` ADD `" . $newfieldname . "` TEXT NULL");
+                $db->execute();
+            } catch (\Throwable $e) {
+                Logger::exception($e);
+            }
+        }
+    }
+
+    /**
+     * Crée/rename la table #__<storage.name> si !bytable
+     * OU sync bytable => créer storage_fields depuis colonnes + ajouter colonnes system + import records si new
+     */
+    private function syncStorageDataTableOrBytable(int $storageId, bool $isNew, \Joomla\CMS\Table\Table $table): void
+    {
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+        $name   = (string) ($table->name ?? '');
+        $bytable = (int) ($table->bytable ?? 0);
+
+        $last_update = Factory::getDate()->toSql();
+
+        // map table list => colonnes
+        $tableList = $db->getTableList();
+        $tables = array_combine(
+            $tableList,
+            array_map(static fn($t) => $db->getTableColumns($t, true), $tableList)
+        );
+
+        if (!$bytable) {
+            // data table = #__<name>
+            $prefixedName = $db->getPrefix() . $name;
+
+            $exists = isset($tables[$prefixedName]);
+            $oldName = $this->oldItem->name ?? null;
+
+            if (!$exists) {
+                // rename si l'ancienne existait
+                if (!empty($oldName)) {
+                    $oldPrefixed = $db->getPrefix() . $oldName;
+                    if (isset($tables[$oldPrefixed])) {
+                        Logger::info('Rename data table', ['from' => $oldName, 'to' => $name]);
+                        $db->setQuery("RENAME TABLE `#__" . $oldName . "` TO `#__" . $name . "`");
+                        $db->execute();
+                        return;
+                    }
+                }
+
+                // create
+                Logger::info('Create data table', ['name' => $name, 'storageId' => $storageId]);
+
+                try {
+                    $db->setQuery("
+                        CREATE TABLE `#__{$name}` (
+                            `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                            `storage_id` INT NOT NULL DEFAULT " . (int)$storageId . ",
+                            `user_id` INT NOT NULL DEFAULT 0,
+                            `created` DATETIME NOT NULL DEFAULT " . $db->quote($last_update) . ",
+                            `created_by` VARCHAR(255) NOT NULL DEFAULT '',
+                            `modified_user_id` INT NOT NULL DEFAULT 0,
+                            `modified` DATETIME NULL DEFAULT NULL,
+                            `modified_by` VARCHAR(255) NOT NULL DEFAULT ''
+                        )
+                    ");
+                    $db->execute();
+
+                    $db->setQuery("ALTER TABLE `#__{$name}` ADD INDEX (`storage_id`)");
+                    $db->execute();
+                    $db->setQuery("ALTER TABLE `#__{$name}` ADD INDEX (`user_id`)");
+                    $db->execute();
+                    $db->setQuery("ALTER TABLE `#__{$name}` ADD INDEX (`created`)");
+                    $db->execute();
+                    $db->setQuery("ALTER TABLE `#__{$name}` ADD INDEX (`modified_user_id`)");
+                    $db->execute();
+                    $db->setQuery("ALTER TABLE `#__{$name}` ADD INDEX (`modified`)");
+                    $db->execute();
+                } catch (\Throwable $e) {
+                    Logger::exception($e);
+                }
             }
 
-            $filter_state .= ' And published = ' . $published;
+            return;
         }
 
-        return "Select * From #__contentbuilder_storage_fields Where storage_id = " . $this->_id . $filter_state . $this->buildOrderBy();
+        // BYTABLE = table externe (nom dans $name)
+        if (!isset($tables[$name])) {
+            // attention: getTableList() retourne souvent les noms déjà préfixés (selon driver)
+            // on tente aussi avec prefix
+            $name2 = $db->getPrefix() . $name;
+            if (isset($tables[$name2])) {
+                $name = $name2;
+            } else {
+                Logger::info('Bytable not found in database table list', ['bytable' => $name]);
+                return;
+            }
+        }
+
+        Logger::info('Sync bytable', ['bytable' => $name, 'storageId' => $storageId, 'isNew' => $isNew]);
+
+        $system_fields = ['id', 'storage_id', 'user_id', 'created', 'created_by', 'modified_user_id', 'modified', 'modified_by'];
+
+        $fields = $tables[$name]; // colonne => type
+        $allfields = [];
+        $fieldin = '';
+
+        foreach ($fields as $field => $type) {
+            $allfields[] = $field;
+            $fieldin .= $db->quote($field) . ',';
+        }
+        $fieldin = rtrim($fieldin, ',');
+
+        // ordering max+1
+        $db->setQuery("SELECT COALESCE(MAX(ordering), 0) + 1 FROM #__contentbuilder_storage_fields WHERE storage_id = " . (int) $storageId);
+        $max = (int) $db->loadResult();
+
+        if ($fieldin !== '') {
+            $db->setQuery(
+                "SELECT `name` FROM #__contentbuilder_storage_fields
+                 WHERE `name` IN ($fieldin) AND storage_id = " . (int) $storageId
+            );
+            $existingNames = $db->loadColumn() ?: [];
+
+            foreach ($fields as $field => $type) {
+                if (!in_array($field, $existingNames, true) && !in_array($field, $system_fields, true)) {
+                    $db->setQuery(
+                        "INSERT INTO #__contentbuilder_storage_fields (ordering, storage_id, `name`, `title`, `is_group`, `group_definition`)
+                         VALUES (" . (int)$max . "," . (int)$storageId . "," . $db->quote($field) . "," . $db->quote($field) . ",0,'')"
+                    );
+                    $db->execute();
+                }
+            }
+        }
+
+        // Ajouter colonnes system manquantes dans la table externe
+        foreach ($system_fields as $missing) {
+            if (in_array($missing, $allfields, true)) {
+                continue;
+            }
+
+            try {
+                switch ($missing) {
+                    case 'id':
+                        $db->setQuery("ALTER TABLE `{$name}` ADD `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY");
+                        $db->execute();
+                        break;
+
+                    case 'storage_id':
+                        $db->setQuery("ALTER TABLE `{$name}` ADD `storage_id` INT NOT NULL DEFAULT " . (int)$storageId . ", ADD INDEX (`storage_id`)");
+                        $db->execute();
+                        break;
+
+                    case 'user_id':
+                        $db->setQuery("ALTER TABLE `{$name}` ADD `user_id` INT NOT NULL DEFAULT 0, ADD INDEX (`user_id`)");
+                        $db->execute();
+                        break;
+
+                    case 'created':
+                        $db->setQuery("ALTER TABLE `{$name}` ADD `created` DATETIME NOT NULL DEFAULT " . $db->quote($last_update) . ", ADD INDEX (`created`)");
+                        $db->execute();
+                        break;
+
+                    case 'created_by':
+                        $db->setQuery("ALTER TABLE `{$name}` ADD `created_by` VARCHAR(255) NOT NULL DEFAULT ''");
+                        $db->execute();
+                        break;
+
+                    case 'modified_user_id':
+                        $db->setQuery("ALTER TABLE `{$name}` ADD `modified_user_id` INT NOT NULL DEFAULT 0, ADD INDEX (`modified_user_id`)");
+                        $db->execute();
+                        break;
+
+                    case 'modified':
+                        $db->setQuery("ALTER TABLE `{$name}` ADD `modified` DATETIME NULL DEFAULT NULL, ADD INDEX (`modified`)");
+                        $db->execute();
+                        break;
+
+                    case 'modified_by':
+                        $db->setQuery("ALTER TABLE `{$name}` ADD `modified_by` VARCHAR(255) NOT NULL DEFAULT ''");
+                        $db->execute();
+                        break;
+                }
+            } catch (\Throwable $e) {
+                Logger::exception($e);
+            }
+        }
+
+        // Import records si nouveau storage
+        if ($isNew) {
+            try {
+                // set default + set storage_id
+                $db->setQuery("UPDATE `{$name}` SET `storage_id` = " . (int)$storageId);
+                $db->execute();
+
+                $db->setQuery("SELECT id FROM `{$name}`");
+                $thirdPartyIds = $db->loadColumn() ?: [];
+
+                foreach ($thirdPartyIds as $thirdPartyId) {
+                    $db->setQuery(
+                        "INSERT INTO #__contentbuilder_records
+                        (`type`, last_update, is_future, lang_code, sef, published, record_id, reference_id)
+                        VALUES
+                        ('com_contentbuilder', " . $db->quote($last_update) . ", 0, '*', '', 1, " . (int)$thirdPartyId . ", " . (int)$storageId . ")"
+                    );
+                    $db->execute();
+                }
+            } catch (\Throwable $e) {
+                Logger::exception($e);
+            }
+        }
     }
 
-    function getData()
+    /**
+     * Applique les modifications sur les fields existants (édition inline)
+     * + rename colonnes si !bytable
+     */
+    private function syncEditedFields(int $storageId, int $bytable, \Joomla\CMS\Table\Table $storageTable): void
     {
-        $this->getDatabase()->setQuery($this->_buildQuery(), $this->getState('limitstart'), $this->getState('limit'));
-        $entries = $this->getDatabase()->loadObjectList();
-        return $entries;
-    }*/
+        $input = Factory::getApplication()->input;
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+        $listnames  = $input->post->get('itemNames', [], 'array');
+        if (empty($listnames)) {
+            return;
+        }
+
+        $listtitles = $input->post->get('itemTitles', [], 'array');
+        $listisgroup = $input->post->get('itemIsGroup', [], 'array');
+        $listgroupdefinitions = $input->post->get('itemGroupDefinitions', [], 'array');
+
+        Logger::info('syncEditedFields', [
+            'storageId' => $storageId,
+            'count' => count($listnames),
+            'bytable' => $bytable,
+        ]);
+
+        foreach ($listnames as $field_id => $name) {
+            $field_id = (int) $field_id;
+
+            $name = preg_replace("/[^a-zA-Z0-9_\s]/isU", "_", trim((string)$name));
+            $name = str_replace([' ', "\n", "\r", "\t"], [''], $name);
+            $name = preg_replace("/^([0-9\s])/isU", "field$1$2", $name);
+            $name = $name === '' ? ('field' . mt_rand(0, mt_getrandmax())) : $name;
+
+            $title = trim((string)($listtitles[$field_id] ?? ''));
+            $title = $title !== '' ? $title : $name;
+
+            $isGroup = (int)($listisgroup[$field_id] ?? 0);
+            $groupDef = (string)($listgroupdefinitions[$field_id] ?? '');
+
+            if (!$bytable) {
+                // old name
+                $db->setQuery("SELECT `name` FROM #__contentbuilder_storage_fields WHERE id = " . (int)$field_id);
+                $old_name = (string) $db->loadResult();
+
+                // update storage_fields
+                $db->setQuery(
+                    "UPDATE #__contentbuilder_storage_fields
+                     SET group_definition = " . $db->quote($groupDef) . ",
+                         is_group = " . (int)$isGroup . ",
+                         `name` = " . $db->quote($name) . ",
+                         `title` = " . $db->quote($title) . "
+                     WHERE id = " . (int)$field_id
+                );
+                $db->execute();
+
+                // rename column if needed
+                if ($old_name !== '' && $old_name !== $name) {
+                    try {
+                        $db->setQuery("ALTER TABLE `#__" . $storageTable->name . "` CHANGE `" . $old_name . "` `" . $name . "` TEXT");
+                        $db->execute();
+                    } catch (\Throwable $e) {
+                        Logger::exception($e);
+                    }
+                }
+            } else {
+                // bytable => pas de rename colonne
+                $db->setQuery(
+                    "UPDATE #__contentbuilder_storage_fields
+                     SET group_definition = " . $db->quote($groupDef) . ",
+                         is_group = " . (int)$isGroup . ",
+                         `title` = " . $db->quote($title) . "
+                     WHERE id = " . (int)$field_id
+                );
+                $db->execute();
+            }
+        }
+
+        // Reorder fields
+        try {
+            $fieldsTable = $this->getTable('StorageFields');
+            $fieldsTable->reorder('storage_id = ' . (int)$storageId);
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+        }
+
+        // Synchroniser colonnes manquantes si !bytable
+        if (!$bytable) {
+            $this->ensureMissingColumnsFromFields($storageId, (string)$storageTable->name);
+        }
+    }
+
+    /**
+     * Ajoute les colonnes manquantes dans la table data (ancienne synch)
+     */
+    private function ensureMissingColumnsFromFields(int $storageId, string $dataTableName): void
+    {
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+        // liste des champs définis
+        $db->setQuery("SELECT `name` FROM #__contentbuilder_storage_fields WHERE storage_id = " . (int)$storageId);
+        $fieldNames = $db->loadColumn() ?: [];
+
+        // colonnes existantes
+        try {
+            $cols = $db->getTableColumns($db->getPrefix() . $dataTableName, true);
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+            return;
+        }
+
+        foreach ($fieldNames as $fieldname) {
+            if ($fieldname === '' || isset($cols[$fieldname])) {
+                continue;
+            }
+
+            try {
+                $db->setQuery("ALTER TABLE `#__{$dataTableName}` ADD `{$fieldname}` TEXT NULL");
+                $db->execute();
+            } catch (\Throwable $e) {
+                Logger::exception($e);
+            }
+        }
+    }
+
+    /**
+     * Delete “propre” (ton code existant est OK, je le garde)
+     */
+    public function delete(&$pks)
+    {
+        $pks = (array) $pks;
+        ArrayHelper::toInteger($pks);
+
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $row = $this->getTable('Storage');
+
+        foreach ($pks as $pk) {
+            $pk = (int)$pk;
+
+            // charger storage
+            $storage = $this->getItem($pk);
+
+            $db->setQuery("DELETE FROM #__contentbuilder_storage_fields WHERE storage_id = " . (int)$pk);
+            $db->execute();
+
+            try {
+                $fieldsTable = $this->getTable('StorageFields');
+                $fieldsTable->reorder('storage_id = ' . (int) $pk);
+            } catch (\Throwable $e) {
+                Logger::exception($e);
+            }
+
+            if (!$row->delete($pk)) {
+                $this->setError($row->getError());
+                return false;
+            }
+
+            if ($storage && empty($storage->bytable) && !empty($storage->name)) {
+                try {
+                    $db->setQuery("DROP TABLE `#__" . $storage->name . "`");
+                    $db->execute();
+                } catch (\Throwable $e) {
+                    Logger::exception($e);
+                }
+            }
+        }
+
+        try {
+            $row->reorder();
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+        }
+
+        return true;
+    }
+
 
     function storeCsv($file)
     {
@@ -274,8 +673,6 @@ class StorageModel extends AdminModel
         return $handle;
     }
 
-    // required for CSV
-    private $target_table = '';
 
     function csv_file_to_table($source_file, $data, $max_line_length = 1000000)
     {
@@ -409,555 +806,5 @@ class StorageModel extends AdminModel
         $value = $this->getDatabase()->Quote($value);
         return $value;
     }
-
-    function store($post_replace = null)
-    {
-        $isNew = false;
-        $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $row = $this->getTable('Storage');
-        $storage = $this->getStorage();
-        $storage_id = 0;
-
-        if ($post_replace === null) {
-            $data = CBRequest::get('post');
-        } else {
-            $data = $post_replace;
-        }
-
-        Logger::info('In StorageModel::store', [
-            'storageId'     => $this->_id,
-            'postReplace'   => $post_replace !== null,
-            'hasByTable'    => isset($data['bytable']) ? (int) $data['bytable'] : null,
-            'name'          => $data['name'] ?? null,
-        ]);
-
-
-        $bytable = isset($data['bytable']) ? $data['bytable'] : '';
-
-        if (isset($data['bytable'])) {
-            unset($data['bytable']);
-        }
-
-        // forcing to lower as database exports may lead to tablename lowering
-        $data['name'] = isset($data['name']) ? strtolower($data['name']) : '';
-
-        if ($bytable) {
-
-            $data['bytable'] = 1;
-
-            $newname = $bytable;
-            $data['name'] = $newname;
-
-            if (!trim($data['title'])) {
-                $newtitle = $newname;
-            } else {
-                $newtitle = trim($data['title']);
-            }
-            $data['title'] = $newtitle;
-        } else {
-
-            $data['bytable'] = 0;
-
-            $newname = str_replace(array(' ', "\n", "\r", "\t"), array(''), preg_replace("/[^a-zA-Z0-9_\s]/isU", "_", trim($data['name'])));
-            $newname = preg_replace("/^([0-9\s])/isU", "field$1$2", $newname);
-            $newname = $newname == '' ? 'field' . mt_rand(0, mt_getrandmax()) : $newname;
-
-            // required for csv
-            $this->target_table = $newname;
-
-            $data['name'] = $newname;
-            if (!trim($data['title'])) {
-                $newtitle = $newname;
-            } else {
-                $newtitle = trim($data['title']);
-            }
-            $data['title'] = $newtitle;
-        }
-
-        $listnames = isset($data['itemNames']) ? $data['itemNames'] : array();
-        $listtitles = isset($data['itemTitles']) ? $data['itemTitles'] : array();
-        $listisgroup = isset($data['itemIsGroup']) ? $data['itemIsGroup'] : array();
-        $listgroupdefinitions = CBRequest::getVar('itemGroupDefinitions', array(), 'POST', 'ARRAY', CBREQUEST_ALLOWRAW);
-
-        unset($data['itemIsGroup']);
-        unset($data['itemGroupDefinitions']);
-        unset($data['itemNames']);
-        unset($data['itemTitles']);
-
-        // case of new field
-        $newfieldname = '';
-        $newfieldtitle = '';
-        $is_group = 0;
-        $group_definition = '';
-
-        $fieldexists = false;
-
-        if (isset($data['fieldname']) && trim($data['fieldname'])) {
-            $newfieldname = str_replace(array(' ', "\n", "\r", "\t"), array('_'), preg_replace("/[^a-zA-Z0-9_\s]/isU", "_", trim($data['fieldname'])));
-            $newfieldname = preg_replace("/^([0-9\s])/isU", "field$1$2", $newfieldname);
-            $newfieldname = $newfieldname == '' ? 'field' . mt_rand(0, mt_getrandmax()) : $newfieldname;
-            if (!trim($data['fieldtitle'])) {
-                $newfieldtitle = $newfieldname;
-            } else {
-                $newfieldtitle = trim($data['fieldtitle']);
-            }
-            $this->getDatabase()->setQuery("Select `name` From #__contentbuilder_storage_fields Where `name` = " . $this->getDatabase()->Quote($newfieldname) . " And storage_id = " . CBRequest::getInt('id', 0));
-            $fieldexists = $this->getDatabase()->loadResult();
-            if ($fieldexists) {
-                $newfieldname = $fieldexists;
-            }
-            $is_group = intval($data['is_group']);
-            $group_definition = $data['group_definition'];
-            unset($data['is_group']);
-            unset($data['group_definition']);
-            unset($data['fieldname']);
-            unset($data['fieldtitle']);
-        }
-
-        try {
-            $rr = $row->bind($data);
-        } catch (\RuntimeException $e) {
-            Logger::exception($e);
-            // throw $e; // optionnel : si tu veux laisser Joomla gérer l'erreur
-            $this->setError($e->getMessage());
-            return false;
-        } finally {
-            if (!$rr) {
-                return false;
-            }
-        }
-
-        try {
-            $r = $row->check();
-        } catch (\RuntimeException $e) {
-            Logger::exception($e);
-            $this->setError($e->getMessage());
-            return false;
-        } finally {
-            if (!$r) {
-                return false;
-            }
-        }
-
-        try {
-            $storeRes = $row->store();
-        } catch (\RuntimeException $e) {
-            Logger::exception($e);
-            $this->setError($e->getMessage());
-            return false;
-        }
-
-        if (!$storeRes) {
-            return false;
-        } else {
-            $storage_id = (int) $row->{$row->getKeyName()};
-            if (!$storage_id) {
-                $isNew = true;
-                $storage_id = $this->getDatabase()->insertid();
-                $this->_id = $storage_id;
-            }
-
-            // required for csv
-            $this->_id = $storage_id;
-        }
-
-        $row->reorder();
-
-        $this->getDatabase()->setQuery("Select Max(ordering)+1 From #__contentbuilder_storage_fields Where storage_id = " . $this->_id . "");
-        $max = intval($this->getDatabase()->loadResult());
-
-        // we have a new field, so let's add it
-        if (!$bytable && $this->_id && $newfieldname && !$fieldexists) {
-
-            $this->getDatabase()->setQuery("Insert Into #__contentbuilder_storage_fields (ordering, storage_id,`name`,`title`,`is_group`,`group_definition`) Values ($max," . intval($this->_id) . "," . $this->getDatabase()->Quote($newfieldname) . "," . $this->getDatabase()->Quote($newfieldtitle) . "," . $is_group . "," . $this->getDatabase()->Quote($group_definition) . ")");
-            $this->getDatabase()->execute();
-        }
-
-        // table
-        // create or update the corresponding table, field synch below
-
-        $last_update = Factory::getDate()->toSql();
-
-        $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $tableList = $db->getTableList();
-
-        $tables = [];
-        foreach ($tableList as $table) {
-            $tables[$table] = $db->getTableColumns($table, true);  // true = retourne seulement les types (comme dans l'original)
-        }
-
-        if (!$bytable && !isset($tables[Factory::getContainer()->get(DatabaseInterface::class)->getPrefix() . $data['name']])) {
-            if ($storage->name && isset($tables[Factory::getContainer()->get(DatabaseInterface::class)->getPrefix() . $storage->name])) {
-
-                $this->getDatabase()->setQuery("Rename Table #__" . $storage->name . " To #__" . $data['name']);
-                $this->getDatabase()->execute();
-            } else {
-                try {
-                    $this->getDatabase()->setQuery('
-                    CREATE TABLE `#__' . $data['name'] . '` (
-                    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                    `storage_id` INT NOT NULL DEFAULT "' . $this->_id . '",
-                    `user_id` INT NOT NULL DEFAULT "0",
-                    `created` DATETIME NOT NULL DEFAULT "' . $last_update . '",
-                    `created_by` VARCHAR( 255 ) NOT NULL DEFAULT "",
-                    `modified_user_id` INT NOT NULL DEFAULT "0",
-                    `modified` DATETIME NOT NULL DEFAULT NULL,
-                    `modified_by` VARCHAR( 255 ) NOT NULL DEFAULT ""
-                    ) ;
-                    ');
-                    $this->getDatabase()->execute();
-                    $this->getDatabase()->setQuery("ALTER TABLE `#__" . $data['name'] . "` ADD INDEX ( `storage_id` )");
-                    $this->getDatabase()->execute();
-                    $this->getDatabase()->setQuery("ALTER TABLE `#__" . $data['name'] . "` ADD INDEX ( `user_id` )");
-                    $this->getDatabase()->execute();
-                    $this->getDatabase()->setQuery("ALTER TABLE `#__" . $data['name'] . "` ADD INDEX ( `created` )");
-                    $this->getDatabase()->execute();
-                    $this->getDatabase()->setQuery("ALTER TABLE `#__" . $data['name'] . "` ADD INDEX ( `modified_user_id` )");
-                    $this->getDatabase()->execute();
-                    $this->getDatabase()->setQuery("ALTER TABLE `#__" . $data['name'] . "` ADD INDEX ( `modified` )");
-                    $this->getDatabase()->execute();
-                } catch (\Exception $e) {
-                    Logger::exception($e);
-                }
-            }
-        } else if ($bytable) {
-            // creating the storage fields in custom table if not existing already
-            $system_fields = array('id', 'storage_id', 'user_id', 'created', 'created_by', 'modified_user_id', 'modified', 'modified_by');
-            $allfields = array();
-            $fieldin = '';
-            $fields = $tables[$data['name']];
-            foreach ($fields as $field => $type) {
-                $fieldin .= "'" . $field . "',";
-            }
-            $fieldin = rtrim($fieldin, ',');
-            if ($fieldin) {
-                $this->getDatabase()->setQuery("Select `name` From #__contentbuilder_storage_fields Where `name` In (" . $fieldin . ") And storage_id = " . $this->_id);
-
-                $fieldnames = $this->getDatabase()->loadColumn();
-                foreach ($fields as $field => $type) {
-                    if (!in_array($field, $fieldnames) && !in_array($field, $system_fields)) {
-                        $this->getDatabase()->setQuery("Insert Into #__contentbuilder_storage_fields (ordering,storage_id,`name`,`title`,`is_group`,`group_definition`) Values ($max," . intval($this->_id) . "," . $this->getDatabase()->Quote($field) . "," . $this->getDatabase()->Quote($field) . ",0,'')");
-                        $this->getDatabase()->execute();
-                    }
-                    $allfields[] = $field;
-                }
-
-                // now we add missing system columns into the custom table
-                try {
-                    foreach ($system_fields as $missing) {
-                        if (!in_array($missing, $allfields)) {
-                            switch ($missing) {
-                                case 'id':
-                                    $this->getDatabase()->setQuery("ALTER TABLE `" . $data['name'] . "` ADD `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ");
-                                    $this->getDatabase()->execute();
-                                    break;
-                                case 'storage_id':
-                                    $this->getDatabase()->setQuery("ALTER TABLE `" . $data['name'] . "` ADD `storage_id` INT NOT NULL DEFAULT " . $this->_id . ", ADD INDEX ( `storage_id` )");
-                                    $this->getDatabase()->execute();
-                                    break;
-                                case 'user_id':
-                                    $this->getDatabase()->setQuery("ALTER TABLE `" . $data['name'] . "` ADD `user_id` INT NOT NULL DEFAULT 0, ADD INDEX ( `user_id` ) ");
-                                    $this->getDatabase()->execute();
-                                    break;
-                                case 'created':
-                                    $this->getDatabase()->setQuery("ALTER TABLE `" . $data['name'] . "` ADD `created` DATETIME NOT NULL DEFAULT '" . $last_update . "', ADD INDEX ( `created` ) ");
-                                    $this->getDatabase()->execute();
-                                    break;
-                                case 'created_by':
-                                    $this->getDatabase()->setQuery("ALTER TABLE `" . $data['name'] . "` ADD `created_by` VARCHAR( 255 ) NOT NULL DEFAULT '' ");
-                                    $this->getDatabase()->execute();
-                                    break;
-                                case 'modified_user_id':
-                                    $this->getDatabase()->setQuery("ALTER TABLE `" . $data['name'] . "` ADD `modified_user_id` INT NOT NULL DEFAULT 0, ADD INDEX ( `modified_user_id` ) ");
-                                    $this->getDatabase()->execute();
-                                    break;
-                                case 'modified':
-                                    $this->getDatabase()->setQuery("ALTER TABLE `" . $data['name'] . "` ADD `modified` DATETIME NOT NULL DEFAULT NULL, ADD INDEX ( `modified` ) ");
-                                    $this->getDatabase()->execute();
-                                    break;
-                                case 'modified_by':
-                                    $this->getDatabase()->setQuery("ALTER TABLE `" . $data['name'] . "` ADD `modified_by` VARCHAR( 255 ) NOT NULL DEFAULT '' ");
-                                    $this->getDatabase()->execute();
-                                    break;
-                            }
-                        }
-                    }
-                } catch (\Exception $e) {
-                    Logger::exception($e);
-                }
-
-                // importing records
-                if ($isNew) {
-
-                    $this->getDatabase()->setQuery("Alter Table `" . $data['name'] . "` Alter Column `storage_id` Set Default '" . $this->_id . "'");
-                    $this->getDatabase()->execute();
-
-                    $this->getDatabase()->setQuery("Update `" . $data['name'] . "` Set `storage_id` = '" . $this->_id . "'");
-                    $this->getDatabase()->execute();
-
-                    $this->getDatabase()->setQuery("Select id From `" . $data['name'] . "`");
-
-                    $third_party_ids = $this->getDatabase()->loadColumn();
-
-                    foreach ($third_party_ids as $third_party_id) {
-                        $this->getDatabase()->setQuery("Insert Into #__contentbuilder_records (
-                            `type`,
-                            last_update,
-                            is_future,
-                            lang_code, 
-                            sef, 
-                            published, 
-                            record_id, 
-                            reference_id
-                        ) 
-                        Values 
-                        (
-                            'com_contentbuilder',
-                            " . $this->getDatabase()->Quote($last_update) . ",
-                            0,
-                            '*',
-                            '',
-                            1,
-                            " . $this->getDatabase()->Quote(intval($third_party_id)) . ",
-                            " . $this->getDatabase()->Quote($this->_id) . "
-                        )"); // ignore already imported records
-
-                        $this->getDatabase()->execute();
-                    }
-                }
-            }
-        }
-
-
-        $tableList = $db->getTableList();
-        $tables = array_combine(
-            $tableList,
-            array_map(static fn($t) => $db->getTableColumns($t, true), $tableList)
-        );
-
-        foreach ($listnames as $field_id => $name) {
-
-            $name = str_replace(array(' ', "\n", "\r", "\t"), array(''), preg_replace("/[^a-zA-Z0-9_\s]/isU", "_", trim($name)));
-            $name = preg_replace("/^([0-9\s])/isU", "field$1$2", $name);
-            $name = $name == '' ? 'field' . mt_rand(0, mt_getrandmax()) : $name;
-
-            if (!trim($listtitles[$field_id])) {
-                $listtitles[$field_id] = $name;
-            } else {
-                $listtitles[$field_id] = trim($listtitles[$field_id]);
-            }
-
-            if (!$bytable) {
-
-                $this->getDatabase()->setQuery("Select `name` From #__contentbuilder_storage_fields Where id = " . intval($field_id));
-                $old_name = $this->getDatabase()->loadResult();
-
-                $this->getDatabase()->setQuery("Update #__contentbuilder_storage_fields Set group_definition = " . $this->getDatabase()->Quote($listgroupdefinitions[$field_id]) . ", is_group = " . intval($listisgroup[$field_id]) . ",`name` = " . $this->getDatabase()->Quote($name) . ", `title` = " . $this->getDatabase()->Quote($listtitles[$field_id]) . " Where id = " . intval($field_id));
-                $this->getDatabase()->execute();
-
-                if ($old_name != $name) {
-
-                    $this->getDatabase()->setQuery("ALTER TABLE `#__" . $data['name'] . "` CHANGE `" . $old_name . "` `" . $name . "` TEXT ");
-                    $this->getDatabase()->execute();
-                }
-            } else {
-                $this->getDatabase()->setQuery("Update #__contentbuilder_storage_fields Set group_definition = " . $this->getDatabase()->Quote($listgroupdefinitions[$field_id]) . ", is_group = " . intval($listisgroup[$field_id]) . ", `title` = " . $this->getDatabase()->Quote($listtitles[$field_id]) . " Where id = " . intval($field_id));
-                $this->getDatabase()->execute();
-            }
-        }
-
-        $this->getTable('StorageFields')->reorder('storage_id = ' . $this->_id);
-
-        if (!$bytable) {
-
-            // fields
-            // synch non-existing fields
-            $fields = $this->getFields();
-
-            foreach ($fields as $field) {
-                if (!isset($field->name)) {
-                    continue;
-                }
-                $fieldname = $field->name;
-                if ($fieldname && !isset($tables[$this->getDatabase()->getPrefix() . $data['name']][$fieldname])) {
-                    try {
-                        $this->getDatabase()->setQuery("ALTER TABLE `#__" . $data['name'] . "` ADD `" . $fieldname . "` TEXT NULL ");
-                        $this->getDatabase()->execute();
-                    } catch (\Exception $e) {
-                        Logger::exception($e);
-                    }
-                }
-            }
-        }
-
-        if ($post_replace === null) {
-            return $this->_id;
-        } else {
-            return $newfieldname;
-        }
-    }
-
-    public function delete(&$pks)
-    {
-        $pks = (array) $pks;
-        ArrayHelper::toInteger($pks);
-
-        $row = $this->getTable('Storage');
-
-        foreach ($pks as $pk) {
-            // Charger le storage correspondant AU PK (important)
-            $this->setId($pk);
-            $storage = $this->getStorage();
-
-            $this->getDatabase()->setQuery(
-                "DELETE FROM #__contentbuilder_storage_fields WHERE storage_id = " . (int) $pk
-            );
-            $this->getDatabase()->execute();
-
-            $this->getTable('StorageFields')->reorder('storage_id = ' . (int) $pk);
-
-            if (!$row->delete((int) $pk)) {
-                $this->setError($row->getError());
-                return false;
-            }
-
-            if (!$storage->bytable) {
-                try {
-                    $this->getDatabase()->setQuery("DROP TABLE `#__" . $storage->name . "`");
-                    $this->getDatabase()->execute();
-                } catch (\Throwable $e) {
-                    Logger::exception($e);
-                }
-            }
-        }
-
-        $row->reorder();
-        return true;
-    }
-
-
-    function listDelete()
-    {
-        $storage = $this->getStorage();
-
-        $cids = CBRequest::getVar('cid', array(0), 'post', 'array');
-        ArrayHelper::toInteger($cids);
-        foreach ($cids as $cid) {
-
-            $this->getDatabase()->setQuery("Select `name` From #__contentbuilder_storage_fields Where id = " . $cid);
-            $field_name = $this->getDatabase()->loadResult();
-
-            $this->getDatabase()->setQuery(
-                "DELETE FROM #__contentbuilder_storage_fields WHERE id = " . (int) $cid
-            );
-            $this->getDatabase()->execute();
-
-            if (!$storage->bytable) {
-                try {
-                    $this->getDatabase()->setQuery("ALTER TABLE `#__" . $storage->name . "` DROP `" . $field_name . "`");
-                    $this->getDatabase()->execute();
-                } catch (\Exception $e) {
-                    Logger::exception($e);
-                }
-            }
-
-            $table = $this->getTable('StorageFields');
-            $table->reorder('storage_id = ' . (int) $this->_id);
-        }
-    }
-
-    function move($direction)
-    {
-
-        $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $mainframe = Factory::getApplication();
-
-        $row = $this->getTable('Storage');
-
-        if (!$row->load($this->_id)) {
-            $this->setError($db->getErrorMsg());
-            return false;
-        }
-
-        if (!$row->move($direction)) {
-            $this->setError($db->getErrorMsg());
-            return false;
-        }
-
-        return true;
-    }
-
-    function listMove($direction)
-    {
-        $mainframe = Factory::getApplication();
-        $items = CBRequest::getVar('cid', array(), 'post', 'array');
-        ArrayHelper::toInteger($items);
-
-        if (count($items)) {
-            $db = Factory::getContainer()->get(DatabaseInterface::class);
-            $row = $this->getTable('StorageFields');
-
-            if (!$row->load($items[0])) {
-                $this->setError($db->getErrorMsg());
-                return false;
-            }
-
-            if (!$row->move($direction, 'storage_id=' . $this->_id)) {
-                $this->setError($db->getErrorMsg());
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /*
-    function getTotal()
-    {
-        // Load the content if it doesn't already exist
-        if (empty($this->_total)) {
-            $query = $this->_buildQuery();
-            $this->_total = $this->_getListCount($query);
-        }
-        return $this->_total;
-    }
-
-    function getPagination()
-    {
-        // Load the content if it doesn't already exist
-        if (empty($this->_pagination)) {
-            $this->_pagination = new Pagination($this->getTotal(), $this->getState('limitstart'), $this->getState('limit'));
-        }
-        return $this->_pagination;
-    }*/
-
-    function listSaveOrder()
-    {
-        $items = CBRequest::getVar('cid', array(), 'post', 'array');
-        ArrayHelper::toInteger($items);
-
-        $total = count($items);
-        $row = $this->getTable('StorageFields');
-        $groupings = array();
-
-        $order = CBRequest::getVar('order', array(), 'post', 'array');
-        ArrayHelper::toInteger($order);
-
-        // update ordering values
-        for ($i = 0; $i < $total; $i++) {
-            $row->load($items[$i]);
-            if ($row->ordering != $order[$i]) {
-                $row->ordering = $order[$i];
-                if (!$row->store()) {
-                    $this->setError($row->getError());
-                    return false;
-                }
-            } // if
-        } // for
-
-
-        $row->reorder("storage_id = " . $this->_id);
-    }
-
 
 }

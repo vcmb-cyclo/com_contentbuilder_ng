@@ -513,6 +513,8 @@ class FormModel extends AdminModel
         return $options;
     }
 
+
+    // Nettoie les données avant sauvegarde.
     protected function prepareTable($table): void
     {
         parent::prepareTable($table);
@@ -520,6 +522,10 @@ class FormModel extends AdminModel
         $now  = Factory::getDate()->toSql();
         $user = Factory::getUser();
 
+        $table->name  = trim((string) $table->name);
+        $table->title = trim((string) $table->title);
+        $table->tag   = trim((string) ($table->tag ?? ''));
+        
         // Si tes champs existent bien en JTable (c'est le cas)
         if (empty($table->id)) {
             // Création
@@ -540,13 +546,11 @@ class FormModel extends AdminModel
         }
     }
 
-
     public function save($data): bool
     {
         $app   = Factory::getApplication();
         $input = $app->input;
         $db    = $this->getDatabase();
-        $user  = Factory::getUser();
 
         // 1) Récupération standard + RAW/HTML (nécessaire pour tes éditeurs)
         $jform     = (array) $input->post->get('jform', [], 'array');

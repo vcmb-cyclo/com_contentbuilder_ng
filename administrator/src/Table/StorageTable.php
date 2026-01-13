@@ -23,7 +23,6 @@ class StorageTable extends Table
     public $ordering = 0;
     public $published = 0;
 
-
     /**
      * Constructor
      *

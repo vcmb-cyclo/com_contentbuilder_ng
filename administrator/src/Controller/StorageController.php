@@ -57,87 +57,68 @@ class StorageController extends BaseFormController
     }
 
     /**
-     * Surcharge save pour rester compatible avec ton modèle legacy (store/storeCsv).
+     * Surcharge save pour rester compatible avec ton modèle legacy (save/storeCsv).
      * Task: storage.save / storage.apply
      */
     public function save($key = null, $urlVar = null)
     {
-        // Sécurité token
         $this->checkToken();
 
-        Logger::info('save called', ['key' => $key, 'urlVar' => $urlVar]);
+        $file = $this->input->files->get('csv_file', null, 'array');
 
-        $model = $this->getModel('Storage', '', ['ignore_request' => true]);
-        if (!$model) {
-            throw new \RuntimeException('FormModel introuvable');
-        }
-
-        // Lecture fichier upload (legacy)
-        $file = Factory::getApplication()->getInput()->files->get('csv_file', null, 'array');
-
+        // Pas de CSV → core
         if (!is_array($file) || empty($file['name']) || (int) ($file['size'] ?? 0) <= 0) {
-            try {
-                $id = $model->store(); // Méthode legacy
-
-                if (!$id) {
-                    $this->setRedirect(
-                        Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . (int) $this->input->getInt('id', 0), false),
-                        $model->getError() ?: 'Store failed (no id returned)',
-                        'error'
-                    );
-                    return false;
-                }
-            } catch (\Throwable $e) {
-                Logger::exception($e);
-                $this->setMessage($e->getMessage(), 'warning');
-                return false;
-            }
-        } else {
-            // sécurise le nom
-            $file['name'] = File::makeSafe($file['name']);
-
-            try {
-                $id = $model->storeCsv($file); // Méthode legacy
-
-                if (!$id) {
-                    $this->setRedirect(
-                        Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . (int) $this->input->getInt('id', 0), false),
-                        $model->getError() ?: 'Store failed (no id returned)',
-                        'error'
-                    );
-                    return false;
-                }
-            } catch (\Throwable $e) {
-                Logger::exception($e);
-                $this->setMessage($e->getMessage(), 'warning');
-                return false;
-            }
+            return parent::save($key, $urlVar);
         }
 
-        // Message
-        if (is_numeric($id) && (int) $id > 0) {
-            $msg = Text::_('COM_CONTENTBUILDER_SAVED');
-        } elseif (is_string($id) && $id !== '') {
-            // storeCsv peut renvoyer un texte d’erreur
-            $msg = $id;
-        } else {
-            $msg = Text::_('COM_CONTENTBUILDER_ERROR');
+        // CSV → 1) sauvegarde core du storage, 2) import
+        $file['name'] = File::makeSafe($file['name']);
+
+        try {
+            // (A) Sauver l'item via le core (ça gère jform + table + hooks)
+            $data  = $this->input->post->get('jform', [], 'array');
+            $model = $this->getModel('Storage', '', ['ignore_request' => true]);
+
+            $id = $model->save($data);
+            if (!$id) {
+                $this->setRedirect(
+                    Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . (int) ($data['id'] ?? 0), false),
+                    $model->getError() ?: 'Save failed',
+                    'error'
+                );
+                return false;
+            }
+
+            // (B) Import CSV (en sachant sur quel storage bosser)
+            $ok = $model->storeCsv($file, (int) $id); // <= idéalement tu changes la signature
+            if (!$ok) {
+                $this->setRedirect(
+                    Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . (int) $id, false),
+                    $model->getError() ?: 'CSV import failed',
+                    'error'
+                );
+                return false;
+            }
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+            $this->setRedirect(
+                Route::_('index.php?option=com_contentbuilder&view=storages', false),
+                $e->getMessage(),
+                'error'
+            );
+            return false;
         }
 
-        // Apply vs Save
+        // Redirect apply/save
         $task = $this->getTask();
-        if ($task === 'apply' && is_numeric($id) && (int) $id > 0) {
-            // Retour en édition
-            $link = Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . (int) $id, false);
-        } else {
-            // Retour liste
-            $link = Route::_('index.php?option=com_contentbuilder&view=storages', false);
-        }
+        $link = ($task === 'apply')
+            ? Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . (int) $id, false)
+            : Route::_('index.php?option=com_contentbuilder&view=storages', false);
 
-        $this->setRedirect($link, $msg);
-
+        $this->setRedirect($link, Text::_('COM_CONTENTBUILDER_SAVED'));
         return true;
     }
+
 
     protected function getRedirectToItemAppend($recordId = null, $urlVar = 'id')
     {
@@ -229,7 +210,7 @@ class StorageController extends BaseFormController
     public function save2new()
     {
         $model = $this->getModel('Storage', 'Contentbuilder');
-        $model->store();
+        $model->save();
 
         $this->setRedirect('index.php?option=com_contentbuilder&view=storage&layout=edit&id=0');
         return true;

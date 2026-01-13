@@ -91,7 +91,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
                 Joomla.submitform(task);
                 break;
             case 'form.save':
-            case 'form.save2New':
+            case 'form.save2new':
             case 'form.apply':
                 var error = false;
                 var nodes = document.adminForm['cid[]'];

@@ -13,163 +13,206 @@ namespace CB\Component\Contentbuilder\Administrator\Model;
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
-use Joomla\Database\DatabaseInterface;
+use Joomla\Database\QueryInterface;
 use Joomla\Utilities\ArrayHelper;
-use Joomla\CMS\Pagination\Pagination;
 use Joomla\CMS\MVC\Model\ListModel;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 class UsersModel extends ListModel
 {
-    /**
-     * Items total
-     * @var integer
-     */
-    private $_total = null;
-
-    /**
-     * Pagination object
-     * @var object
-     */
-    private $_pagination = null;
-
     public function __construct($config = [])
     {
-        $this->_db = Factory::getContainer()->get(DatabaseInterface::class);
+        if (empty($config['filter_fields'])) {
+            $config['filter_fields'] = [
+                // #__users
+                'u.id', 'id',
+                'u.name', 'name',
+                'u.username', 'username',
+                'u.email', 'email',
+
+                // #__contentbuilder_users (alias a)
+                'a.verified_view', 'verified_view',
+                'a.verified_new', 'verified_new',
+                'a.verified_edit', 'verified_edit',
+                'a.records', 'records',
+                'a.published', 'published',
+            ];
+        }
 
         parent::__construct($config);
-
-        $mainframe = Factory::getApplication();
-        $option = 'com_contentbuilder';
-
-        // Get pagination request variables
-        $limit = $mainframe->getUserStateFromRequest('global.list.limit', 'limit', $mainframe->get('list_limit'), 'int');
-        $limitstart = CBRequest::getVar('limitstart', 0, '', 'int');
-
-        // In case limit has been changed, adjust it
-        $limitstart = ($limit != 0 ? (floor($limitstart / $limit) * $limit) : 0);
-
-        $this->setState('limit', $limit);
-        $this->setState('limitstart', $limitstart);
-
-        $filter_order = $mainframe->getUserStateFromRequest($option . 'users_filter_order', 'filter_order', '`users`.`id`', 'cmd');
-        $filter_order_Dir = $mainframe->getUserStateFromRequest($option . 'users_filter_order_Dir', 'filter_order_Dir', 'desc', 'word');
-
-        $this->setState('users_filter_order', $filter_order);
-        $this->setState('users_filter_order_Dir', $filter_order_Dir);
-
-        $filter_state = $mainframe->getUserStateFromRequest($option . 'users_filter_state', 'filter_state', '', 'word');
-        $this->setState('users_filter_state', $filter_state);
-
-        $search = $mainframe->getUserStateFromRequest("$option.users_search", 'users_search', '', 'string');
-        $this->setState('users_search', $search);
     }
 
-    /*
-     *
-     * MAIN LIST AREA
-     * 
-     */
-
-    private function buildOrderBy()
+    protected function populateState($ordering = 'u.id', $direction = 'ASC')
     {
-        $mainframe = Factory::getApplication();
-        $option = 'com_contentbuilder';
+        $app = Factory::getApplication();
 
-        $orderby = '';
-        $filter_order = $this->getState('users_filter_order');
-        $filter_order_Dir = $this->getState('users_filter_order_Dir');
+        parent::populateState($ordering, $direction);
 
-        /* Error handling is never a bad thing*/
-        if (!empty($filter_order) && !empty($filter_order_Dir) && $filter_order != 'ordering') {
-            $orderby = ' ORDER BY ' . $filter_order . ' ' . $filter_order_Dir;
+        // Recherche (champ standard dans la toolbar / layout)
+        $search = $app->getUserStateFromRequest($this->context . '.filter.search', 'filter_search', '', 'string');
+        $this->setState('filter.search', $search);
+
+        // Exemple de filtre state (si tu l’utilises)
+        $state = $app->getUserStateFromRequest($this->context . '.filter.state', 'filter_state', '', 'cmd');
+        $this->setState('filter.state', $state);
+
+        // form_id (tu en as besoin pour le JOIN)
+        $formId = $app->input->getInt('form_id', 0);
+        $this->setState('filter.form_id', $formId);
+    }
+
+    protected function getListQuery(): QueryInterface
+    {
+        $db    = $this->getDatabase();
+        $query = $db->getQuery(true);
+
+        $formId = (int) $this->getState('filter.form_id', 0);
+
+        $query
+            ->select([
+                'u.*',
+                // Valeurs CB, avec défauts si pas de ligne jointe
+                'COALESCE(a.verified_view, 0) AS verified_view',
+                'COALESCE(a.verified_new, 0)  AS verified_new',
+                'COALESCE(a.verified_edit, 0) AS verified_edit',
+                'COALESCE(a.records, 0)       AS records',
+                'COALESCE(a.published, 1)     AS published',
+            ])
+            ->from($db->quoteName('#__users', 'u'))
+            ->join(
+                'LEFT',
+                $db->quoteName('#__contentbuilder_users', 'a')
+                . ' ON ' . $db->quoteName('a.userid') . ' = ' . $db->quoteName('u.id')
+                . ' AND ' . $db->quoteName('a.form_id') . ' = ' . (int) $formId
+            );
+
+        // filter.search (name/username/email/id)
+        $search = trim((string) $this->getState('filter.search'));
+        if ($search !== '') {
+            $like = '%' . $db->escape($search, true) . '%';
+
+            $conditions = [
+                $db->quoteName('u.name')     . ' LIKE ' . $db->quote($like, false),
+                $db->quoteName('u.username') . ' LIKE ' . $db->quote($like, false),
+                $db->quoteName('u.email')    . ' LIKE ' . $db->quote($like, false),
+            ];
+
+            if (ctype_digit($search)) {
+                $conditions[] = $db->quoteName('u.id') . ' = ' . (int) $search;
+            }
+
+            $query->where('(' . implode(' OR ', $conditions) . ')');
         }
 
-        return $orderby;
+        // filter.state : exemple (à adapter à ton UI)
+        // Ici je laisse le comportement "legacy" : P=published, U=unpublished sur a.published
+        $state = (string) $this->getState('filter.state');
+        if ($state === 'P') {
+            $query->where('COALESCE(a.published, 1) = 1');
+        } elseif ($state === 'U') {
+            $query->where('COALESCE(a.published, 1) = 0');
+        }
+
+        // ORDER BY standard ListModel
+        $ordering  = (string) $this->getState('list.ordering', 'u.id');
+        $direction = strtoupper((string) $this->getState('list.direction', 'ASC'));
+        if (!in_array($direction, ['ASC', 'DESC'], true)) {
+            $direction = 'ASC';
+        }
+
+        $allowed = [
+            'u.id', 'u.name', 'u.username', 'u.email',
+            'a.verified_view', 'a.verified_new', 'a.verified_edit',
+            'a.records', 'a.published',
+        ];
+
+        if (!in_array($ordering, $allowed, true)) {
+            $ordering = 'u.id';
+        }
+
+        $query->order($db->escape($ordering . ' ' . $direction));
+
+        return $query;
     }
 
-
-    function setPublished()
+    // ✅ Modernise tes actions publish/unpublish (évite SQL concat + CBRequest)
+    public function setPublished(): void
     {
-        $cids = CBRequest::getVar('cid', array(), '', 'array');
+        $app  = Factory::getApplication();
+        $db   = $this->getDatabase();
+        $formId = (int) $app->input->getInt('form_id', 0);
+
+        $cids = (array) $app->input->get('cid', [], 'array');
         ArrayHelper::toInteger($cids);
-        foreach ($cids as $cid) {
-            $this->getDatabase()->setQuery("Select id From #__contentbuilder_users Where form_id = " . CBRequest::getInt('form_id', 0) . " And userid = " . $cid);
-            if (!$this->getDatabase()->loadResult() && CBRequest::getInt('form_id', 0) && $cid) {
-                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_users (form_id, userid, published) Values (" . CBRequest::getInt('form_id', 0) . ", $cid, 1)");
-                $this->getDatabase()->execute();
+        $cids = array_values(array_filter($cids));
+
+        if (!$formId || !$cids) {
+            return;
+        }
+
+        // Assure une ligne pour chaque user (upsert simple)
+        foreach ($cids as $uid) {
+            $query = $db->getQuery(true)
+                ->select($db->quoteName('id'))
+                ->from($db->quoteName('#__contentbuilder_users'))
+                ->where($db->quoteName('form_id') . ' = ' . (int) $formId)
+                ->where($db->quoteName('userid') . ' = ' . (int) $uid);
+            $db->setQuery($query);
+
+            if (!$db->loadResult()) {
+                $insert = $db->getQuery(true)
+                    ->insert($db->quoteName('#__contentbuilder_users'))
+                    ->columns([$db->quoteName('form_id'), $db->quoteName('userid'), $db->quoteName('published')])
+                    ->values((int) $formId . ', ' . (int) $uid . ', 1');
+                $db->setQuery($insert)->execute();
             }
         }
-        $this->getDatabase()->setQuery(' Update #__contentbuilder_users ' .
-            '  Set published = 1 Where form_id = ' . CBRequest::getInt('form_id', 0) . ' And userid In ( ' . implode(',', $cids) . ')');
-        $this->getDatabase()->execute();
 
+        $update = $db->getQuery(true)
+            ->update($db->quoteName('#__contentbuilder_users'))
+            ->set($db->quoteName('published') . ' = 1')
+            ->where($db->quoteName('form_id') . ' = ' . (int) $formId)
+            ->where($db->quoteName('userid') . ' IN (' . implode(',', $cids) . ')');
+
+        $db->setQuery($update)->execute();
     }
 
-    function setUnpublished()
+    public function setUnpublished(): void
     {
-        $cids = CBRequest::getVar('cid', array(), '', 'array');
+        $app  = Factory::getApplication();
+        $db   = $this->getDatabase();
+        $formId = (int) $app->input->getInt('form_id', 0);
+
+        $cids = (array) $app->input->get('cid', [], 'array');
         ArrayHelper::toInteger($cids);
-        foreach ($cids as $cid) {
-            $this->getDatabase()->setQuery("Select id From #__contentbuilder_users Where form_id = " . CBRequest::getInt('form_id', 0) . " And userid = " . $cid);
-            if (!$this->getDatabase()->loadResult() && CBRequest::getInt('form_id', 0) && $cid) {
-                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_users (form_id, userid, published) Values (" . CBRequest::getInt('form_id', 0) . ", $cid, 1)");
-                $this->getDatabase()->execute();
+        $cids = array_values(array_filter($cids));
+
+        if (!$formId || !$cids) {
+            return;
+        }
+
+        foreach ($cids as $uid) {
+            $query = $db->getQuery(true)
+                ->select($db->quoteName('id'))
+                ->from($db->quoteName('#__contentbuilder_users'))
+                ->where($db->quoteName('form_id') . ' = ' . (int) $formId)
+                ->where($db->quoteName('userid') . ' = ' . (int) $uid);
+            $db->setQuery($query);
+
+            if (!$db->loadResult()) {
+                $insert = $db->getQuery(true)
+                    ->insert($db->quoteName('#__contentbuilder_users'))
+                    ->columns([$db->quoteName('form_id'), $db->quoteName('userid'), $db->quoteName('published')])
+                    ->values((int) $formId . ', ' . (int) $uid . ', 1');
+                $db->setQuery($insert)->execute();
             }
         }
-        $this->getDatabase()->setQuery(' Update #__contentbuilder_users ' .
-            '  Set published = 0 Where form_id = ' . CBRequest::getInt('form_id', 0) . ' And userid In ( ' . implode(',', $cids) . ')');
-        $this->getDatabase()->execute();
+
+        $update = $db->getQuery(true)
+            ->update($db->quoteName('#__contentbuilder_users'))
+            ->set($db->quoteName('published') . ' = 0')
+            ->where($db->quoteName('form_id') . ' = ' . (int) $formId)
+            ->where($db->quoteName('userid') . ' IN (' . implode(',', $cids) . ')');
+
+        $db->setQuery($update)->execute();
     }
-
-    /**
-     * @return string The query
-     */
-    private function _buildQuery()
-    {
-
-        $where = '';
-
-        if (trim($this->getState('users_search')) != '') {
-            $where = ' Where users.email Like ' . $this->getDatabase()->Quote('%' . $this->getState('users_search') . '%') . ' Or users.id = ' . $this->getDatabase()->Quote(intval($this->getState('users_search'))) . ' Or users.username Like ' . $this->getDatabase()->Quote('%' . $this->getState('users_search') . '%') . ' Or users.`name` Like ' . $this->getDatabase()->Quote('%' . $this->getState('users_search') . '%') . ' ';
-        }
-
-        return 'Select SQL_CALC_FOUND_ROWS users.*, contentbuilder_users.verified_view, contentbuilder_users.verified_new, contentbuilder_users.verified_edit, contentbuilder_users.records, contentbuilder_users.published From #__users As users Left Join #__contentbuilder_users As contentbuilder_users On ( users.id = contentbuilder_users.userid And contentbuilder_users.form_id = ' . CBRequest::getInt('form_id', 0) . ' ) ' . $where . $this->buildOrderBy();
-    }
-
-    /**
-     * Gets the currencies
-     * @return array List of products
-     */
-    function getData()
-    {
-        // Lets load the data if it doesn't already exist
-        if (empty($this->_data)) {
-            $query = $this->_buildQuery();
-            $this->_data = $this->_getList($query, $this->getState('limitstart'), $this->getState('limit'));
-            echo $this->getDatabase()->getErrorMessage();
-        }
-
-        return $this->_data;
-    }
-
-    function getTotal()
-    {
-        // Load the content if it doesn't already exist
-        if (empty($this->_total)) {
-            $query = $this->_buildQuery();
-            $this->_total = $this->_getListCount($query);
-        }
-        return $this->_total;
-    }
-
-    function getPagination()
-    {
-        // Load the content if it doesn't already exist
-        if (empty($this->_pagination)) {
-            $this->_pagination = new Pagination($this->getTotal(), $this->getState('limitstart'), $this->getState('limit'));
-        }
-        return $this->_pagination;
-    }
-
 }

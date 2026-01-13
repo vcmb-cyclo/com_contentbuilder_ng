@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     ContentBuilder
  * @author      Markus Bopp
@@ -18,26 +19,25 @@ use Joomla\CMS\HTML\HTMLHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
 
+$ordering  = $this->state->get('list.ordering');
+$direction = $this->state->get('list.direction');
+$search    = $this->state->get('filter.search');
 ?>
-<style type="text/css">
-    .cbPagesCounter {
-        float: left;
-        padding-right: 10px;
-        padding-top: 4px;
-    }
-</style>
-<script language="javascript" type="text/javascript">
-    listItemTask = Joomla.listItemTask;
-</script>
 <form action="index.php" method="post" name="adminForm" id="adminForm">
 
+    <input class="form-control form-control-sm w-25"
+        type="text"
+        name="filter_search"
+        id="filter_search"
+        value="<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>"
+        onchange="document.adminForm.submit();" />
 
-    <input style="display:inline-block;" class="form-control form-control-sm w-25" type="text" name="users_search"
-        id="users_search" value="<?php echo $this->lists['users_search']; ?>" onchange="document.adminForm.submit();" />
     <input type="button" class="btn btn-sm btn-primary" value="<?php echo Text::_('COM_CONTENTBUILDER_SEARCH'); ?>"
         onclick="this.form.submit();" />
-    <input type="button" class="btn btn-sm btn-primary" value="<?php echo Text::_('COM_CONTENTBUILDER_RESET'); ?>"
-        onclick="document.getElementById('users_search').value='';document.adminForm.submit();" />
+    <input type="button" class="btn btn-sm btn-primary"
+        value="<?php echo Text::_('COM_CONTENTBUILDER_RESET'); ?>"
+        onclick="document.getElementById('filter_search').value='';document.adminForm.submit();" />
+
 
 
     <div style="float:right">
@@ -46,10 +46,10 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
             <option> -
                 <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -
             </option>
-            <option value="publish">
+            <option value="users.publish">
                 <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH'); ?>
             </option>
-            <option value="unpublish">
+            <option value="users.unpublish">
                 <?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISH'); ?>
             </option>
         </select>
@@ -86,81 +86,77 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
             <thead>
                 <tr>
                     <th width="5">
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ID'), 'id', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', 'ID', 'u.id', $direction, $ordering); ?>
                     </th>
                     <th width="20">
                         <input class="form-check-input" type="checkbox" name="toggle" value=""
                             onclick="Joomla.checkAll(this);" />
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NAME'), 'name', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', 'Name', 'u.name', $direction, $ordering); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_USERNAME'), 'username', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', 'Username', 'u.username', $direction, $ordering); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW'), 'verified_view', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW'), 'a.verified_view', $direction, $ordering); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_NEW'), 'verified_new', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_NEW'),  'a.verified_new',  $direction, $ordering); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT'), 'verified_edit', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT'), 'a.verified_edit', $direction, $ordering); ?>
                     </th>
                     <th width="5">
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_PUBLISHED'), 'published', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_PUBLISHED'),     'a.published',     $direction, $ordering); ?>
                     </th>
                 </tr>
             </thead>
-            <?php
-            $k = 0;
-            $n = count($this->items);
-            for ($i = 0; $i < $n; $i++) {
-                $row = $this->items[$i];
-                $checked = HTMLHelper::_('grid.id', $i, $row->id);
-                $link = Route::_('index.php?option=com_contentbuilder&view=users&tmpl=' . CBRequest::getCmd('tmpl', '') . '&task=user.edit&form_id=' . CBRequest::getInt('form_id', 0) . '&joomla_userid=' . $row->id);
-                if ($row->published === null) {
-                    $row->published = 1;
-                }
-                $published = ContentbuilderHelper::listPublish('users', $row, $i);
-                $verified_view = ContentbuilderHelper::listVerifiedView('users', $row, $i);
-                $verified_new = ContentbuilderHelper::listVerifiedNew('users', $row, $i);
-                $verified_edit = ContentbuilderHelper::listVerifiedEdit('users', $row, $i);
+
+            <tbody>
+                <?php foreach ($this->items as $i => $item):
+                    $checked = HTMLHelper::_('grid.id', $i, $item->id);
+                    $link = Route::_('index.php?option=com_contentbuilder&task=user.edit&form_id=' . (int) CBRequest::getInt('form_id', 0) . '&joomla_userid=' . (int) $item->id);
+                    if ($item->published === null) {
+                        $item->published = 1;
+                    }
+                    $published = ContentbuilderHelper::listPublish('users', $item, $i);
+                    $verified_view = ContentbuilderHelper::listVerifiedView('users', $item, $i);
+                    $verified_new = ContentbuilderHelper::listVerifiedNew('users', $item, $i);
+                    $verified_edit = ContentbuilderHelper::listVerifiedEdit('users', $item, $i);
                 ?>
-                <tr class="<?php echo "row$k"; ?>">
-                    <td>
-                        <?php echo $row->id; ?>
-                    </td>
-                    <td>
-                        <?php echo $checked; ?>
-                    </td>
-                    <td>
-                        <a href="<?php echo $link; ?>">
-                            <?php echo $row->name; ?>
-                        </a>
-                    </td>
-                    <td>
-                        <a href="<?php echo $link; ?>">
-                            <?php echo $row->username; ?>
-                        </a>
-                    </td>
-                    <td>
-                        <?php echo $verified_view; ?>
-                    </td>
-                    <td>
-                        <?php echo $verified_new; ?>
-                    </td>
-                    <td>
-                        <?php echo $verified_edit; ?>
-                    </td>
-                    <td>
-                        <?php echo $published; ?>
-                    </td>
-                </tr>
-                <?php
-                $k = 1 - $k;
-            }
-            ?>
+                    <tr>
+                        <td>
+                            <?php echo (int) $item->id; ?>
+                        </td>
+                        <td>
+                            <?php echo $checked; ?>
+                        </td>
+                        <td>
+                            <a href="<?php echo $link; ?>">
+                                <?php echo htmlspecialchars($item->name, ENT_QUOTES, 'UTF-8'); ?>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="<?php echo $link; ?>">
+                                <?php echo htmlspecialchars($item->username, ENT_QUOTES, 'UTF-8'); ?>
+                            </a>
+                        </td>
+                        <td>
+                            <?php echo $verified_view; ?>
+                        </td>
+                        <td>
+                            <?php echo $verified_new; ?>
+                        </td>
+                        <td>
+                            <?php echo $verified_edit; ?>
+                        </td>
+                        <td>
+                            <?php echo $published; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
             <tfoot>
                 <tr>
                     <td colspan="9">
@@ -175,9 +171,10 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
     <input type="hidden" name="option" value="com_contentbuilder" />
     <input type="hidden" name="task" value="" />
     <input type="hidden" name="boxchecked" value="0" />
+    <input type="hidden" name="view" value="users" />
     <input type="hidden" name="form_id" value="<?php echo CBRequest::getInt('form_id', 0); ?>" />
     <input type="hidden" name="tmpl" value="<?php echo CBRequest::getWord('tmpl', ''); ?>" />
-    <input type="hidden" name="filter_order" value="<?php echo $this->lists['order']; ?>" />
-    <input type="hidden" name="filter_order_Dir" value="<?php echo $this->lists['order_Dir']; ?>" />
+    <input type="hidden" name="list[ordering]" value="<?php echo htmlspecialchars($ordering, ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" name="list[direction]" value="<?php echo htmlspecialchars($direction, ENT_QUOTES, 'UTF-8'); ?>">
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

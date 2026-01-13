@@ -23,6 +23,8 @@ class HtmlView extends BaseHtmlView
     public $tables;
     public $pagination;
     public $ordering;
+    public $item;
+    public $state;
 
     public function display($tpl = null): void
     {         
@@ -47,7 +49,7 @@ class HtmlView extends BaseHtmlView
         $this->state = null;
 
         try {
-            $storageId = (int) ($storageId ?? 0);
+            $storageId  = (int) ($this->item->id ?? $app->input->getInt('id', 0));
             if ($storageId > 0) {
                 $factory = $app->bootComponent('com_contentbuilder')->getMVCFactory();
                 $elementsModel = $factory->createModel('Elements', 'Administrator');
@@ -58,6 +60,7 @@ class HtmlView extends BaseHtmlView
 
                 // IMPORTANT : fournir le form id au ListModel
                 $elementsModel->setFormId($storageId);
+                $elementsModel->setState('filter.form_id', $storageId);
 
                 // Charge les items
                 $this->elements   = $elementsModel->getItems();
@@ -71,11 +74,11 @@ class HtmlView extends BaseHtmlView
             );
         }
 
-        $isNew = ((int) ($this->form->id ?? 0) < 1);
+        $isNew = ((int) ($this->item->id ?? 0) < 1);
         $text  = $isNew ? Text::_('COM_CONTENTBUILDER_NEW') : Text::_('COM_CONTENTBUILDER_EDIT');
 
         ToolbarHelper::title(
-            'ContentBuilder :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_STORAGES') : ($this->form->title ?? ''))
+            'ContentBuilder :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_STORAGES') : ($this->item->title ?? ''))
             . ' : <small><small>[ ' . $text . ' ]</small></small>',
             'logo_left.png'
         );
@@ -83,10 +86,14 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::apply('storage.apply');
         ToolbarHelper::save('storage.save');
 
-        ToolbarHelper::custom('storage.save2New', 'save', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
+        ToolbarHelper::custom('storage.save2new', 'save', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
         ToolbarHelper::publish('storage.publish');
         ToolbarHelper::unpublish('storage.unpublish');
-        ToolbarHelper::deleteList('storage.listdelete', 'delete', '', Text::_('COM_CONTENTBUILDER_DELETE_FIELDS'), false);
+        ToolbarHelper::deleteList(
+            Text::_('COM_CONTENTBUILDER_DELETE_FIELDS_CONFIRM'),
+            'storage.listDelete',
+            Text::_('COM_CONTENTBUILDER_DELETE_FIELDS')
+        );
 
         ToolbarHelper::cancel('storage.cancel', $isNew ? 'JTOOLBAR_CANCEL' : 'JTOOLBAR_CLOSE');
 
