@@ -71,7 +71,7 @@
         
         <folder>forms</folder>
         <folder>languages</folder>
-        <folder>librairies</folder>
+        <folder>vendor</folder>
         <folder>plugins</folder>
         <folder>services</folder>
         <folder>src</folder>

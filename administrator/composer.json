@@ -1,0 +1,13 @@
+{
+  "name": "xda-gil/com_contentbuilder",
+  "type": "joomla-component",
+  "require": {
+    "phpoffice/phpspreadsheet": "5.4.0"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  }
+}
+

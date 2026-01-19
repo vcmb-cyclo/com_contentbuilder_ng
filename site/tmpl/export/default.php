@@ -15,7 +15,9 @@ use Joomla\CMS\Language\Text;
 
 @ob_end_clean();
 
-require JPATH_ADMINISTRATOR . '/components/com_contentbuilder/librairies/PhpSpreadsheet-5.3.0/vendor/autoload.php';
+use CB\Component\Contentbuilder\Administrator\Helper\VendorHelper;
+
+VendorHelper::load();
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Joomla\CMS\Factory;
