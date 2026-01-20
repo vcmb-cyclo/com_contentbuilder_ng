@@ -29,10 +29,12 @@ class HtmlView extends BaseHtmlView
         // Get data from the model
         $subject = $this->get('Data');
 
+        // 1️⃣ Récupération du WebAssetManager
+        $document = $this->getDocument();
+        $wa = $document->getWebAssetManager();
+        $wa->useScript('core');
+
         if (!$this->frontend) {
-            // 1️⃣ Récupération du WebAssetManager
-            $document = $this->getDocument();
-            $wa = $document->getWebAssetManager();
             $wa->addInlineStyle(
                 '.icon-logo_left{
                     background-image:url(' . Uri::root(true) . '/media/com_contentbuilder/images/logo_left.png);
@@ -45,11 +47,13 @@ class HtmlView extends BaseHtmlView
                 }'
             );
 
+
             ToolbarHelper::title($subject->page_title, 'logo_left');
         }
 
 
-        $pagination = $this->get('Pagination');
+        $pagination = $this->getModel()->getPagination();
+        $pagination->showLimitBox = true;
         $total = $this->get('Total');
 
         $state = $this->get('state');
@@ -59,7 +63,7 @@ class HtmlView extends BaseHtmlView
         $lists['filter_state'] = $state->get('formsd_filter_state');
         $lists['filter_publish'] = $state->get('formsd_filter_publish');
         $lists['filter_language'] = $state->get('formsd_filter_language');
-        $lists['limitstart'] = $state->get('limitstart');
+        $lists['limitstart'] = (int) $state->get('list.start');
 
         PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
 

@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder\Site\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');

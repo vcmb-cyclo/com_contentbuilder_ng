@@ -32,7 +32,7 @@ class ListModel extends BaseListModel
 
     protected ?array $_data = null; // si tu veux être propre avec _data aussi
 
-/**
+    /**
      * Items total
      * @var integer
      */
@@ -53,7 +53,7 @@ class ListModel extends BaseListModel
     private $_page_title = '';
 
     private $_page_heading = '';
-   
+
     private $app;
 
     function  __construct($config)
@@ -187,23 +187,32 @@ class ListModel extends BaseListModel
     protected function populateState($ordering = null, $direction = null)
     {
         $app = Factory::getApplication();
-
-        $limit = $app->getUserStateFromRequest(
-            'global.list.limit',
-            'limit',
-            CBRequest::getInt('cb_list_limit', 0) > 0 ? CBRequest::getInt('cb_list_limit', 0) : $app->get('list_limit'),
-            'int'
-        );
-
-        $start = $app->input->getInt('limitstart', 0);
-
-        // Important: états utilisés par ListModel + Pagination
-        $this->setState('list.limit', $limit);
-        $this->setState('list.start', $start);
-
         parent::populateState($ordering, $direction);
-    }
 
+        $limit = $app->input->getInt('limit', 0);
+        if ($limit === 0) {
+            $limit = $app->input->getInt('list.limit', $app->get('list_limit'));
+        }
+
+        $start = $app->input->getInt('list.start', 0);
+        if (!$start) {
+            $start = $app->input->getInt('limitstart', 0);
+        }
+
+        // ✅ RESET page si on change un filtre (ou clique Search/Reset)
+        if (
+            $app->input->get('filter', null) !== null ||
+            $app->input->get('list_state_filter', null) !== null ||
+            $app->input->get('list_publish_filter', null) !== null ||
+            $app->input->get('list_language_filter', null) !== null ||
+            $app->input->getBool('filter_reset', false)
+        ) {
+            $start = 0;
+        }
+
+        $this->setState('list.limit', (int) $limit);
+        $this->setState('list.start', (int) $start);
+    }
 
 
 
@@ -295,7 +304,8 @@ class ListModel extends BaseListModel
                     }
                     $___now = $now->toSql();
 
-                  if ($data->initial_sort_order == 'Rand' &&
+                    if (
+                        $data->initial_sort_order == 'Rand' &&
                         (empty($data->rand_date_update) || $now->toUnix() - strtotime($data->rand_date_update) >= $data->rand_update)
                     ) {
                         $this->getDatabase()->setQuery("UPDATE #__contentbuilder_records SET rand_date = '" . $___now . "' + interval rand()*10000 day Where `type` = " . $this->getDatabase()->Quote($data->type) . " And reference_id = " . $this->getDatabase()->Quote($data->reference_id));
@@ -533,10 +543,30 @@ class ListModel extends BaseListModel
                         $act_as_registration[$data->registration_email_field] = 'registration_email_field';
                     }
 
-                    $data->items = $data->form->getListRecords($ids, $this->getState('formsd_filter'), 
-                        $searchable_elements, 
-                        $this->getState('list.start'), $this->getState('list.limit'),
-                        $this->getState('formsd_filter_order'), $order_types, $this->getState('formsd_filter_order_Dir') ? $this->getState('formsd_filter_order_Dir') : $data->initial_order_dir, 0, $data->published_only, $this->frontend ? ($data->own_only_fe ? Factory::getUser()->get('id', 0) : -1) : ($data->own_only ? Factory::getUser()->get('id', 0) : -1), $this->getState('formsd_filter_state'), $this->getState('formsd_filter_publish'), $data->initial_sort_order == -1 ? -1 : 'col' . $data->initial_sort_order, $data->initial_sort_order2 == -1 ? -1 : 'col' . $data->initial_sort_order2, $data->initial_sort_order3 == -1 ? -1 : 'col' . $data->initial_sort_order3, $this->_menu_filter, $this->frontend ? $data->show_all_languages_fe : true, $this->getState('formsd_filter_language'), $act_as_registration, $data, $this->getState('article_category_filter'));
+                    $data->items = $data->form->getListRecords(
+                        $ids,
+                        $this->getState('formsd_filter'),
+                        $searchable_elements,
+                        $this->getState('list.start'),
+                        $this->getState('list.limit'),
+                        $this->getState('formsd_filter_order'),
+                        $order_types,
+                        $this->getState('formsd_filter_order_Dir') ? $this->getState('formsd_filter_order_Dir') : $data->initial_order_dir,
+                        0,
+                        $data->published_only,
+                        $this->frontend ? ($data->own_only_fe ? Factory::getUser()->get('id', 0) : -1) : ($data->own_only ? Factory::getUser()->get('id', 0) : -1),
+                        $this->getState('formsd_filter_state'),
+                        $this->getState('formsd_filter_publish'),
+                        $data->initial_sort_order == -1 ? -1 : 'col' . $data->initial_sort_order,
+                        $data->initial_sort_order2 == -1 ? -1 : 'col' . $data->initial_sort_order2,
+                        $data->initial_sort_order3 == -1 ? -1 : 'col' . $data->initial_sort_order3,
+                        $this->_menu_filter,
+                        $this->frontend ? $data->show_all_languages_fe : true,
+                        $this->getState('formsd_filter_language'),
+                        $act_as_registration,
+                        $data,
+                        $this->getState('article_category_filter')
+                    );
 
                     if ($data->items === null) {
                         $app->setUserState($option . 'formsd_filter_order', '');
@@ -626,7 +656,7 @@ class ListModel extends BaseListModel
         return parent::getPagination();
     }
 
- 
+
     function startsWith($haystack, $needle)
     {
         $length = strlen($needle);
