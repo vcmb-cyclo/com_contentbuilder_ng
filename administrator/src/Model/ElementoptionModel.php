@@ -15,9 +15,12 @@ namespace CB\Component\Contentbuilder\Administrator\Model;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
+use Joomla\Input\Input;
 use Joomla\Utilities\ArrayHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\Logger;
@@ -27,10 +30,14 @@ class ElementoptionModel extends BaseDatabaseModel
 {
     private $_element_id = 0;
 
-    public function __construct($config = [])
-    {
+    public function __construct(
+        $config,
+        MVCFactoryInterface $factory
+    ) {
+        // IMPORTANT : on transmet factory/app/input à BaseController
+        parent::__construct($config, $factory);
+
         $this->_db = Factory::getContainer()->get(DatabaseInterface::class);
-        parent::__construct($config);
 
         $app = Factory::getApplication();
         $option = 'com_contentbuilder';

@@ -35,7 +35,7 @@ final class StoragesController extends AdminController
     protected $view_item = 'storage';
 
     public function __construct(
-        $config = [],
+        $config,
         MVCFactoryInterface $factory,
         CMSApplicationInterface $app,
         Input $input

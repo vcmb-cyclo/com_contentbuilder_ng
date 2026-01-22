@@ -14,6 +14,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
+use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class ListController extends BaseController
@@ -27,17 +28,31 @@ class ListController extends BaseController
         $suffix = '_fe';
 
         // 1) d'abord depuis l'URL
-        $form_id = $this->input->getInt('id', 0);
+        $formId   = $this->input->getInt('id', 0);
+        $recordId = $this->input->getInt('record_id', 0);
 
         // 2) sinon depuis les params du menu actif
-        if (!$form_id) {
+        if (!$formId) {
             $menu = $app->getMenu()->getActive();
             if ($menu) {
-                $form_id = (int) $menu->getParams()->get('form_id', 0);
+                $formId = (int) $menu->getParams()->get('form_id', 0);
             }
         }
 
-        ContentbuilderLegacyHelper::setPermissions($form_id, 0, $suffix);
+        // Synchroniser Joomla Input + CBRequest (legacy)
+        $this->input->set('id', $formId);
+        CBRequest::setVar('id', $formId);
+
+        if ($recordId) {
+            $this->input->set('record_id', $recordId);
+            CBRequest::setVar('record_id', $recordId);
+        }
+
+        // Contexte CB correct pour cette page
+        CBRequest::setVar('view', 'list');
+
+        // Permissions
+        ContentbuilderLegacyHelper::setPermissions($formId, $recordId, $suffix);
         ContentbuilderLegacyHelper::checkPermissions(
             'listaccess',
             Text::_('COM_CONTENTBUILDER_PERMISSIONS_LISTACCESS_NOT_ALLOWED'),

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="contentbuilder_themes" method="upgrade">
+  <name>ContentBuilder - Themes - Blank</name>
+  <author>Markus Bopp - Crosstec GmbH &amp; CO. KG</author>
+  <creationDate>January 2013</creationDate>
+  <copyright>(C) 2026 by XDA+GIL</copyright>
+  <license>GNU/GPLv2</license>
+  <authorEmail>noreply@vcmb.fr</authorEmail>
+  <authorUrl>breezingforms.vcmb.fr</authorUrl>
+  <version>6.0</version>
+  <description><![CDATA[A blank theme without any style]]></description>
+  <files>
+    <filename plugin="blank">blank.php</filename>
+  </files>
+</extension>

@@ -17,6 +17,9 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\Input\Input;
 
 class AjaxModel extends BaseDatabaseModel
 {
@@ -24,9 +27,12 @@ class AjaxModel extends BaseDatabaseModel
     private $frontend = false;
     private $_subject = '';
 
-    public function __construct($config = [])
-    {
-        parent::__construct($config);
+    public function __construct(
+        $config,
+        MVCFactoryInterface $factory
+    ) {
+        // IMPORTANT : on transmet factory/app/input à ListModel
+        parent::__construct($config, $factory);
 
         $this->frontend = Factory::getApplication()->isClient('site');
 

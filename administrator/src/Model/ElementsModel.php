@@ -21,6 +21,9 @@ namespace CB\Component\Contentbuilder\Administrator\Model;
 
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\Input\Input;
 use Joomla\Database\DatabaseQuery;
 use Joomla\Utilities\ArrayHelper;
 use CB\Component\Contentbuilder\Administrator\Table\ElementoptionTable;
@@ -35,8 +38,13 @@ class ElementsModel extends ListModel
     /**
      * Constructor.
      */
-    public function __construct($config = [])
-    {
+    public function __construct(
+        $config,
+        MVCFactoryInterface $factory
+    ) {
+        // IMPORTANT : on transmet factory/app/input à ListModel
+        parent::__construct($config, $factory);
+
         // Colonnes autorisées pour le filtrage et le tri (très important pour la sécurité)
         $this->filter_fields = [
             'id',
@@ -50,8 +58,6 @@ class ElementsModel extends ListModel
             'ordering',
             'order_type'
         ];
-
-        parent::__construct($config);
     }
 
 

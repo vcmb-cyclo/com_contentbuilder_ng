@@ -22,7 +22,7 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 class AjaxController extends BaseController
 {
     public function __construct(
-        $config = [],
+        $config,
         MVCFactoryInterface $factory,
         CMSApplicationInterface $app,
         Input $input

@@ -32,6 +32,9 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\User\User;
 use Joomla\CMS\User\UserHelper;
+use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\Input\Input;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
@@ -120,11 +123,14 @@ class EditModel extends BaseDatabaseModel
         return $endpath;
     }
 
-     public function __construct($config = [])
-   {
-        $this->_db = Factory::getContainer()->get(DatabaseInterface::class);
-        parent::__construct($config);
+    public function __construct(
+        $config,
+        MVCFactoryInterface $factory
+    ) {
+        // IMPORTANT : on transmet factory/app/input à BaseController
+        parent::__construct($config, $factory);
 
+        $this->_db = Factory::getContainer()->get(DatabaseInterface::class);
         $app = Factory::getApplication();
         $option = 'com_contentbuilder';
 

@@ -12,6 +12,7 @@
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
+use Joomla\Database\DatabaseInterface;
 
 @ob_end_clean();
 
@@ -24,7 +25,7 @@ use Joomla\CMS\Factory;
 
 //Font::setAutoSizeMethod(Font::AUTOSIZE_METHOD_EXACT);
 
-$database = Factory::getDbo();
+$db = Factory::getContainer()->get(DatabaseInterface::class);
 
 $spreadsheet = new Spreadsheet();
 $spreadsheet->getProperties()->setCreator("ContentBuilder")->setLastModifiedBy("ContentBuilder");
@@ -105,14 +106,14 @@ foreach ($this->data->items as $item) {
     // Si on veut mettre la colonne d'état.
     if ($col_state > 0) {
         // Sécuriser la requête
-        $recordId = $database->quote($item->colRecord);
+        $recordId = $db->quote($item->colRecord);
         $sql = "SELECT title, color 
                 FROM `#__contentbuilder_list_states` 
                 WHERE id = (SELECT state_id 
                             FROM `#__contentbuilder_list_records` 
                             WHERE record_id = $recordId)";
-        $database->setQuery($sql);
-        $result = $database->loadRow();
+        $db->setQuery($sql);
+        $result = $db->loadRow();
 
         if ($result !== null) {
             if (empty($result[1]) || !preg_match('/^[0-9A-F]{6}$/i', $result[1])) {
@@ -170,13 +171,13 @@ if (!$userTimezone) {
 // Créer la date avec le fuseau horaire
 $date = Factory::getDate('now', $userTimezone);
 
-$query = $database->getQuery(true)
-    ->select($database->quoteName('name'))
-    ->from($database->quoteName('#__facileforms_forms'))
-    ->where($database->quoteName('id') . ' = ' . (int) $this->data->reference_id);
+$query = $db->getQuery(true)
+    ->select($db->quoteName('name'))
+    ->from($db->quoteName('#__facileforms_forms'))
+    ->where($db->quoteName('id') . ' = ' . (int) $this->data->reference_id);
 
-$database->setQuery($query);
-$name = $database->loadResult() ?: 'Formulaire_inconnu';
+$db->setQuery($query);
+$name = $db->loadResult() ?: 'Formulaire_inconnu';
 
 
 $filename = "CB_export_" . $name. '_' .$date->format('Y-m-d_Hi', true) . ".xlsx";

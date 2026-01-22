@@ -27,6 +27,9 @@ use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\MVC\Model\AdminModel;
+use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\Input\Input;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilder\Administrator\Helper\Logger;
@@ -48,9 +51,12 @@ class FormModel extends AdminModel
         array('id' => -10, 'action' => '', 'title' => 'State 10', 'color' => 'FFFFFF', 'published' => 0)
     );
 
-    public function __construct($config = [])
-    {
-        parent::__construct($config);
+    public function __construct(
+        $config,
+        MVCFactoryInterface $factory
+    ) {
+        // IMPORTANT : on transmet factory/app/input à ListModel
+        parent::__construct($config, $factory);
         $this->option = 'com_contentbuilder';
     }
 
@@ -764,10 +770,31 @@ class FormModel extends AdminModel
         // Nettoyage des champs temporaires (on ne les stocke pas en colonnes)
         unset($jform['perms'], $jform['perms_fe'], $jform['own'], $jform['own_fe']);
 
-        // config legacy
+        $createSample = !empty($jform['create_sample']);
+        if ($createSample) {
+            $jform['details_template'] .= ContentbuilderLegacyHelper::createDetailsSample($id, $jform, $jform['theme_plugin']);
+        }
+
+        $createEditableSample = !empty($jform['create_editable_sample']);
+        if ($createEditableSample) {
+            $jform['editable_template'] .= ContentbuilderLegacyHelper::createEditableSample($id, $jform, $jform['theme_plugin']);
+        }
+
+        $emailAdminHtml = !empty($jform['email_admin_html']);
+        $emailAdminTemplate = !empty($jform['email_admin_create_sample']);
+        if ($emailAdminTemplate) {
+            $jform['email_admin_template'] .= ContentbuilderLegacyHelper::createEmailSample($id, $jform, $emailAdminHtml);
+        }
+
+        $emailCreateSample = !empty($jform['email_create_sample']);
+        if ($emailCreateSample) {
+            $jform['email_template'] .= ContentbuilderLegacyHelper::createEmailSample($id, $jform, CBRequest::getBool('email_html', false));
+        }
+
+        // Config legacy
         $jform['config'] = base64_encode(serialize($config));
 
-        // last_update (tu l’avais déjà)
+        // Last_update.
         $jform['last_update'] = Factory::getDate()->toSql();
 
         // 7) Ajustements legacy divers (si nécessaire)
@@ -939,14 +966,18 @@ class FormModel extends AdminModel
                     $table = Table::getInstance('content');
                     // Trigger the onContentBeforeDelete event.
                     if (!$is15 && $table->load($article)) {
-                        Factory::getApplication()->getDispatcher()->dispatch('onContentBeforeDelete', array('com_content.article', $table));
+                        $dispatcher = Factory::getApplication()->getDispatcher();
+		                $eventObj = new \Joomla\Event\Event('onContentBeforeDisplay', ['com_content.article', &$table]);
+                    	$dispatcher->dispatch('onContentBeforeDisplay', $eventObj);
                     }
                     $db->setQuery("Delete From #__content Where id = " . intval($article));
                     $db->execute();
                     // Trigger the onContentAfterDelete event.
                     $table->reset();
                     if (!$is15) {
-                        Factory::getApplication()->getDispatcher()->dispatch('onContentAfterDelete', array('com_content.article', $table));
+                        $dispatcher = Factory::getApplication()->getDispatcher();
+		                $eventObj = new \Joomla\Event\Event('onContentAfterDelete', ['com_content.article', &$table]);
+                    	$dispatcher->dispatch('onContentAfterDelete', $eventObj);
                     }
                 }
                 $db->setQuery("Delete From #__assets Where `name` In (" . implode(',', $article_items) . ")");

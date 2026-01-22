@@ -78,7 +78,7 @@ class HtmlView extends BaseHtmlView
 			$table->slug = ($article > 0 ? $article : 0) . ':' . $alias . ':contentbuilder_slug_used';
 
 			$registry = new Registry;
-			$registry->loadString($table->attribs);
+			$registry->loadString($table->attribs ?? '');
 
 			PluginHelper::importPlugin('content', 'breezingforms');
 
@@ -120,7 +120,7 @@ class HtmlView extends BaseHtmlView
 							}
 						}
 					}
-					$subject->template = str_replace($match, Route::_('index.php?option=com_contentbuilder&task=details.display&id=' . CBRequest::getInt('id') . '&record_id=' . CBRequest::getCmd('record_id', '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . $sub), $subject->template);
+					$subject->template = str_replace($match, Route::_('index.php?option=com_contentbuilder&view=details&id=' . CBRequest::getInt('id') . '&record_id=' . CBRequest::getCmd('record_id', '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . $sub), $subject->template);
 				}
 			}
 
@@ -142,7 +142,7 @@ class HtmlView extends BaseHtmlView
 							}
 						}
 					}
-					$table->toc = str_replace($match, Route::_('index.php?option=com_contentbuilder&task=details.display&id=' . CBRequest::getInt('id') . '&record_id=' . CBRequest::getCmd('record_id', '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . $sub), $table->toc);
+					$table->toc = str_replace($match, Route::_('index.php?option=com_contentbuilder&view=details&id=' . CBRequest::getInt('id') . '&record_id=' . CBRequest::getCmd('record_id', '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . $sub), $table->toc);
 				}
 			}
 

@@ -23,6 +23,9 @@ use Joomla\CMS\User\UserHelper;
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Mail\MailerFactoryInterface;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\Input\Input;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
@@ -32,9 +35,12 @@ class VerifyModel extends BaseDatabaseModel
     private $frontend = false;
     var $app;
 
-    public function __construct($config = [])
-    {
-        parent::__construct($config);
+    public function __construct(
+        $config,
+        MVCFactoryInterface $factory
+    ) {
+        // IMPORTANT : on transmet factory/app/input à ListModel
+        parent::__construct($config, $factory);
 
         $this->app = Factory::getApplication();
         $this->frontend = $this->app->isClient('site');

@@ -16,10 +16,6 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 class PublicformsController extends BaseController
 {
-    public function __construct($config = [])
-    {
-        parent::__construct($config);
-    }
 
     function display($cachable = false, $urlparams = array())
     {

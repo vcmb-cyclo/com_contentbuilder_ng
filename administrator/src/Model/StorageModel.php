@@ -26,6 +26,9 @@ use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\Input\Input;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\Logger;
 
@@ -37,9 +40,12 @@ class StorageModel extends AdminModel
     /** Required for CSV file */
     private string $target_table = '';
 
-    public function __construct($config = [])
-    {
-        parent::__construct($config);
+    public function __construct(
+        $config,
+        MVCFactoryInterface $factory
+    ) {
+        // IMPORTANT : on transmet factory/app/input à AdminModel
+        parent::__construct($config, $factory);
         $this->option = 'com_contentbuilder';
     }
 

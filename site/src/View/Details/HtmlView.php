@@ -14,13 +14,17 @@ namespace CB\Component\Contentbuilder\Site\View\Details;
 
 
 use Joomla\CMS\Factory;
-use Joomla\Database\DatabaseInterface;
-use Joomla\Registry\Registry;
+use Joomla\CMS\Event\Content\ContentPrepareEvent; 
+use Joomla\CMS\Event\Content\AfterTitleEvent;
+use Joomla\CMS\Event\Content\BeforeDisplayEvent;
+use Joomla\CMS\Event\Content\AfterDisplayEvent;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Uri\Uri;
+use Joomla\Database\DatabaseInterface;
+use Joomla\Registry\Registry;
 use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\HtmlView as BaseHtmlView;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
@@ -31,7 +35,6 @@ class HtmlView extends BaseHtmlView
     protected $state;
     protected $item;
     protected $form;
-
 
 	function display($tpl = null)
 	{
@@ -88,7 +91,7 @@ class HtmlView extends BaseHtmlView
 		$table->slug = ($article > 0 ? $article : 0) . ':' . $alias . ':contentbuilder_slug_used';
 
 		$registry = new Registry;
-		$registry->loadString($table->attribs);
+		$registry->loadString($table->attribs ?? '{}', 'json');
 		PluginHelper::importPlugin('content');
 
 		// seems to be a joomla bug. if sef urls is enabled, "start" is used for paging in articles, else "limitstart" will be used
@@ -98,16 +101,53 @@ class HtmlView extends BaseHtmlView
 		$limitstart = 0;
 
 		$table->text = "<!-- class=\"system-pagebreak\"  -->\n" . $table->text;
-		Factory::getApplication()->getDispatcher()->dispatch('onContentPrepare', array('com_content.article', &$table, &$registry, $limitstart));
-		$subject->template = $table->text;
 
-		$results = Factory::getApplication()->getDispatcher()->dispatch('onContentAfterTitle', array('com_content.article', &$table, &$registry, $limitstart));
+		$dispatcher = Factory::getApplication()->getDispatcher();
+		$dispatcher->dispatch(
+			'onContentPrepare',
+			new ContentPrepareEvent('onContentPrepare', ['com_content.article', &$table, &$registry, $limitstart])
+		);
+
+		// After title
+		$eventObj = new AfterTitleEvent(
+			'onContentAfterTitle',
+			[
+				'context' => 'com_content.article',
+				'subject' => $table,
+				'params'  => $registry,
+				'page'    => $limitstart,
+			]
+		);
+		$dispatcher->dispatch('onContentAfterTitle', $eventObj);
+		$results = $eventObj->getArgument('result') ?: [];
 		$event->afterDisplayTitle = trim(implode("\n", $results));
 
-		$results = Factory::getApplication()->getDispatcher()->dispatch('onContentBeforeDisplay', array('com_content.article', &$table, &$registry, $limitstart));
+		// Before display
+		$eventObj = new BeforeDisplayEvent(
+			'onContentBeforeDisplay',
+			[
+				'context' => 'com_content.article',
+				'subject' => $table,
+				'params'  => $registry,
+				'page'    => $limitstart,
+			]
+		);
+		$dispatcher->dispatch('onContentBeforeDisplay', $eventObj);
+		$results = $eventObj->getArgument('result') ?: [];
 		$event->beforeDisplayContent = trim(implode("\n", $results));
 
-		$results = Factory::getApplication()->getDispatcher()->dispatch('onContentAfterDisplay', array('com_content.article', &$table, &$registry, $limitstart));
+		// After display
+		$eventObj = new AfterDisplayEvent(
+			'onContentAfterDisplay',
+			[
+				'context' => 'com_content.article',
+				'subject' => $table,
+				'params'  => $registry,
+				'page'    => $limitstart,
+			]
+		);
+		$dispatcher->dispatch('onContentAfterDisplay', $eventObj);
+		$results = $eventObj->getArgument('result') ?: [];
 		$event->afterDisplayContent = trim(implode("\n", $results));
 
 		// if the slug has been used, we would like to stay in com_contentbuilder, so we re-arrange the resulting url a little
@@ -163,14 +203,15 @@ class HtmlView extends BaseHtmlView
 		$subject->template = preg_replace($pattern, '', $subject->template);
 
 		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
-		$dispatcher = Factory::getApplication()->getDispatcher();
-        $eventResult = $dispatcher->dispatch('onContentTemplateCss', new \Joomla\Event\Event('onContentTemplateCss', array()));
-        $results = $eventResult->getArgument('result') ?: [];
+
+		$eventObj = new \Joomla\Event\Event('onContentTemplateCss', []);
+		$dispatcher->dispatch('onContentTemplateCss', $eventObj);
+		$results = $eventObj->getArgument('result') ?: [];
 		$this->theme_css = implode('', $results);
 
-		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
-        $eventResult = $dispatcher->dispatch('onContentTemplateJavascript', new \Joomla\Event\Event('onContentTemplateJavascript', array()));
-        $results = $eventResult->getArgument('result') ?: [];
+		$eventObj = new \Joomla\Event\Event('onContentTemplateJavascript', []);
+		$dispatcher->dispatch('onContentTemplateJavascript', $eventObj);
+		$results = $eventObj->getArgument('result') ?: [];
 		$this->theme_js = implode('', $results);
 
 		$this->toc = $table->toc;
@@ -193,10 +234,6 @@ class HtmlView extends BaseHtmlView
 
 		$this->print_button = $subject->print_button;
 		$this->show_back_button = $subject->show_back_button;
-
-        $this->state = $this->getModel()->getState();
-        $this->item  = $this->getModel()->getItem();   // si ton model fournit Item
-        $this->form  = $this->getModel()->getForm();   // si c’est une vue avec formulaire
 
 		parent::display($tpl);
 	}

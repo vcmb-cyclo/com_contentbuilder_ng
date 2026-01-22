@@ -91,14 +91,11 @@ if ((CBRequest::getInt('cb_show_details_back_button', 1) && $this->show_back_but
 ?>
 
     <div class="cbToolBar" style="float: right; text-align: right;">
-
     <?php
 }
     ?>
 
-    <?php
-    if ($edit_allowed) {
-    ?>
+    <?php if ($edit_allowed) { ?>
         <a class="btn btn-sm btn-primary cbButton cbEditButton"
             href="<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&id=' . CBRequest::getInt('id', 0) . '&record_id=' . CBRequest::getCmd('record_id', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order')); ?>">
             <?php echo Text::_('COM_CONTENTBUILDER_EDIT') ?>
@@ -106,9 +103,7 @@ if ((CBRequest::getInt('cb_show_details_back_button', 1) && $this->show_back_but
     <?php
     }
     ?>
-    <?php
-    if ($delete_allowed) {
-    ?>
+    <?php if ($delete_allowed) { ?>
         <button class="btn btn-sm btn-primary cbButton cbDeleteButton" onclick="contentbuilder_delete();">
             <?php echo Text::_('COM_CONTENTBUILDER_DELETE') ?>
         </button>

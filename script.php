@@ -106,7 +106,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
 
   function installAndUpdate(): bool
   {
-    $db = Factory::getContainer()->get(DatabaseInterface::class);
+/*    $db = Factory::getContainer()->get(DatabaseInterface::class);
     $plugins = $this->getPlugins();
     $base_path = JPATH_SITE . '/administrator/components/com_contentbuilder/plugins';
     $folders = Folder::folders($base_path);
@@ -120,9 +120,10 @@ class com_contentbuilderInstallerScript extends InstallerScript
       if (!$success) {
         Factory::getApplication()->enqueueMessage('Install failed for plugin <b>' . $folder . '</b>', 'error');
       }
-    }
+    }*/
 
     // Publication des plugins.
+    /*
     foreach ($plugins as $folder => $subplugs) {
       foreach ($subplugs as $plugin) {
         $query = 'UPDATE #__extensions SET `enabled` = 1 WHERE `type` = "plugin" AND `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder);
@@ -131,7 +132,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
         $this->log("Plugin {$plugin} in folder {$folder} enabled.");
         Factory::getApplication()->enqueueMessage('Published plugin <b>' . $plugin . '</b>', 'message');
       }
-    }
+    }*/
 
     return true;
   }
@@ -341,8 +342,37 @@ class com_contentbuilderInstallerScript extends InstallerScript
     Factory::getApplication()->enqueueMessage($msg, 'message');
   }
 
+
+  private function activatePlugins(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+    
+    // Active les plugins fournis par le package (Joomla 4/5/6)
+    $plugins = $this->getPlugins();
+
+    foreach ($plugins as $folder => $elements) {
+        foreach ($elements as $element) {
+            $query = $db->getQuery(true)
+                ->update($db->quoteName('#__extensions'))
+                ->set($db->quoteName('enabled') . ' = 1')
+                ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
+                ->where($db->quoteName('folder') . ' = ' . $db->quote($folder))
+                ->where($db->quoteName('element') . ' = ' . $db->quote($element));
+
+            try {
+                $db->setQuery($query)->execute();
+                $this->log("[OK] Plugin enabled: {$folder}/{$element}");
+                Factory::getApplication()->enqueueMessage("[OK] Plugin enabled: {$folder}/{$element}", 'info');
+            } catch (\Throwable $e) {
+                $this->log("[ERROR] Failed enabling {$folder}/{$element}: " . $e->getMessage(), Log::ERROR);
+                Factory::getApplication()->enqueueMessage("[ERROR] Failed enabling {$folder}/{$element}: " . $e->getMessage(), 'error');
+            }
+        }
+    }
+  }
+
   /**
-   * method to run after an install/update/uninstall method
+   * Method to run after an install/update/uninstall method
    *
    * @return void
    */
@@ -365,6 +395,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
 
     $this->removeOldLibraries();
     $this->updateDateColumns();
+    $this->activatePlugins();
 
 
     // On ne fait ça que sur update (et éventuellement discover_install si tu veux)

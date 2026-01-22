@@ -614,7 +614,7 @@ class ListModel extends BaseListModel
 
                     $data->intro_text = $introtext . ($fulltext ? '<br/><br/>' . $fulltext : '');
 
-                    // plugin call
+                    // Plugin call
                     $limitstart = (int) $this->getState('list.start');
                     $start      = CBRequest::getVar('start', 0, '', 'int');
                     $table = Table::getInstance('content');

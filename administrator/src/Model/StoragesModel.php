@@ -23,6 +23,9 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\Database\QueryInterface;
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\Input\Input;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 class StoragesModel extends ListModel
@@ -30,8 +33,13 @@ class StoragesModel extends ListModel
     // Optionnel mais recommandé : définir le nom de la table (sans postfix)
     protected $table = 'Storage';
 
-    public function __construct($config = [])
-    {
+    public function __construct(
+        $config,
+        MVCFactoryInterface $factory
+    ) {
+        // IMPORTANT : on transmet factory/app/input à AdminModel
+        parent::__construct($config, $factory);
+
         if (empty($config['filter_fields'])) {
             $config['filter_fields'] = [
                 'a.id',
@@ -44,8 +52,6 @@ class StoragesModel extends ListModel
         }
 
         $this->option = 'com_contentbuilder';
-
-        parent::__construct($config);
     }
 
     protected function populateState($ordering = 'a.ordering', $direction = 'ASC')

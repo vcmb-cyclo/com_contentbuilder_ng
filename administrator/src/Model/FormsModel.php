@@ -23,11 +23,17 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\Database\QueryInterface;
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\Input\Input;
 
 class FormsModel extends ListModel
 {
-    public function __construct($config = [])
-    {
+    public function __construct(
+        $config,
+        MVCFactoryInterface $factory
+    ) {
+        // IMPORTANT : on transmet factory/app/input à ListModel
         if (empty($config['filter_fields'])) {
             $config['filter_fields'] = [
                 'a.id',
@@ -41,7 +47,7 @@ class FormsModel extends ListModel
             ];
         }
 
-        parent::__construct($config);
+        parent::__construct($config, $factory);
     }
 
     protected function populateState($ordering = 'a.ordering', $direction = 'ASC')

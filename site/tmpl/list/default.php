@@ -474,7 +474,8 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					if ($this->edit_button && $edit_allowed) {
 					?>
 						<td>
-							<a href="<?php echo $edit_link; ?>"><img
+							<a href="<?php echo $edit_link; ?>">
+								<img
 									src="<?php echo \Joomla\CMS\Uri\Uri::root(); ?>media/com_contentbuilder/images/edit.png"
 									border="0"
 									width="18" height="18" /></a>

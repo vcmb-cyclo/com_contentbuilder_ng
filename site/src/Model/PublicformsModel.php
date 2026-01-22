@@ -15,6 +15,9 @@ namespace CB\Component\Contentbuilder\Site\Model;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Pagination\Pagination;
 use Joomla\CMS\MVC\Model\ListModel;
+use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\Input\Input;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
@@ -54,9 +57,12 @@ class PublicformsModel extends ListModel
 
     private $_show_page_heading = false;
 
-    public function __construct($config = [])
-    {
-        parent::__construct($config);
+    public function __construct(
+        $config,
+        MVCFactoryInterface $factory
+    ) {
+        // IMPORTANT : on transmet factory/app/input à BaseController
+        parent::__construct($config, $factory);
 
         $app = Factory::getApplication();
         $option = 'com_contentbuilder';

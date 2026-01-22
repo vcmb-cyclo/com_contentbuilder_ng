@@ -71,7 +71,6 @@
         
         <folder>forms</folder>
         <folder>languages</folder>
-        <folder>plugins</folder>
         <folder>services</folder>
         <folder>vendor</folder>
         <folder>src</folder>
@@ -100,6 +99,12 @@
     <folder>images</folder>
     <filename>joomla.asset.json</filename>
 </media>
+
+<plugins>
+    <plugin group="contentbuilder_themes">plugins/contentbuilder_themes/blank</plugin>
+    <plugin group="contentbuilder_themes">plugins/contentbuilder_themes/joomla3</plugin>
+    <plugin group="contentbuilder_themes">plugins/contentbuilder_themes/khepri</plugin>
+</plugins>
 
 
 </extension>

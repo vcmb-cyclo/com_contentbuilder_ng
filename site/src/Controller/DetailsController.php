@@ -32,7 +32,7 @@ class DetailsController extends BaseController
     private bool $frontend;
 
     public function __construct(
-        $config = [],
+        $config,
         MVCFactoryInterface $factory,
         CMSApplicationInterface $app,
         Input $input) {
@@ -98,7 +98,7 @@ class DetailsController extends BaseController
                     Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder&task=edit.display&latest=1&backtolist=' . CBRequest::getInt('backtolist', 0) . '&id=' . CBRequest::getInt('id', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&record_id=&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getVar('filter_order', ''), false));
                 } else {
                     Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
-                    Factory::getApplication()->redirect('index.php');
+                    Factory::getApplication()->redirect(Route::_('index.php'));
                 }
             }
         }
@@ -125,7 +125,23 @@ class DetailsController extends BaseController
             }
         }
 
-        ContentbuilderLegacyHelper::setPermissions($form_id, 0, $suffix);
+        // Synchroniser Input + CBRequest (legacy)
+        $this->input->set('id', $form_id);
+        CBRequest::setVar('id', $form_id);
+
+        $recordId = (int) $this->input->getInt('record_id', 0);
+        if (!$recordId) {
+            $menu = $this->app->getMenu()->getActive();
+            if ($menu) {
+                $recordId = (int) $menu->getParams()->get('record_id', 0);
+            }
+        }
+        if ($recordId) {
+            $this->input->set('record_id', $recordId);
+            CBRequest::setVar('record_id', $recordId);
+        }
+
+        ContentbuilderLegacyHelper::setPermissions($form_id, $recordId, $suffix);
         ContentbuilderLegacyHelper::checkPermissions('view', Text::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
 
         CBRequest::setVar('tmpl', CBRequest::getWord('tmpl', null));

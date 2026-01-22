@@ -16,11 +16,17 @@ use Joomla\CMS\Factory;
 use Joomla\Database\QueryInterface;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\MVC\Model\ListModel;
+use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\Input\Input;
 
 class UsersModel extends ListModel
 {
-    public function __construct($config = [])
-    {
+    public function __construct(
+        $config,
+        MVCFactoryInterface $factory
+    ) {
+        
         if (empty($config['filter_fields'])) {
             $config['filter_fields'] = [
                 // #__users
@@ -37,7 +43,8 @@ class UsersModel extends ListModel
             ];
         }
 
-        parent::__construct($config);
+        // IMPORTANT : on transmet factory/app/input à ListModel
+        parent::__construct($config, $factory);
     }
 
     protected function populateState($ordering = 'u.id', $direction = 'ASC')

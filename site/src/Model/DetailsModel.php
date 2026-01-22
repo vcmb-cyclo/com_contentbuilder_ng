@@ -17,6 +17,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\MVC\Model\ListModel;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
@@ -43,9 +44,12 @@ class DetailsModel extends ListModel
 
     private $_page_heading = '';
 
-    public function __construct($config = [])
-    {
-        parent::__construct($config);
+    public function __construct(
+        $config,
+        MVCFactoryInterface $factory) {
+        // IMPORTANT : on transmet factory/app/input à ListModel
+        parent::__construct($config, $factory);
+
         $option = 'com_contentbuilder';
 
         $this->frontend = Factory::getApplication()->isClient('site');
@@ -343,7 +347,7 @@ class DetailsModel extends ListModel
                             $document->setTitle(html_entity_decode($data->page_title, ENT_QUOTES, 'UTF-8'));
                         }
 
-                        $data->template = ContentbuilderLegacyHelper::getTemplate($this->_id, $this->_record_id, $data->items, $ids);
+                        $data->template = ContentbuilderLegacyHelper::getTemplate($this->_id, $this->_record_id, $data->items, $ids, true);
 
                         if (
                             Factory::getApplication()->isClient('administrator')

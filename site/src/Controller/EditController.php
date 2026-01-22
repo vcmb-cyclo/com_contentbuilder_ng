@@ -28,7 +28,7 @@ class EditController extends BaseController
     private bool $frontend;
 
     public function __construct(
-        $config = [],
+        $config,
         MVCFactoryInterface $factory,
         CMSApplicationInterface $app,
         Input $input
@@ -203,17 +203,31 @@ class EditController extends BaseController
         $suffix = '_fe';
 
         // 1) d'abord depuis l'URL
-        $form_id = $this->input->getInt('id', 0);
+        $formId   = $this->input->getInt('id', 0);
+        $recordId = $this->input->getInt('record_id', 0);
 
         // 2) sinon depuis les params du menu actif
-        if (!$form_id) {
+        if (!$formId) {
             $menu = $app->getMenu()->getActive();
             if ($menu) {
-                $form_id = (int) $menu->getParams()->get('form_id', 0);
+                $formId = (int) $menu->getParams()->get('form_id', 0);
             }
         }
 
-        ContentbuilderLegacyHelper::setPermissions($form_id, 0, $suffix);
+        // Synchroniser Joomla Input + CBRequest (legacy)
+        $this->input->set('id', $formId);
+        CBRequest::setVar('id', $formId);
+
+        if ($recordId) {
+            $this->input->set('record_id', $recordId);
+            CBRequest::setVar('record_id', $recordId);
+        }
+
+        // Contexte CB correct pour cette page
+        CBRequest::setVar('view', 'list');
+
+        // Permissions
+        ContentbuilderLegacyHelper::setPermissions($formId, $recordId, $suffix);
         
         if (CBRequest::getCmd('record_id', '')) {
             ContentbuilderLegacyHelper::checkPermissions('Edit', Text::_('COM_CONTENTBUILDER_PERMISSIONS_EDIT_NOT_ALLOWED'), $this->frontend ? '_fe' : '');

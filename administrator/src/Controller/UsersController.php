@@ -22,7 +22,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
 class UsersController extends BaseController
 {
     public function __construct(
-        $config = [],
+        $config,
         MVCFactoryInterface $factory,
         CMSApplicationInterface $app,
         Input $input

@@ -36,7 +36,7 @@ final class FormsController extends AdminController
     protected $view_item = 'form';
 
     public function __construct(
-        $config = [],
+        $config,
         MVCFactoryInterface $factory,
         CMSApplicationInterface $app,
         Input $input
