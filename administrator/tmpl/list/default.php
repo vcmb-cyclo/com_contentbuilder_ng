@@ -53,17 +53,6 @@ $___tableOrdering = "Joomla.tableOrdering = function";
         form.filter_order_Dir.value = dir;
         document.adminForm.submit(task);
     };
-    function contentbuilder_selectAll(checker) {
-        for (var i = 0; i < document.adminForm.elements.length; i++) {
-            if (document.adminForm.elements[i].name == 'cid[]') {
-                if (checker.checked) {
-                    document.adminForm.elements[i].checked = true;
-                } else {
-                    document.adminForm.elements[i].checked = false;
-                }
-            }
-        }
-    }
     function contentbuilder_state() {
         document.getElementById('controller').value = 'edit';
         document.getElementById('view').value = 'edit';
@@ -106,32 +95,34 @@ $___tableOrdering = "Joomla.tableOrdering = function";
     //-->
 </script>
 
-<?php
-if ($this->export_xls):
-    ?>
-    <div class="hidden-phone" style="float: right; text-align: right;">
-        <a
-            href="<?php echo Route::_('index.php?option=com_contentbuilder&view=export&id=' . CBRequest::getInt('id', 0) . '&type=xls&format=raw&tmpl=component'); ?>"><i
-                class="fa fa-file-excel"></i></a>
-    </div>
-    <div style="clear: both;"></div>
-    <?php
-endif;
-?>
 <?php if ($this->page_title): ?>
     <h1 class="contentheading">
         <?php echo $this->page_title; ?>
     </h1>
 <?php endif; ?>
 <?php echo $this->intro_text; ?>
-<div style="float: right; text-align: right;">
+<div class="row g-2 justify-content-md-end align-items-center mb-3">
+    <?php
+    if ($this->export_xls):
+        ?>
+        <div class="col-12 col-sm-auto d-grid d-sm-block">
+            <a class="btn btn-sm btn-outline-success"
+                href="<?php echo Route::_('index.php?option=com_contentbuilder&view=export&id=' . CBRequest::getInt('id', 0) . '&type=xls&format=raw&tmpl=component'); ?>">
+                <i class="fa fa-file-excel" aria-hidden="true"></i>
+            </a>
+        </div>
+        <?php
+    endif;
+    ?>
     <?php
     if ($new_allowed) {
         ?>
-        <button class="button btn btn-sm btn-primary cbButton cbNewButton"
-            onclick="location.href='<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&backtolist=1&id=' . CBRequest::getInt('id', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&record_id=0&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order')); ?>'">
-            <?php echo Text::_('COM_CONTENTBUILDER_NEW'); ?>
-        </button>
+        <div class="col-12 col-sm-auto d-grid d-sm-block">
+            <button class="button btn btn-sm btn-primary cbButton cbNewButton"
+                onclick="location.href='<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&backtolist=1&id=' . CBRequest::getInt('id', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&record_id=0&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order')); ?>'">
+                <?php echo Text::_('COM_CONTENTBUILDER_NEW'); ?>
+            </button>
+        </div>
         <?php
     }
     ?>
@@ -139,219 +130,264 @@ endif;
     <?php
     if ($delete_allowed) {
         ?>
-        <button class="button btn btn-sm btn-primary cbButton cbDeleteButton" onclick="contentbuilder_delete();">
-            <?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>
-        </button>
-        <?php
-    }
-    if ($delete_allowed || $new_allowed) {
-        ?>
-        <div style="padding-bottom: 10px;"></div>
+        <div class="col-12 col-sm-auto d-grid d-sm-block">
+            <button class="button btn btn-sm btn-outline-danger cbButton cbDeleteButton" onclick="contentbuilder_delete();">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+                <?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>
+            </button>
+        </div>
         <?php
     }
     ?>
 </div>
-<div style="clear: both;"></div>
 
 
 
 <form action="index.php" method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm">
     <div id="editcell">
-        <table class="cbFilterTable" width="100%">
-            <tr>
-                <td>
-                    <?php
-
-                    if (
-                        $state_allowed && count($this->states) ||
-                        $publish_allowed ||
-                        $language_allowed
-                    ) {
-                        echo Text::_('COM_CONTENTBUILDER_BULK_OPTIONS') . '&nbsp;';
-                    }
+        <?php
+        if (
+            $state_allowed && count($this->states) ||
+            $publish_allowed ||
+            $language_allowed
+        ) {
+            ?>
+            <div class="row g-2 align-items-center flex-md-nowrap mb-2">
+                <div class="col-12 col-lg-auto fw-semibold text-center text-md-start">
+                    <?php echo Text::_('COM_CONTENTBUILDER_BULK_OPTIONS'); ?>
+                </div>
+                <?php
+                if ($state_allowed && count($this->states)) {
                     ?>
+                    <div class="col-12 col-md-auto">
+                        <div class="row g-2 align-items-center flex-sm-nowrap">
+                            <div class="col-12 col-sm-auto">
+                                <select class="form-select form-select-sm" name="list_state">
+                                    <option value="0"> -
+                                        <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> -
+                                    </option>
+                                    <?php
+                                    foreach ($this->states as $state) {
+                                        ?>
+                                        <option value="<?php echo $state['id'] ?>">
+                                            <?php echo $state['title'] ?>
+                                        </option>
+                                        <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="col-12 col-sm-auto">
+                                <button class="button btn btn-sm btn-outline-primary cbButton cbSearchButton"
+                                    onclick="contentbuilder_state();">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_APPLY'); ?>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <?php
+                }
+                ?>
+                <?php
+                if ($publish_allowed) {
+                    ?>
+                    <div class="col-12 col-md-auto">
+                        <div class="row g-2 align-items-center flex-sm-nowrap">
+                            <div class="col-12 col-sm-auto">
+                                <select class="form-select form-select-sm" name="list_publish">
+                                    <option value="-1"> -
+                                        <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -
+                                    </option>
+                                    <option value="1">
+                                        <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH') ?>
+                                    </option>
+                                    <option value="0">
+                                        <?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISH') ?>
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-sm-auto">
+                                <button class="button btn btn-sm btn-outline-primary cbButton cbSearchButton"
+                                    onclick="contentbuilder_publish();">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_APPLY'); ?>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <?php
+                }
+                ?>
+                <?php
+                if ($language_allowed) {
+                    ?>
+                    <div class="col-12 col-md-auto">
+                        <div class="row g-2 align-items-center flex-sm-nowrap">
+                            <div class="col-12 col-sm-auto">
+                                <select class="form-select form-select-sm" name="list_language">
+                                    <option value="*"> -
+                                        <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?> -
+                                    </option>
+                                    <option value="*">
+                                        <?php echo Text::_('COM_CONTENTBUILDER_ANY'); ?>
+                                    </option>
+                                    <?php
+                                    foreach ($this->languages as $filter_language) {
+                                        ?>
+                                        <option value="<?php echo $filter_language; ?>">
+                                            <?php echo $filter_language; ?>
+                                        </option>
+                                        <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="col-12 col-sm-auto">
+                                <button class="button btn btn-sm btn-outline-primary cbButton cbSearchButton"
+                                    onclick="contentbuilder_language();">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_APPLY'); ?>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <?php
-                    if ($state_allowed && count($this->states)) {
-                        ?>
-                        <select class="form-select-sm" style="max-width: 100px;" name="list_state">
+                }
+                ?>
+            </div>
+            <?php
+        }
+        ?>
+
+        <?php
+        if ($this->display_filter) {
+            ?>
+            <div class="row g-2 align-items-center flex-md-nowrap mb-3">
+                <div class="col-12 col-lg-auto fw-semibold text-center text-md-start">
+                    <?php echo Text::_('COM_CONTENTBUILDER_FILTER'); ?>
+                </div>
+                <div class="col-12 col-md-auto">
+                    <input class="form-control form-control-sm" type="text" id="contentbuilder_filter" name="filter"
+                        value="<?php echo $this->escape($this->lists['filter']); ?>"
+                        onchange="document.adminForm.submit();" />
+                </div>
+                <?php
+                if ($this->list_state && count($this->states)) {
+                    ?>
+                    <div class="col-12 col-md-auto">
+                        <select class="form-select form-select-sm" name="list_state_filter" id="list_state_filter"
+                            onchange="document.adminForm.submit();">
                             <option value="0"> -
                                 <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> -
                             </option>
                             <?php
                             foreach ($this->states as $state) {
                                 ?>
-                                <option value="<?php echo $state['id'] ?>">
+                                <option value="<?php echo $state['id'] ?>" <?php echo $this->lists['filter_state'] == $state['id'] ? ' selected="selected"' : ''; ?>>
                                     <?php echo $state['title'] ?>
                                 </option>
                                 <?php
                             }
                             ?>
                         </select>
-                        <button class="button btn btn-sm btn-primary cbButton cbSearchButton"
-                            onclick="contentbuilder_state();">
-                            <?php echo Text::_('COM_CONTENTBUILDER_SET'); ?>
-                        </button>
+                    </div>
                     <?php
-                    }
+                }
+
+                if ($this->list_publish && $publish_allowed) {
                     ?>
-                    <?php
-                    if ($publish_allowed) {
-                        ?>
-                        <select class="form-select-sm" style="max-width: 100px;" name="list_publish">
+                    <div class="col-12 col-md-auto">
+                        <select class="form-select form-select-sm" name="list_publish_filter"
+                            id="list_publish_filter" onchange="document.adminForm.submit();">
                             <option value="-1"> -
                                 <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -
                             </option>
-                            <option value="1">
-                                <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH') ?>
+                            <option value="1" <?php echo $this->lists['filter_publish'] == 1 ? ' selected="selected"' : ''; ?>>
+                                <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED') ?>
                             </option>
-                            <option value="0">
-                                <?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISH') ?>
+                            <option value="0" <?php echo $this->lists['filter_publish'] == 0 ? ' selected="selected"' : ''; ?>>
+                                <?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISHED') ?>
                             </option>
                         </select>
-                        <button class="button btn btn-sm btn-primary cbButton cbSearchButton"
-                            onclick="contentbuilder_publish();">
-                            <?php echo Text::_('COM_CONTENTBUILDER_SET'); ?>
-                        </button>
+                    </div>
                     <?php
-                    }
+                }
+
+                if ($this->list_language) {
                     ?>
-                    <?php
-                    if ($language_allowed) {
-                        ?>
-                        <select class="form-select-sm" style="max-width: 100px;" name="list_language">
-                            <option value="*"> -
+                    <div class="col-12 col-md-auto">
+                        <select class="form-select form-select-sm" name="list_language_filter"
+                            id="list_language_filter" onchange="document.adminForm.submit();">
+                            <option value=""> -
                                 <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?> -
-                            </option>
-                            <option value="*">
-                                <?php echo Text::_('COM_CONTENTBUILDER_ANY'); ?>
                             </option>
                             <?php
                             foreach ($this->languages as $filter_language) {
                                 ?>
-                                <option value="<?php echo $filter_language; ?>">
+                                <option value="<?php echo $filter_language; ?>" <?php echo $this->lists['filter_language'] == $filter_language ? ' selected="selected"' : ''; ?>>
                                     <?php echo $filter_language; ?>
                                 </option>
                                 <?php
                             }
                             ?>
                         </select>
-                        <button class="button btn btn-sm btn-primary cbButton cbSearchButton"
-                            onclick="contentbuilder_language();">
-                            <?php echo Text::_('COM_CONTENTBUILDER_SET'); ?>
-                        </button>
-                        <?php
-                    }
-                    ?>
-                </td>
-            </tr>
-
-            <tr>
-                <?php
-                if ($this->display_filter) {
-                    ?>
-                    <td>
-                        <?php echo Text::_('COM_CONTENTBUILDER_FILTER') . '&nbsp;'; ?>
-                        <input class="form-control form-control-sm" type="text" id="contentbuilder_filter" name="filter"
-                            value="<?php echo $this->escape($this->lists['filter']); ?>" class="inputbox"
-                            onchange="document.adminForm.submit();" />
-                        <?php
-                        if ($this->list_state && count($this->states)) {
-                            ?>
-                            <select class="form-select-sm" style="max-width: 100px;" name="list_state_filter"
-                                id="list_state_filter" onchange="document.adminForm.submit();">
-                                <option value="0"> -
-                                    <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> -
-                                </option>
-                                <?php
-                                foreach ($this->states as $state) {
-                                    ?>
-                                    <option value="<?php echo $state['id'] ?>" <?php echo $this->lists['filter_state'] == $state['id'] ? ' selected="selected"' : ''; ?>>
-                                        <?php echo $state['title'] ?>
-                                    </option>
-                                    <?php
-                                }
-                                ?>
-                            </select>
-                            <?php
-                        }
-
-                        if ($this->list_publish && $publish_allowed) {
-                            ?>
-
-                            <select class="form-select-sm" style="max-width: 100px;" name="list_publish_filter"
-                                id="list_publish_filter" onchange="document.adminForm.submit();">
-                                <option value="-1"> -
-                                    <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -
-                                </option>
-                                <option value="1" <?php echo $this->lists['filter_publish'] == 1 ? ' selected="selected"' : ''; ?>>
-                                    <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED') ?>
-                                </option>
-                                <option value="0" <?php echo $this->lists['filter_publish'] == 0 ? ' selected="selected"' : ''; ?>>
-                                    <?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISHED') ?>
-                                </option>
-                            </select>
-                            <?php
-                        }
-
-                        if ($this->list_language) {
-                            ?>
-                            <select class="form-select-sm" style="max-width: 100px;" name="list_language_filter"
-                                id="list_language_filter" onchange="document.adminForm.submit();">
-                                <option value=""> -
-                                    <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?> -
-                                </option>
-                                <?php
-                                foreach ($this->languages as $filter_language) {
-                                    ?>
-                                    <option value="<?php echo $filter_language; ?>" <?php echo $this->lists['filter_language'] == $filter_language ? ' selected="selected"' : ''; ?>>
-                                        <?php echo $filter_language; ?>
-                                    </option>
-                                    <?php
-                                }
-                                ?>
-                            </select>
-                            <?php
-                        }
-                        ?>
-
-                        <button type="submit" class="button btn btn-sm btn-primary cbButton cbSearchButton"
-                            id="cbSearchButton" onclick="document.adminForm.submit();">
-                            <?php echo Text::_('COM_CONTENTBUILDER_SEARCH') ?>
-                        </button>
-                        <button class="button btn btn-sm btn-primary cbButton cbResetButton"
-                            onclick="document.getElementById('contentbuilder_filter').value='';<?php echo $this->list_language && count($this->languages) ? "if(document.getElementById('list_language_filter')) document.getElementById('list_language_filter').selectedIndex=0;" : ""; ?><?php echo $this->list_state && count($this->states) ? "if(document.getElementById('list_state_filter')) document.getElementById('list_state_filter').selectedIndex=0;" : ""; ?><?php echo $this->list_publish ? "if(document.getElementById('list_publish_filter')) document.getElementById('list_publish_filter').selectedIndex=0;" : ""; ?>document.adminForm.submit();">
-                            <?php echo Text::_('COM_CONTENTBUILDER_RESET') ?>
-                        </button>
-                    </td>
+                    </div>
                     <?php
                 }
                 ?>
-            </tr>
-        </table>
+
+                <div class="col-12 col-md-auto">
+                    <div class="row g-2 align-items-center flex-sm-nowrap">
+                        <div class="col-12 col-sm-auto d-grid d-sm-block">
+                            <button type="submit" class="button btn btn-sm btn-primary cbButton cbSearchButton"
+                                id="cbSearchButton" onclick="document.adminForm.submit();">
+                                <?php echo Text::_('COM_CONTENTBUILDER_SEARCH') ?>
+                            </button>
+                        </div>
+                        <div class="col-12 col-sm-auto d-grid d-sm-block">
+                            <button class="button btn btn-sm btn-outline-secondary cbButton cbResetButton"
+                                onclick="document.getElementById('contentbuilder_filter').value='';<?php echo $this->list_language && count($this->languages) ? "if(document.getElementById('list_language_filter')) document.getElementById('list_language_filter').selectedIndex=0;" : ""; ?><?php echo $this->list_state && count($this->states) ? "if(document.getElementById('list_state_filter')) document.getElementById('list_state_filter').selectedIndex=0;" : ""; ?><?php echo $this->list_publish ? "if(document.getElementById('list_publish_filter')) document.getElementById('list_publish_filter').selectedIndex=0;" : ""; ?>document.adminForm.submit();">
+                                <?php echo Text::_('COM_CONTENTBUILDER_RESET') ?>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
+        }
+        ?>
+
+        <?php
+        $current_order = isset($this->lists['order']) ? $this->lists['order'] : '';
+        $current_dir = isset($this->lists['order_Dir']) ? strtolower($this->lists['order_Dir']) : '';
+        $sort_indicator = function ($order_key) use ($current_order, $current_dir) {
+            if ($order_key !== $current_order) {
+                return '';
+            }
+            return $current_dir === 'asc' ? ' &uarr;' : ' &darr;';
+        };
+        ?>
         <table class="mt-3 table table-striped">
             <thead>
                 <tr>
                     <?php
                     if ($this->show_id_column) {
                         ?>
-                        <th class="sectiontableheader hidden-phone" width="5">
-                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ID', ENT_QUOTES, 'UTF-8'), 'colRecord', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <th class="sectiontableheader hidden-phone align-middle text-nowrap small text-uppercase" width="5">
+                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ID', ENT_QUOTES, 'UTF-8') . $sort_indicator('colRecord'), 'colRecord', $this->lists['order_Dir'], $this->lists['order']); ?>
                         </th>
                         <?php
                     }
 
                     if ($this->select_column && ($delete_allowed || $state_allowed || $publish_allowed)) {
                         ?>
-                        <th class="sectiontableheader hidden-phone" width="20">
-                            <input class="contentbuilder_select_all form-check-input" type="checkbox"
-                                onclick="contentbuilder_selectAll(this);" />
+                        <th class="sectiontableheader hidden-phone align-middle text-nowrap small text-uppercase" width="20">
+                            <?php echo HTMLHelper::_('grid.checkall'); ?>
                         </th>
                         <?php
                     }
 
                     if ($this->edit_button && $edit_allowed) {
                         ?>
-                        <th class="sectiontableheader" width="20">
+                        <th class="sectiontableheader align-middle text-nowrap small text-uppercase" width="20">
                             <?php echo Text::_('COM_CONTENTBUILDER_EDIT'); ?>
                         </th>
                         <?php
@@ -359,7 +395,7 @@ endif;
 
                     if ($this->list_state) {
                         ?>
-                        <th class="sectiontableheader hidden-phone">
+                        <th class="sectiontableheader hidden-phone align-middle text-nowrap small text-uppercase">
                             <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>
                         </th>
                         <?php
@@ -367,7 +403,7 @@ endif;
 
                     if ($this->list_publish && $publish_allowed) {
                         ?>
-                        <th class="sectiontableheader" width="20">
+                        <th class="sectiontableheader align-middle text-nowrap small text-uppercase" width="20">
                             <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED'); ?>
                         </th>
                         <?php
@@ -375,7 +411,7 @@ endif;
 
                     if ($this->list_language) {
                         ?>
-                        <th class="sectiontableheader hidden-phone" width="20">
+                        <th class="sectiontableheader hidden-phone align-middle text-nowrap small text-uppercase" width="20">
                             <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?>
                         </th>
                         <?php
@@ -383,24 +419,24 @@ endif;
 
                     if ($this->list_article) {
                         ?>
-                        <th class="sectiontableheader hidden-phone">
-                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ARTICLE', ENT_QUOTES, 'UTF-8'), 'colArticleId', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <th class="sectiontableheader hidden-phone align-middle text-nowrap small text-uppercase">
+                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ARTICLE', ENT_QUOTES, 'UTF-8') . $sort_indicator('colArticleId'), 'colArticleId', $this->lists['order_Dir'], $this->lists['order']); ?>
                         </th>
                         <?php
                     }
 
                     if ($this->list_author) {
                         ?>
-                        <th class="sectiontableheader hidden-phone">
-                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_AUTHOR', ENT_QUOTES, 'UTF-8'), 'colAuthor', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <th class="sectiontableheader hidden-phone align-middle text-nowrap small text-uppercase">
+                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_AUTHOR', ENT_QUOTES, 'UTF-8') . $sort_indicator('colAuthor'), 'colAuthor', $this->lists['order_Dir'], $this->lists['order']); ?>
                         </th>
                         <?php
                     }
 
                     if ($this->list_rating) {
                         ?>
-                        <th class="sectiontableheader hidden-phone">
-                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_RATING', ENT_QUOTES, 'UTF-8'), 'colRating', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <th class="sectiontableheader hidden-phone align-middle text-nowrap small text-uppercase">
+                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_RATING', ENT_QUOTES, 'UTF-8') . $sort_indicator('colRating'), 'colRating', $this->lists['order_Dir'], $this->lists['order']); ?>
                         </th>
                         <?php
                     }
@@ -415,8 +451,8 @@ endif;
                                 $hidden = ' hidden-phone';
                             }
                             ?>
-                            <th class="sectiontableheader<?php echo $hidden; ?>">
-                                <?php echo HTMLHelper::_('grid.sort', nl2br(htmlentities(ContentbuilderHelper::contentbuilder_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')), "col$reference_id", $this->lists['order_Dir'], $this->lists['order']); ?>
+                            <th class="sectiontableheader<?php echo $hidden; ?> align-middle text-nowrap small text-uppercase">
+                                <?php echo HTMLHelper::_('grid.sort', nl2br(htmlentities(ContentbuilderHelper::contentbuilder_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')) . $sort_indicator("col$reference_id"), "col$reference_id", $this->lists['order_Dir'], $this->lists['order']); ?>
                             </th>
                             <?php
                             $label_count++;
@@ -601,7 +637,7 @@ endif;
                 <tfoot>
                     <tr>
                         <td colspan="1000" valign="middle" align="center">
-                            <div class="pagination pagination-toolbar">
+                            <div class="pagination pagination-toolbar d-flex flex-column flex-md-row flex-md-nowrap justify-content-between align-items-center gap-2">
                                 <?php
                                 if ($this->show_records_per_page) {
                                     ?>
@@ -617,7 +653,9 @@ endif;
                                     <?php
                                 }
                                 ?>
-                                <?php echo $pages_links; ?>
+                                <div class="d-flex align-items-center flex-wrap gap-2">
+                                    <?php echo $pages_links; ?>
+                                </div>
                             </div>
                         </td>
                     </tr>
