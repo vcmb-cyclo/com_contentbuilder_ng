@@ -61,8 +61,80 @@ class FormsModel extends ListModel
         $filterState = $app->getUserStateFromRequest($this->context . '.filter.state', 'filter_state', '', 'cmd');
         $this->setState('filter.state', $filterState);
 
+        $input = $app->input;
+        $user = $app->getIdentity();
+        $profileKey = 'com_contentbuilder.filter_tag';
+
         $filterTag = $app->getUserStateFromRequest($this->context . '.filter.tag', 'filter_tag', '', 'string');
-        $this->setState('filter.tag', $filterTag);
+        $hasRequestValue = $input->get('filter_tag', null) !== null;
+
+        if ($user && $user->id) {
+            if ($hasRequestValue) {
+                $this->saveUserProfileValue((int) $user->id, $profileKey, (string) $filterTag);
+            } elseif ($filterTag === '') {
+                $savedTag = $this->loadUserProfileValue((int) $user->id, $profileKey);
+                if ($savedTag !== '') {
+                    $filterTag = $savedTag;
+                    $app->setUserState($this->context . '.filter.tag', $filterTag);
+                }
+            }
+        }
+
+        $this->setState('filter.tag', (string) $filterTag);
+    }
+
+    private function loadUserProfileValue(int $userId, string $profileKey): string
+    {
+        $db = $this->getDatabase();
+        $query = $db->getQuery(true)
+            ->select($db->quoteName('profile_value'))
+            ->from($db->quoteName('#__user_profiles'))
+            ->where($db->quoteName('user_id') . ' = ' . (int) $userId)
+            ->where($db->quoteName('profile_key') . ' = ' . $db->quote($profileKey))
+            ->order($db->quoteName('ordering') . ' ASC');
+
+        $db->setQuery($query, 0, 1);
+        $value = $db->loadResult();
+
+        if ($value === null) {
+            return '';
+        }
+
+        $decoded = json_decode((string) $value, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_string($decoded)) {
+            return $decoded;
+        }
+
+        return (string) $value;
+    }
+
+    private function saveUserProfileValue(int $userId, string $profileKey, string $value): void
+    {
+        $db = $this->getDatabase();
+
+        $db->setQuery(
+            $db->getQuery(true)
+                ->delete($db->quoteName('#__user_profiles'))
+                ->where($db->quoteName('user_id') . ' = ' . (int) $userId)
+                ->where($db->quoteName('profile_key') . ' = ' . $db->quote($profileKey))
+        );
+        $db->execute();
+
+        $columns = ['user_id', 'profile_key', 'profile_value', 'ordering'];
+        $values = [
+            (int) $userId,
+            $db->quote($profileKey),
+            $db->quote(json_encode($value, JSON_UNESCAPED_SLASHES)),
+            1,
+        ];
+
+        $db->setQuery(
+            $db->getQuery(true)
+                ->insert($db->quoteName('#__user_profiles'))
+                ->columns($db->quoteName($columns))
+                ->values(implode(',', $values))
+        );
+        $db->execute();
     }
 
     protected function getListQuery(): QueryInterface

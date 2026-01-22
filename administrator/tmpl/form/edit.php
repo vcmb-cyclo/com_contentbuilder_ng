@@ -18,6 +18,10 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 ?>
+<?php
+$wa = Factory::getApplication()->getDocument()->getWebAssetManager();
+$wa->addInlineStyle('.saveorder.btn{background-color:#fff;border-color:#ced4da;color:#1b1b1b}.saveorder.btn:hover{background-color:#f8f9fa}.cb-order-slot{display:inline-block;width:24px;text-align:center}.cb-order-placeholder{visibility:hidden}.cb-order-input{margin-left:6px}.cb-order-head{vertical-align:middle;white-space:nowrap}.cb-order-head .saveorder{float:none!important;margin-left:6px}');
+?>
 
 <script type="text/javascript">
     function listItemTask(id, task) {
@@ -72,6 +76,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
             case 'form.listunpublish':
             case 'form.listorderdown':
             case 'form.listorderup':
+            case 'form.saveorder':
             case 'form.listremove':
             case 'form.list_include':
             case 'form.no_list_include':
@@ -118,13 +123,20 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
         }
     }
 
+    function saveorder(n, task) {
+        if (task === 'saveorder') {
+            task = 'form.saveorder';
+        }
+        submitbutton(task);
+    }
+
     if (typeof Joomla != 'undefined') {
         Joomla.submitbutton = submitbutton;
         Joomla.listItemTask = listItemTask;
     }
 
     function contentbuilder_selectAll(checker, type) {
-        var type = type == 'fe' ? 'perms_fe[' : 'perms[';
+        var type = type == 'fe' ? 'jform[perms_fe][' : 'jform[perms][';
         for (var i = 0; i < document.adminForm.elements.length; i++) {
             if (typeof document.adminForm.elements[i].name != 'undefined' && document.adminForm.elements[i].name.startsWith(type) && document.adminForm.elements[i].name.endsWith(checker.value + "]")) {
                 if (checker.checked) {
@@ -693,7 +705,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
                             <th>
                                 <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED'); ?>
                             </th>
-                            <th width="120">
+                            <th width="120" class="cb-order-head">
                                 <?php if (!empty($this->elements) && is_array($this->elements)) : ?>
                                     <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering', $this->listDirn, $this->listOrderr); ?>
                                     <?php //TODO: dragndrop if ($this->ordering) echo HTMLHelper::_('grid.order',  $this->elements );   
@@ -797,18 +809,26 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
                                     <?php echo $published; ?>
                                 </td>
                                 <td class="order" width="150" valign="top">
-                                    <span>
-                                        <?php echo $this->pagination->orderUpIcon($i, true, 'form.orderup', 'Move Up', $this->ordering); ?>
+                                    <?php
+                                    $orderUp = '';
+                                    $orderDown = '';
+                                    if ($this->pagination) {
+                                        $orderUp = (string) $this->pagination->orderUpIcon($i, true, 'form.orderup', 'Move Up', $this->ordering);
+                                        $orderDown = (string) $this->pagination->orderDownIcon($i, $n, true, 'form.orderdown', 'Move Down', $this->ordering);
+                                    }
+                                    ?>
+                                    <span class="cb-order-slot">
+                                        <?php echo $orderUp !== '' ? $orderUp : '<span class="cb-order-placeholder">•</span>'; ?>
                                     </span>
-                                    <span>
-                                        <?php echo $this->pagination->orderDownIcon($i, $n, true, 'form.orderdown', 'Move Down', $this->ordering); ?>
+                                    <span class="cb-order-slot">
+                                        <?php echo $orderDown !== '' ? $orderDown : '<span class="cb-order-placeholder">•</span>'; ?>
                                     </span>
                                     <?php $disabled = $this->ordering ? '' : 'disabled="disabled"'; ?>
                                     <input
                                         type="text"
                                         name="jform[order][<?php echo (int) $row->id; ?>]"
                                         size="3"
-                                        style="width:30px;text-align:center"
+                                        style="width:30px;text-align:center;margin-left:20px"
                                         value="<?php echo (int) $row->ordering; ?>"
                                         <?php echo $disabled; ?>
                                         class="text_area" />
@@ -825,15 +845,15 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
                                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
 
                                     <div class="d-flex flex-wrap align-items-center gap-2">
-                                        <?php echo $this->pagination->getPagesCounter(); ?>
+                                        <?php echo $this->pagination ? $this->pagination->getPagesCounter() : ''; ?>
                                         <span><?php echo Text::_('COM_CONTENTBUILDER_DISPLAY_NUM'); ?>&nbsp;</span>
                                         <span class="d-inline-block">
-                                            <?php echo $this->pagination->getLimitBox(); ?>
+                                            <?php echo $this->pagination ? $this->pagination->getLimitBox() : ''; ?>
                                         </span>
                                     </div>
 
                                     <div>
-                                        <?php echo $this->pagination->getPagesLinks(); ?>
+                                        <?php echo $this->pagination ? $this->pagination->getPagesLinks() : ''; ?>
                                     </div>
 
                                 </div>
@@ -1680,7 +1700,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
                             value="1" <?php echo !$this->item->id ? ' checked="checked"' : (isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['view']) && $this->item->config['permissions_fe'][$entry->value]['view'] ? ' checked="checked"' : ''); ?> />
                     </td>
                     <td><input class="form-check-input" type="checkbox" name="jform[perms_fe][<?php echo $entry->value; ?>][new]"
-                            value="1" <?php echo isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['new']) && $this->item->config['permissions_fe'][$entry->value]['new'] ? ' checked="checked"' : ''; ?> />
+                            value="1" <?php echo !$this->item->id ? ' checked="checked"' : (isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['new']) && $this->item->config['permissions_fe'][$entry->value]['new'] ? ' checked="checked"' : ''); ?> />
                     </td>
                     <td><input class="form-check-input" type="checkbox" name="jform[perms_fe][<?php echo $entry->value; ?>][edit]"
                             value="1" <?php echo isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['edit']) && $this->item->config['permissions_fe'][$entry->value]['edit'] ? ' checked="checked"' : ''; ?> />
@@ -1867,7 +1887,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
                             value="1" <?php echo !$this->item->id ? ' checked="checked"' : (isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['view']) && $this->item->config['permissions'][$entry->value]['view'] ? ' checked="checked"' : ''); ?> />
                     </td>
                     <td><input class="form-check-input" type="checkbox" name="jform[perms][<?php echo $entry->value; ?>][new]"
-                            value="1" <?php echo isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['new']) && $this->item->config['permissions'][$entry->value]['new'] ? ' checked="checked"' : ''; ?> /></td>
+                            value="1" <?php echo !$this->item->id ? ' checked="checked"' : (isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['new']) && $this->item->config['permissions'][$entry->value]['new'] ? ' checked="checked"' : ''); ?> /></td>
                     <td><input class="form-check-input" type="checkbox" name="jform[perms][<?php echo $entry->value; ?>][edit]"
                             value="1" <?php echo isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['edit']) && $this->item->config['permissions'][$entry->value]['edit'] ? ' checked="checked"' : ''; ?> /></td>
                     <td><input class="form-check-input" type="checkbox" name="jform[perms][<?php echo $entry->value; ?>][delete]"

@@ -254,6 +254,45 @@ class FormController extends BaseFormController
         $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=' . $this->view_item . '&id=' . $this->input->getInt('id'), false));
     }
 
+    public function saveorder(): void
+    {
+        $this->checkToken();
+
+        $formId = (int) $this->input->getInt('id');
+        $orderMap = (array) $this->input->post->get('order', [], 'array');
+
+        if (empty($orderMap)) {
+            $jform = (array) $this->input->post->get('jform', [], 'array');
+            $orderMap = (array) ($jform['order'] ?? []);
+        }
+
+        if (empty($orderMap)) {
+            $this->setMessage(Text::_('JGLOBAL_NO_MATCHING_RESULTS'), 'warning');
+            $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=' . $this->view_item . '&id=' . $formId, false));
+            return;
+        }
+
+        $pks = array_keys($orderMap);
+        $order = array_values($orderMap);
+        ArrayHelper::toInteger($pks);
+        ArrayHelper::toInteger($order);
+
+        $model = $this->getModel('Elements', 'Administrator', ['ignore_request' => true]);
+        if (!$model) {
+            throw new \RuntimeException('ElementsModel introuvable');
+        }
+
+        $model->setFormId($formId);
+
+        if (!$model->saveorder($pks, $order)) {
+            $this->setMessage($model->getError() ?: 'Saveorder failed', 'warning');
+        } else {
+            $this->setMessage(Text::_('JLIB_APPLICATION_SAVE_SUCCESS'));
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=' . $this->view_item . '&id=' . $formId, false));
+    }
+
     // ==================================================================
     // Toutes les tâches sur les ÉLÉMENTS (champs du formulaire)
     // ==================================================================

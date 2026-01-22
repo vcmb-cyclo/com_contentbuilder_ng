@@ -75,7 +75,7 @@ final class FormsController extends AdminController
      *
      * @return  \Joomla\CMS\MVC\Model\BaseDatabaseModel|false  Model object on success; otherwise false on failure.
      */
-    public function getModel($name = 'Form', $prefix = 'Contentbuilder', $config = ['ignore_request' => true])
+    public function getModel($name = 'Form', $prefix = 'Administrator', $config = ['ignore_request' => true])
     {
         return parent::getModel($name, $prefix, $config);
     }
@@ -104,7 +104,7 @@ final class FormsController extends AdminController
             'cid'  => $cid,
         ]);
 
-        $model = $this->getModel('Form', 'Contentbuilder', ['ignore_request' => true]);
+        $model = $this->getModel('Form', 'Administrator', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('FormModel introuvable');
         }
@@ -145,7 +145,7 @@ final class FormsController extends AdminController
             'cid'  => $cid,
         ]);
 
-        $model = $this->getModel('Form', 'Contentbuilder', ['ignore_request' => true]);
+        $model = $this->getModel('Form', 'Administrator', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('FormModel introuvable');
         }
@@ -182,7 +182,7 @@ final class FormsController extends AdminController
             'cid'  => $cid,
         ]);
 
-        $model = $this->getModel('Form', 'Contentbuilder', ['ignore_request' => true]);
+        $model = $this->getModel('Form', 'Administrator', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('FormModel introuvable');
         }

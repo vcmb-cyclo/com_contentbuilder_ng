@@ -35,7 +35,7 @@ $app = Factory::getApplication();
 $limitstart = $app->input->getInt('limitstart', 0);
 
 ?>
-<form action="<?php echo Route::_('index.php?option=com_contentbuilder&task=forms.display'); ?>"
+<form action="index.php"
     method="post"
     name="adminForm"
     id="adminForm">
@@ -247,6 +247,7 @@ $limitstart = $app->input->getInt('limitstart', 0);
 
     <input type="hidden" name="option" value="com_contentbuilder" />
     <input type="hidden" name="task" value="" />
+    <input type="hidden" name="view" value="forms" />
     <input type="hidden" name="limitstart" value="<?php echo (int) $limitstart; ?>" />
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="filter_order" value="<?php echo htmlspecialchars($order, ENT_QUOTES, 'UTF-8'); ?>">

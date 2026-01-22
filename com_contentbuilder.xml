@@ -102,7 +102,7 @@
 
 <plugins>
     <plugin group="contentbuilder_themes">plugins/contentbuilder_themes/blank</plugin>
-    <plugin group="contentbuilder_themes">plugins/contentbuilder_themes/joomla3</plugin>
+    <plugin group="contentbuilder_themes">plugins/contentbuilder_themes/joomla6</plugin>
     <plugin group="contentbuilder_themes">plugins/contentbuilder_themes/khepri</plugin>
 </plugins>
 

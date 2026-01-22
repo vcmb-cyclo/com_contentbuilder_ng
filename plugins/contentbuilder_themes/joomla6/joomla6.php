@@ -15,7 +15,7 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Event\Event;
 
-class PlgContentbuilder_themesJoomla3 extends CMSPlugin
+class PlgContentbuilder_themesJoomla6 extends CMSPlugin
 {
     /**
      * Helper: pousse un résultat dans $event->result en mode Joomla 4/5/6.
@@ -137,7 +137,7 @@ class PlgContentbuilder_themesJoomla3 extends CMSPlugin
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $elementTypes = $this->fetchElementTypes($db, $contentbuilder_form_id, false);
 
-        $out = '<ul class="category list-striped list-condensed">' . "\n";
+        $out = '<ul class="list-group list-group-flush">' . "\n";
         $names = $form->getElementNames();
 
         foreach ($names as $reference_id => $name) {
@@ -145,7 +145,7 @@ class PlgContentbuilder_themesJoomla3 extends CMSPlugin
 
             if ($type !== null && $type !== 'hidden') {
                 $out .= '{hide-if-empty ' . $name . '}' . "\n\n";
-                $out .= '<li class="cat-list-row0" ><strong class="list-title">{' . $name . ':label}</strong><div>{' . $name . ':value}</div></li>' . "\n\n";
+                $out .= '<li class="list-group-item"><span class="fw-semibold me-2">{' . $name . ':label}</span><span>{' . $name . ':value}</span></li>' . "\n\n";
                 $out .= '{/hide}' . "\n\n";
             }
         }
@@ -196,12 +196,11 @@ class PlgContentbuilder_themesJoomla3 extends CMSPlugin
 
             if ($type !== 'hidden') {
                 if ($type === 'checkboxgroup') {
-                    $out .= '<div class="control-group form-inline"><div class="control-label">{' . $name . ':label}</div> <div class="controls"><fieldset class="checkbox">{' . $name . ':item}</fieldset></div></div>';
+                    $out .= '<div class="mb-3"><div class="form-label">{' . $name . ':label}</div><div>{' . $name . ':item}</div></div>';
                 } elseif ($type === 'radiogroup') {
-                    $out .= '<div class="control-group form-inline"><div class="control-label">{' . $name . ':label}</div> <div class="controls"><fieldset class="radio">{' . $name . ':item}</fieldset></div></div>';
+                    $out .= '<div class="mb-3"><div class="form-label">{' . $name . ':label}</div><div>{' . $name . ':item}</div></div>';
                 } else {
-                    $out .= '<div class="control-group form-inline"><div class="control-label">{' . $name . ':label}</div> 
-                            <div class="controls">{' . $name . ':item}</div></div>' . "\n";
+                    $out .= '<div class="mb-3"><label class="form-label">{' . $name . ':label}</label><div>{' . $name . ':item}</div></div>' . "\n";
                 }
             } else {
                 $hidden[] = '{' . $name . ':item}' . "\n";
