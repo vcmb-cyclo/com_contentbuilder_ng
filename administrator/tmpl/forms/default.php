@@ -189,12 +189,12 @@ $limitstart = $app->input->getInt('limitstart', 0);
                         </td>
                         <td class="order,text-nowrap">
                             <span>
-                                <?php echo $this->pagination->orderUpIcon($i, $saveOrder, 'forms.orderup', 'Move Up', $this->ordering);
+                                <?php echo $this->pagination->orderUpIcon($i, $saveOrder, 'forms.orderup', Text::_('JLIB_HTML_MOVE_UP'), $this->ordering);
                                 ?>
                             </span>
                             <span>
                                 <?php echo 
-                                $this->pagination->orderDownIcon($i, $n, $saveOrder, 'forms.orderdown', 'Move Down', $this->ordering);
+                                $this->pagination->orderDownIcon($i, $n, $saveOrder, 'forms.orderdown', Text::_('JLIB_HTML_MOVE_DOWN'), $this->ordering);
                                 ?>
                             </span>
                             <?php $disabled = $this->ordering ? '' : 'disabled="disabled"'; ?>
@@ -250,8 +250,8 @@ $limitstart = $app->input->getInt('limitstart', 0);
     <input type="hidden" name="view" value="forms" />
     <input type="hidden" name="limitstart" value="<?php echo (int) $limitstart; ?>" />
     <input type="hidden" name="boxchecked" value="0" />
-    <input type="hidden" name="filter_order" value="<?php echo htmlspecialchars($order, ENT_QUOTES, 'UTF-8'); ?>">
-    <input type="hidden" name="filter_order_Dir" value="<?php echo htmlspecialchars($orderDir, ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" name="list[ordering]" value="<?php echo htmlspecialchars($order, ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" name="list[direction]" value="<?php echo htmlspecialchars($orderDir, ENT_QUOTES, 'UTF-8'); ?>">
     
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

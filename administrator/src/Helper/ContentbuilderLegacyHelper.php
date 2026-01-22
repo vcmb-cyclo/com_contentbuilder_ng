@@ -1652,7 +1652,7 @@ final class ContentbuilderLegacyHelper
 
                             $the_item = '<div class="cbFormField cbCalendarField">' . "\n";
                             $the_item .= '<div id="field-calendar_cb_' . $item['id'] . '">' . "\n";
-                            $the_item .= '<div class="input-append">' . "\n";
+                            $the_item .= '<div class="input-group">' . "\n";
 
                             if (!isset($options->length)) {
                                 $options->length = '';

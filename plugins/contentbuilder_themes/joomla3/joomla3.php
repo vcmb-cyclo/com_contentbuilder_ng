@@ -196,12 +196,12 @@ class PlgContentbuilder_themesJoomla3 extends CMSPlugin
 
             if ($type !== 'hidden') {
                 if ($type === 'checkboxgroup') {
-                    $out .= '<div class="control-group form-inline"><div class="control-label">{' . $name . ':label}</div> <div class="controls"><fieldset class="checkbox">{' . $name . ':item}</fieldset></div></div>';
+                    $out .= '<div class="mb-3 d-flex flex-wrap align-items-center gap-2"><div class="form-label mb-0">{' . $name . ':label}</div> <div class="flex-grow-1"><fieldset class="checkbox">{' . $name . ':item}</fieldset></div></div>';
                 } elseif ($type === 'radiogroup') {
-                    $out .= '<div class="control-group form-inline"><div class="control-label">{' . $name . ':label}</div> <div class="controls"><fieldset class="radio">{' . $name . ':item}</fieldset></div></div>';
+                    $out .= '<div class="mb-3 d-flex flex-wrap align-items-center gap-2"><div class="form-label mb-0">{' . $name . ':label}</div> <div class="flex-grow-1"><fieldset class="radio">{' . $name . ':item}</fieldset></div></div>';
                 } else {
-                    $out .= '<div class="control-group form-inline"><div class="control-label">{' . $name . ':label}</div> 
-                            <div class="controls">{' . $name . ':item}</div></div>' . "\n";
+                    $out .= '<div class="mb-3 d-flex flex-wrap align-items-center gap-2"><div class="form-label mb-0">{' . $name . ':label}</div> 
+                            <div class="flex-grow-1">{' . $name . ':item}</div></div>' . "\n";
                 }
             } else {
                 $hidden[] = '{' . $name . ':item}' . "\n";

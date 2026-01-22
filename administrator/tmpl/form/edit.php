@@ -149,7 +149,7 @@ $wa->addInlineStyle('.saveorder.btn{background-color:#fff;border-color:#ced4da;c
     }
 </script>
 <form action="index.php" method="post" name="adminForm" id="adminForm">
-    <div class="col100 row-fluid" style="margin-left: 20px; overflow-x: auto;">
+    <div class="w-100 row" style="margin-left: 20px; overflow-x: auto;">
 
         <?php
         // Démarrer les onglets
