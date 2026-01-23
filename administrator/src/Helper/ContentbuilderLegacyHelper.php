@@ -481,7 +481,7 @@ final class ContentbuilderLegacyHelper
                             } else {
                                 $size = count($w) - 1;
                                 for ($j = 0; $j < $size; $j++) {
-                                    \Joomla\CMS\Plugin\PluginHelper4::importPlugin('content', $w[$j]);
+                                    \Joomla\CMS\Plugin\PluginHelper::importPlugin('content', $w[$j]);
                                 }
                             }
 
@@ -1522,20 +1522,29 @@ final class ContentbuilderLegacyHelper
                 $asterisk = '';
 
                 if (is_array($element)) {
+                    $elementType = $element['type'] ?? '';
+                    $elementOptions = $element['options'] ?? '';
+                    $elementReferenceId = $element['reference_id'] ?? '';
+                    $elementCustomInit = $element['custom_init_script'] ?? '';
+                    $elementHint = $element['hint'] ?? '';
 
-                    if ($element['type'] == 'captcha' || trim($element['validations'] ?? '') != '' || trim($element['custom_validation_script'] ?? '') != '') {
+                    if ($elementType == 'captcha' || trim($element['validations'] ?? '') != '' || trim($element['custom_validation_script'] ?? '') != '') {
                         $asterisk = ' <span class="cbRequired" style="color:red;">*</span>';
                     }
 
-                    $options = unserialize(base64_decode($element['options']));
+                    $decodedOptions = base64_decode((string) $elementOptions, true);
+                    $options = $decodedOptions !== false ? @unserialize($decodedOptions) : null;
+                    if (!is_object($options)) {
+                        $options = new \stdClass();
+                    }
 
                     $the_item = '';
 
-                    switch ($element['type']) {
-                        case in_array($element['type'], self::getFormElementsPlugins()):
+                    switch ($elementType) {
+                        case in_array($elementType, self::getFormElementsPlugins()):
 
 
-                            \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_form_elements', $element['type']);
+                            \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_form_elements', $elementType);
 
                             $dispatcher = Factory::getApplication()->getDispatcher();
                             $eventResult = $dispatcher->dispatch('onRenderElement', new \Joomla\Event\Event('onRenderElement', array($item, $element, $options, $failed_values, $result, $hasRecords)));
@@ -1751,18 +1760,18 @@ final class ContentbuilderLegacyHelper
 
                             break;
                         case 'hidden':
-                            $the_item = '<input type="hidden" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" value="' . htmlentities($failed_values !== null && isset($failed_values[$element['reference_id']]) ? $failed_values[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']), ENT_QUOTES, 'UTF-8') . '"/>';
+                            $the_item = '<input type="hidden" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" value="' . htmlentities($failed_values !== null && $elementReferenceId !== '' && isset($failed_values[$elementReferenceId]) ? $failed_values[$elementReferenceId] : ($hasRecords ? $item['value'] : $element['default_value']), ENT_QUOTES, 'UTF-8') . '"/>';
                             break;
                     }
 
-                    if ($element['custom_init_script']) {
-                        $the_init_scripts .= $element['custom_init_script'] . "\n";
+                    if ($elementCustomInit) {
+                        $the_init_scripts .= $elementCustomInit . "\n";
                     }
 
                     if ($the_item) {
                         $tip = 'hasTip';
                         $tip_prefix = htmlentities($item['label'], ENT_QUOTES, 'UTF-8') . '::';
-                        $template = str_replace('{' . $key . ':label}', '<label ' . ($element['hint'] ? 'class="editlinktip ' . $tip . '" title="' . $tip_prefix . $element['hint'] . '" ' : '') . 'for="cb_' . $item['id'] . '">' . $item['label'] . $asterisk . ($element['hint'] ? ' <img style="cursor: pointer;" src="' . Uri::root(true) . '/components/com_contentbuilder/images/icon_info.png" border="0"/>' : '') . '</label>', $template);
+                        $template = str_replace('{' . $key . ':label}', '<label ' . ($elementHint ? 'class="editlinktip ' . $tip . '" title="' . $tip_prefix . $elementHint . '" ' : '') . 'for="cb_' . $item['id'] . '">' . $item['label'] . $asterisk . ($elementHint ? ' <img style="cursor: pointer;" src="' . Uri::root(true) . '/components/com_contentbuilder/images/icon_info.png" border="0"/>' : '') . '</label>', $template);
                         $template = str_replace('{' . $key . ':item}', $the_item, $template);
                     }
                 }

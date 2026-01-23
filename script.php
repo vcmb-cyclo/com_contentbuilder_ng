@@ -272,6 +272,29 @@ class com_contentbuilderInstallerScript extends InstallerScript
     }
   }
 
+  private function removeObsoleteFiles(): void
+  {
+    $paths = [
+      JPATH_ADMINISTRATOR . '/components/com_contentbuilder/src/Model/EditModel.php',
+    ];
+
+    $app = Factory::getApplication();
+
+    foreach ($paths as $path) {
+      if (File::exists($path)) {
+        if (File::delete($path)) {
+          $this->log("[OK] Removed obsolete file {$path}.");
+          $app->enqueueMessage("[OK] Removed obsolete file {$path}.", 'message');
+        } else {
+          $this->log("[ERROR] Failed to remove obsolete file {$path}.", Log::ERROR);
+          $app->enqueueMessage("[ERROR] Failed to remove obsolete file {$path}.", 'warning');
+        }
+      } else {
+        $this->log("[OK] Obsolete file {$path} not found.");
+      }
+    }
+  }
+
   /**
    * method to change the DATE default value for strict MySQL databases.
    *
@@ -447,6 +470,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
     $db->execute();
 
     $this->removeOldLibraries();
+    $this->removeObsoleteFiles();
     $this->updateDateColumns();
     $source = null;
     if (is_object($parent) && method_exists($parent, 'getParent')) {

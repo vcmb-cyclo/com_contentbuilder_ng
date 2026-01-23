@@ -155,7 +155,7 @@ $wa->addInlineStyle('.saveorder.btn{background-color:#fff;border-color:#ced4da;c
         // Démarrer les onglets
         echo HTMLHelper::_('uitab.startTabSet', 'view-pane', ['active' => 'tab0']);
         // Premier onglet
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUILDER_STORAGE'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUILDER_VIEW'));
         ?>
 
         <table width="100%">

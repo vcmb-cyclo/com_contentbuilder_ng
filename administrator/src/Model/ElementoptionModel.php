@@ -117,7 +117,7 @@ class ElementoptionModel extends BaseDatabaseModel
 
                 $hint = CBRequest::getVar('hint', '', 'POST', 'STRING', CBREQUEST_ALLOWHTML);
 
-                \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_form_elements', CBRequest::getCmd('field_type', ''));
+                \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_form_elements', CBRequest::getCmd('field_type', ''));
 
                 $dispatcher = Factory::getApplication()->getDispatcher();
                 $eventResult = $dispatcher->dispatch('onSettingsStore', new \Joomla\Event\Event('onSettingsStore', array()));

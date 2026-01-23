@@ -39,7 +39,6 @@ use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
-$pluginHelper4 = new \Joomla\CMS\Plugin\PluginHelper4();
 
 class EditModel extends BaseDatabaseModel
 {
@@ -68,6 +67,24 @@ class EditModel extends BaseDatabaseModel
     private $_page_title = '';
 
     private $_page_heading = '';
+
+    public function getItem($pk = null)
+    {
+        $data = $this->getData();
+
+        if (is_array($data)) {
+            return $data[0] ?? null;
+        }
+
+        return $data ?: null;
+    }
+
+    public function getForm($data = [], $loadData = true)
+    {
+        $item = $this->getItem();
+
+        return is_object($item) && property_exists($item, 'form') ? $item->form : null;
+    }
 
     function createPathByTokens($path, array $names)
     {
@@ -1059,7 +1076,7 @@ var contentbuilder = new function(){
                                     $validations = explode(',', $the_upload_fields[$id]['validations']);
 
                                     foreach ($validations as $validation) {
-                                        \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_validation', $validation);
+                                        \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_validation', $validation);
                                     }
 
                                     $dispatcher = Factory::getApplication()->getDispatcher();
@@ -1142,7 +1159,7 @@ var contentbuilder = new function(){
                                     $validations = explode(',', $f['validations'] ?? '');
 
                                     foreach ($validations as $validation) {
-                                        \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_validation', $validation);
+                                        \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_validation', $validation);
                                     }
 
                                     $dispatcher = Factory::getApplication()->getDispatcher();
@@ -1162,7 +1179,7 @@ var contentbuilder = new function(){
                                         }
                                     } else {
 
-                                        \Joomla\CMS\Plugin\PluginHelper4::importPlugin('contentbuilder_form_elements', $f['type']);
+                                        \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_form_elements', $f['type']);
 
                                         $dispatcher = Factory::getApplication()->getDispatcher();
                                         $plugin_validations = $dispatcher->dispatch(

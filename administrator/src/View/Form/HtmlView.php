@@ -15,6 +15,7 @@ namespace CB\Component\Contentbuilder\Administrator\View\Form;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Toolbar\Toolbar;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
@@ -99,6 +100,20 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::unpublish('form.unpublish');
 
         ToolbarHelper::cancel('form.cancel', $isNew ? 'JTOOLBAR_CLOSE' : 'JTOOLBAR_CLOSE');
+
+        if ($formId > 0) {
+            $previewUrl = Uri::root()
+                . 'index.php?option=com_contentbuilder&task=edit.display&id='
+                . $formId
+                . '&record_id=0';
+            Toolbar::getInstance('toolbar')->appendButton(
+                'Link',
+                'eye',
+                Text::_('JTOOLBAR_PREVIEW'),
+                $previewUrl,
+                '_blank'
+            );
+        }
 
         // Compat template / listes
         $this->listOrder = (string) $this->state?->get('list.ordering', 'a.ordering');

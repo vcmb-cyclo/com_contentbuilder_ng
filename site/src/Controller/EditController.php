@@ -62,20 +62,9 @@ class EditController extends BaseController
      *
      * @return  \Joomla\CMS\MVC\Model\BaseDatabaseModel|false  Model object on success; otherwise false on failure.
      */
-    public function getModel($name = 'Storage', $prefix = '', $config = ['ignore_request' => true])
+    public function getModel($name = 'Edit', $prefix = 'Contentbuilder', $config = ['ignore_request' => true])
     {
-        // On force explicitement le bon namespace complet
-        $className = 'CB\\Component\\Contentbuilder\\Administrator\\Model\\EditModel';
-
-        if (!class_exists($className)) {
-            // Si la classe n'existe pas, on laisse le parent essayer (mais ça plantera proprement)
-            return parent::getModel($name, 'Contentbuilder', $config);
-        }
-
-        // On instancie manuellement le modèle avec la factory
-        $model = new $className($config);
-
-        return $model;
+        return parent::getModel($name, $prefix, $config);
     }
 
     public function save($apply = false)
@@ -217,6 +206,7 @@ class EditController extends BaseController
         // Synchroniser Joomla Input + CBRequest (legacy)
         $this->input->set('id', $formId);
         CBRequest::setVar('id', $formId);
+        $this->input->set('view', 'edit');
 
         if ($recordId) {
             $this->input->set('record_id', $recordId);

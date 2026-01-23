@@ -187,6 +187,23 @@ class contentbuilder_com_contentbuilder
         $own_only = -1,
         $show_all_languages = false
     ) {
+        if ((int) $record_id === 0) {
+            $out = [];
+            $i = 0;
+            foreach ($this->elements as $element) {
+                $out[$i] = new \stdClass();
+                $out[$i]->recElementId = $element['id'];
+                $out[$i]->recTitle = $element['title'];
+                $out[$i]->recName = $element['name'];
+                $out[$i]->recType = '';
+                $out[$i]->recRating = 0;
+                $out[$i]->recRatingCount = 0;
+                $out[$i]->recRatingSum = 0;
+                $out[$i]->recValue = '';
+                $i++;
+            }
+            return $out;
+        }
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 
