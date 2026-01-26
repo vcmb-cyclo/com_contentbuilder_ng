@@ -26,6 +26,7 @@ class HtmlView extends BaseHtmlView
     public $ordering;
     public $item;
     public $state;
+    public bool $frontend = false;
 
     public function display($tpl = null): void
     {         
@@ -122,4 +123,3 @@ class HtmlView extends BaseHtmlView
         parent::display($tpl);
     }
 }
-

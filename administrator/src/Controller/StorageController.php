@@ -66,6 +66,18 @@ class StorageController extends BaseFormController
 
         $file = $this->input->files->get('csv_file', null, 'array');
 
+        // Ensure required fields exist when using bytable (name/title may be disabled in the form).
+        $data = $this->input->post->get('jform', [], 'array');
+        if (!empty($data['bytable'])) {
+            if (empty($data['name'])) {
+                $data['name'] = $data['bytable'];
+            }
+            if (empty($data['title'])) {
+                $data['title'] = $data['bytable'];
+            }
+            $this->input->post->set('jform', $data);
+        }
+
         // Pas de CSV → core
         if (!is_array($file) || empty($file['name']) || (int) ($file['size'] ?? 0) <= 0) {
             return parent::save($key, $urlVar);
@@ -278,7 +290,7 @@ class StorageController extends BaseFormController
 
     public function apply()
     {
-        $this->save(true);
+        $this->save();
     }
 
     // Passe par le modèle.

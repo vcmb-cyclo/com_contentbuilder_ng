@@ -60,7 +60,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir): str
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th class="w-1 text-nowrap"><?php echo Text::_('COM_CONTENTBUILDER_ID'); ?></th>
+                    <th class="w-1 text-nowrap"><?php echo $sortLink(Text::_('COM_CONTENTBUILDER_ID'), 'a.id'); ?></th>
 
                     <th class="w-1 text-center">
                         <?php echo HTMLHelper::_('grid.checkall'); ?>
