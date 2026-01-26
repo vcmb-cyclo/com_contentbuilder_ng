@@ -438,8 +438,8 @@ class CBPagination
 			$html = HTMLHelper::_(
 				'select.genericlist',
 				$limits,
-				$this->prefix . 'limit',
-				'class="inputbox input-mini" size="1" onchange="Joomla.submitform();"',
+				'list[limit]',
+				'class="form-select js-select-submit-on-change active" id="list_limit"',
 				'value',
 				'text',
 				$selected

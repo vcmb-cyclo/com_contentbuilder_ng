@@ -21,6 +21,27 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
 <?php
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 $wa->addInlineStyle('.saveorder.btn{background-color:#fff;border-color:#ced4da;color:#1b1b1b}.saveorder.btn:hover{background-color:#f8f9fa}.cb-order-slot{display:inline-block;width:24px;text-align:center}.cb-order-placeholder{visibility:hidden}.cb-order-input{margin-left:6px}.cb-order-head{vertical-align:middle;white-space:nowrap}.cb-order-head .saveorder{float:none!important;margin-left:6px}');
+
+$listOrder = (string) ($this->listOrder ?? 'ordering');
+$listDirn  = strtolower((string) ($this->listDirn ?? 'asc'));
+$listDirn  = ($listDirn === 'desc') ? 'desc' : 'asc';
+$formId    = (int) ($this->item->id ?? 0);
+
+$sortLink = function (string $label, string $field) use ($listOrder, $listDirn, $formId): string {
+    $isActive = ($listOrder === $field);
+    $nextDir = ($isActive && $listDirn === 'asc') ? 'desc' : 'asc';
+    $indicator = $isActive
+        ? ($listDirn === 'asc'
+            ? ' <span class="ms-1 icon-sort icon-sort-asc" aria-hidden="true"></span>'
+            : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>')
+        : '';
+    $url = \Joomla\CMS\Router\Route::_(
+        'index.php?option=com_contentbuilder&task=form.edit&id=' . $formId
+        . '&list[ordering]=' . $field . '&list[direction]=' . $nextDir
+    );
+
+    return '<a href="' . $url . '">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . $indicator . '</a>';
+};
 ?>
 
 <script type="text/javascript">
@@ -707,7 +728,7 @@ $wa->addInlineStyle('.saveorder.btn{background-color:#fff;border-color:#ced4da;c
                             </th>
                             <th width="120" class="cb-order-head">
                                 <?php if (!empty($this->elements) && is_array($this->elements)) : ?>
-                                    <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering', $this->listDirn, $this->listOrderr); ?>
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering'); ?>
                                     <?php //TODO: dragndrop if ($this->ordering) echo HTMLHelper::_('grid.order',  $this->elements );   
                                     ?>
                                     <?php echo HTMLHelper::_('grid.order', $this->elements); ?>
@@ -2269,8 +2290,8 @@ $wa->addInlineStyle('.saveorder.btn{background-color:#fff;border-color:#ced4da;c
     <input type="hidden" name="limitstart" value="" />
     <input type="hidden" name="jform[ordering]" value="<?php echo $this->item->ordering; ?>" />
     <input type="hidden" name="jform[published]" value="<?php echo $this->item->published; ?>" />
-    <input type="hidden" name="list[ordering]" value="<?php echo htmlspecialchars($this->listOrderr, ENT_QUOTES, 'UTF-8'); ?>" />
-    <input type="hidden" name="list[direction]" value="<?php echo htmlspecialchars($this->listDirn, ENT_QUOTES, 'UTF-8'); ?>" />
+    <input type="hidden" name="list[ordering]" value="<?php echo htmlspecialchars($listOrder, ENT_QUOTES, 'UTF-8'); ?>" />
+    <input type="hidden" name="list[direction]" value="<?php echo htmlspecialchars($listDirn, ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="hidemainmenu" value="0" />
     <input type="hidden" name="tabStartOffset" value="<?php echo Factory::getApplication()->getSession()->get('tabStartOffset', 0); ?>" />

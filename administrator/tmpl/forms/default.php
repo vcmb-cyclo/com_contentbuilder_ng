@@ -24,6 +24,7 @@ HTMLHelper::_('behavior.multiselect');
 // Sécurité: valeurs par défaut
 $order     = $this->lists['order'] ?? 'a.ordering';
 $orderDir  = $this->lists['order_Dir'] ?? 'asc';
+$orderDir  = strtolower($orderDir) === 'desc' ? 'desc' : 'asc';
 
 // Les flèches d'ordering ne doivent être actives QUE si on est trié sur ordering
 $saveOrder = ($order === 'a.ordering');
@@ -33,6 +34,41 @@ $n = is_countable($this->items) ? count($this->items) : 0;
 // limitstart courant (évite CBRequest/eval)
 $app = Factory::getApplication();
 $limitstart = $app->input->getInt('limitstart', 0);
+$limitValue = (int) ($this->pagination->limit ?? 0);
+
+$limitOptions = [];
+for ($i = 5; $i <= 30; $i += 5) {
+    $limitOptions[] = HTMLHelper::_('select.option', (string) $i);
+}
+$limitOptions[] = HTMLHelper::_('select.option', '50', Text::_('J50'));
+$limitOptions[] = HTMLHelper::_('select.option', '100', Text::_('J100'));
+$limitOptions[] = HTMLHelper::_('select.option', '0', Text::_('JALL'));
+
+$limitSelect = HTMLHelper::_(
+    'select.genericlist',
+    $limitOptions,
+    'list[limit]',
+    'class="form-select js-select-submit-on-change active" id="list_limit" onchange="document.adminForm.submit();"',
+    'value',
+    'text',
+    $limitValue
+);
+
+$sortLink = function (string $label, string $field) use ($order, $orderDir, $limitValue): string {
+    $isActive = ($order === $field);
+    $nextDir = ($isActive && $orderDir === 'asc') ? 'desc' : 'asc';
+    $indicator = $isActive
+        ? ($orderDir === 'asc'
+            ? ' <span class="ms-1 icon-sort icon-sort-asc" aria-hidden="true"></span>'
+            : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>')
+        : '';
+    $url = Route::_(
+        'index.php?option=com_contentbuilder&view=forms&limitstart=0&list[ordering]='
+        . $field . '&list[direction]=' . $nextDir . '&list[limit]=' . $limitValue
+    );
+
+    return '<a href="' . $url . '">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . $indicator . '</a>';
+};
 
 ?>
 <form action="index.php"
@@ -41,6 +77,17 @@ $limitstart = $app->input->getInt('limitstart', 0);
     id="adminForm">
 
     <div id="editcell">
+        <label for="filter_id">
+            <?php echo Text::_('JGLOBAL_FIELD_ID_LABEL'); ?>:
+        </label>
+        <input class="form-control form-control-sm d-inline-block" style="max-width: 120px;"
+            type="number"
+            id="filter_id"
+            name="filter_id"
+            min="0"
+            value="<?php echo (int) ($this->lists['filter_id'] ?? 0); ?>"
+            onchange="document.adminForm.submit();" />
+        <span class="mx-2"></span>
         <label for="filter_tag">
             <?php echo Text::_('COM_CONTENTBUILDER_FILTER_TAG'); ?>:
         </label>
@@ -64,84 +111,36 @@ $limitstart = $app->input->getInt('limitstart', 0);
             <thead>
                 <tr>
                     <th width="5">
-                        <?php echo Text::_('COM_CONTENTBUILDER_ID'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_ID'), 'a.id'); ?>
                     </th>
                     <th width="20">
                         <?php echo HTMLHelper::_('grid.checkall'); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_(
-                            'grid.sort',
-                            Text::_('COM_CONTENTBUILDER_VIEW_NAME'),
-                            'a.name',
-                            $this->lists['order_Dir'],
-                            $this->lists['order']
-                        ); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_VIEW_NAME'), 'a.name'); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_(
-                            'grid.sort',
-                            Text::_('COM_CONTENTBUILDER_TAG'),
-                            'a.tag',
-                            $this->lists['order_Dir'],
-                            $this->lists['order']
-                        ); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_TAG'), 'a.tag'); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_(
-                            'grid.sort',
-                            Text::_('COM_CONTENTBUILDER_FORM_SOURCE'),
-                            'a.title',
-                            $this->lists['order_Dir'],
-                            $this->lists['order']
-                        ); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_FORM_SOURCE'), 'a.title'); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_(
-                            'grid.sort',
-                            Text::_('COM_CONTENTBUILDER_TYPE'),
-                            'a.type',
-                            $this->lists['order_Dir'],
-                            $this->lists['order']
-                        ); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_TYPE'), 'a.type'); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_(
-                            'grid.sort',
-                            Text::_('COM_CONTENTBUILDER_DISPLAY'),
-                            'a.display_in',
-                            $this->lists['order_Dir'],
-                            $this->lists['order']
-                        ); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_DISPLAY'), 'a.display_in'); ?>
                     </th>
 
 
                     <th width="120">
-                        <?php echo HTMLHelper::_(
-                            'grid.sort',
-                            Text::_('COM_CONTENTBUILDER_ORDERBY'),
-                            'a.ordering',
-                            $this->lists['order_Dir'],
-                            $this->lists['order']
-                        ); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_ORDERBY'), 'a.ordering'); ?>
                     </th>
                     <th width="5">
-                        <?php echo HTMLHelper::_(
-                            'grid.sort',
-                            Text::_('COM_CONTENTBUILDER_PUBLISHED'),
-                            'a.published',
-                            $this->lists['order_Dir'],
-                            $this->lists['order']
-                        ); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_PUBLISHED'), 'a.published'); ?>
                     </th>
                     <th width="140">
-                        <?php echo HTMLHelper::_(
-                            'grid.sort',
-                            Text::_('JGLOBAL_MODIFIED'),
-                            'a.modified',
-                            $this->lists['order_Dir'],
-                            $this->lists['order']
-                        ); ?>
+                        <?php echo $sortLink(Text::_('JGLOBAL_MODIFIED'), 'a.modified'); ?>
                     </th>
                 </tr>
             </thead>
@@ -229,7 +228,7 @@ $limitstart = $app->input->getInt('limitstart', 0);
                     <div class="d-flex flex-wrap align-items-center gap-2">
                     <?php echo $this->pagination->getPagesCounter(); ?>
                     <span><?php echo Text::_('COM_CONTENTBUILDER_DISPLAY_NUM'); ?></span>
-                    <span class="d-inline-block"><?php echo $this->pagination->getLimitBox(); ?></span>
+                    <span class="d-inline-block"><?php echo $limitSelect; ?></span>
                     <span><?php echo Text::_('COM_CONTENTBUILDER_OF'); ?></span>
                     <span><?php echo (int) ($this->pagination->total ?? 0); ?></span>
                     </div>
@@ -252,6 +251,5 @@ $limitstart = $app->input->getInt('limitstart', 0);
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="list[ordering]" value="<?php echo htmlspecialchars($order, ENT_QUOTES, 'UTF-8'); ?>">
     <input type="hidden" name="list[direction]" value="<?php echo htmlspecialchars($orderDir, ENT_QUOTES, 'UTF-8'); ?>">
-    
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

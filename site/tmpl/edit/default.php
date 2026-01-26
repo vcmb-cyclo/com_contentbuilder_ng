@@ -36,6 +36,137 @@ $fullarticle_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('full
             location.href = '<?php echo 'index.php?option=com_contentbuilder&task=edit.delete' . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&task=edit.display&id=' . CBRequest::getInt('id', 0) . '&cid[]=' . CBRequest::getCmd('record_id', 0) . '&Itemid=' . CBRequest::getInt('Itemid', 0) . '&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order'); ?>';
         }
     }
+
+    if (typeof FF_SELECTED_DEBUG === "undefined") {
+        var FF_SELECTED_DEBUG = false;
+    }
+
+    function ff_setSelected(name, value, checked) {
+        if (checked === undefined) checked = true;
+        if (value === undefined || value === null) value = "";
+        value = String(value).trim();
+
+        var el = null;
+        if (typeof ff_getElementByName === "function") {
+            try { el = ff_getElementByName(name); } catch (e) { el = null; }
+        }
+        if (!el) {
+            var nodes = document.getElementsByName(name);
+            if (nodes && nodes.length) el = nodes[0];
+        }
+
+        if (el && el.tagName === "SELECT") {
+            return ff_setSelected_listNode(el, name, value);
+        }
+        if (el && el.element && el.element.tagName === "SELECT") {
+            return ff_setSelected_listNode(el.element, name, value);
+        }
+        if (el && el[0] && el[0].tagName === "SELECT") {
+            return ff_setSelected_listNode(el[0], name, value);
+        }
+
+        return ff_setSelected_groupBF(name, value, checked);
+    }
+
+    function ff_setSelected_listNode(selectEl, name, value) {
+        var found = false;
+        for (var i = 0; i < selectEl.options.length; i++) {
+            if (String(selectEl.options[i].value) == value) {
+                selectEl.selectedIndex = i;
+                found = true;
+                break;
+            }
+        }
+        if (FF_SELECTED_DEBUG) {
+            console.log("[BF] ff_setSelected SELECT name=" + name + " value=" + value + " found=" + found);
+        }
+        if (!found) return false;
+        try {
+            if (typeof selectEl.onchange === "function") selectEl.onchange();
+            selectEl.dispatchEvent(new Event("change", { bubbles: true }));
+        } catch (e) { }
+        return true;
+    }
+
+    function ff_setSelected_groupBF(name, value, checked) {
+        var htmlName = name;
+
+        try {
+            if (typeof ff_elements !== "undefined") {
+                for (var i = 0; i < ff_elements.length; i++) {
+                    if (ff_elements[i][2] == name) {
+                        var e = typeof ff_getElementByIndex === "function" ? ff_getElementByIndex(i) : null;
+                        if (e && e.name) htmlName = e.name;
+                        break;
+                    }
+                }
+            }
+        } catch (e) {
+        }
+
+        var nodes = document.getElementsByName(htmlName);
+        if ((!nodes || nodes.length === 0) && htmlName.slice(-2) !== "[]") {
+            nodes = document.getElementsByName(htmlName + "[]");
+            if (nodes && nodes.length > 0) htmlName = htmlName + "[]";
+        }
+
+        if (!nodes || nodes.length === 0) {
+            if (FF_SELECTED_DEBUG) console.warn("[BF] ff_setSelected GROUP not found name=" + name + " htmlName=" + htmlName);
+            return false;
+        }
+
+        var values = [value];
+        if (value.indexOf(";") >= 0) values = value.split(/\s*;\s*/);
+        else if (value.indexOf(",") >= 0) values = value.split(/\s*,\s*/);
+
+        var done = false;
+
+        for (var n = 0; n < nodes.length; n++) {
+            var input = nodes[n];
+            var v = String(input.value);
+
+            if (input.type === "radio") {
+                if (v == value) {
+                    input.checked = checked;
+                    done = true;
+                    break;
+                }
+            } else if (input.type === "checkbox") {
+                for (var k = 0; k < values.length; k++) {
+                    if (v == String(values[k])) {
+                        input.checked = checked;
+                        done = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (FF_SELECTED_DEBUG) {
+            console.log("[BF] ff_setSelected GROUP name=" + name + " htmlName=" + htmlName + " value=" + value + " done=" + done);
+        }
+
+        return done;
+    }
+
+    function ff_setChecked(name, value, checked) {
+        var missingInputs = (name === undefined || name === null || value === undefined || value === null);
+        if (checked === undefined) checked = true;
+        if (value === undefined || value === null) value = "";
+        if (name === undefined || name === null) name = "";
+        name = String(name).trim();
+        value = String(value).trim();
+
+        var result = ff_setSelected_groupBF(name, value, checked);
+
+        if (missingInputs) {
+            console.warn("[BF] ff_setChecked called with undefined inputs", { name: name, value: value, checked: checked });
+        } else if (!result) {
+            console.warn("[BF] ff_setChecked element not found", { name: name, value: value });
+        }
+
+        return result;
+    }
     //
     -->
 </script>
@@ -76,7 +207,10 @@ $fullarticle_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('full
         }
         if ($this->record_id && $delete_allowed) {
         ?>
-            <button class="btn btn-sm btn-primary cbButton cbDeleteButton" onclick="contentbuilder_delete();"><?php echo Text::_('COM_CONTENTBUILDER_DELETE') ?></button>
+            <button class="btn btn-sm btn-primary cbButton cbDeleteButton" 
+                onclick="contentbuilder_delete();">
+            <i class="fa fa-trash" aria-hidden="true"></i>
+            <?php echo Text::_('COM_CONTENTBUILDER_DELETE') ?></button>
             <?php
         }
         if (!CBRequest::getInt('backtolist', 0) && !CBRequest::getVar('return', '')) {

@@ -38,21 +38,12 @@ $wa->useScript('jquery');
 $wa->useScript('com_contentbuilder.contentbuilder');
 
 
-$___getpost = 'post';
-$___tableOrdering = "Joomla.tableOrdering = function";
 ?>
 <?php Factory::getApplication()->getDocument()->addStyleDeclaration($this->theme_css); ?>
 <?php Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js); ?>
 
 <script language="javascript" type="text/javascript">
 <!--
-<?php echo $___tableOrdering; ?>(order, dir, task) {
-        var form = document.adminForm;
-        form.limitstart.value = <?php echo CBRequest::getInt('limitstart', 0) ?>;
-        form.filter_order.value = order;
-        form.filter_order_Dir.value = dir;
-        document.adminForm.submit(task);
-    };
     function contentbuilder_state() {
         document.getElementById('controller').value = 'edit';
         document.getElementById('view').value = 'edit';
@@ -143,7 +134,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 
 
 
-<form action="index.php" method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm">
+<form action="index.php" method="post" name="adminForm" id="adminForm">
     <div id="editcell">
         <?php
         if (
@@ -358,11 +349,31 @@ $___tableOrdering = "Joomla.tableOrdering = function";
         <?php
         $current_order = isset($this->lists['order']) ? $this->lists['order'] : '';
         $current_dir = isset($this->lists['order_Dir']) ? strtolower($this->lists['order_Dir']) : '';
+        $current_dir = $current_dir === 'desc' ? 'desc' : 'asc';
         $sort_indicator = function ($order_key) use ($current_order, $current_dir) {
             if ($order_key !== $current_order) {
                 return '';
             }
-            return $current_dir === 'asc' ? ' &uarr;' : ' &darr;';
+            return $current_dir === 'asc'
+                ? ' <span class="ms-1 icon-sort icon-sort-asc" aria-hidden="true"></span>'
+                : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>';
+        };
+        $formId = (int) ($this->form_id ?? CBRequest::getInt('id', 0));
+        $itemId = (int) CBRequest::getInt('Itemid', 0);
+        $tmpl = (string) CBRequest::getVar('tmpl', '');
+        $layout = (string) CBRequest::getVar('layout', '');
+        $tmplParam = $tmpl !== '' ? '&tmpl=' . $tmpl : '';
+        $layoutParam = $layout !== '' ? '&layout=' . $layout : '';
+        $itemIdParam = $itemId ? '&Itemid=' . $itemId : '';
+        $sortLink = function (string $labelHtml, string $field) use ($current_order, $current_dir, $formId, $tmplParam, $layoutParam, $itemIdParam) {
+            $nextDir = ($current_order === $field && $current_dir === 'asc') ? 'desc' : 'asc';
+            $url = Route::_(
+                'index.php?option=com_contentbuilder&task=list.display&id=' . $formId
+                . $tmplParam . $layoutParam . $itemIdParam
+                . '&limitstart=0&filter_order=' . $field . '&filter_order_Dir=' . $nextDir
+            );
+
+            return '<a href="' . $url . '">' . $labelHtml . '</a>';
         };
         ?>
         <table class="mt-3 table table-striped">
@@ -372,7 +383,10 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                     if ($this->show_id_column) {
                         ?>
                         <th class="sectiontableheader hidden-phone align-middle text-nowrap small text-uppercase" width="5">
-                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ID', ENT_QUOTES, 'UTF-8') . $sort_indicator('colRecord'), 'colRecord', $this->lists['order_Dir'], $this->lists['order']); ?>
+                            <?php echo $sortLink(
+                                htmlentities('COM_CONTENTBUILDER_ID', ENT_QUOTES, 'UTF-8') . $sort_indicator('colRecord'),
+                                'colRecord'
+                            ); ?>
                         </th>
                         <?php
                     }
@@ -420,7 +434,10 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                     if ($this->list_article) {
                         ?>
                         <th class="sectiontableheader hidden-phone align-middle text-nowrap small text-uppercase">
-                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ARTICLE', ENT_QUOTES, 'UTF-8') . $sort_indicator('colArticleId'), 'colArticleId', $this->lists['order_Dir'], $this->lists['order']); ?>
+                            <?php echo $sortLink(
+                                htmlentities('COM_CONTENTBUILDER_ARTICLE', ENT_QUOTES, 'UTF-8') . $sort_indicator('colArticleId'),
+                                'colArticleId'
+                            ); ?>
                         </th>
                         <?php
                     }
@@ -428,7 +445,10 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                     if ($this->list_author) {
                         ?>
                         <th class="sectiontableheader hidden-phone align-middle text-nowrap small text-uppercase">
-                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_AUTHOR', ENT_QUOTES, 'UTF-8') . $sort_indicator('colAuthor'), 'colAuthor', $this->lists['order_Dir'], $this->lists['order']); ?>
+                            <?php echo $sortLink(
+                                htmlentities('COM_CONTENTBUILDER_AUTHOR', ENT_QUOTES, 'UTF-8') . $sort_indicator('colAuthor'),
+                                'colAuthor'
+                            ); ?>
                         </th>
                         <?php
                     }
@@ -436,7 +456,10 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                     if ($this->list_rating) {
                         ?>
                         <th class="sectiontableheader hidden-phone align-middle text-nowrap small text-uppercase">
-                            <?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_RATING', ENT_QUOTES, 'UTF-8') . $sort_indicator('colRating'), 'colRating', $this->lists['order_Dir'], $this->lists['order']); ?>
+                            <?php echo $sortLink(
+                                htmlentities('COM_CONTENTBUILDER_RATING', ENT_QUOTES, 'UTF-8') . $sort_indicator('colRating'),
+                                'colRating'
+                            ); ?>
                         </th>
                         <?php
                     }
@@ -452,7 +475,10 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                             }
                             ?>
                             <th class="sectiontableheader<?php echo $hidden; ?> align-middle text-nowrap small text-uppercase">
-                                <?php echo HTMLHelper::_('grid.sort', nl2br(htmlentities(ContentbuilderHelper::contentbuilder_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')) . $sort_indicator("col$reference_id"), "col$reference_id", $this->lists['order_Dir'], $this->lists['order']); ?>
+                                <?php echo $sortLink(
+                                    nl2br(htmlentities(ContentbuilderHelper::contentbuilder_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')) . $sort_indicator("col$reference_id"),
+                                    "col$reference_id"
+                                ); ?>
                             </th>
                             <?php
                             $label_count++;

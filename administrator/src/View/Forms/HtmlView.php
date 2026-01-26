@@ -58,6 +58,7 @@ class HtmlView extends BaseHtmlView
         $lists['order_Dir']  = (string) $state->get('list.direction', 'ASC');
         $lists['state']      = HTMLHelper::_('grid.state', (string) $state->get('filter.state', ''));
         $lists['filter_tag'] = (string) $state->get('filter.tag', '');
+        $lists['filter_id']  = (int) $state->get('filter.id', 0);
 
         $ordering = ($lists['order'] === 'a.ordering');
 

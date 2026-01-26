@@ -19,9 +19,30 @@ use Joomla\CMS\HTML\HTMLHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
 
-$ordering  = $this->state->get('list.ordering');
-$direction = $this->state->get('list.direction');
+$ordering  = (string) $this->state->get('list.ordering', 'u.id');
+$direction = strtolower((string) $this->state->get('list.direction', 'asc'));
+$direction = ($direction === 'desc') ? 'desc' : 'asc';
 $search    = $this->state->get('filter.search');
+$formId    = (int) CBRequest::getInt('form_id', 0);
+$tmpl      = CBRequest::getWord('tmpl', '');
+
+$sortLink = function (string $label, string $field) use ($ordering, $direction, $formId, $tmpl): string {
+    $isActive = ($ordering === $field);
+    $nextDir = ($isActive && $direction === 'asc') ? 'desc' : 'asc';
+    $indicator = $isActive
+        ? ($direction === 'asc'
+            ? ' <span class="ms-1 icon-sort icon-sort-asc" aria-hidden="true"></span>'
+            : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>')
+        : '';
+    $tmplParam = $tmpl !== '' ? '&tmpl=' . $tmpl : '';
+    $url = Route::_(
+        'index.php?option=com_contentbuilder&view=users&form_id='
+        . $formId . $tmplParam . '&limitstart=0&list[ordering]=' . $field
+        . '&list[direction]=' . $nextDir
+    );
+
+    return '<a href="' . $url . '">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . $indicator . '</a>';
+};
 ?>
 <form action="index.php" method="post" name="adminForm" id="adminForm">
 
@@ -86,35 +107,29 @@ $search    = $this->state->get('filter.search');
             <thead>
                 <tr>
                     <th width="5">
-                        <?php echo HTMLHelper::_('grid.sort', 'ID', 'u.id', $direction, $ordering); ?>
+                        <?php echo $sortLink('ID', 'u.id'); ?>
                     </th>
                     <th width="20">
                         <input class="form-check-input" type="checkbox" name="toggle" value=""
                             onclick="Joomla.checkAll(this);" />
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_(
-                            'grid.sort', 'Name', 'u.name', $direction, $ordering); ?>
+                        <?php echo $sortLink('Name', 'u.name'); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_(
-                            'grid.sort', 'Username', 'u.username', $direction, $ordering); ?>
+                        <?php echo $sortLink('Username', 'u.username'); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_(
-                            'grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW'), 'a.verified_view', $direction, $ordering); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW'), 'a.verified_view'); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_(
-                            'grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_NEW'),  'a.verified_new',  $direction, $ordering); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_VERIFIED_NEW'), 'a.verified_new'); ?>
                     </th>
                     <th>
-                        <?php echo HTMLHelper::_(
-                            'grid.sort', Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT'), 'a.verified_edit', $direction, $ordering); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT'), 'a.verified_edit'); ?>
                     </th>
                     <th width="5">
-                        <?php echo HTMLHelper::_(
-                            'grid.sort', Text::_('COM_CONTENTBUILDER_PUBLISHED'),     'a.published',     $direction, $ordering); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_PUBLISHED'), 'a.published'); ?>
                     </th>
                 </tr>
             </thead>
@@ -178,8 +193,8 @@ $search    = $this->state->get('filter.search');
     <input type="hidden" name="task" value="" />
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="view" value="users" />
-    <input type="hidden" name="form_id" value="<?php echo CBRequest::getInt('form_id', 0); ?>" />
-    <input type="hidden" name="tmpl" value="<?php echo CBRequest::getWord('tmpl', ''); ?>" />
+    <input type="hidden" name="form_id" value="<?php echo $formId; ?>" />
+    <input type="hidden" name="tmpl" value="<?php echo $tmpl; ?>" />
     <input type="hidden" name="list[ordering]" value="<?php echo htmlspecialchars($ordering, ENT_QUOTES, 'UTF-8'); ?>">
     <input type="hidden" name="list[direction]" value="<?php echo htmlspecialchars($direction, ENT_QUOTES, 'UTF-8'); ?>">
     <?php echo HTMLHelper::_('form.token'); ?>

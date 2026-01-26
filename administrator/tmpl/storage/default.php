@@ -15,6 +15,27 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
+
+$listOrder = $this->state ? (string) $this->state->get('list.ordering', 'ordering') : 'ordering';
+$listDirn  = $this->state ? (string) $this->state->get('list.direction', 'asc') : 'asc';
+$listDirn  = strtolower($listDirn) === 'desc' ? 'desc' : 'asc';
+$storageId = (int) ($this->item->id ?? 0);
+
+$sortLink = function (string $label, string $field) use ($listOrder, $listDirn, $storageId): string {
+    $isActive = ($listOrder === $field);
+    $nextDir = ($isActive && $listDirn === 'asc') ? 'desc' : 'asc';
+    $indicator = $isActive
+        ? ($listDirn === 'asc'
+            ? ' <span class="ms-1 icon-sort icon-sort-asc" aria-hidden="true"></span>'
+            : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>')
+        : '';
+    $url = \Joomla\CMS\Router\Route::_(
+        'index.php?option=com_contentbuilder&task=storage.edit&id=' . $storageId
+        . '&list[ordering]=' . $field . '&list[direction]=' . $nextDir
+    );
+
+    return '<a href="' . $url . '">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . $indicator . '</a>';
+};
 ?>
 
 <script>
@@ -355,7 +376,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
                                 <?php echo Text::_('COM_CONTENTBUILDER_STORAGE_GROUP'); ?>
                             </th>
                             <th>
-                                <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering', 'desc', @$this->lists['order'], 'edit'); ?>
+                                <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering'); ?>
                             </th>
                             <th>
                                 <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED'); ?>

@@ -57,9 +57,24 @@ class FormsModel extends ListModel
         // ✅ appels standard ListModel
         parent::populateState($ordering, $direction);
 
+        // Joomla 6 admin lists post list[limit]; also accept legacy limit.
+        $list = $app->input->get('list', [], 'array');
+        if (is_array($list) && array_key_exists('limit', $list)) {
+            $limit = (int) $list['limit'];
+            $this->setState('list.limit', $limit);
+            $app->setUserState($this->context . '.list.limit', $limit);
+        } elseif ($app->input->get('limit', null, 'raw') !== null) {
+            $limit = (int) $app->input->get('limit', 0, 'int');
+            $this->setState('list.limit', $limit);
+            $app->setUserState($this->context . '.list.limit', $limit);
+        }
+
         // ✅ tes filtres custom, mais stockés dans l’état
         $filterState = $app->getUserStateFromRequest($this->context . '.filter.state', 'filter_state', '', 'cmd');
         $this->setState('filter.state', $filterState);
+
+        $filterId = $app->getUserStateFromRequest($this->context . '.filter.id', 'filter_id', 0, 'int');
+        $this->setState('filter.id', (int) $filterId);
 
         $input = $app->input;
         $user = $app->getIdentity();
@@ -160,19 +175,25 @@ class FormsModel extends ListModel
             $query->where($db->quoteName('a.tag') . ' = ' . $db->quote($filterTag));
         }
 
+        // ID filter.
+        $filterId = (int) $this->getState('filter.id', 0);
+        if ($filterId > 0) {
+            $query->where($db->quoteName('a.id') . ' = ' . $filterId);
+        }
+
         // Ordering (equivalent à ton buildOrderBy())
-        $ordering  = (string) $this->getState('list.ordering', 'a.id');
-        $direction = strtoupper((string) $this->getState('list.direction', 'DESC'));
+        $ordering  = (string) $this->getState('list.ordering', 'a.ordering');
+        $direction = strtoupper((string) $this->getState('list.direction', 'ASC'));
 
         // Petite sécurité sur la direction
         if (!in_array($direction, ['ASC', 'DESC'], true)) {
-            $direction = 'DESC';
+            $direction = 'ASC';
         }
 
         // Optionnel : whitelist rapide des colonnes triables
         $allowedOrdering = ['a.id', 'a.name', 'a.tag', 'a.title', 'a.type', 'a.display_in', 'a.published', 'a.created', 'a.modified', 'a.ordering'];
         if (!in_array($ordering, $allowedOrdering, true)) {
-            $ordering = 'a.id';
+            $ordering = 'a.ordering';
         }
 
         $query->order($db->escape($ordering . ' ' . $direction));

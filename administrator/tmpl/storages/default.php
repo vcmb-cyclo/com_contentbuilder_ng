@@ -23,6 +23,7 @@ HTMLHelper::_('behavior.multiselect');
 // Sécurité: valeurs par défaut
 $order     = $this->lists['order'] ?? 'a.ordering';
 $orderDir  = $this->lists['order_Dir'] ?? 'asc';
+$orderDir  = strtolower($orderDir) === 'desc' ? 'desc' : 'asc';
 
 // Les flèches d'ordering ne doivent être actives QUE si on est trié sur ordering
 $saveOrder = ($order === 'a.ordering');
@@ -32,6 +33,22 @@ $n = is_countable($this->items) ? count($this->items) : 0;
 // limitstart courant (évite CBRequest/eval)
 $app = Factory::getApplication();
 $limitstart = $app->input->getInt('limitstart', 0);
+
+$sortLink = function (string $label, string $field) use ($order, $orderDir): string {
+    $isActive = ($order === $field);
+    $nextDir = ($isActive && $orderDir === 'asc') ? 'desc' : 'asc';
+    $indicator = $isActive
+        ? ($orderDir === 'asc'
+            ? ' <span class="ms-1 icon-sort icon-sort-asc" aria-hidden="true"></span>'
+            : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>')
+        : '';
+    $url = Route::_(
+        'index.php?option=com_contentbuilder&view=storages&limitstart=0&list[ordering]='
+        . $field . '&list[direction]=' . $nextDir
+    );
+
+    return '<a href="' . $url . '">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . $indicator . '</a>';
+};
 ?>
 
 <form action="<?php echo Route::_('index.php?option=com_contentbuilder&task=storages.display'); ?>"
@@ -50,42 +67,30 @@ $limitstart = $app->input->getInt('limitstart', 0);
                     </th>
 
                     <th>
-                        <?php echo HTMLHelper::_(
-                            'grid.sort',
+                        <?php echo $sortLink(
                             Text::_('COM_CONTENTBUILDER_NAME'),
-                            'a.name',
-                            $orderDir,
-                            $order
+                            'a.name'
                         ); ?>
                     </th>
 
                     <th>
-                        <?php echo HTMLHelper::_(
-                            'grid.sort',
+                        <?php echo $sortLink(
                             Text::_('COM_CONTENTBUILDER_STORAGE_TITLE'),
-                            'a.title',
-                            $orderDir,
-                            $order
+                            'a.title'
                         ); ?>
                     </th>
 
                     <th class="w-10 text-nowrap">
-                        <?php echo HTMLHelper::_(
-                            'grid.sort',
+                        <?php echo $sortLink(
                             Text::_('COM_CONTENTBUILDER_ORDERBY'),
-                            'a.ordering',
-                            $orderDir,
-                            $order
+                            'a.ordering'
                         ); ?>
                     </th>
 
                     <th class="w-1 text-center">
-                        <?php echo HTMLHelper::_(
-                            'grid.sort',
+                        <?php echo $sortLink(
                             Text::_('COM_CONTENTBUILDER_PUBLISHED'),
-                            'a.published',
-                            $orderDir,
-                            $order
+                            'a.published'
                         ); ?>
                     </th>
                 </tr>
@@ -166,8 +171,8 @@ $limitstart = $app->input->getInt('limitstart', 0);
     <input type="hidden" name="task" value="">
     <input type="hidden" name="limitstart" value="<?php echo (int) $limitstart; ?>">
     <input type="hidden" name="boxchecked" value="0">
-    <input type="hidden" name="filter_order" value="<?php echo htmlspecialchars($order, ENT_QUOTES, 'UTF-8'); ?>">
-    <input type="hidden" name="filter_order_Dir" value="<?php echo htmlspecialchars($orderDir, ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" name="list[ordering]" value="<?php echo htmlspecialchars($order, ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" name="list[direction]" value="<?php echo htmlspecialchars($orderDir, ENT_QUOTES, 'UTF-8'); ?>">
 
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

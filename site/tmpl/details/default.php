@@ -105,6 +105,7 @@ if ((CBRequest::getInt('cb_show_details_back_button', 1) && $this->show_back_but
     ?>
     <?php if ($delete_allowed) { ?>
         <button class="btn btn-sm btn-danger cbButton cbDeleteButton" onclick="contentbuilder_delete();">
+            <i class="fa fa-trash" aria-hidden="true"></i>
             <?php echo Text::_('COM_CONTENTBUILDER_DELETE') ?>
         </button>
     <?php

@@ -114,8 +114,8 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 	<?php
 	if ($delete_allowed) {
 	?>
-		<button class="btn btn-sm btn-primary" onclick="contentbuilder_delete();">
-			<?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>
+		<button class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1" onclick="contentbuilder_delete();" title="<?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>">
+			<i class="fa fa-trash" aria-hidden="true"></i>
 		</button>
 	<?php
 	}
@@ -154,74 +154,75 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					<?php
 					if ($state_allowed && count($this->states)) {
 					?>
-						<select class="form-select form-select-sm mb-0" style="max-width: 100px;" name="list_state">
-							<option value="0"> -
-								<?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> -
-							</option>
-							<?php
-							foreach ($this->states as $state) {
-							?>
-								<option value="<?php echo $state['id'] ?>">
-									<?php echo $state['title'] ?>
+						<div class="d-inline-flex align-items-center gap-1 me-2">
+							<select class="form-select form-select-sm" style="max-width: 100px;" name="list_state">
+								<option value="0"> -
+									<?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> -
 								</option>
-							<?php
-							}
-							?>
-						</select>
-						<button style="margin-bottom: 0.25rem;"
-							class="btn btn-sm btn-primary" onclick="contentbuilder_state();">
-							<?php echo Text::_('COM_CONTENTBUILDER_SET'); ?>
-						</button>
+								<?php
+								foreach ($this->states as $state) {
+								?>
+									<option value="<?php echo $state['id'] ?>">
+										<?php echo $state['title'] ?>
+									</option>
+								<?php
+								}
+								?>
+							</select>
+							<button class="btn btn-sm btn-primary" onclick="contentbuilder_state();">
+								<?php echo Text::_('COM_CONTENTBUILDER_APPLY'); ?>
+							</button>
+						</div>
 					<?php
 					}
 					?>
 					<?php
 					if ($publish_allowed) {
 					?>
-						<select class="form-select form-select-sm" style="max-width: 100px;" name="list_publish">
-							<option value="-1"> -
-								<?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -
-							</option>
-							<option value="1">
-								<?php echo Text::_('COM_CONTENTBUILDER_PUBLISH') ?>
-							</option>
-							<option value="0">
-								<?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISH') ?>
-							</option>
-						</select>
-						<button style="margin-bottom: 0.25rem;"
-							class="btn btn-sm btn-primary"
-							onclick="contentbuilder_publish();">
-							<?php echo Text::_('COM_CONTENTBUILDER_SET'); ?>
-						</button>
+						<div class="d-inline-flex align-items-center gap-1 me-2">
+							<select class="form-select form-select-sm" style="max-width: 100px;" name="list_publish">
+								<option value="-1"> -
+									<?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -
+								</option>
+								<option value="1">
+									<?php echo Text::_('COM_CONTENTBUILDER_PUBLISH') ?>
+								</option>
+								<option value="0">
+									<?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISH') ?>
+								</option>
+							</select>
+							<button class="btn btn-sm btn-primary" onclick="contentbuilder_publish();">
+								<?php echo Text::_('COM_CONTENTBUILDER_APPLY'); ?>
+							</button>
+						</div>
 					<?php
 					}
 					?>
 					<?php
 					if ($language_allowed) {
 					?>
-						<select class="form-select form-select-sm" style="max-width: 100px;" name="list_language">
-							<option value="*"> -
-								<?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?> -
-							</option>
-							<option value="*">
-								<?php echo Text::_('COM_CONTENTBUILDER_ANY'); ?>
-							</option>
-							<?php
-							foreach ($this->languages as $filter_language) {
-							?>
-								<option value="<?php echo $filter_language; ?>">
-									<?php echo $filter_language; ?>
+						<div class="d-inline-flex align-items-center gap-1 me-2">
+							<select class="form-select form-select-sm" style="max-width: 100px;" name="list_language">
+								<option value="*"> -
+									<?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?> -
 								</option>
-							<?php
-							}
-							?>
-						</select>
-						<button style="margin-bottom: 0.25rem;"
-							class="btn btn-sm btn-primary"
-							onclick="contentbuilder_language();">
-							<?php echo Text::_('COM_CONTENTBUILDER_SET'); ?>
-						</button>
+								<option value="*">
+									<?php echo Text::_('COM_CONTENTBUILDER_ANY'); ?>
+								</option>
+								<?php
+								foreach ($this->languages as $filter_language) {
+								?>
+									<option value="<?php echo $filter_language; ?>">
+										<?php echo $filter_language; ?>
+									</option>
+								<?php
+								}
+								?>
+							</select>
+							<button class="btn btn-sm btn-primary" onclick="contentbuilder_language();">
+								<?php echo Text::_('COM_CONTENTBUILDER_APPLY'); ?>
+							</button>
+						</div>
 					<?php
 					}
 					?>
