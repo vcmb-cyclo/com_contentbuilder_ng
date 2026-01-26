@@ -2,10 +2,11 @@
 ## About the Project
 
 This repository provides **community-maintained updates and fixes for ContentBuilder**,  
-a Joomla extension originally developed by **Crosstec**.
+a Joomla extension originally developed by **Crosstec**. The original Crosstec project 
+is no longer maintained or supported.
 
-The original Crosstec project is no longer actively maintained and does not support
-recent Joomla versions (Joomla 5 / 6).
+This ContentBuiler-ng (new gen) has been highly refactored for Joomla 6 native support.
+New Gen releases releases will be named: " contentBuiler-ng-6.1.xx.zip " and above
 
 This initiative aims to keep the extension usable on modern Joomla installations by:
 - fixing compatibility issues
@@ -21,7 +22,7 @@ All trademarks and original copyrights remain the property of their respective o
 
 - ✅ Joomla 5.x (tested **without** the Backward Compatibility plugin)
 - ✅ Joomla 6.x (tested **with** the Backward Compatibility plugin)
-- ✅ PHP 8.2 / 8.3
+- ✅ PHP 8.3
 
 ⚠️ **This is NOT an official ContentBuilder repository.**  
 This project is maintained by volunteers and provided *as-is*.
