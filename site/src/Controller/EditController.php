@@ -160,7 +160,16 @@ class EditController extends BaseController
 
         ContentbuilderLegacyHelper::checkPermissions('publish', Text::_('COM_CONTENTBUILDER_PERMISSIONS_PUBLISHING_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
 
-        $model = $this->getModel('Edit', 'Contentbuilder');
+        $model = $this->getModel('Edit', 'Site');
+        if (!$model) {
+            $model = $this->getModel('Edit', 'Contentbuilder');
+        }
+        if (!$model) {
+            throw new \RuntimeException('EditModel introuvable');
+        }
+        if (method_exists($model, 'setIds')) {
+            $model->setIds(CBRequest::getInt('id', 0), CBRequest::getCmd('record_id', 0));
+        }
         $model->change_list_publish();
         if (CBRequest::getInt('list_publish', 0)) {
             $msg = Text::_('COM_CONTENTBUILDER_PUBLISHED');

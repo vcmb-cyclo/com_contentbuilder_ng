@@ -2274,6 +2274,7 @@ var contentbuilder = new function(){
         }
         $this->getDatabase()->setQuery("SELECT @ids");
         $select_ids = $this->getDatabase()->loadResult();
+        $affected_articles = [];
         if ($select_ids) {
             $affected_articles = explode(',', $this->getDatabase()->loadResult());
         }
@@ -2284,7 +2285,18 @@ var contentbuilder = new function(){
 
         // Trigger the onContentChangeState event.
         $dispatcher = Factory::getApplication()->getDispatcher();
-        $eventResult = $dispatcher->dispatch('onContentChangeState', new \Joomla\Event\Event('onContentChangeState', array('com_content.article', $affected_articles, CBRequest::getInt('list_publish', 0))));
+        $context = 'com_content.article';
+        $value = CBRequest::getInt('list_publish', 0);
+        if (class_exists(\Joomla\CMS\Event\Model\AfterChangeStateEvent::class)) {
+            $event = new \Joomla\CMS\Event\Model\AfterChangeStateEvent('onContentChangeState', [
+                'context' => $context,
+                'subject' => $affected_articles,
+                'value' => $value,
+            ]);
+        } else {
+            $event = new \Joomla\Event\Event('onContentChangeState', [$context, $affected_articles, $value]);
+        }
+        $eventResult = $dispatcher->dispatch('onContentChangeState', $event);
         $result = $eventResult->getArgument('result') ?: [];
     }
 }
