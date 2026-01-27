@@ -369,13 +369,13 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					<?php
 					}
 
-					if ($this->list_publish && $publish_allowed) {
-					?>
-						<th class="sectiontableheader" width="20">
-							<?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED'); ?>
-						</th>
-					<?php
-					}
+						if ($this->list_publish && $publish_allowed) {
+						?>
+							<th class="sectiontableheader" width="20">
+								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_PUBLISHED'), 'colPublished', $this->lists['order_Dir'], $this->lists['order']); ?>
+							</th>
+						<?php
+						}
 
 					if ($this->list_language) {
 					?>
@@ -436,10 +436,11 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 				$row = $this->items[$i];
 				$link = Route::_('index.php?option=com_contentbuilder&task=details.display&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
 				$edit_link = Route::_('index.php?option=com_contentbuilder&task=edit.display&backtolist=1&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
-				$publish_link = Route::_('index.php?option=com_contentbuilder&task=edit.display&task=edit.publish&backtolist=1&id=' . $this->form_id . '&list_publish=1&cid[]=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
-				$unpublish_link = Route::_('index.php?option=com_contentbuilder&task=edit.display&task=edit.publish&backtolist=1&id=' . $this->form_id . '&list_publish=0&cid[]=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
-				$select = '<input class="form-check-input" type="checkbox" name="cid[]" value="' . $row->colRecord . '"/>';
-			?>
+					$isPublished = isset($this->published_items[$row->colRecord]) && $this->published_items[$row->colRecord];
+					$togglePublish = $isPublished ? 0 : 1;
+					$toggle_link = Route::_('index.php?option=com_contentbuilder&task=edit.publish&backtolist=1&id=' . $this->form_id . '&list_publish=' . $togglePublish . '&cid[]=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
+					$select = '<input class="form-check-input" type="checkbox" name="cid[]" value="' . $row->colRecord . '"/>';
+				?>
 				<tr class="<?php echo "row$k"; ?>">
 					<?php
 					if ($this->show_id_column) {
@@ -494,15 +495,22 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					<?php
 					}
 					?>
-					<?php
-					if ($this->list_publish && $publish_allowed) {
-					?>
-						<td align="center" valign="middle">
-							<?php echo ContentbuilderHelper::publishButton(isset($this->published_items[$row->colRecord]) && $this->published_items[$row->colRecord] ? true : false, $publish_link, $unpublish_link, 'tick.png', 'publish_x.png', $publish_allowed); ?>
-						</td>
-					<?php
-					}
-					?>
+						<?php
+						if ($this->list_publish && $publish_allowed) {
+						?>
+							<td align="center" valign="middle">
+								<?php
+								$iconClass = $isPublished ? 'icon-publish text-success' : 'icon-unpublish text-danger';
+								$iconTitle = $isPublished ? Text::_('JPUBLISHED') : Text::_('JUNPUBLISHED');
+								?>
+								<a class="btn btn-sm btn-link p-0" href="<?php echo $toggle_link; ?>" title="<?php echo $iconTitle; ?>">
+									<span class="<?php echo $iconClass; ?>" aria-hidden="true"></span>
+									<span class="visually-hidden"><?php echo $iconTitle; ?></span>
+								</a>
+							</td>
+						<?php
+						}
+						?>
 					<?php
 					if ($this->list_language) {
 					?>

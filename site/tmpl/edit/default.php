@@ -24,16 +24,103 @@ $edit_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('edit') : Co
 $delete_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('delete') : ContentbuilderLegacyHelper::authorize('delete');
 $view_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('view') : ContentbuilderLegacyHelper::authorize('view');
 $fullarticle_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('fullarticle') : ContentbuilderLegacyHelper::authorize('fullarticle');
+
+$input = Factory::getApplication()->input;
+$hasReturn = $input->getString('return', '') !== '';
+$backToList = $input->getInt('backtolist', 0) === 1;
+$jsBack = $input->getInt('jsback', 0) === 1;
+$layout = $input->getString('layout', '');
+$tmpl = $input->getString('tmpl', '');
+$id = $input->getInt('id', 0);
+$recordId = $input->getCmd('record_id', 0);
+$itemId = $input->getInt('Itemid', 0);
+$limitStart = $input->getInt('limitstart', 0);
+$filterOrder = $input->getCmd('filter_order');
+
+$detailsHref = Route::_(
+    'index.php?option=com_contentbuilder&task=details.display'
+        . ($layout !== '' ? '&layout=' . $layout : '')
+        . '&id=' . $id
+        . '&record_id=' . $recordId
+        . ($tmpl !== '' ? '&tmpl=' . $tmpl : '')
+        . '&Itemid=' . $itemId
+        . '&limitstart=' . $limitStart
+        . '&filter_order=' . $filterOrder
+);
+
+$listHref = Route::_(
+    'index.php?option=com_contentbuilder&task=list.display'
+        . ($layout !== '' ? '&layout=' . $layout : '')
+        . '&id=' . $id
+        . '&limitstart=' . $limitStart
+        . '&filter_order=' . $filterOrder
+        . ($tmpl !== '' ? '&tmpl=' . $tmpl : '')
+        . '&Itemid=' . $itemId
+);
+
+$backHref = $backToList ? $listHref : $detailsHref;
+$showBack = $this->back_button && !$hasReturn;
+
+$customCss = <<<'CSS'
+.cbEditableWrapper .mb-3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+}
+
+.cbEditableWrapper .mb-3 > label.form-label {
+    flex: 0 0 240px;
+    max-width: 240px;
+    margin-bottom: 0;
+    padding-right: 0.5rem;
+    font-weight: 600;
+}
+
+.cbEditableWrapper .mb-3 > div {
+    flex: 1 1 320px;
+    min-width: 0;
+}
+
+.cbEditableWrapper .cbFormField input,
+.cbEditableWrapper .cbFormField select,
+.cbEditableWrapper .cbFormField textarea,
+.cbEditableWrapper .cbFormField .inputbox {
+    width: 100%;
+}
+
+.cbToolBar .btn {
+    margin-left: 0.5rem;
+}
+
+.cbToolBar .btn:first-child {
+    margin-left: 0;
+}
+
+@media (max-width: 768px) {
+    .cbEditableWrapper .mb-3 {
+        align-items: stretch;
+    }
+
+    .cbEditableWrapper .mb-3 > label.form-label,
+    .cbEditableWrapper .mb-3 > div {
+        flex: 1 1 100%;
+        max-width: 100%;
+        padding-right: 0;
+    }
+}
+CSS;
 ?>
 <?php Factory::getApplication()->getDocument()->addStyleDeclaration($this->theme_css); ?>
 <?php Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js); ?>
+<?php Factory::getApplication()->getDocument()->addStyleDeclaration($customCss); ?>
 <a name="article_up"></a>
 <script type="text/javascript">
     <!--
     function contentbuilder_delete() {
         var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDER_CONFIRM_DELETE_MESSAGE'); ?>');
         if (confirmed) {
-            location.href = '<?php echo 'index.php?option=com_contentbuilder&task=edit.delete' . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&cid[]=' . Factory::getApplication()->input->getCmd('record_id', 0) . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order'); ?>';
+            location.href = '<?php echo 'index.php?option=com_contentbuilder&task=edit.delete' . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&cid[]=' . Factory::getApplication()->input->getCmd('record_id', 0) . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order'); ?>';
         }
     }
 
@@ -48,7 +135,11 @@ $fullarticle_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('full
 
         var el = null;
         if (typeof ff_getElementByName === "function") {
-            try { el = ff_getElementByName(name); } catch (e) { el = null; }
+            try {
+                el = ff_getElementByName(name);
+            } catch (e) {
+                el = null;
+            }
         }
         if (!el) {
             var nodes = document.getElementsByName(name);
@@ -83,8 +174,10 @@ $fullarticle_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('full
         if (!found) return false;
         try {
             if (typeof selectEl.onchange === "function") selectEl.onchange();
-            selectEl.dispatchEvent(new Event("change", { bubbles: true }));
-        } catch (e) { }
+            selectEl.dispatchEvent(new Event("change", {
+                bubbles: true
+            }));
+        } catch (e) {}
         return true;
     }
 
@@ -101,8 +194,7 @@ $fullarticle_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('full
                     }
                 }
             }
-        } catch (e) {
-        }
+        } catch (e) {}
 
         var nodes = document.getElementsByName(htmlName);
         if ((!nodes || nodes.length === 0) && htmlName.slice(-2) !== "[]") {
@@ -160,9 +252,16 @@ $fullarticle_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('full
         var result = ff_setSelected_groupBF(name, value, checked);
 
         if (missingInputs) {
-            console.warn("[BF] ff_setChecked called with undefined inputs", { name: name, value: value, checked: checked });
+            console.warn("[BF] ff_setChecked called with undefined inputs", {
+                name: name,
+                value: value,
+                checked: checked
+            });
         } else if (!result) {
-            console.warn("[BF] ff_setChecked element not found", { name: name, value: value });
+            console.warn("[BF] ff_setChecked element not found", {
+                name: name,
+                value: value
+            });
         }
 
         return result;
@@ -174,7 +273,7 @@ $fullarticle_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('full
     <?php
     if ($this->show_page_heading && $this->page_title) {
     ?>
-        <h1 class="contentheading">
+        <h1 class="contentheading display-6 mb-4">
             <?php echo $this->page_title; ?>
         </h1>
     <?php
@@ -189,46 +288,44 @@ $fullarticle_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('full
         if ($this->record_id && $edit_allowed && $this->create_articles && $fullarticle_allowed) {
         ?>
             <button class="btn btn-sm btn-primary cbButton cbArticleSettingsButton" onclick="if(document.getElementById('cbArticleOptions').style.display == 'none'){document.getElementById('cbArticleOptions').style.display='block'}else{document.getElementById('cbArticleOptions').style.display='none'};"><?php echo Text::_('COM_CONTENTBUILDER_SHOW_ARTICLE_SETTINGS') ?></button>
-            <?php
+        <?php
         }
         if (($edit_allowed || $new_allowed) && !$this->edit_by_type) {
-            if (Factory::getApplication()->input->getString('cb_controller', '') != 'edit' && !Factory::getApplication()->input->get('return', '', 'string') && !$this->latest) {
-            ?>
-                <button class="btn btn-sm btn-primary cbButton cbApplyButton" onclick="document.getElementById('contentbuilder_task').value='apply';contentbuilder.onSubmit();"><?php echo trim($this->apply_button_title) != '' ? htmlentities($this->apply_button_title, ENT_QUOTES, 'UTF-8') : Text::_('COM_CONTENTBUILDER_APPLY') ?></button>
-            <?php
-            }
-            ?>
-            <button class="btn btn-sm btn-primary cbButton cbSaveButton" onclick="<?php echo $this->latest ? "document.getElementById('contentbuilder_task').value='apply';" : '' ?>contentbuilder.onSubmit();"><?php echo trim($this->save_button_title) != '' ? htmlentities($this->save_button_title, ENT_QUOTES, 'UTF-8') : Text::_('COM_CONTENTBUILDER_SAVE') ?></button>
+        ?>
+            <button class="btn btn-sm btn-primary cbButton cbSaveButton" title="<?php echo Text::_('COM_CONTENTBUILDER_SAVE'); ?>" onclick="<?php echo $this->latest ? "document.getElementById('contentbuilder_task').value='edit.apply';" : '' ?>contentbuilder.onSubmit();">
+                <span class="icon-save me-1" aria-hidden="true"></span>
+                <?php echo trim($this->save_button_title) != '' ? htmlentities($this->save_button_title, ENT_QUOTES, 'UTF-8') : Text::_('COM_CONTENTBUILDER_SAVE') ?>
+            </button>
         <?php
         } else if ($this->record_id && $edit_allowed && $this->create_articles && $this->edit_by_type && $fullarticle_allowed) {
         ?>
-            <button class="btn btn-sm btn-primary cbButton cbArticleSettingsButton" onclick="document.getElementById('contentbuilder_task').value='apply';contentbuilder.onSubmit();"><?php echo Text::_('COM_CONTENTBUILDER_APPLY_ARTICLE_SETTINGS') ?></button>
-        <?php
-        }
-        if ($this->record_id && $delete_allowed) {
-        ?>
-            <button class="btn btn-sm btn-primary cbButton cbDeleteButton" 
-                onclick="contentbuilder_delete();">
-            <i class="fa fa-trash" aria-hidden="true"></i>
-            <?php echo Text::_('COM_CONTENTBUILDER_DELETE') ?></button>
+            <button class="btn btn-sm btn-primary cbButton cbArticleSettingsButton" onclick="document.getElementById('contentbuilder_task').value='edit.apply';contentbuilder.onSubmit();">
+                <span class="icon-apply me-1" aria-hidden="true"></span>
+                <?php echo Text::_('COM_CONTENTBUILDER_APPLY_ARTICLE_SETTINGS') ?>
+            </button>
+        <?php }
+        if ($this->record_id && $delete_allowed) { ?>
+            <button class="btn btn-sm btn-primary cbButton cbDeleteButton"
+                onclick="contentbuilder_delete();"
+                title="<?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+                <?php echo Text::_('COM_CONTENTBUILDER_DELETE') ?></button>
             <?php
         }
-        if (!Factory::getApplication()->input->getInt('backtolist', 0) && !Factory::getApplication()->input->get('return', '', 'string')) {
-            if (!Factory::getApplication()->input->getInt('jsback', 0)) {
-                if ($this->back_button) {
+        if ($showBack) {
+            if ($jsBack) {
             ?>
-                    <a class="btn btn-sm btn-primary cbButton cbBackButton" href="<?php echo Route::_('index.php?option=com_contentbuilder&task=details.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order')); ?>"><?php echo Text::_('COM_CONTENTBUILDER_BACK') ?></a>
-                <?php
-                }
+                <button class="btn btn-sm btn-outline-secondary cbButton cbBackButton" title="<?php echo Text::_('COM_CONTENTBUILDER_BACK'); ?>" onclick="history.back(-1);void(0);">
+                    <span class="icon-arrow-left me-1" aria-hidden="true"></span>
+                    <?php echo Text::_('COM_CONTENTBUILDER_BACK') ?>
+                </button>
+            <?php
             } else {
-                ?>
-                <button class="button btn-sm btn btn-primary cbButton cbBackButton" onclick="history.back(-1);void(0);"><?php echo Text::_('COM_CONTENTBUILDER_BACK') ?></button>
-            <?php
-            }
-        } else {
-            if ($this->back_button && !Factory::getApplication()->input->get('return', '', 'string')) {
             ?>
-                <a class="btn btn-sm btn-primary cbButton cbBackButton" href="<?php echo Route::_('index.php?option=com_contentbuilder&task=list.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0)); ?>"><?php echo Text::_('COM_CONTENTBUILDER_BACK') ?></a>
+                <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton" title="<?php echo Text::_('COM_CONTENTBUILDER_BACK'); ?>" href="<?php echo $backHref; ?>">
+                    <span class="icon-arrow-left me-1" aria-hidden="true"></span>
+                    <?php echo Text::_('COM_CONTENTBUILDER_BACK') ?>
+                </a>
         <?php
             }
         }

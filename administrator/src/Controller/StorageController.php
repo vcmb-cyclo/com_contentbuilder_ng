@@ -191,7 +191,11 @@ class StorageController extends BaseFormController
         }
 
         /** @var \CB\Component\Contentbuilder\Administrator\Model\StorageModel $model */
-        $model = $this->getModel('Storage', 'Contentbuilder');
+        $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true])
+            ?: $this->getModel('Storage', 'Contentbuilder', ['ignore_request' => true]);
+        if (!$model) {
+            throw new \RuntimeException('StorageModel not found');
+        }
 
         // IMPORTANT : ton model delete() doit utiliser $pks, pas CBRequest (je t’ai donné le patch)
         try {
@@ -221,7 +225,11 @@ class StorageController extends BaseFormController
 
     public function save2new()
     {
-        $model = $this->getModel('Storage', 'Contentbuilder');
+        $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true])
+            ?: $this->getModel('Storage', 'Contentbuilder', ['ignore_request' => true]);
+        if (!$model) {
+            throw new \RuntimeException('StorageModel not found');
+        }
         $model->save();
 
         $this->setRedirect('index.php?option=com_contentbuilder&task=storage.display&layout=edit&id=0');

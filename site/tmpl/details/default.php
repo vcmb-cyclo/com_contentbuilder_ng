@@ -74,7 +74,7 @@ endif;
 <?php
 if ($this->show_page_heading && $this->page_title) {
 ?>
-    <h1 class="contentheading">
+    <h1 class="contentheading display-6 mb-4">
         <?php echo $this->page_title; ?>
     </h1>
 <?php
@@ -97,14 +97,16 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
 
     <?php if ($edit_allowed) { ?>
         <a class="btn btn-sm btn-primary cbButton cbEditButton"
-            href="<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order')); ?>">
+            href="<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order')); ?>"
+            title="<?php echo Text::_('COM_CONTENTBUILDER_EDIT'); ?>">
             <?php echo Text::_('COM_CONTENTBUILDER_EDIT') ?>
         </a>
     <?php
     }
     ?>
     <?php if ($delete_allowed) { ?>
-        <button class="btn btn-sm btn-danger cbButton cbDeleteButton" onclick="contentbuilder_delete();">
+        <button class="btn btn-sm btn-danger cbButton cbDeleteButton" onclick="contentbuilder_delete();"
+            title="<?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>">
             <i class="fa fa-trash" aria-hidden="true"></i>
             <?php echo Text::_('COM_CONTENTBUILDER_DELETE') ?>
         </button>
@@ -113,7 +115,9 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
     ?>
     <?php if ($this->show_back_button && Factory::getApplication()->input->getBool('cb_show_details_back_button', 1)): ?>
         <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton"
-            href="<?php echo Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0)); ?>">
+            href="<?php echo Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0)); ?>"
+            title="<?php echo Text::_('COM_CONTENTBUILDER_BACK'); ?>">
+            <span class="icon-arrow-left me-1" aria-hidden="true"></span>
             <?php echo Text::_('COM_CONTENTBUILDER_BACK') ?>
         </a>
     <?php endif; ?>

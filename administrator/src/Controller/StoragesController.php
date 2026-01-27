@@ -78,6 +78,8 @@ final class StoragesController extends AdminController
         parent::display($cachable, $urlparams);
     }
 
+
+/*
     public function delete(): void
     {
         // Vérif CSRF.
@@ -110,7 +112,7 @@ final class StoragesController extends AdminController
         }
 
         $this->setRedirect('index.php?option=com_contentbuilder&task=storages.display');
-    }
+    }*/
 
     /**
      * Copie (custom)

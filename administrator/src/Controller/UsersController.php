@@ -181,7 +181,11 @@ class UsersController extends BaseController
     
     public function save($keep_task = false)
     {
-        $model = $this->getModel('User', 'Contentbuilder');
+        $model = $this->getModel('User', 'Administrator', ['ignore_request' => true])
+            ?: $this->getModel('User', 'Contentbuilder', ['ignore_request' => true]);
+        if (!$model) {
+            throw new \RuntimeException('UserModel not found');
+        }
         $id = $model->store();
         
         if ($id) {

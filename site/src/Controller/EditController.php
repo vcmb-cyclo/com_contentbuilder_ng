@@ -62,7 +62,7 @@ class EditController extends BaseController
      *
      * @return  \Joomla\CMS\MVC\Model\BaseDatabaseModel|false  Model object on success; otherwise false on failure.
      */
-    public function getModel($name = 'Edit', $prefix = 'Contentbuilder', $config = ['ignore_request' => true])
+    public function getModel($name = 'Edit', $prefix = 'Site', $config = ['ignore_request' => true])
     {
         return parent::getModel($name, $prefix, $config);
     }
@@ -89,7 +89,12 @@ class EditController extends BaseController
             ContentbuilderLegacyHelper::checkPermissions('new', Text::_('COM_CONTENTBUILDER_PERMISSIONS_NEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
         }
 
-        $model = $this->getModel('edit', 'Contentbuilder');
+        $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
+            ?: $this->getModel('Edit', 'Contentbuilder', ['ignore_request' => true]);
+
+        if (!$model) {
+            throw new \RuntimeException('EditModel not found');
+        }
         $id = $model->store();
 
         $submission_failed = Factory::getApplication()->input->getBool('cb_submission_failed', false);
@@ -137,18 +142,50 @@ class EditController extends BaseController
     {
         ContentbuilderLegacyHelper::checkPermissions('delete', Text::_('COM_CONTENTBUILDER_PERMISSIONS_DELETE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
 
-        $model = $this->getModel('Edit', 'Contentbuilder');
-        $id = $model->delete();
-        $msg = Text::_('COM_CONTENTBUILDER_ENTRIES_DELETED');
-        $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
-        $this->setRedirect($link, $msg, 'message');
+        $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
+            ?: $this->getModel('Edit', 'Contentbuilder', ['ignore_request' => true]);
+        if (!$model) {
+            throw new \RuntimeException('EditModel not found');
+        }
+        $ok = true;
+        try {
+            // Legacy model may not return a strict boolean; treat "no exception" as success.
+            $model->delete();
+        } catch (\Throwable $e) {
+            $ok = false;
+            $this->app->enqueueMessage($e->getMessage(), 'warning');
+        }
+        $msg = $ok ? Text::_('COM_CONTENTBUILDER_ENTRIES_DELETED') : Text::_('COM_CONTENTBUILDER_ERROR');
+        $type = $ok ? 'message' : 'warning';
+
+        // Clear record context to avoid redirects back to details/edit for a deleted record.
+        $this->input->set('record_id', 0);
+        Factory::getApplication()->input->set('record_id', 0);
+
+        $link = Route::_(
+            'index.php?option=com_contentbuilder&task=list.display&backtolist=1&id='
+            . Factory::getApplication()->input->getInt('id', 0)
+            . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '')
+            . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '')
+            . '&record_id='
+            . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0)
+            . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order')
+            . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0),
+            false
+        );
+
+        $this->setRedirect($link, $msg, $type);
     }
 
     public function state()
     {
         ContentbuilderLegacyHelper::checkPermissions('state', Text::_('COM_CONTENTBUILDER_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
 
-        $model = $this->getModel('Edit', 'Contentbuilder');
+        $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
+            ?: $this->getModel('Edit', 'Contentbuilder', ['ignore_request' => true]);
+        if (!$model) {
+            throw new \RuntimeException('EditModel not found');
+        }
         $model->change_list_states();
         $msg = Text::_('COM_CONTENTBUILDER_STATES_CHANGED');
         $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
@@ -185,7 +222,11 @@ class EditController extends BaseController
 
         ContentbuilderLegacyHelper::checkPermissions('language', Text::_('COM_CONTENTBUILDER_PERMISSIONS_CHANGE_LANGUAGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
 
-        $model = $this->getModel('Edit', 'Contentbuilder');
+        $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
+            ?: $this->getModel('Edit', 'Contentbuilder', ['ignore_request' => true]);
+        if (!$model) {
+            throw new \RuntimeException('EditModel not found');
+        }
         $model->change_list_language();
         $msg = Text::_('COM_CONTENTBUILDER_LANGUAGE_CHANGED');
         $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);

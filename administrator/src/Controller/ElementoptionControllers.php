@@ -31,7 +31,11 @@ class ElementoptionsController extends AdminController
 
     function save()
     {
-        $model = $this->getModel('Elementoption', 'Contentbuilder');
+        $model = $this->getModel('Elementoption', 'Administrator', ['ignore_request' => true])
+            ?: $this->getModel('Elementoption', 'Contentbuilder', ['ignore_request' => true]);
+        if (!$model) {
+            throw new \RuntimeException('ElementoptionModel not found');
+        }
         $id = $model->store();
 
         if ($id) {

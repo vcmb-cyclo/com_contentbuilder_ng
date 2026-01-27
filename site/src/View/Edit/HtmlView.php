@@ -80,7 +80,8 @@ class HtmlView extends BaseHtmlView
                     }
                 }
 
-                if ($this->tpl === '' && property_exists($this->item, 'template')) {
+                // Model exposes the rendered markup as $item->template; accept null/empty here.
+                if (($this->tpl === null || $this->tpl === '') && property_exists($this->item, 'template')) {
                     $this->tpl = $this->item->template;
                 }
 

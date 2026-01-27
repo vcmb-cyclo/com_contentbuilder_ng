@@ -411,11 +411,8 @@ class EditModel extends BaseDatabaseModel
 
                         $label = '';
                         foreach ($data->items as $rec) {
-
                             if ($rec->recElementId == $data->title_field) {
-
                                 if ($data->act_as_registration && $user !== null) {
-
                                     if ($data->registration_name_field == $rec->recElementId) {
                                         $rec->recValue = $user->name;
                                     } else
@@ -429,14 +426,17 @@ class EditModel extends BaseDatabaseModel
                                         $rec->recValue = $user->email;
                                     }
                                 }
-                                $label = ContentbuilderHelper::cbinternal($rec->recValue);
-                                break;
+                                $candidateLabel = trim((string) ContentbuilderHelper::cbinternal($rec->recValue));
+                                if ($candidateLabel !== '') {
+                                    $label = $candidateLabel;
+                                    break;
+                                }
                             }
                         }
 
-                        // trying first element if no title field given
+                        // Fallback to the record id when no title label is available.
                         if (!$label) {
-                            $label = ContentbuilderHelper::cbinternal($data->items[0]->recValue);
+                            $label = (string) $this->_record_id;
                         }
 
                         // "buddy quaid hack", should be an option in future versions

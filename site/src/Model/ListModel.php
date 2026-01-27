@@ -532,6 +532,8 @@ class ListModel extends BaseListModel
                             $order_types['col' . $row['reference_id']] = $row['order_type'];
                         }
                     }
+                    // Allow sorting on the published state column.
+                    $order_types['colPublished'] = 'UNSIGNED';
 
                     $act_as_registration = array();
 
