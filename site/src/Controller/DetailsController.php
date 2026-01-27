@@ -95,7 +95,24 @@ class DetailsController extends BaseController
                 $auth = $this->frontend ? ContentbuilderLegacyHelper::authorizeFe('new') : ContentbuilderLegacyHelper::authorize('new');
 
                 if ($auth) {
-                    Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder&task=edit.display&latest=1&backtolist=' . Factory::getApplication()->input->getInt('backtolist', 0) . '&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&record_id=&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->get('filter_order', '', 'string'), false));
+                    $app = Factory::getApplication();
+                    $option = 'com_contentbuilder';
+                    $list = (array) $app->input->get('list', [], 'array');
+                    $limit = isset($list['limit']) ? $app->input->getInt('list[limit]', 0) : (int) $app->getUserState($option . '.list.limit', 0);
+                    if ($limit === 0) {
+                        $limit = (int) $app->get('list_limit');
+                    }
+                    $start = isset($list['start']) ? $app->input->getInt('list[start]', 0) : (int) $app->getUserState($option . '.list.start', 0);
+                    $ordering = isset($list['ordering']) ? $app->input->getCmd('list[ordering]', '') : (string) $app->getUserState($option . 'formsd_filter_order', '');
+                    $direction = isset($list['direction']) ? $app->input->getCmd('list[direction]', '') : (string) $app->getUserState($option . 'formsd_filter_order_Dir', '');
+                    $listQuery = http_build_query(['list' => [
+                        'limit' => $limit,
+                        'start' => $start,
+                        'ordering' => $ordering,
+                        'direction' => $direction,
+                    ]]);
+
+                    Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder&task=edit.display&latest=1&backtolist=' . Factory::getApplication()->input->getInt('backtolist', 0) . '&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&record_id=' . ($listQuery !== '' ? '' : '') . ($listQuery !== '' ? '&' . $listQuery : ''), false));
                 } else {
                     Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
                     Factory::getApplication()->redirect(Route::_('index.php'));

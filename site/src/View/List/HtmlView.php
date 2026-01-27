@@ -63,7 +63,7 @@ class HtmlView extends BaseHtmlView
         $lists['filter_state'] = $state->get('formsd_filter_state');
         $lists['filter_publish'] = $state->get('formsd_filter_publish');
         $lists['filter_language'] = $state->get('formsd_filter_language');
-        $lists['limitstart'] = (int) $state->get('list.start');
+        $lists['liststart'] = (int) $state->get('list.start');
 
         PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
 

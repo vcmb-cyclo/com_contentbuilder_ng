@@ -97,26 +97,42 @@ class ListModel extends BaseListModel
             throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
         }
 
+        $list = (array) $app->input->get('list', [], 'array');
+        $listOrdering = isset($list['ordering']) ? preg_replace('/[^A-Za-z0-9_\\.]/', '', (string) $list['ordering']) : '';
+        $listDirection = isset($list['direction']) ? strtolower((string) $list['direction']) : '';
+        $listFullordering = isset($list['fullordering']) ? trim((string) $list['fullordering']) : '';
+
+        // Joomla native fullordering takes precedence when present.
+        if ($listFullordering !== '' && $listOrdering === '') {
+            $parts = preg_split('/\s+/', $listFullordering);
+            $listOrdering = isset($parts[0]) ? preg_replace('/[^A-Za-z0-9_\\.]/', '', (string) $parts[0]) : '';
+            $listDirection = isset($parts[1]) ? strtolower((string) $parts[1]) : $listDirection;
+        }
+
         if ($app->getSession()->get($option . 'formsd_id', 0) == 0 || $app->getSession()->get($option . 'formsd_id', 0) == $this->_id) {
-            $filter_order     = $app->getUserStateFromRequest($option . 'formsd_filter_order', 'filter_order', '', 'cmd');
-            $filter_order_Dir = $app->getUserStateFromRequest($option . 'formsd_filter_order_Dir', 'filter_order_Dir', '', 'cmd');
+            $filter_order     = (string) $app->getUserState($option . 'formsd_filter_order', '');
+            $filter_order_Dir = (string) $app->getUserState($option . 'formsd_filter_order_Dir', '');
             $filter           = $app->getUserStateFromRequest($option . 'formsd_filter', 'filter', '', 'string');
             $filter_state     = $app->getUserStateFromRequest($option . 'formsd_filter_state', 'list_state_filter', 0, 'int');
             $filter_publish   = $app->getUserStateFromRequest($option . 'formsd_filter_publish', 'list_publish_filter', -1, 'int');
             $filter_language  = $app->getUserStateFromRequest($option . 'formsd_filter_language', 'list_language_filter', '', 'cmd');
         } else {
-            $app->setUserState($option . 'formsd_filter_order', Factory::getApplication()->input->getCmd('filter_order', ''));
-            $app->setUserState($option . 'formsd_filter_order_Dir', Factory::getApplication()->input->getCmd('filter_order_Dir', ''));
-            $app->setUserState($option . 'formsd_filter', Factory::getApplication()->input->get('filter', '', 'string'));
-            $app->setUserState($option . 'formsd_filter_state', Factory::getApplication()->input->getInt('list_state_filter', 0));
-            $app->setUserState($option . 'formsd_filter_publish', Factory::getApplication()->input->getInt('list_publish_filter', -1));
-            $app->setUserState($option . 'formsd_filter_language', Factory::getApplication()->input->getCmd('list_language_filter', ''));
-            $filter_order     = Factory::getApplication()->input->getCmd('filter_order', '');
-            $filter_order_Dir = Factory::getApplication()->input->getCmd('filter_order_Dir', '');
-            $filter           = Factory::getApplication()->input->get('filter', '', 'string');
-            $filter_state     = Factory::getApplication()->input->getInt('list_state_filter', 0);
-            $filter_publish   = Factory::getApplication()->input->getInt('list_publish_filter', -1);
-            $filter_language  = Factory::getApplication()->input->getCmd('list_language_filter', '');
+            $filter_order     = $listOrdering;
+            $filter_order_Dir = $listDirection;
+            $filter           = $app->input->get('filter', '', 'string');
+            $filter_state     = $app->input->getInt('list_state_filter', 0);
+            $filter_publish   = $app->input->getInt('list_publish_filter', -1);
+            $filter_language  = $app->input->getCmd('list_language_filter', '');
+        }
+
+        // Joomla 6 native list state takes precedence when present.
+        if ($listOrdering !== '') {
+            $filter_order = $listOrdering;
+            $app->setUserState($option . 'formsd_filter_order', $filter_order);
+        }
+        if ($listDirection !== '') {
+            $filter_order_Dir = $listDirection;
+            $app->setUserState($option . 'formsd_filter_order_Dir', $filter_order_Dir);
         }
 
         $this->setState('formsd_filter_state', $filter_state);
@@ -193,16 +209,23 @@ class ListModel extends BaseListModel
     protected function populateState($ordering = null, $direction = null)
     {
         $app = Factory::getApplication();
+        $option = 'com_contentbuilder';
         parent::populateState($ordering, $direction);
 
-        $limit = $app->input->getInt('limit', 0);
+        $list = (array) $app->input->get('list', [], 'array');
+
+        // Joomla 6-only pagination state.
+        $limit = isset($list['limit']) ? (int) $list['limit'] : 0;
         if ($limit === 0) {
-            $limit = $app->input->getInt('list.limit', $app->get('list_limit'));
+            $limit = (int) $app->getUserState($option . '.list.limit', 0);
+        }
+        if ($limit === 0) {
+            $limit = (int) $app->get('list_limit');
         }
 
-        $start = $app->input->getInt('list.start', 0);
+        $start = isset($list['start']) ? (int) $list['start'] : 0;
         if (!$start) {
-            $start = $app->input->getInt('limitstart', 0);
+            $start = (int) $app->getUserState($option . '.list.start', 0);
         }
 
         // ✅ RESET page si on change un filtre (ou clique Search/Reset)
@@ -215,6 +238,10 @@ class ListModel extends BaseListModel
         ) {
             $start = 0;
         }
+
+        // Persist pagination state across bulk actions and redirects.
+        $app->setUserState($option . '.list.limit', (int) $limit);
+        $app->setUserState($option . '.list.start', (int) $start);
 
         $this->setState('list.limit', (int) $limit);
         $this->setState('list.start', (int) $start);
@@ -534,6 +561,10 @@ class ListModel extends BaseListModel
                     }
                     // Allow sorting on the published state column.
                     $order_types['colPublished'] = 'UNSIGNED';
+                    // Allow sorting on the list state title column.
+                    $order_types['colState'] = 'CHAR';
+                    // Allow sorting on the language code column.
+                    $order_types['colLanguage'] = 'CHAR';
 
                     $act_as_registration = array();
 
@@ -551,15 +582,46 @@ class ListModel extends BaseListModel
                         $act_as_registration[$data->registration_email_field] = 'registration_email_field';
                     }
 
+                    // Derive ordering directly from the request to stay Joomla 6-native.
+                    $list = (array) $app->input->get('list', [], 'array');
+                    $ordering = isset($list['ordering']) ? preg_replace('/[^A-Za-z0-9_\\.]/', '', (string) $list['ordering']) : '';
+                    $direction = isset($list['direction']) ? strtolower((string) $list['direction']) : '';
+                    if ($ordering === '' && isset($list['fullordering'])) {
+                        $parts = preg_split('/\s+/', trim((string) $list['fullordering']));
+                        $ordering = isset($parts[0]) ? preg_replace('/[^A-Za-z0-9_\\.]/', '', (string) $parts[0]) : '';
+                        $direction = isset($parts[1]) ? strtolower((string) $parts[1]) : $direction;
+                    }
+                    if ($ordering === '') {
+                        $ordering = (string) $this->getState('formsd_filter_order');
+                    } else {
+                        $app->setUserState($option . 'formsd_filter_order', $ordering);
+                    }
+                    if ($direction === '') {
+                        $direction = $this->getState('formsd_filter_order_Dir')
+                            ? (string) $this->getState('formsd_filter_order_Dir')
+                            : $data->initial_order_dir;
+                    } else {
+                        $app->setUserState($option . 'formsd_filter_order_Dir', $direction);
+                    }
+                    if ($direction !== 'asc' && $direction !== 'desc') {
+                        $direction = 'asc';
+                    }
+
+                    // Guard against ordering by a column that is not part of the SELECT.
+                    $knownOrderKeys = ['colRecord', 'colState', 'colPublished', 'colLanguage', 'colRating', 'colArticleId', 'colAuthor'];
+                    if ($ordering !== '' && !isset($order_types[$ordering]) && !in_array($ordering, $knownOrderKeys, true)) {
+                        $ordering = '';
+                    }
+
                     $data->items = $data->form->getListRecords(
                         $ids,
                         $this->getState('formsd_filter'),
                         $searchable_elements,
                         $this->getState('list.start'),
                         $this->getState('list.limit'),
-                        $this->getState('formsd_filter_order'),
+                        $ordering,
                         $order_types,
-                        $this->getState('formsd_filter_order_Dir') ? $this->getState('formsd_filter_order_Dir') : $data->initial_order_dir,
+                        $direction,
                         0,
                         $data->published_only,
                         $this->frontend ? ($data->own_only_fe ? Factory::getApplication()->getIdentity()->get('id', 0) : -1) : ($data->own_only ? Factory::getApplication()->getIdentity()->get('id', 0) : -1),

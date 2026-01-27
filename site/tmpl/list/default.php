@@ -15,6 +15,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Uri\Uri;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
@@ -41,18 +42,58 @@ $___getpost = 'post';
 $___tableOrdering = "Joomla.tableOrdering = function";
 ?>
 <?php Factory::getApplication()->getDocument()->addStyleDeclaration($this->theme_css); ?>
+<?php Factory::getApplication()->getDocument()->addStyleDeclaration(
+	'.cb-scroll-x{overflow-x:auto;padding-bottom:.35rem;box-shadow:inset 0 -1px 0 rgba(0,0,0,.08)}'
+	. '.cb-scroll-x::-webkit-scrollbar{height:12px}'
+	. '.cb-scroll-x::-webkit-scrollbar-track{background:rgba(0,0,0,.06);border-radius:999px}'
+	. '.cb-scroll-x::-webkit-scrollbar-thumb{background:rgba(13,110,253,.55);border-radius:999px}'
+	. '.cb-scroll-x::-webkit-scrollbar-thumb:hover{background:rgba(13,110,253,.75)}'
+); ?>
 <?php Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js); ?>
 <script>
 	Joomla.tableOrdering = function(order, dir, task) {
 		var form = document.getElementById('adminForm');
 		if (!form) return;
 
-		form.limitstart.value = 0; // reset au tri
-		form.filter_order.value = order;
-		form.filter_order_Dir.value = dir;
+		// Joomla 6 native list state
+		if (form.elements['list[start]']) {
+			form.elements['list[start]'].value = 0;
+		}
+		if (form.elements['list[ordering]']) {
+			form.elements['list[ordering]'].value = order;
+		}
+		if (form.elements['list[direction]']) {
+			form.elements['list[direction]'].value = dir;
+		}
+		if (form.elements['list[fullordering]']) {
+			form.elements['list[fullordering]'].value = order + ' ' + dir;
+		}
 
 		Joomla.submitform(task || '', form);
 	};
+
+	function contentbuilder_updateBoxchecked(form) {
+		if (!form) return;
+		var boxes = form.querySelectorAll('input[name="cid[]"]');
+		var checked = 0;
+		boxes.forEach(function(box) {
+			if (box.checked) checked++;
+		});
+		var boxchecked = form.querySelector('input[name="boxchecked"]');
+		if (boxchecked) {
+			boxchecked.value = String(checked);
+		}
+	}
+
+	function contentbuilder_selectAll(toggle) {
+		var form = document.getElementById('adminForm');
+		if (!form) return;
+		var boxes = form.querySelectorAll('input[name="cid[]"]');
+		boxes.forEach(function(box) {
+			box.checked = !!toggle.checked;
+		});
+		contentbuilder_updateBoxchecked(form);
+	}
 
 	function contentbuilder_delete() {
 		if (confirm('<?php echo Text::_('COM_CONTENTBUILDER_CONFIRM_DELETE_MESSAGE'); ?>')) {
@@ -64,6 +105,37 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 
 	function contentbuilder_state() {
 		var form = document.getElementById('adminForm');
+		document.getElementById('task').value = 'list.state';
+		Joomla.submitform('list.state', form);
+	}
+
+	function contentbuilder_state_single(stateId, recordId) {
+		var form = document.getElementById('adminForm');
+		if (!form) return;
+		if (stateId === undefined || stateId === null || String(stateId) === '') return;
+
+		// Ensure only the clicked record is selected.
+		var boxes = form.querySelectorAll('input[name="cid[]"]');
+		boxes.forEach(function (box) {
+			box.checked = String(box.value) === String(recordId);
+		});
+
+		// Prefer the bulk state select if present, otherwise create a hidden input.
+		var stateSelect = form.querySelector('select[name="list_state"]');
+		if (stateSelect) {
+			stateSelect.value = stateId;
+		} else {
+			var hiddenState = document.getElementById('cb_list_state_value');
+			if (!hiddenState) {
+				hiddenState = document.createElement('input');
+				hiddenState.type = 'hidden';
+				hiddenState.name = 'list_state';
+				hiddenState.id = 'cb_list_state_value';
+				form.appendChild(hiddenState);
+			}
+			hiddenState.value = stateId;
+		}
+
 		document.getElementById('task').value = 'list.state';
 		Joomla.submitform('list.state', form);
 	}
@@ -84,18 +156,48 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 		const form = document.getElementById('adminForm');
 		if (!form) return;
 
-		// Limit box select (name="limit")
-		const limitSelect = form.querySelector('select[name="limit"]');
+		function syncListLimitFromSelect() {
+			const select = form.querySelector('select[name="limit"], select[name="list[limit]"]');
+			if (!select || !form.elements['list[limit]']) return;
+			// Force Joomla 6 naming on the select itself.
+			if (select.name !== 'list[limit]') {
+				select.name = 'list[limit]';
+				select.id = 'list_limit';
+			}
+			form.elements['list[limit]'].value = select.value;
+		}
+
+		// Limit box select (legacy name="limit" or Joomla name="list[limit]")
+		const limitSelect = form.querySelector('select[name="limit"], select[name="list[limit]"]');
 		if (limitSelect) {
 			limitSelect.classList.add('form-select', 'form-select-sm');
 			limitSelect.style.maxWidth = '120px';
 			limitSelect.style.width = 'auto';
+			// Mirror legacy limit into Joomla 6 list[limit] and submit immediately.
+			limitSelect.addEventListener('change', function() {
+				syncListLimitFromSelect();
+				if (form.elements['list[start]']) {
+					form.elements['list[start]'].value = 0;
+				}
+				Joomla.submitform('', form);
+			});
 		}
+
+		// Ensure the hidden Joomla 6 limit always reflects the visible select.
+		form.addEventListener('submit', syncListLimitFromSelect);
+
+		// Keep boxchecked in sync with manual row selection.
+		const rowBoxes = form.querySelectorAll('input[name="cid[]"]');
+		rowBoxes.forEach(function(box) {
+			box.addEventListener('change', function() {
+				contentbuilder_updateBoxchecked(form);
+			});
+		});
 	});
 </script>
 
 <?php if ($this->page_title): ?>
-	<h1 class="contentheading">
+	<h1 class="h3 mb-3">
 		<?php echo $this->page_title; ?>
 	</h1>
 <?php endif; ?>
@@ -105,25 +207,18 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 	/** XDA+GN / BEGIN remove, Hide NEW button
 	if ($new_allowed) {
 		?>
-		<button class="btn btn-sm btn-primary"
-			onclick="location.href='<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&backtolist=1&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&record_id=0&filter_order=' . Factory::getApplication()->input->getCmd('filter_order')); ?>'"><?php echo Text::_('COM_CONTENTBUILDER_NEW'); ?></button>
+			<button class="btn btn-sm btn-primary"
+				onclick="location.href='<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&backtolist=1&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&record_id=0'); ?>'"><?php echo Text::_('COM_CONTENTBUILDER_NEW'); ?></button>
 		<?php
 	}
 	-- END of BEGIN - NEW BUTTON */
 	?>
 	<?php
-	if ($delete_allowed) {
-	?>
-		<button class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1" onclick="contentbuilder_delete();" title="<?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>">
-			<i class="fa fa-trash" aria-hidden="true"></i>
-		</button>
-	<?php
-	}
-	if ($delete_allowed || $new_allowed) {
-	?>
-		<div style="padding-bottom: 10px;"></div>
-	<?php
-	}
+		if ($delete_allowed || $new_allowed) {
+		?>
+			<div style="padding-bottom: 10px;"></div>
+		<?php
+		}
 	?>
 </div>
 <div style="clear: both;"></div>
@@ -137,70 +232,11 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 	method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm">
 
 	<!-- 2023-12-19 END -->
-	<div style="overflow-x: auto;">
+	<div class="cb-scroll-x">
 		<table class="cbFilterTable" width="100%">
-			<tr>
-				<td>
-					<?php
-
-					if (
-						$state_allowed && count($this->states) ||
-						$publish_allowed ||
-						$language_allowed
-					) {
-						echo Text::_('COM_CONTENTBUILDER_BULK_OPTIONS') . '&nbsp;';
-					}
-					?>
-					<?php
-					if ($state_allowed && count($this->states)) {
-					?>
-						<div class="d-inline-flex align-items-center gap-1 me-2">
-							<select class="form-select form-select-sm" style="max-width: 100px;" name="list_state">
-								<option value="0"> -
-									<?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> -
-								</option>
-								<?php
-								foreach ($this->states as $state) {
-								?>
-									<option value="<?php echo $state['id'] ?>">
-										<?php echo $state['title'] ?>
-									</option>
-								<?php
-								}
-								?>
-							</select>
-							<button class="btn btn-sm btn-primary" onclick="contentbuilder_state();">
-								<?php echo Text::_('COM_CONTENTBUILDER_APPLY'); ?>
-							</button>
-						</div>
-					<?php
-					}
-					?>
-					<?php
-					if ($publish_allowed) {
-					?>
-						<div class="d-inline-flex align-items-center gap-1 me-2">
-							<select class="form-select form-select-sm" style="max-width: 100px;" name="list_publish">
-								<option value="-1"> -
-									<?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -
-								</option>
-								<option value="1">
-									<?php echo Text::_('COM_CONTENTBUILDER_PUBLISH') ?>
-								</option>
-								<option value="0">
-									<?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISH') ?>
-								</option>
-							</select>
-							<button class="btn btn-sm btn-primary" onclick="contentbuilder_publish();">
-								<?php echo Text::_('COM_CONTENTBUILDER_APPLY'); ?>
-							</button>
-						</div>
-					<?php
-					}
-					?>
-					<?php
-					if ($language_allowed) {
-					?>
+			<?php if ($language_allowed) : ?>
+				<tr>
+					<td>
 						<div class="d-inline-flex align-items-center gap-1 me-2">
 							<select class="form-select form-select-sm" style="max-width: 100px;" name="list_language">
 								<option value="*"> -
@@ -209,25 +245,19 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 								<option value="*">
 									<?php echo Text::_('COM_CONTENTBUILDER_ANY'); ?>
 								</option>
-								<?php
-								foreach ($this->languages as $filter_language) {
-								?>
+								<?php foreach ($this->languages as $filter_language) : ?>
 									<option value="<?php echo $filter_language; ?>">
 										<?php echo $filter_language; ?>
 									</option>
-								<?php
-								}
-								?>
+								<?php endforeach; ?>
 							</select>
 							<button class="btn btn-sm btn-primary" onclick="contentbuilder_language();">
 								<?php echo Text::_('COM_CONTENTBUILDER_APPLY'); ?>
 							</button>
 						</div>
-					<?php
-					}
-					?>
-				</td>
-			</tr>
+					</td>
+				</tr>
+			<?php endif; ?>
 
 			<tr>
 				<td>
@@ -236,8 +266,31 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 						<!-- GAUCHE : filtre + selects + boutons (optionnel) -->
 						<div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
 
+							<?php if ($this->list_state && $state_allowed && count($this->states)) : ?>
+								<select class="form-select form-select-sm" style="max-width: 140px;"
+									name="list_state" title="<?php echo Text::_('COM_CONTENTBUILDER_BULK_OPTIONS'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>"
+									onchange="if (this.value !== '0') { contentbuilder_state(); }">
+									<option value="0"> - <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> -</option>
+									<?php foreach ($this->states as $state) : ?>
+										<option value="<?php echo $state['id']; ?>">
+											<?php echo $state['title']; ?>
+										</option>
+									<?php endforeach; ?>
+								</select>
+							<?php endif; ?>
+
+							<?php if ($this->list_publish && $publish_allowed) : ?>
+								<select class="form-select form-select-sm" style="max-width: 160px;"
+									name="list_publish" title="<?php echo Text::_('COM_CONTENTBUILDER_BULK_OPTIONS'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH'); ?>"
+									onchange="if (this.value !== '-1') { contentbuilder_publish(); }">
+									<option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -</option>
+									<option value="1"><?php echo Text::_('COM_CONTENTBUILDER_PUBLISH'); ?></option>
+									<option value="0"><?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISH'); ?></option>
+								</select>
+							<?php endif; ?>
+
 							<?php if ($this->display_filter) : ?>
-								<div class="input-group input-group-sm" style="max-width: 520px;">
+								<div class="input-group input-group-sm" style="max-width: 360px;">
 									<span class="input-group-text">
 										<?php echo Text::_('COM_CONTENTBUILDER_FILTER'); ?>
 									</span>
@@ -268,6 +321,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 							<?php if ($this->list_state && count($this->states)) : ?>
 								<select class="form-select form-select-sm" style="max-width: 160px;"
 									name="list_state_filter" id="list_state_filter"
+									title="<?php echo Text::_('COM_CONTENTBUILDER_FILTER'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>"
 									onchange="document.adminForm.submit();">
 									<option value="0"> - <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> -</option>
 									<?php foreach ($this->states as $state) : ?>
@@ -281,6 +335,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 							<?php if ($this->list_publish && $publish_allowed) : ?>
 								<select class="form-select form-select-sm" style="max-width: 190px;"
 									name="list_publish_filter" id="list_publish_filter"
+									title="<?php echo Text::_('COM_CONTENTBUILDER_FILTER'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH'); ?>"
 									onchange="document.adminForm.submit();">
 									<option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -</option>
 									<option value="1" <?php echo $this->lists['filter_publish'] == 1 ? 'selected' : ''; ?>>
@@ -295,6 +350,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 							<?php if ($this->list_language) : ?>
 								<select class="form-select form-select-sm" style="max-width: 160px;"
 									name="list_language_filter" id="list_language_filter"
+									title="<?php echo Text::_('COM_CONTENTBUILDER_FILTER'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?>"
 									onchange="document.adminForm.submit();">
 									<option value=""> - <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?> -</option>
 									<?php foreach ($this->languages as $filter_language) : ?>
@@ -308,14 +364,40 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 						</div>
 
 						<!-- DROITE : limitbox + excel (indépendants du filtre) -->
-						<?php if ($this->show_records_per_page || $this->export_xls) : ?>
-							<div class="d-flex align-items-center gap-2 ms-auto">
+							<?php if ($this->show_records_per_page || $this->export_xls) : ?>
+								<div class="d-flex align-items-center gap-2 ms-auto">
 
-								<?php if ($this->show_records_per_page) : ?>
-									<div style="max-width: 120px;">
-										<?php echo $this->pagination->getLimitBox(); ?>
-									</div>
-								<?php endif; ?>
+									<?php if ($delete_allowed) : ?>
+										<button class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" onclick="contentbuilder_delete();" title="<?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>">
+											<span class="icon-trash" aria-hidden="true"></span>
+										</button>
+									<?php endif; ?>
+
+									<?php if ($this->show_records_per_page) : ?>
+										<div style="max-width: 120px;">
+											<?php
+											$currentLimit = (int) ($this->pagination->limit ?? 20);
+											$totalItems = (int) ($this->pagination->total ?? 0);
+											$limitOptions = [5, 10, 20, 50, 100, 500];
+											if ($totalItems > 0) {
+												$limitOptions[] = $totalItems;
+											}
+											?>
+											<select
+												id="list_limit"
+												name="list[limit]"
+												class="form-select form-select-sm"
+												onchange="document.getElementById('adminForm').elements['list[start]'].value = 0; Joomla.submitform('', document.getElementById('adminForm'));"
+											>
+												<?php foreach ($limitOptions as $opt) : ?>
+													<?php $label = ($totalItems > 0 && $opt === $totalItems) ? Text::_('JALL') : (string) $opt; ?>
+													<option value="<?php echo $opt; ?>"<?php echo $opt === $currentLimit ? ' selected' : ''; ?>>
+														<?php echo $label; ?>
+													</option>
+												<?php endforeach; ?>
+											</select>
+										</div>
+									<?php endif; ?>
 
 								<?php if ($this->export_xls) : ?>
 									<a class="btn btn-sm btn-outline-success align-self-center"
@@ -332,13 +414,13 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 				</td>
 			</tr>
 		</table>
-		<table class="mt-3 table table-striped">
+		<table class="mt-3 table table-striped table-hover">
 			<thead>
 				<tr>
 					<?php
 					if ($this->show_id_column) {
 					?>
-						<th class="sectiontableheader hidden-phone" width="5">
+						<th class="table-light hidden-phone" width="5">
 							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ID', ENT_QUOTES, 'UTF-8'), 'colRecord', $this->lists['order_Dir'], $this->lists['order']); ?>
 						</th>
 					<?php
@@ -346,7 +428,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 
 					if ($this->select_column && ($delete_allowed || $state_allowed || $publish_allowed)) {
 					?>
-						<th class="sectiontableheader hidden-phone" width="20">
+						<th class="table-light hidden-phone" width="20">
 							<input class="contentbuilder_select_all form-check-input" type="checkbox"
 								onclick="contentbuilder_selectAll(this);" />
 						</th>
@@ -355,39 +437,39 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 
 					if ($this->edit_button && $edit_allowed) {
 					?>
-						<th class="sectiontableheader" width="20">
+						<th class="table-light" width="20">
 							<?php echo Text::_('COM_CONTENTBUILDER_EDIT'); ?>
 						</th>
 					<?php
 					}
 
-					if ($this->list_state) {
-					?>
-						<th class="sectiontableheader hidden-phone">
-							<?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>
-						</th>
-					<?php
-					}
+						if ($this->list_state) {
+						?>
+							<th class="table-light hidden-phone">
+								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_EDIT_STATE'), 'colState', $this->lists['order_Dir'], $this->lists['order']); ?>
+							</th>
+						<?php
+						}
 
 						if ($this->list_publish && $publish_allowed) {
 						?>
-							<th class="sectiontableheader" width="20">
+							<th class="table-light" width="20">
 								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_PUBLISHED'), 'colPublished', $this->lists['order_Dir'], $this->lists['order']); ?>
 							</th>
 						<?php
 						}
 
-					if ($this->list_language) {
-					?>
-						<th class="sectiontableheader hidden-phone" width="20">
-							<?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?>
-						</th>
-					<?php
-					}
+						if ($this->list_language) {
+						?>
+							<th class="table-light hidden-phone" width="20">
+								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_LANGUAGE'), 'colLanguage', $this->lists['order_Dir'], $this->lists['order']); ?>
+							</th>
+						<?php
+						}
 
 					if ($this->list_article) {
 					?>
-						<th class="sectiontableheader hidden-phone">
+						<th class="table-light hidden-phone">
 							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ARTICLE', ENT_QUOTES, 'UTF-8'), 'colArticleId', $this->lists['order_Dir'], $this->lists['order']); ?>
 						</th>
 					<?php
@@ -395,7 +477,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 
 					if ($this->list_author) {
 					?>
-						<th class="sectiontableheader hidden-phone">
+						<th class="table-light hidden-phone">
 							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_AUTHOR', ENT_QUOTES, 'UTF-8'), 'colAuthor', $this->lists['order_Dir'], $this->lists['order']); ?>
 						</th>
 					<?php
@@ -403,7 +485,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 
 					if ($this->list_rating) {
 					?>
-						<th class="sectiontableheader hidden-phone">
+						<th class="table-light hidden-phone">
 							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_RATING', ENT_QUOTES, 'UTF-8'), 'colRating', $this->lists['order_Dir'], $this->lists['order']); ?>
 						</th>
 						<?php
@@ -419,7 +501,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 								$hidden = ' hidden-phone';
 							}
 						?>
-							<th class="sectiontableheader<?php echo $hidden; ?>">
+							<th class="table-light<?php echo $hidden; ?>">
 								<?php echo HTMLHelper::_('grid.sort', nl2br(htmlentities(ContentbuilderHelper::contentbuilder_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')), "col$reference_id", $this->lists['order_Dir'], $this->lists['order']); ?>
 							</th>
 					<?php
@@ -476,11 +558,10 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					if ($this->edit_button && $edit_allowed) {
 					?>
 						<td>
-							<a href="<?php echo $edit_link; ?>">
-								<img
-									src="<?php echo \Joomla\CMS\Uri\Uri::root(); ?>media/com_contentbuilder/images/edit.png"
-									border="0"
-									width="18" height="18" /></a>
+							<a class="text-primary" href="<?php echo $edit_link; ?>"
+								title="<?php echo Text::_('COM_CONTENTBUILDER_EDIT'); ?>">
+								<span class="icon-edit" aria-hidden="true"></span>
+							</a>
 						</td>
 					<?php
 					}
@@ -490,7 +571,23 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					?>
 						<td class="hidden-phone"
 							style="background-color: #<?php echo isset($this->state_colors[$row->colRecord]) ? $this->state_colors[$row->colRecord] : 'FFFFFF'; ?>;">
-							<?php echo isset($this->state_titles[$row->colRecord]) ? htmlentities($this->state_titles[$row->colRecord], ENT_QUOTES, 'UTF-8') : ''; ?>
+							<?php if ($state_allowed && count($this->states)) : ?>
+								<?php $currentStateTitle = $this->state_titles[$row->colRecord] ?? ''; ?>
+								<select
+									class="form-select form-select-sm"
+									style="min-width: 140px;"
+									onchange="contentbuilder_state_single(this.value, <?php echo (int) $row->colRecord; ?>);"
+									title="<?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>">
+									<option value="" <?php echo $currentStateTitle === '' ? 'selected' : ''; ?>>-</option>
+									<?php foreach ($this->states as $state) : ?>
+										<option value="<?php echo (int) $state['id']; ?>" <?php echo $currentStateTitle === $state['title'] ? 'selected' : ''; ?>>
+											<?php echo htmlentities($state['title'], ENT_QUOTES, 'UTF-8'); ?>
+										</option>
+									<?php endforeach; ?>
+								</select>
+							<?php else : ?>
+								<?php echo isset($this->state_titles[$row->colRecord]) ? htmlentities($this->state_titles[$row->colRecord], ENT_QUOTES, 'UTF-8') : ''; ?>
+							<?php endif; ?>
 						</td>
 					<?php
 					}
@@ -609,17 +706,73 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 			<?php
 				$k = 1 - $k;
 			} ?>
-			<?php if ($this->pagination->pagesTotal > 1 || $this->show_records_per_page) : ?>
-				<tfoot>
-					<tr>
-						<td colspan="1000">
-							<?php echo $this->pagination->getListFooter(); ?>
-						</td>
-					</tr>
-				</tfoot>
-			<?php endif; ?>
-		</table>
-	</div>
+				<?php
+				$pagTotal = (int) ($this->pagination->total ?? 0);
+				$pagLimit = max(1, (int) ($this->pagination->limit ?? 0));
+				$pagStart = (int) ($this->lists['liststart'] ?? Factory::getApplication()->input->getInt('list[start]', 0));
+				$pagPages = (int) ceil($pagTotal / $pagLimit);
+				$pagCurrent = $pagPages > 0 ? (int) floor($pagStart / $pagLimit) + 1 : 1;
+				$showSummary = $pagTotal > 0;
+				$showPagination = $pagPages > 1;
+				$rangeStart = $pagTotal > 0 ? $pagStart + 1 : 0;
+				$rangeEnd = $pagTotal > 0 ? min($pagStart + $pagLimit, $pagTotal) : 0;
+
+				if ($showSummary) :
+				    $params = Uri::getInstance()->getQuery(true);
+				    $params['option'] = 'com_contentbuilder';
+				    $params['task'] = 'list.display';
+				    $params['id'] = Factory::getApplication()->input->getInt('id', 0);
+				    $params['Itemid'] = Factory::getApplication()->input->getInt('Itemid', 0);
+				    $params['list'] = [
+				        'limit' => $pagLimit,
+				        'ordering' => $this->lists['order'],
+				        'direction' => $this->lists['order_Dir'],
+				        'start' => 0,
+				    ];
+
+				    $buildPageLink = static function (int $start) use ($params): string {
+				        $params['list']['start'] = max(0, $start);
+				        return Route::_('index.php?' . http_build_query($params), false);
+				    };
+
+				?>
+					<tfoot>
+						<tr>
+							<td colspan="1000">
+								<nav class="pagination__wrapper d-flex flex-wrap align-items-center justify-content-between gap-2" aria-label="Pagination">
+									<div class="small text-muted">
+										<?php echo $rangeStart . ' - ' . $rangeEnd . ' / ' . $pagTotal . ' items'; ?>
+									</div>
+									<?php if ($showPagination) : ?>
+										<ul class="pagination pagination-sm mb-0">
+											<li class="page-item<?php echo $pagCurrent <= 1 ? ' disabled' : ''; ?>">
+												<a class="page-link" href="<?php echo $buildPageLink($pagStart - $pagLimit); ?>" aria-label="Previous">
+													<span aria-hidden="true">&laquo;</span>
+												</a>
+											</li>
+											<?php for ($p = 1; $p <= $pagPages; $p++) :
+											    $startForPage = ($p - 1) * $pagLimit;
+											?>
+												<li class="page-item<?php echo $p === $pagCurrent ? ' active' : ''; ?>">
+													<a class="page-link" href="<?php echo $buildPageLink($startForPage); ?>">
+														<?php echo $p; ?>
+													</a>
+												</li>
+											<?php endfor; ?>
+											<li class="page-item<?php echo $pagCurrent >= $pagPages ? ' disabled' : ''; ?>">
+												<a class="page-link" href="<?php echo $buildPageLink($pagStart + $pagLimit); ?>" aria-label="Next">
+													<span aria-hidden="true">&raquo;</span>
+												</a>
+											</li>
+										</ul>
+									<?php endif; ?>
+								</nav>
+							</td>
+						</tr>
+					</tfoot>
+				<?php endif; ?>
+			</table>
+		</div>
 	<?php
 	if (Factory::getApplication()->input->get('tmpl', '', 'string') != '') {
 	?>
@@ -630,11 +783,12 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 	<input type="hidden" name="option" value="com_contentbuilder" />
 	<input type="hidden" name="task" id="task" value="" />
 	<input type="hidden" name="view" id="view" value="list" />
+	<input type="hidden" name="boxchecked" value="0" />
 	<input type="hidden" name="Itemid" value="<?php echo Factory::getApplication()->input->getInt('Itemid', 0); ?>" />
-	<input type="hidden" name="limitstart" value="<?php echo (int) $this->pagination->limitstart; ?>" />
-	<input type="hidden" name="list[start]" value="<?php echo (int) $this->pagination->limitstart; ?>" />
+	<input type="hidden" name="list[start]" value="<?php echo (int) ($this->lists['liststart'] ?? 0); ?>" />
 	<input type="hidden" name="id" value="<?php echo Factory::getApplication()->input->getInt('id', 0) ?>" />
-	<input type="hidden" name="filter_order" value="<?php echo $this->lists['order']; ?>" />
-	<input type="hidden" name="filter_order_Dir" value="<?php echo $this->lists['order_Dir']; ?>" />
+	<input type="hidden" name="list[ordering]" value="<?php echo $this->lists['order']; ?>" />
+	<input type="hidden" name="list[direction]" value="<?php echo $this->lists['order_Dir']; ?>" />
+	<input type="hidden" name="list[fullordering]" value="<?php echo trim(($this->lists['order'] ?? '') . ' ' . ($this->lists['order_Dir'] ?? '')); ?>" />
 	<?php echo HTMLHelper::_('form.token'); ?>
 </form>

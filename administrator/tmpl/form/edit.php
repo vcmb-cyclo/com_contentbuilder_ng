@@ -37,7 +37,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
         : '';
     $url = \Joomla\CMS\Router\Route::_(
         'index.php?option=com_contentbuilder&task=form.edit&id=' . $formId
-        . '&list[ordering]=' . $field . '&list[direction]=' . $nextDir
+            . '&list[ordering]=' . $field . '&list[direction]=' . $nextDir
     );
 
     return '<a href="' . $url . '">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . $indicator . '</a>';
@@ -287,6 +287,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                 <?php
                                 if ($this->item->type != 'com_contentbuilder') {
                                 ?>
+                                    <input type="hidden" name="jform[edit_by_type]" value="0" />
                                     <input class="form-check-input" type="checkbox" id="edit_by_type" name="jform[edit_by_type]"
                                         value="1" <?php echo $this->item->edit_by_type ? ' checked="checked"' : '' ?> />
                                     <label for="edit_by_type">
@@ -299,11 +300,13 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                 <?php
                                 }
                                 ?>
+                                <input type="hidden" name="jform[email_notifications]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="email_notifications"
                                     name="jform[email_notifications]" value="1" <?php echo $this->item->email_notifications ? ' checked="checked"' : '' ?> />
                                 <label for="email_notifications">
                                     <?php echo Text::_('COM_CONTENTBUILDER_TYPE_EMAIL_NOTIFICATIONS'); ?>
                                 </label>
+                                <input type="hidden" name="jform[email_update_notifications]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="email_update_notifications"
                                     name="jform[email_update_notifications]" value="1" <?php echo $this->item->email_update_notifications ? ' checked="checked"' : '' ?> />
                                 <label for="email_update_notifications">
@@ -372,40 +375,48 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                 </legend>
 
 
+                                <input type="hidden" name="jform[show_id_column]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="show_id_column"
                                     name="jform[show_id_column]" value="1" <?php echo $this->item->show_id_column ? ' checked="checked"' : '' ?> /> <label for="show_id_column">
                                     <?php echo Text::_('COM_CONTENTBUILDER_ID_COLUMN'); ?>
                                 </label>
+                                <input type="hidden" name="jform[select_column]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="select_column" name="jform[select_column]"
                                     value="1" <?php echo $this->item->select_column ? ' checked="checked"' : '' ?> />
                                 <label for="select_column">
                                     <?php echo Text::_('COM_CONTENTBUILDER_SELECT_COLUMN'); ?>
                                 </label>
+                                <input type="hidden" name="jform[list_state]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="list_state" name="jform[list_state]"
                                     value="1" <?php echo $this->item->list_state ? ' checked="checked"' : '' ?> />
                                 <label for="list_state">
                                     <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>
                                 </label>
+                                <input type="hidden" name="jform[edit_button]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="edit_button" name="jform[edit_button]"
                                     value="1" <?php echo $this->item->edit_button ? ' checked="checked"' : '' ?> />
                                 <label for="edit_button">
                                     <?php echo Text::_('COM_CONTENTBUILDER_EDIT_BUTTON'); ?>
                                 </label>
+                                <input type="hidden" name="jform[list_publish]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="list_publish" name="jform[list_publish]"
                                     value="1" <?php echo $this->item->list_publish ? ' checked="checked"' : '' ?> />
                                 <label for="list_publish">
                                     <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH'); ?>
                                 </label>
+                                <input type="hidden" name="jform[list_language]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="list_language" name="jform[list_language]"
                                     value="1" <?php echo $this->item->list_language ? ' checked="checked"' : '' ?> />
                                 <label for="list_language">
                                     <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?>
                                 </label>
+                                <input type="hidden" name="jform[list_article]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="list_article" name="jform[list_article]"
                                     value="1" <?php echo $this->item->list_article ? ' checked="checked"' : '' ?> />
                                 <label for="list_article">
                                     <?php echo Text::_('COM_CONTENTBUILDER_ARTICLE'); ?>
                                 </label>
+                                <input type="hidden" name="jform[list_author]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="list_author" name="jform[list_author]"
                                     value="1" <?php echo $this->item->list_author ? ' checked="checked"' : '' ?> />
                                 <label for="list_author">
@@ -414,6 +425,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
 
 
 
+                                <input type="hidden" name="jform[export_xls]" value="0" />
                                 <input class="form-check-input" type="checkbox" name="jform[export_xls]" id="export_xls"
                                     value="1" <?php echo $this->item->export_xls ? ' checked="checked"' : '' ?> />
                                 <label for="export_xls">
@@ -423,6 +435,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     </span>
                                 </label>
 
+                                <input type="hidden" name="jform[print_button]" value="0" />
                                 <input class="form-check-input" type="checkbox" name="jform[print_button]" id="print_button"
                                     value="1" <?php echo $this->item->print_button ? ' checked="checked"' : '' ?> />
                                 <label for="print_button">
@@ -432,6 +445,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     </span>
                                 </label>
 
+                                <input type="hidden" name="jform[metadata]" value="0" />
                                 <input class="form-check-input" type="checkbox" name="jform[metadata]" id="metadata" value="1"
                                     <?php echo $this->item->metadata ? ' checked="checked"' : '' ?> />
                                 <label for="metadata">
@@ -441,6 +455,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     </span>
                                 </label>
 
+                                <input type="hidden" name="jform[show_filter]" value="0" />
                                 <input class="form-check-input" type="checkbox" name="jform[show_filter]" id="show_filter"
                                     value="1" <?php echo $this->item->show_filter ? ' checked="checked"' : '' ?> />
                                 <label for="show_filter">
@@ -450,6 +465,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     </span>
                                 </label>
 
+                                <input type="hidden" name="jform[show_records_per_page]" value="0" />
                                 <input class="form-check-input" type="checkbox" name="jform[show_records_per_page]"
                                     id="show_records_per_page" value="1" <?php echo $this->item->show_records_per_page ? ' checked="checked"' : '' ?> />
                                 <label for="show_records_per_page">
@@ -470,6 +486,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     </h3>
                                 </legend>
                                 <div class="alert">
+                                    <input type="hidden" name="jform[list_rating]" value="0" />
                                     <input class="form-check-input" type="checkbox" id="list_rating" name="jform[list_rating]"
                                         value="1" <?php echo $this->item->list_rating ? ' checked="checked"' : '' ?> />
                                     <label for="list_rating">
@@ -621,6 +638,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     </h3>
                                 </legend>
                                 <div class="alert">
+                                    <input type="hidden" name="jform[filter_exact_match]" value="0" />
                                     <input class="form-check-input" id="filter_exact_match" type="checkbox"
                                         name="jform[filter_exact_match]" value="1" <?php echo $this->item->filter_exact_match ? ' checked="checked"' : '' ?> />
                                     <label for="filter_exact_match">
@@ -630,6 +648,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                         </span>
                                     </label>
 
+                                    <input type="hidden" name="jform[use_view_name_as_title]" value="0" />
                                     <input class="form-check-input" id="use_view_name_as_title" type="checkbox"
                                         name="jform[use_view_name_as_title]" value="1" <?php echo $this->item->use_view_name_as_title ? ' checked="checked"' : '' ?> />
                                     <label for="use_view_name_as_title">
@@ -639,6 +658,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                         </span>
                                     </label>
 
+                                    <input type="hidden" name="jform[published_only]" value="0" />
                                     <input class="form-check-input" id="published_only" type="checkbox"
                                         name="jform[published_only]" value="1" <?php echo $this->item->published_only ? ' checked="checked"' : '' ?> />
                                     <label for="published_only">
@@ -648,6 +668,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                         </span>
                                     </label>
 
+                                    <input type="hidden" name="jform[allow_external_filter]" value="0" />
                                     <input class="form-check-input" type="checkbox" id="allow_external_filter"
                                         name="jform[allow_external_filter]" value="1" <?php echo $this->item->allow_external_filter ? ' checked="checked"' : '' ?> />
                                     <label for="allow_external_filter">
@@ -678,6 +699,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                 <?php echo Text::_('COM_CONTENTBUILDER_ID'); ?>
                             </th>
                             <th width="20">
+                                <input type="hidden" name="jform[toggle]" value="0" />
                                 <input class="form-check-input" type="checkbox" name="jform[toggle]" value=""
                                     onclick="Joomla.checkAll(this);" />
                             </th>
@@ -859,7 +881,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                             $k = 1 - $k;
                         }
                         ?>
-                    </tbody>                    
+                    </tbody>
                     <tfoot>
                         <tr>
                             <td colspan="11">
@@ -974,6 +996,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     <label for="create_sample">
                         <?php echo Text::_('COM_CONTENTBUILDER_CREATE_SAMPLE'); ?>
                     </label>
+                    <input type="hidden" name="jform[create_articles]" value="0" />
                     <input class="form-check-input" <?php echo $this->item->create_articles == 1 ? ' checked="checked"' : '' ?>type="checkbox" name="jform[create_articles]" id="create_articles" value="1" /><label
                         for="create_articles">
                         <?php echo Text::_('COM_CONTENTBUILDER_CREATE_ARTICLES'); ?>
@@ -1181,6 +1204,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         </span></label>
                 </td>
                 <td>
+                    <input type="hidden" name="jform[auto_publish]" value="0" />
                     <input class="form-check-input" <?php echo $this->item->auto_publish == 1 ? ' checked="checked"' : '' ?>type="checkbox" name="jform[auto_publish]" id="auto_publish" value="1" />
                 </td>
                 <td width="20%">
@@ -1389,6 +1413,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                             </label>
                         </td>
                         <td>
+                            <input type="hidden" name="jform[email_admin_html]" value="0" />
                             <input class="form-check-input" id="email_admin_html" type="checkbox" name="jform[email_admin_html]"
                                 value="1" <?php echo $this->item->email_admin_html ? ' checked="checked"' : ''; ?> />
                         </td>
@@ -1490,6 +1515,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                             </label>
                         </td>
                         <td>
+                            <input type="hidden" name="jform[email_html]" value="0" />
                             <input class="form-check-input" id="email_html" type="checkbox" name="jform[email_html]" value="1"
                                 <?php echo $this->item->email_html ? ' checked="checked"' : ''; ?> />
                         </td>
@@ -1543,6 +1569,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     </label>
                 </td>
                 <td>
+                    <input type="hidden" name="jform[own_only_fe]" value="0" />
                     <input class="form-check-input" type="checkbox" name="jform[own_only_fe]" id="own_only_fe" value="1" <?php echo $this->item->own_only_fe ? ' checked="checked"' : ''; ?> />
                 </td>
             </tr>
@@ -1556,6 +1583,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     </label>
                 </td>
                 <td>
+                    <input type="hidden" name="jform[limited_article_options_fe]" value="0" />
                     <input class="form-check-input" type="checkbox" name="jform[limited_article_options_fe]"
                         id="limited_article_options_fe" value="1" <?php echo $this->item->limited_article_options_fe ? ' checked="checked"' : ''; ?> />
                 </td>
@@ -1622,6 +1650,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     </label>
                 </td>
                 <td>
+                    <input type="hidden" name="jform[show_all_languages_fe]" value="0" />
                     <input class="form-check-input" type="checkbox" name="jform[show_all_languages_fe]"
                         id="show_all_languages_fe" value="1" <?php echo $this->item->show_all_languages_fe ? ' checked="checked"' : ''; ?> />
                 </td>
@@ -1636,6 +1665,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         </label>
                     </td>
                     <td>
+                        <input type="hidden" name="jform[force_login]" value="0" />
                         <input class="form-check-input" type="checkbox" name="jform[force_login]" id="force_login" value="1" <?php echo $this->item->force_login ? ' checked="checked"' : '' ?> />
                     </td>
                 </tr>
@@ -1777,6 +1807,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     </label>
                 </td>
                 <td>
+                    <input type="hidden" name="jform[own_only]" value="0" />
                     <input class="form-check-input" type="checkbox" name="jform[own_only]" id="own_only" value="1" <?php echo $this->item->own_only ? ' checked="checked"' : ''; ?> />
                 </td>
             </tr>
@@ -1790,6 +1821,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     </label>
                 </td>
                 <td>
+                    <input type="hidden" name="jform[limited_article_options]" value="0" />
                     <input class="form-check-input" type="checkbox" name="jform[limited_article_options]"
                         id="limited_article_options" value="1" <?php echo $this->item->limited_article_options ? ' checked="checked"' : ''; ?> />
                 </td>
@@ -1983,6 +2015,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     </label>
                 </td>
                 <td>
+                    <input type="hidden" name="jform[verification_required_view]" value="0" />
                     <input class="form-check-input" type="checkbox" name="jform[verification_required_view]"
                         id="verification_required_view" value="1" <?php echo $this->item->verification_required_view ? ' checked="checked"' : '' ?> /><label for="verification_required_view">
                         <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_REQUIRED'); ?>
@@ -2008,6 +2041,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     </label>
                 </td>
                 <td>
+                    <input type="hidden" name="jform[verification_required_new]" value="0" />
                     <input class="form-check-input" type="checkbox" name="jform[verification_required_new]"
                         id="verification_required_new" value="1" <?php echo $this->item->verification_required_new ? ' checked="checked"' : '' ?> /><label for="verification_required_new">
                         <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_REQUIRED'); ?>
@@ -2032,6 +2066,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     </label>
                 </td>
                 <td>
+                    <input type="hidden" name="jform[verification_required_edit]" value="0" />
                     <input class="form-check-input" type="checkbox" name="jform[verification_required_edit]"
                         id="verification_required_edit" value="1" <?php echo $this->item->verification_required_edit ? ' checked="checked"' : '' ?> /><label for="verification_required_edit">
                         <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_REQUIRED'); ?>
@@ -2071,6 +2106,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         </label>
                     </td>
                     <td>
+                        <input type="hidden" name="jform[act_as_registration]" value="0" />
                         <input class="form-check-input" type="checkbox" name="jform[act_as_registration]" id="act_as_registration"
                             value="1" <?php echo $this->item->act_as_registration ? ' checked="checked"' : '' ?> />
                         <br />
@@ -2182,6 +2218,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                             <?php echo Text::_('COM_CONTENTBUILDER_PERM_FORCE_LOGIN'); ?>
                         </label>
                         <br />
+                        <input type="hidden" name="jform[force_login]" value="0" />
                         <input class="form-check-input" type="checkbox" name="jform[force_login]" id="force_login" value="1" <?php echo $this->item->force_login ? ' checked="checked"' : '' ?> />
                         <br />
                         <br />

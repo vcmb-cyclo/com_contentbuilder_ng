@@ -23,6 +23,22 @@ $edit_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('edit') : Co
 $delete_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('delete') : ContentbuilderLegacyHelper::authorize('delete');
 $view_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('view') : ContentbuilderLegacyHelper::authorize('view');
 
+$input = Factory::getApplication()->input;
+$list = (array) $input->get('list', [], 'array');
+$listStart = isset($list['start']) ? $input->getInt('list[start]', 0) : 0;
+$listLimit = isset($list['limit']) ? $input->getInt('list[limit]', 0) : 0;
+if ($listLimit === 0) {
+    $listLimit = (int) Factory::getApplication()->get('list_limit');
+}
+$listOrdering = isset($list['ordering']) ? $input->getCmd('list[ordering]', '') : '';
+$listDirection = isset($list['direction']) ? $input->getCmd('list[direction]', '') : '';
+$listQuery = http_build_query(['list' => [
+    'start' => $listStart,
+    'limit' => $listLimit,
+    'ordering' => $listOrdering,
+    'direction' => $listDirection,
+]]);
+
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 
 // Charge le manifeste joomla.asset.json du composant
@@ -52,7 +68,7 @@ $wa->useScript('com_contentbuilder.contentbuilder');
     function contentbuilder_delete() {
         var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDER_CONFIRM_DELETE_MESSAGE'); ?>');
         if (confirmed) {
-            location.href = '<?php echo 'index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=detail.delete&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&cid[]=' . Factory::getApplication()->input->getCmd('record_id', 0) . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order'); ?>';
+            location.href = '<?php echo 'index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=detail.delete&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&cid[]=' . Factory::getApplication()->input->getCmd('record_id', 0) . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : ''); ?>';
         }
     }
     //
@@ -97,7 +113,7 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
 
     <?php if ($edit_allowed) { ?>
         <a class="btn btn-sm btn-primary cbButton cbEditButton"
-            href="<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order')); ?>"
+            href="<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '')); ?>"
             title="<?php echo Text::_('COM_CONTENTBUILDER_EDIT'); ?>">
             <?php echo Text::_('COM_CONTENTBUILDER_EDIT') ?>
         </a>
@@ -105,7 +121,7 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
     }
     ?>
     <?php if ($delete_allowed) { ?>
-        <button class="btn btn-sm btn-danger cbButton cbDeleteButton" onclick="contentbuilder_delete();"
+        <button class="btn btn-sm btn-primary cbButton cbDeleteButton" onclick="contentbuilder_delete();"
             title="<?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>">
             <i class="fa fa-trash" aria-hidden="true"></i>
             <?php echo Text::_('COM_CONTENTBUILDER_DELETE') ?>
@@ -115,7 +131,7 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
     ?>
     <?php if ($this->show_back_button && Factory::getApplication()->input->getBool('cb_show_details_back_button', 1)): ?>
         <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton"
-            href="<?php echo Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0)); ?>"
+            href="<?php echo Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0)); ?>"
             title="<?php echo Text::_('COM_CONTENTBUILDER_BACK'); ?>">
             <span class="icon-arrow-left me-1" aria-hidden="true"></span>
             <?php echo Text::_('COM_CONTENTBUILDER_BACK') ?>

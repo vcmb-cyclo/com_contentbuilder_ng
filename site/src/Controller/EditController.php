@@ -123,12 +123,41 @@ class EditController extends BaseController
             $type = 'error';
         }
 
+        $app = Factory::getApplication();
+        $option = 'com_contentbuilder';
+        $list = (array) $app->input->get('list', [], 'array');
+        $limit = isset($list['limit']) ? $app->input->getInt('list[limit]', 0) : 0;
+        if ($limit === 0) {
+            $limit = (int) $app->getUserState($option . '.list.limit', 0);
+        }
+        if ($limit === 0) {
+            $limit = (int) $app->get('list_limit');
+        }
+        $start = isset($list['start']) ? $app->input->getInt('list[start]', 0) : 0;
+        if ($start === 0) {
+            $start = (int) $app->getUserState($option . '.list.start', 0);
+        }
+        $ordering = isset($list['ordering']) ? $app->input->getCmd('list[ordering]', '') : '';
+        if ($ordering === '') {
+            $ordering = (string) $app->getUserState($option . 'formsd_filter_order', '');
+        }
+        $direction = isset($list['direction']) ? $app->input->getCmd('list[direction]', '') : '';
+        if ($direction === '') {
+            $direction = (string) $app->getUserState($option . 'formsd_filter_order_Dir', '');
+        }
+        $listQuery = http_build_query(['list' => [
+            'limit' => $limit,
+            'start' => $start,
+            'ordering' => $ordering,
+            'direction' => $direction,
+        ]]);
+
         if (Factory::getApplication()->input->getString('cb_controller', '') == 'edit') {
             $link = Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=edit.display&return=' . Factory::getApplication()->input->get('return', '', 'string') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         } else if ($apply) {
-            $link = Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=edit.display&return=' . Factory::getApplication()->input->get('return', '', 'string') . '&backtolist=' . Factory::getApplication()->input->getInt('backtolist', 0) . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . $id . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order'), false);
+            $link = Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=edit.display&return=' . Factory::getApplication()->input->get('return', '', 'string') . '&backtolist=' . Factory::getApplication()->input->getInt('backtolist', 0) . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . $id . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : ''), false);
         } else {
-            $link = Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
+            $link = Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         }
         $this->setRedirect($link, $msg, $type);
     }
@@ -162,14 +191,14 @@ class EditController extends BaseController
         $this->input->set('record_id', 0);
         Factory::getApplication()->input->set('record_id', 0);
 
+        $listQuery = $this->buildListQuery();
         $link = Route::_(
             'index.php?option=com_contentbuilder&task=list.display&backtolist=1&id='
             . Factory::getApplication()->input->getInt('id', 0)
             . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '')
             . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '')
             . '&record_id='
-            . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0)
-            . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order')
+            . ($listQuery !== '' ? '&' . $listQuery : '')
             . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0),
             false
         );
@@ -188,7 +217,8 @@ class EditController extends BaseController
         }
         $model->change_list_states();
         $msg = Text::_('COM_CONTENTBUILDER_STATES_CHANGED');
-        $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
+        $listQuery = $this->buildListQuery();
+        $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         $this->setRedirect($link, $msg, 'message');
     }
 
@@ -213,7 +243,8 @@ class EditController extends BaseController
         } else {
             $msg = Text::_('COM_CONTENTBUILDER_PUNPUBLISHED');
         }
-        $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
+        $listQuery = $this->buildListQuery();
+        $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         $this->setRedirect($link, $msg, 'message');
     }
 
@@ -229,8 +260,46 @@ class EditController extends BaseController
         }
         $model->change_list_language();
         $msg = Text::_('COM_CONTENTBUILDER_LANGUAGE_CHANGED');
-        $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
+        $listQuery = $this->buildListQuery();
+        $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         $this->setRedirect($link, $msg, 'message');
+    }
+
+    private function buildListQuery(): string
+    {
+        $app = Factory::getApplication();
+        $option = 'com_contentbuilder';
+        $list = (array) $app->input->get('list', [], 'array');
+
+        $limit = isset($list['limit']) ? $app->input->getInt('list[limit]', 0) : 0;
+        if ($limit === 0) {
+            $limit = (int) $app->getUserState($option . '.list.limit', 0);
+        }
+        if ($limit === 0) {
+            $limit = (int) $app->get('list_limit');
+        }
+
+        $start = isset($list['start']) ? $app->input->getInt('list[start]', 0) : 0;
+        if ($start === 0) {
+            $start = (int) $app->getUserState($option . '.list.start', 0);
+        }
+
+        $ordering = isset($list['ordering']) ? $app->input->getCmd('list[ordering]', '') : '';
+        if ($ordering === '') {
+            $ordering = (string) $app->getUserState($option . 'formsd_filter_order', '');
+        }
+
+        $direction = isset($list['direction']) ? $app->input->getCmd('list[direction]', '') : '';
+        if ($direction === '') {
+            $direction = (string) $app->getUserState($option . 'formsd_filter_order_Dir', '');
+        }
+
+        return http_build_query(['list' => [
+            'limit' => $limit,
+            'start' => $start,
+            'ordering' => $ordering,
+            'direction' => $direction,
+        ]]);
     }
 
     public function display($cachable = false, $urlparams = array())

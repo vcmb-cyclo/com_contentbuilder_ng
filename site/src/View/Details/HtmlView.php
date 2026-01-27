@@ -27,7 +27,6 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
 use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\HtmlView as BaseHtmlView;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 class HtmlView extends BaseHtmlView
 {

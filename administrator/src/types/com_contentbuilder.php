@@ -512,6 +512,7 @@ class contentbuilder_com_contentbuilder
             Select
                 SQL_CALC_FOUND_ROWS
                 joined_records.published As colPublished,
+                joined_records.lang_code As colLanguage,
                 joined_records.rating_sum / joined_records.rating_count As colRating,
                 joined_records.rating_count As colRatingCount,
                 joined_records.rating_sum As colRatingSum,
@@ -519,6 +520,7 @@ class contentbuilder_com_contentbuilder
                 r.id As colRecord,
                 " . ($selectors ? $selectors . ',' : '') . "
                 joined_articles.article_id As colArticleId,
+                list_states.title As colState,
                 r.created_by As colAuthor,
                 r.modified_by As colModifiedBy
             From
@@ -547,8 +549,13 @@ class contentbuilder_com_contentbuilder
                 ) On (
                     r.user_id = joined_users.id
                 )' : '') . "
-                
-                " . (intval($state) > 0 ? ", #__contentbuilder_list_records As list" : "") . "
+                Left Join #__contentbuilder_list_records As list On (
+                    list.form_id = " . (int) $this->properties->id . " And
+                    list.record_id = r.id
+                )
+                Left Join #__contentbuilder_list_states As list_states On (
+                    list_states.id = list.state_id
+                )
                 Where
                 " . (intval($published) == 0 ? "(joined_records.published Is Null Or joined_records.published = 0) And" : "") . "
                 " . (intval($published) == 1 ? "joined_records.published = 1 And" : "") . "
@@ -561,7 +568,7 @@ class contentbuilder_com_contentbuilder
                 " . ($show_all_languages ? " And ( joined_records.id is Null Or joined_records.id Is Not Null ) " : '') . "
                 " . ($lang_code !== null ? " And joined_records.lang_code = " . $db->Quote($lang_code) : '') . "
                 " . (intval($own_only) > -1 ? ' And r.user_id=' . intval($own_only) . ' ' : '') . "
-                " . (intval($state) > 0 ? " And list.record_id = r.id And list.state_id = " . intval($state) : "") . "
+                " . (intval($state) > 0 ? " And list.state_id = " . intval($state) : "") . "
                 " . ($published_only ? " And joined_records.published = 1 " : '') . "
             
         Group By r.id $search  " . ($order ? " Order By " . ($order == 'colRating' && $form !== null && $form->rating_slots == 1 ? 'colRatingCount' : $order) . " " : ' Order By ' . ($init_order_by == -1 ? 'colRecord' : $init_order_by) . ' ' . ($init_order_by2 == -1 ? '' : ',' . $init_order_by2) . ' ' . ($init_order_by3 == -1 ? '' : ',' . $init_order_by3) . ' ' . ($order_Dir ? (strtolower($order_Dir) == 'asc' ? 'asc' : 'desc') : 'asc') . ' ') . " " . ($order ? (strtolower($order_Dir) == 'asc' ? 'asc' : 'desc') : '') . "

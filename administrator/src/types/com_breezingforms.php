@@ -379,17 +379,18 @@ class contentbuilder_com_breezingforms
         $radio_buttons = array();
 
         foreach ($elements as $element) {
-            // filtering the ids above, we have them already, but we need all the other fields,
-            // so we can search for their values from the fontend
-            if (!in_array($element['id'], $ids)) {
+            $colKey = 'col' . $element['id'];
+            $needsSelector = !in_array($element['id'], $ids) || $order === $colKey;
+            // We still need the column in SELECT when it is used for ordering.
+            if ($needsSelector) {
 
                 /// CASTING FOR BEING ABLE TO SORT THE WAY DEDIRED
                 // In BreezingForms, we have to cast on selection level, since casting in order by is not allowed
                 $cast_open = '';
                 $cast_close = '';
 
-                if (isset($order_types['col' . $element['id']])) {
-                    switch ($order_types['col' . $element['id']]) {
+                if (isset($order_types[$colKey])) {
+                    switch ($order_types[$colKey]) {
                         case 'CHAR':
                             $cast_open = 'Cast(';
                             $cast_close = ' As Char) ';
@@ -623,10 +624,44 @@ class contentbuilder_com_breezingforms
         }
         //////////////////
 
+        $orderExpr = '';
+        $orderKey = '';
+        if ($order) {
+            $orderKey = ($order === 'colRating' && $form !== null && $form->rating_slots == 1)
+                ? 'colRatingCount'
+                : $order;
+            switch ($orderKey) {
+                case 'colState':
+                    // Sorting by state id is more stable than the title (often NULL).
+                    $orderExpr = 'COALESCE(list.state_id, 0)';
+                    break;
+                case 'colPublished':
+                    $orderExpr = 'joined_records.published';
+                    break;
+                case 'colLanguage':
+                    $orderExpr = 'joined_records.lang_code';
+                    break;
+                default:
+                    $orderExpr = '`' . $orderKey . '`';
+                    break;
+            }
+        }
+
+        $orderTail = $order ? (strtolower($order_Dir) == 'asc' ? 'asc' : 'desc') : '';
+        $secondaryOrder = ($orderKey === 'colState') ? ', colRecord asc' : '';
+
+        $cbFormId = (int) ($form->id ?? 0);
+        if ($cbFormId <= 0) {
+            $cbFormId = (int) $this->properties->id;
+        }
+
         $db->setQuery("
             Select
                 SQL_CALC_FOUND_ROWS
-                " . (intval($published) > -1 ? "joined_records.published As colPublished," : "") . "
+                joined_records.published As colPublished,
+                joined_records.lang_code As colLanguage,
+                list.state_id As colStateId,
+                list_states.title As colState,
                 s.record As colRecord,
                 joined_records.rating_sum / joined_records.rating_count As colRating,
                 joined_records.rating_count As colRatingCount,
@@ -662,8 +697,13 @@ class contentbuilder_com_breezingforms
                 ) On (
                     r.user_id = joined_users.id
                 )' : '') . "
-                
-                " . (intval($state) > 0 ? ", #__contentbuilder_list_records As list" : "") . "
+                Left Join #__contentbuilder_list_records As list On (
+                    list.form_id = " . $cbFormId . " And
+                    list.record_id = r.id
+                )
+                Left Join #__contentbuilder_list_states As list_states On (
+                    list_states.id = list.state_id
+                )
                 Where
                 " . (intval($published) == 0 ? "(joined_records.published Is Null Or joined_records.published = 0) And" : "") . "
                 " . (intval($published) == 1 ? "joined_records.published = 1 And" : "") . "
@@ -678,14 +718,14 @@ class contentbuilder_com_breezingforms
                 " . ($show_all_languages ? " And ( joined_records.id is Null Or joined_records.id Is Not Null ) " : '') . "
                 " . ($lang_code !== null ? " And joined_records.lang_code = " . $db->Quote($lang_code) : '') . "
                 " . (intval($own_only) > -1 ? ' And r.user_id=' . intval($own_only) . ' ' : '') . "
-                " . (intval($state) > 0 ? " And list.record_id = r.id And list.state_id = " . intval($state) : "") . "
+                " . (intval($state) > 0 ? " And list.state_id = " . intval($state) : "") . "
                 " . ($published_only ? " And joined_records.published = 1 " : '') . "
                 
             And
                 s.record = r.id
             And
                 r.archived = 0
-            Group By s.record $search " . ($order ? " Order By `" . ($order == 'colRating' && $form !== null && $form->rating_slots == 1 ? 'colRatingCount' : $order) . "` " : ' Order By ' . ($init_order_by == -1 ? 'colRecord' : "`" . $init_order_by . "`") . ' ' . ($init_order_by2 == -1 ? '' : ',' . "`" . $init_order_by2 . "`") . ' ' . ($init_order_by3 == -1 ? '' : ',' . "`" . $init_order_by3 . "`") . ' ' . ($order_Dir ? (strtolower($order_Dir) == 'asc' ? 'asc' : 'desc') : 'asc') . ' ') . " " . ($order ? (strtolower($order_Dir) == 'asc' ? 'asc' : 'desc') : '') . "
+            Group By s.record $search " . ($order ? " Order By " . $orderExpr . " " : ' Order By ' . ($init_order_by == -1 ? 'colRecord' : "`" . $init_order_by . "`") . ' ' . ($init_order_by2 == -1 ? '' : ',' . "`" . $init_order_by2 . "`") . ' ' . ($init_order_by3 == -1 ? '' : ',' . "`" . $init_order_by3 . "`") . ' ' . ($order_Dir ? (strtolower($order_Dir) == 'asc' ? 'asc' : 'desc') : 'asc') . ' ') . " " . $orderTail . $secondaryOrder . "
         ", $limitstart, $limit);
 
         try {
