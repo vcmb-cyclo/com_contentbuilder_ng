@@ -739,8 +739,8 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					<tfoot>
 						<tr>
 							<td colspan="1000">
-								<nav class="pagination__wrapper d-flex flex-wrap align-items-center justify-content-between gap-2" aria-label="Pagination">
-									<div class="small text-muted">
+								<nav class="pagination__wrapper d-flex flex-wrap align-items-center justify-content-start gap-2" aria-label="Pagination">
+									<div class="small text-muted me-2">
 										<?php echo $rangeStart . ' - ' . $rangeEnd . ' / ' . $pagTotal . ' items'; ?>
 									</div>
 									<?php if ($showPagination) : ?>

@@ -11,6 +11,7 @@ namespace CB\Component\Contentbuilder\Site\Controller;
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Controller\BaseController;
 use CB\Component\Contentbuilder\Administrator\CBRequest;
 
