@@ -27,7 +27,6 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\Logger;
 
 class StorageModel extends AdminModel
@@ -93,23 +92,89 @@ class StorageModel extends AdminModel
         $this->setState($this->getName() . '.id', $id);
     }
 
-    /**
-     * On charge l'ancien item avant save (utile pour rename de table)
-     */
-    protected function preSaveHook(\Joomla\CMS\Table\Table $table, $data = [])
+    public function addFieldFromRequest(int $storageId): bool
     {
-        $id = (int) ($data['id'] ?? 0);
-        $this->oldItem = $id > 0 ? $this->getItem($id) : null;
+        // Recharger l’item pour connaître name/bytable
+        $storage = $this->getItem($storageId);
+        if (!$storage) {
+            $this->setError('Storage not found: ' . $storageId);
+            return false;
+        }
 
-        Logger::info('StorageModel preSaveHook', [
-            'id' => $id,
-            'oldName' => $this->oldItem->name ?? null,
-            'oldBytable' => $this->oldItem->bytable ?? null,
-            'incomingKeys' => array_keys((array) $data),
-        ]);
+        // Pas d’ajout en mode bytable
+        if (!empty($storage->bytable)) {
+            $this->setError(Text::_('COM_CONTENTBUILDER_CANNOT_ADD_FIELD_WITH_FOREIGN_TABLE'));
+            return false;
+        }
 
-        return parent::preSaveHook($table, $data);
+        // Lire le POST
+        $input = Factory::getApplication()->input;
+        $jform = $input->post->get('jform', [], 'array');
+
+        $fieldname = trim((string) ($jform['fieldname'] ?? ''));
+        if ($fieldname === '') {
+            $this->setError(Text::_('COM_CONTENTBUILDER_FIELDNAME_REQUIRED'));
+            return false;
+        }
+
+        $fieldtitle = trim((string) ($jform['fieldtitle'] ?? ''));
+        $isGroup    = (int) ($jform['is_group'] ?? 0);
+        $groupDef   = (string) ($jform['group_definition'] ?? '');
+
+        // Normalisation
+        $newfieldname = preg_replace("/[^a-zA-Z0-9_\s]/isU", "_", $fieldname);
+        $newfieldname = str_replace([' ', "\n", "\r", "\t"], ['_'], $newfieldname);
+        $newfieldname = preg_replace("/^([0-9\s])/isU", "field$1$2", $newfieldname);
+        $newfieldname = $newfieldname === '' ? ('field' . mt_rand(0, mt_getrandmax())) : $newfieldname;
+
+        $newfieldtitle = $fieldtitle !== '' ? $fieldtitle : $newfieldname;
+
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+        // Unicité
+        $db->setQuery(
+            "SELECT id FROM #__contentbuilder_storage_fields
+            WHERE storage_id = " . (int) $storageId . " AND `name` = " . $db->quote($newfieldname)
+        );
+        if ($db->loadResult()) {
+            $this->setError(Text::sprintf('COM_CONTENTBUILDER_FIELD_EXISTS', $newfieldname));
+            return false;
+        }
+
+        // Ordering max+1
+        $db->setQuery(
+            "SELECT COALESCE(MAX(ordering), 0) + 1
+            FROM #__contentbuilder_storage_fields
+            WHERE storage_id = " . (int) $storageId
+        );
+        $max = (int) $db->loadResult();
+
+        // Insert field
+        $db->setQuery(
+            "INSERT INTO #__contentbuilder_storage_fields
+            (ordering, storage_id, `name`, `title`, `is_group`, `group_definition`)
+            VALUES (" . (int) $max . ", " . (int) $storageId . ", " . $db->quote($newfieldname) . ", " . $db->quote($newfieldtitle) . ", " . (int) $isGroup . ", " . $db->quote($groupDef) . ")"
+        );
+        $db->execute();
+
+        // Assurer l’existence de la table data puis ajouter la colonne
+        // (si ta table data existe toujours, tu peux garder juste l’ALTER)
+        if (!empty($storage->name)) {
+            try {
+                $db->setQuery("ALTER TABLE `#__" . $storage->name . "` ADD `" . $newfieldname . "` TEXT NULL");
+                $db->execute();
+            } catch (\Throwable $e) {
+                // Si la colonne existe déjà ou table absente, on log et on renvoie false
+                Logger::exception($e);
+                $this->setError($e->getMessage());
+                return false;
+            }
+        }
+
+        // Optionnel: vider le champ dans la session / form
+        return true;
     }
+
 
     /**
      * Normalisation name/title/bytable.
@@ -170,11 +235,11 @@ class StorageModel extends AdminModel
     /**
      * Toute la logique legacy (table, champs, rename, sync...) APRES le save core
      */
+
+    /*
     protected function postSaveHook(\Joomla\CMS\Table\Table $table, $validData = [])
     {
         parent::postSaveHook($table, $validData);
-
-        $db = Factory::getContainer()->get(DatabaseInterface::class);
 
         $storageId = (int) $table->id;
         $isNew     = empty($validData['id']) || (int) $validData['id'] === 0;
@@ -187,11 +252,11 @@ class StorageModel extends AdminModel
             'bytable' => $bytable,
         ]);
 
-        // 1) Ajouter un nouveau champ si demandé (jform[fieldname], etc.)
-        $this->maybeAddNewField($storageId, $bytable);
-
-        // 2) Créer/renommer la table de données (si !bytable) OU sync bytable (si bytable)
+        // 1) Créer/renommer la table de données (si !bytable) OU sync bytable (si bytable)
         $this->syncStorageDataTableOrBytable($storageId, $isNew, $table);
+
+        // 2) Ajouter un nouveau champ si demandé (jform[fieldname], etc.)
+        $this->maybeAddNewField($storageId, $bytable);
 
         // 3) Appliquer les modifs sur les champs existants (itemNames/itemTitles/itemIsGroup/itemGroupDefinitions)
         $this->syncEditedFields($storageId, $bytable, $table);
@@ -209,7 +274,9 @@ class StorageModel extends AdminModel
         } catch (\Throwable $e) {
             Logger::exception($e);
         }
-    }
+    }*/
+
+
 
     /**
      * Ajout d’un nouveau champ si jform[fieldname] rempli (ancienne logique "case of new field")
@@ -232,7 +299,7 @@ class StorageModel extends AdminModel
         $isGroup    = (int)($jform['is_group'] ?? 0);
         $groupDef   = (string)($jform['group_definition'] ?? '');
 
-        // Normalisation comme ton legacy
+        // Normalisation.
         $newfieldname = preg_replace("/[^a-zA-Z0-9_\s]/isU", "_", trim($fieldname));
         $newfieldname = str_replace([' ', "\n", "\r", "\t"], ['_'], $newfieldname);
         $newfieldname = preg_replace("/^([0-9\s])/isU", "field$1$2", $newfieldname);
@@ -271,7 +338,7 @@ class StorageModel extends AdminModel
         );
         $db->execute();
 
-        // colonne dans table data (si table existe déjà)
+        // Colonne dans table data (si table existe déjà)
         $storage = $this->getItem($storageId);
         if (!empty($storage->name)) {
             try {
@@ -282,6 +349,17 @@ class StorageModel extends AdminModel
             }
         }
     }
+
+    // Crée une table #__<storage.name> 
+    public function ensureDataTable(int $storageId): void
+    {
+        $table = $this->getTable('Storage');
+        $table->load($storageId);
+
+        // isNew = false ici (on ne fait pas d'import bytable)
+        $this->syncStorageDataTableOrBytable($storageId, false, $table);
+}
+
 
     /**
      * Crée/rename la table #__<storage.name> si !bytable

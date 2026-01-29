@@ -19,7 +19,10 @@ use Joomla\CMS\Extension\Service\Provider\MVCFactory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
+use CB\Component\Contentbuilder\Administrator\Service\DatatableService;
+use CB\Component\Contentbuilder\Administrator\Service\StorageFieldService;
 
+//\Joomla\CMS\Factory::getApplication()->enqueueMessage('provider.php chargé', 'warning');
 return new class implements ServiceProviderInterface
 {
     public function register(Container $container): void
@@ -29,10 +32,19 @@ return new class implements ServiceProviderInterface
         $container->registerServiceProvider(new MVCFactory($namespace));
         $container->registerServiceProvider(new ComponentDispatcherFactory($namespace));
 
+        // ✅ Enregistre les services ici
+        $container->set(
+            DatatableService::class,
+            static fn(Container $c) => new DatatableService()
+        );
+        $container->set(
+            StorageFieldService::class,
+            static fn(Container $c) => new StorageFieldService()
+        );      
+
         $container->set(
             ComponentInterface::class,
-            function (Container $container): ComponentInterface
-            {
+            function (Container $container): ComponentInterface {
                 $component = new ContentbuilderComponent(
                     $container->get(ComponentDispatcherFactoryInterface::class)
                 );

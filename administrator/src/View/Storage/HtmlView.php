@@ -20,7 +20,7 @@ use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\HtmlView as Ba
 class HtmlView extends BaseHtmlView
 {
     public $form;
-    public $elements;
+    public $fields;
     public $tables;
     public $pagination;
     public $ordering;
@@ -66,7 +66,7 @@ class HtmlView extends BaseHtmlView
         // Chargement sécurisé des éléments
         $storageId = (int) ($this->item->id ?? $app->input->getInt('id', 0));
 
-        $this->elements = [];
+        $this->fields = [];
         $this->pagination = null;
         $this->state = null;
 
@@ -74,25 +74,24 @@ class HtmlView extends BaseHtmlView
             $storageId  = (int) ($this->item->id ?? $app->input->getInt('id', 0));
             if ($storageId > 0) {
                 $factory = $app->bootComponent('com_contentbuilder')->getMVCFactory();
-                $elementsModel = $factory->createModel('Elements', 'Administrator');
+                $fieldsModel = $factory->createModel('Storagefields', 'Administrator');
 
-                if (!$elementsModel) {
-                    throw new \RuntimeException('Modèle Elements introuvable (factory)');
+                if (!$fieldsModel) {
+                    throw new \RuntimeException('Modèle Storagefields introuvable (factory)');
                 }
 
                 // IMPORTANT : fournir le form id au ListModel
-                $elementsModel->setFormId($storageId);
-                $elementsModel->setState('filter.form_id', $storageId);
+                $fieldsModel->setStorageId($storageId);
 
                 // Charge les items
-                $this->elements   = $elementsModel->getItems();
-                $this->pagination = $elementsModel->getPagination();
-                $this->state      = $elementsModel->getState();
+                $this->fields     = $fieldsModel->getItems();
+                $this->pagination = $fieldsModel->getPagination();
+                $this->state      = $fieldsModel->getState();
                 $this->ordering   = ($this->state && $this->state->get('list.ordering') === 'ordering');
             }
         } catch (\Throwable $e) {
             $app->enqueueMessage(
-                'Erreur lors du chargement des éléments : ' . $e->getMessage(),
+                'Erreur lors du chargement des champs : ' . $e->getMessage(),
                 'warning'
             );
         }
@@ -112,6 +111,16 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::custom('storage.save2new', 'save', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
         ToolbarHelper::publish('storage.publish');
         ToolbarHelper::unpublish('storage.unpublish');
+
+        $id = (int) ($this->item->id ?? 0);
+
+        if ($id > 0) {
+            // POST via task + token : on fait pointer vers une URL, mais le bouton doit poster (sinon token)
+            // Astuce: utiliser un "custom" button JS submitTask
+            ToolbarHelper::custom('datatable.create', 'database', '', Text::_('COM_CONTENTBUILDER_DATATABLE_CREATE'), false);
+            ToolbarHelper::custom('datatable.sync', 'refresh', '', Text::_('COM_CONTENTBUILDER_DATATABLE_SYNC'), false);
+        }
+        
         ToolbarHelper::deleteList(
             Text::_('COM_CONTENTBUILDER_DELETE_FIELDS_CONFIRM'),
             'storage.listDelete',

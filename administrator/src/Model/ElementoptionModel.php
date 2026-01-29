@@ -15,14 +15,11 @@ namespace CB\Component\Contentbuilder\Administrator\Model;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
-use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
-use Joomla\Input\Input;
 use Joomla\Utilities\ArrayHelper;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
 use CB\Component\Contentbuilder\Administrator\Helper\Logger;
 use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
 
@@ -131,8 +128,8 @@ class ElementoptionModel extends BaseDatabaseModel
                 $the_item = $results;
 
                 $query = " `options`='" . base64_encode(serialize($the_item['options'])) . "', `type`=" . $this->getDatabase()->Quote(Factory::getApplication()->input->getCmd('field_type', '')) . ", `change_type`=" . $this->getDatabase()->Quote(Factory::getApplication()->input->getCmd('field_type', '')) . ", `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($the_item['default_value']) . " ";
-
                 break;
+
             case '':
             case 'text':
                 $length = Factory::getApplication()->input->get('length', '', 'string');
@@ -155,8 +152,8 @@ class ElementoptionModel extends BaseDatabaseModel
                 $options->allow_html = $allow_html;
 
                 $query = " `options`='" . base64_encode(serialize($options)) . "', `type`='text', `change_type`='text', `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($default_value) . " ";
-
                 break;
+
             case 'textarea':
                 $maxlength = Factory::getApplication()->input->getInt('maxlength', '');
                 $width = Factory::getApplication()->input->get('width', '', 'string');
@@ -179,6 +176,7 @@ class ElementoptionModel extends BaseDatabaseModel
 
                 $query = " `options`='" . base64_encode(serialize($options)) . "', `type`='textarea', `change_type`='textarea', `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($default_value) . " ";
                 break;
+
             case 'checkboxgroup':
             case 'radiogroup':
             case 'select':
@@ -214,6 +212,7 @@ class ElementoptionModel extends BaseDatabaseModel
 
                 $query = " `options`='" . base64_encode(serialize($options)) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($default_value) . " ";
                 break;
+
             case 'upload':
                 $this->getDatabase()->setQuery("Select upload_directory, protect_upload_directory From #__contentbuilder_forms Where id = " . $this->_id);
                 $setup = $this->getDatabase()->loadAssoc();
@@ -364,8 +363,8 @@ class ElementoptionModel extends BaseDatabaseModel
                 $query = " `options`='" . base64_encode(serialize($options)) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($default_value) . " ";
                 break;
         }
-        if ($query) {
 
+        if ($query) {
             $custom_init_script = Factory::getApplication()->input->post->get('custom_init_script', '', 'raw');
             $custom_action_script = Factory::getApplication()->input->post->get('custom_action_script', '', 'raw');
             $custom_validation_script = Factory::getApplication()->input->post->get('custom_validation_script', '', 'raw');

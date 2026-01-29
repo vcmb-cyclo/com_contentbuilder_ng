@@ -14,7 +14,6 @@
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
 
 $listOrder = $this->state ? (string) $this->state->get('list.ordering', 'ordering') : 'ordering';
 $listDirn  = $this->state ? (string) $this->state->get('list.direction', 'asc') : 'asc';
@@ -276,9 +275,16 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 if (!$this->item->bytable) {
                 ?>
                     <fieldset class="adminform">
-                        <legend>
+                    <?php if ((int) $this->item->id === 0) : ?>
+                    <div class="alert alert-info">
+                        Enregistrez d’abord le stockage, puis vous pourrez ajouter des champs.
+                    </div>
+                    <button class="btn btn-success" disabled>Ajouter le champ</button>
+                    <?php else : ?>
+                    <button type="button" class="btn btn-success"
+                            onclick="Joomla.submitbutton('storage.addfield');">
                             <?php echo Text::_('COM_CONTENTBUILDER_STORAGE_NEW_FIELD'); ?>
-                        </legend>
+                    </button>
                         <table class="admintable" width="100%">
                             <tr>
                                 <td>
@@ -349,6 +355,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                 </td>
                             </tr>
                         </table>
+                    <?php endif; ?>
                     </fieldset>
                 <?php
                 }
@@ -384,10 +391,10 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         </tr>
                     </thead>
                     <?php
-                    $elements = $this->elements ?? [];
-                    $n        = is_countable($elements) ? count($elements) : 0;
+                    $fields = $this->fields ?? [];
+                    $n      = is_countable($fields) ? count($fields) : 0;
                     ?>
-                    <?php foreach ($elements as $i => $row) :
+                    <?php foreach ($fields as $i => $row) :
                         $id    = (int) ($row->id ?? 0);
                         $name  = htmlspecialchars((string) ($row->name ?? ''), ENT_QUOTES, 'UTF-8');
                         $title = htmlspecialchars((string) ($row->title ?? ''), ENT_QUOTES, 'UTF-8');

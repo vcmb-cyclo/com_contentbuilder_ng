@@ -23,19 +23,32 @@ use Joomla\CMS\Extension\MVCComponent;
 use Joomla\CMS\HTML\HTMLRegistryAwareTrait;
 use Psr\Container\ContainerInterface;
 use Joomla\CMS\Factory;
+use LogicException;
 
 
 class ContentbuilderComponent extends MVCComponent implements BootableExtensionInterface
 {
     use HTMLRegistryAwareTrait;
 
+    private ?ContainerInterface $container = null;
+
     public function boot(ContainerInterface $container): void
     {
+        $this->container = $container;
         // Charge les langues du core (lib_joomla) pour avoir les clés JLIB_* traduites
         // Factory::getApplication()->getLanguage()->load('lib_joomla', JPATH_ADMINISTRATOR, null, true);
 
         // Et celles du composant (normalement déjà fait, mais safe)
         Factory::getApplication()->getLanguage()->load('com_contentbuilder', JPATH_ADMINISTRATOR, null, true);
+    }
+
+    public function getContainer(): ContainerInterface
+    {
+        if ($this->container === null) {
+            throw new LogicException('Component container has not been booted yet.');
+        }
+
+        return $this->container;
     }
 
 }

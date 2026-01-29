@@ -80,7 +80,22 @@ class StorageController extends BaseFormController
 
         // Pas de CSV → core
         if (!is_array($file) || empty($file['name']) || (int) ($file['size'] ?? 0) <= 0) {
-            return parent::save($key, $urlVar);
+            $result = parent::save($key, $urlVar);
+            if ($result === false) {
+                return false;
+            }
+
+            // Récupère l'id
+            $jform = $this->input->post->get('jform', [], 'array');
+            $id = (int) ($jform['id'] ?? $this->input->getInt('id'));
+
+            if ($id) {
+                /** @var \CB\Component\Contentbuilder\Administrator\Model\StorageModel $model */
+                $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
+                $model->ensureDataTable($id);
+            }
+
+            return $result;
         }
 
         // CSV → 1) sauvegarde core du storage, 2) import
@@ -89,8 +104,9 @@ class StorageController extends BaseFormController
         try {
             // (A) Sauver l'item via le core (ça gère jform + table + hooks)
             $data  = $this->input->post->get('jform', [], 'array');
-            $model = $this->getModel('Storage', '', ['ignore_request' => true]);
+            $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
 
+            Logger::info('Controller got model class', ['class' => get_class($model)]);
             $id = $model->save($data);
             if (!$id) {
                 $this->setRedirect(
@@ -129,6 +145,39 @@ class StorageController extends BaseFormController
 
         $this->setRedirect($link, Text::_('COM_CONTENTBUILDER_SAVED'));
         return true;
+    }
+
+
+    public function addfield(): bool
+    {
+        $this->checkToken();
+
+        $jform = $this->input->post->get('jform', [], 'array');
+        $storageId = (int) ($jform['id'] ?? $this->input->getInt('id'));
+
+        /** @var \CB\Component\Contentbuilder\Administrator\Model\StorageModel $model */
+        $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
+
+        if (!$model) {
+            throw new \RuntimeException('StorageModel not found');
+        }
+
+        $ok = $model->addFieldFromRequest($storageId);
+
+        $msg = $ok
+            ? Text::_('COM_CONTENTBUILDER_FIELD_ADDED')
+            : ($model->getError() ?: Text::_('COM_CONTENTBUILDER_FIELD_ADD_FAILED'));
+
+        $type = $ok ? 'message' : 'warning';
+
+        // Redirect vers l’édition du storage
+        $this->setRedirect(
+            Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . (int) $storageId, false),
+            $msg,
+            $type
+        );
+
+        return $ok;
     }
 
 
@@ -296,11 +345,6 @@ class StorageController extends BaseFormController
     }
 */
 
-    public function apply()
-    {
-        $this->save();
-    }
-
     // Passe par le modèle.
     private function storagesPublish(int $state, string $successMsgKey)
     {
@@ -316,7 +360,11 @@ class StorageController extends BaseFormController
                 return false;
             }
 
-            $model = $this->getModel('Elementoption', 'Administrator', ['ignore_request' => true]);
+            $model = $this->getModel('Storagefields', 'Administrator', ['ignore_request' => true]);
+            if (!$model) {
+                throw new \RuntimeException('StoragefieldsModel introuvable');
+            }
+            $model->setStorageId($storageId);
             $model->publish($cids, $state);
 
             $this->setRedirect(

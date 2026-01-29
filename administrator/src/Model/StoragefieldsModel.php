@@ -1,0 +1,219 @@
+<?php
+/**
+ * ContentBuilder Storage fields list model.
+ *
+ * @package     ContentBuilder
+ * @subpackage  Administrator.Model
+ * @copyright   Copyright (C) 2011–2026 by XDA+GIL
+ * @license     GNU/GPL v2 or later
+ */
+
+namespace CB\Component\Contentbuilder\Administrator\Model;
+
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\CMS\MVC\Model\ListModel;
+use Joomla\Database\DatabaseQuery;
+use Joomla\Utilities\ArrayHelper;
+use CB\Component\Contentbuilder\Administrator\Table\StorageFieldsTable;
+
+class StoragefieldsModel extends ListModel
+{
+    /**
+     * Storage id to filter on.
+     *
+     * @var int
+     */
+    private int $storageId = 0;
+
+    public function __construct($config = [], MVCFactoryInterface $factory = null)
+    {
+        $this->filter_fields = [
+            'id',
+            'name',
+            'title',
+            'group_definition',
+            'published',
+            'ordering'
+        ];
+
+        parent::__construct($config, $factory);
+    }
+
+    public function setStorageId(int $storageId): void
+    {
+        $this->storageId = $storageId;
+        $this->setState('storage.id', $storageId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function populateState($ordering = 'ordering', $direction = 'asc'): void
+    {
+        $app = Factory::getApplication();
+        $storageId = (int) $this->storageId;
+
+        if (!$storageId) {
+            $storageId = $app->input->getInt('id', 0);
+            if (!$storageId) {
+                $jform = $app->input->post->get('jform', [], 'array');
+                $storageId = (int) ($jform['id'] ?? 0);
+            }
+        }
+
+        $this->storageId = $storageId;
+        $this->setState('storage.id', $storageId);
+
+        $published = $app->getUserStateFromRequest(
+            'com_contentbuilder.storagefields.filter.published',
+            'filter_published',
+            '',
+            'string'
+        );
+        $this->setState('filter.published', $published);
+
+        parent::populateState($ordering, $direction);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getListQuery(): DatabaseQuery
+    {
+        $db = $this->getDatabase();
+        $query = $db->getQuery(true);
+
+        $query->select($db->quoteName([
+            'id',
+            'storage_id',
+            'name',
+            'title',
+            'is_group',
+            'group_definition',
+            'ordering',
+            'published'
+        ]))
+            ->from($db->quoteName('#__contentbuilder_storage_fields'))
+            ->where($db->quoteName('storage_id') . ' = ' . (int) $this->getState('storage.id', 0));
+
+        $published = $this->getState('filter.published');
+        if (is_numeric($published)) {
+            $query->where($db->quoteName('published') . ' = ' . (int) $published);
+        }
+
+        $orderCol  = $this->getState('list.ordering', 'ordering');
+        $orderDirn = $this->getState('list.direction', 'asc');
+
+        $query->order($db->escape($orderCol) . ' ' . $db->escape($orderDirn));
+
+        return $query;
+    }
+
+    public function getTable($name = 'StorageFields', $prefix = 'CB\\Component\\Contentbuilder\\Administrator\\Table\\', $options = [])
+    {
+        if ($name === 'StorageFields') {
+            return new StorageFieldsTable($this->getDatabase());
+        }
+
+        return parent::getTable($name, $prefix, $options);
+    }
+
+    public function move(int $direction): bool
+    {
+        $storageId = (int) $this->getState('storage.id', 0);
+        if (!$storageId) {
+            $this->setError('Missing storage id');
+            return false;
+        }
+
+        $cid = $this->input->post->get('cid', [], 'array');
+        ArrayHelper::toInteger($cid);
+        $pk = (int) ($cid[0] ?? 0);
+
+        if (!$pk) {
+            $this->setError('No item selected');
+            return false;
+        }
+
+        $table = $this->getTable();
+        if (!$table->load($pk)) {
+            $this->setError($table->getError());
+            return false;
+        }
+
+        return (bool) $table->move($direction, 'storage_id = ' . $storageId);
+    }
+
+    public function saveorder(array $pks = null, array $order = null): bool
+    {
+        $storageId = (int) $this->getState('storage.id', 0);
+        if (!$storageId) {
+            $this->setError('Missing storage id');
+            return false;
+        }
+
+        $pks = array_values((array) ($pks ?? []));
+        $order = array_values((array) ($order ?? []));
+
+        if (empty($pks) || empty($order)) {
+            $this->setError(Text::_('JGLOBAL_NO_MATCHING_RESULTS'));
+            return false;
+        }
+
+        $table = $this->getTable();
+
+        try {
+            foreach ($pks as $i => $pk) {
+                if (!$table->load((int) $pk)) {
+                    $this->setError($table->getError());
+                    return false;
+                }
+                $table->ordering = (int) ($order[$i] ?? 0);
+                if (!$table->store()) {
+                    $this->setError($table->getError());
+                    return false;
+                }
+            }
+
+            $table->reorder('storage_id = ' . $storageId);
+        } catch (\Throwable $e) {
+            $this->setError($e->getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+    public function publish(array $pks, int $value = 1): bool
+    {
+        $pks = (array) $pks;
+
+        if (empty($pks)) {
+            throw new \RuntimeException(Text::_('JLIB_DATABASE_ERROR_NO_ROWS_SELECTED'));
+        }
+
+        ArrayHelper::toInteger($pks);
+        $pks = array_filter($pks);
+
+        $db = $this->getDatabase();
+        $query = $db->getQuery(true)
+            ->update($db->quoteName('#__contentbuilder_storage_fields'))
+            ->set($db->quoteName('published') . ' = ' . (int) $value)
+            ->where($db->quoteName('id') . ' IN (' . implode(',', $pks) . ')');
+
+        $db->setQuery($query);
+
+        try {
+            $db->execute();
+        } catch (\Throwable $e) {
+            $this->setError($e->getMessage());
+            return false;
+        }
+
+        return true;
+    }
+}

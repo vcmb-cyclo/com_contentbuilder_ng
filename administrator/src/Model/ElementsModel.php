@@ -21,9 +21,7 @@ namespace CB\Component\Contentbuilder\Administrator\Model;
 
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
-use Joomla\Input\Input;
 use Joomla\Database\DatabaseQuery;
 use Joomla\Utilities\ArrayHelper;
 use CB\Component\Contentbuilder\Administrator\Table\ElementoptionTable;
@@ -104,7 +102,6 @@ class ElementsModel extends ListModel
             $jform  = $app->input->post->get('jform', [], 'array');
             $formId = (int) ($jform['id'] ?? 0);
         }
-
 
         $this->formId = $formId;        
         $this->setState('form.id', $formId);
