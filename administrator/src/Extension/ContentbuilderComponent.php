@@ -14,7 +14,7 @@
 
 // administrator/src/Extension/ContentbuilderComponent.php
 
-namespace CB\Component\Contentbuilder\Administrator\Extension;
+namespace CB\Component\Contentbuilder_ng\Administrator\Extension;
 
 \defined('_JEXEC') or die;
 
@@ -39,7 +39,7 @@ class ContentbuilderComponent extends MVCComponent implements BootableExtensionI
         // Factory::getApplication()->getLanguage()->load('lib_joomla', JPATH_ADMINISTRATOR, null, true);
 
         // Et celles du composant (normalement déjà fait, mais safe)
-        Factory::getApplication()->getLanguage()->load('com_contentbuilder', JPATH_ADMINISTRATOR, null, true);
+        Factory::getApplication()->getLanguage()->load('com_contentbuilder_ng', JPATH_ADMINISTRATOR, null, true);
     }
 
     public function getContainer(): ContainerInterface

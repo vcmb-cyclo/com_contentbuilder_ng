@@ -6,12 +6,12 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder\Administrator\View\About;
+namespace CB\Component\Contentbuilder_ng\Administrator\View\About;
 
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\MVC\View\HtmlView  as BaseHtmlView;
+use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
 
@@ -25,8 +25,8 @@ class HtmlView extends BaseHtmlView
 
         // 2️⃣ Enregistrement + chargement du CSS
         $wa->registerAndUseStyle(
-            'com_contentbuilder.admin',
-            'com_contentbuilder/admin.css',
+            'com_contentbuilder_ng.admin',
+            'com_contentbuilder_ng/admin.css',
             [],
             ['media' => 'all']
         );
@@ -34,7 +34,7 @@ class HtmlView extends BaseHtmlView
         // Icon addition.
         $wa->addInlineStyle(
             '.icon-logo_left{
-                background-image:url(' . Uri::root(true) . '/media/com_contentbuilder/images/logo_left.png);
+                background-image:url(' . Uri::root(true) . '/media/com_contentbuilder_ng/images/logo_left.png);
                 background-size:contain;
                 background-repeat:no-repeat;
                 background-position:center;
@@ -45,7 +45,7 @@ class HtmlView extends BaseHtmlView
         );
 
         ToolbarHelper::title(
-            'ContentBuilder :: ' . Text::_('COM_CONTENTBUILDER_ABOUT'),
+            'ContentBuilder :: ' . Text::_('COM_CONTENTBUILDER_NG_ABOUT'),
             'logo_left'
         );
 

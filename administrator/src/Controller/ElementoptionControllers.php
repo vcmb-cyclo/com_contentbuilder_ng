@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -15,7 +15,7 @@ namespace CB\Component\Contentbuilder\Administrator\Controller;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\AdminController;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
 class ElementoptionsController extends AdminController
 {
@@ -32,16 +32,16 @@ class ElementoptionsController extends AdminController
     function save()
     {
         $model = $this->getModel('Elementoption', 'Administrator', ['ignore_request' => true])
-            ?: $this->getModel('Elementoption', 'Contentbuilder', ['ignore_request' => true]);
+            ?: $this->getModel('Elementoption', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('ElementoptionModel not found');
         }
         $id = $model->store();
 
         if ($id) {
-            $msg = Text::_('COM_CONTENTBUILDER_SAVED');
+            $msg = Text::_('COM_CONTENTBUILDER_NG_SAVED');
         } else {
-            $msg = Text::_('COM_CONTENTBUILDER_ERROR');
+            $msg = Text::_('COM_CONTENTBUILDER_NG_ERROR');
         }
 
 

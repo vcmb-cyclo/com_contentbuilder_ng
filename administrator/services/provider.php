@@ -11,7 +11,7 @@
 
 \defined('_JEXEC') or die;
 
-use CB\Component\Contentbuilder\Administrator\Extension\ContentbuilderComponent;
+use CB\Component\Contentbuilder_ng\Administrator\Extension\ContentbuilderComponent;
 use Joomla\CMS\Dispatcher\ComponentDispatcherFactoryInterface;
 use Joomla\CMS\Extension\ComponentInterface;
 use Joomla\CMS\Extension\Service\Provider\ComponentDispatcherFactory;
@@ -19,15 +19,15 @@ use Joomla\CMS\Extension\Service\Provider\MVCFactory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
-use CB\Component\Contentbuilder\Administrator\Service\DatatableService;
-use CB\Component\Contentbuilder\Administrator\Service\StorageFieldService;
+use CB\Component\Contentbuilder_ng\Administrator\Service\DatatableService;
+use CB\Component\Contentbuilder_ng\Administrator\Service\StorageFieldService;
 
 //\Joomla\CMS\Factory::getApplication()->enqueueMessage('provider.php chargé', 'warning');
 return new class implements ServiceProviderInterface
 {
     public function register(Container $container): void
     {
-        $namespace = '\\CB\\Component\\Contentbuilder';
+        $namespace = '\\CB\\Component\\Contentbuilder_ng';
 
         $container->registerServiceProvider(new MVCFactory($namespace));
         $container->registerServiceProvider(new ComponentDispatcherFactory($namespace));

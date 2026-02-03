@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="contentbuilder_ng_themes" method="upgrade">
+  <name>ContentBuilder NG - Themes - Blank</name>
+  <author>Xavier DANO</author>
+  <creationDate>December 2025</creationDate>
+  <copyright>(C) 2026 by XDA+GIL</copyright>
+  <license>GNU/GPLv2</license>
+  <authorEmail>noreply@vcmb.fr</authorEmail>
+  <authorUrl>breezingforms.vcmb.fr</authorUrl>
+  <version>6.0.0-RC3</version>
+  <description><![CDATA[A blank theme without any style]]></description>
+  <files>
+    <filename plugin="blank">blank.php</filename>
+  </files>
+</extension>

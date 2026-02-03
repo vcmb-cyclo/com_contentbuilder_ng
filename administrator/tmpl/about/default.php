@@ -15,4 +15,4 @@
 use Joomla\CMS\Language\Text;
 
 ?>
-<?php echo Text::_('COM_CONTENTBUILDER_ABOUT_DESC'); ?> <a href="https://breezingforms.vcmb.fr">VCMB migration</a>
+<?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_DESC'); ?> <a href="https://breezingforms.vcmb.fr">VCMB migration</a>

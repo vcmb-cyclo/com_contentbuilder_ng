@@ -13,7 +13,7 @@
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Table;
+namespace CB\Component\Contentbuilder_ng\Administrator\Table;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -91,7 +91,7 @@ class FormTable extends Table
     public $email_update_notifications = 0;
     public $limited_article_options = 1;
     public $limited_article_options_fe = 1;
-    public $upload_directory = 'media/com_contentbuilder/upload';
+    public $upload_directory = 'media/com_contentbuilder_ng/upload';
     public $protect_upload_directory = 1;
     public $last_update = null;
     public $limit_add = 0;
@@ -165,7 +165,7 @@ class FormTable extends Table
      */
     function __construct(DatabaseDriver $db)
     {
-        parent::__construct('#__contentbuilder_forms', 'id', $db);
+        parent::__construct('#__contentbuilder_ng_forms', 'id', $db);
 
         // Joomla attend un champ "state" pour publish/unpublish au lieu de "published"
         $this->setColumnAlias('state', 'published');

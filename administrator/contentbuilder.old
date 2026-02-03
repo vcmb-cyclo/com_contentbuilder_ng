@@ -4,11 +4,11 @@
  * @package     ContentBuilder
  * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
- * @copyright   (C) 2025 by XDA+GIL
+ * @copyright   (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator;
+namespace CB\Component\Contentbuilder_ng\Administrator;
 
 // no direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -16,27 +16,27 @@ namespace CB\Component\Contentbuilder\Administrator;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
-use CB\Component\Contentbuilder\Administrator\Controller\TestController;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\Controller\TestController;
 
 if ((Factory::getApplication()->input->getCmd('controller', '') == 'elementoptions' || 
     Factory::getApplication()->input->getCmd('controller', '') == 'storages' || 
     Factory::getApplication()->input->getCmd('controller', '') == 'forms' || 
-    Factory::getApplication()->input->getCmd('controller', '') == 'users') && !Factory::getApplication()->getIdentity()->authorise('contentbuilder.manage', 'com_contentbuilder')) {
+    Factory::getApplication()->input->getCmd('controller', '') == 'users') && !Factory::getApplication()->getIdentity()->authorise('contentbuilder_ng.manage', 'com_contentbuilder_ng')) {
     Factory::getApplication()->enqueueMessage(Text::_('JERROR_ALERTNOAUTHOR'), 'warning');
 }
 
 if (!(Factory::getApplication()->input->getCmd('controller', '') == 'elementoptions' ||
     Factory::getApplication()->input->getCmd('controller', '') == 'storages' ||
     Factory::getApplication()->input->getCmd('controller', '') == 'forms' ||
-    Factory::getApplication()->input->getCmd('controller', '') == 'users') && !Factory::getApplication()->getIdentity()->authorise('contentbuilder.admin', 'com_contentbuilder')) {
+    Factory::getApplication()->input->getCmd('controller', '') == 'users') && !Factory::getApplication()->getIdentity()->authorise('contentbuilder_ng.admin', 'com_contentbuilder_ng')) {
     Factory::getApplication()->enqueueMessage(Text::_('JERROR_ALERTNOAUTHOR'), 'warning');
 }
 
-require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/src/contentbuilder.php');
+require_once(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/src/contentbuilder_ng.php');
 
 $db     = Factory::getContainer()->get(DatabaseInterface::class);
-$db->setQuery("Select `id`,`name` From #__contentbuilder_forms Where display_in In (1,2) And published = 1");
+$db->setQuery("Select `id`,`name` From #__contentbuilder_ng_forms Where display_in In (1,2) And published = 1");
 $forms = $db->loadAssocList();
 
 /*
@@ -82,7 +82,7 @@ if (Factory::getApplication()->input->getWord('task') === 'test') {
     $db      = Factory::getContainer()->get(\Joomla\Database\DatabaseInterface::class);
 
     // Instancier le contrôleur moderne
-    $controller = new \CB\Component\Contentbuilder\Administrator\Controller\TestController([], $db, $factory);
+    $controller = new \CB\Component\Contentbuilder_ng\Administrator\Controller\TestController([], $db, $factory);
 
     // Exécuter la display() du TestController
     $controller->display();

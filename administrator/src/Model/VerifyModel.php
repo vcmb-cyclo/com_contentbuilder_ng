@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder_ng\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -26,8 +26,8 @@ use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class VerifyModel extends BaseDatabaseModel
 {
@@ -45,7 +45,7 @@ class VerifyModel extends BaseDatabaseModel
         $this->app = Factory::getApplication();
         $this->frontend = $this->app->isClient('site');
 
-        $option = 'com_contentbuilder';
+        $option = 'com_contentbuilder_ng';
 
         $plugin = Factory::getApplication()->input->get('plugin', '', 'string');
         $verification_name = Factory::getApplication()->input->get('verification_name', '', 'string');
@@ -61,9 +61,9 @@ class VerifyModel extends BaseDatabaseModel
 
         if (!$verification_id) {
             $user_id = $this->app->getIdentity()->get('id', 0);
-            $setup = $this->app->getSession()->get($plugin . $verification_name, '', 'com_contentbuilder.verify.' . $plugin . $verification_name);
+            $setup = $this->app->getSession()->get($plugin . $verification_name, '', 'com_contentbuilder_ng.verify.' . $plugin . $verification_name);
         } else {
-            $this->getDatabase()->setQuery("Select `setup`,`user_id` From #__contentbuilder_verifications Where `verification_hash` = " . $this->getDatabase()->Quote($verification_id));
+            $this->getDatabase()->setQuery("Select `setup`,`user_id` From #__contentbuilder_ng_verifications Where `verification_hash` = " . $this->getDatabase()->Quote($verification_id));
             $setup = $this->getDatabase()->loadAssoc();
             if (is_array($setup)) {
                 $user_id = $setup['user_id'];
@@ -97,16 +97,16 @@ class VerifyModel extends BaseDatabaseModel
 
         $_now = Factory::getDate();
 
-        //$this->getDatabase()->setQuery("Select count(id) From #__contentbuilder_verifications Where Timestampdiff(Second, `start_date`, '".strtotime($_now->toSQL())."') < 1 And ip = " . $this->getDatabase()->Quote($_SERVER['REMOTE_ADDR']));
+        //$this->getDatabase()->setQuery("Select count(id) From #__contentbuilder_ng_verifications Where Timestampdiff(Second, `start_date`, '".strtotime($_now->toSQL())."') < 1 And ip = " . $this->getDatabase()->Quote($_SERVER['REMOTE_ADDR']));
         //$ver = $this->getDatabase()->loadResult();
 
         //if($ver >= 5){
-        //    $this->getDatabase()->setQuery("Delete From #__contentbuilder_verifications Where `verification_date` IS NULL And ip = " . $this->getDatabase()->Quote($_SERVER['REMOTE_ADDR']));
+        //    $this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_verifications Where `verification_date` IS NULL And ip = " . $this->getDatabase()->Quote($_SERVER['REMOTE_ADDR']));
         //    $this->getDatabase()->execute();
         //    JError::raiseError(500, 'Penetration Denied');
         //}
 
-        //$this->getDatabase()->setQuery("Delete From #__contentbuilder_verifications Where Timestampdiff(Second, `start_date`, '".strtotime($_now->toSQL())."') > 86400 And `verification_date` IS NULL");
+        //$this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_verifications Where Timestampdiff(Second, `start_date`, '".strtotime($_now->toSQL())."') > 86400 And `verification_date` IS NULL");
         //$this->getDatabase()->execute();
 
         $rec = null;
@@ -114,14 +114,14 @@ class VerifyModel extends BaseDatabaseModel
 
         if (isset($out['require_view']) && is_numeric($out['require_view']) && intval($out['require_view']) > 0) {
 
-            if ($this->app->getSession()->get('cb_last_record_user_id', 0, 'com_contentbuilder')) {
-                $user_id = $this->app->getSession()->get('cb_last_record_user_id', 0, 'com_contentbuilder');
-                $this->app->getSession()->clear('cb_last_record_user_id', 'com_contentbuilder');
+            if ($this->app->getSession()->get('cb_last_record_user_id', 0, 'com_contentbuilder_ng')) {
+                $user_id = $this->app->getSession()->get('cb_last_record_user_id', 0, 'com_contentbuilder_ng');
+                $this->app->getSession()->clear('cb_last_record_user_id', 'com_contentbuilder_ng');
             }
 
             $id = intval($out['require_view']);
 
-            $this->getDatabase()->setQuery("Select `type`, `reference_id`, `show_all_languages_fe` From #__contentbuilder_forms Where published = 1 And id = " . $id);
+            $this->getDatabase()->setQuery("Select `type`, `reference_id`, `show_all_languages_fe` From #__contentbuilder_ng_forms Where published = 1 And id = " . $id);
             $formsettings = $this->getDatabase()->loadAssoc();
 
             if (!is_array($formsettings)) {
@@ -154,7 +154,7 @@ class VerifyModel extends BaseDatabaseModel
         }
 
         // clearing session after possible required view to make re-visits possible
-        $this->app->getSession()->clear($plugin . $verification_name, 'com_contentbuilder.verify.' . $plugin . $verification_name);
+        $this->app->getSession()->clear($plugin . $verification_name, 'com_contentbuilder_ng.verify.' . $plugin . $verification_name);
 
         $verification_data = '';
         if (is_array($rec) && count($rec)) {
@@ -169,7 +169,7 @@ class VerifyModel extends BaseDatabaseModel
 
             $verification_id = md5(uniqid("", true) . mt_rand(0, mt_getrandmax()) . $user_id);
             $this->getDatabase()->setQuery("
-                    Insert Into #__contentbuilder_verifications
+                    Insert Into #__contentbuilder_ng_verifications
                     (
                     `verification_hash`,
                     `start_date`,
@@ -211,7 +211,7 @@ class VerifyModel extends BaseDatabaseModel
             $this_page = Uri::getInstance()->toString();
         }
 
-        PluginHelper::importPlugin('contentbuilder_verify', $plugin);
+        PluginHelper::importPlugin('contentbuilder_ng_verify', $plugin);
 
         $eventResult = $this->app->getDispatcher()->dispatch('onSetup', new \Joomla\Event\Event('onSetup', array($this_page, $out)));
         $setup_result = $eventResult->getArgument('result') ?: [];
@@ -250,7 +250,7 @@ class VerifyModel extends BaseDatabaseModel
 
                         if ($verify_result[0] === false) {
 
-                            $msg = Text::_('COM_CONTENTBUILDER_VERIFICATION_FAILED');
+                            $msg = Text::_('COM_CONTENTBUILDER_NG_VERIFICATION_FAILED');
 
                         } else {
 
@@ -261,7 +261,7 @@ class VerifyModel extends BaseDatabaseModel
                                 if (isset($out['verification_msg']) && $out['verification_msg']) {
                                     $msg = urldecode($out['verification_msg']);
                                 } else {
-                                    $msg = Text::_('COM_CONTENTBUILDER_VERIFICATION_SUCCESS');
+                                    $msg = Text::_('COM_CONTENTBUILDER_NG_VERIFICATION_SUCCESS');
                                 }
                             }
 
@@ -273,13 +273,13 @@ class VerifyModel extends BaseDatabaseModel
                                 }
                             }
 
-                            $this->getDatabase()->setQuery("Select id From #__contentbuilder_users Where userid = " . $this->getDatabase()->Quote($user_id) . " And form_id = " . intval($out['verify_view']));
+                            $this->getDatabase()->setQuery("Select id From #__contentbuilder_ng_users Where userid = " . $this->getDatabase()->Quote($user_id) . " And form_id = " . intval($out['verify_view']));
                             $usertableid = $this->getDatabase()->loadResult();
 
                             $levels = explode(',', $out['verify_levels']);
                             $___now = $_now->toSql();
                             if ($usertableid) {
-                                $this->getDatabase()->setQuery("Update #__contentbuilder_users
+                                $this->getDatabase()->setQuery("Update #__contentbuilder_ng_users
                                 Set
                                 " . (in_array('view', $levels) ? ' verified_view=1, verification_date_view=' . $this->getDatabase()->Quote($___now) . ", " : '') . "
                                 " . (in_array('new', $levels) ? ' verified_new=1, verification_date_new=' . $this->getDatabase()->Quote($___now) . ", " : '') . "
@@ -290,7 +290,7 @@ class VerifyModel extends BaseDatabaseModel
                                 $this->getDatabase()->execute();
                             } else {
                                 $this->getDatabase()->setQuery("
-                                Insert Into #__contentbuilder_users
+                                Insert Into #__contentbuilder_ng_users
                                 (
                                 " . (in_array('view', $levels) ? 'verified_view, verification_date_view,' : '') . "
                                 " . (in_array('new', $levels) ? 'verified_new, verification_date_new,' : '') . "
@@ -321,7 +321,7 @@ class VerifyModel extends BaseDatabaseModel
                             }
 
                             $this->getDatabase()->setQuery("
-                                Update #__contentbuilder_verifications
+                                Update #__contentbuilder_ng_verifications
                                 Set
                                 `verification_hash` = '',
                                 `is_test` = " . (isset($verify_result[0]['is_test']) ? intval(isset($verify_result[0]['is_test'])) : 0) . ",
@@ -356,7 +356,7 @@ class VerifyModel extends BaseDatabaseModel
                         }
                     }
                 } else {
-                    $msg = Text::_('COM_CONTENTBUILDER_VERIFICATION_NOT_EXECUTED');
+                    $msg = Text::_('COM_CONTENTBUILDER_NG_VERIFICATION_NOT_EXECUTED');
                 }
 
                 $this->app->enqueueMessage($msg, 'warning');

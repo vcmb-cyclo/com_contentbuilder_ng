@@ -15,7 +15,7 @@
  */
 
 
-namespace CB\Component\Contentbuilder\Site\View\Ajax;
+namespace CB\Component\Contentbuilder_ng\Site\View\Ajax;
 
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );

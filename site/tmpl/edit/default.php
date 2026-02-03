@@ -15,8 +15,8 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 $frontend = Factory::getApplication()->isClient('site');
 $new_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('new') : ContentbuilderLegacyHelper::authorize('new');
@@ -127,8 +127,8 @@ CSS;
 <a name="article_up"></a>
 <script type="text/javascript">
     <!--
-    function contentbuilder_delete() {
-        var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDER_CONFIRM_DELETE_MESSAGE'); ?>');
+    function contentbuilder_ng_delete() {
+        var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDER_NG_CONFIRM_DELETE_MESSAGE'); ?>');
         if (confirmed) {
             location.href = '<?php echo 'index.php?option=com_contentbuilder&task=edit.delete' . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&cid[]=' . Factory::getApplication()->input->getCmd('record_id', 0) . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : ''); ?>';
         }
@@ -297,44 +297,44 @@ CSS;
         <?php
         if ($this->record_id && $edit_allowed && $this->create_articles && $fullarticle_allowed) {
         ?>
-            <button class="btn btn-sm btn-primary cbButton cbArticleSettingsButton" onclick="if(document.getElementById('cbArticleOptions').style.display == 'none'){document.getElementById('cbArticleOptions').style.display='block'}else{document.getElementById('cbArticleOptions').style.display='none'};"><?php echo Text::_('COM_CONTENTBUILDER_SHOW_ARTICLE_SETTINGS') ?></button>
+            <button class="btn btn-sm btn-primary cbButton cbArticleSettingsButton" onclick="if(document.getElementById('cbArticleOptions').style.display == 'none'){document.getElementById('cbArticleOptions').style.display='block'}else{document.getElementById('cbArticleOptions').style.display='none'};"><?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_ARTICLE_SETTINGS') ?></button>
         <?php
         }
         if (($edit_allowed || $new_allowed) && !$this->edit_by_type) {
         ?>
-            <button class="btn btn-sm btn-primary cbButton cbSaveButton" title="<?php echo Text::_('COM_CONTENTBUILDER_SAVE'); ?>" onclick="<?php echo $this->latest ? "document.getElementById('contentbuilder_task').value='edit.apply';" : '' ?>contentbuilder.onSubmit();">
+            <button class="btn btn-sm btn-primary cbButton cbSaveButton" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SAVE'); ?>" onclick="<?php echo $this->latest ? "document.getElementById('contentbuilder_ng_task').value='edit.apply';" : '' ?>contentbuilder_ng.onSubmit();">
                 <span class="icon-save me-1" aria-hidden="true"></span>
-                <?php echo trim($this->save_button_title) != '' ? htmlentities($this->save_button_title, ENT_QUOTES, 'UTF-8') : Text::_('COM_CONTENTBUILDER_SAVE') ?>
+                <?php echo trim($this->save_button_title) != '' ? htmlentities($this->save_button_title, ENT_QUOTES, 'UTF-8') : Text::_('COM_CONTENTBUILDER_NG_SAVE') ?>
             </button>
         <?php
         } else if ($this->record_id && $edit_allowed && $this->create_articles && $this->edit_by_type && $fullarticle_allowed) {
         ?>
-            <button class="btn btn-sm btn-primary cbButton cbArticleSettingsButton" onclick="document.getElementById('contentbuilder_task').value='edit.apply';contentbuilder.onSubmit();">
+            <button class="btn btn-sm btn-primary cbButton cbArticleSettingsButton" onclick="document.getElementById('contentbuilder_ng_task').value='edit.apply';contentbuilder_ng.onSubmit();">
                 <span class="icon-apply me-1" aria-hidden="true"></span>
-                <?php echo Text::_('COM_CONTENTBUILDER_APPLY_ARTICLE_SETTINGS') ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_APPLY_ARTICLE_SETTINGS') ?>
             </button>
         <?php }
         if ($this->record_id && $delete_allowed) { ?>
             <button class="btn btn-sm btn-primary cbButton cbDeleteButton"
-                onclick="contentbuilder_delete();"
-                title="<?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>">
+                onclick="contentbuilder_ng_delete();"
+                title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE'); ?>">
                 <i class="fa fa-trash" aria-hidden="true"></i>
-                <?php echo Text::_('COM_CONTENTBUILDER_DELETE') ?></button>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE') ?></button>
             <?php
         }
         if ($showBack) {
             if ($jsBack) {
             ?>
-                <button class="btn btn-sm btn-outline-secondary cbButton cbBackButton" title="<?php echo Text::_('COM_CONTENTBUILDER_BACK'); ?>" onclick="history.back(-1);void(0);">
+                <button class="btn btn-sm btn-outline-secondary cbButton cbBackButton" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_BACK'); ?>" onclick="history.back(-1);void(0);">
                     <span class="icon-arrow-left me-1" aria-hidden="true"></span>
-                    <?php echo Text::_('COM_CONTENTBUILDER_BACK') ?>
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK') ?>
                 </button>
             <?php
             } else {
             ?>
-                <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton" title="<?php echo Text::_('COM_CONTENTBUILDER_BACK'); ?>" href="<?php echo $backHref; ?>">
+                <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_BACK'); ?>" href="<?php echo $backHref; ?>">
                     <span class="icon-arrow-left me-1" aria-hidden="true"></span>
-                    <?php echo Text::_('COM_CONTENTBUILDER_BACK') ?>
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK') ?>
                 </a>
         <?php
             }
@@ -356,11 +356,11 @@ CSS;
     ?>
 
         <?php if ($this->created): ?>
-            <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_CREATED_ON'); ?> <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?></span>
+            <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_CREATED_ON'); ?> <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?></span>
         <?php endif; ?>
 
         <?php if ($this->created_by): ?>
-            <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_BY'); ?> <?php echo $this->created_by; ?></span><br />
+            <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_BY'); ?> <?php echo $this->created_by; ?></span><br />
         <?php endif; ?>
     <?php
     }
@@ -371,10 +371,10 @@ CSS;
         <?php if ($this->modified_by): ?>
 
             <?php if ($this->modified): ?>
-                <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_LAST_UPDATED_ON'); ?> <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?></span>
+                <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON'); ?> <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?></span>
             <?php endif; ?>
 
-            <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_BY'); ?> <?php echo $this->modified_by; ?></span>
+            <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_BY'); ?> <?php echo $this->modified_by; ?></span>
 
         <?php endif;
     }
@@ -539,7 +539,7 @@ CSS;
                 }
                 ?>
                 <input type="hidden" name="Itemid" value="<?php echo Factory::getApplication()->input->getInt('Itemid', 0); ?>" />
-                <input type="hidden" name="task" id="contentbuilder_task" value="edit.save" />
+                <input type="hidden" name="task" id="contentbuilder_ng_task" value="edit.save" />
                 <input type="hidden" name="backtolist" value="<?php echo Factory::getApplication()->input->getInt('backtolist', 0); ?>" />
                 <input type="hidden" name="return" value="<?php echo Factory::getApplication()->input->get('return', '', 'string'); ?>" />
                 <?php echo HTMLHelper::_('form.token'); ?>
@@ -584,7 +584,7 @@ CSS;
                 }
                 ?>
                 <input type="hidden" name="Itemid" value="<?php echo Factory::getApplication()->input->getInt('Itemid', 0); ?>" />
-                <input type="hidden" name="task" id="contentbuilder_task" value="edit.save" />
+                <input type="hidden" name="task" id="contentbuilder_ng_task" value="edit.save" />
                 <input type="hidden" name="backtolist" value="<?php echo Factory::getApplication()->input->getInt('backtolist', 0); ?>" />
                 <input type="hidden" name="return" value="<?php echo Factory::getApplication()->input->get('return', '', 'string'); ?>" />
                 <?php echo HTMLHelper::_('form.token'); ?>
@@ -619,7 +619,7 @@ CSS;
                 }
                 ?>
                 <input type="hidden" name="Itemid" value="<?php echo Factory::getApplication()->input->getInt('Itemid', 0); ?>" />
-                <input type="hidden" name="task" id="contentbuilder_task" value="edit.save" />
+                <input type="hidden" name="task" id="contentbuilder_ng_task" value="edit.save" />
                 <input type="hidden" name="backtolist" value="<?php echo Factory::getApplication()->input->getInt('backtolist', 0); ?>" />
                 <input type="hidden" name="return" value="<?php echo Factory::getApplication()->input->get('return', '', 'string'); ?>" />
                 <?php echo HTMLHelper::_('form.token'); ?>

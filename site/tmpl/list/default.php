@@ -16,9 +16,9 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
 
 $frontend = Factory::getApplication()->isClient('site');
 $language_allowed = ContentbuilderLegacyHelper::authorizeFe('language');
@@ -33,10 +33,10 @@ $rating_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('rating') 
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 
 // Charge le manifeste joomla.asset.json du composant
-$wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder');
+$wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
 
 $wa->useScript('jquery');
-$wa->useScript('com_contentbuilder.contentbuilder');
+$wa->useScript('com_contentbuilder_ng.contentbuilder_ng');
 
 $___getpost = 'post';
 $___tableOrdering = "Joomla.tableOrdering = function";
@@ -72,7 +72,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 		Joomla.submitform(task || '', form);
 	};
 
-	function contentbuilder_updateBoxchecked(form) {
+	function contentbuilder_ng_updateBoxchecked(form) {
 		if (!form) return;
 		var boxes = form.querySelectorAll('input[name="cid[]"]');
 		var checked = 0;
@@ -85,31 +85,31 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 		}
 	}
 
-	function contentbuilder_selectAll(toggle) {
+	function contentbuilder_ng_selectAll(toggle) {
 		var form = document.getElementById('adminForm');
 		if (!form) return;
 		var boxes = form.querySelectorAll('input[name="cid[]"]');
 		boxes.forEach(function(box) {
 			box.checked = !!toggle.checked;
 		});
-		contentbuilder_updateBoxchecked(form);
+		contentbuilder_ng_updateBoxchecked(form);
 	}
 
-	function contentbuilder_delete() {
-		if (confirm('<?php echo Text::_('COM_CONTENTBUILDER_CONFIRM_DELETE_MESSAGE'); ?>')) {
+	function contentbuilder_ng_delete() {
+		if (confirm('<?php echo Text::_('COM_CONTENTBUILDER_NG_CONFIRM_DELETE_MESSAGE'); ?>')) {
 			var form = document.getElementById('adminForm');
 			document.getElementById('task').value = 'list.delete';
 			Joomla.submitform('list.delete', form);
 		}
 	}
 
-	function contentbuilder_state() {
+	function contentbuilder_ng_state() {
 		var form = document.getElementById('adminForm');
 		document.getElementById('task').value = 'list.state';
 		Joomla.submitform('list.state', form);
 	}
 
-	function contentbuilder_state_single(stateId, recordId) {
+	function contentbuilder_ng_state_single(stateId, recordId) {
 		var form = document.getElementById('adminForm');
 		if (!form) return;
 		if (stateId === undefined || stateId === null || String(stateId) === '') return;
@@ -140,13 +140,13 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 		Joomla.submitform('list.state', form);
 	}
 
-	function contentbuilder_publish() {
+	function contentbuilder_ng_publish() {
 		var form = document.getElementById('adminForm');
 		document.getElementById('task').value = 'list.publish';
 		Joomla.submitform('list.publish', form);
 	}
 
-	function contentbuilder_language() {
+	function contentbuilder_ng_language() {
 		var form = document.getElementById('adminForm');
 		document.getElementById('task').value = 'list.language';
 		Joomla.submitform('list.language', form);
@@ -190,7 +190,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 		const rowBoxes = form.querySelectorAll('input[name="cid[]"]');
 		rowBoxes.forEach(function(box) {
 			box.addEventListener('change', function() {
-				contentbuilder_updateBoxchecked(form);
+				contentbuilder_ng_updateBoxchecked(form);
 			});
 		});
 	});
@@ -208,7 +208,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 	if ($new_allowed) {
 		?>
 			<button class="btn btn-sm btn-primary"
-				onclick="location.href='<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&backtolist=1&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&record_id=0'); ?>'"><?php echo Text::_('COM_CONTENTBUILDER_NEW'); ?></button>
+				onclick="location.href='<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&backtolist=1&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&record_id=0'); ?>'"><?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?></button>
 		<?php
 	}
 	-- END of BEGIN - NEW BUTTON */
@@ -226,7 +226,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 <!-- 2023-12-19 XDA / GIL - BEGIN - Fix
 <form action="index.php" method=<php echo $___getpost;?>" name="adminForm" id
 # Bug CB Joomla 4 (march 2023) - fix error search, delete, pagination, 404 error 
-Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
+Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 # by this block -->
 <form action="<?php echo Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . (int) Factory::getApplication()->input->getInt('id') . '&Itemid=' . (int) Factory::getApplication()->input->getInt('Itemid', 0)); ?>"
 	method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm">
@@ -240,10 +240,10 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 						<div class="d-inline-flex align-items-center gap-1 me-2">
 							<select class="form-select form-select-sm" style="max-width: 100px;" name="list_language">
 								<option value="*"> -
-									<?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?> -
+									<?php echo Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'); ?> -
 								</option>
 								<option value="*">
-									<?php echo Text::_('COM_CONTENTBUILDER_ANY'); ?>
+									<?php echo Text::_('COM_CONTENTBUILDER_NG_ANY'); ?>
 								</option>
 								<?php foreach ($this->languages as $filter_language) : ?>
 									<option value="<?php echo $filter_language; ?>">
@@ -251,8 +251,8 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 									</option>
 								<?php endforeach; ?>
 							</select>
-							<button class="btn btn-sm btn-primary" onclick="contentbuilder_language();">
-								<?php echo Text::_('COM_CONTENTBUILDER_APPLY'); ?>
+							<button class="btn btn-sm btn-primary" onclick="contentbuilder_ng_language();">
+								<?php echo Text::_('COM_CONTENTBUILDER_NG_APPLY'); ?>
 							</button>
 						</div>
 					</td>
@@ -268,9 +268,9 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 
 							<?php if ($this->list_state && $state_allowed && count($this->states)) : ?>
 								<select class="form-select form-select-sm" style="max-width: 140px;"
-									name="list_state" title="<?php echo Text::_('COM_CONTENTBUILDER_BULK_OPTIONS'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>"
-									onchange="if (this.value !== '0') { contentbuilder_state(); }">
-									<option value="0"> - <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> -</option>
+									name="list_state" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_BULK_OPTIONS'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?>"
+									onchange="if (this.value !== '0') { contentbuilder_ng_state(); }">
+									<option value="0"> - <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?> -</option>
 									<?php foreach ($this->states as $state) : ?>
 										<option value="<?php echo $state['id']; ?>">
 											<?php echo $state['title']; ?>
@@ -281,39 +281,39 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 
 							<?php if ($this->list_publish && $publish_allowed) : ?>
 								<select class="form-select form-select-sm" style="max-width: 160px;"
-									name="list_publish" title="<?php echo Text::_('COM_CONTENTBUILDER_BULK_OPTIONS'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH'); ?>"
-									onchange="if (this.value !== '-1') { contentbuilder_publish(); }">
-									<option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -</option>
-									<option value="1"><?php echo Text::_('COM_CONTENTBUILDER_PUBLISH'); ?></option>
-									<option value="0"><?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISH'); ?></option>
+									name="list_publish" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_BULK_OPTIONS'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>"
+									onchange="if (this.value !== '-1') { contentbuilder_ng_publish(); }">
+									<option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_UNPUBLISHED'); ?> -</option>
+									<option value="1"><?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?></option>
+									<option value="0"><?php echo Text::_('COM_CONTENTBUILDER_NG_UNPUBLISH'); ?></option>
 								</select>
 							<?php endif; ?>
 
 							<?php if ($this->display_filter) : ?>
 								<div class="input-group input-group-sm" style="max-width: 360px;">
 									<span class="input-group-text">
-										<?php echo Text::_('COM_CONTENTBUILDER_FILTER'); ?>
+										<?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER'); ?>
 									</span>
 
 									<input
 										type="text"
 										class="form-control"
-										id="contentbuilder_filter"
+										id="contentbuilder_ng_filter"
 										name="filter"
 										value="<?php echo $this->escape($this->lists['filter']); ?>"
 										onchange="document.adminForm.submit();" />
 
 									<button type="submit" class="btn btn-primary" id="cbSearchButton">
-										<?php echo Text::_('COM_CONTENTBUILDER_SEARCH'); ?>
+										<?php echo Text::_('COM_CONTENTBUILDER_NG_SEARCH'); ?>
 									</button>
 
 									<button type="button" class="btn btn-outline-secondary"
-										onclick="document.getElementById('contentbuilder_filter').value='';
+										onclick="document.getElementById('contentbuilder_ng_filter').value='';
                 <?php echo $this->list_language && count($this->languages) ? "if(document.getElementById('list_language_filter')) document.getElementById('list_language_filter').selectedIndex=0;" : ""; ?>
                 <?php echo $this->list_state && count($this->states) ? "if(document.getElementById('list_state_filter')) document.getElementById('list_state_filter').selectedIndex=0;" : ""; ?>
                 <?php echo $this->list_publish ? "if(document.getElementById('list_publish_filter')) document.getElementById('list_publish_filter').selectedIndex=0;" : ""; ?>
                 document.adminForm.submit();">
-										<?php echo Text::_('COM_CONTENTBUILDER_RESET'); ?>
+										<?php echo Text::_('COM_CONTENTBUILDER_NG_RESET'); ?>
 									</button>
 								</div>
 							<?php endif; ?>
@@ -321,9 +321,9 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 							<?php if ($this->list_state && count($this->states)) : ?>
 								<select class="form-select form-select-sm" style="max-width: 160px;"
 									name="list_state_filter" id="list_state_filter"
-									title="<?php echo Text::_('COM_CONTENTBUILDER_FILTER'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>"
+									title="<?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?>"
 									onchange="document.adminForm.submit();">
-									<option value="0"> - <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> -</option>
+									<option value="0"> - <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?> -</option>
 									<?php foreach ($this->states as $state) : ?>
 										<option value="<?php echo $state['id'] ?>" <?php echo $this->lists['filter_state'] == $state['id'] ? 'selected' : ''; ?>>
 											<?php echo $state['title'] ?>
@@ -335,14 +335,14 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 							<?php if ($this->list_publish && $publish_allowed) : ?>
 								<select class="form-select form-select-sm" style="max-width: 190px;"
 									name="list_publish_filter" id="list_publish_filter"
-									title="<?php echo Text::_('COM_CONTENTBUILDER_FILTER'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH'); ?>"
+									title="<?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>"
 									onchange="document.adminForm.submit();">
-									<option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -</option>
+									<option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_UNPUBLISHED'); ?> -</option>
 									<option value="1" <?php echo $this->lists['filter_publish'] == 1 ? 'selected' : ''; ?>>
-										<?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED') ?>
+										<?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED') ?>
 									</option>
 									<option value="0" <?php echo $this->lists['filter_publish'] == 0 ? 'selected' : ''; ?>>
-										<?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISHED') ?>
+										<?php echo Text::_('COM_CONTENTBUILDER_NG_UNPUBLISHED') ?>
 									</option>
 								</select>
 							<?php endif; ?>
@@ -350,9 +350,9 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 							<?php if ($this->list_language) : ?>
 								<select class="form-select form-select-sm" style="max-width: 160px;"
 									name="list_language_filter" id="list_language_filter"
-									title="<?php echo Text::_('COM_CONTENTBUILDER_FILTER'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?>"
+									title="<?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'); ?>"
 									onchange="document.adminForm.submit();">
-									<option value=""> - <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?> -</option>
+									<option value=""> - <?php echo Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'); ?> -</option>
 									<?php foreach ($this->languages as $filter_language) : ?>
 										<option value="<?php echo $filter_language; ?>" <?php echo $this->lists['filter_language'] == $filter_language ? 'selected' : ''; ?>>
 											<?php echo $filter_language; ?>
@@ -368,7 +368,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 								<div class="d-flex align-items-center gap-2 ms-auto">
 
 									<?php if ($delete_allowed) : ?>
-										<button class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" onclick="contentbuilder_delete();" title="<?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>">
+										<button class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" onclick="contentbuilder_ng_delete();" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE'); ?>">
 											<span class="icon-trash" aria-hidden="true"></span>
 										</button>
 									<?php endif; ?>
@@ -421,7 +421,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					if ($this->show_id_column) {
 					?>
 						<th class="table-light hidden-phone" width="5">
-							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ID', ENT_QUOTES, 'UTF-8'), 'colRecord', $this->lists['order_Dir'], $this->lists['order']); ?>
+							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_NG_ID', ENT_QUOTES, 'UTF-8'), 'colRecord', $this->lists['order_Dir'], $this->lists['order']); ?>
 						</th>
 					<?php
 					}
@@ -429,8 +429,8 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					if ($this->select_column && ($delete_allowed || $state_allowed || $publish_allowed)) {
 					?>
 						<th class="table-light hidden-phone" width="20">
-							<input class="contentbuilder_select_all form-check-input" type="checkbox"
-								onclick="contentbuilder_selectAll(this);" />
+							<input class="contentbuilder_ng_select_all form-check-input" type="checkbox"
+								onclick="contentbuilder_ng_selectAll(this);" />
 						</th>
 					<?php
 					}
@@ -438,7 +438,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					if ($this->edit_button && $edit_allowed) {
 					?>
 						<th class="table-light" width="20">
-							<?php echo Text::_('COM_CONTENTBUILDER_EDIT'); ?>
+							<?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT'); ?>
 						</th>
 					<?php
 					}
@@ -446,7 +446,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 						if ($this->list_state) {
 						?>
 							<th class="table-light hidden-phone">
-								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_EDIT_STATE'), 'colState', $this->lists['order_Dir'], $this->lists['order']); ?>
+								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'), 'colState', $this->lists['order_Dir'], $this->lists['order']); ?>
 							</th>
 						<?php
 						}
@@ -454,7 +454,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 						if ($this->list_publish && $publish_allowed) {
 						?>
 							<th class="table-light" width="20">
-								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_PUBLISHED'), 'colPublished', $this->lists['order_Dir'], $this->lists['order']); ?>
+								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'colPublished', $this->lists['order_Dir'], $this->lists['order']); ?>
 							</th>
 						<?php
 						}
@@ -462,7 +462,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 						if ($this->list_language) {
 						?>
 							<th class="table-light hidden-phone" width="20">
-								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_LANGUAGE'), 'colLanguage', $this->lists['order_Dir'], $this->lists['order']); ?>
+								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'), 'colLanguage', $this->lists['order_Dir'], $this->lists['order']); ?>
 							</th>
 						<?php
 						}
@@ -470,7 +470,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					if ($this->list_article) {
 					?>
 						<th class="table-light hidden-phone">
-							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_ARTICLE', ENT_QUOTES, 'UTF-8'), 'colArticleId', $this->lists['order_Dir'], $this->lists['order']); ?>
+							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_NG_ARTICLE', ENT_QUOTES, 'UTF-8'), 'colArticleId', $this->lists['order_Dir'], $this->lists['order']); ?>
 						</th>
 					<?php
 					}
@@ -478,7 +478,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					if ($this->list_author) {
 					?>
 						<th class="table-light hidden-phone">
-							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_AUTHOR', ENT_QUOTES, 'UTF-8'), 'colAuthor', $this->lists['order_Dir'], $this->lists['order']); ?>
+							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_NG_AUTHOR', ENT_QUOTES, 'UTF-8'), 'colAuthor', $this->lists['order_Dir'], $this->lists['order']); ?>
 						</th>
 					<?php
 					}
@@ -486,7 +486,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					if ($this->list_rating) {
 					?>
 						<th class="table-light hidden-phone">
-							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_RATING', ENT_QUOTES, 'UTF-8'), 'colRating', $this->lists['order_Dir'], $this->lists['order']); ?>
+							<?php echo HTMLHelper::_('grid.sort', htmlentities('COM_CONTENTBUILDER_NG_RATING', ENT_QUOTES, 'UTF-8'), 'colRating', $this->lists['order_Dir'], $this->lists['order']); ?>
 						</th>
 						<?php
 					}
@@ -502,7 +502,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 							}
 						?>
 							<th class="table-light<?php echo $hidden; ?>">
-								<?php echo HTMLHelper::_('grid.sort', nl2br(htmlentities(ContentbuilderHelper::contentbuilder_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')), "col$reference_id", $this->lists['order_Dir'], $this->lists['order']); ?>
+								<?php echo HTMLHelper::_('grid.sort', nl2br(htmlentities(ContentbuilderHelper::contentbuilder_ng_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')), "col$reference_id", $this->lists['order_Dir'], $this->lists['order']); ?>
 							</th>
 					<?php
 							$label_count++;
@@ -559,7 +559,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 					?>
 						<td>
 							<a class="text-primary" href="<?php echo $edit_link; ?>"
-								title="<?php echo Text::_('COM_CONTENTBUILDER_EDIT'); ?>">
+								title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT'); ?>">
 								<span class="icon-edit" aria-hidden="true"></span>
 							</a>
 						</td>
@@ -576,8 +576,8 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 								<select
 									class="form-select form-select-sm"
 									style="min-width: 140px;"
-									onchange="contentbuilder_state_single(this.value, <?php echo (int) $row->colRecord; ?>);"
-									title="<?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>">
+									onchange="contentbuilder_ng_state_single(this.value, <?php echo (int) $row->colRecord; ?>);"
+									title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?>">
 									<option value="" <?php echo $currentStateTitle === '' ? 'selected' : ''; ?>>-</option>
 									<?php foreach ($this->states as $state) : ?>
 										<option value="<?php echo (int) $state['id']; ?>" <?php echo $currentStateTitle === $state['title'] ? 'selected' : ''; ?>>
@@ -719,7 +719,7 @@ Replace line 144 of media/com_contentbuilder/images/list/tmpl/default.php
 
 				if ($showSummary) :
 				    $params = Uri::getInstance()->getQuery(true);
-				    $params['option'] = 'com_contentbuilder';
+				    $params['option'] = 'com_contentbuilder_ng';
 				    $params['task'] = 'list.display';
 				    $params['id'] = Factory::getApplication()->input->getInt('id', 0);
 				    $params['Itemid'] = Factory::getApplication()->input->getInt('Itemid', 0);

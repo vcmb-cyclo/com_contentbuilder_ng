@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder_ng\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -20,8 +20,8 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
-use CB\Component\Contentbuilder\Administrator\Helper\Logger;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class ElementoptionModel extends BaseDatabaseModel
 {
@@ -37,7 +37,7 @@ class ElementoptionModel extends BaseDatabaseModel
         $this->_db = Factory::getContainer()->get(DatabaseInterface::class);
 
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder';
+        $option = 'com_contentbuilder_ng';
 
         $this->setIds(Factory::getApplication()->input->getInt('id', 0), Factory::getApplication()->input->getInt('element_id', ''));
     }
@@ -60,7 +60,7 @@ class ElementoptionModel extends BaseDatabaseModel
 
     private function _buildQuery()
     {
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_elements Where id = ' . intval($this->_element_id);
+        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_elements Where id = ' . intval($this->_element_id);
     }
 
     function getData()
@@ -82,7 +82,7 @@ class ElementoptionModel extends BaseDatabaseModel
     function getValidationPlugins()
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_validation' And `enabled` = 1");
+        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_ng_validation' And `enabled` = 1");
 
         $res = $db->loadColumn();
         return $res;
@@ -90,7 +90,7 @@ class ElementoptionModel extends BaseDatabaseModel
 
     function getGroupDefinition()
     {
-        $this->getDatabase()->setQuery("Select `type`, `reference_id` From #__contentbuilder_forms Where id = " . intval($this->_id));
+        $this->getDatabase()->setQuery("Select `type`, `reference_id` From #__contentbuilder_ng_forms Where id = " . intval($this->_id));
         $form = $this->getDatabase()->loadAssoc();
         $form = ContentbuilderLegacyHelper::getForm($form['type'], $form['reference_id']);
         if ($form->isGroup($this->_data->reference_id)) {
@@ -102,7 +102,7 @@ class ElementoptionModel extends BaseDatabaseModel
     function store()
     {
         if (Factory::getApplication()->input->getInt('type_change', 0)) {
-            $this->getDatabase()->setQuery("Update #__contentbuilder_elements Set `type`=" . $this->getDatabase()->Quote(Factory::getApplication()->input->getCmd('type_selection', '')) . " Where id = " . $this->_element_id);
+            $this->getDatabase()->setQuery("Update #__contentbuilder_ng_elements Set `type`=" . $this->getDatabase()->Quote(Factory::getApplication()->input->getCmd('type_selection', '')) . " Where id = " . $this->_element_id);
             $this->getDatabase()->execute();
             return 1;
         }
@@ -114,7 +114,7 @@ class ElementoptionModel extends BaseDatabaseModel
 
                 $hint = Factory::getApplication()->input->post->get('hint', '', 'html');
 
-                \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_form_elements', Factory::getApplication()->input->getCmd('field_type', ''));
+                \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_ng_form_elements', Factory::getApplication()->input->getCmd('field_type', ''));
 
                 $dispatcher = Factory::getApplication()->getDispatcher();
                 $eventResult = $dispatcher->dispatch('onSettingsStore', new \Joomla\Event\Event('onSettingsStore', array()));
@@ -214,7 +214,7 @@ class ElementoptionModel extends BaseDatabaseModel
                 break;
 
             case 'upload':
-                $this->getDatabase()->setQuery("Select upload_directory, protect_upload_directory From #__contentbuilder_forms Where id = " . $this->_id);
+                $this->getDatabase()->setQuery("Select upload_directory, protect_upload_directory From #__contentbuilder_ng_forms Where id = " . $this->_id);
                 $setup = $this->getDatabase()->loadAssoc();
 
                 // rel check for setup
@@ -242,28 +242,28 @@ class ElementoptionModel extends BaseDatabaseModel
 
                 if (!trim(Factory::getApplication()->input->get('upload_directory', '', 'string')) && !is_dir($upload_directory)) {
 
-                    if (!is_dir(JPATH_SITE .'/media/contentbuilder')) {
-                        Folder::create(JPATH_SITE .'/media/contentbuilder');
-                        File::write(JPATH_SITE .'/media/contentbuilder/index.html', $def = '');
+                    if (!is_dir(JPATH_SITE .'/media/contentbuilder_ng')) {
+                        Folder::create(JPATH_SITE .'/media/contentbuilder_ng');
+                        File::write(JPATH_SITE .'/media/contentbuilder_ng/index.html', $def = '');
                     }
 
-                    if (!is_dir(JPATH_SITE .'/media/contentbuilder/upload')) {
-                        Folder::create(JPATH_SITE .'/media/contentbuilder/upload');
-                        File::write(JPATH_SITE .'/media/contentbuilder/upload/index.html', $def = '');
+                    if (!is_dir(JPATH_SITE .'/media/contentbuilder_ng/upload')) {
+                        Folder::create(JPATH_SITE .'/media/contentbuilder_ng/upload');
+                        File::write(JPATH_SITE .'/media/contentbuilder_ng/upload/index.html', $def = '');
                     }
 
-                    $upload_directory = JPATH_SITE .'/media/contentbuilder/upload';
+                    $upload_directory = JPATH_SITE .'/media/contentbuilder_ng/upload';
 
                     if ($is_opt_relative) {
                         $is_relative = 1;
-                        $tmp_upload_directory = '{CBSite}/media/contentbuilder/upload';
+                        $tmp_upload_directory = '{CBSite}/media/contentbuilder_ng/upload';
                     }
 
                     if (isset($upl_ex[1])) {
                         $tokens = '|' . $upl_ex[1];
                     }
 
-                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' (/media/contentbuilder/upload' . ')', 'warning');
+                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FALLBACK_UPLOAD_CREATED') . ' (/media/contentbuilder_ng/upload' . ')', 'warning');
 
                 } else if (trim(Factory::getApplication()->input->get('upload_directory', '', 'string')) != '' && !is_dir(ContentbuilderLegacyHelper::makeSafeFolder(Factory::getApplication()->input->get('upload_directory', '', 'string')))) {
 
@@ -281,7 +281,7 @@ class ElementoptionModel extends BaseDatabaseModel
                         $tokens = '|' . $upl_ex2[1];
                     }
 
-                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FALLBACK_UPLOAD_CREATED') . ' (' . $upload_directory . ')', 'warning');
+                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FALLBACK_UPLOAD_CREATED') . ' (' . $upload_directory . ')', 'warning');
 
                 } else if (trim(Factory::getApplication()->input->get('upload_directory', '', 'string')) != '' && is_dir(ContentbuilderLegacyHelper::makeSafeFolder(Factory::getApplication()->input->get('upload_directory', '', 'string')))) {
 
@@ -378,7 +378,7 @@ class ElementoptionModel extends BaseDatabaseModel
             $other .= " `custom_validation_script`=" . $this->getDatabase()->Quote($custom_validation_script) . ", ";
             $other .= " `validation_message`=" . $this->getDatabase()->Quote($validation_message) . ", ";
 
-            $this->getDatabase()->setQuery("Update #__contentbuilder_elements Set $other $query Where id = " . $this->_element_id);
+            $this->getDatabase()->setQuery("Update #__contentbuilder_ng_elements Set $other $query Where id = " . $this->_element_id);
             $this->getDatabase()->execute();
             return true;
         }
@@ -409,7 +409,7 @@ class ElementoptionModel extends BaseDatabaseModel
         $value = (int) $value;
         $db = $this->getDatabase();
         $query = $db->getQuery(true)
-            ->update($db->quoteName('#__contentbuilder_elements'))
+            ->update($db->quoteName('#__contentbuilder_ng_elements'))
             ->set($db->quoteName('published') . ' = ' . $value)
             ->where($db->quoteName('id') . ' IN (' . implode(',', $pks) . ')');
 
@@ -449,7 +449,7 @@ class ElementoptionModel extends BaseDatabaseModel
         $db = $this->getDatabase();
 
         $query = $db->getQuery(true)
-            ->update($db->quoteName('#__contentbuilder_elements'))
+            ->update($db->quoteName('#__contentbuilder_ng_elements'))
             ->set($db->quoteName($field) . ' = ' . (int) $value)
             ->where($db->quoteName('id') . ' IN (' . implode(',', $pks) . ')');
 

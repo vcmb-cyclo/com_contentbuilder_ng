@@ -13,7 +13,7 @@
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -24,7 +24,7 @@ use Joomla\CMS\MVC\Controller\AdminController;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 final class StoragesController extends AdminController
 {
@@ -104,7 +104,7 @@ final class StoragesController extends AdminController
 
             // Message Joomla standard (tu peux aussi faire tes propres Text::sprintf)
             $this->setMessage(
-                Text::plural('COM_CONTENTBUILDER_COPIED'),
+                Text::plural('COM_CONTENTBUILDER_NG_COPIED'),
                 'message'
             );
         } catch (\Throwable $e) {
@@ -113,7 +113,7 @@ final class StoragesController extends AdminController
 
         $this->setRedirect(
             Route::_('index.php?option=com_contentbuilder&task=storages.display&limitstart=' . $this->input->getInt('limitstart'), false),
-            Text::_('COM_CONTENTBUILDER_COPIED')
+            Text::_('COM_CONTENTBUILDER_NG_COPIED')
         );
     }
 }

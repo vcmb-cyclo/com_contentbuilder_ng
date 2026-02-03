@@ -7,12 +7,12 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Site\View\Export;
+namespace CB\Component\Contentbuilder_ng\Site\View\Export;
 
 // no direct access
 \defined('_JEXEC') or die('Restricted access');
 
-use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 
 class RawView extends BaseHtmlView
 {

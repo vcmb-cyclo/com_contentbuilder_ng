@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Helper;
+namespace CB\Component\Contentbuilder_ng\Administrator\Helper;
 
 \defined('_JEXEC') or die;
 
@@ -21,7 +21,7 @@ final class VendorHelper
             return;
         }
 
-        $autoload = JPATH_ADMINISTRATOR . '/components/com_contentbuilder/vendor/autoload.php';
+        $autoload = JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/vendor/autoload.php';
 
         if (!is_file($autoload)) {
             throw new \RuntimeException('Composer autoload not found: ' . $autoload);

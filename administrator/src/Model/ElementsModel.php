@@ -15,7 +15,7 @@
  */
 
 
-namespace CB\Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder_ng\Administrator\Model;
 
 \defined('_JEXEC') or die;
 
@@ -24,7 +24,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Database\DatabaseQuery;
 use Joomla\Utilities\ArrayHelper;
-use CB\Component\Contentbuilder\Administrator\Table\ElementoptionTable;
+use CB\Component\Contentbuilder_ng\Administrator\Table\ElementoptionTable;
 
 class ElementsModel extends ListModel
 {
@@ -59,7 +59,7 @@ class ElementsModel extends ListModel
     }
 
 
-    public function getTable($name = 'Elementoption', $prefix = 'CB\\Component\\Contentbuilder\\Administrator\\Table\\', $options = [])
+    public function getTable($name = 'Elementoption', $prefix = 'CB\\Component\\Contentbuilder_ng\\Administrator\\Table\\', $options = [])
     {
         $db = $this->getDatabase();
 
@@ -109,18 +109,18 @@ class ElementsModel extends ListModel
 
 
         // Filtre sur published
-        $published = $app->getUserStateFromRequest('com_contentbuilder.elements.filter.published', 'filter_published', '', 'string');
+        $published = $app->getUserStateFromRequest('com_contentbuilder_ng.elements.filter.published', 'filter_published', '', 'string');
         $this->setState('filter.published', $published);
 
         // Recherche (si tu veux ajouter un champ de recherche sur label ou type)
-        $search = $app->getUserStateFromRequest('com_contentbuilder.elements.filter.search', 'filter_search', '', 'string');
+        $search = $app->getUserStateFromRequest('com_contentbuilder_ng.elements.filter.search', 'filter_search', '', 'string');
         $this->setState('filter.search', $search);
 
         // Pagination
         $limit = $app->getUserStateFromRequest('global.list.limit', 'limit', $app->get('list_limit'), 'uint');
         $this->setState('list.limit', $limit);
 
-        $value = $app->getUserStateFromRequest('com_contentbuilder.elements.limitstart', 'limitstart', 0, 'int');
+        $value = $app->getUserStateFromRequest('com_contentbuilder_ng.elements.limitstart', 'limitstart', 0, 'int');
         $limitstart = ($limit != 0 ? (floor($value / $limit) * $limit) : 0);
         $this->setState('list.start', $limitstart);
 
@@ -137,7 +137,7 @@ class ElementsModel extends ListModel
         $db    = $this->getDatabase();
         $query = $db->getQuery(true);
 
-        // Sélectionner les colonnes pertinentes de #__contentbuilder_elements
+        // Sélectionner les colonnes pertinentes de #__contentbuilder_ng_elements
         $query->select(
             $db->quoteName([
                 'id',
@@ -165,7 +165,7 @@ class ElementsModel extends ListModel
                 'ordering'
             ])
         )
-            ->from($db->quoteName('#__contentbuilder_elements'))
+            ->from($db->quoteName('#__contentbuilder_ng_elements'))
             ->where($db->quoteName('form_id') . ' = ' . (int) $this->getState('form.id'));  // Filtre par form_id
 
         // Filtre publié (si défini)
@@ -321,7 +321,7 @@ class ElementsModel extends ListModel
     private function buildOrderBy()
     {
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder';
+        $option = 'com_contentbuilder_ng';
 
         $orderby = '';
         $filter_order = $this->getState('elements_filter_order');
@@ -350,7 +350,7 @@ class ElementsModel extends ListModel
             $filter_state .= ' And published = ' . $published;
         }
 
-        return "Select * From #__contentbuilder_elements Where form_id = " . $this->formId . $filter_state . $this->buildOrderBy();
+        return "Select * From #__contentbuilder_ng_elements Where form_id = " . $this->formId . $filter_state . $this->buildOrderBy();
     }
 
     // Legacy

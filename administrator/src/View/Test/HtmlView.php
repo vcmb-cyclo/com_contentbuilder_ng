@@ -10,12 +10,12 @@
 
 // administrator/src/View/Test/HtmlView.php
 // Vue simple de test.
-namespace CB\Component\Contentbuilder\Administrator\View\Test;
+namespace CB\Component\Contentbuilder_ng\Administrator\View\Test;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
 
-use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 use Joomla\Database\DatabaseInterface;
 
 class HtmlView extends BaseHtmlView

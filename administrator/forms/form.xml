@@ -4,7 +4,7 @@
   <!-- =======================
        BASIC
   ======================== -->
-  <fieldset name="basic" label="COM_CONTENTBUILDER_FIELDSET_BASIC">
+  <fieldset name="basic" label="COM_CONTENTBUILDER_NG_FIELDSET_BASIC">
 
     <field name="id" type="text"
            label="JGLOBAL_FIELD_ID_LABEL"
@@ -22,11 +22,11 @@
        <field name="email_admins" type="hidden" />
 
     <field name="name" type="text"
-           label="COM_CONTENTBUILDER_FIELD_NAME"
+           label="COM_CONTENTBUILDER_NG_FIELD_NAME"
            required="false" filter="string" maxlength="255" />
 
     <field name="tag" type="text"
-           label="COM_CONTENTBUILDER_FIELD_TAG"
+           label="COM_CONTENTBUILDER_NG_FIELD_TAG"
            default="default" filter="string" maxlength="255" />
 
     <field name="title" type="text"
@@ -34,24 +34,24 @@
            filter="string" maxlength="255" />
 
     <field name="type" type="text"
-           label="COM_CONTENTBUILDER_FIELD_TYPE"
+           label="COM_CONTENTBUILDER_NG_FIELD_TYPE"
            required="false" filter="string" maxlength="255" />
 
     <field name="reference_id" type="text"
-           label="COM_CONTENTBUILDER_FIELD_REFERENCE_ID"
+           label="COM_CONTENTBUILDER_NG_FIELD_REFERENCE_ID"
            required="false" filter="string" maxlength="255" />
 
     <field name="theme_plugin" type="text"
-           label="COM_CONTENTBUILDER_FIELD_THEME_PLUGIN"
+           label="COM_CONTENTBUILDER_NG_FIELD_THEME_PLUGIN"
            filter="string" maxlength="255" />
 
     <field name="display_in" type="list"
-           label="COM_CONTENTBUILDER_FIELD_DISPLAY_IN"
+           label="COM_CONTENTBUILDER_NG_FIELD_DISPLAY_IN"
            default="0" filter="intval">
-      <option value="0">COM_CONTENTBUILDER_DISPLAY_IN_NONE</option>
-      <option value="1">COM_CONTENTBUILDER_DISPLAY_IN_BACKEND</option>
-      <option value="2">COM_CONTENTBUILDER_DISPLAY_IN_FRONTEND</option>
-      <option value="3">COM_CONTENTBUILDER_DISPLAY_IN_BOTH</option>
+      <option value="0">COM_CONTENTBUILDER_NG_DISPLAY_IN_NONE</option>
+      <option value="1">COM_CONTENTBUILDER_NG_DISPLAY_IN_BACKEND</option>
+      <option value="2">COM_CONTENTBUILDER_NG_DISPLAY_IN_FRONTEND</option>
+      <option value="3">COM_CONTENTBUILDER_NG_DISPLAY_IN_BOTH</option>
     </field>
 
     <field name="created" type="calendar"
@@ -69,7 +69,7 @@
            label="JGLOBAL_FIELD_MODIFIED_BY_LABEL" />
 
     <field name="last_update" type="calendar"
-           label="COM_CONTENTBUILDER_FIELD_LAST_UPDATE"
+           label="COM_CONTENTBUILDER_NG_FIELD_LAST_UPDATE"
            format="%Y-%m-%d %H:%M:%S" filter="user_utc" />
 
   </fieldset>
@@ -78,11 +78,11 @@
   <!-- =======================
        TEMPLATES / PREPARE
   ======================== -->
-  <fieldset name="templates" label="COM_CONTENTBUILDER_FIELDSET_TEMPLATES">
+  <fieldset name="templates" label="COM_CONTENTBUILDER_NG_FIELDSET_TEMPLATES">
        <field
        name="intro_text"
        type="editor"
-       label="COM_CONTENTBUILDER_FIELD_INTRO_TEXT"
+       label="COM_CONTENTBUILDER_NG_FIELD_INTRO_TEXT"
        hiddenLabel="true"
        filter="raw"
        buttons="true"
@@ -94,7 +94,7 @@
 
     <field name="details_template" type="editor"
            hiddenLabel="true"
-           label="COM_CONTENTBUILDER_FIELD_DETAILS_TEMPLATE"
+           label="COM_CONTENTBUILDER_NG_FIELD_DETAILS_TEMPLATE"
            filter="raw"
            buttons="true"
            width="100%"
@@ -106,20 +106,20 @@
     <field name="details_prepare" type="editor"
            editor="none"
            hiddenLabel="true"
-           label="COM_CONTENTBUILDER_FIELD_DETAILS_PREPARE"
+           label="COM_CONTENTBUILDER_NG_FIELD_DETAILS_PREPARE"
            filter="raw"
            buttons="false"
            rows="10" />
 
     <field name="editable_template" type="editor"
            hiddenLabel="true"
-           label="COM_CONTENTBUILDER_FIELD_EDITABLE_TEMPLATE"
+           label="COM_CONTENTBUILDER_NG_FIELD_EDITABLE_TEMPLATE"
            filter="raw" rows="12" />
 
     <field name="editable_prepare" type="editor"
            editor="none"
            hiddenLabel="true"
-           label="COM_CONTENTBUILDER_FIELD_EDITABLE_PREPARE"
+           label="COM_CONTENTBUILDER_NG_FIELD_EDITABLE_PREPARE"
            filter="raw"
            buttons="false"
            width="100%"
@@ -134,57 +134,57 @@
   <!-- =======================
        LIST / FILTER / DISPLAY
   ======================== -->
-  <fieldset name="list" label="COM_CONTENTBUILDER_FIELDSET_LIST">
+  <fieldset name="list" label="COM_CONTENTBUILDER_NG_FIELDSET_LIST">
 
     <field name="show_filter" type="radio" default="1" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_SHOW_FILTER">
+           label="COM_CONTENTBUILDER_NG_FIELD_SHOW_FILTER">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 
     <field name="show_records_per_page" type="radio" default="1" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_SHOW_RECORDS_PER_PAGE">
+           label="COM_CONTENTBUILDER_NG_FIELD_SHOW_RECORDS_PER_PAGE">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 
     <field name="initial_list_limit" type="number" default="20" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_INITIAL_LIST_LIMIT" />
+           label="COM_CONTENTBUILDER_NG_FIELD_INITIAL_LIST_LIMIT" />
 
     <field name="initial_sort_order" type="number" default="-1" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_INITIAL_SORT_ORDER" />
+           label="COM_CONTENTBUILDER_NG_FIELD_INITIAL_SORT_ORDER" />
     <field name="initial_sort_order2" type="number" default="-1" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_INITIAL_SORT_ORDER2" />
+           label="COM_CONTENTBUILDER_NG_FIELD_INITIAL_SORT_ORDER2" />
     <field name="initial_sort_order3" type="number" default="-1" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_INITIAL_SORT_ORDER3" />
+           label="COM_CONTENTBUILDER_NG_FIELD_INITIAL_SORT_ORDER3" />
 
     <field name="initial_order_dir" type="list" default="desc" filter="string"
-           label="COM_CONTENTBUILDER_FIELD_INITIAL_ORDER_DIR">
+           label="COM_CONTENTBUILDER_NG_FIELD_INITIAL_ORDER_DIR">
       <option value="asc">JGLOBAL_ORDER_ASCENDING</option>
       <option value="desc">JGLOBAL_ORDER_DESCENDING</option>
     </field>
 
     <field name="show_id_column" type="radio" default="1" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_SHOW_ID_COLUMN">
+           label="COM_CONTENTBUILDER_NG_FIELD_SHOW_ID_COLUMN">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 
     <field name="select_column" type="radio" default="0" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_SELECT_COLUMN">
+           label="COM_CONTENTBUILDER_NG_FIELD_SELECT_COLUMN">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 
     <field name="edit_button" type="radio" default="0" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_EDIT_BUTTON">
+           label="COM_CONTENTBUILDER_NG_FIELD_EDIT_BUTTON">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 
 <!--
     <field name="list_states" type="radio" default="0" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_LIST_STATES">
+           label="COM_CONTENTBUILDER_NG_FIELD_LIST_STATES">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
@@ -192,7 +192,7 @@
 
 <!--
     <field name="list_state" type="radio" default="0" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_LIST_STATE">
+           label="COM_CONTENTBUILDER_NG_FIELD_LIST_STATE">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
@@ -200,20 +200,20 @@
 
 <!--
     <field name="list_publish" type="radio" default="0" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_LIST_PUBLISH">
+           label="COM_CONTENTBUILDER_NG_FIELD_LIST_PUBLISH">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 -->
 
     <field name="allow_external_filter" type="radio" default="0" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_ALLOW_EXTERNAL_FILTER">
+           label="COM_CONTENTBUILDER_NG_FIELD_ALLOW_EXTERNAL_FILTER">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 
     <field name="filter_exact_match" type="radio" default="0" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_FILTER_EXACT_MATCH">
+           label="COM_CONTENTBUILDER_NG_FIELD_FILTER_EXACT_MATCH">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
@@ -224,14 +224,14 @@
   <!-- =======================
        UPLOADS
   ======================== -->
-  <fieldset name="uploads" label="COM_CONTENTBUILDER_FIELDSET_UPLOADS">
+  <fieldset name="uploads" label="COM_CONTENTBUILDER_NG_FIELDSET_UPLOADS">
 
     <field name="upload_directory" type="text"
-           label="COM_CONTENTBUILDER_FIELD_UPLOAD_DIRECTORY"
+           label="COM_CONTENTBUILDER_NG_FIELD_UPLOAD_DIRECTORY"
            filter="string" maxlength="1024" />
 
     <field name="protect_upload_directory" type="checkbox" default="0" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_PROTECT_UPLOAD_DIRECTORY">
+           label="COM_CONTENTBUILDER_NG_FIELD_PROTECT_UPLOAD_DIRECTORY">
       <option value="1">JYES</option>
     </field>
 
@@ -241,49 +241,49 @@
   <!-- =======================
        EMAILS
   ======================== -->
-  <fieldset name="emails" label="COM_CONTENTBUILDER_FIELDSET_EMAILS">
+  <fieldset name="emails" label="COM_CONTENTBUILDER_NG_FIELDSET_EMAILS">
 
     <field name="email_notifications" type="radio" default="1" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_NOTIFICATIONS">
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_NOTIFICATIONS">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 
     <field name="email_update_notifications" type="radio" default="0" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_UPDATE_NOTIFICATIONS">
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_UPDATE_NOTIFICATIONS">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 
     <field name="email_subject" type="text"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_SUBJECT"
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_SUBJECT"
            filter="string" maxlength="255" />
 
     <field name="email_recipients" type="textarea"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_RECIPIENTS"
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_RECIPIENTS"
            filter="string" rows="3" />
 
     <field name="email_alternative_from" type="text"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_ALTERNATIVE_FROM"
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_ALTERNATIVE_FROM"
            filter="string" maxlength="255" />
 
     <field name="email_alternative_fromname" type="text"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_ALTERNATIVE_FROMNAME"
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_ALTERNATIVE_FROMNAME"
            filter="string" maxlength="255" />
 
     <field name="email_recipients_attach_uploads" type="textarea"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_RECIPIENTS_ATTACH_UPLOADS"
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_RECIPIENTS_ATTACH_UPLOADS"
            filter="string" rows="3" />
 
     <field name="email_html" type="radio" default="0" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_HTML">
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_HTML">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 
     <field name="email_template" type="editor"
            hiddenLabel="true"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_TEMPLATE"
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_TEMPLATE"
            filter="raw" 
            width="100%"
            height="550"
@@ -293,33 +293,33 @@
 
     <!-- Admin email -->
     <field name="email_admin_subject" type="text"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_ADMIN_SUBJECT"
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_ADMIN_SUBJECT"
            filter="string" maxlength="255" />
 
     <field name="email_admin_recipients" type="textarea"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_ADMIN_RECIPIENTS"
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_ADMIN_RECIPIENTS"
            filter="string" rows="3" />
 
     <field name="email_admin_alternative_from" type="text"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_ADMIN_ALTERNATIVE_FROM"
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_ADMIN_ALTERNATIVE_FROM"
            filter="string" maxlength="255" />
 
     <field name="email_admin_alternative_fromname" type="text"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_ADMIN_ALTERNATIVE_FROMNAME"
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_ADMIN_ALTERNATIVE_FROMNAME"
            filter="string" maxlength="255" />
 
     <field name="email_admin_recipients_attach_uploads" type="textarea"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_ADMIN_RECIPIENTS_ATTACH_UPLOADS"
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_ADMIN_RECIPIENTS_ATTACH_UPLOADS"
            filter="string" rows="3" />
 
     <field name="email_admin_html" type="radio" default="0" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_ADMIN_HTML">
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_ADMIN_HTML">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 
     <field name="email_admin_template" type="editor"
-           label="COM_CONTENTBUILDER_FIELD_EMAIL_ADMIN_TEMPLATE"
+           label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_ADMIN_TEMPLATE"
            filter="raw" 
            width="100%"
            height="550"
@@ -333,22 +333,22 @@
   <!-- =======================
        MISC / FLAGS
   ======================== -->
-  <fieldset name="misc" label="COM_CONTENTBUILDER_FIELDSET_MISC">
+  <fieldset name="misc" label="COM_CONTENTBUILDER_NG_FIELDSET_MISC">
 
     <field name="metadata" type="radio" default="1" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_METADATA">
+           label="COM_CONTENTBUILDER_NG_FIELD_METADATA">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 
     <field name="export_xls" type="radio" default="0" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_EXPORT_XLS">
+           label="COM_CONTENTBUILDER_NG_FIELD_EXPORT_XLS">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
 
     <field name="print_button" type="radio" default="1" filter="intval"
-           label="COM_CONTENTBUILDER_FIELD_PRINT_BUTTON">
+           label="COM_CONTENTBUILDER_NG_FIELD_PRINT_BUTTON">
       <option value="0">JNO</option>
       <option value="1">JYES</option>
     </field>
@@ -358,7 +358,7 @@
 
     <!-- Important: config = base64(serialize()) => on ne valide pas côté JForm -->
     <field name="config" type="textarea"
-           label="COM_CONTENTBUILDER_FIELD_CONFIG"
+           label="COM_CONTENTBUILDER_NG_FIELD_CONFIG"
            filter="raw" rows="6" />
 
   </fieldset>
@@ -369,7 +369,7 @@
        jform[itemLabels][ID], jform[itemWordwrap][ID], ...
        We declare them so JForm won't drop them.
   ======================== -->
-  <fieldset name="dynamic" label="COM_CONTENTBUILDER_FIELDSET_DYNAMIC" hidden="true">
+  <fieldset name="dynamic" label="COM_CONTENTBUILDER_NG_FIELDSET_DYNAMIC" hidden="true">
 
     <!-- Elements table editor arrays -->
     <field name="itemLabels"

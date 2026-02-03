@@ -6,14 +6,14 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder\Site\Controller;
+namespace CB\Component\Contentbuilder_ng\Site\Controller;
 
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Controller\BaseController;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
 class ExportController extends BaseController
 {

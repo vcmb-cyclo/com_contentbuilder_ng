@@ -8,7 +8,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Site\Element;
+namespace CB\Component\Contentbuilder_ng\Site\Element;
 
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -29,19 +29,19 @@ class JFormFieldCbfilter extends FormField
         $class = $this->element['class'] ? $this->element['class'] : "text_area";
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         if ($this->value) {
-            $db->setQuery("Select * From #__contentbuilder_elements Where published = 1 And form_id = " . intval($this->value));
+            $db->setQuery("Select * From #__contentbuilder_ng_elements Where published = 1 And form_id = " . intval($this->value));
             $elements = $db->loadAssocList();
             $i = 0;
 
             foreach ($elements as $element) {
-                $out .= '<div class="mb-2"><label class="w-15">' . htmlentities($element['label'], ENT_QUOTES, 'UTF-8') . '</label> <input class="form-control w-25" style="display:inline-block;" value="" type="text" onchange="contentbuilder_addValue(\'' . $element['reference_id'] . '\',this.value);" name="element_' . $element['reference_id'] . '" id="element_' . $element['reference_id'] . '"/>';
-                $out .= ' <input class="form-control w-10" style="display: inline-block;" value="" type="text" onchange="contentbuilder_addOrderValue(\'' . $element['reference_id'] . '\',this.value);" name="element_' . $element['reference_id'] . '_order" id="element_' . $element['reference_id'] . '_order"/></div>';
+                $out .= '<div class="mb-2"><label class="w-15">' . htmlentities($element['label'], ENT_QUOTES, 'UTF-8') . '</label> <input class="form-control w-25" style="display:inline-block;" value="" type="text" onchange="contentbuilder_ng_addValue(\'' . $element['reference_id'] . '\',this.value);" name="element_' . $element['reference_id'] . '" id="element_' . $element['reference_id'] . '"/>';
+                $out .= ' <input class="form-control w-10" style="display: inline-block;" value="" type="text" onchange="contentbuilder_ng_addOrderValue(\'' . $element['reference_id'] . '\',this.value);" name="element_' . $element['reference_id'] . '_order" id="element_' . $element['reference_id'] . '_order"/></div>';
 
                 $i++;
             }
 
         } else {
-            $out .= '<br/><br/>' . Text::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST');
+            $out .= '<br/><br/>' . Text::_('COM_CONTENTBUILDER_NG_ADD_LIST_VIEW_SELECT_FORM_FIRST');
         }
         $out .= '</div>';
         $out .= '
@@ -53,7 +53,7 @@ class JFormFieldCbfilter extends FormField
                 document.getElementById("' . $this->id . '").value = form_id;
                 
                 if(curr_form_id != form_id){
-                    document.getElementById("cbElementsWrapper").innerHTML = "' . addslashes(Text::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST')) . '";
+                    document.getElementById("cbElementsWrapper").innerHTML = "' . addslashes(Text::_('COM_CONTENTBUILDER_NG_ADD_LIST_VIEW_SELECT_FORM_FIRST')) . '";
                     document.getElementById("jform_params_cb_list_filterhidden").value = "";
                     document.getElementById("jform_params_cb_list_orderhidden").value = "";
                 }
@@ -84,9 +84,9 @@ class JFormFieldCbfilter extends FormField
                     }
                 }
 
-                function contentbuilder_setFormId(form_id){
+                function contentbuilder_ng_setFormId(form_id){
                     document.getElementById("' . $this->id . '").value = form_id;
-                    document.getElementById("cbElementsWrapper").innerHTML = "' . addslashes(Text::_('COM_CONTENTBUILDER_ADD_LIST_VIEW_SELECT_FORM_FIRST')) . '";
+                    document.getElementById("cbElementsWrapper").innerHTML = "' . addslashes(Text::_('COM_CONTENTBUILDER_NG_ADD_LIST_VIEW_SELECT_FORM_FIRST')) . '";
                     document.getElementById("jform_params_cb_list_filterhidden").value = "";
                     document.getElementById("jform_params_cb_list_orderhidden").value = "";
                 }

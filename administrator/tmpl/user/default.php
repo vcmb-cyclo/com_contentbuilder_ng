@@ -14,7 +14,7 @@
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
 ?>
 <style type="text/css">
@@ -24,10 +24,10 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
 </style>
 
 <div style="float:right" class="mb-3">
-    <input type="button" class="btn btn-sm btn-primary w-25" value="<?php echo Text::_('COM_CONTENTBUILDER_SAVE'); ?>"
+    <input type="button" class="btn btn-sm btn-primary w-25" value="<?php echo Text::_('COM_CONTENTBUILDER_NG_SAVE'); ?>"
         onclick="document.adminForm.task.value='user.save';document.adminForm.submit();" />
     <input type="button" class="btn btn-sm btn-primary w-25"
-        value="<?php echo Text::_('COM_CONTENTBUILDER_CANCEL'); ?>"
+        value="<?php echo Text::_('COM_CONTENTBUILDER_NG_CANCEL'); ?>"
         onclick="document.adminForm.task.value='user.cancel';document.adminForm.submit();" />
 </div>
 
@@ -38,7 +38,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
         <table class="adminlist table table-striped">
             <tr class="row0">
                 <td width="20%" align="right" class="key">
-                    <?php echo Text::_('COM_CONTENTBUILDER_ID'); ?>
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ID'); ?>
                 </td>
                 <td>
                     <?php echo htmlentities($this->subject->id, ENT_QUOTES, 'UTF-8'); ?>
@@ -46,7 +46,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
             </tr>
             <tr class="row0">
                 <td width="20%" align="right" class="key">
-                    <?php echo Text::_('COM_CONTENTBUILDER_NAME'); ?>
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_NAME'); ?>
                 </td>
                 <td>
                     <?php echo htmlentities($this->subject->name, ENT_QUOTES, 'UTF-8'); ?>
@@ -54,7 +54,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
             </tr>
             <tr class="row0">
                 <td width="20%" align="right" class="key">
-                    <?php echo Text::_('COM_CONTENTBUILDER_USERNAME'); ?>
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_USERNAME'); ?>
                 </td>
                 <td>
                     <?php echo htmlentities($this->subject->username, ENT_QUOTES, 'UTF-8'); ?>
@@ -63,7 +63,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="limit_add">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIMIT_ADD'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMIT_ADD'); ?>:
                     </label>
                 </td>
                 <td>
@@ -74,7 +74,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="limit_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIMIT_EDIT'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMIT_EDIT'); ?>:
                     </label>
                 </td>
                 <td>
@@ -85,7 +85,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="verification_date_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_DATE_VIEW'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_DATE_VIEW'); ?>:
                     </label>
                 </td>
                 <td>
@@ -108,7 +108,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
                     <input class="form-check-input" type="checkbox" id="verified_view" name="verified_view" value="1"
                         <?php echo $this->subject->verified_view ? ' checked="checked"' : ''; ?> /> <label
                         for="verified_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_VIEW'); ?>
                     </label>
 
                 </td>
@@ -116,7 +116,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="verification_date_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_DATE_NEW'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_DATE_NEW'); ?>:
                     </label>
                 </td>
                 <td>
@@ -140,7 +140,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
                     <input class="form-check-input" type="checkbox" id="verified_new" name="verified_new" value="1"
                         <?php echo $this->subject->verified_new ? ' checked="checked"' : ''; ?> /> <label
                         for="verified_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_VERIFIED_NEW'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_NEW'); ?>
                     </label>
 
                 </td>
@@ -148,7 +148,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="verification_date_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_DATE_EDIT'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_DATE_EDIT'); ?>:
                     </label>
                 </td>
                 <td>
@@ -172,7 +172,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
                     <input class="form-check-input" type="checkbox" id="verified_edit" name="verified_edit" value="1"
                         <?php echo $this->subject->verified_edit ? ' checked="checked"' : ''; ?> /> <label
                         for="verified_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_EDIT'); ?>
                     </label>
 
                 </td>
@@ -180,7 +180,7 @@ use CB\Component\Contentbuilder\Administrator\CBRequest;
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="published">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'); ?>
                     </label>
                 </td>
                 <td>

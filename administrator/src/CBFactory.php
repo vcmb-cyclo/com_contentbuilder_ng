@@ -3,11 +3,11 @@
 /**
  * @package     ContentBuilder
  * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
- * @copyright   (C) 2025 by XDA+GIL
+ * @copyright   (C) 2026 by XDA+GIL
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace CB\Component\Contentbuilder\Administrator;
+namespace CB\Component\Contentbuilder_ng\Administrator;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');

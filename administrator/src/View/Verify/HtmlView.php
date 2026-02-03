@@ -7,12 +7,12 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\View\Verify;
+namespace CB\Component\Contentbuilder_ng\Administrator\View\Verify;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
 
-use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
 {

@@ -15,7 +15,7 @@
  */
 
 
-namespace CB\Component\Contentbuilder\Site\View\Edit;
+namespace CB\Component\Contentbuilder_ng\Site\View\Edit;
 
 \defined('_JEXEC') or die;
 
@@ -94,7 +94,7 @@ class HtmlView extends BaseHtmlView
                 }
 
                 if ($this->theme_css === '' && $this->theme_js === '' && property_exists($this->item, 'theme_plugin')) {
-                    PluginHelper::importPlugin('contentbuilder_themes', $this->item->theme_plugin);
+                    PluginHelper::importPlugin('contentbuilder_ng_themes', $this->item->theme_plugin);
                     $dispatcher = Factory::getApplication()->getDispatcher();
 
                     $eventObj = new \Joomla\Event\Event('onContentTemplateCss', []);

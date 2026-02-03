@@ -13,7 +13,7 @@
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -363,22 +363,22 @@ class FormController extends BaseFormController
 
     public function listpublish(): bool
     {
-        return $this->elementsPublish(1, 'COM_CONTENTBUILDER_PUBLISHED');
+        return $this->elementsPublish(1, 'COM_CONTENTBUILDER_NG_PUBLISHED');
     }
 
     public function listunpublish(): bool
     {
-        return $this->elementsPublish(0, 'COM_CONTENTBUILDER_UNPUBLISHED');
+        return $this->elementsPublish(0, 'COM_CONTENTBUILDER_NG_UNPUBLISHED');
     }
 
     public function publish(): bool
     {
-        return $this->elementsPublish(1, 'COM_CONTENTBUILDER_PUBLISHED');
+        return $this->elementsPublish(1, 'COM_CONTENTBUILDER_NG_PUBLISHED');
     }
 
     public function unpublish(): bool
     {
-        return $this->elementsPublish(0, 'COM_CONTENTBUILDER_UNPUBLISHED');
+        return $this->elementsPublish(0, 'COM_CONTENTBUILDER_NG_UNPUBLISHED');
     }
 
 

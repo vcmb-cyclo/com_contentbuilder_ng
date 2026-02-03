@@ -1,6 +1,6 @@
 <?php return array(
     'root' => array(
-        'name' => 'xda-gil/com_contentbuilder',
+        'name' => 'xda-gil/com_contentbuilder_ng',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
         'reference' => '5b5f24a3a5face7500cc2929c1156d7af9f291e6',
@@ -64,7 +64,7 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'xda-gil/com_contentbuilder' => array(
+        'xda-gil/com_contentbuilder_ng' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
             'reference' => '5b5f24a3a5face7500cc2929c1156d7af9f291e6',

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="contentbuilder_ng_verify" version="6.0" method="upgrade">
+	<name>ContentBuilder NG - Verify - PayPal</name>
+	<creationDate>December 2025</creationDate>
+	<author>Xavier DANO</author>
+        <license>GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html</license>
+	<copyright>This Joomla! component is released under the GNU/GPL license</copyright>
+	<authorEmail>noreply@vcmb.fr</authorEmail>
+	<authorUrl>breezingforms.vcmb.fr</authorUrl>
+	<version>6.0.0-RC3</version>
+	<administration></administration>
+	<description>
+	<![CDATA[
+        Simple PayPal payment that verifies the desired view
+        ]]>
+    </description>
+    <files>
+        <filename plugin="paypal">paypal.php</filename>
+    </files>
+    <languages>
+    </languages>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field name="business" type="text" default="" label="Business/Email"/>
+                <field name="token" type="text" default="" label="Token"/>
+                <field name="test" type="radio" default="0" label="Sandbox">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </field>
+                <field name="test_business" type="text" default="" label="Test Business/Email"/>
+                <field name="test_token" type="text" default="" label="Test Token"/>
+            </fieldset>
+        </fields>
+    </config>
+</extension>

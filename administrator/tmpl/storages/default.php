@@ -87,7 +87,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
             <thead>
                 <tr>
                     <th class="w-1 text-nowrap">
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ID'), 'a.id', $listDirn, $listOrder); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_ID'), 'a.id', $listDirn, $listOrder); ?>
                     </th>
 
                     <th class="w-1 text-center">
@@ -95,19 +95,19 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                     </th>
 
                     <th>
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NAME'), 'a.name', $listDirn, $listOrder); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_NAME'), 'a.name', $listDirn, $listOrder); ?>
                     </th>
 
                     <th>
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_STORAGE_TITLE'), 'a.title', $listDirn, $listOrder); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_STORAGE_TITLE'), 'a.title', $listDirn, $listOrder); ?>
                     </th>
 
                     <th class="w-10 text-nowrap">
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_ORDERBY'), 'a.ordering', $listDirn, $listOrder); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_ORDERBY'), 'a.ordering', $listDirn, $listOrder); ?>
                     </th>
 
                     <th class="w-1 text-center">
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_PUBLISHED'), 'a.published', $listDirn, $listOrder); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'a.published', $listDirn, $listOrder); ?>
                     </th>
                 </tr>
             </thead>
@@ -166,9 +166,9 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 
                             <div class="d-flex flex-wrap align-items-center gap-2">
                                 <?php echo $this->pagination->getPagesCounter(); ?>
-                                <span><?php echo Text::_('COM_CONTENTBUILDER_DISPLAY_NUM'); ?></span>
+                                <span><?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_NUM'); ?></span>
                                 <span class="d-inline-block"><?php echo $limitSelect; ?></span>
-                                <span><?php echo Text::_('COM_CONTENTBUILDER_OF'); ?></span>
+                                <span><?php echo Text::_('COM_CONTENTBUILDER_NG_OF'); ?></span>
                                 <span><?php echo (int) ($this->pagination->total ?? 0); ?></span>
                             </div>
 

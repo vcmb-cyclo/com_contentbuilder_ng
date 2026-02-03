@@ -1,11 +1,11 @@
 <?php
-namespace CB\Component\Contentbuilder\Administrator\Service;
+namespace CB\Component\Contentbuilder_ng\Administrator\Service;
 
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
-use CB\Component\Contentbuilder\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 class StorageFieldService
 {
@@ -17,7 +17,7 @@ class StorageFieldService
 
         // 1) Charger le storage
         $db->setQuery(
-            'SELECT id, name, bytable FROM #__contentbuilder_storages WHERE id = ' . (int) $storageId
+            'SELECT id, name, bytable FROM #__contentbuilder_ng_storages WHERE id = ' . (int) $storageId
         );
         $storage = $db->loadObject();
 
@@ -49,7 +49,7 @@ class StorageFieldService
 
         // 3) Idempotent : si le champ existe déjà dans storage_fields -> stop
         $db->setQuery(
-            'SELECT id FROM #__contentbuilder_storage_fields
+            'SELECT id FROM #__contentbuilder_ng_storage_fields
              WHERE storage_id = ' . (int) $storageId . '
                AND name = ' . $db->quote($name)
         );
@@ -62,14 +62,14 @@ class StorageFieldService
         // 4) Calcul ordering (max+1)
         $db->setQuery(
             'SELECT COALESCE(MAX(ordering), 0) + 1
-             FROM #__contentbuilder_storage_fields
+             FROM #__contentbuilder_ng_storage_fields
              WHERE storage_id = ' . (int) $storageId
         );
         $ordering = (int) $db->loadResult();
 
         // 5) Insert storage_fields
         $db->setQuery(
-            'INSERT INTO #__contentbuilder_storage_fields
+            'INSERT INTO #__contentbuilder_ng_storage_fields
              (ordering, storage_id, name, title, is_group, group_definition, published)
              VALUES (
                 ' . (int) $ordering . ',

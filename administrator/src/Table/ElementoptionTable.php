@@ -13,7 +13,7 @@
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Table;
+namespace CB\Component\Contentbuilder_ng\Administrator\Table;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -84,7 +84,7 @@ class ElementoptionTable extends Table
      * @param object Database connector object
      */
     function __construct( DatabaseDriver $db ) {
-        parent::__construct('#__contentbuilder_elements', 'id', $db);
+        parent::__construct('#__contentbuilder_ng_elements', 'id', $db);
 
 
         // Joomla attend un champ "state" pour publish/unpublish au lieu de "published"

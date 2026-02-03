@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\View\List\Tmpl;
+namespace CB\Component\Contentbuilder_ng\Administrator\View\List\Tmpl;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -18,9 +18,9 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
 $language_allowed = ContentbuilderLegacyHelper::authorize('language');
 $edit_allowed = ContentbuilderLegacyHelper::authorize('edit');
@@ -34,15 +34,15 @@ $rating_allowed = ContentbuilderLegacyHelper::authorize('rating');
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 
 // Charge le manifeste joomla.asset.json du composant
-$wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder');
-$wa->useScript('com_contentbuilder.contentbuilder');
+$wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
+$wa->useScript('com_contentbuilder_ng.contentbuilder_ng');
 
 ?>
 <?php Factory::getApplication()->getDocument()->addStyleDeclaration($this->theme_css); ?>
 <?php Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js); ?>
 <script language="javascript" type="text/javascript">
     <!--
-    function contentbuilder_selectAll(checker) {
+    function contentbuilder_ng_selectAll(checker) {
         for (var i = 0; i < document.adminForm.elements.length; i++) {
             if (document.adminForm.elements[i].name == 'cid[]') {
                 if (checker.checked) {
@@ -53,26 +53,26 @@ $wa->useScript('com_contentbuilder.contentbuilder');
             }
         }
     }
-    function contentbuilder_state() {
+    function contentbuilder_ng_state() {
         document.getElementById('controller').value = 'edit';
         document.getElementById('view').value = 'edit';
         document.getElementById('task').value = 'list.state';
         document.adminForm.submit();
     }
-    function contentbuilder_publish() {
+    function contentbuilder_ng_publish() {
         document.getElementById('controller').value = 'edit';
         document.getElementById('view').value = 'edit';
         document.getElementById('task').value = 'list.publish';
         document.adminForm.submit();
     }
-    function contentbuilder_language() {
+    function contentbuilder_ng_language() {
         document.getElementById('controller').value = 'edit';
         document.getElementById('view').value = 'edit';
         document.getElementById('task').value = 'list.language';
         document.adminForm.submit();
     }
-    function contentbuilder_delete() {
-        var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDER_CONFIRM_DELETE_MESSAGE'); ?>');
+    function contentbuilder_ng_delete() {
+        var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDER_NG_CONFIRM_DELETE_MESSAGE'); ?>');
         if (confirmed) {
             document.getElementById('controller').value = 'edit';
             document.getElementById('view').value = 'edit';
@@ -80,8 +80,8 @@ $wa->useScript('com_contentbuilder.contentbuilder');
             document.adminForm.submit();
         }
     }
-    function contentbuilder_related_item(record_id) {
-        window.parent.contentbuilder_related_item(record_id);
+    function contentbuilder_ng_related_item(record_id) {
+        window.parent.contentbuilder_ng_related_item(record_id);
     }
     //-->
 </script>
@@ -97,7 +97,7 @@ SELECT
                         href="<?php echo Route::_('index.php?option=com_contentbuilder&view=export&id=' . Factory::getApplication()->input->getInt('id', 0) . '&type=xls&format=raw&tmpl=component'); ?>">
                         <div class="
                 cbXlsExportButton"
-                            style="background-image: url(../components/com_contentbuilder/images/xls.png); background-repeat: no-repeat; width: 16px; height: 16px;"
+                            style="background-image: url(../components/com_contentbuilder_ng/images/xls.png); background-repeat: no-repeat; width: 16px; height: 16px;"
                             alt="Export"></div>
                     </a></span>
                 <?php
@@ -118,7 +118,7 @@ SELECT
                         ?>
                         <a class="button cbButton cbNewButton"
                             href="<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&backtolist=1&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&record_id=&limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0) . '&filter_order=' . Factory::getApplication()->input->getCmd('filter_order')); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NEW'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?>
                         </a>
                         <?php
                     }
@@ -128,8 +128,8 @@ SELECT
                     <?php
                     if ($delete_allowed) {
                         ?>
-                        <a class=" button cbButton cbDeleteButton" href="javascript:contentbuilder_delete();">
-                            <?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>
+                        <a class=" button cbButton cbDeleteButton" href="javascript:contentbuilder_ng_delete();">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE'); ?>
                         </a>
                         <?php
                     }
@@ -141,7 +141,7 @@ SELECT
                         ?>
                         <select style="max-width: 100px;" name="list_state">
                             <option value="0"> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?> -
                             </option>
                             <?php
                             foreach ($this->states as $state) {
@@ -153,8 +153,8 @@ SELECT
                             }
                             ?>
                         </select>
-                        <a class=" button cbButton cbSetButton" href="javascript:contentbuilder_state();">
-                            <?php echo Text::_('COM_CONTENTBUILDER_SET'); ?>
+                        <a class=" button cbButton cbSetButton" href="javascript:contentbuilder_ng_state();">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_SET'); ?>
                         </a>
                         <?php
                     }
@@ -166,17 +166,17 @@ SELECT
                         ?>
                         <select style="max-width: 100px;" name="list_publish">
                             <option value="-1"> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_UNPUBLISHED'); ?> -
                             </option>
                             <option value="1">
-                                <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH') ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH') ?>
                             </option>
                             <option value="0">
-                                <?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISH') ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_UNPUBLISH') ?>
                             </option>
                         </select>
-                        <a class="button cbButton cbSetButton" href="javascript:contentbuilder_publish();">
-                            <?php echo Text::_('COM_CONTENTBUILDER_SET'); ?>
+                        <a class="button cbButton cbSetButton" href="javascript:contentbuilder_ng_publish();">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_SET'); ?>
                         </a>
                         <?php
                     }
@@ -188,10 +188,10 @@ SELECT
                         ?>
                         <select style="max-width: 100px;" name="list_language">
                             <option value="*"> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'); ?> -
                             </option>
                             <option value="*">
-                                <?php echo Text::_('COM_CONTENTBUILDER_ANY'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_ANY'); ?>
                             </option>
                             <?php
                             foreach ($this->languages as $filter_language) {
@@ -203,8 +203,8 @@ SELECT
                             }
                             ?>
                         </select>
-                        <a class=" button cbButton cbSetButton" href="javascript:contentbuilder_language();">
-                            <?php echo Text::_('COM_CONTENTBUILDER_SET'); ?>
+                        <a class=" button cbButton cbSetButton" href="javascript:contentbuilder_ng_language();">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_SET'); ?>
                         </a>
                         <?php
                     }
@@ -214,10 +214,10 @@ SELECT
 
                         <?php echo $this->pagination->getPagesCounter(); ?>
                         <?php
-                        echo '&nbsp;&nbsp;&nbsp;' . Text::_('COM_CONTENTBUILDER_DISPLAY_NUM') . '&nbsp;';
+                        echo '&nbsp;&nbsp;&nbsp;' . Text::_('COM_CONTENTBUILDER_NG_DISPLAY_NUM') . '&nbsp;';
                         echo $this->pagination->getLimitBox();
                         ?>
-                        <?php echo Text::_('COM_CONTENTBUILDER_OF'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_OF'); ?>
                         <?php echo $this->total; ?>
 
                         <?php
@@ -230,8 +230,8 @@ SELECT
                 if ($this->display_filter) {
                     ?>
                     <td align="left" width="60%" class="text-nowrap">
-                        <?php echo Text::_('COM_CONTENTBUILDER_FILTER') . '&nbsp;'; ?>
-                        <input type="text" id="contentbuilder_filter" name="filter"
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER') . '&nbsp;'; ?>
+                        <input type="text" id="contentbuilder_ng_filter" name="filter"
                             value="<?php echo $this->escape($this->lists['filter']); ?>" class=" inputbox"
                             onchange="document.adminForm.submit();" />
                         <?php
@@ -240,7 +240,7 @@ SELECT
                             <select style="max-width: 100px;" name="list_state_filter" id="list_state_filter"
                                 onchange="document.adminForm.submit();">
                                 <option value="0"> -
-                                    <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?> -
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?> -
                                 </option>
                                 <?php
                                 foreach ($this->states as $state) {
@@ -261,13 +261,13 @@ SELECT
                             <select style=" max-width: 100px;" name="list_publish_filter" id="list_publish_filter"
                                 onchange="document.adminForm.submit();">
                                 <option value="-1"> -
-                                    <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_UNPUBLISHED'); ?> -
                                 </option>
                                 <option value="1" <?php echo $this->lists['filter_publish'] == 1 ? ' selected="selected"' : ''; ?>>
-                                    <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED') ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED') ?>
                                 </option>
                                 <option value="0" <?php echo $this->lists['filter_publish'] == 0 ? ' selected="selected"' : ''; ?>>
-                                    <?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISHED') ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_UNPUBLISHED') ?>
                                 </option>
                             </select>
                             <?php
@@ -278,7 +278,7 @@ SELECT
                             <select style="max-width: 100px;" name="list_language_filter" id="list_language_filter"
                                 onchange="document.adminForm.submit();">
                                 <option value=""> -
-                                    <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?> -
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'); ?> -
                                 </option>
                                 <?php
                                 foreach ($this->languages as $filter_language) {
@@ -294,11 +294,11 @@ SELECT
                         }
                         ?>
                         <button class=" button cbButton cbSearchButton" onclick="document.adminForm.submit();">
-                            <?php echo Text::_('COM_CONTENTBUILDER_SEARCH') ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_SEARCH') ?>
                         </button>
                         <button class="button cbButton cbResetButton"
-                            onclick="document.getElementById('contentbuilder_filter').value='';<?php echo $this->list_state && count($this->states) ? "if(document.getElementById('list_state_filter')) document.getElementById('list_state_filter').selectedIndex=0;" : ""; ?><?php echo $this->list_publish ? "if(document.getElementById('list_publish_filter')) document.getElementById('list_publish_filter').selectedIndex=0;" : ""; ?>document.adminForm.submit();">
-                            <?php echo Text::_('COM_CONTENTBUILDER_RESET') ?>
+                            onclick="document.getElementById('contentbuilder_ng_filter').value='';<?php echo $this->list_state && count($this->states) ? "if(document.getElementById('list_state_filter')) document.getElementById('list_state_filter').selectedIndex=0;" : ""; ?><?php echo $this->list_publish ? "if(document.getElementById('list_publish_filter')) document.getElementById('list_publish_filter').selectedIndex=0;" : ""; ?>document.adminForm.submit();">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_RESET') ?>
                         </button>
                     </td>
                     <?php
@@ -347,7 +347,7 @@ SELECT
                         ?>
                         <th class="sectiontableheader" width="5">
                             <?php echo $sortLink(
-                                htmlentities('COM_CONTENTBUILDER_ID', ENT_QUOTES, 'UTF-8') . $sort_indicator('colRecord'),
+                                htmlentities('COM_CONTENTBUILDER_NG_ID', ENT_QUOTES, 'UTF-8') . $sort_indicator('colRecord'),
                                 'colRecord'
                             ); ?>
                         </th>
@@ -357,20 +357,20 @@ SELECT
                     if ($this->select_column && ($delete_allowed || $state_allowed || $publish_allowed)) {
                         ?>
                         <th class="sectiontableheader" width="20">
-                            <input class="contentbuilder_select_all" type="checkbox"
-                                onclick="contentbuilder_selectAll(this);" />
+                            <input class="contentbuilder_ng_select_all" type="checkbox"
+                                onclick="contentbuilder_ng_selectAll(this);" />
                         </th>
                         <?php
                     }
                     ?>
                     <th class="sectiontableheader" width="20">
-                        <?php echo Text::_('COM_CONTENTBUILDER_ADD_RELATION'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ADD_RELATION'); ?>
                     </th>
                     <?php
                     if ($this->edit_button && $edit_allowed) {
                         ?>
                         <th class="sectiontableheader" width="20">
-                            <?php echo Text::_('COM_CONTENTBUILDER_EDIT'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT'); ?>
                         </th>
                         <?php
                     }
@@ -378,7 +378,7 @@ SELECT
                     if ($this->list_state) {
                         ?>
                         <th class="sectiontableheader" width="20">
-                            <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?>
                         </th>
                         <?php
                     }
@@ -386,7 +386,7 @@ SELECT
                     if ($this->list_publish && $publish_allowed) {
                         ?>
                         <th class="sectiontableheader" width="20">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'); ?>
                         </th>
                         <?php
                     }
@@ -394,7 +394,7 @@ SELECT
                     if ($this->list_language) {
                         ?>
                         <th class="sectiontableheader" width="20">
-                            <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'); ?>
                         </th>
                         <?php
                     }
@@ -403,7 +403,7 @@ SELECT
                         ?>
                         <th class="sectiontableheader" width="20">
                             <?php echo $sortLink(
-                                htmlentities('COM_CONTENTBUILDER_ARTICLE', ENT_QUOTES, 'UTF-8') . $sort_indicator('colArticleId'),
+                                htmlentities('COM_CONTENTBUILDER_NG_ARTICLE', ENT_QUOTES, 'UTF-8') . $sort_indicator('colArticleId'),
                                 'colArticleId'
                             ); ?>
                         </th>
@@ -414,7 +414,7 @@ SELECT
                         ?>
                         <th class="sectiontableheader" width="20">
                             <?php echo $sortLink(
-                                htmlentities('COM_CONTENTBUILDER_AUTHOR', ENT_QUOTES, 'UTF-8') . $sort_indicator('colAuthor'),
+                                htmlentities('COM_CONTENTBUILDER_NG_AUTHOR', ENT_QUOTES, 'UTF-8') . $sort_indicator('colAuthor'),
                                 'colAuthor'
                             ); ?>
                         </th>
@@ -425,7 +425,7 @@ SELECT
                         ?>
                         <th class="sectiontableheader" width="20">
                             <?php echo $sortLink(
-                                htmlentities('COM_CONTENTBUILDER_RATING', ENT_QUOTES, 'UTF-8') . $sort_indicator('colRating'),
+                                htmlentities('COM_CONTENTBUILDER_NG_RATING', ENT_QUOTES, 'UTF-8') . $sort_indicator('colRating'),
                                 'colRating'
                             ); ?>
                         </th>
@@ -437,7 +437,7 @@ SELECT
                             ?>
                             <th class="sectiontableheader">
                                 <?php echo $sortLink(
-                                    nl2br(htmlentities(contentbuilder_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')) . $sort_indicator("col$reference_id"),
+                                    nl2br(htmlentities(contentbuilder_ng_wordwrap($label, 20, "\n", true), ENT_QUOTES, 'UTF-8')) . $sort_indicator("col$reference_id"),
                                     "col$reference_id"
                                 ); ?>
                             </th>
@@ -492,8 +492,8 @@ SELECT
 
                     <td>
                         <a
-                            href="javascript:contentbuilder_related_item(<?php echo $row->colRecord; ?>);window.parent.SqueezeBox.close();"><img
-                                src="../components/com_contentbuilder/images/plus.png" border="0" width="18"
+                            href="javascript:contentbuilder_ng_related_item(<?php echo $row->colRecord; ?>);window.parent.SqueezeBox.close();"><img
+                                src="../components/com_contentbuilder_ng/images/plus.png" border="0" width="18"
                                 height="18" /></a>
                     </td>
 
@@ -501,7 +501,7 @@ SELECT
                     if ($this->edit_button && $edit_allowed) {
                         ?>
                         <td>
-                            <a href="<?php echo $edit_link; ?>"><img src="<?php echo \Joomla\CMS\Uri\Uri::root(); ?>media/com_contentbuilder/images/edit.png"
+                            <a href="<?php echo $edit_link; ?>"><img src="<?php echo \Joomla\CMS\Uri\Uri::root(); ?>media/com_contentbuilder_ng/images/edit.png"
                                     border="0" width="18" height="18" /></a>
                         </td>
                         <?php

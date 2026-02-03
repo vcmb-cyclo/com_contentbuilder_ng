@@ -15,7 +15,7 @@
  */
 
 
-namespace CB\Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder_ng\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -27,7 +27,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
-use CB\Component\Contentbuilder\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 class StorageModel extends AdminModel
 {
@@ -43,7 +43,7 @@ class StorageModel extends AdminModel
     ) {
         // IMPORTANT : on transmet factory/app/input à AdminModel
         parent::__construct($config, $factory);
-        $this->option = 'com_contentbuilder';
+        $this->option = 'com_contentbuilder_ng';
     }
 
     public function getTable($type = 'Storage', $prefix = 'Administrator', $config = [])
@@ -53,7 +53,7 @@ class StorageModel extends AdminModel
 
         // Fallback (déprécié mais utile en dépannage)
         // if (!$table) {
-        //    $table = Table::getInstance($type, 'CB\\Component\\Contentbuilder\\Administrator\\Table\\', $config);
+        //    $table = Table::getInstance($type, 'CB\\Component\\Contentbuilder_ng\\Administrator\\Table\\', $config);
         // }
 
         if (!$table) {
@@ -103,7 +103,7 @@ class StorageModel extends AdminModel
 
         // Pas d’ajout en mode bytable
         if (!empty($storage->bytable)) {
-            $this->setError(Text::_('COM_CONTENTBUILDER_CANNOT_ADD_FIELD_WITH_FOREIGN_TABLE'));
+            $this->setError(Text::_('COM_CONTENTBUILDER_NG_CANNOT_ADD_FIELD_WITH_FOREIGN_TABLE'));
             return false;
         }
 
@@ -113,7 +113,7 @@ class StorageModel extends AdminModel
 
         $fieldname = trim((string) ($jform['fieldname'] ?? ''));
         if ($fieldname === '') {
-            $this->setError(Text::_('COM_CONTENTBUILDER_FIELDNAME_REQUIRED'));
+            $this->setError(Text::_('COM_CONTENTBUILDER_NG_FIELDNAME_REQUIRED'));
             return false;
         }
 
@@ -133,25 +133,25 @@ class StorageModel extends AdminModel
 
         // Unicité
         $db->setQuery(
-            "SELECT id FROM #__contentbuilder_storage_fields
+            "SELECT id FROM #__contentbuilder_ng_storage_fields
             WHERE storage_id = " . (int) $storageId . " AND `name` = " . $db->quote($newfieldname)
         );
         if ($db->loadResult()) {
-            $this->setError(Text::sprintf('COM_CONTENTBUILDER_FIELD_EXISTS', $newfieldname));
+            $this->setError(Text::sprintf('COM_CONTENTBUILDER_NG_FIELD_EXISTS', $newfieldname));
             return false;
         }
 
         // Ordering max+1
         $db->setQuery(
             "SELECT COALESCE(MAX(ordering), 0) + 1
-            FROM #__contentbuilder_storage_fields
+            FROM #__contentbuilder_ng_storage_fields
             WHERE storage_id = " . (int) $storageId
         );
         $max = (int) $db->loadResult();
 
         // Insert field
         $db->setQuery(
-            "INSERT INTO #__contentbuilder_storage_fields
+            "INSERT INTO #__contentbuilder_ng_storage_fields
             (ordering, storage_id, `name`, `title`, `is_group`, `group_definition`)
             VALUES (" . (int) $max . ", " . (int) $storageId . ", " . $db->quote($newfieldname) . ", " . $db->quote($newfieldtitle) . ", " . (int) $isGroup . ", " . $db->quote($groupDef) . ")"
         );
@@ -310,12 +310,12 @@ class StorageModel extends AdminModel
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 
         // ordering max+1
-        $db->setQuery("SELECT COALESCE(MAX(ordering), 0) + 1 FROM #__contentbuilder_storage_fields WHERE storage_id = " . (int) $storageId);
+        $db->setQuery("SELECT COALESCE(MAX(ordering), 0) + 1 FROM #__contentbuilder_ng_storage_fields WHERE storage_id = " . (int) $storageId);
         $max = (int) $db->loadResult();
 
         // unicité
         $db->setQuery(
-            "SELECT `name` FROM #__contentbuilder_storage_fields WHERE `name` = " . $db->quote($newfieldname) .
+            "SELECT `name` FROM #__contentbuilder_ng_storage_fields WHERE `name` = " . $db->quote($newfieldname) .
             " AND storage_id = " . (int) $storageId
         );
         $exists = $db->loadResult();
@@ -333,7 +333,7 @@ class StorageModel extends AdminModel
         ]);
 
         $db->setQuery(
-            "INSERT INTO #__contentbuilder_storage_fields (ordering, storage_id, `name`, `title`, `is_group`, `group_definition`)
+            "INSERT INTO #__contentbuilder_ng_storage_fields (ordering, storage_id, `name`, `title`, `is_group`, `group_definition`)
              VALUES (" . (int)$max . "," . (int)$storageId . "," . $db->quote($newfieldname) . "," . $db->quote($newfieldtitle) . "," . (int)$isGroup . "," . $db->quote($groupDef) . ")"
         );
         $db->execute();
@@ -464,12 +464,12 @@ class StorageModel extends AdminModel
         $fieldin = rtrim($fieldin, ',');
 
         // ordering max+1
-        $db->setQuery("SELECT COALESCE(MAX(ordering), 0) + 1 FROM #__contentbuilder_storage_fields WHERE storage_id = " . (int) $storageId);
+        $db->setQuery("SELECT COALESCE(MAX(ordering), 0) + 1 FROM #__contentbuilder_ng_storage_fields WHERE storage_id = " . (int) $storageId);
         $max = (int) $db->loadResult();
 
         if ($fieldin !== '') {
             $db->setQuery(
-                "SELECT `name` FROM #__contentbuilder_storage_fields
+                "SELECT `name` FROM #__contentbuilder_ng_storage_fields
                  WHERE `name` IN ($fieldin) AND storage_id = " . (int) $storageId
             );
             $existingNames = $db->loadColumn() ?: [];
@@ -477,7 +477,7 @@ class StorageModel extends AdminModel
             foreach ($fields as $field => $type) {
                 if (!in_array($field, $existingNames, true) && !in_array($field, $system_fields, true)) {
                     $db->setQuery(
-                        "INSERT INTO #__contentbuilder_storage_fields (ordering, storage_id, `name`, `title`, `is_group`, `group_definition`)
+                        "INSERT INTO #__contentbuilder_ng_storage_fields (ordering, storage_id, `name`, `title`, `is_group`, `group_definition`)
                          VALUES (" . (int)$max . "," . (int)$storageId . "," . $db->quote($field) . "," . $db->quote($field) . ",0,'')"
                     );
                     $db->execute();
@@ -550,10 +550,10 @@ class StorageModel extends AdminModel
 
                 foreach ($thirdPartyIds as $thirdPartyId) {
                     $db->setQuery(
-                        "INSERT INTO #__contentbuilder_records
+                        "INSERT INTO #__contentbuilder_ng_records
                         (`type`, last_update, is_future, lang_code, sef, published, record_id, reference_id)
                         VALUES
-                        ('com_contentbuilder', " . $db->quote($last_update) . ", 0, '*', '', 1, " . (int)$thirdPartyId . ", " . (int)$storageId . ")"
+                        ('com_contentbuilder_ng', " . $db->quote($last_update) . ", 0, '*', '', 1, " . (int)$thirdPartyId . ", " . (int)$storageId . ")"
                     );
                     $db->execute();
                 }
@@ -603,12 +603,12 @@ class StorageModel extends AdminModel
 
             if (!$bytable) {
                 // old name
-                $db->setQuery("SELECT `name` FROM #__contentbuilder_storage_fields WHERE id = " . (int)$field_id);
+                $db->setQuery("SELECT `name` FROM #__contentbuilder_ng_storage_fields WHERE id = " . (int)$field_id);
                 $old_name = (string) $db->loadResult();
 
                 // update storage_fields
                 $db->setQuery(
-                    "UPDATE #__contentbuilder_storage_fields
+                    "UPDATE #__contentbuilder_ng_storage_fields
                      SET group_definition = " . $db->quote($groupDef) . ",
                          is_group = " . (int)$isGroup . ",
                          `name` = " . $db->quote($name) . ",
@@ -629,7 +629,7 @@ class StorageModel extends AdminModel
             } else {
                 // bytable => pas de rename colonne
                 $db->setQuery(
-                    "UPDATE #__contentbuilder_storage_fields
+                    "UPDATE #__contentbuilder_ng_storage_fields
                      SET group_definition = " . $db->quote($groupDef) . ",
                          is_group = " . (int)$isGroup . ",
                          `title` = " . $db->quote($title) . "
@@ -661,7 +661,7 @@ class StorageModel extends AdminModel
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 
         // Liste des champs définis
-        $db->setQuery("SELECT `name` FROM #__contentbuilder_storage_fields WHERE storage_id = " . (int)$storageId);
+        $db->setQuery("SELECT `name` FROM #__contentbuilder_ng_storage_fields WHERE storage_id = " . (int)$storageId);
         $fieldNames = $db->loadColumn() ?: [];
 
         // Colonnes existantes
@@ -700,7 +700,7 @@ class StorageModel extends AdminModel
             // charger storage
             $storage = $this->getItem($pk);
 
-            $db->setQuery("DELETE FROM #__contentbuilder_storage_fields WHERE storage_id = " . (int)$pk);
+            $db->setQuery("DELETE FROM #__contentbuilder_ng_storage_fields WHERE storage_id = " . (int)$pk);
             $db->execute();
 
             try {
@@ -740,7 +740,7 @@ class StorageModel extends AdminModel
         $data = Factory::getApplication()->input->post->getArray();
 
         if (isset($data['bytable']) && $data['bytable']) {
-            return Text::_('COM_CONTENTBUILDER_CANNOT_USE_CSV_WITH_FOREIGN_TABLE');
+            return Text::_('COM_CONTENTBUILDER_NG_CANNOT_USE_CSV_WITH_FOREIGN_TABLE');
         }
 
         if (isset($data['bytable'])) {
@@ -826,7 +826,7 @@ class StorageModel extends AdminModel
 
         if ($encoding) {
             if (!function_exists('iconv')) {
-                return Text::_('COM_CONTENTBUILDER_CSV_IMPORT_REPAIR_NO_ICONV');
+                return Text::_('COM_CONTENTBUILDER_NG_CSV_IMPORT_REPAIR_NO_ICONV');
             }
             $handle = $this->utf8_fopen_read("$source_file", $encoding);
         } else {
@@ -845,7 +845,7 @@ class StorageModel extends AdminModel
             foreach ($columns as &$column) {
                 $col = str_replace(".", "", trim($column));
                 if (in_array($col, $colCheck)) {
-                    return Text::_('COM_CONTENTBUILDER_CSV_IMPORT_COLUMN_NOT_UNIQUE');
+                    return Text::_('COM_CONTENTBUILDER_NG_CSV_IMPORT_COLUMN_NOT_UNIQUE');
                 }
                 $colCheck[] = $col;
             }
@@ -862,9 +862,9 @@ class StorageModel extends AdminModel
             if (Factory::getApplication()->input->getBool('csv_drop_records', false)) {
                 $this->getDatabase()->setQuery("Truncate Table #__" . $this->target_table);
                 $this->getDatabase()->execute();
-                $this->getDatabase()->setQuery("Delete From #__contentbuilder_records Where `type` = 'com_contentbuilder' And reference_id = " . $this->getDatabase()->Quote($this->_id));
+                $this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_records Where `type` = 'com_contentbuilder_ng' And reference_id = " . $this->getDatabase()->Quote($this->_id));
                 $this->getDatabase()->execute();
-                $this->getDatabase()->setQuery("Delete a.*, c.* From #__contentbuilder_articles As a, #__content As c Where c.id = a.article_id And a.`type` = 'com_contentbuilder' And a.reference_id = " . $this->getDatabase()->Quote($this->_id));
+                $this->getDatabase()->setQuery("Delete a.*, c.* From #__contentbuilder_ng_articles As a, #__content As c Where c.id = a.article_id And a.`type` = 'com_contentbuilder_ng' And a.reference_id = " . $this->getDatabase()->Quote($this->_id));
                 $this->getDatabase()->execute();
             }
 
@@ -876,7 +876,7 @@ class StorageModel extends AdminModel
                 $query = "$insert_query_prefix (" . join(", ", $this->quote_all_array($data)) . ")";
                 $this->getDatabase()->setQuery($query);
                 $this->getDatabase()->execute();
-                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_records (`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id) Values ('com_contentbuilder'," . $this->getDatabase()->Quote($last_update) . ",0,'*',''," . Factory::getApplication()->input->getInt('csv_published', 0) . ", " . $this->getDatabase()->Quote(intval($this->getDatabase()->insertid())) . ", " . $this->getDatabase()->Quote($this->_id) . ")");
+                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_records (`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id) Values ('com_contentbuilder_ng'," . $this->getDatabase()->Quote($last_update) . ",0,'*',''," . Factory::getApplication()->input->getInt('csv_published', 0) . ", " . $this->getDatabase()->Quote(intval($this->getDatabase()->insertid())) . ", " . $this->getDatabase()->Quote($this->_id) . ")");
                 $this->getDatabase()->execute();
             }
             fclose($handle);

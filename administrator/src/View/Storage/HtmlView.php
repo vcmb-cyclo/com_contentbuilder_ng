@@ -7,7 +7,7 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder\Administrator\View\Storage;
+namespace CB\Component\Contentbuilder_ng\Administrator\View\Storage;
 
 \defined('_JEXEC') or die;
 
@@ -15,7 +15,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
 {
@@ -35,8 +35,8 @@ class HtmlView extends BaseHtmlView
 
         // JS
         $wa = $app->getDocument()->getWebAssetManager();
-        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder');
-        $wa->useScript('com_contentbuilder.jscolor');
+        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
+        $wa->useScript('com_contentbuilder_ng.jscolor');
 
 		if (!$this->frontend) {
             // 1️⃣ Récupération du WebAssetManager
@@ -44,7 +44,7 @@ class HtmlView extends BaseHtmlView
             $wa = $document->getWebAssetManager();
             $wa->addInlineStyle(
                 '.icon-logo_left{
-                    background-image:url(' . Uri::root(true) . '/media/com_contentbuilder/images/logo_left.png);
+                    background-image:url(' . Uri::root(true) . '/media/com_contentbuilder_ng/images/logo_left.png);
                     background-size:contain;
                     background-repeat:no-repeat;
                     background-position:center;
@@ -73,7 +73,7 @@ class HtmlView extends BaseHtmlView
         try {
             $storageId  = (int) ($this->item->id ?? $app->input->getInt('id', 0));
             if ($storageId > 0) {
-                $factory = $app->bootComponent('com_contentbuilder')->getMVCFactory();
+                $factory = $app->bootComponent('com_contentbuilder_ng')->getMVCFactory();
                 $fieldsModel = $factory->createModel('Storagefields', 'Administrator');
 
                 if (!$fieldsModel) {
@@ -116,10 +116,10 @@ class HtmlView extends BaseHtmlView
         }
 
         $isNew = ((int) ($this->item->id ?? 0) < 1);
-        $text  = $isNew ? Text::_('COM_CONTENTBUILDER_NEW') : Text::_('COM_CONTENTBUILDER_EDIT');
+        $text  = $isNew ? Text::_('COM_CONTENTBUILDER_NG_NEW') : Text::_('COM_CONTENTBUILDER_NG_EDIT');
 
         ToolbarHelper::title(
-            'ContentBuilder :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_STORAGES') : ($this->item->title ?? ''))
+            'ContentBuilder :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_NG_STORAGES') : ($this->item->title ?? ''))
             . ' : <small><small>[ ' . $text . ' ]</small></small>',
             'logo_left'
         );
@@ -127,7 +127,7 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::apply('storage.apply');
         ToolbarHelper::save('storage.save');
 
-        ToolbarHelper::custom('storage.save2new', 'save', '', Text::_('COM_CONTENTBUILDER_SAVENEW'), false);
+        ToolbarHelper::custom('storage.save2new', 'save', '', Text::_('COM_CONTENTBUILDER_NG_SAVENEW'), false);
         ToolbarHelper::publish('storage.publish');
         ToolbarHelper::unpublish('storage.unpublish');
 
@@ -136,14 +136,14 @@ class HtmlView extends BaseHtmlView
         if ($id > 0) {
             // POST via task + token : on fait pointer vers une URL, mais le bouton doit poster (sinon token)
             // Astuce: utiliser un "custom" button JS submitTask
-            ToolbarHelper::custom('datatable.create', 'database', '', Text::_('COM_CONTENTBUILDER_DATATABLE_CREATE'), false);
-            ToolbarHelper::custom('datatable.sync', 'refresh', '', Text::_('COM_CONTENTBUILDER_DATATABLE_SYNC'), false);
+            ToolbarHelper::custom('datatable.create', 'database', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_CREATE'), false);
+            ToolbarHelper::custom('datatable.sync', 'refresh', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC'), false);
         }
         
         ToolbarHelper::deleteList(
-            Text::_('COM_CONTENTBUILDER_DELETE_FIELDS_CONFIRM'),
+            Text::_('COM_CONTENTBUILDER_NG_DELETE_FIELDS_CONFIRM'),
             'storage.listDelete',
-            Text::_('COM_CONTENTBUILDER_DELETE_FIELDS')
+            Text::_('COM_CONTENTBUILDER_NG_DELETE_FIELDS')
         );
 
         ToolbarHelper::cancel('storage.cancel', $isNew ? 'JTOOLBAR_CANCEL' : 'JTOOLBAR_CLOSE');

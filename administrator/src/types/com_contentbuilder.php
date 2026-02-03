@@ -7,7 +7,7 @@
  * @copyright   Copyright (C) 2026 by XDA+GIL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\types;
+namespace CB\Component\Contentbuilder_ng\Administrator\types;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -16,9 +16,9 @@ use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
-class contentbuilder_com_contentbuilder
+class contentbuilder_ng_com_contentbuilder
 {
 
     public $properties = null;
@@ -34,13 +34,13 @@ class contentbuilder_com_contentbuilder
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $this->form_id = intval($id);
-        $db->setQuery("Select * From #__contentbuilder_storages Where id = " . intval($id) . " And published = 1 Order By `ordering`");
+        $db->setQuery("Select * From #__contentbuilder_ng_storages Where id = " . intval($id) . " And published = 1 Order By `ordering`");
         $this->properties = $db->loadObject();
         if ($this->properties instanceof \stdClass) {
             $this->exists = true;
             $this->bytable = $this->properties->bytable == 1 ? '' : '#__';
 
-            $db->setQuery("Select * From #__contentbuilder_storage_fields Where storage_id = " . intval($id) . " And published = 1 Order By `ordering`");
+            $db->setQuery("Select * From #__contentbuilder_ng_storage_fields Where storage_id = " . intval($id) . " And published = 1 Order By `ordering`");
             $this->elements = $db->loadAssocList();
         }
     }
@@ -56,7 +56,7 @@ class contentbuilder_com_contentbuilder
                 From 
                 " . $this->bytable . $this->properties->name . " As r
                 Where r.id Not In (
-                    Select record_id From #__contentbuilder_records As cr Where cr.`type` = 'com_contentbuilder' And cr.reference_id = '" . intval($this->properties->id) . "' And cr.record_id = r.id
+                    Select record_id From #__contentbuilder_ng_records As cr Where cr.`type` = 'com_contentbuilder_ng' And cr.reference_id = '" . intval($this->properties->id) . "' And cr.record_id = r.id
                 ) 
         ");
 
@@ -64,10 +64,10 @@ class contentbuilder_com_contentbuilder
 
         if (is_array($reference_ids)) {
             foreach ($reference_ids as $reference_id) {
-                $db->setQuery("Select `id` From #__contentbuilder_records Where `type` = 'com_contentbuilder' And `reference_id` = " . intval($this->properties->id) . ' And `record_id` = ' . intval($reference_id));
+                $db->setQuery("Select `id` From #__contentbuilder_ng_records Where `type` = 'com_contentbuilder_ng' And `reference_id` = " . intval($this->properties->id) . ' And `record_id` = ' . intval($reference_id));
                 $res = $db->loadResult();
                 if (!$res) {
-                    $db->setQuery("Insert Into #__contentbuilder_records (`type`,`record_id`,`reference_id`) Values ('com_contentbuilder','" . intval($reference_id) . "', '" . intval($this->properties->id) . "')");
+                    $db->setQuery("Insert Into #__contentbuilder_ng_records (`type`,`record_id`,`reference_id`) Values ('com_contentbuilder_ng','" . intval($reference_id) . "', '" . intval($this->properties->id) . "')");
                     $db->execute();
                 }
             }
@@ -77,7 +77,7 @@ class contentbuilder_com_contentbuilder
     public static function getNumRecordsQuery($form_id, $user_id)
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select `name`,`bytable` From #__contentbuilder_storages Where id = " . intval($form_id));
+        $db->setQuery("Select `name`,`bytable` From #__contentbuilder_ng_storages Where id = " . intval($form_id));
         $res = $db->loadAssoc();
         $res['bytable'] = $res['bytable'] == 1 ? '' : '#__';
         if (is_array($res)) {
@@ -89,11 +89,11 @@ class contentbuilder_com_contentbuilder
     public function getUniqueValues($element_id, $where_field = '', $where = '')
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select `name` From #__contentbuilder_storage_fields Where id = " . intval($element_id) . " And storage_id = " . intval($this->properties->id) . " And published = 1 Order By `ordering`");
+        $db->setQuery("Select `name` From #__contentbuilder_ng_storage_fields Where id = " . intval($element_id) . " And storage_id = " . intval($this->properties->id) . " And published = 1 Order By `ordering`");
         $name = $db->loadResult();
         $where_add = '';
         if ($where_field != '' && $where != '') {
-            $db->setQuery("Select `name` From #__contentbuilder_storage_fields Where id = " . intval($where_field) . " And storage_id = " . intval($this->properties->id) . " And published = 1 Order By `ordering`");
+            $db->setQuery("Select `name` From #__contentbuilder_ng_storage_fields Where id = " . intval($where_field) . " And storage_id = " . intval($this->properties->id) . " And published = 1 Order By `ordering`");
             $where_name = $db->loadResult();
             if ($where_name) {
                 $where_add = " And `" . $where_name . "` = " . $db->Quote($where) . " ";
@@ -109,7 +109,7 @@ class contentbuilder_com_contentbuilder
     public function getAllElements()
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select * From #__contentbuilder_storage_fields Where storage_id = " . intval($this->properties->id) . " And published = 1 Order By `ordering`");
+        $db->setQuery("Select * From #__contentbuilder_ng_storage_fields Where storage_id = " . intval($this->properties->id) . " And published = 1 Order By `ordering`");
         $e = $db->loadAssocList();
         $elements = array();
         if ($e) {
@@ -140,7 +140,7 @@ class contentbuilder_com_contentbuilder
     {
         $data = new \stdClass();
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select metakey, metadesc, author, robots, rights, xreference From #__contentbuilder_records Where `type` = 'com_contentbuilder' And reference_id = " . $db->Quote($this->properties->id) . " And record_id = " . $db->Quote($record_id));
+        $db->setQuery("Select metakey, metadesc, author, robots, rights, xreference From #__contentbuilder_ng_records Where `type` = 'com_contentbuilder_ng' And reference_id = " . $db->Quote($this->properties->id) . " And record_id = " . $db->Quote($record_id));
         $metadata = $db->loadObject();
 
         $data->metadesc = '';
@@ -223,11 +223,11 @@ class contentbuilder_com_contentbuilder
                 joined_records.rating_sum As colRatingSum
             From
                 " . $this->bytable . $this->properties->name . " As r
-                " . ($published_only || !$show_all_languages || $show_all_languages ? " Left Join #__contentbuilder_records As joined_records On ( joined_records.`type` = 'com_contentbuilder' And joined_records.record_id = r.id And joined_records.reference_id = r.storage_id ) " : "") . "
+                " . ($published_only || !$show_all_languages || $show_all_languages ? " Left Join #__contentbuilder_ng_records As joined_records On ( joined_records.`type` = 'com_contentbuilder_ng' And joined_records.record_id = r.id And joined_records.reference_id = r.storage_id ) " : "") . "
                 
             Where
                 r.id = " . $db->Quote(intval($record_id)) . " And
-                joined_records.`type` = 'com_contentbuilder'
+                joined_records.`type` = 'com_contentbuilder_ng'
                 " . (!$show_all_languages ? " And ( joined_records.sef = " . $db->Quote(Factory::getApplication()->input->getCmd('lang', '')) . " Or joined_records.sef = '' Or joined_records.sef is Null ) " : '') . "
                 " . ($show_all_languages ? " And ( joined_records.id is Null Or joined_records.id Is Not Null ) " : '') . "
                 " . (intval($own_only) > -1 ? ' And r.user_id=' . intval($own_only) . ' ' : '') . "
@@ -526,15 +526,15 @@ class contentbuilder_com_contentbuilder
             From
                 (
                     " . $this->bytable . $this->properties->name . " As r,
-                    #__contentbuilder_records As joined_records
+                    #__contentbuilder_ng_records As joined_records
                 )
                 
                 Left Join (
-                    #__contentbuilder_articles As joined_articles,
-                    #__contentbuilder_forms As forms,
+                    #__contentbuilder_ng_articles As joined_articles,
+                    #__contentbuilder_ng_forms As forms,
                     #__content As content
                 ) On (
-                    joined_articles.`type` = 'com_contentbuilder' And
+                    joined_articles.`type` = 'com_contentbuilder_ng' And
                     joined_articles.reference_id = " . $this->properties->id . " And
                     joined_records.reference_id = joined_articles.reference_id And
                     joined_records.record_id = joined_articles.record_id And
@@ -549,11 +549,11 @@ class contentbuilder_com_contentbuilder
                 ) On (
                     r.user_id = joined_users.id
                 )' : '') . "
-                Left Join #__contentbuilder_list_records As list On (
+                Left Join #__contentbuilder_ng_list_records As list On (
                     list.form_id = " . (int) $this->properties->id . " And
                     list.record_id = r.id
                 )
-                Left Join #__contentbuilder_list_states As list_states On (
+                Left Join #__contentbuilder_ng_list_states As list_states On (
                     list_states.id = list.state_id
                 )
                 Where
@@ -563,7 +563,7 @@ class contentbuilder_com_contentbuilder
                 " . ($article_category_filter > -1 ? ' content.catid = ' . intval($article_category_filter) . ' And ' : '') . "
                 joined_records.reference_id = r.storage_id And
                 joined_records.record_id = r.id And
-                joined_records.`type` = 'com_contentbuilder'
+                joined_records.`type` = 'com_contentbuilder_ng'
                 " . (!$show_all_languages ? " And ( joined_records.sef = " . $db->Quote(Factory::getApplication()->input->getCmd('lang', '')) . " Or joined_records.sef = '' Or joined_records.sef is Null ) " : '') . "
                 " . ($show_all_languages ? " And ( joined_records.id is Null Or joined_records.id Is Not Null ) " : '') . "
                 " . ($lang_code !== null ? " And joined_records.lang_code = " . $db->Quote($lang_code) : '') . "
@@ -632,7 +632,7 @@ class contentbuilder_com_contentbuilder
     {
         $list = array();
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select `id`,`title`,`name` From #__contentbuilder_storages Where published = 1 Order By `ordering`");
+        $db->setQuery("Select `id`,`title`,`name` From #__contentbuilder_ng_storages Where published = 1 Order By `ordering`");
         $rows = $db->loadAssocList();
         foreach ($rows as $row) {
             $list[$row['id']] = $row['title'] . ' (' . $row['name'] . ')';
@@ -649,7 +649,7 @@ class contentbuilder_com_contentbuilder
     public function isGroup($element_id)
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select is_group From #__contentbuilder_storage_fields Where id = " . intval($element_id));
+        $db->setQuery("Select is_group From #__contentbuilder_ng_storage_fields Where id = " . intval($element_id));
         $result = $db->loadResult();
 
         if ($result) {
@@ -663,7 +663,7 @@ class contentbuilder_com_contentbuilder
     {
         $return = array();
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select group_definition From #__contentbuilder_storage_fields Where id = " . intval($element_id));
+        $db->setQuery("Select group_definition From #__contentbuilder_ng_storage_fields Where id = " . intval($element_id));
         $result = $db->loadResult();
         if ($result) {
 
@@ -794,7 +794,7 @@ class contentbuilder_com_contentbuilder
 
             } else {
 
-                $db->setQuery("Select e.* From #__contentbuilder_elements As e, #__contentbuilder_forms As f Where e.reference_id = " . $db->Quote($id) . " And f.reference_id = " . $db->Quote($this->form_id) . " And e.form_id = f.id Order By ordering");
+                $db->setQuery("Select e.* From #__contentbuilder_ng_elements As e, #__contentbuilder_ng_forms As f Where e.reference_id = " . $db->Quote($id) . " And f.reference_id = " . $db->Quote($this->form_id) . " And e.form_id = f.id Order By ordering");
                 $element = $db->loadAssoc();
 
                 //$options = null;
@@ -906,11 +906,11 @@ class contentbuilder_com_contentbuilder
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         ArrayHelper::toInteger($items);
         if (count($items)) {
-            $db->setQuery("Select reference_id From #__contentbuilder_elements Where `type` = 'upload' And form_id = " . intval($form_id));
+            $db->setQuery("Select reference_id From #__contentbuilder_ng_elements Where `type` = 'upload' And form_id = " . intval($form_id));
             $refs = $db->loadColumn();
 
             if (count($refs)) {
-                $db->setQuery("Select `name` From #__contentbuilder_storage_fields Where id In (" . implode(',', $refs) . ")");
+                $db->setQuery("Select `name` From #__contentbuilder_ng_storage_fields Where id In (" . implode(',', $refs) . ")");
                 $names = $db->loadColumn();
 
                 if (count($names)) {

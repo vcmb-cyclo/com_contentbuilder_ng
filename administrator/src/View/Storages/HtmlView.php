@@ -6,14 +6,15 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\View\Storages;
+namespace CB\Component\Contentbuilder_ng\Administrator\View\Storages;
 
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Toolbar\ToolbarHelper;
-use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\HtmlView as BaseHtmlView;
+use Joomla\CMS\Uri\Uri;
+use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 
 /**
  * Vue Storages pour ContentBuilder
@@ -55,11 +56,11 @@ class HtmlView extends BaseHtmlView
             throw new \Exception(implode('<br>', $errors), 500);
         }
 
-        // Barre d'outils
-        $this->addToolbar();
-
         // Ajout du CSS personnalisé (méthode propre)
         $this->addToolbarIcon();
+
+        // Barre d'outils
+        $this->addToolbar();
 
         HTMLHelper::_('behavior.keepalive');
         parent::display($tpl);
@@ -70,7 +71,7 @@ class HtmlView extends BaseHtmlView
      */
     protected function addToolbar()
     {
-        ToolbarHelper::title('ContentBuilder :: ' . Text::_('COM_CONTENTBUILDER_STORAGES'), 'logo_left');
+        ToolbarHelper::title('ContentBuilder :: ' . Text::_('COM_CONTENTBUILDER_NG_STORAGES'), 'logo_left');
 
         ToolbarHelper::addNew('storage.add');
         ToolbarHelper::editList('storage.edit');
@@ -78,7 +79,7 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::publish('storages.publish');
         ToolbarHelper::unpublish('storages.unpublish');
 
-        ToolbarHelper::preferences('com_contentbuilder');
+        ToolbarHelper::preferences('com_contentbuilder_ng');
     }
 
     /**
@@ -86,8 +87,23 @@ class HtmlView extends BaseHtmlView
      */
     protected function addToolbarIcon()
     {
-        // Récupération du WebAssetManager (méthode moderne)
-        $wa = $this->getDocument()->getWebAssetManager();
-        $wa->useStyle('com_contentbuilder.admin-toolbar'); // à déclarer dans joomla.asset.json
+         // 1️⃣ Récupération du WebAssetManager
+        $document = $this->getDocument();
+        $wa = $document->getWebAssetManager();
+
+         // Icon addition.
+        $wa->addInlineStyle(
+            '.icon-logo_left{
+                background-image:url(' . Uri::root(true) . '/media/com_contentbuilder_ng/images/logo_left.png);
+                background-size:contain;
+                background-repeat:no-repeat;
+                background-position:center;
+                display:inline-block;
+                width:48px;
+                height:48px;
+            }'
+        );
+
+        $wa->useStyle('com_contentbuilder_ng.admin-toolbar'); // à déclarer dans joomla.asset.json
     }
 }

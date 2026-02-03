@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `#__contentbuilder_articles`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_articles`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_articles`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_articles`
 (
     `id`
     int
@@ -45,8 +45,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_articles`
 )
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `#__contentbuilder_elements`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_elements`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_elements`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_elements`
 (
     `id`
     int
@@ -129,8 +129,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_elements`
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
 
 
-DROP TABLE IF EXISTS `#__contentbuilder_forms`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_forms`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_forms`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
 (
     `id`
     int
@@ -486,8 +486,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_forms`
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
 
 
-DROP TABLE IF EXISTS `#__contentbuilder_list_records`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_list_records`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_list_records`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_list_records`
 (
     `id`
     bigint
@@ -535,8 +535,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_list_records`
 )
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `#__contentbuilder_list_states`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_list_states`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_list_states`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_list_states`
 (
     `id`
     int
@@ -569,8 +569,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_list_states`
 )
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `#__contentbuilder_rating_cache`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_rating_cache`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_rating_cache`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_rating_cache`
 (
     `record_id`
     bigint
@@ -602,8 +602,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_rating_cache`
 )
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `#__contentbuilder_records`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_records`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_records`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_records`
 (
     `id`
     bigint
@@ -689,8 +689,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_records`
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
 
 
-DROP TABLE IF EXISTS `#__contentbuilder_registered_users`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_registered_users`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_registered_users`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_registered_users`
 (
     `id`
     bigint
@@ -728,8 +728,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_registered_users`
 )
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `#__contentbuilder_resource_access`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_resource_access`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_resource_access`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_resource_access`
 (
     `type` varchar
 (
@@ -750,8 +750,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_resource_access`
 )
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `#__contentbuilder_storages`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_storages`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_storages`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_storages`
 (
     `id`
     int
@@ -786,8 +786,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_storages`
 )
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `#__contentbuilder_storage_fields`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_storage_fields`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_storage_fields`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_storage_fields`
 (
     `id`
     int
@@ -830,8 +830,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_storage_fields`
 )
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `#__contentbuilder_users`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_users`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_users`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_users`
 (
     `id`
     int
@@ -889,8 +889,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_users`
 )
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `#__contentbuilder_verifications`;
-CREATE TABLE IF NOT EXISTS `#__contentbuilder_verifications`
+DROP TABLE IF EXISTS `#__contentbuilder_ng_verifications`;
+CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_verifications`
 (
     `id`
     int

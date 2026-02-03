@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Site\Model;
+namespace CB\Component\Contentbuilder_ng\Site\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -18,8 +18,8 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class DetailsModel extends ListModel
 {
@@ -49,7 +49,7 @@ class DetailsModel extends ListModel
         // IMPORTANT : on transmet factory/app/input à ListModel
         parent::__construct($config, $factory);
 
-        $option = 'com_contentbuilder';
+        $option = 'com_contentbuilder_ng';
 
         $this->frontend = Factory::getApplication()->isClient('site');
 
@@ -137,7 +137,7 @@ class DetailsModel extends ListModel
 
     private function _buildQuery()
     {
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_forms Where id = ' . intval($this->_id) . ' And published = 1';
+        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id) . ' And published = 1';
     }
 
     /**
@@ -152,15 +152,15 @@ class DetailsModel extends ListModel
             $this->_data = $this->_getList($query, 0, 1);
 
             if (!count($this->_data)) {
-                throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
             }
 
             foreach ($this->_data as $data) {
 
                 if (!$this->frontend && $data->display_in == 0) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
                 } else if ($this->frontend && $data->display_in == 1) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
                 }
 
                 $data->form_id = $this->_id;
@@ -177,7 +177,7 @@ class DetailsModel extends ListModel
                     }
 
                     if (count($ids)) {
-                        $this->getDatabase()->setQuery("Select Distinct `label`, reference_id From #__contentbuilder_elements Where form_id = " . intval($this->_id) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
+                        $this->getDatabase()->setQuery("Select Distinct `label`, reference_id From #__contentbuilder_ng_elements Where form_id = " . intval($this->_id) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
                         $rows = $this->getDatabase()->loadAssocList();
                         $ids = array();
                         foreach ($rows as $row) {
@@ -203,7 +203,7 @@ class DetailsModel extends ListModel
 
                             if ($auth) {
                                 $app = Factory::getApplication();
-                                $option = 'com_contentbuilder';
+                                $option = 'com_contentbuilder_ng';
                                 $list = (array) $app->input->get('list', [], 'array');
                                 $limit = isset($list['limit']) ? $app->input->getInt('list[limit]', 0) : (int) $app->getUserState($option . '.list.limit', 0);
                                 if ($limit === 0) {
@@ -221,7 +221,7 @@ class DetailsModel extends ListModel
 
                                 Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder&task=edit.display&latest=1&backtolist=' . Factory::getApplication()->input->getInt('backtolist', 0) . '&id=' . $this->_id . '&record_id=' . ($listQuery !== '' ? '' : '') . ($listQuery !== '' ? '&' . $listQuery : ''), false));
                             } else {
-                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_ADD_ENTRY_FIRST'));
                                 Factory::getApplication()->redirect('index.php');
                             }
                         }
@@ -229,7 +229,7 @@ class DetailsModel extends ListModel
 
                     $data->show_page_heading = $this->_show_page_heading;
                     if (!$data->form->exists) {
-                        throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
                     }
                     $data->page_title = '';
                     if (Factory::getApplication()->input->getInt('cb_prefix_in_title', 1)) {
@@ -309,9 +309,9 @@ class DetailsModel extends ListModel
                                             }
                                         }
                                         if (count($ex2) == 2) {
-                                            $out = (trim($ex2[0]) ? Text::_('COM_CONTENTBUILDER_FROM') . ' ' . trim($val) : '') . ' ' . Text::_('COM_CONTENTBUILDER_TO') . ' ' . trim($val2);
+                                            $out = (trim($ex2[0]) ? Text::_('COM_CONTENTBUILDER_NG_FROM') . ' ' . trim($val) : '') . ' ' . Text::_('COM_CONTENTBUILDER_NG_TO') . ' ' . trim($val2);
                                         } else if (count($ex2) > 0) {
-                                            $out = Text::_('COM_CONTENTBUILDER_FROM') . ' ' . trim($val);
+                                            $out = Text::_('COM_CONTENTBUILDER_NG_FROM') . ' ' . trim($val);
                                         }
                                         if ($out) {
                                             $this->_menu_filter[$order_key] = $ex;
@@ -327,7 +327,7 @@ class DetailsModel extends ListModel
                                         $i = 0;
                                         foreach ($ex2 as $val) {
                                             if ($i + 1 < $size) {
-                                                $out .= trim($val) . ' ' . Text::_('COM_CONTENTBUILDER_AND') . ' ';
+                                                $out .= trim($val) . ' ' . Text::_('COM_CONTENTBUILDER_NG_AND') . ' ';
                                             } else {
                                                 $out .= trim($val);
                                             }
@@ -398,7 +398,7 @@ class DetailsModel extends ListModel
                             $data->xreference = '';
                         }
                     } else {
-                        throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
                     }
                 }
                 return $data;

@@ -27,7 +27,7 @@ ob_end_clean();
 
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
-include JPATH_SITE .'/components/com_contentbuilder/images/securimage/securimage.php';
+include JPATH_SITE .'/components/com_contentbuilder_ng/images/securimage/securimage.php';
 
 $img = new securimage();
 
@@ -49,6 +49,6 @@ $img->use_wordlist = true;
 
 http_response_code(200);
 
-$img->show(JPATH_SITE .'/components/com_contentbuilder/images/securimage/backgrounds/bg6.jpg');
+$img->show(JPATH_SITE .'/components/com_contentbuilder_ng/images/securimage/backgrounds/bg6.jpg');
 
 

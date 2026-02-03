@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Site\View\Details;
+namespace CB\Component\Contentbuilder_ng\Site\View\Details;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -25,8 +25,8 @@ use Joomla\CMS\Table\Table;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
-use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\HtmlView as BaseHtmlView;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class HtmlView extends BaseHtmlView
 {
@@ -47,7 +47,7 @@ class HtmlView extends BaseHtmlView
             $wa = $document->getWebAssetManager();
             $wa->addInlineStyle(
                 '.icon-logo_left{
-                    background-image:url(' . Uri::root(true) . '/media/com_contentbuilder/images/logo_left.png);
+                    background-image:url(' . Uri::root(true) . '/media/com_contentbuilder_ng/images/logo_left.png);
                     background-size:contain;
                     background-repeat:no-repeat;
                     background-position:center;
@@ -63,7 +63,7 @@ class HtmlView extends BaseHtmlView
 		$event = new \stdClass();
 
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
-		$db->setQuery("Select articles.`article_id` From #__contentbuilder_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($subject->form_id) . " And articles.record_id = " . $db->Quote($subject->record_id));
+		$db->setQuery("Select articles.`article_id` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($subject->form_id) . " And articles.record_id = " . $db->Quote($subject->record_id));
 		$article = $db->loadResult();
 
 		$table = Table::getInstance('content');
@@ -87,7 +87,7 @@ class HtmlView extends BaseHtmlView
 		}
 
 		// we pass the slug with a flag in the end, and see in the end if the slug has been used in the output
-		$table->slug = ($article > 0 ? $article : 0) . ':' . $alias . ':contentbuilder_slug_used';
+		$table->slug = ($article > 0 ? $article : 0) . ':' . $alias . ':contentbuilder_ng_slug_used';
 
 		$registry = new Registry;
 		$registry->loadString($table->attribs ?? '{}', 'json');
@@ -150,10 +150,10 @@ class HtmlView extends BaseHtmlView
 		$event->afterDisplayContent = trim(implode("\n", $results));
 
 		// if the slug has been used, we would like to stay in com_contentbuilder, so we re-arrange the resulting url a little
-		if (strstr($subject->template, 'contentbuilder_slug_used') !== false) {
+		if (strstr($subject->template, 'contentbuilder_ng_slug_used') !== false) {
 
 			$matches = array(array(), array());
-			preg_match_all("/\\\"([^\"]*contentbuilder_slug_used[^\"]*)\\\"/i", $subject->template, $matches);
+			preg_match_all("/\\\"([^\"]*contentbuilder_ng_slug_used[^\"]*)\\\"/i", $subject->template, $matches);
 
 			foreach ($matches[1] as $match) {
 				$sub = '';
@@ -173,9 +173,9 @@ class HtmlView extends BaseHtmlView
 		}
 
 		// the same for the case a toc has been created
-		if (isset($table->toc) && strstr($table->toc, 'contentbuilder_slug_used') !== false) {
+		if (isset($table->toc) && strstr($table->toc, 'contentbuilder_ng_slug_used') !== false) {
 
-			preg_match_all("/\\\"([^\"]*contentbuilder_slug_used[^\"]*)\\\"/i", $table->toc, $matches);
+			preg_match_all("/\\\"([^\"]*contentbuilder_ng_slug_used[^\"]*)\\\"/i", $table->toc, $matches);
 
 			foreach ($matches[1] as $match) {
 				$sub = '';
@@ -201,7 +201,7 @@ class HtmlView extends BaseHtmlView
 		$pattern = '#<hr\s+id=("|\')system-readmore("|\')\s*\/*>#i';
 		$subject->template = preg_replace($pattern, '', $subject->template);
 
-		PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
+		PluginHelper::importPlugin('contentbuilder_ng_themes', $subject->theme_plugin);
 
 		$eventObj = new \Joomla\Event\Event('onContentTemplateCss', []);
 		$dispatcher->dispatch('onContentTemplateCss', $eventObj);

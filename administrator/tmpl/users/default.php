@@ -17,8 +17,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Factory;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
 
 $ordering  = (string) $this->state->get('list.ordering', 'u.id');
 $direction = strtolower((string) $this->state->get('list.direction', 'asc'));
@@ -54,10 +54,10 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
         value="<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>"
         onchange="document.adminForm.submit();" />
 
-    <input type="button" class="btn btn-sm btn-primary" value="<?php echo Text::_('COM_CONTENTBUILDER_SEARCH'); ?>"
+    <input type="button" class="btn btn-sm btn-primary" value="<?php echo Text::_('COM_CONTENTBUILDER_NG_SEARCH'); ?>"
         onclick="this.form.submit();" />
     <input type="button" class="btn btn-sm btn-primary"
-        value="<?php echo Text::_('COM_CONTENTBUILDER_RESET'); ?>"
+        value="<?php echo Text::_('COM_CONTENTBUILDER_NG_RESET'); ?>"
         onclick="document.getElementById('filter_search').value='';document.adminForm.submit();" />
 
 
@@ -66,37 +66,37 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
         <select class="form-select-sm"
             onchange="if(this.selectedIndex == 1 || this.selectedIndex == 2){document.adminForm.task.value=this.options[this.selectedIndex].value;document.adminForm.submit();}">
             <option> -
-                <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_UNPUBLISHED'); ?> -
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_UNPUBLISHED'); ?> -
             </option>
             <option value="users.publish">
-                <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>
             </option>
             <option value="users.unpublish">
-                <?php echo Text::_('COM_CONTENTBUILDER_UNPUBLISH'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_UNPUBLISH'); ?>
             </option>
         </select>
         <select class="form-select-sm"
             onchange="if(this.selectedIndex != 0){document.adminForm.task.value=this.options[this.selectedIndex].value;document.adminForm.submit();}">
             <option> -
-                <?php echo Text::_('COM_CONTENTBUILDER_SET_VERIFICATION'); ?> -
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_SET_VERIFICATION'); ?> -
             </option>
             <option value="verified_view">
-                <?php echo Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_VIEW'); ?>
             </option>
             <option value="not_verified_view">
-                <?php echo Text::_('COM_CONTENTBUILDER_UNVERIFIED_VIEW'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_UNVERIFIED_VIEW'); ?>
             </option>
             <option value="verified_new">
-                <?php echo Text::_('COM_CONTENTBUILDER_VERIFIED_NEW'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_NEW'); ?>
             </option>
             <option value="not_verified_new">
-                <?php echo Text::_('COM_CONTENTBUILDER_UNVERIFIED_NEW'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_UNVERIFIED_NEW'); ?>
             </option>
             <option value="verified_edit">
-                <?php echo Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_EDIT'); ?>
             </option>
             <option value="not_verified_edit">
-                <?php echo Text::_('COM_CONTENTBUILDER_UNVERIFIED_EDIT'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_UNVERIFIED_EDIT'); ?>
             </option>
         </select>
     </div>
@@ -121,16 +121,16 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
                         <?php echo $sortLink('Username', 'u.username'); ?>
                     </th>
                     <th>
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW'), 'a.verified_view'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_VERIFIED_VIEW'), 'a.verified_view'); ?>
                     </th>
                     <th>
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_VERIFIED_NEW'), 'a.verified_new'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_VERIFIED_NEW'), 'a.verified_new'); ?>
                     </th>
                     <th>
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT'), 'a.verified_edit'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_VERIFIED_EDIT'), 'a.verified_edit'); ?>
                     </th>
                     <th width="5">
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_PUBLISHED'), 'a.published'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'a.published'); ?>
                     </th>
                 </tr>
             </thead>

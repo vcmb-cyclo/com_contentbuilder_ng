@@ -9,7 +9,7 @@
  */
 
 
-namespace CB\Component\Contentbuilder\Administrator\Helper;
+namespace CB\Component\Contentbuilder_ng\Administrator\Helper;
 
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -90,7 +90,7 @@ if (!function_exists('mb_wordwrap')) {
 class ContentbuilderHelper
 {
 
-    public static function contentbuilder_wordwrap($str, $width = 75, $break = "\n", $cut = false, $charset = null)
+    public static function contentbuilder_ng_wordwrap($str, $width = 75, $break = "\n", $cut = false, $charset = null)
     {
         if (function_exists('mb_strlen')) {
             return mb_wordwrap($str, $width, $break, $cut, $charset);
@@ -504,7 +504,7 @@ class ContentbuilderHelper
         $taskName = $row->list_include ? 'no_list_include' : 'list_include';
         $task = $domain . '.' . $taskName;
 
-        $action = $row->list_include ? Text::_('COM_CONTENTBUILDER_NO_LIST_INCLUDE') : Text::_('COM_CONTENTBUILDER_LIST_INCLUDE');
+        $action = $row->list_include ? Text::_('COM_CONTENTBUILDER_NG_NO_LIST_INCLUDE') : Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE');
 
         $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -518,7 +518,7 @@ class ContentbuilderHelper
         $taskName = $row->search_include ? 'no_search_include' : 'search_include';
         $task = $domain . '.' . $taskName;
 
-        $action = $row->search_include ? Text::_('COM_CONTENTBUILDER_NO_SEARCH_INCLUDE') : Text::_('COM_CONTENTBUILDER_SEARCH_INCLUDE');
+        $action = $row->search_include ? Text::_('COM_CONTENTBUILDER_NG_NO_SEARCH_INCLUDE') : Text::_('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE');
 
         $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -533,7 +533,7 @@ class ContentbuilderHelper
         $taskName = $row->linkable ? 'not_linkable' : 'linkable';
         $task = $domain . '.' . $taskName;
 
-        $action = $row->linkable ? Text::_('COM_CONTENTBUILDER_NOT_LINKABLE') : Text::_('COM_CONTENTBUILDER_LINKABLE');
+        $action = $row->linkable ? Text::_('COM_CONTENTBUILDER_NG_NOT_LINKABLE') : Text::_('COM_CONTENTBUILDER_NG_LINKABLE');
 
         $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -548,7 +548,7 @@ class ContentbuilderHelper
         $taskName = $row->editable ? 'not_editable' : 'editable';
         $task = $domain . '.' . $taskName;
 
-        $action = $row->editable ? Text::_('COM_CONTENTBUILDER_NOT_EDITABLE') : Text::_('COM_CONTENTBUILDER_EDITABLE');
+        $action = $row->editable ? Text::_('COM_CONTENTBUILDER_NG_NOT_EDITABLE') : Text::_('COM_CONTENTBUILDER_NG_EDITABLE');
 
         $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -563,7 +563,7 @@ class ContentbuilderHelper
         $taskName = $row->verified_view ? 'not_verified_view' : 'verified_view';
         $task = $domain . '.' . $taskName;
 
-        $action = $row->verified_view ? Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW') : Text::_('COM_CONTENTBUILDER_VERIFIED_VIEW');
+        $action = $row->verified_view ? Text::_('COM_CONTENTBUILDER_NG_VERIFIED_VIEW') : Text::_('COM_CONTENTBUILDER_NG_VERIFIED_VIEW');
 
         $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -578,7 +578,7 @@ class ContentbuilderHelper
         $taskName = $row->verified_new ? 'not_verified_new' : 'verified_new';
         $task = $domain . '.' . $taskName;
 
-        $action = $row->verified_new ? Text::_('COM_CONTENTBUILDER_VERIFIED_NEW') : Text::_('COM_CONTENTBUILDER_VERIFIED_NEW');
+        $action = $row->verified_new ? Text::_('COM_CONTENTBUILDER_NG_VERIFIED_NEW') : Text::_('COM_CONTENTBUILDER_NG_VERIFIED_NEW');
 
         $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -593,7 +593,7 @@ class ContentbuilderHelper
         $taskName = $row->verified_edit ? 'not_verified_edit' : 'verified_edit';
         $task = $domain . '.' . $taskName;
 
-        $action = $row->verified_edit ? Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT') : Text::_('COM_CONTENTBUILDER_VERIFIED_EDIT');
+        $action = $row->verified_edit ? Text::_('COM_CONTENTBUILDER_NG_VERIFIED_EDIT') : Text::_('COM_CONTENTBUILDER_NG_VERIFIED_EDIT');
 
         $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -608,7 +608,7 @@ class ContentbuilderHelper
         $taskName = $row->published ? 'unpublish' : 'publish';
         $task = $domain . '.' . $taskName;
 
-        $action = $row->published ? Text::_('COM_CONTENTBUILDER_UNPUBLISH') : Text::_('COM_CONTENTBUILDER_PUBLISH');
+        $action = $row->published ? Text::_('COM_CONTENTBUILDER_NG_UNPUBLISH') : Text::_('COM_CONTENTBUILDER_NG_PUBLISH');
 
         $href = '
                     <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
@@ -622,11 +622,11 @@ class ContentbuilderHelper
 
         $img = $published ? $imgY : $imgX;
         $url = $published ? $url_unpublish : $url_publish;
-        $alt = $published ? Text::_('COM_CONTENTBUILDER_PUBLISH') : Text::_('COM_CONTENTBUILDER_UNPUBLISH');
-        $action = $published ? Text::_('COM_CONTENTBUILDER_PUBLISH') : Text::_('COM_CONTENTBUILDER_UNPUBLISH');
+        $alt = $published ? Text::_('COM_CONTENTBUILDER_NG_PUBLISH') : Text::_('COM_CONTENTBUILDER_NG_UNPUBLISH');
+        $action = $published ? Text::_('COM_CONTENTBUILDER_NG_PUBLISH') : Text::_('COM_CONTENTBUILDER_NG_UNPUBLISH');
 
         $href = ($allowed ? '<a href="' . $url . '" title="' . $action . '">' : '') . '
-                     <img src="' . Uri::root(true) . '/components/com_contentbuilder/images/_' . $img . '" border="0" alt="' . $alt . '" />' .
+                     <img src="' . Uri::root(true) . '/components/com_contentbuilder_ng/images/_' . $img . '" border="0" alt="' . $alt . '" />' .
             ($allowed ? '</a>' : '');
 
         return $href;

@@ -1,0 +1,111 @@
+<extension type="component" method="upgrade" version="6.0">
+
+    <name>Contentbuilder_ng</name>
+    <creationDate>2026-02-03</creationDate>
+    <author>XDA+GIL</author>
+    <authorEmail>breezingforms@vcmb.fr</authorEmail>
+    <authorUrl>https://breezingforms.vcmb.fr</authorUrl>
+    <copyright>Copyright 2011 - 2026 by XDA+GIL</copyright>
+    <license>GNU/GPL v2.0</license>
+    <version>6.1.0-RC3</version>
+    <description>COM_CONTENTBUILDER_NG_XML_DESCRIPTION</description>
+
+    <!-- ===================== -->
+    <!-- PSR-4 NAMESPACE -->
+    <!-- ===================== -->
+    <namespace path="src">CB\Component\Contentbuilder_ng</namespace>
+
+    <!-- ===================== -->
+    <!-- INSTALL / UNINSTALL -->
+    <!-- ===================== -->
+ <scriptfile>script.php</scriptfile>
+
+<install>
+    <sql>
+        <file charset="utf8" driver="mysql">sql/install.sql</file>
+    </sql>
+</install>
+
+ <uninstall>
+  <sql>
+    <file charset="utf8" driver="mysql">sql/uninstall.sql</file>
+  </sql>
+ </uninstall>
+ 
+ <updateservers>
+    <server type="extension" name="ContentBuilder_ng" priority="1">https://breezingforms.vcmb.fr/download/contentbuilder_ng_update.xml</server>
+ </updateservers>
+
+ <files folder="site">
+    <filename>index.html</filename>
+    <filename>controller.php</filename>
+    <filename>router.php</filename>
+    <filename>contentbuilder_ng.php</filename>
+    <folder>src</folder>
+    <folder>tmpl</folder>
+ </files>
+
+ <languages folder="site">
+    <language tag="en-GB">languages/en-GB/site/en-GB.com_contentbuilder_ng.ini</language>
+    <language tag="de-DE">languages/de-DE/site/de-DE.com_contentbuilder_ng.ini</language>
+    <language tag="fr-FR">languages/fr-FR/site/fr-FR.com_contentbuilder_ng.ini</language>
+ </languages>
+
+<!-- ===================== -->
+<!-- ADMINISTRATION -->
+<!-- ===================== -->
+<administration>
+    <menu>Contentbuilder_ng</menu>
+    <submenu>
+        <menu view="storages">COM_CONTENTBUILDER_NG_STORAGES</menu>
+        <menu view="forms">COM_CONTENTBUILDER_NG_LIST</menu>
+        <menu view="about">COM_CONTENTBUILDER_NG_ABOUT</menu>
+    </submenu>
+
+    <!-- Un seul bloc <files> avec folder="administrator" -->
+    <files folder="administrator">
+        <filename>access.xml</filename>
+        <filename>config.xml</filename>
+        <filename>index.html</filename>
+        <filename>contentbuilder_ng.php</filename>
+        
+        <folder>forms</folder>
+        <folder>languages</folder>
+        <folder>services</folder>
+        <folder>vendor</folder>
+        <folder>src</folder>
+        <folder>sql</folder>
+        <folder>tmpl</folder>
+    </files>
+
+    <!-- Languages admin (à laisser séparément, c'est correct) -->
+    <languages folder="administrator">
+        <language tag="en-GB">languages/en-GB/admin/en-GB.com_contentbuilder_ng.ini</language>
+        <language tag="en-GB">languages/en-GB/admin/en-GB.com_contentbuilder_ng.menu.ini</language>
+        <language tag="en-GB">languages/en-GB/admin/en-GB.com_contentbuilder_ng.sys.ini</language>
+        <language tag="de-DE">languages/de-DE/admin/de-DE.com_contentbuilder_ng.ini</language>
+        <language tag="de-DE">languages/de-DE/admin/de-DE.com_contentbuilder_ng.menu.ini</language>
+        <language tag="de-DE">languages/de-DE/admin/de-DE.com_contentbuilder_ng.sys.ini</language>
+        <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilder_ng.ini</language>
+        <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilder_ng.menu.ini</language>
+        <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilder_ng.sys.ini</language>
+    </languages>
+
+</administration>
+
+<media folder="media" destination="com_contentbuilder">
+    <folder>css</folder>
+    <folder>js</folder>
+    <folder>images</folder>
+    <filename>joomla.asset.json</filename>
+</media>
+
+<plugins>
+    <plugin group="contentbuilder_ng_themes">plugins/contentbuilder_ng_themes/blank</plugin>
+    <plugin group="contentbuilder_ng_themes">plugins/contentbuilder_ng_themes/joomla3</plugin>
+    <plugin group="contentbuilder_ng_themes">plugins/contentbuilder_ng_themes/joomla6</plugin>
+    <plugin group="contentbuilder_ng_themes">plugins/contentbuilder_ng_themes/khepri</plugin>
+</plugins>
+
+
+</extension>

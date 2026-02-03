@@ -8,7 +8,7 @@
  * @license GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\View\Form;
+namespace CB\Component\Contentbuilder_ng\Administrator\View\Form;
 
 \defined('_JEXEC') or die;
 
@@ -19,7 +19,7 @@ use Joomla\CMS\Toolbar\Toolbar;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
-use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
 {
@@ -30,12 +30,12 @@ class HtmlView extends BaseHtmlView
 
         // JS
         $wa = $app->getDocument()->getWebAssetManager();
-        $wa->useScript('com_contentbuilder.jscolor');
+        $wa->useScript('com_contentbuilder_ng.jscolor');
 
         $wa->addInlineStyle(
             '.icon-48-logo_icon_cb{background-image:url('
             . Uri::root(true)
-            . '/media/com_contentbuilder/images/logo_icon_cb.png);background-size:contain;background-repeat:no-repeat;}'
+            . '/media/com_contentbuilder_ng/images/logo_icon_cb.png);background-size:contain;background-repeat:no-repeat;}'
         );
 
 
@@ -55,7 +55,7 @@ class HtmlView extends BaseHtmlView
         try {
             $formId = (int) ($formId ?? 0);
             if ($formId > 0) {
-                $factory = $app->bootComponent('com_contentbuilder')->getMVCFactory();
+                $factory = $app->bootComponent('com_contentbuilder_ng')->getMVCFactory();
                 $elementsModel = $factory->createModel('Elements', 'Administrator');
 
                 if (!$elementsModel) {
@@ -78,10 +78,10 @@ class HtmlView extends BaseHtmlView
         }
 
         $isNew = ($formId < 1);
-        $text  = $isNew ? Text::_('COM_CONTENTBUILDER_NEW') : Text::_('COM_CONTENTBUILDER_EDIT');
+        $text  = $isNew ? Text::_('COM_CONTENTBUILDER_NG_NEW') : Text::_('COM_CONTENTBUILDER_NG_EDIT');
 
         ToolbarHelper::title(
-            'ContentBuilder :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_FORM') : ($this->item->name ?? '')) .
+            'ContentBuilder :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_NG_FORM') : ($this->item->name ?? '')) .
                 ' : <small><small>[ ' . $text . ' ]</small></small>',
             'logo_left'
         );
@@ -90,11 +90,11 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::save('form.save');
         ToolbarHelper::save2new('form.save2new');
 
-        ToolbarHelper::custom('form.list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_LIST_INCLUDE'), false);
-        ToolbarHelper::custom('form.no_list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_NO_LIST_INCLUDE'), false);
+        ToolbarHelper::custom('form.list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE'), false);
+        ToolbarHelper::custom('form.no_list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_NG_NO_LIST_INCLUDE'), false);
 
-        ToolbarHelper::custom('form.editable', 'edit', '', Text::_('COM_CONTENTBUILDER_EDITABLE'), false);
-        ToolbarHelper::custom('form.not_editable', 'edit', '', Text::_('COM_CONTENTBUILDER_NOT_EDITABLE'), false);
+        ToolbarHelper::custom('form.editable', 'edit', '', Text::_('COM_CONTENTBUILDER_NG_EDITABLE'), false);
+        ToolbarHelper::custom('form.not_editable', 'edit', '', Text::_('COM_CONTENTBUILDER_NG_NOT_EDITABLE'), false);
 
         ToolbarHelper::publish('forms.publish');
         ToolbarHelper::unpublish('forms.unpublish');

@@ -7,7 +7,7 @@
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace CB\Component\Contentbuilder\Administrator;
+namespace CB\Component\Contentbuilder_ng\Administrator;
 
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -546,7 +546,7 @@ if (!class_exists(__NAMESPACE__ . '\\CBRequest'))
 
 	// IMPORTANT : ne pas réécrire les variables pour tout Joomla
 	// sinon on casse com_content / l'éditeur / les filtres.
-	if ($option === 'com_contentbuilder') {
+	if ($option === 'com_contentbuilder_ng') {
 		// En Joomla 6, getArray() n'a plus la même signature partout.
 		// On évite de forcer RAW via une signature incertaine.
 		$cb_request = $app->input->getArray(); // suffisant pour CB ici

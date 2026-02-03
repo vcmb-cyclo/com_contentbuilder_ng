@@ -15,8 +15,8 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 $frontend = Factory::getApplication()->isClient('site');
 $edit_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('edit') : ContentbuilderLegacyHelper::authorize('edit');
@@ -42,10 +42,10 @@ $listQuery = http_build_query(['list' => [
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 
 // Charge le manifeste joomla.asset.json du composant
-$wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder');
+$wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
 
 $wa->useScript('jquery');
-$wa->useScript('com_contentbuilder.contentbuilder');
+$wa->useScript('com_contentbuilder_ng.contentbuilder_ng');
 ?>
 
 <?php if ($this->author)
@@ -65,8 +65,8 @@ $wa->useScript('com_contentbuilder.contentbuilder');
 <?php Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js); ?>
 <script type="text/javascript">
     <!--
-    function contentbuilder_delete() {
-        var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDER_CONFIRM_DELETE_MESSAGE'); ?>');
+    function contentbuilder_ng_delete() {
+        var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDER_NG_CONFIRM_DELETE_MESSAGE'); ?>');
         if (confirmed) {
             location.href = '<?php echo 'index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=detail.delete&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&cid[]=' . Factory::getApplication()->input->getCmd('record_id', 0) . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : ''); ?>';
         }
@@ -114,17 +114,17 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
     <?php if ($edit_allowed) { ?>
         <a class="btn btn-sm btn-primary cbButton cbEditButton"
             href="<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '')); ?>"
-            title="<?php echo Text::_('COM_CONTENTBUILDER_EDIT'); ?>">
-            <?php echo Text::_('COM_CONTENTBUILDER_EDIT') ?>
+            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT'); ?>">
+            <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT') ?>
         </a>
     <?php
     }
     ?>
     <?php if ($delete_allowed) { ?>
-        <button class="btn btn-sm btn-primary cbButton cbDeleteButton" onclick="contentbuilder_delete();"
-            title="<?php echo Text::_('COM_CONTENTBUILDER_DELETE'); ?>">
+        <button class="btn btn-sm btn-primary cbButton cbDeleteButton" onclick="contentbuilder_ng_delete();"
+            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE'); ?>">
             <i class="fa fa-trash" aria-hidden="true"></i>
-            <?php echo Text::_('COM_CONTENTBUILDER_DELETE') ?>
+            <?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE') ?>
         </button>
     <?php
     }
@@ -132,9 +132,9 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
     <?php if ($this->show_back_button && Factory::getApplication()->input->getBool('cb_show_details_back_button', 1)): ?>
         <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton"
             href="<?php echo Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0)); ?>"
-            title="<?php echo Text::_('COM_CONTENTBUILDER_BACK'); ?>">
+            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_BACK'); ?>">
             <span class="icon-arrow-left me-1" aria-hidden="true"></span>
-            <?php echo Text::_('COM_CONTENTBUILDER_BACK') ?>
+            <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK') ?>
         </a>
     <?php endif; ?>
 
@@ -166,14 +166,14 @@ if (Factory::getApplication()->input->getInt('cb_show_author', 1)) {
 
     <?php if ($this->created): ?>
         <span class="small created-by">
-            <?php echo Text::_('COM_CONTENTBUILDER_CREATED_ON'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATED_ON'); ?>
             <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?>
         </span>
     <?php endif; ?>
 
     <?php if ($this->created_by): ?>
         <span class="small created-by">
-            <?php echo Text::_('COM_CONTENTBUILDER_BY'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDER_NG_BY'); ?>
             <?php echo $this->created_by; ?>
         </span><br />
     <?php endif; ?>
@@ -206,13 +206,13 @@ if (Factory::getApplication()->input->getInt('cb_show_author', 1)) {
 
         <?php if ($this->modified): ?>
             <span class="small created-by">
-                <?php echo Text::_('COM_CONTENTBUILDER_LAST_UPDATED_ON'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON'); ?>
                 <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?>
             </span>
         <?php endif; ?>
 
         <span class="small created-by">
-            <?php echo Text::_('COM_CONTENTBUILDER_BY'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDER_NG_BY'); ?>
             <?php echo $this->modified_by; ?>
         </span>
 

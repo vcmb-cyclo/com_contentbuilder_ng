@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder\Site\Table;
+namespace CB\Component\Contentbuilder_ng\Site\Table;
 
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');

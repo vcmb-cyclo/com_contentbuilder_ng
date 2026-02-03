@@ -17,7 +17,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 $th = 'th';
 if ($this->page_heading) {
@@ -33,10 +33,10 @@ if ($this->page_heading) {
     <?php
     if ($this->show_tags) {
         ?>
-        <?php echo Text::_('COM_CONTENTBUILDER_FILTER_TAG'); ?>:
+        <?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_TAG'); ?>:
         <select name="filter_tag" onchange="document.adminForm.submit();">
             <option value=""> -
-                <?php echo htmlentities(Text::_('COM_CONTENTBUILDER_FILTER_TAG_ALL'), ENT_QUOTES, 'UTF-8') ?> -
+                <?php echo htmlentities(Text::_('COM_CONTENTBUILDER_NG_FILTER_TAG_ALL'), ENT_QUOTES, 'UTF-8') ?> -
             </option>
             <?php
             foreach ($this->tags as $tag) {
@@ -61,8 +61,8 @@ if ($this->page_heading) {
                     ?>
 
                     <<?php echo $th; ?> width="5" class="sectiontableheader">
-                        <?php echo Text::_('COM_CONTENTBUILDER_ID'); ?>
-                        <?php //echo HTMLHelper::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_ID' ), 'id', $this->lists['order_Dir'], $this->lists['order'] );     ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ID'); ?>
+                        <?php //echo HTMLHelper::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_NG_ID' ), 'id', $this->lists['order_Dir'], $this->lists['order'] );     ?>
                     </<?php echo $th; ?>>
 
                     <?php
@@ -70,8 +70,8 @@ if ($this->page_heading) {
                 ?>
 
                 <<?php echo $th; ?> style="width: 200px !important;" class="sectiontableheader">
-                    <?php echo Text::_('COM_CONTENTBUILDER_VIEW_NAME'); ?>
-                    <?php // echo HTMLHelper::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_VIEW_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] );     ?>
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_VIEW_NAME'); ?>
+                    <?php // echo HTMLHelper::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_NG_VIEW_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] );     ?>
                 </<?php echo $th; ?>>
 
                 <?php
@@ -79,7 +79,7 @@ if ($this->page_heading) {
                     ?>
 
                     <<?php echo $th; ?> class="sectiontableheader">
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_TAG'), 'tag', $this->lists['order_Dir'], $this->lists['order']); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_TAG'), 'tag', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </<?php echo $th; ?>>
 
                     <?php
@@ -91,7 +91,7 @@ if ($this->page_heading) {
                     ?>
 
                     <<?php echo $th; ?> class="sectiontableheader">
-                        <?php echo Text::_('COM_CONTENTBUILDER_INTROTEXT'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_INTROTEXT'); ?>
                     </<?php echo $th; ?>>
 
                     <?php
@@ -103,7 +103,7 @@ if ($this->page_heading) {
                     ?>
 
                     <<?php echo $th; ?> class="sectiontableheader">
-                        <?php echo Text::_('COM_CONTENTBUILDER_ACCESS_VIEW'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ACCESS_VIEW'); ?>
                     </<?php echo $th; ?>>
 
                     <?php
@@ -115,7 +115,7 @@ if ($this->page_heading) {
                     ?>
 
                     <<?php echo $th; ?> class="sectiontableheader">
-                        <?php echo Text::_('COM_CONTENTBUILDER_ACCESS_NEW'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ACCESS_NEW'); ?>
                     </<?php echo $th; ?>>
 
                     <?php
@@ -127,7 +127,7 @@ if ($this->page_heading) {
                     ?>
 
                     <<?php echo $th; ?> class="sectiontableheader">
-                        <?php echo Text::_('COM_CONTENTBUILDER_ACCESS_EDIT'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ACCESS_EDIT'); ?>
                     </<?php echo $th; ?>>
 
                     <?php
@@ -202,7 +202,7 @@ if ($this->page_heading) {
 
                     <td valign="top">
                         <img width="16" height="16" alt=""
-                            src="<?php echo $this->perms[$row->id]['view'] ? Uri::root(true) . '/components/com_contentbuilder/assets/images/tick.png' : Uri::root(true) . '/components/com_contentbuilder/assets/images/untick.png'; ?>" />
+                            src="<?php echo $this->perms[$row->id]['view'] ? Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/tick.png' : Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/untick.png'; ?>" />
                     </td>
 
                     <?php
@@ -215,7 +215,7 @@ if ($this->page_heading) {
 
                     <td valign="top">
                         <img width="16" height="16" alt=""
-                            src="<?php echo $this->perms[$row->id]['new'] ? Uri::root(true) . '/components/com_contentbuilder/assets/images/tick.png' : Uri::root(true) . '/components/com_contentbuilder/assets/images/untick.png'; ?>" />
+                            src="<?php echo $this->perms[$row->id]['new'] ? Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/tick.png' : Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/untick.png'; ?>" />
                     </td>
 
                     <?php
@@ -228,7 +228,7 @@ if ($this->page_heading) {
 
                     <td valign="top">
                         <img width="16" height="16" alt=""
-                            src="<?php echo $this->perms[$row->id]['edit'] ? Uri::root(true) . '/components/com_contentbuilder/assets/images/tick.png' : Uri::root(true) . '/components/com_contentbuilder/assets/images/untick.png'; ?>" />
+                            src="<?php echo $this->perms[$row->id]['edit'] ? Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/tick.png' : Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/untick.png'; ?>" />
                     </td>
 
                     <?php

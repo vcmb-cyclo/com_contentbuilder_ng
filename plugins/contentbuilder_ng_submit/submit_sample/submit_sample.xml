@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="contentbuilder_ng_submit" version="6.0" method="upgrade">
+	<name>ContentBuilder NG - Submit - Sample</name>
+	<creationDate>December 2025</creationDate>
+	<author>Xavier DANO</author>
+        <license>GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html</license>
+	<copyright>This Joomla! component is released under the GNU/GPL license</copyright>
+	<authorEmail>noreply@vcmb.fr</authorEmail>
+	<authorUrl>breezingforms.vcmb.fr</authorUrl>
+	<version>6.0.0-RC3</version>
+	<administration></administration>
+	<description>
+	<![CDATA[
+        Sample on how to use submit plugins
+        ]]>
+    </description>
+    <files>
+        <filename plugin="submit_sample">submit_sample.php</filename>
+    </files>
+    <languages>
+    </languages>
+
+    <config>
+    </config>
+</extension>

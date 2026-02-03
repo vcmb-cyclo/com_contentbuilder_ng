@@ -13,7 +13,7 @@
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -25,7 +25,7 @@ use Joomla\CMS\MVC\Controller\AdminController;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 final class FormsController extends AdminController
 {
@@ -49,19 +49,19 @@ final class FormsController extends AdminController
         $session = Factory::getApplication()->getSession();
 
         if ($this->input->getInt('email_users', -1) !== -1) {
-            $session->set('email_users', $this->input->get('email_users', 'none'), 'com_contentbuilder');
+            $session->set('email_users', $this->input->get('email_users', 'none'), 'com_contentbuilder_ng');
         }
 
         if ($this->input->getInt('email_admins', -1) !== -1) {
-            $session->set('email_admins', $this->input->get('email_admins', ''), 'com_contentbuilder');
+            $session->set('email_admins', $this->input->get('email_admins', ''), 'com_contentbuilder_ng');
         }
 
         if ($this->input->getInt('slideStartOffset', -1) !== -1) {
-            $session->set('slideStartOffset', $this->input->getInt('slideStartOffset', 1), 'com_contentbuilder');
+            $session->set('slideStartOffset', $this->input->getInt('slideStartOffset', 1), 'com_contentbuilder_ng');
         }
 
         if ($this->input->getInt('tabStartOffset', -1) !== -1) {
-            $session->set('tabStartOffset', $this->input->getInt('tabStartOffset', 0), 'com_contentbuilder');
+            $session->set('tabStartOffset', $this->input->getInt('tabStartOffset', 0), 'com_contentbuilder_ng');
         }
     }
 

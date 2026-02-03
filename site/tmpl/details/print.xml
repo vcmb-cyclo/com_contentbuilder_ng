@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <metadata>
     <!-- Joomla! 1.6 compatibility -->
-    <layout title="COM_CONTENTBUILDER_MENU_ITEM" hidden="true">
+    <layout title="COM_CONTENTBUILDER_NG_MENU_ITEM" hidden="true">
     </layout>
 </metadata>

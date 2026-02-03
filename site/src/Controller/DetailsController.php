@@ -6,7 +6,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Site\Controller;
+namespace CB\Component\Contentbuilder_ng\Site\Controller;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -19,15 +19,15 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class DetailsController extends BaseController
 {
     protected $default_view = 'details';
 
     // ✅ IMPORTANT : force le prefix PSR-4 des vues
-    protected $viewPrefix = 'CB\\Component\\Contentbuilder\\Site\\View';
+    protected $viewPrefix = 'CB\\Component\\Contentbuilder_ng\\Site\\View';
 
     private bool $frontend;
 
@@ -44,7 +44,7 @@ class DetailsController extends BaseController
 
         if ($this->frontend && Factory::getApplication()->input->getInt('Itemid', 0)) {
 
-            $option = 'com_contentbuilder';
+            $option = 'com_contentbuilder_ng';
 
             // try menu item
             $menu = Factory::getApplication()->getMenu();
@@ -60,7 +60,7 @@ class DetailsController extends BaseController
         if (Factory::getApplication()->input->getWord('view', '') == 'latest') {
             $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-            $db->setQuery('Select `type`, `reference_id` From #__contentbuilder_forms Where id = ' . intval(Factory::getApplication()->input->getInt('id', 0)) . ' And published = 1');
+            $db->setQuery('Select `type`, `reference_id` From #__contentbuilder_ng_forms Where id = ' . intval(Factory::getApplication()->input->getInt('id', 0)) . ' And published = 1');
             $form = $db->loadAssoc();
             $form = ContentbuilderLegacyHelper::getForm($form['type'], $form['reference_id']);
 
@@ -71,7 +71,7 @@ class DetailsController extends BaseController
             }
 
             if (count($ids)) {
-                $db->setQuery("Select Distinct `label`, reference_id From #__contentbuilder_elements Where form_id = " . intval(Factory::getApplication()->input->getInt('id', 0)) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
+                $db->setQuery("Select Distinct `label`, reference_id From #__contentbuilder_ng_elements Where form_id = " . intval(Factory::getApplication()->input->getInt('id', 0)) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
                 $rows = $db->loadAssocList();
                 $ids = array();
                 foreach ($rows as $row) {
@@ -96,7 +96,7 @@ class DetailsController extends BaseController
 
                 if ($auth) {
                     $app = Factory::getApplication();
-                    $option = 'com_contentbuilder';
+                    $option = 'com_contentbuilder_ng';
                     $list = (array) $app->input->get('list', [], 'array');
                     $limit = isset($list['limit']) ? $app->input->getInt('list[limit]', 0) : (int) $app->getUserState($option . '.list.limit', 0);
                     if ($limit === 0) {
@@ -114,7 +114,7 @@ class DetailsController extends BaseController
 
                     Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder&task=edit.display&latest=1&backtolist=' . Factory::getApplication()->input->getInt('backtolist', 0) . '&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&record_id=' . ($listQuery !== '' ? '' : '') . ($listQuery !== '' ? '&' . $listQuery : ''), false));
                 } else {
-                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
+                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_ADD_ENTRY_FIRST'));
                     Factory::getApplication()->redirect(Route::_('index.php'));
                 }
             }
@@ -159,7 +159,7 @@ class DetailsController extends BaseController
         }
 
         ContentbuilderLegacyHelper::setPermissions($form_id, $recordId, $suffix);
-        ContentbuilderLegacyHelper::checkPermissions('view', Text::_('COM_CONTENTBUILDER_PERMISSIONS_VIEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        ContentbuilderLegacyHelper::checkPermissions('view', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_VIEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
 
         Factory::getApplication()->input->set('tmpl', Factory::getApplication()->input->getWord('tmpl', null));
         Factory::getApplication()->input->set('layout', Factory::getApplication()->input->getWord('layout', null) == 'latest' ? null : Factory::getApplication()->input->getWord('layout', null));

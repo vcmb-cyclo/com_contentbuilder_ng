@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Site\View\List;
+namespace CB\Component\Contentbuilder_ng\Site\View\List;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -16,7 +16,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
 {
@@ -37,7 +37,7 @@ class HtmlView extends BaseHtmlView
         if (!$this->frontend) {
             $wa->addInlineStyle(
                 '.icon-logo_left{
-                    background-image:url(' . Uri::root(true) . '/media/com_contentbuilder/images/logo_left.png);
+                    background-image:url(' . Uri::root(true) . '/media/com_contentbuilder_ng/images/logo_left.png);
                     background-size:contain;
                     background-repeat:no-repeat;
                     background-position:center;
@@ -65,7 +65,7 @@ class HtmlView extends BaseHtmlView
         $lists['filter_language'] = $state->get('formsd_filter_language');
         $lists['liststart'] = (int) $state->get('list.start');
 
-        PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
+        PluginHelper::importPlugin('contentbuilder_ng_themes', $subject->theme_plugin);
 
         $dispatcher = Factory::getApplication()->getDispatcher();
         $eventResult = $dispatcher->dispatch('onListViewCss', new \Joomla\Event\Event('onListViewCss', array()));
@@ -74,7 +74,7 @@ class HtmlView extends BaseHtmlView
         $theme_css = implode('', $results);
         $this->theme_css = $theme_css;
 
-        PluginHelper::importPlugin('contentbuilder_themes', $subject->theme_plugin);
+        PluginHelper::importPlugin('contentbuilder_ng_themes', $subject->theme_plugin);
         $eventResult = $dispatcher->dispatch('onListViewJavascript', new \Joomla\Event\Event('onListViewJavascript', array()));
         $results = $eventResult->getArgument('result') ?: [];
 

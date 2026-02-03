@@ -8,7 +8,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Site\Model;
+namespace CB\Component\Contentbuilder_ng\Site\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -35,9 +35,9 @@ use Joomla\CMS\User\UserHelper;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 
 class EditModel extends BaseDatabaseModel
@@ -146,7 +146,7 @@ class EditModel extends BaseDatabaseModel
 
         $this->_db = Factory::getContainer()->get(DatabaseInterface::class);
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder';
+        $option = 'com_contentbuilder_ng';
 
         $this->is15 = false;
         $this->is16 = false;
@@ -249,7 +249,7 @@ class EditModel extends BaseDatabaseModel
 
     private function _buildQuery()
     {
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_forms Where id = ' . intval($this->_id) . ' And published = 1';
+        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id) . ' And published = 1';
     }
 
     /**
@@ -264,15 +264,15 @@ class EditModel extends BaseDatabaseModel
             $this->_data = $this->_getList($query, 0, 1);
 
             if (!count($this->_data)) {
-                throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
             }
 
             foreach ($this->_data as $data) {
 
                 if (!$this->frontend && $data->display_in == 0) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
                 } else if ($this->frontend && $data->display_in == 1) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
                 }
 
                 $data->show_page_heading = $this->_show_page_heading;
@@ -282,11 +282,11 @@ class EditModel extends BaseDatabaseModel
                 if ($data->type && $data->reference_id) {
 
                     // article options
-                    $this->getDatabase()->setQuery("Select content.id, content.modified_by, content.version, content.hits, content.catid From #__contentbuilder_articles As articles, #__content As content Where (content.state = 1 Or content.state = 0) And content.id = articles.article_id And articles.form_id = " . $this->_id . " And articles.record_id = " . $this->getDatabase()->Quote($this->_record_id));
+                    $this->getDatabase()->setQuery("Select content.id, content.modified_by, content.version, content.hits, content.catid From #__contentbuilder_ng_articles As articles, #__content As content Where (content.state = 1 Or content.state = 0) And content.id = articles.article_id And articles.form_id = " . $this->_id . " And articles.record_id = " . $this->getDatabase()->Quote($this->_record_id));
                     $article = $this->getDatabase()->loadAssoc();
 
                     if ($data->create_articles) {
-                        Form::addFormPath(JPATH_SITE . '/administrator/components/com_contentbuilder/models/forms');
+                        Form::addFormPath(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/models/forms');
                         Form::addFieldPath(JPATH_SITE . '/administrator/components/com_content/models/fields');
                         $form = Form::getInstance('com_content.article', 'article', array('control' => 'Form', 'load_data' => true));
 
@@ -371,7 +371,7 @@ class EditModel extends BaseDatabaseModel
                     $data->frontend = $this->frontend;
                     $data->form = ContentbuilderLegacyHelper::getForm($data->type, $data->reference_id);
                     if (!$data->form->exists) {
-                        throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
                     }
                     $data->page_title = '';
                     if (Factory::getApplication()->input->getInt('cb_prefix_in_title', 1)) {
@@ -389,7 +389,7 @@ class EditModel extends BaseDatabaseModel
                     }
 
                     if (count($ids)) {
-                        $this->getDatabase()->setQuery("Select Distinct `label`, reference_id From #__contentbuilder_elements Where form_id = " . intval($this->_id) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
+                        $this->getDatabase()->setQuery("Select Distinct `label`, reference_id From #__contentbuilder_ng_elements Where form_id = " . intval($this->_id) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
                         $rows = $this->getDatabase()->loadAssocList();
                         $ids = array();
                         foreach ($rows as $row) {
@@ -608,23 +608,23 @@ var contentbuilder = new function(){
 
         \Joomla\CMS\Session\Session::checkToken('post') or jexit(Text::_('JInvalid_Token'));
 
-        PluginHelper::importPlugin('contentbuilder_submit');
-        Factory::getApplication()->getSession()->clear('cb_failed_values', 'com_contentbuilder.' . $this->_id);
+        PluginHelper::importPlugin('contentbuilder_ng_submit');
+        Factory::getApplication()->getSession()->clear('cb_failed_values', 'com_contentbuilder_ng.' . $this->_id);
         Factory::getApplication()->input->set('cb_submission_failed', 0);
 
         $query = $this->_buildQuery();
         $this->_data = $this->_getList($query, 0, 1);
 
         if (!count($this->_data)) {
-            throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+            throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
         }
 
         foreach ($this->_data as $data) {
 
             if (!$this->frontend && $data->display_in == 0) {
-                throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
             } else if ($this->frontend && $data->display_in == 1) {
-                throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
             }
 
             $data->form_id = $this->_id;
@@ -639,7 +639,7 @@ var contentbuilder = new function(){
                     $noneditable_fields = ContentbuilderLegacyHelper::getListNonEditableElements($this->_id);
                     $names = $data->form->getElementNames();
 
-                    $this->getDatabase()->setQuery("Select * From #__contentbuilder_elements Where form_id = " . $this->_id . " And published = 1 And editable = 1");
+                    $this->getDatabase()->setQuery("Select * From #__contentbuilder_ng_elements Where form_id = " . $this->_id . " And published = 1 And editable = 1");
                     $fields = $this->getDatabase()->loadAssocList();
 
                     $the_fields = array();
@@ -707,14 +707,14 @@ var contentbuilder = new function(){
                     if ($the_captcha_field !== null && !in_array($the_captcha_field['reference_id'], $noneditable_fields)) {
 
                         if (!class_exists('Securimage')) {
-                            require_once(JPATH_SITE . '/components/com_contentbuilder/images/securimage/securimage.php');
+                            require_once(JPATH_SITE . '/components/com_contentbuilder_ng/images/securimage/securimage.php');
                         }
 
                         $securimage = new Securimage();
                         $cap_value = Factory::getApplication()->input->post->get('cb_' . $the_captcha_field['reference_id'], null, 'raw');
                         if ($securimage->check($cap_value) == false) {
                             Factory::getApplication()->input->set('cb_submission_failed', 1);
-                            Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_CAPTCHA_FAILED'), 'error');
+                            Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_CAPTCHA_FAILED'), 'error');
                         }
                         $values[$the_captcha_field['reference_id']] = $cap_value;
                         $noneditable_fields[] = $the_captcha_field['reference_id'];
@@ -735,26 +735,26 @@ var contentbuilder = new function(){
 
                             if (!trim($name)) {
                                 Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NAME_EMPTY'), 'error');
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_NAME_EMPTY'), 'error');
                             }
 
                             if (!trim($username)) {
                                 Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_USERNAME_EMPTY'), 'error');
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_USERNAME_EMPTY'), 'error');
                             } else if (preg_match("#[<>\"'%;()&]#i", $username) || strlen(utf8_decode($username)) < 2) {
                                 Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_USERNAME_INVALID'), 'error');
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_USERNAME_INVALID'), 'error');
                             }
 
                             if (!trim($email)) {
                                 Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_EMAIL_EMPTY'), 'error');
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_EMAIL_EMPTY'), 'error');
                             } else if (!ContentbuilderHelper::isEmail($email)) {
                                 Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_EMAIL_INVALID'), 'error');
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_EMAIL_INVALID'), 'error');
                             } else if ($email != $email2) {
                                 Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_EMAIL_MISMATCH'), 'error');
+                                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_EMAIL_MISMATCH'), 'error');
                             }
 
                             if (!$meta->created_id && !Factory::getApplication()->getIdentity()->get('id', 0)) {
@@ -762,24 +762,24 @@ var contentbuilder = new function(){
                                 $this->getDatabase()->setQuery("Select count(id) From #__users Where `username` = " . $this->getDatabase()->Quote($username));
                                 if ($this->getDatabase()->loadResult()) {
                                     Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
+                                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_USERNAME_NOT_AVAILABLE'), 'error');
                                 }
 
                                 $this->getDatabase()->setQuery("Select count(id) From #__users Where `email` = " . $this->getDatabase()->Quote($email));
                                 if ($this->getDatabase()->loadResult()) {
                                     Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
+                                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_EMAIL_NOT_AVAILABLE'), 'error');
                                 }
 
                                 if ($pw1 != $pw2) {
                                     Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_PASSWORD_MISMATCH'), 'error');
+                                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_PASSWORD_MISMATCH'), 'error');
 
                                     Factory::getApplication()->input->set('cb_' . $the_password_field['reference_id'], '');
                                     Factory::getApplication()->input->set('cb_' . $the_password_repeat_field['reference_id'], '');
                                 } else if (!trim($pw1)) {
                                     Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_PASSWORD_EMPTY'), 'error');
+                                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_PASSWORD_EMPTY'), 'error');
 
                                     Factory::getApplication()->input->set('cb_' . $the_password_field['reference_id'], '');
                                     Factory::getApplication()->input->set('cb_' . $the_password_repeat_field['reference_id'], '');
@@ -789,25 +789,25 @@ var contentbuilder = new function(){
                                     $this->getDatabase()->setQuery("Select count(id) From #__users Where id <> " . $this->getDatabase()->Quote($meta->created_id) . " And `username` = " . $this->getDatabase()->Quote($username));
                                     if ($this->getDatabase()->loadResult()) {
                                         Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
+                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_USERNAME_NOT_AVAILABLE'), 'error');
                                     }
 
                                     $this->getDatabase()->setQuery("Select count(id) From #__users Where id <> " . $this->getDatabase()->Quote($meta->created_id) . " And `email` = " . $this->getDatabase()->Quote($email));
                                     if ($this->getDatabase()->loadResult()) {
                                         Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
+                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_EMAIL_NOT_AVAILABLE'), 'error');
                                     }
                                 } else {
                                     $this->getDatabase()->setQuery("Select count(id) From #__users Where id <> " . $this->getDatabase()->Quote(Factory::getApplication()->getIdentity()->get('id', 0)) . " And `username` = " . $this->getDatabase()->Quote($username));
                                     if ($this->getDatabase()->loadResult()) {
                                         Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_USERNAME_NOT_AVAILABLE'), 'error');
+                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_USERNAME_NOT_AVAILABLE'), 'error');
                                     }
 
                                     $this->getDatabase()->setQuery("Select count(id) From #__users Where id <> " . $this->getDatabase()->Quote(Factory::getApplication()->getIdentity()->get('id', 0)) . " And `email` = " . $this->getDatabase()->Quote($email));
                                     if ($this->getDatabase()->loadResult()) {
                                         Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_EMAIL_NOT_AVAILABLE'), 'error');
+                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_EMAIL_NOT_AVAILABLE'), 'error');
                                     }
                                 }
 
@@ -815,13 +815,13 @@ var contentbuilder = new function(){
 
                                     if ($pw1 != $pw2) {
                                         Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_PASSWORD_MISMATCH'), 'error');
+                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_PASSWORD_MISMATCH'), 'error');
 
                                         Factory::getApplication()->input->set('cb_' . $the_password_field['reference_id'], '');
                                         Factory::getApplication()->input->set('cb_' . $the_password_repeat_field['reference_id'], '');
                                     } else if (!trim($pw1)) {
                                         Factory::getApplication()->input->set('cb_submission_failed', 1);
-                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_PASSWORD_EMPTY'), 'error');
+                                        Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_PASSWORD_EMPTY'), 'error');
 
                                         Factory::getApplication()->input->set('cb_' . $the_password_field['reference_id'], '');
                                         Factory::getApplication()->input->set('cb_' . $the_password_repeat_field['reference_id'], '');
@@ -965,7 +965,7 @@ var contentbuilder = new function(){
                                             }
 
                                             if ($file['size'] > $val) {
-                                                $msg = Text::_('COM_CONTENTBUILDER_FILESIZE_EXCEEDED') . ' ' . $the_upload_fields[$id]['options']->max_filesize . 'b';
+                                                $msg = Text::_('COM_CONTENTBUILDER_NG_FILESIZE_EXCEEDED') . ' ' . $the_upload_fields[$id]['options']->max_filesize . 'b';
                                             }
                                         }
 
@@ -977,7 +977,7 @@ var contentbuilder = new function(){
                                             $ext = strtolower(File::getExt($filename));
 
                                             if (!in_array($ext, $allowed)) {
-                                                $msg = Text::_('COM_CONTENTBUILDER_FILE_EXTENSION_NOT_ALLOWED');
+                                                $msg = Text::_('COM_CONTENTBUILDER_NG_FILE_EXTENSION_NOT_ALLOWED');
                                             }
                                         }
 
@@ -1040,7 +1040,7 @@ var contentbuilder = new function(){
                                             $uploaded = File::upload($src, $dest . '/' . $filename, false, true);
 
                                             if (!$uploaded) {
-                                                $msg = Text::_('COM_CONTENTBUILDER_UPLOAD_FAILED');
+                                                $msg = Text::_('COM_CONTENTBUILDER_NG_UPLOAD_FAILED');
                                             }
                                         }
 
@@ -1071,7 +1071,7 @@ var contentbuilder = new function(){
                                     $validations = explode(',', $the_upload_fields[$id]['validations']);
 
                                     foreach ($validations as $validation) {
-                                        \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_validation', $validation);
+                                        \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_ng_validation', $validation);
                                     }
 
                                     $dispatcher = Factory::getApplication()->getDispatcher();
@@ -1152,7 +1152,7 @@ var contentbuilder = new function(){
                                     $validations = explode(',', $f['validations'] ?? '');
 
                                     foreach ($validations as $validation) {
-                                        \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_validation', $validation);
+                                        \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_ng_validation', $validation);
                                     }
 
                                     $dispatcher = Factory::getApplication()->getDispatcher();
@@ -1172,7 +1172,7 @@ var contentbuilder = new function(){
                                         }
                                     } else {
 
-                                        \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_form_elements', $f['type']);
+                                        \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_ng_form_elements', $f['type']);
 
                                         $dispatcher = Factory::getApplication()->getDispatcher();
                                         $plugin_validations = $dispatcher->dispatch(
@@ -1197,7 +1197,7 @@ var contentbuilder = new function(){
                     $submit_before_result = $dispatcher->dispatch('onBeforeSubmit', new \Joomla\Event\Event('onBeforeSubmit', array(Factory::getApplication()->input->getCmd('record_id', 0), $data->form, $values)));
 
                     if (Factory::getApplication()->input->get('cb_submission_failed', 0, 'string')) {
-                        Factory::getApplication()->getSession()->set('cb_failed_values', $values, 'com_contentbuilder.' . $this->_id);
+                        Factory::getApplication()->getSession()->set('cb_failed_values', $values, 'com_contentbuilder_ng.' . $this->_id);
                         return Factory::getApplication()->input->getCmd('record_id', 0);
                     }
 
@@ -1229,7 +1229,7 @@ var contentbuilder = new function(){
 
                             if (intval($user_id) > 0) {
 
-                                Factory::getApplication()->getSession()->set('cb_last_record_user_id', $user_id, 'com_contentbuilder');
+                                Factory::getApplication()->getSession()->set('cb_last_record_user_id', $user_id, 'com_contentbuilder_ng');
 
                                 $data->form->saveRecordUserData(
                                     $record_return,
@@ -1254,7 +1254,7 @@ var contentbuilder = new function(){
                                 $bypass->text = $orig_text = '{CBVerify plugin: ' . $data->registration_bypass_plugin . '; verification-name: ' . $verification_name . '; verify-view: ' . $verify_view . '; ' . str_replace(array("\r", "\n"), '', $data->registration_bypass_plugin_params) . '}';
                                 $params = new \stdClass();
 
-                                PluginHelper::importPlugin('content', 'contentbuilder_verify');
+                                PluginHelper::importPlugin('content', 'contentbuilder_ng_verify');
 
                                 $dispatcher = Factory::getApplication()->getDispatcher();
                                 $bypass_result = $dispatcher->dispatch('onPrepareContent', new \Joomla\Event\Event('onPrepareContent', array(&$bypass, &$params)));
@@ -1278,7 +1278,7 @@ var contentbuilder = new function(){
 
                                 if (intval($user_id) > 0) {
 
-                                    Factory::getApplication()->getSession()->set('cb_last_record_user_id', $user_id, 'com_contentbuilder');
+                                    Factory::getApplication()->getSession()->set('cb_last_record_user_id', $user_id, 'com_contentbuilder_ng');
 
                                     $data->form->saveRecordUserData(
                                         $record_return,
@@ -1298,12 +1298,12 @@ var contentbuilder = new function(){
 
                                     $_now = Factory::getDate();
 
-                                    $setup = Factory::getApplication()->getSession()->get($data->registration_bypass_plugin . $verification_name, '', 'com_contentbuilder.verify.' . $data->registration_bypass_plugin . $verification_name);
-                                    Factory::getApplication()->getSession()->clear($data->registration_bypass_plugin . $verification_name, 'com_contentbuilder.verify.' . $data->registration_bypass_plugin . $verification_name);
+                                    $setup = Factory::getApplication()->getSession()->get($data->registration_bypass_plugin . $verification_name, '', 'com_contentbuilder_ng.verify.' . $data->registration_bypass_plugin . $verification_name);
+                                    Factory::getApplication()->getSession()->clear($data->registration_bypass_plugin . $verification_name, 'com_contentbuilder_ng.verify.' . $data->registration_bypass_plugin . $verification_name);
                                     $___now = $_now->toSql();
 
                                     $this->getDatabase()->setQuery("
-                                            Insert Into #__contentbuilder_verifications
+                                            Insert Into #__contentbuilder_ng_verifications
                                             (
                                             `verification_hash`,
                                             `start_date`,
@@ -1377,7 +1377,7 @@ var contentbuilder = new function(){
 
                         $language = $data->default_lang_code_ignore ? $ignore_lang_code : $data->default_lang_code;
 
-                        $this->getDatabase()->setQuery("Select id, edited From #__contentbuilder_records Where `type` = " . $this->getDatabase()->Quote($data->type) . " And `reference_id` = " . $this->getDatabase()->Quote($data->form->getReferenceId()) . " And record_id = " . $this->getDatabase()->Quote($record_return));
+                        $this->getDatabase()->setQuery("Select id, edited From #__contentbuilder_ng_records Where `type` = " . $this->getDatabase()->Quote($data->type) . " And `reference_id` = " . $this->getDatabase()->Quote($data->form->getReferenceId()) . " And record_id = " . $this->getDatabase()->Quote($record_return));
                         $res = $this->getDatabase()->loadAssoc();
                         $last_update = Factory::getDate();
                         $last_update = $last_update->toSql();
@@ -1398,10 +1398,10 @@ var contentbuilder = new function(){
                                 $date = Factory::getDate(strtotime($created_up . ' +' . intval($data->default_publish_down_days) . ' days'));
                                 $created_down = $date->toSql();
                             }
-                            $this->getDatabase()->setQuery("Insert Into #__contentbuilder_records (session_id,`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id, publish_up, publish_down) Values ('" . Factory::getApplication()->getSession()->getId() . "'," . $this->getDatabase()->Quote($data->type) . "," . $this->getDatabase()->Quote($last_update) . ",$is_future," . $this->getDatabase()->Quote($language) . "," . $this->getDatabase()->Quote(trim($sef)) . "," . $this->getDatabase()->Quote($data->auto_publish && !$is_future ? 1 : 0) . ", " . $this->getDatabase()->Quote($record_return) . ", " . $this->getDatabase()->Quote($data->form->getReferenceId()) . ", " . $this->getDatabase()->Quote($created_up) . ", " . $this->getDatabase()->Quote($created_down) . ")");
+                            $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_records (session_id,`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id, publish_up, publish_down) Values ('" . Factory::getApplication()->getSession()->getId() . "'," . $this->getDatabase()->Quote($data->type) . "," . $this->getDatabase()->Quote($last_update) . ",$is_future," . $this->getDatabase()->Quote($language) . "," . $this->getDatabase()->Quote(trim($sef)) . "," . $this->getDatabase()->Quote($data->auto_publish && !$is_future ? 1 : 0) . ", " . $this->getDatabase()->Quote($record_return) . ", " . $this->getDatabase()->Quote($data->form->getReferenceId()) . ", " . $this->getDatabase()->Quote($created_up) . ", " . $this->getDatabase()->Quote($created_down) . ")");
                             $this->getDatabase()->execute();
                         } else {
-                            $this->getDatabase()->setQuery("Update #__contentbuilder_records Set last_update = " . $this->getDatabase()->Quote($last_update) . ",lang_code = " . $this->getDatabase()->Quote($language) . ", sef = " . $this->getDatabase()->Quote(trim($sef ?? '')) . ", edited = edited + 1 Where `type` = " . $this->getDatabase()->Quote($data->type) . " And  `reference_id` = " . $this->getDatabase()->Quote($data->form->getReferenceId()) . " And record_id = " . $this->getDatabase()->Quote($record_return));
+                            $this->getDatabase()->setQuery("Update #__contentbuilder_ng_records Set last_update = " . $this->getDatabase()->Quote($last_update) . ",lang_code = " . $this->getDatabase()->Quote($language) . ", sef = " . $this->getDatabase()->Quote(trim($sef ?? '')) . ", edited = edited + 1 Where `type` = " . $this->getDatabase()->Quote($data->type) . " And  `reference_id` = " . $this->getDatabase()->Quote($data->form->getReferenceId()) . " And record_id = " . $this->getDatabase()->Quote($record_return));
                             $this->getDatabase()->execute();
                         }
                     }
@@ -1414,7 +1414,7 @@ var contentbuilder = new function(){
 
                 $data_email_items = $data->form->getRecord($record_return, false, -1, true);
 
-                $this->getDatabase()->setQuery("Select * From #__contentbuilder_records");
+                $this->getDatabase()->setQuery("Select * From #__contentbuilder_ng_records");
 
                 $data->labels = $data->form->getElementLabels();
                 $ids = array();
@@ -1423,7 +1423,7 @@ var contentbuilder = new function(){
                 }
                 $data->labels = array();
                 if (count($ids)) {
-                    $this->getDatabase()->setQuery("Select Distinct `label`, reference_id From #__contentbuilder_elements Where form_id = " . intval($this->_id) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
+                    $this->getDatabase()->setQuery("Select Distinct `label`, reference_id From #__contentbuilder_ng_elements Where form_id = " . intval($this->_id) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
                     $rows = $this->getDatabase()->loadAssocList();
                     $ids = array();
                     foreach ($rows as $row) {
@@ -1439,10 +1439,10 @@ var contentbuilder = new function(){
                     $data->page_title = $data->use_view_name_as_title ? $data->name : $data->form->getPageTitle();
 
                     //if(!count($data->items)){
-                    //     JError::raiseError(404, Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'));
+                    //     JError::raiseError(404, Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'));
                     //}
 
-                    $this->getDatabase()->setQuery("Select articles.`id` From #__contentbuilder_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($this->_id) . " And articles.record_id = " . $this->getDatabase()->Quote($record_return));
+                    $this->getDatabase()->setQuery("Select articles.`id` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($this->_id) . " And articles.record_id = " . $this->getDatabase()->Quote($record_return));
                     $article = $this->getDatabase()->loadResult();
 
                     $config = array();
@@ -1464,7 +1464,7 @@ var contentbuilder = new function(){
 
                 // required to determine blocked users in system plugin
                 if ($data->act_as_registration && isset($user_id) && intval($user_id) > 0) {
-                    $this->getDatabase()->setQuery("Insert Into #__contentbuilder_registered_users (user_id, form_id, record_id) Values (" . intval($user_id) . ", " . $this->_id . ", " . $this->getDatabase()->Quote($record_return) . ")");
+                    $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_registered_users (user_id, form_id, record_id) Values (" . intval($user_id) . ", " . $this->_id . ", " . $this->getDatabase()->Quote($record_return) . ")");
                     $this->getDatabase()->execute();
                 }
 
@@ -1557,7 +1557,7 @@ var contentbuilder = new function(){
                             $email_admin_template = ContentbuilderLegacyHelper::getEmailTemplate($this->_id, $record_return, $data_email_items, $ids, true);
 
                             // subject
-                            $subject_admin = Text::_('COM_CONTENTBUILDER_EMAIL_RECORD_RECEIVED');
+                            $subject_admin = Text::_('COM_CONTENTBUILDER_NG_EMAIL_RECORD_RECEIVED');
                             if (trim($data->email_admin_subject)) {
                                 foreach ($data->items as $item) {
                                     $data->email_admin_subject = str_replace('{' . $item->recName . '}', ContentbuilderHelper::cbinternal($item->recValue), $data->email_admin_subject);
@@ -1668,7 +1668,7 @@ var contentbuilder = new function(){
                             $email_template = ContentbuilderLegacyHelper::getEmailTemplate($this->_id, $record_return, $data_email_items, $ids, false);
 
                             // subject
-                            $subject = Text::_('COM_CONTENTBUILDER_EMAIL_RECORD_RECEIVED');
+                            $subject = Text::_('COM_CONTENTBUILDER_NG_EMAIL_RECORD_RECEIVED');
                             if (trim($data->email_subject)) {
                                 foreach ($data->items as $item) {
                                     $data->email_subject = str_replace('{' . $item->recName . '}', ContentbuilderHelper::cbinternal($item->recValue), $data->email_subject);
@@ -1733,7 +1733,7 @@ var contentbuilder = new function(){
 
         $cache = Factory::getCache('com_content');
         $cache->clean();
-        $cache = Factory::getCache('com_contentbuilder');
+        $cache = Factory::getCache('com_contentbuilder_ng');
         $cache->clean();
 
         return false;
@@ -2034,14 +2034,14 @@ var contentbuilder = new function(){
             $this->_data = $this->_getList($query, 0, 1);
 
             if (!count($this->_data)) {
-                throw new \Exception(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
             }
 
             foreach ($this->_data as $data) {
                 if (!$this->frontend && $data->display_in == 0) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
                 } else if ($this->frontend && $data->display_in == 1) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_RECORD_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
                 }
                 $data->form_id = $this->_id;
                 if ($data->type && $data->reference_id) {
@@ -2054,12 +2054,12 @@ var contentbuilder = new function(){
                             $new_items[] = $this->getDatabase()->Quote($items[$i]);
                         }
                         $new_items = implode(',', $new_items);
-                        $this->getDatabase()->setQuery("Delete From #__contentbuilder_list_records Where form_id = " . intval($this->_id) . " And record_id In ($new_items)");
+                        $this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_list_records Where form_id = " . intval($this->_id) . " And record_id In ($new_items)");
                         $this->getDatabase()->execute();
-                        $this->getDatabase()->setQuery("Delete From #__contentbuilder_records Where `type` = " . $this->getDatabase()->Quote($data->type) . " And  `reference_id` = " . $this->getDatabase()->Quote($data->form->getReferenceId()) . " And record_id In ($new_items)");
+                        $this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_records Where `type` = " . $this->getDatabase()->Quote($data->type) . " And  `reference_id` = " . $this->getDatabase()->Quote($data->form->getReferenceId()) . " And record_id In ($new_items)");
                         $this->getDatabase()->execute();
                         if ($data->delete_articles) {
-                            $this->getDatabase()->setQuery("Select article_id From #__contentbuilder_articles Where `type` = " . $this->getDatabase()->Quote($data->type) . " And reference_id = " . $this->getDatabase()->Quote($data->form->getReferenceId()) . " And record_id In ($new_items)");
+                            $this->getDatabase()->setQuery("Select article_id From #__contentbuilder_ng_articles Where `type` = " . $this->getDatabase()->Quote($data->type) . " And reference_id = " . $this->getDatabase()->Quote($data->form->getReferenceId()) . " And record_id In ($new_items)");
                             $articles = $this->getDatabase()->loadColumn();
 
                             if (count($articles)) {
@@ -2092,7 +2092,7 @@ var contentbuilder = new function(){
                             }
                         }
 
-                        $this->getDatabase()->setQuery("Delete From #__contentbuilder_articles Where `type` = " . $this->getDatabase()->Quote($data->type) . " And reference_id = " . $this->getDatabase()->Quote($data->form->getReferenceId()) . " And record_id In ($new_items)");
+                        $this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_articles Where `type` = " . $this->getDatabase()->Quote($data->type) . " And reference_id = " . $this->getDatabase()->Quote($data->form->getReferenceId()) . " And record_id In ($new_items)");
                         $this->getDatabase()->execute();
                     }
                 }
@@ -2102,12 +2102,12 @@ var contentbuilder = new function(){
         if (!$this->is15) {
             $cache = Factory::getCache('com_content');
             $cache->clean();
-            $cache = Factory::getCache('com_contentbuilder');
+            $cache = Factory::getCache('com_contentbuilder_ng');
             $cache->clean();
         } else {
             $cache = Factory::getCache('com_content');
             $cache->clean();
-            $cache = Factory::getCache('com_contentbuilder');
+            $cache = Factory::getCache('com_contentbuilder_ng');
             $cache->clean();
         }
     }
@@ -2115,20 +2115,20 @@ var contentbuilder = new function(){
     function change_list_states()
     {
 
-        $this->getDatabase()->setQuery('Select reference_id From #__contentbuilder_forms Where id = ' . intval($this->_id));
+        $this->getDatabase()->setQuery('Select reference_id From #__contentbuilder_ng_forms Where id = ' . intval($this->_id));
         $reference_id = $this->getDatabase()->loadResult();
         if (!$reference_id) {
             return;
         }
 
         // prevent from changing to an unpublished state
-        $this->getDatabase()->setQuery("Select id, action From #__contentbuilder_list_states Where published = 1 And id = " . Factory::getApplication()->input->getInt('list_state', 0) . " And form_id = " . $this->_id);
+        $this->getDatabase()->setQuery("Select id, action From #__contentbuilder_ng_list_states Where published = 1 And id = " . Factory::getApplication()->input->getInt('list_state', 0) . " And form_id = " . $this->_id);
         $res = $this->getDatabase()->loadAssoc();
         if (!is_array($res)) {
             return;
         }
 
-        PluginHelper::importPlugin('contentbuilder_listaction', $res['action']);
+        PluginHelper::importPlugin('contentbuilder_ng_listaction', $res['action']);
         $items = Factory::getApplication()->input->get('cid', [], 'array');
 
         $dispatcher = Factory::getApplication()->getDispatcher();
@@ -2141,13 +2141,13 @@ var contentbuilder = new function(){
         }
 
         foreach ($items as $item) {
-            $this->getDatabase()->setQuery("Select id From #__contentbuilder_list_records Where form_id = " . $this->_id . " And record_id = " . $this->getDatabase()->Quote($item));
+            $this->getDatabase()->setQuery("Select id From #__contentbuilder_ng_list_records Where form_id = " . $this->_id . " And record_id = " . $this->getDatabase()->Quote($item));
             $res = $this->getDatabase()->loadResult();
             if (!$res) {
-                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_list_records (state_id, form_id, record_id, reference_id) Values (" . Factory::getApplication()->input->getInt('list_state', 0) . ", " . $this->_id . ", " . $this->getDatabase()->Quote($item) . ", " . $this->getDatabase()->Quote($reference_id) . ")");
+                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_list_records (state_id, form_id, record_id, reference_id) Values (" . Factory::getApplication()->input->getInt('list_state', 0) . ", " . $this->_id . ", " . $this->getDatabase()->Quote($item) . ", " . $this->getDatabase()->Quote($reference_id) . ")");
                 $this->getDatabase()->execute();
             } else {
-                $this->getDatabase()->setQuery("Update #__contentbuilder_list_records Set state_id = " . Factory::getApplication()->input->getInt('list_state', 0) . " Where form_id = " . $this->_id . " And record_id = " . $this->getDatabase()->Quote($item));
+                $this->getDatabase()->setQuery("Update #__contentbuilder_ng_list_records Set state_id = " . Factory::getApplication()->input->getInt('list_state', 0) . " Where form_id = " . $this->_id . " And record_id = " . $this->getDatabase()->Quote($item));
                 $this->getDatabase()->execute();
             }
         }
@@ -2164,7 +2164,7 @@ var contentbuilder = new function(){
 
     function change_list_language()
     {
-        $this->getDatabase()->setQuery('Select reference_id,`type` From #__contentbuilder_forms Where id = ' . intval($this->_id));
+        $this->getDatabase()->setQuery('Select reference_id,`type` From #__contentbuilder_ng_forms Where id = ' . intval($this->_id));
         $typeref = $this->getDatabase()->loadAssoc();
 
         if (!is_array($typeref)) {
@@ -2181,29 +2181,29 @@ var contentbuilder = new function(){
         $sef = $this->getDatabase()->loadResult();
 
         foreach ($items as $item) {
-            $this->getDatabase()->setQuery("Select id From #__contentbuilder_records Where `type` = " . $this->getDatabase()->Quote($type) . " And `reference_id` = " . $this->getDatabase()->Quote($reference_id) . " And record_id = " . $this->getDatabase()->Quote($item));
+            $this->getDatabase()->setQuery("Select id From #__contentbuilder_ng_records Where `type` = " . $this->getDatabase()->Quote($type) . " And `reference_id` = " . $this->getDatabase()->Quote($reference_id) . " And record_id = " . $this->getDatabase()->Quote($item));
             $res = $this->getDatabase()->loadResult();
             if (!$res) {
-                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_records (`type`,lang_code, sef, record_id, reference_id) Values (" . $this->getDatabase()->Quote($type) . "," . $this->getDatabase()->Quote(Factory::getApplication()->input->get('list_language', '*', 'string')) . ", " . $this->getDatabase()->Quote($sef) . ", " . $this->getDatabase()->Quote($item) . ", " . $this->getDatabase()->Quote($reference_id) . ")");
+                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_records (`type`,lang_code, sef, record_id, reference_id) Values (" . $this->getDatabase()->Quote($type) . "," . $this->getDatabase()->Quote(Factory::getApplication()->input->get('list_language', '*', 'string')) . ", " . $this->getDatabase()->Quote($sef) . ", " . $this->getDatabase()->Quote($item) . ", " . $this->getDatabase()->Quote($reference_id) . ")");
                 $this->getDatabase()->execute();
             } else {
-                $this->getDatabase()->setQuery("Update #__contentbuilder_records Set sef = " . $this->getDatabase()->Quote($sef) . ", lang_code = " . $this->getDatabase()->Quote(Factory::getApplication()->input->get('list_language', '*', 'string')) . " Where `type` = " . $this->getDatabase()->Quote($type) . " And `reference_id` = " . $this->getDatabase()->Quote($reference_id) . " And record_id = " . $this->getDatabase()->Quote($item));
+                $this->getDatabase()->setQuery("Update #__contentbuilder_ng_records Set sef = " . $this->getDatabase()->Quote($sef) . ", lang_code = " . $this->getDatabase()->Quote(Factory::getApplication()->input->get('list_language', '*', 'string')) . " Where `type` = " . $this->getDatabase()->Quote($type) . " And `reference_id` = " . $this->getDatabase()->Quote($reference_id) . " And record_id = " . $this->getDatabase()->Quote($item));
                 $this->getDatabase()->execute();
             }
 
-            $this->getDatabase()->setQuery("Update #__contentbuilder_articles As articles, #__content As content Set content.language = " . $this->getDatabase()->Quote(Factory::getApplication()->input->get('list_language', '*', 'string')) . " Where ( content.state = 1 Or content.state = 0 ) And content.id = articles.article_id And articles.`type` = " . intval($type) . " And articles.reference_id = " . $this->getDatabase()->Quote($reference_id) . " And articles.record_id = " . $this->getDatabase()->Quote($item));
+            $this->getDatabase()->setQuery("Update #__contentbuilder_ng_articles As articles, #__content As content Set content.language = " . $this->getDatabase()->Quote(Factory::getApplication()->input->get('list_language', '*', 'string')) . " Where ( content.state = 1 Or content.state = 0 ) And content.id = articles.article_id And articles.`type` = " . intval($type) . " And articles.reference_id = " . $this->getDatabase()->Quote($reference_id) . " And articles.record_id = " . $this->getDatabase()->Quote($item));
             $this->getDatabase()->execute();
         }
 
         $cache = Factory::getCache('com_content');
         $cache->clean();
-        $cache = Factory::getCache('com_contentbuilder');
+        $cache = Factory::getCache('com_contentbuilder_ng');
         $cache->clean();
     }
 
     function change_list_publish()
     {
-        $this->getDatabase()->setQuery('Select reference_id,`type` From #__contentbuilder_forms Where id = ' . intval($this->_id));
+        $this->getDatabase()->setQuery('Select reference_id,`type` From #__contentbuilder_ng_forms Where id = ' . intval($this->_id));
         $typeref = $this->getDatabase()->loadAssoc();
 
         if (!is_array($typeref)) {
@@ -2222,17 +2222,17 @@ var contentbuilder = new function(){
         $created_up = $created_up->toSql();
 
         foreach ($items as $item) {
-            $this->getDatabase()->setQuery("Select id, publish_up From #__contentbuilder_records Where `type` = " . $this->getDatabase()->Quote($type) . " And `reference_id` = " . $this->getDatabase()->Quote($reference_id) . " And record_id = " . $this->getDatabase()->Quote($item));
+            $this->getDatabase()->setQuery("Select id, publish_up From #__contentbuilder_ng_records Where `type` = " . $this->getDatabase()->Quote($type) . " And `reference_id` = " . $this->getDatabase()->Quote($reference_id) . " And record_id = " . $this->getDatabase()->Quote($item));
             $res = $this->getDatabase()->loadAssoc();
 
             if (!is_array($res)) {
-                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_records (`type`,published, record_id, reference_id) Values (" . $this->getDatabase()->Quote($type) . "," . (Factory::getApplication()->input->getInt('list_publish', 0) ? 1 : 0) . ", " . $this->getDatabase()->Quote($item) . ", " . $this->getDatabase()->Quote($reference_id) . ")");
+                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_records (`type`,published, record_id, reference_id) Values (" . $this->getDatabase()->Quote($type) . "," . (Factory::getApplication()->input->getInt('list_publish', 0) ? 1 : 0) . ", " . $this->getDatabase()->Quote($item) . ", " . $this->getDatabase()->Quote($reference_id) . ")");
                 $this->getDatabase()->execute();
             } else {
                 $publish = Factory::getApplication()->input->getInt('list_publish', 0);
 
                 $this->getDatabase()->setQuery(
-                    "UPDATE #__contentbuilder_records 
+                    "UPDATE #__contentbuilder_ng_records 
                     SET 
                         is_future = 0, 
                         publish_up = " . ($publish ? $this->getDatabase()->Quote($created_up) : 'NULL') . ", 
@@ -2251,7 +2251,7 @@ var contentbuilder = new function(){
                 : $this->getDatabase()->Quote(is_array($res) ? $res['publish_up'] : $created_up);
 
             $this->getDatabase()->setQuery(
-                "UPDATE #__contentbuilder_articles AS articles
+                "UPDATE #__contentbuilder_ng_articles AS articles
                 INNER JOIN #__content AS content ON content.id = articles.article_id
                 SET 
                     content.publish_up = " . $publishUpValue . ",
@@ -2272,7 +2272,7 @@ var contentbuilder = new function(){
         }
         $cache = Factory::getCache('com_content');
         $cache->clean();
-        $cache = Factory::getCache('com_contentbuilder');
+        $cache = Factory::getCache('com_contentbuilder_ng');
         $cache->clean();
 
         // Trigger the onContentChangeState event.

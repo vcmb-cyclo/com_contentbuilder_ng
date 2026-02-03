@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\View\Forms;
+namespace CB\Component\Contentbuilder_ng\Administrator\View\Forms;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -17,7 +17,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder\Administrator\View\Contentbuilder\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
 {
@@ -27,7 +27,7 @@ class HtmlView extends BaseHtmlView
         $wa = $this->document->getWebAssetManager();
         $wa->addInlineStyle(
             '.icon-logo_left{
-                background-image:url(' . Uri::root(true) . '/media/com_contentbuilder/images/logo_left.png);
+                background-image:url(' . Uri::root(true) . '/media/com_contentbuilder_ng/images/logo_left.png);
                 background-size:contain;
                 background-repeat:no-repeat;
                 background-position:center;
@@ -38,15 +38,15 @@ class HtmlView extends BaseHtmlView
         );
 
         // Et pour le title, garde un identifiant cohérent :
-        ToolbarHelper::title('ContentBuilder :: ' . Text::_('COM_CONTENTBUILDER_FORMS'), 'logo_left');
+        ToolbarHelper::title('ContentBuilder :: ' . Text::_('COM_CONTENTBUILDER_NG_FORMS'), 'logo_left');
         ToolbarHelper::addNew('form.add');
-        ToolbarHelper::custom('forms.copy', 'copy', '', Text::_('COM_CONTENTBUILDER_COPY'));
+        ToolbarHelper::custom('forms.copy', 'copy', '', Text::_('COM_CONTENTBUILDER_NG_COPY'));
         ToolbarHelper::editList('form.edit');
 
         ToolbarHelper::publish('forms.publish');
         ToolbarHelper::unpublish('forms.unpublish');
         ToolbarHelper::deleteList('JGLOBAL_CONFIRM_DELETE', 'forms.delete');
-        ToolbarHelper::preferences('com_contentbuilder');
+        ToolbarHelper::preferences('com_contentbuilder_ng');
 
         $items      = $this->getModel()->getItems();
         $pagination = $this->getModel()->getPagination();

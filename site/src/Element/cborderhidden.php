@@ -8,7 +8,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Site\Element;
+namespace CB\Component\Contentbuilder_ng\Site\Element;
 
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -29,7 +29,7 @@ class JFormFieldCborderhidden extends FormField
                 var cb_value_order = {};
                 var currval_order = "' . str_replace(array("\n", "\r"), array("\\n", ""), addslashes($this->value)) . '";
                 
-                function contentbuilder_addOrderValue(element_id, value){
+                function contentbuilder_ng_addOrderValue(element_id, value){
                     cb_value_order[element_id] = value;
                     var contents = "";
                     for(var x in cb_value_order){

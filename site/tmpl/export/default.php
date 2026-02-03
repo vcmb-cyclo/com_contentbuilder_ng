@@ -16,7 +16,7 @@ use Joomla\Database\DatabaseInterface;
 
 @ob_end_clean();
 
-use CB\Component\Contentbuilder\Administrator\Helper\VendorHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\VendorHelper;
 
 VendorHelper::load();
 
@@ -28,7 +28,7 @@ use Joomla\CMS\Factory;
 $db = Factory::getContainer()->get(DatabaseInterface::class);
 
 $spreadsheet = new Spreadsheet();
-$spreadsheet->getProperties()->setCreator("ContentBuilder")->setLastModifiedBy("ContentBuilder");
+$spreadsheet->getProperties()->setCreator("ContentBuilder_ng")->setLastModifiedBy("ContentBuilder_ng");
 
 // Create "Sheet 1" tab as the first worksheet.
 // https://phpspreadsheet.readthedocs.io/en/latest/topics/worksheets/adding-a-new-worksheet
@@ -67,21 +67,21 @@ $col_id = 0;
 $reserved_labels = [];
 if ($this->data->show_id_column) {
     $col_id = ++$colreserved;
-    array_push($reserved_labels, Text::_('COM_CONTENTBUILDER_ID'));
+    array_push($reserved_labels, Text::_('COM_CONTENTBUILDER_NG_ID'));
 }
 
 // Case of state true -> column reserved.
 $col_state = 0;
 if ($this->data->list_state) {
     $col_state = ++$colreserved;
-    array_push($reserved_labels, Text::_('COM_CONTENTBUILDER_EDIT_STATE'));
+    array_push($reserved_labels, Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'));
 }
 
 // Case of publish true -> column reserved.
 $col_publish = 0;
 if ($this->data->list_publish) {
     $col_publish = ++$colreserved;
-    array_push($reserved_labels, Text::_('COM_CONTENTBUILDER_PUBLISH'));
+    array_push($reserved_labels, Text::_('COM_CONTENTBUILDER_NG_PUBLISH'));
 }
 
 $labels = array_merge($reserved_labels, $labels);
@@ -108,9 +108,9 @@ foreach ($this->data->items as $item) {
         // Sécuriser la requête
         $recordId = $db->quote($item->colRecord);
         $sql = "SELECT title, color 
-                FROM `#__contentbuilder_list_states` 
+                FROM `#__contentbuilder_ng_list_states` 
                 WHERE id = (SELECT state_id 
-                            FROM `#__contentbuilder_list_records` 
+                            FROM `#__contentbuilder_ng_list_records` 
                             WHERE record_id = $recordId)";
         $db->setQuery($sql);
         $result = $db->loadRow();

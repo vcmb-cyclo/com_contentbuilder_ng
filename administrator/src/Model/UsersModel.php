@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder_ng\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -34,7 +34,7 @@ class UsersModel extends ListModel
                 'u.name',
                 'u.username',
                 'u.email',
-                // #__contentbuilder_users (alias a)
+                // #__contentbuilder_ng_users (alias a)
                 'a.verified_view', 
                 'a.verified_new', 
                 'a.verified_edit',
@@ -86,7 +86,7 @@ class UsersModel extends ListModel
             ->from($db->quoteName('#__users', 'u'))
             ->join(
                 'LEFT',
-                $db->quoteName('#__contentbuilder_users', 'a')
+                $db->quoteName('#__contentbuilder_ng_users', 'a')
                 . ' ON ' . $db->quoteName('a.userid') . ' = ' . $db->quoteName('u.id')
                 . ' AND ' . $db->quoteName('a.form_id') . ' = ' . (int) $formId
             );
@@ -159,14 +159,14 @@ class UsersModel extends ListModel
         foreach ($cids as $uid) {
             $query = $db->getQuery(true)
                 ->select($db->quoteName('id'))
-                ->from($db->quoteName('#__contentbuilder_users'))
+                ->from($db->quoteName('#__contentbuilder_ng_users'))
                 ->where($db->quoteName('form_id') . ' = ' . (int) $formId)
                 ->where($db->quoteName('userid') . ' = ' . (int) $uid);
             $db->setQuery($query);
 
             if (!$db->loadResult()) {
                 $insert = $db->getQuery(true)
-                    ->insert($db->quoteName('#__contentbuilder_users'))
+                    ->insert($db->quoteName('#__contentbuilder_ng_users'))
                     ->columns([$db->quoteName('form_id'), $db->quoteName('userid'), $db->quoteName('published')])
                     ->values((int) $formId . ', ' . (int) $uid . ', 1');
                 $db->setQuery($insert)->execute();
@@ -174,7 +174,7 @@ class UsersModel extends ListModel
         }
 
         $update = $db->getQuery(true)
-            ->update($db->quoteName('#__contentbuilder_users'))
+            ->update($db->quoteName('#__contentbuilder_ng_users'))
             ->set($db->quoteName('published') . ' = 1')
             ->where($db->quoteName('form_id') . ' = ' . (int) $formId)
             ->where($db->quoteName('userid') . ' IN (' . implode(',', $cids) . ')');
@@ -199,14 +199,14 @@ class UsersModel extends ListModel
         foreach ($cids as $uid) {
             $query = $db->getQuery(true)
                 ->select($db->quoteName('id'))
-                ->from($db->quoteName('#__contentbuilder_users'))
+                ->from($db->quoteName('#__contentbuilder_ng_users'))
                 ->where($db->quoteName('form_id') . ' = ' . (int) $formId)
                 ->where($db->quoteName('userid') . ' = ' . (int) $uid);
             $db->setQuery($query);
 
             if (!$db->loadResult()) {
                 $insert = $db->getQuery(true)
-                    ->insert($db->quoteName('#__contentbuilder_users'))
+                    ->insert($db->quoteName('#__contentbuilder_ng_users'))
                     ->columns([$db->quoteName('form_id'), $db->quoteName('userid'), $db->quoteName('published')])
                     ->values((int) $formId . ', ' . (int) $uid . ', 1');
                 $db->setQuery($insert)->execute();
@@ -214,7 +214,7 @@ class UsersModel extends ListModel
         }
 
         $update = $db->getQuery(true)
-            ->update($db->quoteName('#__contentbuilder_users'))
+            ->update($db->quoteName('#__contentbuilder_ng_users'))
             ->set($db->quoteName('published') . ' = 0')
             ->where($db->quoteName('form_id') . ' = ' . (int) $formId)
             ->where($db->quoteName('userid') . ' IN (' . implode(',', $cids) . ')');

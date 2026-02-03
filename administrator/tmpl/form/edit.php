@@ -14,8 +14,8 @@
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
 ?>
 <?php
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
@@ -116,19 +116,19 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
 
                 if (document.getElementById('name').value == '') {
                     error = true;
-                    alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_ERROR_ENTER_FORMNAME')); ?>");
+                    alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_NG_ERROR_ENTER_FORMNAME')); ?>");
                 } else if (nodes) {
                     if (typeof nodes.value != 'undefined') {
                         if (nodes.checked && document.adminForm['elementLabels[' + nodes.value + ']'].value == '') {
                             error = true;
-                            alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_ERROR_ENTER_FORMNAME_ALL')); ?>");
+                            alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_NG_ERROR_ENTER_FORMNAME_ALL')); ?>");
                             break;
                         }
                     } else {
                         for (var i = 0; i < nodes.length; i++) {
                             if (nodes[i].checked && document.adminForm['elementLabels[' + nodes[i].value + ']'].value == '') {
                                 error = true;
-                                alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_ERROR_ENTER_FORMNAME_ALL')); ?>");
+                                alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_NG_ERROR_ENTER_FORMNAME_ALL')); ?>");
                                 break;
                             }
                         }
@@ -155,7 +155,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
         Joomla.listItemTask = listItemTask;
     }
 
-    function contentbuilder_selectAll(checker, type) {
+    function contentbuilder_ng_selectAll(checker, type) {
         var type = type == 'fe' ? 'jform[perms_fe][' : 'jform[perms][';
         for (var i = 0; i < document.adminForm.elements.length; i++) {
             if (typeof document.adminForm.elements[i].name != 'undefined' && document.adminForm.elements[i].name.startsWith(type) && document.adminForm.elements[i].name.endsWith(checker.value + "]")) {
@@ -175,7 +175,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
         // Démarrer les onglets
         echo HTMLHelper::_('uitab.startTabSet', 'view-pane', ['active' => 'tab0']);
         // Premier onglet
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUILDER_VIEW'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUILDER_NG_VIEW'));
         ?>
 
         <table width="100%">
@@ -186,8 +186,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
 
                         <label for="name">
                             <span class="editlinktip hasTip"
-                                title="<?php echo Text::_('COM_CONTENTBUILDER_VIEW_NAME_TIP'); ?>"><b>
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NAME'); ?>:
+                                title="<?php echo Text::_('COM_CONTENTBUILDER_NG_VIEW_NAME_TIP'); ?>"><b>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_NAME'); ?>:
                                 </b></span>
                         </label>
                         <input class="form-control form-control-sm" type="text" name="jform[name]" id="name" size="32"
@@ -196,8 +196,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
 
                         <label for="tag">
                             <span class="editlinktip hasTip"
-                                title="<?php echo Text::_('COM_CONTENTBUILDER_VIEW_TAG_TIP'); ?>"><b>
-                                    <?php echo Text::_('COM_CONTENTBUILDER_TAG'); ?>:
+                                title="<?php echo Text::_('COM_CONTENTBUILDER_NG_VIEW_TAG_TIP'); ?>"><b>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_TAG'); ?>:
                                 </b></span>
                         </label>
                         <input class="form-control form-control-sm" type="text" name="jform[tag]" id="tag" size="32"
@@ -209,8 +209,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         ?>
                             <label for="types">
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_TYPE_TIP'); ?>"><b>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_TYPE'); ?>:
+                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_TIP'); ?>"><b>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE'); ?>:
                                     </b></span>
                             </label>
                             <select class="form-select-sm" name="jform[type]">
@@ -229,7 +229,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
 
                             <button type="button" class="btn-primary btn-sm"
                                 onclick="if(document.getElementById('advancedOptions').style.display == 'none'){document.getElementById('advancedOptions').style.display = '';}else{document.getElementById('advancedOptions').style.display = 'none';}">
-                                <?php echo Text::_('COM_CONTENTBUILDER_ADVANCED_OPTIONS'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_ADVANCED_OPTIONS'); ?>
                             </button>
 
                         <?php
@@ -237,7 +237,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         ?>
                             <button type="button" class="btn-sm btn-primary"
                                 onclick="if(document.getElementById('advancedOptions').style.display == 'none'){document.getElementById('advancedOptions').style.display = '';}else{document.getElementById('advancedOptions').style.display = 'none';}">
-                                <?php echo Text::_('COM_CONTENTBUILDER_ADVANCED_OPTIONS'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_ADVANCED_OPTIONS'); ?>
                             </button>
 
                             <div></div>
@@ -245,7 +245,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                             <div class="alert">
                                 <label for="name">
                                     <b>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_FORM_SOURCE'); ?>:
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_FORM_SOURCE'); ?>:
                                     </b>
                                 </label>
                                 <?php
@@ -275,8 +275,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
 
                                 <label for="types">
                                     <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_TYPE_TIP'); ?>"><b>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_TYPE'); ?>:
+                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_TIP'); ?>"><b>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE'); ?>:
                                         </b></span>
                                 </label>
                                 <?php echo $this->item->type ?>
@@ -284,13 +284,13 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                 <input type="hidden" name="jform[type_name]"
                                     value="<?php echo isset($this->item->type_name) ? $this->item->type_name : ''; ?>" />
                                 <?php
-                                if ($this->item->type != 'com_contentbuilder') {
+                                if ($this->item->type != 'com_contentbuilder_ng') {
                                 ?>
                                     <input type="hidden" name="jform[edit_by_type]" value="0" />
                                     <input class="form-check-input" type="checkbox" id="edit_by_type" name="jform[edit_by_type]"
                                         value="1" <?php echo $this->item->edit_by_type ? ' checked="checked"' : '' ?> />
                                     <label for="edit_by_type">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_TYPE_EDIT'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_EDIT'); ?>
                                     </label>
                                 <?php
                                 } else {
@@ -303,13 +303,13 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                 <input class="form-check-input" type="checkbox" id="email_notifications"
                                     name="jform[email_notifications]" value="1" <?php echo $this->item->email_notifications ? ' checked="checked"' : '' ?> />
                                 <label for="email_notifications">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_TYPE_EMAIL_NOTIFICATIONS'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_EMAIL_NOTIFICATIONS'); ?>
                                 </label>
                                 <input type="hidden" name="jform[email_update_notifications]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="email_update_notifications"
                                     name="jform[email_update_notifications]" value="1" <?php echo $this->item->email_update_notifications ? ' checked="checked"' : '' ?> />
                                 <label for="email_update_notifications">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_TYPE_EMAIL_UPDATE_NOTIFICATIONS'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_EMAIL_UPDATE_NOTIFICATIONS'); ?>
                                 </label>
 
                             </div>
@@ -325,28 +325,28 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                             <fieldset>
                                 <legend>
                                     <h3 class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_DISPLAY_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_DISPLAY'); ?>
+                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_TIP'); ?>">
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY'); ?>
                                     </h3>
                                 </legend>
 
 
                                 <select class="form-select-sm" name="jform[display_in]">
                                     <option value="0" <?php echo $this->item->display_in == 0 ? ' selected="selected"' : '' ?>>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_DISPLAY_FRONTEND') ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_FRONTEND') ?>
                                     </option>
                                     <option value="1" <?php echo $this->item->display_in == 1 ? ' selected="selected"' : '' ?>>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_DISPLAY_BACKEND') ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_BACKEND') ?>
                                     </option>
                                     <option value="2" <?php echo $this->item->display_in == 2 ? ' selected="selected"' : '' ?>>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_DISPLAY_BOTH') ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_BOTH') ?>
                                     </option>
                                 </select>
 
                                 <label for="theme_plugin">
                                     <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_THEME_PLUGIN_TIP'); ?>"><b>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_THEME_PLUGIN'); ?>:
+                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_THEME_PLUGIN_TIP'); ?>"><b>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_THEME_PLUGIN'); ?>:
                                         </b></span>
                                 </label>
                                 <select class="form-select-sm" name="jform[theme_plugin]" id="theme_plugin">
@@ -368,8 +368,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                             <fieldset>
                                 <legend>
                                     <h3 class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_SHOW_COLUMNS_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_SHOW'); ?>
+                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_COLUMNS_TIP'); ?>">
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW'); ?>
                                     </h3>
                                 </legend>
 
@@ -377,49 +377,49 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                 <input type="hidden" name="jform[show_id_column]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="show_id_column"
                                     name="jform[show_id_column]" value="1" <?php echo $this->item->show_id_column ? ' checked="checked"' : '' ?> /> <label for="show_id_column">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_ID_COLUMN'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ID_COLUMN'); ?>
                                 </label>
                                 <input type="hidden" name="jform[select_column]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="select_column" name="jform[select_column]"
                                     value="1" <?php echo $this->item->select_column ? ' checked="checked"' : '' ?> />
                                 <label for="select_column">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_SELECT_COLUMN'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_SELECT_COLUMN'); ?>
                                 </label>
                                 <input type="hidden" name="jform[list_state]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="list_state" name="jform[list_state]"
                                     value="1" <?php echo $this->item->list_state ? ' checked="checked"' : '' ?> />
                                 <label for="list_state">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_EDIT_STATE'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?>
                                 </label>
                                 <input type="hidden" name="jform[edit_button]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="edit_button" name="jform[edit_button]"
                                     value="1" <?php echo $this->item->edit_button ? ' checked="checked"' : '' ?> />
                                 <label for="edit_button">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_EDIT_BUTTON'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_BUTTON'); ?>
                                 </label>
                                 <input type="hidden" name="jform[list_publish]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="list_publish" name="jform[list_publish]"
                                     value="1" <?php echo $this->item->list_publish ? ' checked="checked"' : '' ?> />
                                 <label for="list_publish">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>
                                 </label>
                                 <input type="hidden" name="jform[list_language]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="list_language" name="jform[list_language]"
                                     value="1" <?php echo $this->item->list_language ? ' checked="checked"' : '' ?> />
                                 <label for="list_language">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_LANGUAGE'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'); ?>
                                 </label>
                                 <input type="hidden" name="jform[list_article]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="list_article" name="jform[list_article]"
                                     value="1" <?php echo $this->item->list_article ? ' checked="checked"' : '' ?> />
                                 <label for="list_article">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_ARTICLE'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE'); ?>
                                 </label>
                                 <input type="hidden" name="jform[list_author]" value="0" />
                                 <input class="form-check-input" type="checkbox" id="list_author" name="jform[list_author]"
                                     value="1" <?php echo $this->item->list_author ? ' checked="checked"' : '' ?> />
                                 <label for="list_author">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_AUTHOR'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_AUTHOR'); ?>
                                 </label>
 
 
@@ -429,8 +429,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     value="1" <?php echo $this->item->export_xls ? ' checked="checked"' : '' ?> />
                                 <label for="export_xls">
                                     <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_SHOW_XLSEXPORT_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_SHOW_XLSEXPORT'); ?>
+                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_XLSEXPORT_TIP'); ?>">
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_XLSEXPORT'); ?>
                                     </span>
                                 </label>
 
@@ -439,8 +439,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     value="1" <?php echo $this->item->print_button ? ' checked="checked"' : '' ?> />
                                 <label for="print_button">
                                     <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_SHOW_PRINTBUTTON_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_SHOW_PRINTBUTTON'); ?>
+                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PRINTBUTTON_TIP'); ?>">
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PRINTBUTTON'); ?>
                                     </span>
                                 </label>
 
@@ -449,8 +449,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     <?php echo $this->item->metadata ? ' checked="checked"' : '' ?> />
                                 <label for="metadata">
                                     <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_SHOW_METADATA_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_SHOW_METADATA'); ?>
+                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_METADATA_TIP'); ?>">
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_METADATA'); ?>
                                     </span>
                                 </label>
 
@@ -459,8 +459,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     value="1" <?php echo $this->item->show_filter ? ' checked="checked"' : '' ?> />
                                 <label for="show_filter">
                                     <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_SHOW_FILTER_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_SHOW_FILTER'); ?>
+                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_FILTER_TIP'); ?>">
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_FILTER'); ?>
                                     </span>
                                 </label>
 
@@ -469,8 +469,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     id="show_records_per_page" value="1" <?php echo $this->item->show_records_per_page ? ' checked="checked"' : '' ?> />
                                 <label for="show_records_per_page">
                                     <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_SHOW_RECORDS_PER_PAGE_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_SHOW_RECORDS_PER_PAGE'); ?>
+                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_RECORDS_PER_PAGE_TIP'); ?>">
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_RECORDS_PER_PAGE'); ?>
                                     </span>
                                 </label>
 
@@ -481,7 +481,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                             <fieldset>
                                 <legend>
                                     <h3>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_RATING'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_RATING'); ?>
                                     </h3>
                                 </legend>
                                 <div class="alert">
@@ -489,7 +489,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     <input class="form-check-input" type="checkbox" id="list_rating" name="jform[list_rating]"
                                         value="1" <?php echo $this->item->list_rating ? ' checked="checked"' : '' ?> />
                                     <label for="list_rating">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_RATING'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_RATING'); ?>
                                     </label>
 
                                     <select class="form-select-sm" name="jform[rating_slots]" id="rating_slots">
@@ -500,7 +500,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                         <option value="5" <?php echo $this->item->rating_slots == 5 ? ' selected="selected"' : ''; ?>>5</option>
                                     </select>
                                     <label for="rating_slots">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_RATING_SLOTS'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_RATING_SLOTS'); ?>
                                     </label>
                                 </div>
                             </fieldset>
@@ -510,30 +510,30 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                             <fieldset>
                                 <legend>
                                     <h3>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_SORTING'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SORTING'); ?>
                                     </h3>
                                 </legend>
                                 <div class="alert">
                                     <label for="initial_sort_order">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_INITIAL_SORT_ORDER_TIP'); ?>"><b>
-                                                <?php echo Text::_('COM_CONTENTBUILDER_INITIAL_SORT_ORDER'); ?>:
+                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_INITIAL_SORT_ORDER_TIP'); ?>"><b>
+                                                <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIAL_SORT_ORDER'); ?>:
                                             </b></span>
                                     </label>
                                     <select class="form-select-sm"
                                         onchange="if(this.selectedIndex == 3) { document.getElementById('randUpdate').style.display='block'; } else { document.getElementById('randUpdate').style.display='none'; } "
                                         name="jform[initial_sort_order]" id="initial_sort_order" style="max-width: 200px;">
                                         <option value="-1">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_INITIAL_SORT_ORDER_BY_ID'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIAL_SORT_ORDER_BY_ID'); ?>
                                         </option>
                                         <option value="Rating" <?php echo $this->item->initial_sort_order == 'Rating' ? ' selected="selected"' : ''; ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_RATING'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_RATING'); ?>
                                         </option>
                                         <option value="RatingCount" <?php echo $this->item->initial_sort_order == 'RatingCount' ? ' selected="selected"' : ''; ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_RATING_COUNT'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_RATING_COUNT'); ?>
                                         </option>
                                         <option value="Rand" <?php echo $this->item->initial_sort_order == 'Rand' ? ' selected="selected"' : ''; ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_INITIAL_SORT_ORDER_RAND'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIAL_SORT_ORDER_RAND'); ?>
                                         </option>
                                         <?php
                                         foreach ($this->elements as $sortable) {
@@ -548,7 +548,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     <span id="randUpdate"
                                         style="display: <?php echo $this->item->initial_sort_order == 'Rand' ? 'block' : 'none' ?>;">
                                         <b>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_RAND_UPDATE'); ?>:
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_RAND_UPDATE'); ?>:
                                         </b>
                                         <input class="form-control form-control-sm" type="text" name="jform[rand_update]"
                                             value="<?php echo $this->item->rand_update; ?>" />
@@ -556,7 +556,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     <select class="form-select-sm" name="jform[initial_sort_order2]" id="initial_sort_order2"
                                         style="max-width: 200px;">
                                         <option value="-1">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NONE'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_NONE'); ?>
                                         </option>
                                         <?php
                                         foreach ($this->elements as $sortable) {
@@ -571,7 +571,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     <select class="form-select-sm" name="jform[initial_sort_order3]" id="initial_sort_order3"
                                         style="max-width: 200px;">
                                         <option value="-1">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NONE'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_NONE'); ?>
                                         </option>
                                         <?php
                                         foreach ($this->elements as $sortable) {
@@ -587,12 +587,12 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     <input class="form-check-input" type="radio" name="jform[initial_order_dir]"
                                         id="initial_order_dir" value="asc" <?php echo $this->item->initial_order_dir == 'asc' ? ' checked="checked"' : ''; ?> /> <label
                                         for="initial_order_dir">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_INITIAL_SORT_ORDER_ASC'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIAL_SORT_ORDER_ASC'); ?>
                                     </label>
                                     <input class="form-check-input" type="radio" name="jform[initial_order_dir]"
                                         id="initial_order_dir_desc" value="desc" <?php echo $this->item->initial_order_dir == 'desc' ? ' checked="checked"' : ''; ?> /> <label
                                         for="initial_order_dir_desc">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_INITIAL_SORT_ORDER_DESC'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIAL_SORT_ORDER_DESC'); ?>
                                     </label>
                                 </div>
                             </fieldset>
@@ -602,14 +602,14 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                             <fieldset>
                                 <legend>
                                     <h3>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_BUTTONS'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_BUTTONS'); ?>
                                     </h3>
                                 </legend>
                                 <div class="alert">
                                     <label for="save_button_title">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_SAVE_BUTTON_TITLE_TIP'); ?>"><b>
-                                                <?php echo Text::_('COM_CONTENTBUILDER_SAVE_BUTTON_TITLE'); ?>:
+                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SAVE_BUTTON_TITLE_TIP'); ?>"><b>
+                                                <?php echo Text::_('COM_CONTENTBUILDER_NG_SAVE_BUTTON_TITLE'); ?>:
                                             </b></span>
                                     </label>
                                     <input class="form-control form-control-sm" type="text" id="save_button_title"
@@ -618,8 +618,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
 
                                     <label for="apply_button_title">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_APPLY_BUTTON_TITLE_TIP'); ?>"><b>
-                                                <?php echo Text::_('COM_CONTENTBUILDER_APPLY_BUTTON_TITLE'); ?>:
+                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_APPLY_BUTTON_TITLE_TIP'); ?>"><b>
+                                                <?php echo Text::_('COM_CONTENTBUILDER_NG_APPLY_BUTTON_TITLE'); ?>:
                                             </b></span>
                                     </label>
                                     <input class="form-control form-control-sm" type="text" id="apply_button_title"
@@ -633,7 +633,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                             <fieldset>
                                 <legend>
                                     <h3>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_MISC'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_MISC'); ?>
                                     </h3>
                                 </legend>
                                 <div class="alert">
@@ -642,8 +642,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                         name="jform[filter_exact_match]" value="1" <?php echo $this->item->filter_exact_match ? ' checked="checked"' : '' ?> />
                                     <label for="filter_exact_match">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_FILTER_EXACT_MATCH_TIP'); ?>">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_FILTER_EXACT_MATCH'); ?>
+                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_EXACT_MATCH_TIP'); ?>">
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_EXACT_MATCH'); ?>
                                         </span>
                                     </label>
 
@@ -652,8 +652,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                         name="jform[use_view_name_as_title]" value="1" <?php echo $this->item->use_view_name_as_title ? ' checked="checked"' : '' ?> />
                                     <label for="use_view_name_as_title">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_USE_VIEW_NAME_AS_TITLE_TIP'); ?>">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_USE_VIEW_NAME_AS_TITLE'); ?>
+                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_USE_VIEW_NAME_AS_TITLE_TIP'); ?>">
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_USE_VIEW_NAME_AS_TITLE'); ?>
                                         </span>
                                     </label>
 
@@ -662,8 +662,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                         name="jform[published_only]" value="1" <?php echo $this->item->published_only ? ' checked="checked"' : '' ?> />
                                     <label for="published_only">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_ONLY_TIP'); ?>">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED_ONLY'); ?>
+                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_ONLY_TIP'); ?>">
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_ONLY'); ?>
                                         </span>
                                     </label>
 
@@ -672,8 +672,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                         name="jform[allow_external_filter]" value="1" <?php echo $this->item->allow_external_filter ? ' checked="checked"' : '' ?> />
                                     <label for="allow_external_filter">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_ALLOW_EXTERNAL_FILTER_TIP'); ?>">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_ALLOW_EXTERNAL_FILTER'); ?>
+                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_ALLOW_EXTERNAL_FILTER_TIP'); ?>">
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ALLOW_EXTERNAL_FILTER'); ?>
                                         </span>
                                     </label>
                                 </div>
@@ -695,7 +695,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     <thead>
                         <tr>
                             <th width="5">
-                                <?php echo Text::_('COM_CONTENTBUILDER_ID'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_ID'); ?>
                             </th>
                             <th width="20">
                                 <input type="hidden" name="jform[toggle]" value="0" />
@@ -704,52 +704,52 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                             </th>
                             <th>
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_LABEL_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_LABEL'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LABEL_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LABEL'); ?>
                                 </span>
                             </th>
                             <th>
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_LIST_INCLUDE_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_LIST_INCLUDE'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE'); ?>
                                 </span>
                             </th>
                             <th>
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_SEARCH_INCLUDE_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_SEARCH_INCLUDE'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE'); ?>
                                 </span>
                             </th>
                             <th>
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_LINKABLE_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_LINKABLE'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LINKABLE_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LINKABLE'); ?>
                                 </span>
                             </th>
                             <th>
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_EDITABLE_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_EDITABLE'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EDITABLE'); ?>
                                 </span>
                             </th>
                             <th>
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_LIST_WORDWRAP_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_LIST_WORDWRAP'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_WORDWRAP_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_WORDWRAP'); ?>
                                 </span>
                             </th>
                             <th width="150">
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo ContentbuilderLegacyHelper::allhtmlentities(Text::_('COM_CONTENTBUILDER_LIST_ITEM_WRAPPER_TIP')); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_LIST_ITEM_WRAPPER'); ?>
+                                    title="<?php echo ContentbuilderLegacyHelper::allhtmlentities(Text::_('COM_CONTENTBUILDER_NG_LIST_ITEM_WRAPPER_TIP')); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_ITEM_WRAPPER'); ?>
                                 </span>
                             </th>
                             <th>
-                                <?php echo Text::_('COM_CONTENTBUILDER_PUBLISHED'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'); ?>
                             </th>
                             <th width="120" class="cb-order-head">
                                 <?php if (!empty($this->elements) && is_array($this->elements)) : ?>
-                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_ORDERBY'), 'ordering'); ?>
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_ORDERBY'), 'ordering'); ?>
                                     <?php //TODO: dragndrop if ($this->ordering) echo HTMLHelper::_('grid.order',  $this->elements );   
                                     ?>
                                     <?php echo HTMLHelper::_('grid.order', $this->elements); ?>
@@ -797,25 +797,25 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     <select class="form-select-sm" style="max-width: 125px;"
                                         id="itemOrderTypes<?php echo $row->id ?>" name="jform[itemOrderTypes][<?php echo $row->id ?>]">
                                         <option value=""> -
-                                            <?php echo Text::_('COM_CONTENTBUILDER_ORDER_TYPES'); ?> -
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES'); ?> -
                                         </option>
                                         <option value="CHAR" <?php echo $row->order_type == 'CHAR' ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_ORDER_TYPES_TEXT'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_TEXT'); ?>
                                         </option>
                                         <option value="DATETIME" <?php echo $row->order_type == 'DATETIME' ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_ORDER_TYPES_DATETIME'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_DATETIME'); ?>
                                         </option>
                                         <option value="DATE" <?php echo $row->order_type == 'DATE' ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_ORDER_TYPES_DATE'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_DATE'); ?>
                                         </option>
                                         <option value="TIME" <?php echo $row->order_type == 'TIME' ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_ORDER_TYPES_TIME'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_TIME'); ?>
                                         </option>
                                         <option value="UNSIGNED" <?php echo $row->order_type == 'UNSIGNED' ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_ORDER_TYPES_INTEGER'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_INTEGER'); ?>
                                         </option>
                                         <option value="DECIMAL" <?php echo $row->order_type == 'DECIMAL' ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_ORDER_TYPES_DECIMAL'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_DECIMAL'); ?>
                                         </option>
                                     </select>
 
@@ -888,7 +888,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
 
                                     <div class="d-flex flex-wrap align-items-center gap-2">
                                         <?php echo $this->pagination ? $this->pagination->getPagesCounter() : ''; ?>
-                                        <span><?php echo Text::_('COM_CONTENTBUILDER_DISPLAY_NUM'); ?>&nbsp;</span>
+                                        <span><?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_NUM'); ?>&nbsp;</span>
                                         <span class="d-inline-block">
                                             <?php echo $this->pagination ? $this->pagination->getLimitBox() : ''; ?>
                                         </span>
@@ -911,28 +911,28 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
 
         <?php
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', Text::_('COM_CONTENTBUILDER_LIST_INTRO_TEXT'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', Text::_('COM_CONTENTBUILDER_NG_LIST_INTRO_TEXT'));
         echo $this->form->renderField('intro_text');
         ?>
 
         <?php
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', Text::_('COM_CONTENTBUILDER_LIST_STATES'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', Text::_('COM_CONTENTBUILDER_NG_LIST_STATES'));
         ?>
         <table class="adminlist table table-striped">
             <thead>
                 <tr>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_LIST_STATES_PUBLISHED') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_STATES_PUBLISHED') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_LIST_STATES_TITLE') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_STATES_TITLE') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_LIST_STATES_COLOR') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_STATES_COLOR') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_LIST_STATES_ACTION') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_STATES_ACTION') ?>
                     </th>
                 </tr>
             </thead>
@@ -958,7 +958,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     <td>
                         <select class="form-select-sm" name="jform[list_states][<?php echo $state['id']; ?>][action]">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_NONE'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_NONE'); ?> -
                             </option>
                             <?php
                             foreach ($this->list_states_action_plugins as $list_state_action_plugin) {
@@ -979,51 +979,51 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
         </table>
         <?php
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab3', Text::_('COM_CONTENTBUILDER_DETAILS_TEMPLATE'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab3', Text::_('COM_CONTENTBUILDER_NG_DETAILS_TEMPLATE'));
 
         ?>
         <table width="100%" class="adminform table table-striped">
             <tr>
                 <td width="20%">
                     <label for="create_sample"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_CREATE_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_CREATE'); ?><span></label>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE'); ?><span></label>
                 </td>
                 <td>
                     <input type="hidden" name="jform[create_sample]" value="0" />
                     <input class="form-check-input" id="create_sample" type="checkbox" name="jform[create_sample]" value="1" />
                     <label for="create_sample">
-                        <?php echo Text::_('COM_CONTENTBUILDER_CREATE_SAMPLE'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_SAMPLE'); ?>
                     </label>
                     <input type="hidden" name="jform[create_articles]" value="0" />
                     <input class="form-check-input" <?php echo $this->item->create_articles == 1 ? ' checked="checked"' : '' ?>type="checkbox" name="jform[create_articles]" id="create_articles" value="1" /><label
                         for="create_articles">
-                        <?php echo Text::_('COM_CONTENTBUILDER_CREATE_ARTICLES'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_ARTICLES'); ?>
                     </label>
                 </td>
                 <td width="20%">
                     <label for="delete_articles"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_DELETE_ARTICLES_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_DELETE_ARTICLES'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE_ARTICLES_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE_ARTICLES'); ?>
                         </span></label>
                 </td>
                 <td>
                     <input class="form-check-input" type="radio" value="1" name="jform[delete_articles]" id="delete_articles"
                         <?php echo $this->item->delete_articles ? ' checked="checked"' : '' ?> /> <label
                         for="delete_articles">
-                        <?php echo Text::_('COM_CONTENTBUILDER_YES'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
                     </label>
                     <input class="form-check-input" type="radio" value="0" name="jform[delete_articles]"
                         id="delete_articles_no" <?php echo !$this->item->delete_articles ? ' checked="checked"' : '' ?> /> <label for="delete_articles_no">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NO'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
                     </label>
                 </td>
             </tr>
             <tr>
                 <td width="20%">
                     <label for="title_field"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_TITLE_FIELD_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_TITLE_FIELD'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_TITLE_FIELD_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_TITLE_FIELD'); ?>
                         </span></label>
                 </td>
                 <td>
@@ -1041,8 +1041,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 </td>
                 <td width="20%">
                     <label for="default_category"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_CATEGORY_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_CATEGORY'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_CATEGORY_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_CATEGORY'); ?>
                         </span></label>
                 </td>
                 <td>
@@ -1066,14 +1066,14 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             <tr>
                 <td width="20%" valign="top">
                     <label for="default_lang_code"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_LANG_CODE_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_LANG_CODE'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_LANG_CODE_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_LANG_CODE'); ?>
                         </span></label>
                 </td>
                 <td valign="top">
                     <select class="form-select-sm" name="jform[default_lang_code]" id="default_lang_code">
                         <option value="*">
-                            <?php echo Text::_('COM_CONTENTBUILDER_ANY'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ANY'); ?>
                         </option>
                         <?php
                         foreach ($this->item->language_codes as $lang_code) {
@@ -1087,45 +1087,45 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     </select>
                     <br /><br />
                     <label for="article_record_impact_language"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_ARTICLE_RECORD_IMPACT_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_ARTICLE_RECORD_IMPACT'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE_RECORD_IMPACT_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE_RECORD_IMPACT'); ?>
                         </span></label>
                     <input class="form-check-input" <?php echo $this->item->article_record_impact_language ? 'checked="checked" ' : '' ?>type="radio" name="jform[article_record_impact_language]"
                         id="article_record_impact_language" value="1" />
                     <label for="article_record_impact_language_yes">
-                        <?php echo Text::_('COM_CONTENTBUILDER_YES'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
                     </label>
                     <input class="form-check-input" <?php echo !$this->item->article_record_impact_language ? 'checked="checked" ' : '' ?>type="radio" name="jform[article_record_impact_language]"
                         id="article_record_impact_language_no" value="0" />
                     <label for="article_record_impact_language_no">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NO'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
                     </label>
                 </td>
                 <td width="20%" valign="top">
                     <label for="default_lang_code_ignore_yes"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_LANG_CODE_IGNORE_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_LANG_CODE_IGNORE'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_LANG_CODE_IGNORE_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_LANG_CODE_IGNORE'); ?>
                         </span></label>
                 </td>
                 <td valign="top">
                     <input class="form-check-input" <?php echo $this->item->default_lang_code_ignore ? 'checked="checked" ' : '' ?>type="radio" name="jform[default_lang_code_ignore]"
                         id="default_lang_code_ignore_yes" value="1" />
                     <label for="default_lang_code_ignore_yes">
-                        <?php echo Text::_('COM_CONTENTBUILDER_YES'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
                     </label>
 
                     <input class="form-check-input" <?php echo !$this->item->default_lang_code_ignore ? 'checked="checked" ' : '' ?>type="radio" name="jform[default_lang_code_ignore]"
                         id="default_lang_code_ignore_no" value="0" />
                     <label for="default_lang_code_ignore_no">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NO'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
                     </label>
                 </td>
             </tr>
             <tr>
                 <td width="20%" valign="top">
                     <label for="default_publish_up_days"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_PUBLISH_UP_DAYS_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_PUBLISH_UP_DAYS'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_PUBLISH_UP_DAYS_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_PUBLISH_UP_DAYS'); ?>
                         </span></label>
                 </td>
                 <td valign="top">
@@ -1133,25 +1133,25 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         id="default_publish_up_days" value="<?php echo $this->item->default_publish_up_days; ?>" />
                     <br /><br />
                     <label for="article_record_impact_publish"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_ARTICLE_RECORD_PUBLISH_IMPACT_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_ARTICLE_RECORD_PUBLISH_IMPACT'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE_RECORD_PUBLISH_IMPACT_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE_RECORD_PUBLISH_IMPACT'); ?>
                         </span></label>
                     <input class="form-check-input" <?php echo $this->item->article_record_impact_publish ? 'checked="checked" ' : '' ?>type="radio" name="jform[article_record_impact_publish]"
                         id="article_record_impact_publish" value="1" />
                     <label for="article_record_impact_publish_yes">
-                        <?php echo Text::_('COM_CONTENTBUILDER_YES'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
                     </label>
                     <input class="form-check-input" <?php echo !$this->item->article_record_impact_publish ? 'checked="checked" ' : '' ?>type="radio" name="jform[article_record_impact_publish]"
                         id="article_record_impact_publish_no" value="0" />
                     <label for="article_record_impact_publish_no">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NO'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
                     </label>
 
                 </td>
                 <td width="20%" valign="top">
                     <label for="default_publish_down_days"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_PUBLISH_DOWN_DAYS_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_PUBLISH_DOWN_DAYS'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_PUBLISH_DOWN_DAYS_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_PUBLISH_DOWN_DAYS'); ?>
                         </span></label>
                 </td>
                 <td valign="top">
@@ -1163,8 +1163,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             <tr>
                 <td width="20%">
                     <label for="default_access"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_ACCESS_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_ACCESS'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_ACCESS_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_ACCESS'); ?>
                         </span></label>
                 </td>
                 <td>
@@ -1176,21 +1176,21 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 </td>
                 <td width="20%">
                     <label for="default_featured"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_FEATURED_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_DEFAULT_FEATURED'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_FEATURED_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_FEATURED'); ?>
                         </span></label>
                 </td>
                 <td>
                     <input class="form-check-input" class="form-check-input" <?php echo $this->item->default_featured ? 'checked="checked" ' : '' ?>type="radio" name="jform[default_featured]" id="default_featured"
                         value="1" />
                     <label for="default_featured">
-                        <?php echo Text::_('COM_CONTENTBUILDER_YES'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
                     </label>
 
                     <input class="form-check-input" class="form-check-input" <?php echo !$this->item->default_featured ? 'checked="checked" ' : '' ?>type="radio" name="jform[default_featured]" id="default_featured_no"
                         value="0" />
                     <label for="default_featured_no">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NO'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
                     </label>
 
                 </td>
@@ -1198,8 +1198,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             <tr>
                 <td width="20%">
                     <label for="auto_publish"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_AUTO_PUBLISH_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_AUTO_PUBLISH'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_AUTO_PUBLISH_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_AUTO_PUBLISH'); ?>
                         </span></label>
                 </td>
                 <td>
@@ -1211,8 +1211,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     if ($this->item->edit_by_type && $this->item->type == 'com_breezingforms') {
                     ?>
                         <label for="protect_upload_directory"><span class="editlinktip hasTip"
-                                title="<?php echo Text::_('COM_CONTENTBUILDER_UPLOAD_DIRECTORY_TYPE_TIP'); ?>">
-                                <?php echo Text::_('COM_CONTENTBUILDER_PROTECT_UPLOAD_DIRECTORY'); ?>
+                                title="<?php echo Text::_('COM_CONTENTBUILDER_NG_UPLOAD_DIRECTORY_TYPE_TIP'); ?>">
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PROTECT_UPLOAD_DIRECTORY'); ?>
                             </span></label>
                     <?php
                     }
@@ -1238,7 +1238,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
         //        echo $editor->display('details_template', $this->item->details_template, '100%', '550', '75', '20', true, 'details_template');
 
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab4', Text::_('COM_CONTENTBUILDER_DETAILS_PREPARE'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab4', Text::_('COM_CONTENTBUILDER_NG_DETAILS_PREPARE'));
         if (trim($this->item->details_prepare ?? '') == '') {
             $this->item->details_prepare = '// Here you may alter labels and values for each item before it gets rendered through your details template.' . "\n";
             $this->item->details_prepare .= '// For example:' . "\n";
@@ -1253,30 +1253,30 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
         ?>
         <?php
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab5', Text::_('COM_CONTENTBUILDER_EDITABLE_TEMPLATE'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab5', Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TEMPLATE'));
 
         if ($this->item->edit_by_type && $this->item->type == 'com_breezingforms') {
-            echo Text::_('COM_CONTENTBUILDER_EDITABLE_TEMPLATE_PROVIDED_BY_BREEZINGFORMS');
+            echo Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TEMPLATE_PROVIDED_BY_BREEZINGFORMS');
             echo '<input type="hidden" name="jform[editable_template]" value="{BreezingForms: ' . (isset($this->item->type_name) ? $this->item->type_name : '') . '}"/>';
             //echo '<input type="hidden" name="jform[protect_upload_directory]" value="'.(trim($this->item->protect_upload_directory) ? 1 : 0).'"/>'; 
-            echo '<input type="hidden" name="jform[upload_directory]" value="' . (trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/contentbuilder/upload') . '"/>';
+            echo '<input type="hidden" name="jform[upload_directory]" value="' . (trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/contentbuilder_ng/upload') . '"/>';
         } else {
         ?>
 
             <label for="upload_directory"><span class="editlinktip hasTip"
-                    title="<?php echo Text::_('COM_CONTENTBUILDER_UPLOAD_DIRECTORY_TIP'); ?>">
-                    <?php echo Text::_('COM_CONTENTBUILDER_UPLOAD_DIRECTORY'); ?>
+                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_UPLOAD_DIRECTORY_TIP'); ?>">
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_UPLOAD_DIRECTORY'); ?>
                 </span></label>
             <br />
             <input class="form-control form-control-sm" style="width: 50%;" type="text"
-                value="<?php echo trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/contentbuilder/upload'; ?>"
+                value="<?php echo trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/contentbuilder_ng/upload'; ?>"
                 name="jform[upload_directory]" id="upload_directory" />
             <br />
             <br />
             <input type="hidden" name="jform[protect_upload_directory]" value="0" />
             <input class="form-check-input" type="checkbox" value="1" name="jform[protect_upload_directory]"
                 id="protect_upload_directory" <?php echo trim($this->item->protect_upload_directory) ? ' checked="checked"' : ''; ?> /> <label for="protect_upload_directory">
-                <?php echo Text::_('COM_CONTENTBUILDER_PROTECT_UPLOAD_DIRECTORY'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_PROTECT_UPLOAD_DIRECTORY'); ?>
             </label>
             <br />
             <br />
@@ -1284,7 +1284,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             <input class="form-check-input" type="checkbox" name="jform[create_editable_sample]" id="editable_sample"
                 value="1" <?php echo !empty($this->item->create_editable_sample) ? ' checked="checked"' : ''; ?> />
             <label for="editable_sample">
-                <?php echo Text::_('COM_CONTENTBUILDER_CREATE_EDITABLE_SAMPLE'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_EDITABLE_SAMPLE'); ?>
             </label>
             <br />
             <br />
@@ -1297,10 +1297,10 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
         ?>
         <?php
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab6', Text::_('COM_CONTENTBUILDER_EDITABLE_PREPARE'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab6', Text::_('COM_CONTENTBUILDER_NG_EDITABLE_PREPARE'));
 
         if ($this->item->edit_by_type) {
-            echo Text::_('COM_CONTENTBUILDER_EDITABLE_TEMPLATE_PROVIDED_BY_BREEZINGFORMS');
+            echo Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TEMPLATE_PROVIDED_BY_BREEZINGFORMS');
             echo '<input type="hidden" name="jform[editable_prepare]" value="' . htmlentities($this->item->editable_prepare ?? '', ENT_QUOTES, 'UTF-8') . '"/>';
         } else {
             if (trim($this->item->editable_prepare ?? '') == '') {
@@ -1315,10 +1315,10 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
         }
 
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab7', Text::_('COM_CONTENTBUILDER_EMAIL_TEMPLATES'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab7', Text::_('COM_CONTENTBUILDER_NG_EMAIL_TEMPLATES'));
 
         if ($this->item->edit_by_type) {
-            echo Text::_('COM_CONTENTBUILDER_EDITABLE_TEMPLATE_PROVIDED_BY_BREEZINGFORMS');
+            echo Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TEMPLATE_PROVIDED_BY_BREEZINGFORMS');
             echo '<input type="hidden" name="jform[email_admin_template]" value="' . htmlentities($this->item->email_admin_template ?? '', ENT_QUOTES, 'UTF-8') . '"/>';
             echo '<input type="hidden" name="jform[email_template]" value="' . htmlentities($this->item->email_template ?? '', ENT_QUOTES, 'UTF-8') . '"/>';
             echo '<input type="hidden" name="jform[email_admin_subject]" value="' . htmlentities($this->item->email_admin_subject ?? '', ENT_QUOTES, 'UTF-8') . '"/>';
@@ -1336,7 +1336,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             echo '<input type="hidden" name="jform[email_html]" value="' . htmlentities($this->item->email_html ?? '', ENT_QUOTES, 'UTF-8') . '"/>';
         } else {
 
-            $title = Text::_('COM_CONTENTBUILDER_EMAIL_ADMINS');
+            $title = Text::_('COM_CONTENTBUILDER_NG_EMAIL_ADMINS');
 
         ?>
             <div id="email_admins" style="cursor:pointer; width: 100%; background-color: #ffffff;"
@@ -1346,13 +1346,13 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 </h3>
             </div>
             <div id="email_admins_div"
-                style="display:<?php echo Factory::getApplication()->getSession()->get('email_admins', '', 'com_contentbuilder'); ?>">
+                style="display:<?php echo Factory::getApplication()->getSession()->get('email_admins', '', 'com_contentbuilder_ng'); ?>">
                 <table width="100%" class="adminform table table-striped">
                     <tr>
                         <td width="20%">
                             <label for="email_admin_subject"><span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_EMAIL_SUBJECT_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_EMAIL_SUBJECT'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_SUBJECT_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_SUBJECT'); ?>
                                 </span></label>
                         </td>
                         <td>
@@ -1362,7 +1362,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         </td>
                         <td width="20%">
                             <label for="email_admin_alternative_from">
-                                <?php echo Text::_('COM_CONTENTBUILDER_EMAIL_ALTERNATIVE_FROM'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ALTERNATIVE_FROM'); ?>
                             </label>
                         </td>
                         <td>
@@ -1374,7 +1374,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     <tr>
                         <td width="20%">
                             <label for="email_admin_alternative_fromname">
-                                <?php echo Text::_('COM_CONTENTBUILDER_EMAIL_ALTERNATIVE_FROMNAME'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ALTERNATIVE_FROMNAME'); ?>
                             </label>
                         </td>
                         <td>
@@ -1384,8 +1384,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         </td>
                         <td width="20%">
                             <label for="email_admin_recipients"><span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_EMAIL_RECIPIENTS_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_EMAIL_RECIPIENTS'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_RECIPIENTS_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_RECIPIENTS'); ?>
                                 </span></label>
                         </td>
                         <td>
@@ -1397,8 +1397,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     <tr>
                         <td width="20%">
                             <label for="email_admin_recipients_attach_uploads"><span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_EMAIL_ATTACH_UPLOADS_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_EMAIL_ATTACH_UPLOADS'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ATTACH_UPLOADS_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ATTACH_UPLOADS'); ?>
                                 </span></label>
                         </td>
                         <td>
@@ -1408,7 +1408,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         </td>
                         <td width="20%">
                             <label for="email_admin_html">
-                                <?php echo Text::_('COM_CONTENTBUILDER_EMAIL_HTML'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_HTML'); ?>
                             </label>
                         </td>
                         <td>
@@ -1420,7 +1420,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     <tr>
                         <td width="20%">
                             <label for="email_admin_create_sample">
-                                <?php echo Text::_('COM_CONTENTBUILDER_CREATE_EDITABLE_SAMPLE'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_EDITABLE_SAMPLE'); ?>
                             </label>
                         </td>
                         <td>
@@ -1443,7 +1443,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             </div>
             <?php
 
-            $title = Text::_('COM_CONTENTBUILDER_EMAIL_USERS');
+            $title = Text::_('COM_CONTENTBUILDER_NG_EMAIL_USERS');
 
             ?>
             <div id="email_users" style="cursor:pointer; width: 100%; background-color: #ffffff;">
@@ -1456,7 +1456,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     <tr>
                         <td width="20%">
                             <label for="email_subject">
-                                <?php echo Text::_('COM_CONTENTBUILDER_EMAIL_SUBJECT'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_SUBJECT'); ?>
                             </label>
                         </td>
                         <td>
@@ -1466,7 +1466,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         </td>
                         <td width="20%">
                             <label for="email_alternative_from">
-                                <?php echo Text::_('COM_CONTENTBUILDER_EMAIL_ALTERNATIVE_FROM'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ALTERNATIVE_FROM'); ?>
                             </label>
                         </td>
                         <td>
@@ -1478,7 +1478,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     <tr>
                         <td width="20%">
                             <label for="email_alternative_fromname">
-                                <?php echo Text::_('COM_CONTENTBUILDER_EMAIL_ALTERNATIVE_FROMNAME'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ALTERNATIVE_FROMNAME'); ?>
                             </label>
                         </td>
                         <td>
@@ -1488,7 +1488,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         </td>
                         <td width="20%">
                             <label for="email_recipients">
-                                <?php echo Text::_('COM_CONTENTBUILDER_EMAIL_RECIPIENTS'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_RECIPIENTS'); ?>
                             </label>
                         </td>
                         <td>
@@ -1500,7 +1500,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     <tr>
                         <td width="20%">
                             <label for="email_recipients_attach_uploads">
-                                <?php echo Text::_('COM_CONTENTBUILDER_EMAIL_ATTACH_UPLOADS'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ATTACH_UPLOADS'); ?>
                             </label>
                         </td>
                         <td>
@@ -1510,7 +1510,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         </td>
                         <td width="20%">
                             <label for="email_html">
-                                <?php echo Text::_('COM_CONTENTBUILDER_EMAIL_HTML'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_HTML'); ?>
                             </label>
                         </td>
                         <td>
@@ -1522,7 +1522,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     <tr>
                         <td width="20%">
                             <label for="email_create_sample">
-                                <?php echo Text::_('COM_CONTENTBUILDER_CREATE_EDITABLE_SAMPLE'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_EDITABLE_SAMPLE'); ?>
                             </label>
                         </td>
                         <td>
@@ -1547,23 +1547,23 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
         }
 
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab8', Text::_('COM_CONTENTBUILDER_PERMISSIONS'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab8', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS'));
 
         // Démarrer les onglets
-        $activePermTab = Factory::getApplication()->getSession()->get('slideStartOffset', 'permtab1', 'com_contentbuilder');
+        $activePermTab = Factory::getApplication()->getSession()->get('slideStartOffset', 'permtab1', 'com_contentbuilder_ng');
         echo HTMLHelper::_('uitab.startTabSet', 'perm-pane', ['active' => $activePermTab]);
 
 
         // Premier onglet
-        echo HTMLHelper::_('uitab.addTab', 'perm-pane', 'permtab1', Text::_('COM_CONTENTBUILDER_PERMISSIONS_FRONTEND'));
+        echo HTMLHelper::_('uitab.addTab', 'perm-pane', 'permtab1', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_FRONTEND'));
         ?>
         <table class="adminlist table table-striped">
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="own_only_fe">
                         <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN_OWNLY_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN_OWNLY'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN_OWNLY_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN_OWNLY'); ?>
                         </span>:
                     </label>
                 </td>
@@ -1576,8 +1576,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 <td width="20%" align="right" class="key">
                     <label for="limited_article_options_fe">
                         <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_LIMITED_ARTICLE_OPTIONS_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIMITED_ARTICLE_OPTIONS'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMITED_ARTICLE_OPTIONS_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMITED_ARTICLE_OPTIONS'); ?>
                         </span>:
                     </label>
                 </td>
@@ -1591,8 +1591,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 <td width="20%" align="right" class="key">
                     <label for="own_fe_view">
                         <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN'); ?>
                         </span>:
                     </label>
                 </td>
@@ -1600,42 +1600,42 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     <input class="form-check-input" type="checkbox" name="jform[own_fe][listaccess]" id="own_fe_listaccess"
                         value="1" <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['listaccess']) && $this->item->config['own_fe']['listaccess'] ? ' checked="checked"' : ''; ?> /> <label
                         for="own_fe_listaccess">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIST_ACCESS'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own_fe][view]" id="own_fe_view" value="1" <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['view']) && $this->item->config['own_fe']['view'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VIEW'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VIEW'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own_fe][new]" id="own_fe_new" value="1" <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['new']) && $this->item->config['own_fe']['new'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_NEW'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_NEW'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own_fe][edit]" id="own_fe_edit" value="1" <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['edit']) && $this->item->config['own_fe']['edit'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_EDIT'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_EDIT'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own_fe][delete]" id="own_fe_delete" value="1"
                         <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['delete']) && $this->item->config['own_fe']['delete'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_delete">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_DELETE'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_DELETE'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own_fe][state]" id="own_fe_state" value="1"
                         <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['state']) && $this->item->config['own_fe']['state'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_state">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_STATE'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_STATE'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own_fe][publish]" id="own_fe_publish" value="1"
                         <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['publish']) && $this->item->config['own_fe']['publish'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_publish">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own_fe][fullarticle]" id="own_fe_fullarticle"
                         value="1" <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['fullarticle']) && $this->item->config['own_fe']['fullarticle'] ? ' checked="checked"' : ''; ?> /> <label
                         for="own_fe_fullarticle">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_FULL_ARTICLE'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own_fe][language]" id="own_fe_language"
                         value="1" <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['language']) && $this->item->config['own_fe']['language'] ? ' checked="checked"' : ''; ?> /> <label
                         for="own_fe_language">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_CHANGE_LANGUAGE'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own_fe][rating]" id="own_fe_rating" value="1"
                         <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['rating']) && $this->item->config['own_fe']['rating'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_rating">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_RATING'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_RATING'); ?>
                     </label>
                 </td>
             </tr>
@@ -1643,8 +1643,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 <td width="20%" align="right" class="key">
                     <label for="show_all_languages_fe">
                         <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_SHOW_ALL_LANGUAGES_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_SHOW_ALL_LANGUAGES'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_SHOW_ALL_LANGUAGES_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_SHOW_ALL_LANGUAGES'); ?>
                         </span>:
                     </label>
                 </td>
@@ -1660,7 +1660,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 <tr class="row0">
                     <td width="20%" align="right" class="key">
                         <label for="force_login">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_FORCE_LOGIN'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FORCE_LOGIN'); ?>
                         </label>
                     </td>
                     <td>
@@ -1671,7 +1671,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 <tr class="row0">
                     <td width="20%" align="right" class="key">
                         <label for="force_url">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_FORCE_URL'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FORCE_URL'); ?>
                         </label>
                     </td>
                     <td>
@@ -1687,62 +1687,62 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             <thead>
                 <tr>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_GROUP') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_GROUP') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIST_ACCESS') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VIEW') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VIEW') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_NEW') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_NEW') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_EDIT') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_EDIT') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_DELETE') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_DELETE') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_STATE') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_STATE') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_FULL_ARTICLE') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_CHANGE_LANGUAGE') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_RATING') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_RATING') ?>
                     </th>
                 </tr>
             </thead>
             <tr>
                 <td style="background-color: #F0F0F0"></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'fe')" value="listaccess" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="listaccess" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'fe')" value="view" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="view" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'fe')" value="new" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="new" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'fe')" value="edit" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="edit" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'fe')" value="delete" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="delete" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'fe')" value="state" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="state" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'fe')" value="publish" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="publish" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'fe')" value="fullarticle" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="fullarticle" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'fe')" value="language" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="language" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'fe')" value="rating" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="rating" /></td>
             </tr>
 
             <?php
@@ -1792,7 +1792,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
         /* Supprime le bouton PERMISSION - BACKEND, laisse FRONTEND seulement pour les droits */
 
         /*
-        $title = Text::_('COM_CONTENTBUILDER_PERMISSIONS_BACKEND');
+        $title = Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_BACKEND');
         echo $sliders->startPanel($title, "permtab0");
         ?>
         <table class="adminlist table table-striped">
@@ -1800,8 +1800,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 <td width="20%" align="right" class="key">
                     <label for="own_only">
                         <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN_OWNLY_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN_OWNLY'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN_OWNLY_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN_OWNLY'); ?>
                         </span>:
                     </label>
                 </td>
@@ -1814,8 +1814,8 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 <td width="20%" align="right" class="key">
                     <label for="limited_article_options">
                         <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_LIMITED_ARTICLE_OPTIONS_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIMITED_ARTICLE_OPTIONS'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMITED_ARTICLE_OPTIONS_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMITED_ARTICLE_OPTIONS'); ?>
                         </span>:
                     </label>
                 </td>
@@ -1829,44 +1829,44 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 <td width="20%" align="right" class="key">
                     <label for="own_view">
                         <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_OWN'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN'); ?>
                         </span>:
                     </label>
                 </td>
                 <td>
                     <input class="form-check-input" type="checkbox" name="jform[own][listaccess]" id="own_listaccess" value="1"
                         <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['listaccess']) && $this->item->config['own']['listaccess'] ? ' checked="checked"' : ''; ?> /><label for="own_listaccess">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIST_ACCESS'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own][view]" id="own_view" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['view']) && $this->item->config['own']['view'] ? ' checked="checked"' : ''; ?> /><label for="own_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VIEW'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VIEW'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own][new]" id="own_new" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['new']) && $this->item->config['own']['new'] ? ' checked="checked"' : ''; ?> /><label for="own_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_NEW'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_NEW'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own][edit]" id="own_edit" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['edit']) && $this->item->config['own']['edit'] ? ' checked="checked"' : ''; ?> /><label for="own_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_EDIT'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_EDIT'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own][delete]" id="own_delete" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['delete']) && $this->item->config['own']['delete'] ? ' checked="checked"' : ''; ?> /> <label for="own_delete">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_DELETE'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_DELETE'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own][state]" id="own_state" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['state']) && $this->item->config['own']['state'] ? ' checked="checked"' : ''; ?> /> <label for="own_state">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_STATE'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_STATE'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own][publish]" id="own_publish" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['publish']) && $this->item->config['own']['publish'] ? ' checked="checked"' : ''; ?> /> <label for="own_publish">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own][fullarticle]" id="own_fullarticle"
                         value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['fullarticle']) && $this->item->config['own']['fullarticle'] ? ' checked="checked"' : ''; ?> /> <label for="own_fullarticle">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_FULL_ARTICLE'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own][language]" id="own_language" value="1"
                         <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['language']) && $this->item->config['own']['language'] ? ' checked="checked"' : ''; ?> /> <label for="own_language">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_CHANGE_LANGUAGE'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE'); ?>
                     </label>
                     <input class="form-check-input" type="checkbox" name="jform[own][rating]" id="own_rating" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['rating']) && $this->item->config['own']['rating'] ? ' checked="checked"' : ''; ?> /> <label for="own_rating">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_RATING'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_RATING'); ?>
                     </label>
                 </td>
             </tr>
@@ -1876,62 +1876,62 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             <thead>
                 <tr>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_GROUP') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_GROUP') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIST_ACCESS') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VIEW') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VIEW') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_NEW') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_NEW') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_EDIT') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_EDIT') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_DELETE') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_DELETE') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_STATE') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_STATE') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PUBLISH') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_FULL_ARTICLE') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_CHANGE_LANGUAGE') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_RATING') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_RATING') ?>
                     </th>
                 </tr>
             </thead>
             <tr class="<?php echo "row0"; ?>">
                 <td style="background-color: #F0F0F0"></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'be')" value="listaccess" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'be')" value="listaccess" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'be')" value="view" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'be')" value="view" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'be')" value="new" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'be')" value="new" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'be')" value="edit" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'be')" value="edit" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'be')" value="delete" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'be')" value="delete" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'be')" value="state" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'be')" value="state" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'be')" value="publish" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'be')" value="publish" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'be')" value="fullarticle" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'be')" value="fullarticle" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'be')" value="language" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'be')" value="language" /></td>
                 <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_selectAll(this,'be')" value="rating" /></td>
+                        onclick="contentbuilder_ng_selectAll(this,'be')" value="rating" /></td>
             </tr>
             <?php
             foreach ($this->gmap as $entry) {
@@ -1981,14 +1981,14 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
         //FIN MODIF XDA - GILLES
 
 
-        echo HTMLHelper::_('uitab.addTab', 'perm-pane', 'permtab2', Text::_('COM_CONTENTBUILDER_PERMISSIONS_USERS'));
+        echo HTMLHelper::_('uitab.addTab', 'perm-pane', 'permtab2', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_USERS'));
         ?>
 
         <table class="adminlist table table-striped">
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="limit_add">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIMIT_ADD'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMIT_ADD'); ?>:
                     </label>
                 </td>
                 <td>
@@ -1999,7 +1999,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="limit_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_LIMIT_EDIT'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMIT_EDIT'); ?>:
                     </label>
                 </td>
                 <td>
@@ -2010,88 +2010,88 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="verification_required_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VIEW'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VIEW'); ?>:
                     </label>
                 </td>
                 <td>
                     <input type="hidden" name="jform[verification_required_view]" value="0" />
                     <input class="form-check-input" type="checkbox" name="jform[verification_required_view]"
                         id="verification_required_view" value="1" <?php echo $this->item->verification_required_view ? ' checked="checked"' : '' ?> /><label for="verification_required_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_REQUIRED'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_REQUIRED'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 50px;" id="verification_days_view"
                         name="jform[verification_days_view]" type="text"
                         value="<?php echo $this->item->verification_days_view; ?>" /> <label
                         for="verification_days_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_DAYS'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_DAYS'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 300px;" id="verification_url_view"
                         name="jform[verification_url_view]" type="text"
                         value="<?php echo htmlentities($this->item->verification_url_view ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                     <label for="verification_url_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_URL'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_URL'); ?>
                     </label>
                 </td>
             </tr>
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="verification_required_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_NEW'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_NEW'); ?>:
                     </label>
                 </td>
                 <td>
                     <input type="hidden" name="jform[verification_required_new]" value="0" />
                     <input class="form-check-input" type="checkbox" name="jform[verification_required_new]"
                         id="verification_required_new" value="1" <?php echo $this->item->verification_required_new ? ' checked="checked"' : '' ?> /><label for="verification_required_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_REQUIRED'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_REQUIRED'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 50px;" id="verification_days_new"
                         name="jform[verification_days_new]" type="text"
                         value="<?php echo $this->item->verification_days_new; ?>" /> <label for="verification_days_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_DAYS'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_DAYS'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 300px;" id="verification_url_new"
                         name="jform[verification_url_new]" type="text"
                         value="<?php echo htmlentities($this->item->verification_url_new ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                     <label for="verification_url_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_URL'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_URL'); ?>
                     </label>
                 </td>
             </tr>
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="verification_required_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_EDIT'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_EDIT'); ?>:
                     </label>
                 </td>
                 <td>
                     <input type="hidden" name="jform[verification_required_edit]" value="0" />
                     <input class="form-check-input" type="checkbox" name="jform[verification_required_edit]"
                         id="verification_required_edit" value="1" <?php echo $this->item->verification_required_edit ? ' checked="checked"' : '' ?> /><label for="verification_required_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_REQUIRED'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_REQUIRED'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 50px;" id="verification_days_edit"
                         name="jform[verification_days_edit]" type="text"
                         value="<?php echo $this->item->verification_days_edit; ?>" /> <label
                         for="verification_days_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_DAYS'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_DAYS'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 300px;" id="verification_url_new"
                         name="jform[verification_url_edit]" type="text"
                         value="<?php echo htmlentities($this->item->verification_url_edit ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                     <label for="verification_url_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_VERIFICATION_URL'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_URL'); ?>
                     </label>
                 </td>
             </tr>
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label>
-                        <?php echo Text::_('COM_CONTENTBUILDER_PERM_USERS'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_USERS'); ?>:
                     </label>
                 </td>
                 <td>
-                    <?php echo '[<a href="index.php?option=com_contentbuilder&amp;view=users&amp;tmpl=component&amp;form_id=' . $this->item->id . '" title="" data-bs-toggle="modal" data-bs-target="#edit-modal">' . Text::_('COM_CONTENTBUILDER_EDIT') . '</a>]'; ?>
+                    <?php echo '[<a href="index.php?option=com_contentbuilder&amp;view=users&amp;tmpl=component&amp;form_id=' . $this->item->id . '" title="" data-bs-toggle="modal" data-bs-target="#edit-modal">' . Text::_('COM_CONTENTBUILDER_NG_EDIT') . '</a>]'; ?>
 
                 </td>
             </tr>
@@ -2101,7 +2101,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                 <tr class="row0">
                     <td width="20%" align="right" class="key" valign="top">
                         <label for="act_as_registration">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_ACT_AS_REGISTRATION'); ?>:
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION'); ?>:
                         </label>
                     </td>
                     <td>
@@ -2113,7 +2113,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         <select class="form-select-sm" name="jform[registration_name_field]" id="registration_name_field"
                             style="max-width: 200px;">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_PERM_ACT_AS_REGISTRATION_NAME_FIELD'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION_NAME_FIELD'); ?> -
                             </option>
                             <?php
                             foreach ($this->elements as $the_element) {
@@ -2130,7 +2130,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         <select class="form-select-sm" name="jform[registration_username_field]" id="registration_username_field"
                             style="max-width: 200px;">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_PERM_ACT_AS_REGISTRATION_USERNAME_FIELD'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION_USERNAME_FIELD'); ?> -
                             </option>
                             <?php
                             foreach ($this->elements as $the_element) {
@@ -2147,7 +2147,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         <select class="form-select-sm" name="jform[registration_email_field]" id="registration_email_field"
                             style="max-width: 200px;">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_PERM_ACT_AS_REGISTRATION_EMAIL_FIELD'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION_EMAIL_FIELD'); ?> -
                             </option>
                             <?php
                             foreach ($this->elements as $the_element) {
@@ -2164,7 +2164,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         <select class="form-select-sm" name="jform[registration_email_repeat_field]"
                             id="registration_email_repeat_field" style="max-width: 200px;">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_PERM_ACT_AS_REGISTRATION_EMAIL_REPEAT_FIELD'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION_EMAIL_REPEAT_FIELD'); ?> -
                             </option>
                             <?php
                             foreach ($this->elements as $the_element) {
@@ -2181,7 +2181,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         <select class="form-select-sm" name="jform[registration_password_field]" id="registration_password_field"
                             style="max-width: 200px;">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_PERM_ACT_AS_REGISTRATION_PASSWORD_FIELD'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION_PASSWORD_FIELD'); ?> -
                             </option>
                             <?php
                             foreach ($this->elements as $the_element) {
@@ -2198,7 +2198,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         <select class="form-select-sm" name="jform[registration_password_repeat_field]"
                             id="registration_password_repeat_field" style="max-width: 200px;">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_PERM_ACT_AS_REGISTRATION_PASSWORD_REPEAT_FIELD'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION_PASSWORD_REPEAT_FIELD'); ?>
                                 -
                             </option>
                             <?php
@@ -2214,7 +2214,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         <br />
                         <br />
                         <label for="force_login">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_FORCE_LOGIN'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FORCE_LOGIN'); ?>
                         </label>
                         <br />
                         <input type="hidden" name="jform[force_login]" value="0" />
@@ -2222,7 +2222,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         <br />
                         <br />
                         <label for="force_url">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_FORCE_URL'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FORCE_URL'); ?>
                         </label>
                         <br />
                         <input class="form-control form-control-sm" id="force_url" name="jform[force_url]" type="text"
@@ -2230,12 +2230,12 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         <br />
                         <br />
                         <label for="registration_bypass_plugin">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_REGISTRATION_BYPASS_PLUGIN'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_REGISTRATION_BYPASS_PLUGIN'); ?>
                         </label>
                         <br />
                         <select class="form-select-sm" name="jform[registration_bypass_plugin]" id="registration_bypass_plugin">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_NONE'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_NONE'); ?> -
                             </option>
                             <?php
                             foreach ($this->verification_plugins as $registration_bypass_plugin) {
@@ -2250,7 +2250,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         <br />
                         <br />
                         <label for="registration_bypass_verification_name">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_REGISTRATION_BYPASS_VERIFICATION_NAME'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_REGISTRATION_BYPASS_VERIFICATION_NAME'); ?>
                         </label>
                         <br />
                         <input class="form-control form-control-sm" type="text" name="jform[registration_bypass_verification_name]"
@@ -2259,7 +2259,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         <br />
                         <br />
                         <label for="registration_bypass_verify_view">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_REGISTRATION_BYPASS_VERIFICATION_VIEW'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_REGISTRATION_BYPASS_VERIFICATION_VIEW'); ?>
                         </label>
                         <br />
                         <input class="form-control form-control-sm" type="text" name="jform[registration_bypass_verify_view]"
@@ -2269,7 +2269,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                         <br />
                         <br />
                         <label for="registration_bypass_plugin_params">
-                            <?php echo Text::_('COM_CONTENTBUILDER_PERM_REGISTRATION_BYPASS_PLUGIN_PARAMS'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_REGISTRATION_BYPASS_PLUGIN_PARAMS'); ?>
                         </label>
                         <br />
                         <textarea class="form-control form-control-sm" style="width: 100%;height: 80px;"
@@ -2334,15 +2334,15 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
     <input type="hidden" name="slideStartOffset"
         value="<?php echo Factory::getApplication()->getSession()->get('slideStartOffset', 1); ?>" />
     <input type="hidden" name="jform[email_users]"
-        value="<?php echo Factory::getApplication()->getSession()->get('email_users', 'none', 'com_contentbuilder'); ?>" />
+        value="<?php echo Factory::getApplication()->getSession()->get('email_users', 'none', 'com_contentbuilder_ng'); ?>" />
     <input type="hidden" name="jform[email_admins]"
-        value="<?php echo Factory::getApplication()->getSession()->get('email_admins', '', 'com_contentbuilder'); ?>" />
+        value="<?php echo Factory::getApplication()->getSession()->get('email_admins', '', 'com_contentbuilder_ng'); ?>" />
 
     <?php echo HTMLHelper::_('form.token'); ?>
 
 </form>
 <?php
-$modalParams['title'] = Text::_('COM_CONTENTBUILDER_EDIT');
+$modalParams['title'] = Text::_('COM_CONTENTBUILDER_NG_EDIT');
 $modalParams['url'] = '#';
 $modalParams['height'] = '400';
 $modalParams['width'] = '800';
@@ -2350,7 +2350,7 @@ $modalParams['bodyHeight'] = 400;
 $modalParams['modalWidth'] = 800;
 echo HTMLHelper::_('bootstrap.renderModal', 'text-type-modal', $modalParams);
 
-$modalParams['title'] = Text::_('COM_CONTENTBUILDER_EDIT');
+$modalParams['title'] = Text::_('COM_CONTENTBUILDER_NG_EDIT');
 $modalParams['url'] = '#';
 $modalParams['height'] = '400';
 $modalParams['width'] = '800';

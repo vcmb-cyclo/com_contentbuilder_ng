@@ -1,61 +1,61 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <metadata>
     <!-- Joomla! 1.6 compatibility -->
-    <layout title="COM_CONTENTBUILDER_MENU_ITEM_LIST_CUSTOM1">
-        <message>COM_CONTENTBUILDER_SELECT_VIEW_MESSAGE</message>
+    <layout title="COM_CONTENTBUILDER_NG_MENU_ITEM_LIST_CUSTOM1">
+        <message>COM_CONTENTBUILDER_NG_SELECT_VIEW_MESSAGE</message>
         <config>
-            <fields name="params" addfieldpath="/components/com_contentbuilder/elements">
-                <fieldset name="settings" group="settings" label="COM_CONTENTBUILDER_MENU_ITEM_LIST_CUSTOM1">
-                    <field required="true" type="forms" label="COM_CONTENTBUILDER_SELECT_VIEW" description="COM_CONTENTBUILDER_SELECT_VIEW_DESC" name="form_id" default="0"/>
-                    <field type="categories" label="COM_CONTENTBUILDER_SELECT_CATEGORY" description="COM_CONTENTBUILDER_SELECT_CATEGORY_DESC" name="cb_category_id" default="0" />
+            <fields name="params" addfieldpath="/components/com_contentbuilder_ng/elements">
+                <fieldset name="settings" group="settings" label="COM_CONTENTBUILDER_NG_MENU_ITEM_LIST_CUSTOM1">
+                    <field required="true" type="forms" label="COM_CONTENTBUILDER_NG_SELECT_VIEW" description="COM_CONTENTBUILDER_NG_SELECT_VIEW_DESC" name="form_id" default="0"/>
+                    <field type="categories" label="COM_CONTENTBUILDER_NG_SELECT_CATEGORY" description="COM_CONTENTBUILDER_NG_SELECT_CATEGORY_DESC" name="cb_category_id" default="0" />
                     
-                    <field name="cb_category_menu_filter" type="radio" default="0" description="COM_CONTENTBUILDER_CATEGORY_MENU_FILTER_DESC" label="COM_CONTENTBUILDER_CATEGORY_MENU_FILTER">
+                    <field name="cb_category_menu_filter" type="radio" default="0" description="COM_CONTENTBUILDER_NG_CATEGORY_MENU_FILTER_DESC" label="COM_CONTENTBUILDER_NG_CATEGORY_MENU_FILTER">
                         <option value="0">No</option>
                         <option value="1">Yes</option>
                     </field>
                     
-                    <field name="cb_show_author" type="radio" default="1" description="COM_CONTENTBUILDER_SHOW_AUTHOR_DESC" label="COM_CONTENTBUILDER_SHOW_AUTHOR">
+                    <field name="cb_show_author" type="radio" default="1" description="COM_CONTENTBUILDER_NG_SHOW_AUTHOR_DESC" label="COM_CONTENTBUILDER_NG_SHOW_AUTHOR">
                         <option value="0">No</option>
                         <option value="1">Yes</option>
                     </field>
-                    <field name="cb_show_top_bar" type="radio" default="1" description="COM_CONTENTBUILDER_SHOW_TOP_BAR_DESC" label="COM_CONTENTBUILDER_SHOW_TOP_BAR">
+                    <field name="cb_show_top_bar" type="radio" default="1" description="COM_CONTENTBUILDER_NG_SHOW_TOP_BAR_DESC" label="COM_CONTENTBUILDER_NG_SHOW_TOP_BAR">
                         <option value="0">No</option>
                         <option value="1">Yes</option>
                     </field>
-                    <field name="cb_show_bottom_bar" type="radio" default="1" description="COM_CONTENTBUILDER_SHOW_BOTTOM_BAR_DESC" label="COM_CONTENTBUILDER_SHOW_BOTTOM_BAR">
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
-                    </field>
-                    
-                    <field name="cb_show_details_top_bar" type="radio" default="1" description="COM_CONTENTBUILDER_SHOW_DETAILS_TOP_BAR_DESC" label="COM_CONTENTBUILDER_SHOW_DETAILS_TOP_BAR">
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
-                    </field>
-                    <field name="cb_show_details_bottom_bar" type="radio" default="1" description="COM_CONTENTBUILDER_SHOW_DETAILS_BOTTOM_BAR_DESC" label="COM_CONTENTBUILDER_SHOW_DETAILS_BOTTOM_BAR">
+                    <field name="cb_show_bottom_bar" type="radio" default="1" description="COM_CONTENTBUILDER_NG_SHOW_BOTTOM_BAR_DESC" label="COM_CONTENTBUILDER_NG_SHOW_BOTTOM_BAR">
                         <option value="0">No</option>
                         <option value="1">Yes</option>
                     </field>
                     
-                    <field name="cb_show_details_back_button" type="radio" default="0" label="COM_CONTENTBUILDER_SHOW_BACK_BUTTON" description="COM_CONTENTBUILDER_SHOW_BACK_BUTTON_DESC">
-                        <option value="0">COM_CONTENTBUILDER_NO</option>
-                        <option value="1">COM_CONTENTBUILDER_YES</option>
+                    <field name="cb_show_details_top_bar" type="radio" default="1" description="COM_CONTENTBUILDER_NG_SHOW_DETAILS_TOP_BAR_DESC" label="COM_CONTENTBUILDER_NG_SHOW_DETAILS_TOP_BAR">
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </field>
+                    <field name="cb_show_details_bottom_bar" type="radio" default="1" description="COM_CONTENTBUILDER_NG_SHOW_DETAILS_BOTTOM_BAR_DESC" label="COM_CONTENTBUILDER_NG_SHOW_DETAILS_BOTTOM_BAR">
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
                     </field>
                     
-                    <field name="cb_filter_in_title" type="radio" default="1" label="COM_CONTENTBUILDER_FILTER_IN_TITLE" description="">
-                        <option value="0">COM_CONTENTBUILDER_NO</option>
-                        <option value="1">COM_CONTENTBUILDER_YES</option>
+                    <field name="cb_show_details_back_button" type="radio" default="0" label="COM_CONTENTBUILDER_NG_SHOW_BACK_BUTTON" description="COM_CONTENTBUILDER_NG_SHOW_BACK_BUTTON_DESC">
+                        <option value="0">COM_CONTENTBUILDER_NG_NO</option>
+                        <option value="1">COM_CONTENTBUILDER_NG_YES</option>
                     </field>
                     
-                    <field name="cb_prefix_in_title" type="radio" default="1" label="COM_CONTENTBUILDER_PREFIX_IN_TITLE" description="">
-                        <option value="0">COM_CONTENTBUILDER_NO</option>
-                        <option value="1">COM_CONTENTBUILDER_YES</option>
+                    <field name="cb_filter_in_title" type="radio" default="1" label="COM_CONTENTBUILDER_NG_FILTER_IN_TITLE" description="">
+                        <option value="0">COM_CONTENTBUILDER_NG_NO</option>
+                        <option value="1">COM_CONTENTBUILDER_NG_YES</option>
                     </field>
                     
-                    <field required="true" type="text" label="COM_CONTENTBUILDER_LIST_LIMIT" description="COM_CONTENTBUILDER_LIST_LIMIT_DESC" name="cb_list_limit" default="20" />
+                    <field name="cb_prefix_in_title" type="radio" default="1" label="COM_CONTENTBUILDER_NG_PREFIX_IN_TITLE" description="">
+                        <option value="0">COM_CONTENTBUILDER_NG_NO</option>
+                        <option value="1">COM_CONTENTBUILDER_NG_YES</option>
+                    </field>
+                    
+                    <field required="true" type="text" label="COM_CONTENTBUILDER_NG_LIST_LIMIT" description="COM_CONTENTBUILDER_NG_LIST_LIMIT_DESC" name="cb_list_limit" default="20" />
 
                     <field type="cbfilterhidden" filter="raw" label="" description="" name="cb_list_filterhidden" default="" />
                     <field type="cborderhidden" label="" description="" name="cb_list_orderhidden" default="" />
-                    <field type="cbfilter" filter="raw" label="COM_CONTENTBUILDER_SELECT_FILTER" description="COM_CONTENTBUILDER_SELECT_FILTER_DESC" name="cb_list_filter" default="" />
+                    <field type="cbfilter" filter="raw" label="COM_CONTENTBUILDER_NG_SELECT_FILTER" description="COM_CONTENTBUILDER_NG_SELECT_FILTER_DESC" name="cb_list_filter" default="" />
 
                 </fieldset>
             </fields>
@@ -63,56 +63,56 @@
     </layout>
     <!-- Joomla! 1.5 compatibility -->
     <state>
-        <name>COM_CONTENTBUILDER_MENU_ITEM_LIST_CUSTOM1</name>
-        <description>COM_CONTENTBUILDER_SELECT_VIEW_MESSAGE</description>
-        <params addpath="/components/com_contentbuilder/elements">
-            <param type="forms" label="COM_CONTENTBUILDER_SELECT_VIEW" description="COM_CONTENTBUILDER_SELECT_VIEW_DESC" name="form_id" default="0" />
-            <param type="categories" label="COM_CONTENTBUILDER_SELECT_CATEGORY" description="COM_CONTENTBUILDER_SELECT_CATEGORY_DESC" name="cb_category_id" default="0" />
-            <param name="cb_category_menu_filter" type="radio" default="0" description="COM_CONTENTBUILDER_CATEGORY_MENU_FILTER_DESC" label="COM_CONTENTBUILDER_CATEGORY_MENU_FILTER">
+        <name>COM_CONTENTBUILDER_NG_MENU_ITEM_LIST_CUSTOM1</name>
+        <description>COM_CONTENTBUILDER_NG_SELECT_VIEW_MESSAGE</description>
+        <params addpath="/components/com_contentbuilder_ng/elements">
+            <param type="forms" label="COM_CONTENTBUILDER_NG_SELECT_VIEW" description="COM_CONTENTBUILDER_NG_SELECT_VIEW_DESC" name="form_id" default="0" />
+            <param type="categories" label="COM_CONTENTBUILDER_NG_SELECT_CATEGORY" description="COM_CONTENTBUILDER_NG_SELECT_CATEGORY_DESC" name="cb_category_id" default="0" />
+            <param name="cb_category_menu_filter" type="radio" default="0" description="COM_CONTENTBUILDER_NG_CATEGORY_MENU_FILTER_DESC" label="COM_CONTENTBUILDER_NG_CATEGORY_MENU_FILTER">
                 <option value="0">No</option>
                 <option value="1">Yes</option>
             </param>
-            <param name="cb_show_author" type="radio" default="1" description="COM_CONTENTBUILDER_SHOW_AUTHOR_DESC" label="COM_CONTENTBUILDER_SHOW_AUTHOR">
+            <param name="cb_show_author" type="radio" default="1" description="COM_CONTENTBUILDER_NG_SHOW_AUTHOR_DESC" label="COM_CONTENTBUILDER_NG_SHOW_AUTHOR">
                 <option value="0">No</option>
                 <option value="1">Yes</option>
             </param>
-            <param name="cb_show_top_bar" type="radio" default="1" description="COM_CONTENTBUILDER_SHOW_TOP_BAR_DESC" label="COM_CONTENTBUILDER_SHOW_TOP_BAR">
+            <param name="cb_show_top_bar" type="radio" default="1" description="COM_CONTENTBUILDER_NG_SHOW_TOP_BAR_DESC" label="COM_CONTENTBUILDER_NG_SHOW_TOP_BAR">
                 <option value="0">No</option>
                 <option value="1">Yes</option>
             </param>
-            <param name="cb_show_bottom_bar" type="radio" default="1" description="COM_CONTENTBUILDER_SHOW_BOTTOM_BAR_DESC" label="COM_CONTENTBUILDER_SHOW_BOTTOM_BAR">
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </param>
-            
-            <param name="cb_show_details_top_bar" type="radio" default="1" description="COM_CONTENTBUILDER_SHOW_DETAILS_TOP_BAR_DESC" label="COM_CONTENTBUILDER_SHOW_DETAILS_TOP_BAR">
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </param>
-            <param name="cb_show_details_bottom_bar" type="radio" default="1" description="COM_CONTENTBUILDER_SHOW_DETAILS_BOTTOM_BAR_DESC" label="COM_CONTENTBUILDER_SHOW_DETAILS_BOTTOM_BAR">
+            <param name="cb_show_bottom_bar" type="radio" default="1" description="COM_CONTENTBUILDER_NG_SHOW_BOTTOM_BAR_DESC" label="COM_CONTENTBUILDER_NG_SHOW_BOTTOM_BAR">
                 <option value="0">No</option>
                 <option value="1">Yes</option>
             </param>
             
-            <param name="cb_show_details_back_button" type="radio" default="0" label="COM_CONTENTBUILDER_SHOW_BACK_BUTTON" description="COM_CONTENTBUILDER_SHOW_BACK_BUTTON_DESC">
-                <option value="0">COM_CONTENTBUILDER_NO</option>
-                <option value="1">COM_CONTENTBUILDER_YES</option>
+            <param name="cb_show_details_top_bar" type="radio" default="1" description="COM_CONTENTBUILDER_NG_SHOW_DETAILS_TOP_BAR_DESC" label="COM_CONTENTBUILDER_NG_SHOW_DETAILS_TOP_BAR">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
             </param>
-            <param name="cb_filter_in_title" type="radio" default="1" label="COM_CONTENTBUILDER_FILTER_IN_TITLE" description="">
-                <option value="0">COM_CONTENTBUILDER_NO</option>
-                <option value="1">COM_CONTENTBUILDER_YES</option>
-            </param>
-            
-            <param name="cb_prefix_in_title" type="radio" default="1" label="COM_CONTENTBUILDER_PREFIX_IN_TITLE" description="">
-                <option value="0">COM_CONTENTBUILDER_NO</option>
-                <option value="1">COM_CONTENTBUILDER_YES</option>
+            <param name="cb_show_details_bottom_bar" type="radio" default="1" description="COM_CONTENTBUILDER_NG_SHOW_DETAILS_BOTTOM_BAR_DESC" label="COM_CONTENTBUILDER_NG_SHOW_DETAILS_BOTTOM_BAR">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
             </param>
             
-            <param required="true" type="text" label="COM_CONTENTBUILDER_LIST_LIMIT" description="COM_CONTENTBUILDER_LIST_LIMIT_DESC" name="cb_list_limit" default="20" />
+            <param name="cb_show_details_back_button" type="radio" default="0" label="COM_CONTENTBUILDER_NG_SHOW_BACK_BUTTON" description="COM_CONTENTBUILDER_NG_SHOW_BACK_BUTTON_DESC">
+                <option value="0">COM_CONTENTBUILDER_NG_NO</option>
+                <option value="1">COM_CONTENTBUILDER_NG_YES</option>
+            </param>
+            <param name="cb_filter_in_title" type="radio" default="1" label="COM_CONTENTBUILDER_NG_FILTER_IN_TITLE" description="">
+                <option value="0">COM_CONTENTBUILDER_NG_NO</option>
+                <option value="1">COM_CONTENTBUILDER_NG_YES</option>
+            </param>
+            
+            <param name="cb_prefix_in_title" type="radio" default="1" label="COM_CONTENTBUILDER_NG_PREFIX_IN_TITLE" description="">
+                <option value="0">COM_CONTENTBUILDER_NG_NO</option>
+                <option value="1">COM_CONTENTBUILDER_NG_YES</option>
+            </param>
+            
+            <param required="true" type="text" label="COM_CONTENTBUILDER_NG_LIST_LIMIT" description="COM_CONTENTBUILDER_NG_LIST_LIMIT_DESC" name="cb_list_limit" default="20" />
 
             <param type="cbfilterhidden" label="" description="" name="cb_list_filterhidden" default="" />
             <param type="cborderhidden" label="" description="" name="cb_list_orderhidden" default="" />
-            <param type="cbfilter" label="COM_CONTENTBUILDER_SELECT_FILTER" description="COM_CONTENTBUILDER_SELECT_FILTER_DESC" name="cb_list_filter" default="" />
+            <param type="cbfilter" label="COM_CONTENTBUILDER_NG_SELECT_FILTER" description="COM_CONTENTBUILDER_NG_SELECT_FILTER_DESC" name="cb_list_filter" default="" />
             
        </params>
     </state>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <metadata>
         <!-- Joomla! 1.5 -->
-	<view title="COM_CONTENTBUILDER_TITLE_CREATE">
-		<message>COM_CONTENTBUILDER_CONTENTBUILDER_CREATE</message>
+	<view title="COM_CONTENTBUILDER_NG_TITLE_CREATE">
+		<message>COM_CONTENTBUILDER_NG_CONTENTBUILDER_NG_CREATE</message>
 	</view>
 </metadata>

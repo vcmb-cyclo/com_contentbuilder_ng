@@ -1,12 +1,12 @@
 <?php
-namespace CB\Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
 
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Language\Text;
-use CB\Component\Contentbuilder\Administrator\Service\StorageFieldService;
+use CB\Component\Contentbuilder_ng\Administrator\Service\StorageFieldService;
 
 class StoragefieldController extends BaseController
 {
@@ -35,7 +35,7 @@ class StoragefieldController extends BaseController
         if ($fieldname === '') {
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . $storageId, false),
-                Text::_('COM_CONTENTBUILDER_FIELDNAME_REQUIRED'),
+                Text::_('COM_CONTENTBUILDER_NG_FIELDNAME_REQUIRED'),
                 'warning'
             );
             return false;
@@ -52,7 +52,7 @@ class StoragefieldController extends BaseController
 
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . $storageId, false),
-                Text::_('COM_CONTENTBUILDER_FIELD_ADDED'),
+                Text::_('COM_CONTENTBUILDER_NG_FIELD_ADDED'),
                 'message'
             );
             return true;

@@ -14,13 +14,13 @@
             description="JACTION_ADMIN_COMPONENT_DESC"
         />
 		<action
-			name="contentbuilder.manage"
-			title="COM_CONTENTBUILDER_ACTION_MANAGE"
-			description="COM_CONTENTBUILDER_ACTION_MANAGE_DESC"
+			name="contentbuilder_ng.manage"
+			title="COM_CONTENTBUILDER_NG_ACTION_MANAGE"
+			description="COM_CONTENTBUILDER_NG_ACTION_MANAGE_DESC"
 		/>
 
 		<action
-			name="contentbuilder.admin"
+			name="contentbuilder_ng.admin"
 			title="JACTION_ADMIN"
 			description="JACTION_ADMIN_COMPONENT_DESC"
 		/>

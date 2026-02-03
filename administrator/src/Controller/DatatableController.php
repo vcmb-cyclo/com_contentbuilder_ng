@@ -9,7 +9,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
 
 \defined('_JEXEC') or die;
 
@@ -17,7 +17,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Language\Text;
-use CB\Component\Contentbuilder\Administrator\Service\DatatableService;
+use CB\Component\Contentbuilder_ng\Administrator\Service\DatatableService;
 
 class DatatableController extends BaseController
 {
@@ -38,14 +38,14 @@ class DatatableController extends BaseController
         }
 
         try {
-            $container = Factory::getApplication()->bootComponent('com_contentbuilder')->getContainer();
+            $container = Factory::getApplication()->bootComponent('com_contentbuilder_ng')->getContainer();
             $service   = $container->get(DatatableService::class);
 
             $breturn = $service->createForStorage($storageId);
             if ($breturn) {
                 $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . $storageId, false),
-                Text::_('COM_CONTENTBUILDER_TABLE_CREATED'),
+                Text::_('COM_CONTENTBUILDER_NG_TABLE_CREATED'),
                 'message'
                 );
             }
@@ -86,7 +86,7 @@ class DatatableController extends BaseController
 
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . $storageId, false),
-                Text::_('COM_CONTENTBUILDER_DATATABLE_SYNCED'),
+                Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNCED'),
                 'message'
             );
             return true;

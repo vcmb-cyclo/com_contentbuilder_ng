@@ -16,7 +16,7 @@
  * @license     GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace CB\Component\Contentbuilder\Administrator;
+namespace CB\Component\Contentbuilder_ng\Administrator;
 
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -303,10 +303,10 @@ class CBPagination
 		$itemOverride = false;
 		$listOverride = false;
 
-		if (file_exists(JPATH_SITE .'/media/contentbuilder/misc/pagination.php')) {
-			$chromePath = JPATH_SITE .'/media/contentbuilder/misc/pagination.php';
+		if (file_exists(JPATH_SITE .'/media/contentbuilder_ng/misc/pagination.php')) {
+			$chromePath = JPATH_SITE .'/media/contentbuilder_ng/misc/pagination.php';
 		} else {
-			$chromePath = JPATH_SITE .'/administrator/components/com_contentbuilder/classes/pagination_chrome.php';
+			$chromePath = JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/pagination_chrome.php';
 		}
 
 		if (file_exists($chromePath)) {
@@ -396,10 +396,10 @@ class CBPagination
 		$list['pagescounter'] = $this->getPagesCounter();
 		$list['pageslinks'] = $this->getPagesLinks();
 
-		if (file_exists(JPATH_SITE .'/media/contentbuilder/misc/pagination.php')) {
-			$chromePath = JPATH_SITE .'/media/contentbuilder/misc/pagination.php';
+		if (file_exists(JPATH_SITE .'/media/contentbuilder_ng/misc/pagination.php')) {
+			$chromePath = JPATH_SITE .'/media/contentbuilder_ng/misc/pagination.php';
 		} else {
-			$chromePath = JPATH_SITE .'/administrator/components/com_contentbuilder/classes/pagination_chrome.php';
+			$chromePath = JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/pagination_chrome.php';
 		}
 
 		if (file_exists($chromePath)) {

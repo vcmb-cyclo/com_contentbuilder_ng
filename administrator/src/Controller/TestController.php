@@ -4,11 +4,11 @@
  * @package     ContentBuilder
  * @author      Xavier DANO
  * @link        https://breezingforms.vcmb.fr
- * @copyright   (C) 2025 by XDA+GIL
+ * @copyright   (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
 
 use Joomla\CMS\MVC\Controller\BaseController;
 

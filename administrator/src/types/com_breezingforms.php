@@ -8,7 +8,7 @@
  * @copyright   Copyright (C) 2026 by XDA+GIL 
  */
 
-namespace CB\Component\Contentbuilder\Administrator\types;
+namespace CB\Component\Contentbuilder_ng\Administrator\types;
 
 // No direct access
 defined('_JEXEC') or die('Restricted access');
@@ -18,9 +18,9 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\Filesystem\File;
 use Joomla\CMS\Environment\Browser;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
-class contentbuilder_com_breezingforms
+class contentbuilder_ng_com_breezingforms
 {
 
     public $properties = null;
@@ -65,11 +65,11 @@ class contentbuilder_com_breezingforms
                 From 
                 (
                     #__facileforms_records As r,
-                    #__contentbuilder_forms As f
+                    #__contentbuilder_ng_forms As f
                 )
                 Left Join 
                 (
-                    #__contentbuilder_records As cr
+                    #__contentbuilder_ng_records As cr
                 ) 
                 On 
                 (
@@ -90,10 +90,10 @@ class contentbuilder_com_breezingforms
 
         if (is_array($reference_ids)) {
             foreach ($reference_ids as $reference_id) {
-                $db->setQuery("Select `id` From #__contentbuilder_records Where `type` = 'com_breezingforms' And `reference_id` = " . intval($this->properties->id) . ' And `record_id` = ' . intval($reference_id));
+                $db->setQuery("Select `id` From #__contentbuilder_ng_records Where `type` = 'com_breezingforms' And `reference_id` = " . intval($this->properties->id) . ' And `record_id` = ' . intval($reference_id));
                 $res = $db->loadResult();
                 if (!$res) {
-                    $db->setQuery("Insert Into #__contentbuilder_records (`type`,`record_id`,`reference_id`) Values ('com_breezingforms','" . intval($reference_id) . "', '" . intval($this->properties->id) . "')");
+                    $db->setQuery("Insert Into #__contentbuilder_ng_records (`type`,`record_id`,`reference_id`) Values ('com_breezingforms','" . intval($reference_id) . "', '" . intval($this->properties->id) . "')");
                     $db->execute();
                 }
             }
@@ -173,7 +173,7 @@ class contentbuilder_com_breezingforms
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-        $db->setQuery("Select metakey, metadesc, author, robots, rights, xreference From #__contentbuilder_records Where `type` = 'com_breezingforms' And reference_id = " . $db->Quote($this->properties->id) . " And record_id = " . $db->Quote($record_id));
+        $db->setQuery("Select metakey, metadesc, author, robots, rights, xreference From #__contentbuilder_ng_records Where `type` = 'com_breezingforms' And reference_id = " . $db->Quote($this->properties->id) . " And record_id = " . $db->Quote($record_id));
         $metadata = $db->loadObject();
 
         $data->metadesc = '';
@@ -270,7 +270,7 @@ class contentbuilder_com_breezingforms
             From
                 #__facileforms_subrecords As s,
                 #__facileforms_records As r
-                " . ($published_only || !$show_all_languages || $show_all_languages ? " Left Join #__contentbuilder_records As joined_records On ( joined_records.`type` = 'com_breezingforms' And joined_records.record_id = r.id And joined_records.reference_id = r.form ) " : "") . "
+                " . ($published_only || !$show_all_languages || $show_all_languages ? " Left Join #__contentbuilder_ng_records As joined_records On ( joined_records.`type` = 'com_breezingforms' And joined_records.record_id = r.id And joined_records.reference_id = r.form ) " : "") . "
                 
             Where
                 r.id = " . $db->Quote(intval($record_id)) . " And
@@ -674,12 +674,12 @@ class contentbuilder_com_breezingforms
                 (
                     #__facileforms_subrecords As s,
                     #__facileforms_records As r,
-                    #__contentbuilder_records As joined_records
+                    #__contentbuilder_ng_records As joined_records
                 )
                 
                 Left Join (
-                    #__contentbuilder_articles As joined_articles,
-                    #__contentbuilder_forms As forms,
+                    #__contentbuilder_ng_articles As joined_articles,
+                    #__contentbuilder_ng_forms As forms,
                     #__content As content
                 ) On (
                     joined_articles.`type` = 'com_breezingforms' And
@@ -697,11 +697,11 @@ class contentbuilder_com_breezingforms
                 ) On (
                     r.user_id = joined_users.id
                 )' : '') . "
-                Left Join #__contentbuilder_list_records As list On (
+                Left Join #__contentbuilder_ng_list_records As list On (
                     list.form_id = " . $cbFormId . " And
                     list.record_id = r.id
                 )
-                Left Join #__contentbuilder_list_states As list_states On (
+                Left Join #__contentbuilder_ng_list_states As list_states On (
                     list_states.id = list.state_id
                 )
                 Where

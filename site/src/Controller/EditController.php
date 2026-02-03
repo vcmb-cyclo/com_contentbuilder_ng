@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Site\Controller;
+namespace CB\Component\Contentbuilder_ng\Site\Controller;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -20,8 +20,8 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class EditController extends BaseController
 {
@@ -83,14 +83,14 @@ class EditController extends BaseController
         Factory::getApplication()->input->set('ContentbuilderHelper::cbinternalCheck', 1);
 
         if (Factory::getApplication()->input->getCmd('record_id', '')) {
-            ContentbuilderLegacyHelper::checkPermissions('edit', Text::_('COM_CONTENTBUILDER_PERMISSIONS_EDIT_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+            ContentbuilderLegacyHelper::checkPermissions('edit', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_EDIT_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
         } else {
             Factory::getApplication()->input->set('cbIsNew', 1);
-            ContentbuilderLegacyHelper::checkPermissions('new', Text::_('COM_CONTENTBUILDER_PERMISSIONS_NEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+            ContentbuilderLegacyHelper::checkPermissions('new', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_NEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
         }
 
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
-            ?: $this->getModel('Edit', 'Contentbuilder', ['ignore_request' => true]);
+            ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
 
         if (!$model) {
             throw new \RuntimeException('EditModel not found');
@@ -103,7 +103,7 @@ class EditController extends BaseController
         $type = 'message';
         if ($id && !$submission_failed) {
 
-            $msg = Text::_('COM_CONTENTBUILDER_SAVED');
+            $msg = Text::_('COM_CONTENTBUILDER_NG_SAVED');
             $return = Factory::getApplication()->input->get('return', '', 'string');
             if ($return) {
                 $return = base64_decode($return);
@@ -124,7 +124,7 @@ class EditController extends BaseController
         }
 
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder';
+        $option = 'com_contentbuilder_ng';
         $list = (array) $app->input->get('list', [], 'array');
         $limit = isset($list['limit']) ? $app->input->getInt('list[limit]', 0) : 0;
         if ($limit === 0) {
@@ -169,10 +169,10 @@ class EditController extends BaseController
 
     public function delete()
     {
-        ContentbuilderLegacyHelper::checkPermissions('delete', Text::_('COM_CONTENTBUILDER_PERMISSIONS_DELETE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        ContentbuilderLegacyHelper::checkPermissions('delete', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_DELETE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
 
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
-            ?: $this->getModel('Edit', 'Contentbuilder', ['ignore_request' => true]);
+            ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('EditModel not found');
         }
@@ -184,7 +184,7 @@ class EditController extends BaseController
             $ok = false;
             $this->app->enqueueMessage($e->getMessage(), 'warning');
         }
-        $msg = $ok ? Text::_('COM_CONTENTBUILDER_ENTRIES_DELETED') : Text::_('COM_CONTENTBUILDER_ERROR');
+        $msg = $ok ? Text::_('COM_CONTENTBUILDER_NG_ENTRIES_DELETED') : Text::_('COM_CONTENTBUILDER_NG_ERROR');
         $type = $ok ? 'message' : 'warning';
 
         // Clear record context to avoid redirects back to details/edit for a deleted record.
@@ -208,15 +208,15 @@ class EditController extends BaseController
 
     public function state()
     {
-        ContentbuilderLegacyHelper::checkPermissions('state', Text::_('COM_CONTENTBUILDER_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        ContentbuilderLegacyHelper::checkPermissions('state', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
 
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
-            ?: $this->getModel('Edit', 'Contentbuilder', ['ignore_request' => true]);
+            ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('EditModel not found');
         }
         $model->change_list_states();
-        $msg = Text::_('COM_CONTENTBUILDER_STATES_CHANGED');
+        $msg = Text::_('COM_CONTENTBUILDER_NG_STATES_CHANGED');
         $listQuery = $this->buildListQuery();
         $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         $this->setRedirect($link, $msg, 'message');
@@ -225,11 +225,11 @@ class EditController extends BaseController
     public function publish()
     {
 
-        ContentbuilderLegacyHelper::checkPermissions('publish', Text::_('COM_CONTENTBUILDER_PERMISSIONS_PUBLISHING_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        ContentbuilderLegacyHelper::checkPermissions('publish', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
 
         $model = $this->getModel('Edit', 'Site');
         if (!$model) {
-            $model = $this->getModel('Edit', 'Contentbuilder');
+            $model = $this->getModel('Edit', 'Contentbuilder_ng');
         }
         if (!$model) {
             throw new \RuntimeException('EditModel introuvable');
@@ -239,9 +239,9 @@ class EditController extends BaseController
         }
         $model->change_list_publish();
         if (Factory::getApplication()->input->getInt('list_publish', 0)) {
-            $msg = Text::_('COM_CONTENTBUILDER_PUBLISHED');
+            $msg = Text::_('COM_CONTENTBUILDER_NG_PUBLISHED');
         } else {
-            $msg = Text::_('COM_CONTENTBUILDER_PUNPUBLISHED');
+            $msg = Text::_('COM_CONTENTBUILDER_NG_PUNPUBLISHED');
         }
         $listQuery = $this->buildListQuery();
         $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
@@ -251,15 +251,15 @@ class EditController extends BaseController
     public function language()
     {
 
-        ContentbuilderLegacyHelper::checkPermissions('language', Text::_('COM_CONTENTBUILDER_PERMISSIONS_CHANGE_LANGUAGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        ContentbuilderLegacyHelper::checkPermissions('language', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_CHANGE_LANGUAGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
 
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
-            ?: $this->getModel('Edit', 'Contentbuilder', ['ignore_request' => true]);
+            ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('EditModel not found');
         }
         $model->change_list_language();
-        $msg = Text::_('COM_CONTENTBUILDER_LANGUAGE_CHANGED');
+        $msg = Text::_('COM_CONTENTBUILDER_NG_LANGUAGE_CHANGED');
         $listQuery = $this->buildListQuery();
         $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         $this->setRedirect($link, $msg, 'message');
@@ -268,7 +268,7 @@ class EditController extends BaseController
     private function buildListQuery(): string
     {
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder';
+        $option = 'com_contentbuilder_ng';
         $list = (array) $app->input->get('list', [], 'array');
 
         $limit = isset($list['limit']) ? $app->input->getInt('list[limit]', 0) : 0;
@@ -339,9 +339,9 @@ class EditController extends BaseController
         ContentbuilderLegacyHelper::setPermissions($formId, $recordId, $suffix);
         
         if (Factory::getApplication()->input->getCmd('record_id', '')) {
-            ContentbuilderLegacyHelper::checkPermissions('edit', Text::_('COM_CONTENTBUILDER_PERMISSIONS_EDIT_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+            ContentbuilderLegacyHelper::checkPermissions('edit', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_EDIT_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
         } else {
-            ContentbuilderLegacyHelper::checkPermissions('new', Text::_('COM_CONTENTBUILDER_PERMISSIONS_NEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+            ContentbuilderLegacyHelper::checkPermissions('new', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_NEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
         }
 
         Factory::getApplication()->input->set('tmpl', Factory::getApplication()->input->getWord('tmpl', null));

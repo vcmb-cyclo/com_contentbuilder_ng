@@ -14,7 +14,7 @@
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -25,7 +25,7 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\Factory;
 use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
-use CB\Component\Contentbuilder\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 class StorageController extends BaseFormController
 {
@@ -90,7 +90,7 @@ class StorageController extends BaseFormController
             $id = (int) ($jform['id'] ?? $this->input->getInt('id'));
 
             if ($id) {
-                /** @var \CB\Component\Contentbuilder\Administrator\Model\StorageModel $model */
+                /** @var \CB\Component\Contentbuilder_ng\Administrator\Model\StorageModel $model */
                 $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
                 $model->ensureDataTable($id);
             }
@@ -143,7 +143,7 @@ class StorageController extends BaseFormController
             ? Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . (int) $id, false)
             : Route::_('index.php?option=com_contentbuilder&task=storages.display', false);
 
-        $this->setRedirect($link, Text::_('COM_CONTENTBUILDER_SAVED'));
+        $this->setRedirect($link, Text::_('COM_CONTENTBUILDER_NG_SAVED'));
         return true;
     }
 
@@ -155,7 +155,7 @@ class StorageController extends BaseFormController
         $jform = $this->input->post->get('jform', [], 'array');
         $storageId = (int) ($jform['id'] ?? $this->input->getInt('id'));
 
-        /** @var \CB\Component\Contentbuilder\Administrator\Model\StorageModel $model */
+        /** @var \CB\Component\Contentbuilder_ng\Administrator\Model\StorageModel $model */
         $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
 
         if (!$model) {
@@ -165,8 +165,8 @@ class StorageController extends BaseFormController
         $ok = $model->addFieldFromRequest($storageId);
 
         $msg = $ok
-            ? Text::_('COM_CONTENTBUILDER_FIELD_ADDED')
-            : ($model->getError() ?: Text::_('COM_CONTENTBUILDER_FIELD_ADD_FAILED'));
+            ? Text::_('COM_CONTENTBUILDER_NG_FIELD_ADDED')
+            : ($model->getError() ?: Text::_('COM_CONTENTBUILDER_NG_FIELD_ADD_FAILED'));
 
         $type = $ok ? 'message' : 'warning';
 
@@ -239,9 +239,9 @@ class StorageController extends BaseFormController
             return false;
         }
 
-        /** @var \CB\Component\Contentbuilder\Administrator\Model\StorageModel $model */
+        /** @var \CB\Component\Contentbuilder_ng\Administrator\Model\StorageModel $model */
         $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true])
-            ?: $this->getModel('Storage', 'Contentbuilder', ['ignore_request' => true]);
+            ?: $this->getModel('Storage', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('StorageModel not found');
         }
@@ -252,7 +252,7 @@ class StorageController extends BaseFormController
             if (!$ok) {
                 $this->setRedirect(
                     Route::_('index.php?option=com_contentbuilder&task=storages.display', false),
-                    Text::_('COM_CONTENTBUILDER_ERROR'),
+                    Text::_('COM_CONTENTBUILDER_NG_ERROR'),
                     'error'
                 );
                 return false;
@@ -265,7 +265,7 @@ class StorageController extends BaseFormController
 
         $this->setRedirect(
             Route::_('index.php?option=com_contentbuilder&task=storages.display', false),
-            Text::_('COM_CONTENTBUILDER_DELETED'),
+            Text::_('COM_CONTENTBUILDER_NG_DELETED'),
             'message'
         );
 
@@ -275,7 +275,7 @@ class StorageController extends BaseFormController
     public function save2new()
     {
         $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true])
-            ?: $this->getModel('Storage', 'Contentbuilder', ['ignore_request' => true]);
+            ?: $this->getModel('Storage', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('StorageModel not found');
         }
@@ -295,12 +295,12 @@ class StorageController extends BaseFormController
 
     public function publish(): bool
     {
-        return $this->storagesPublish(1, 'COM_CONTENTBUILDER_PUBLISHED');
+        return $this->storagesPublish(1, 'COM_CONTENTBUILDER_NG_PUBLISHED');
     }
 
     public function unpublish(): bool
     {
-        return $this->storagesPublish(0, 'COM_CONTENTBUILDER_UNPUBLISHED');
+        return $this->storagesPublish(0, 'COM_CONTENTBUILDER_NG_UNPUBLISHED');
     }
 
     /* 
@@ -312,16 +312,16 @@ class StorageController extends BaseFormController
         ArrayHelper::toInteger($cid);
 
         if (count($cid) == 1) {
-            $model = $this->getModel('Storage', 'Contentbuilder');
+            $model = $this->getModel('Storage', 'Contentbuilder_ng');
             $model->setPublished();
         } else if (count($cid) > 1) {
-            $model = $this->getModel('Storage', 'Contentbuilder');
+            $model = $this->getModel('Storage', 'Contentbuilder_ng');
             $model->setPublished();
         }
 
         $this->setRedirect(
             Route::_('index.php?option=com_contentbuilder&task=storage.display&limitstart=' . $this->input->getInt('limitstart'), false),
-            Text::_('COM_CONTENTBUILDER_PUBLISHED'));
+            Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'));
     }
 
     public function unpublish()
@@ -332,16 +332,16 @@ class StorageController extends BaseFormController
         ArrayHelper::toInteger($cid);
 
         if (count($cid) == 1) {
-            $model = $this->getModel('Storage', 'Contentbuilder');
+            $model = $this->getModel('Storage', 'Contentbuilder_ng');
             $model->setUnpublished();
         } else if (count($cid) > 1) {
-            $model = $this->getModel('Storage', 'Contentbuilder');
+            $model = $this->getModel('Storage', 'Contentbuilder_ng');
             $model->setUnpublished();
         }
 
         $this->setRedirect(
             Route::_('index.php?option=com_contentbuilder&task=storage.display&limitstart=' . $this->input->getInt('limitstart'), false),
-            Text::_('COM_CONTENTBUILDER_UNPUBLISHED'));
+            Text::_('COM_CONTENTBUILDER_NG_UNPUBLISHED'));
     }
 */
 

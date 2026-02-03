@@ -15,7 +15,7 @@
  */
 
 
-namespace CB\Component\Contentbuilder\Site\View\Verify;
+namespace CB\Component\Contentbuilder_ng\Site\View\Verify;
 
 \defined('_JEXEC') or die;
 

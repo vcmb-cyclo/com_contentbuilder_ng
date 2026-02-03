@@ -9,14 +9,14 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Service;
+namespace CB\Component\Contentbuilder_ng\Administrator\Service;
 
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Database\ParameterType;
-use CB\Component\Contentbuilder\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 class DatatableService
 {
@@ -38,7 +38,7 @@ class DatatableService
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $query = $db->getQuery(true)
             ->select($db->quoteName(['id', 'name', 'bytable']))
-            ->from($db->quoteName('#__contentbuilder_storages'))
+            ->from($db->quoteName('#__contentbuilder_ng_storages'))
             ->where($db->quoteName('id') . ' = :id')
             ->bind(':id', $storageId, ParameterType::INTEGER);
 
@@ -122,7 +122,7 @@ class DatatableService
     }
 
     /**
-     * Ajoute les colonnes manquantes dans la table data à partir de #__contentbuilder_storage_fields
+     * Ajoute les colonnes manquantes dans la table data à partir de #__contentbuilder_ng_storage_fields
      * Idempotent : ajoute seulement ce qui manque.
      */
     public function syncColumnsFromFields(int $storageId): void
@@ -151,7 +151,7 @@ class DatatableService
         // ✅ Query Joomla standard
         $query = $db->getQuery(true)
             ->select($db->quoteName('name'))
-            ->from($db->quoteName('#__contentbuilder_storage_fields'))
+            ->from($db->quoteName('#__contentbuilder_ng_storage_fields'))
             ->where($db->quoteName('storage_id') . ' = :sid')
             ->bind(':sid', $storageId, ParameterType::INTEGER);
 

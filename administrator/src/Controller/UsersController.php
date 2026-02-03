@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder\Administrator\Controller;
+namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
 
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
@@ -17,7 +17,7 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
 class UsersController extends BaseController
 {
@@ -159,7 +159,7 @@ class UsersController extends BaseController
             $model->setPublished();
         }
 
-        $this->setRedirect( Route::_('index.php?option=com_contentbuilder&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.Factory::getApplication()->input->getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_PUBLISHED') );
+        $this->setRedirect( Route::_('index.php?option=com_contentbuilder&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.Factory::getApplication()->input->getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_NG_PUBLISHED') );
     }
     
     public function unpublish() {
@@ -176,22 +176,22 @@ class UsersController extends BaseController
             $model->setUnpublished();
         }
 
-        $this->setRedirect( Route::_('index.php?option=com_contentbuilder&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.Factory::getApplication()->input->getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_UNPUBLISHED') );
+        $this->setRedirect( Route::_('index.php?option=com_contentbuilder&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.Factory::getApplication()->input->getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_NG_UNPUBLISHED') );
     }
     
     public function save($keep_task = false)
     {
         $model = $this->getModel('User', 'Administrator', ['ignore_request' => true])
-            ?: $this->getModel('User', 'Contentbuilder', ['ignore_request' => true]);
+            ?: $this->getModel('User', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('UserModel not found');
         }
         $id = $model->store();
         
         if ($id) {
-            $msg = Text::_( 'COM_CONTENTBUILDER_SAVED' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_NG_SAVED' );
         } else {
-            $msg = Text::_( 'COM_CONTENTBUILDER_ERROR' );
+            $msg = Text::_( 'COM_CONTENTBUILDER_NG_ERROR' );
         }
 
         $limit = 0;
@@ -210,7 +210,7 @@ class UsersController extends BaseController
 
     public function cancel()
     {
-        $msg = Text::_( 'COM_CONTENTBUILDER_CANCELLED' );
+        $msg = Text::_( 'COM_CONTENTBUILDER_NG_CANCELLED' );
         $this->setRedirect( Route::_('index.php?option=com_contentbuilder&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart=0', false), $msg );
     }
 

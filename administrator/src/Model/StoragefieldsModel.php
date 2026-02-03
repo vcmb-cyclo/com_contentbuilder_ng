@@ -8,7 +8,7 @@
  * @license     GNU/GPL v2 or later
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Model;
+namespace CB\Component\Contentbuilder_ng\Administrator\Model;
 
 \defined('_JEXEC') or die;
 
@@ -18,7 +18,7 @@ use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\Database\DatabaseQuery;
 use Joomla\Utilities\ArrayHelper;
-use CB\Component\Contentbuilder\Administrator\Table\StorageFieldsTable;
+use CB\Component\Contentbuilder_ng\Administrator\Table\StorageFieldsTable;
 
 class StoragefieldsModel extends ListModel
 {
@@ -69,7 +69,7 @@ class StoragefieldsModel extends ListModel
         $this->setState('storage.id', $storageId);
 
         $published = $app->getUserStateFromRequest(
-            'com_contentbuilder.storagefields.filter.published',
+            'com_contentbuilder_ng.storagefields.filter.published',
             'filter_published',
             '',
             'string'
@@ -97,7 +97,7 @@ class StoragefieldsModel extends ListModel
             'ordering',
             'published'
         ]))
-            ->from($db->quoteName('#__contentbuilder_storage_fields'))
+            ->from($db->quoteName('#__contentbuilder_ng_storage_fields'))
             ->where($db->quoteName('storage_id') . ' = ' . (int) $this->getState('storage.id', 0));
 
         $published = $this->getState('filter.published');
@@ -131,7 +131,7 @@ class StoragefieldsModel extends ListModel
         return $query;
     }
 
-    public function getTable($name = 'StorageFields', $prefix = 'CB\\Component\\Contentbuilder\\Administrator\\Table\\', $options = [])
+    public function getTable($name = 'StorageFields', $prefix = 'CB\\Component\\Contentbuilder_ng\\Administrator\\Table\\', $options = [])
     {
         if ($name === 'StorageFields') {
             return new StorageFieldsTable($this->getDatabase());
@@ -219,7 +219,7 @@ class StoragefieldsModel extends ListModel
 
         $db = $this->getDatabase();
         $query = $db->getQuery(true)
-            ->update($db->quoteName('#__contentbuilder_storage_fields'))
+            ->update($db->quoteName('#__contentbuilder_ng_storage_fields'))
             ->set($db->quoteName('published') . ' = ' . (int) $value)
             ->where($db->quoteName('id') . ' IN (' . implode(',', $pks) . ')');
 

@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder\Administrator\Table;
+namespace CB\Component\Contentbuilder_ng\Administrator\Table;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -44,7 +44,7 @@ class StorageFieldsTable extends Table
      */
     function __construct(DatabaseDriver $db)
     {
-        parent::__construct('#__contentbuilder_storage_fields', 'id', $db);
+        parent::__construct('#__contentbuilder_ng_storage_fields', 'id', $db);
 
         // Joomla attend un champ "state" pour publish/unpublish au lieu de "published"
         $this->setColumnAlias('state', 'published');

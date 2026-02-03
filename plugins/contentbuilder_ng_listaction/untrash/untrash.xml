@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="contentbuilder_ng_listaction" version="6.0" method="upgrade">
+	<name>ContentBuilder NG - List Action - Untrash</name>
+	<creationDate>December 2025</creationDate>
+	<author>XDA+GIL</author>
+    <license>GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html</license>
+	<copyright>This Joomla! component is released under the GNU/GPL license</copyright>
+	<authorEmail>noreply@vcmb.fr</authorEmail>
+	<authorUrl>breezingforms.vcmb.fr</authorUrl>
+	<version>6.0.0-RC3</version>
+	<administration></administration>
+	<description>
+	<![CDATA[
+        Un-Trashes articles bound to selected records
+        ]]>
+    </description>
+    <files>
+        <filename plugin="untrash">untrash.php</filename>
+    </files>
+    <languages>
+        <language tag="en-GB">en-GB.plg_contentbuilder_ng_listaction_untrash.ini</language>
+        <language tag="de-DE">de-DE.plg_contentbuilder_ng_listaction_untrash.ini</language>
+    </languages>
+
+    <config>
+    </config>
+</extension>

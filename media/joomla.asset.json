@@ -2,22 +2,22 @@
     "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
     "name": "com_contentbuilder",
     "version": "6.1.0-RC1",
-    "description": "Assets pour le composant ContentBuilder",
+    "description": "Assets pour le composant ContentBuilder_ng",
     "assets": [
         {
-            "name": "com_contentbuilder.admin-toolbar",
+            "name": "com_contentbuilder_ng.admin-toolbar",
             "type": "style",
-            "uri": "com_contentbuilder/admin-toolbar.css"
+            "uri": "com_contentbuilder_ng/admin-toolbar.css"
         },
         {
-            "name": "com_contentbuilder.system",
+            "name": "com_contentbuilder_ng.system",
             "type": "style",
-            "uri": "media/com_contentbuilder/css/system.css"
+            "uri": "media/com_contentbuilder_ng/css/system.css"
         },
         {
-            "name": "com_contentbuilder.contentbuilder",
+            "name": "com_contentbuilder_ng.contentbuilder",
             "type": "script",
-            "uri": "com_contentbuilder/contentbuilder.js",
+            "uri": "com_contentbuilder_ng/contentbuilder_ng.js",
             "dependencies": [
                 "core"
             ],
@@ -26,9 +26,9 @@
             }
         },
         {
-            "name": "com_contentbuilder.jscolor",
+            "name": "com_contentbuilder_ng.jscolor",
             "type": "script",
-            "uri": "com_contentbuilder/jscolor/jscolor.js",
+            "uri": "com_contentbuilder_ng/jscolor/jscolor.js",
             "dependencies": [
                 "core"
             ],

@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder\Site\Controller;
+namespace CB\Component\Contentbuilder_ng\Site\Controller;
 
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
@@ -15,8 +15,8 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\BaseController;
-use CB\Component\Contentbuilder\Administrator\CBRequest;
-use CB\Component\Contentbuilder\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class ListController extends BaseController
 {
@@ -24,12 +24,12 @@ class ListController extends BaseController
     {
         ContentbuilderLegacyHelper::checkPermissions(
             'delete',
-            Text::_('COM_CONTENTBUILDER_PERMISSIONS_DELETE_NOT_ALLOWED'),
+            Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_DELETE_NOT_ALLOWED'),
             '_fe'
         );
 
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
-            ?: $this->getModel('Edit', 'Contentbuilder', ['ignore_request' => true]);
+            ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('EditModel not found');
         }
@@ -50,7 +50,7 @@ class ListController extends BaseController
             $this->app->enqueueMessage($e->getMessage(), 'warning');
         }
 
-        $msg = $ok ? Text::_('COM_CONTENTBUILDER_ENTRIES_DELETED') : Text::_('COM_CONTENTBUILDER_ERROR');
+        $msg = $ok ? Text::_('COM_CONTENTBUILDER_NG_ENTRIES_DELETED') : Text::_('COM_CONTENTBUILDER_NG_ERROR');
         $type = $ok ? 'message' : 'warning';
 
         // Clear record context to avoid redirects back to a deleted record.
@@ -58,7 +58,7 @@ class ListController extends BaseController
         Factory::getApplication()->input->set('record_id', 0);
 
         $list = (array) $this->input->get('list', [], 'array');
-        $option = 'com_contentbuilder';
+        $option = 'com_contentbuilder_ng';
         $limit = isset($list['limit']) ? $this->input->getInt('list[limit]', 0) : 0;
         if ($limit === 0) {
             $limit = (int) $this->app->getUserState($option . '.list.limit', 0);
@@ -96,12 +96,12 @@ class ListController extends BaseController
     {
         ContentbuilderLegacyHelper::checkPermissions(
             'state',
-            Text::_('COM_CONTENTBUILDER_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'),
+            Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'),
             '_fe'
         );
 
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
-            ?: $this->getModel('Edit', 'Contentbuilder', ['ignore_request' => true]);
+            ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('EditModel not found');
         }
@@ -116,7 +116,7 @@ class ListController extends BaseController
         $model->change_list_states();
 
         $list = (array) $this->input->get('list', [], 'array');
-        $option = 'com_contentbuilder';
+        $option = 'com_contentbuilder_ng';
         $limit = isset($list['limit']) ? $this->input->getInt('list[limit]', 0) : 0;
         if ($limit === 0) {
             $limit = (int) $this->app->getUserState($option . '.list.limit', 0);
@@ -146,19 +146,19 @@ class ListController extends BaseController
             . '&Itemid=' . $this->input->getInt('Itemid', 0),
             false
         );
-        $this->setRedirect($link, Text::_('COM_CONTENTBUILDER_STATES_CHANGED'), 'message');
+        $this->setRedirect($link, Text::_('COM_CONTENTBUILDER_NG_STATES_CHANGED'), 'message');
     }
 
     public function publish(): void
     {
         ContentbuilderLegacyHelper::checkPermissions(
             'publish',
-            Text::_('COM_CONTENTBUILDER_PERMISSIONS_PUBLISHING_NOT_ALLOWED'),
+            Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'),
             '_fe'
         );
 
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
-            ?: $this->getModel('Edit', 'Contentbuilder', ['ignore_request' => true]);
+            ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('EditModel not found');
         }
@@ -173,11 +173,11 @@ class ListController extends BaseController
         $model->change_list_publish();
 
         $msg = $this->input->getInt('list_publish', 0)
-            ? Text::_('COM_CONTENTBUILDER_PUBLISHED')
-            : Text::_('COM_CONTENTBUILDER_PUNPUBLISHED');
+            ? Text::_('COM_CONTENTBUILDER_NG_PUBLISHED')
+            : Text::_('COM_CONTENTBUILDER_NG_PUNPUBLISHED');
 
         $list = (array) $this->input->get('list', [], 'array');
-        $option = 'com_contentbuilder';
+        $option = 'com_contentbuilder_ng';
         $limit = isset($list['limit']) ? $this->input->getInt('list[limit]', 0) : 0;
         if ($limit === 0) {
             $limit = (int) $this->app->getUserState($option . '.list.limit', 0);
@@ -246,7 +246,7 @@ class ListController extends BaseController
         ContentbuilderLegacyHelper::setPermissions($formId, $recordId, $suffix);
         ContentbuilderLegacyHelper::checkPermissions(
             'listaccess',
-            Text::_('COM_CONTENTBUILDER_PERMISSIONS_LISTACCESS_NOT_ALLOWED'),
+            Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_LISTACCESS_NOT_ALLOWED'),
             $suffix
         );
 
