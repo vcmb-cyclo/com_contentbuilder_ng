@@ -33,7 +33,7 @@
  </uninstall>
  
  <updateservers>
-    <server type="extension" name="ContentBuilder_ng" priority="1">https://breezingforms.vcmb.fr/download/contentbuilder_ng_update.xml</server>
+    <server type="extension" name="ContentBuilder_ng" priority="1">https://breezingforms.vcmb.fr/download/com_contentbuilder_ng_update.xml</server>
  </updateservers>
 
  <files folder="site">
