@@ -1,5 +1,6 @@
 <?php
 /**
+ * @version     6.0
  * @package     ContentBuilder
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr

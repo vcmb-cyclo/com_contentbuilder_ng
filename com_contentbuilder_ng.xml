@@ -93,7 +93,7 @@
 
 </administration>
 
-<media folder="media" destination="com_contentbuilder">
+<media folder="media" destination="com_contentbuilder_ng">
     <folder>css</folder>
     <folder>js</folder>
     <folder>images</folder>

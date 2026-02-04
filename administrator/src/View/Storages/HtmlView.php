@@ -104,6 +104,7 @@ class HtmlView extends BaseHtmlView
             }'
         );
 
-        $wa->useStyle('com_contentbuilder_ng.admin-toolbar'); // à déclarer dans joomla.asset.json
+        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
+        $wa->useStyle('com_contentbuilder_ng.admin-toolbar'); // A déclarer dans joomla.asset.json
     }
 }

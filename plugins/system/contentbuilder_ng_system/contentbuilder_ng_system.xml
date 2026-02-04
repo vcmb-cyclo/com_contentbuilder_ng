@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="plugin" group="system" version="6.0" method="upgrade">
-	<name>ContentBuilder System</name>
+	<name>ContentBuilder NG System</name>
 	<creationDate>December 2025</creationDate>
 	<author>Xavier DANO</author>
     <license>GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html</license>

@@ -1,8 +1,9 @@
 <?php
 
 /**
+ * @version     6.0
  * @package     ContentBuilder
- * @author      Markus Bopp / XDA+GIL
+ * @author      Xavier DANO / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @license     GNU/GPL
  */
