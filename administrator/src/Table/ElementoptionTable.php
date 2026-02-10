@@ -1,6 +1,6 @@
 <?php
 /**
- * ContentBuilder Elementoption table.
+ * ContentBuilder NG Elementoption table.
  *
  * Table description.
  *

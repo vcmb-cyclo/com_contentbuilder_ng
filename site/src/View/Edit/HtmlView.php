@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ContentBuilder Edit view.
+ * ContentBuilder NG Edit view.
  *
  * Edit view of the site interface
  *
@@ -20,6 +20,7 @@ namespace CB\Component\Contentbuilder_ng\Site\View\Edit;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 
@@ -118,7 +119,7 @@ class HtmlView extends BaseHtmlView
                 'afterDisplayContent' => '',
             ];
             Factory::getApplication()->enqueueMessage(
-                'ContentBuilder: Edit model not found for this request.',
+                Text::_('COM_CONTENTBUILDER_NG') .' : Edit model not found for this request.',
                 'warning'
             );
         }

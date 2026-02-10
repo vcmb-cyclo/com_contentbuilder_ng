@@ -219,7 +219,7 @@ class DetailsModel extends ListModel
                                     'direction' => $direction,
                                 ]]);
 
-                                Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder&task=edit.display&latest=1&backtolist=' . Factory::getApplication()->input->getInt('backtolist', 0) . '&id=' . $this->_id . '&record_id=' . ($listQuery !== '' ? '' : '') . ($listQuery !== '' ? '&' . $listQuery : ''), false));
+                                Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder_ng&task=edit.display&latest=1&backtolist=' . Factory::getApplication()->input->getInt('backtolist', 0) . '&id=' . $this->_id . '&record_id=' . ($listQuery !== '' ? '' : '') . ($listQuery !== '' ? '&' . $listQuery : ''), false));
                             } else {
                                 Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_ADD_ENTRY_FIRST'));
                                 Factory::getApplication()->redirect('index.php');

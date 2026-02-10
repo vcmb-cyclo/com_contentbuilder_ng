@@ -52,7 +52,7 @@ class ElementoptionsController extends AdminController
         }
 
         // Check the table in so it can be edited.... we are done with it anyway
-        $link = Route::_('index.php?option=com_contentbuilder&view=elementoptions&tabStartOffset=' . Factory::getApplication()->input->getInt('tabStartOffset', 0) . '&tmpl=component&element_id=' . Factory::getApplication()->input->getInt('element_id', 0) . '&id=' . Factory::getApplication()->input->getInt('id', 0) . $type_change_url, false);
+        $link = Route::_('index.php?option=com_contentbuilder_ng&view=elementoptions&tabStartOffset=' . Factory::getApplication()->input->getInt('tabStartOffset', 0) . '&tmpl=component&element_id=' . Factory::getApplication()->input->getInt('element_id', 0) . '&id=' . Factory::getApplication()->input->getInt('id', 0) . $type_change_url, false);
         $this->setRedirect($link, $msg);
     }
 }

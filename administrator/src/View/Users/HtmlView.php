@@ -40,7 +40,7 @@ class HtmlView extends BaseHtmlView
 
         // Toolbar
         ToolbarHelper::title(
-            'ContentBuilder :: ' . Text::_('COM_CONTENTBUILDER_NG_USERS'),
+            Text::_('COM_CONTENTBUILDER_NG') .' :: ' .Text::_('COM_CONTENTBUILDER_NG_USERS'),
             'users'
         );
 

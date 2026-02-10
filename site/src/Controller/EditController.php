@@ -153,11 +153,11 @@ class EditController extends BaseController
         ]]);
 
         if (Factory::getApplication()->input->getString('cb_controller', '') == 'edit') {
-            $link = Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=edit.display&return=' . Factory::getApplication()->input->get('return', '', 'string') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
+            $link = Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=edit.display&return=' . Factory::getApplication()->input->get('return', '', 'string') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         } else if ($apply) {
-            $link = Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=edit.display&return=' . Factory::getApplication()->input->get('return', '', 'string') . '&backtolist=' . Factory::getApplication()->input->getInt('backtolist', 0) . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . $id . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : ''), false);
+            $link = Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=edit.display&return=' . Factory::getApplication()->input->get('return', '', 'string') . '&backtolist=' . Factory::getApplication()->input->getInt('backtolist', 0) . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . $id . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : ''), false);
         } else {
-            $link = Route::_('index.php?option=com_contentbuilder&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
+            $link = Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         }
         $this->setRedirect($link, $msg, $type);
     }
@@ -193,7 +193,7 @@ class EditController extends BaseController
 
         $listQuery = $this->buildListQuery();
         $link = Route::_(
-            'index.php?option=com_contentbuilder&task=list.display&backtolist=1&id='
+            'index.php?option=com_contentbuilder_ng&task=list.display&backtolist=1&id='
             . Factory::getApplication()->input->getInt('id', 0)
             . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '')
             . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '')
@@ -218,7 +218,7 @@ class EditController extends BaseController
         $model->change_list_states();
         $msg = Text::_('COM_CONTENTBUILDER_NG_STATES_CHANGED');
         $listQuery = $this->buildListQuery();
-        $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
+        $link = Route::_('index.php?option=com_contentbuilder_ng&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         $this->setRedirect($link, $msg, 'message');
     }
 
@@ -244,7 +244,7 @@ class EditController extends BaseController
             $msg = Text::_('COM_CONTENTBUILDER_NG_PUNPUBLISHED');
         }
         $listQuery = $this->buildListQuery();
-        $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
+        $link = Route::_('index.php?option=com_contentbuilder_ng&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         $this->setRedirect($link, $msg, 'message');
     }
 
@@ -261,7 +261,7 @@ class EditController extends BaseController
         $model->change_list_language();
         $msg = Text::_('COM_CONTENTBUILDER_NG_LANGUAGE_CHANGED');
         $listQuery = $this->buildListQuery();
-        $link = Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
+        $link = Route::_('index.php?option=com_contentbuilder_ng&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         $this->setRedirect($link, $msg, 'message');
     }
 

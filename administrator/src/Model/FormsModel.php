@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ContentBuilder Forms Model (List).
+ * ContentBuilder NG Forms Model (List).
  *
  * Handles CRUD and publish state for form in the admin interface.
  *

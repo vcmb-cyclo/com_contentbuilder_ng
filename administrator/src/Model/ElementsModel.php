@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ContentBuilder Elements Model.
+ * ContentBuilder NG Elements Model.
  *
  * Handles CRUD and publish state for element in the admin interface.
  *

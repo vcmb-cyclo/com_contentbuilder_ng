@@ -1,7 +1,7 @@
 <?php
 /**
  * @version     6.0
- * @package     ContentBuilder No Verify
+ * @package     ContentBuilder NG No Verify
  * @copyright   (C) 2026 by XDA+GIL
  * @license     Released under the terms of the GNU General Public License
  **/
@@ -75,8 +75,15 @@ class plgContentContentbuilder_ng_verify extends CMSPlugin implements Subscriber
         $this->onContentPrepare('', $article, $params, $limitstart);
     }
 
-    function onContentPrepare($context, &$article, &$params, $limitstart = 0)
+    function onContentPrepare($context = '', $article = null, $params = null, $limitstart = 0)
     {
+        if ($context instanceof \Joomla\Event\Event) {
+            $event = $context;
+            $context = (string) ($event->getArgument('context') ?? '');
+            $article = $event->getArgument('subject') ?? $event->getArgument('article') ?? $event->getArgument('item');
+            $params = $event->getArgument('params') ?? $params;
+            $limitstart = (int) ($event->getArgument('page') ?? $event->getArgument('limitstart') ?? $limitstart);
+        }
 
         if (!$article || !isset ($article->text) || !file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/src/contentbuilder_ng.php')) {
             return true;
@@ -167,7 +174,7 @@ class plgContentContentbuilder_ng_verify extends CMSPlugin implements Subscriber
                     $this->app->getSession()->clear($plugin . $verification_name, 'com_contentbuilder_ng.verify.' . $plugin . $verification_name);
                     $this->app->getSession()->set($plugin . $verification_name, $plugin_settings, 'com_contentbuilder_ng.verify.' . $plugin . $verification_name);
 
-                    $link = Uri::root(true) . '/index.php?option=com_contentbuilder&view=verify&plugin=' . urlencode($plugin) . '&verification_name=' . urlencode($verification_name) . '&format=raw';
+                    $link = Uri::root(true) . '/index.php?option=com_contentbuilder_ng&view=verify&plugin=' . urlencode($plugin) . '&verification_name=' . urlencode($verification_name) . '&format=raw';
                     PluginHelper::importPlugin('contentbuilder_ng_verify', $plugin);
                     $eventResult = $this->app->getDispatcher()->dispatch('onViewport', new \Joomla\Event\Event('onVerify', array($link, $plugin_settings)));
                     $results = $eventResult->getArgument('result') ?: [];

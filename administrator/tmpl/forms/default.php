@@ -64,7 +64,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
             : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>')
         : '';
     $url = Route::_(
-        'index.php?option=com_contentbuilder&view=forms&list[start]=0&list[ordering]='
+        'index.php?option=com_contentbuilder_ng&view=forms&list[start]=0&list[ordering]='
         . $field . '&list[direction]=' . $nextDir . '&list[limit]=' . $limitValue
     );
 
@@ -141,7 +141,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                 for ($i = 0; $i < $n; $i++) {
                     $row = $this->items[$i];
                     $checked = HTMLHelper::_('grid.id', $i, $row->id);
-                    $link = Route::_('index.php?option=com_contentbuilder&task=form.edit&id=' . $row->id);
+                    $link = Route::_('index.php?option=com_contentbuilder_ng&task=form.edit&id=' . $row->id);
                     $published = ContentbuilderHelper::listPublish('forms', $row, $i);
                 ?>
                     <tr class="<?php echo "row$k"; ?>">
@@ -234,7 +234,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
         </table>
     </div>
 
-    <input type="hidden" name="option" value="com_contentbuilder" />
+    <input type="hidden" name="option" value="com_contentbuilder_ng" />
     <input type="hidden" name="task" value="" />
     <input type="hidden" name="view" value="forms" />
     <input type="hidden" name="list[start]" value="<?php echo (int) $listStart; ?>" />

@@ -33,7 +33,7 @@ if(!defined('_JEXEC')){
  - Add new captcha type that displays 2 dictionary words on one image
  - Update examples
 
- 3.2RC3
+ 3.2RC4
  - Fix canSendHeaders() check which was breaking if a PHP startup error was issued
 
  3.2RC2

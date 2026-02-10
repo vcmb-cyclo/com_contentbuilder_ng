@@ -901,7 +901,7 @@ $is_plugin = false;
     </div>
 
 
-    <input type="hidden" name="option" value="com_contentbuilder" />
+    <input type="hidden" name="option" value="com_contentbuilder_ng" />
     <input type="hidden" name="task" id="task" value="" />
     <input type="hidden" name="type_change" id="type_change" value="0" />
     <input type="hidden" name="id" value="<?php echo $this->element->form_id; ?>" />

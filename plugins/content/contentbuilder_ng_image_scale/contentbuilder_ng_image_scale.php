@@ -1,7 +1,7 @@
 <?php
 /**
  * @version     6.0
- * @package     ContentBuilder Image Scale
+ * @package     ContentBuilder NG Image Scale
  * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     Released under the terms of the GNU General Public License
  **/
@@ -82,8 +82,15 @@ class plgContentContentbuilder_ng_image_scale extends CMSPlugin implements Subsc
 		$this->onContentPrepare('', $article, $params, $limitstart, $is_list, $form, $item);
 	}
 
-	function onContentPrepare($context, &$article, &$params, $limitstart = 0, $is_list = false, $form = null, $item = null)
+	function onContentPrepare($context = '', $article = null, $params = null, $limitstart = 0, $is_list = false, $form = null, $item = null)
 	{
+		if ($context instanceof \Joomla\Event\Event) {
+			$event = $context;
+			$context = (string) ($event->getArgument('context') ?? '');
+			$article = $event->getArgument('subject') ?? $event->getArgument('article') ?? $event->getArgument('item');
+			$params = $event->getArgument('params') ?? $params;
+			$limitstart = (int) ($event->getArgument('page') ?? $event->getArgument('limitstart') ?? $limitstart);
+		}
 
 
 
@@ -736,7 +743,7 @@ class plgContentContentbuilder_ng_image_scale extends CMSPlugin implements Subsc
 																$url = Uri::getInstance()->toString();
 																//fixing downloads on other pages than page 1
 																if (Factory::getApplication()->input->get('controller', '', 'string') == 'list') {
-																	$url = Uri::getInstance()->base() . 'index.php?option=com_contentbuilder&amp;task=list.display&amp;id=' . intval($form_id) . '&amp;limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0);
+																	$url = Uri::getInstance()->base() . 'index.php?option=com_contentbuilder_ng&amp;task=list.display&amp;id=' . intval($form_id) . '&amp;limitstart=' . Factory::getApplication()->input->getInt('limitstart', 0);
 																}
 
 																if (trim($open) == 'true') {

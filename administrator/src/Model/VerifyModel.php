@@ -138,7 +138,7 @@ class VerifyModel extends BaseDatabaseModel
             }
 
             if (intval($user_id) == 0) {
-                $this->app->redirect('index.php?option=com_contentbuilder&lang=' . Factory::getApplication()->input->getCmd('lang', '') . '&return=' . base64_decode(Uri::getInstance()->toString()) . '&task=edit.display&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
+                $this->app->redirect('index.php?option=com_contentbuilder_ng&lang=' . Factory::getApplication()->input->getCmd('lang', '') . '&return=' . base64_decode(Uri::getInstance()->toString()) . '&task=edit.display&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
             }
 
             $rec = $form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, $user_id, 0, -1, -1, -1, -1, array(), true, null);
@@ -149,7 +149,7 @@ class VerifyModel extends BaseDatabaseModel
             }
 
             if (!$form->getListRecordsTotal($ids)) {
-                $this->app->redirect('index.php?option=com_contentbuilder&lang=' . Factory::getApplication()->input->getCmd('lang', '') . '&return=' . base64_decode(Uri::getInstance()->toString()) . '&task=edit.display&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
+                $this->app->redirect('index.php?option=com_contentbuilder_ng&lang=' . Factory::getApplication()->input->getCmd('lang', '') . '&return=' . base64_decode(Uri::getInstance()->toString()) . '&task=edit.display&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
             }
         }
 
@@ -267,9 +267,9 @@ class VerifyModel extends BaseDatabaseModel
 
                             if ((!$out['client'] && (!isset($out['return-site']) || !$out['return-site'])) || ($out['client'] && (!isset($out['return-admin']) || !$out['return-admin']))) {
                                 if (intval($out['client']) && !$this->app->isClient('administrator')) {
-                                    $redirect_view = Uri::getInstance()->base() . 'administrator/index.php?option=com_contentbuilder&task=list.display&lang=' . Factory::getApplication()->input->getCmd('lang', '') . '&id=' . $out['verify_view'];
+                                    $redirect_view = Uri::getInstance()->base() . 'administrator/index.php?option=com_contentbuilder_ng&task=list.display&lang=' . Factory::getApplication()->input->getCmd('lang', '') . '&id=' . $out['verify_view'];
                                 } else {
-                                    $redirect_view = 'index.php?option=com_contentbuilder&task=list.display&lang=' . Factory::getApplication()->input->getCmd('lang', '') . '&id=' . $out['verify_view'];
+                                    $redirect_view = 'index.php?option=com_contentbuilder_ng&task=list.display&lang=' . Factory::getApplication()->input->getCmd('lang', '') . '&id=' . $out['verify_view'];
                                 }
                             }
 
@@ -502,7 +502,7 @@ class VerifyModel extends BaseDatabaseModel
             $data['activation'] = ApplicationHelper::getHash(UserHelper::genRandomPassword());
             $user->set('activation', $data['activation']);
             $data['siteurl'] = Uri::root();
-            $data['activate'] = Uri::root() . 'index.php?option=com_contentbuilder&view=verify&token=' . $data['activation'] . '&verify_by_admin=1&format=raw';
+            $data['activate'] = Uri::root() . 'index.php?option=com_contentbuilder_ng&view=verify&token=' . $data['activation'] . '&verify_by_admin=1&format=raw';
 
             // Remove administrator/ from activate url in case this method is called from admin
             if ($this->app->isClient('administrator')) {

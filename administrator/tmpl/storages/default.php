@@ -77,7 +77,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 };
 </script>
 
-<form action="<?php echo Route::_('index.php?option=com_contentbuilder&task=storages.display'); ?>"
+<form action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=storages.display'); ?>"
     method="post"
     name="adminForm"
     id="adminForm">
@@ -127,7 +127,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                         $title     = htmlspecialchars((string) ($row->title ?? ''), ENT_QUOTES, 'UTF-8');
 
                         // ⚠️ Vérifie ta convention : task=storage.edit (singulier) ou storages.edit (pluriel)
-                        $link = Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . $id);
+                        $link = Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $id);
 
                         $checked   = HTMLHelper::_('grid.id', $i, $id);
                         $published = HTMLHelper::_('jgrid.published', $row->published, $i, 'storages.', true);
@@ -183,7 +183,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
         </table>
     </div>
 
-    <input type="hidden" name="option" value="com_contentbuilder">
+    <input type="hidden" name="option" value="com_contentbuilder_ng">
     <input type="hidden" name="task" value="storages.display">
     <input type="hidden" name="list[start]" value="<?php echo (int) $listStart; ?>">
     <input type="hidden" name="boxchecked" value="0">

@@ -143,7 +143,7 @@ if ($this->page_heading) {
             $row = $this->items[$i];
             $link_ = htmlentities($row->name, ENT_QUOTES, 'UTF-8');
             if (($this->show_permissions && $this->perms[$row->id]['view']) || !$this->show_permissions) {
-                $link = Route::_('index.php?option=com_contentbuilder&title=' . ContentbuilderLegacyHelper::stringURLUnicodeSlug($row->name) . '&task=list.display&id=' . $row->id);
+                $link = Route::_('index.php?option=com_contentbuilder_ng&title=' . ContentbuilderLegacyHelper::stringURLUnicodeSlug($row->name) . '&task=list.display&id=' . $row->id);
                 $link_ = '<a href="' . $link . '">' . htmlentities($row->name, ENT_QUOTES, 'UTF-8') . '</a>';
             }
             ?>
@@ -256,7 +256,7 @@ if ($this->page_heading) {
     </table>
 
 
-    <input type="hidden" name="option" value="com_contentbuilder" />
+    <input type="hidden" name="option" value="com_contentbuilder_ng" />
     <input type="hidden" name="task" value="" />
     <input type="hidden" name="Itemid" value="<?php echo Factory::getApplication()->input->getInt('Itemid', 0); ?>" />
     <input type="hidden" name="limitstart" value="" />

@@ -79,7 +79,7 @@ class ListController extends BaseController
             $direction = (string) $this->app->getUserState($option . '.formsd_filter_order_Dir', '');
         }
         $link = Route::_(
-            'index.php?option=com_contentbuilder&task=list.display&id='
+            'index.php?option=com_contentbuilder_ng&task=list.display&id='
             . $this->input->getInt('id', 0)
             . '&list[limit]=' . $limit
             . '&list[start]=' . $start
@@ -137,7 +137,7 @@ class ListController extends BaseController
             $direction = (string) $this->app->getUserState($option . '.formsd_filter_order_Dir', '');
         }
         $link = Route::_(
-            'index.php?option=com_contentbuilder&task=list.display&id='
+            'index.php?option=com_contentbuilder_ng&task=list.display&id='
             . $this->input->getInt('id', 0)
             . '&list[limit]=' . $limit
             . '&list[start]=' . $start
@@ -198,7 +198,7 @@ class ListController extends BaseController
             $direction = (string) $this->app->getUserState($option . '.formsd_filter_order_Dir', '');
         }
         $link = Route::_(
-            'index.php?option=com_contentbuilder&task=list.display&id='
+            'index.php?option=com_contentbuilder_ng&task=list.display&id='
             . $this->input->getInt('id', 0)
             . '&list[limit]=' . $limit
             . '&list[start]=' . $start

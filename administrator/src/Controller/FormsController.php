@@ -1,6 +1,6 @@
 <?php
 /**
- * ContentBuilder Forms controller.
+ * ContentBuilder NG Forms controller.
  *
  * Handles actions (copy, delete, publish, ...) for forms list in the admin interface.
  *
@@ -120,7 +120,7 @@ final class FormsController extends AdminController
             $this->setMessage($e->getMessage(), 'warning');
         }
 
-        $this->setRedirect('index.php?option=com_contentbuilder&task=forms.display');
+        $this->setRedirect('index.php?option=com_contentbuilder_ng&task=forms.display');
     }
 
     /**
@@ -159,7 +159,7 @@ final class FormsController extends AdminController
         }
 
         $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&task=forms.display&limitstart=' . $this->input->getInt('limitstart'),
+            Route::_('index.php?option=com_contentbuilder_ng&task=forms.display&limitstart=' . $this->input->getInt('limitstart'),
             false));
     }
 

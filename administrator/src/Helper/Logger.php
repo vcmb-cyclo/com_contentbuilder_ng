@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ContentBuilder Logs.
+ * ContentBuilder NG Logs.
  *
  * Log file manager.
  *

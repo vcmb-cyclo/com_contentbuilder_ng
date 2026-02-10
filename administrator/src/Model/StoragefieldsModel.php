@@ -1,6 +1,6 @@
 <?php
 /**
- * ContentBuilder Storage fields list model.
+ * ContentBuilder NG Storage fields list model.
  *
  * @package     ContentBuilder
  * @subpackage  Administrator.Model

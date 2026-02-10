@@ -37,7 +37,7 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
         : '';
     $tmplParam = $tmpl !== '' ? '&tmpl=' . $tmpl : '';
     $url = Route::_(
-        'index.php?option=com_contentbuilder&view=users&form_id='
+        'index.php?option=com_contentbuilder_ng&view=users&form_id='
         . $formId . $tmplParam . '&list[start]=0&list[ordering]=' . $field
         . '&list[direction]=' . $nextDir
     );
@@ -138,7 +138,7 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
             <tbody>
                 <?php foreach ($this->items as $i => $item):
                     $checked = HTMLHelper::_('grid.id', $i, $item->id);
-                    $link = Route::_('index.php?option=com_contentbuilder&task=user.edit&form_id=' . (int) Factory::getApplication()->input->getInt('form_id', 0) . '&joomla_userid=' . (int) $item->id);
+                    $link = Route::_('index.php?option=com_contentbuilder_ng&task=user.edit&form_id=' . (int) Factory::getApplication()->input->getInt('form_id', 0) . '&joomla_userid=' . (int) $item->id);
                     if ($item->published === null) {
                         $item->published = 1;
                     }
@@ -190,7 +190,7 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
         </table>
     </div>
 
-    <input type="hidden" name="option" value="com_contentbuilder" />
+    <input type="hidden" name="option" value="com_contentbuilder_ng" />
     <input type="hidden" name="task" value="" />
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="view" value="users" />

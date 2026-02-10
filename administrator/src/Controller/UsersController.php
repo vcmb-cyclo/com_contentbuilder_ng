@@ -159,7 +159,7 @@ class UsersController extends BaseController
             $model->setPublished();
         }
 
-        $this->setRedirect( Route::_('index.php?option=com_contentbuilder&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.Factory::getApplication()->input->getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_NG_PUBLISHED') );
+        $this->setRedirect( Route::_('index.php?option=com_contentbuilder_ng&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.Factory::getApplication()->input->getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_NG_PUBLISHED') );
     }
     
     public function unpublish() {
@@ -176,7 +176,7 @@ class UsersController extends BaseController
             $model->setUnpublished();
         }
 
-        $this->setRedirect( Route::_('index.php?option=com_contentbuilder&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.Factory::getApplication()->input->getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_NG_UNPUBLISHED') );
+        $this->setRedirect( Route::_('index.php?option=com_contentbuilder_ng&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.Factory::getApplication()->input->getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_NG_UNPUBLISHED') );
     }
     
     public function save($keep_task = false)
@@ -204,14 +204,14 @@ class UsersController extends BaseController
         }
 
         // Check the table in so it can be edited.... we are done with it anyway
-        $link = 'index.php?option=com_contentbuilder&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.$limit.$additionalParams;
+        $link = 'index.php?option=com_contentbuilder_ng&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.$limit.$additionalParams;
         $this->setRedirect(Route::_($link, false), $msg);
     }
 
     public function cancel()
     {
         $msg = Text::_( 'COM_CONTENTBUILDER_NG_CANCELLED' );
-        $this->setRedirect( Route::_('index.php?option=com_contentbuilder&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart=0', false), $msg );
+        $this->setRedirect( Route::_('index.php?option=com_contentbuilder_ng&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart=0', false), $msg );
     }
 
     public function display($cachable = false, $urlparams = array())

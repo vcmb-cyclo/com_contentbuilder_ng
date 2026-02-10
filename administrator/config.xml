@@ -12,7 +12,7 @@
 			class="inputbox"
 			validate="rules"
 			filter="rules"
-			component="com_contentbuilder"
+			component="com_contentbuilder_ng"
 			section="component"
 		/>
 	</fieldset>

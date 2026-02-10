@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ContentBuilder Ajax raw view.
+ * ContentBuilder NG Ajax raw view.
  *
  * Ajax raw view of the site interface
  *

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ContentBuilder Verify view.
+ * ContentBuilder NG Verify view.
  *
  * Verify view of the site interface
  *

@@ -1,7 +1,7 @@
 <?php
 /**
  * @version 6.0
- * @package ContentBuilder Image Scale
+ * @package ContentBuilder NG Permission observer
  * @copyright (C) 2011 by Markus Bopp
  * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license Released under the terms of the GNU General Public License
@@ -32,8 +32,16 @@ class plgContentContentbuilder_ng_permission_observer extends CMSPlugin implemen
         $this->onContentPrepare('', $article, $params, $limitstart);
     }
 
-    function onContentPrepare($context, &$article, &$params, $limitstart = 0)
+    function onContentPrepare($context = '', $article = null, $params = null, $limitstart = 0)
     {
+        if ($context instanceof \Joomla\Event\Event) {
+            $event = $context;
+            $context = (string) ($event->getArgument('context') ?? '');
+            $article = $event->getArgument('subject') ?? $event->getArgument('article') ?? $event->getArgument('item');
+            $params = $event->getArgument('params') ?? $params;
+            $limitstart = (int) ($event->getArgument('page') ?? $event->getArgument('limitstart') ?? $limitstart);
+        }
+
         if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/src/contentbuilder_ng.php')) {
             return true;
         }

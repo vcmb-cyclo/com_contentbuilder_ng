@@ -71,7 +71,7 @@ class HtmlView extends BaseHtmlView
      */
     protected function addToolbar()
     {
-        ToolbarHelper::title('ContentBuilder :: ' . Text::_('COM_CONTENTBUILDER_NG_STORAGES'), 'logo_left');
+        ToolbarHelper::title(Text::_('COM_CONTENTBUILDER_NG') .' :: ' . Text::_('COM_CONTENTBUILDER_NG_STORAGES'), 'logo_left');
 
         ToolbarHelper::addNew('storage.add');
         ToolbarHelper::editList('storage.edit');

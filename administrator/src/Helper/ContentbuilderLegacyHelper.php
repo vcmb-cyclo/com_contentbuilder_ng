@@ -242,9 +242,9 @@ final class ContentbuilderLegacyHelper
         if ($rating_allowed) {
             if (Factory::getApplication()->isClient('site')) {
                 $rating_link = Uri::root(true) . (Factory::getApplication()->isClient('administrator') ? '/administrator' : (Factory::getApplication()->input->getCmd('lang', '') && 
-                Factory::getConfig()->get('sef') && Factory::getConfig()->get('sef_rewrite') ? '/' . Factory::getApplication()->input->getCmd('lang', '') : '')) . '/?option=com_contentbuilder&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
+                Factory::getConfig()->get('sef') && Factory::getConfig()->get('sef_rewrite') ? '/' . Factory::getApplication()->input->getCmd('lang', '') : '')) . '/?option=com_contentbuilder_ng&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
             } else {
-                $rating_link = 'index.php?option=com_contentbuilder&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
+                $rating_link = 'index.php?option=com_contentbuilder_ng&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
             }
         }
         for ($x = 1; $x <= $rating_slots; $x++) {
@@ -586,7 +586,7 @@ final class ContentbuilderLegacyHelper
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $parent_id = 0;
-        $db->setQuery("Select id From #__components Where `option`='' And admin_menu_link='option=com_contentbuilder&viewcontainer=true'");
+        $db->setQuery("Select id From #__components Where `option`='' And admin_menu_link='option=com_contentbuilder_ng&viewcontainer=true'");
         $res = $db->loadResult();
         if ($res) {
             $parent_id = $res;
@@ -603,8 +603,8 @@ final class ContentbuilderLegacyHelper
                  )
                  Values
                  (
-                    'ContentBuilder Views',
-                    'option=com_contentbuilder&viewcontainer=true',
+                    'ContentBuilder NG Views',
+                    'option=com_contentbuilder_ng&viewcontainer=true',
                     'contentbuilder_ng',
                     '',
                     'media/com_contentbuilder_ng/images/logo_icon_cb.png',
@@ -615,7 +615,7 @@ final class ContentbuilderLegacyHelper
             $db->execute();
             $parent_id = $db->insertid();
         }
-        $db->setQuery("Select id From #__components Where admin_menu_link = 'option=com_contentbuilder&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
+        $db->setQuery("Select id From #__components Where admin_menu_link = 'option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
         $menuitem = $db->loadResult();
         if (!$update)
             return;
@@ -636,7 +636,7 @@ final class ContentbuilderLegacyHelper
                      Values
                      (
                         " . $db->Quote($name) . ",
-                        'option=com_contentbuilder&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "',
+                        'option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "',
                         " . $db->Quote($name) . ",
                         'com_contentbuilder_ng',
                         'media/com_contentbuilder_ng/images/logo_icon_cb.png',
@@ -668,7 +668,7 @@ final class ContentbuilderLegacyHelper
             $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder_ng' And parent_id = 1");
             $result = $db->loadResult();
 
-            $db->setQuery("Select id From #__menu Where `link`='index.php?option=com_contentbuilder&viewcontainer=true' And parent_id = 1");
+            $db->setQuery("Select id From #__menu Where `link`='index.php?option=com_contentbuilder_ng&viewcontainer=true' And parent_id = 1");
             $old_id = $db->loadResult();
             $parent_id = $old_id;
 
@@ -680,8 +680,8 @@ final class ContentbuilderLegacyHelper
                     "ordering, level, component_id, client_id, img, lft,rgt" .
                     ") " .
                     "values (" .
-                    "'ContentBuilder Views', 'ContentBuilder Views', 'main', 1, " .
-                    "'index.php?option=com_contentbuilder&viewcontainer=true'," .
+                    "'ContentBuilder NG Views', 'ContentBuilder NG Views', 'main', 1, " .
+                    "'index.php?option=com_contentbuilder_ng&viewcontainer=true'," .
                     "'0', 1, " . intval($result) . ", 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png',( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet )" .
                     ")"
                 );
@@ -695,7 +695,7 @@ final class ContentbuilderLegacyHelper
                 $db->execute();
             }
 
-            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
             $menuitem = $db->loadResult();
 
             if (!$update)
@@ -703,7 +703,7 @@ final class ContentbuilderLegacyHelper
             if (!$result)
                 die("ContentBuilder main menu item not found!");
 
-            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder&task=list.display&id=%' And link <> 'index.php?option=com_contentbuilder&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder_ng&task=list.display&id=%' And link <> 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
             $name_exists = $db->loadResult();
 
             if ($name_exists) {
@@ -720,7 +720,7 @@ final class ContentbuilderLegacyHelper
                     ",lft,rgt) " .
                     "values (" .
                     "" . $db->Quote($name) . ", " . $db->Quote($name) . ", 'main', '$parent_id', " .
-                    "'index.php?option=com_contentbuilder&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'," .
+                    "'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'," .
                     "'0', 1, " . intval($result) . ", 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png'" .
                     ",( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone), ( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet))"
                 );
@@ -753,7 +753,7 @@ final class ContentbuilderLegacyHelper
             $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder_ng' And parent_id = 1");
             $result = $db->loadResult();
 
-            $db->setQuery("Select id From #__menu Where `link`='index.php?option=com_contentbuilder&viewcontainer=true' And parent_id = 1");
+            $db->setQuery("Select id From #__menu Where `link`='index.php?option=com_contentbuilder_ng&viewcontainer=true' And parent_id = 1");
             $old_id = $db->loadResult();
             $parent_id = $old_id;
 
@@ -766,8 +766,8 @@ final class ContentbuilderLegacyHelper
                     "level, component_id, client_id, img, lft,rgt" .
                     ") " .
                     "values (" .
-                    "'ContentBuilder Views', 'ContentBuilder Views', 'main', 'component', 1, " .
-                    "'index.php?option=com_contentbuilder&viewcontainer=true'," .
+                    "'ContentBuilder NG Views', 'ContentBuilder NG Views', 'main', 'component', 1, " .
+                    "'index.php?option=com_contentbuilder_ng&viewcontainer=true'," .
                     "1, " . intval($result) . ", 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png',( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet )" .
                     ")"
                 );
@@ -781,15 +781,15 @@ final class ContentbuilderLegacyHelper
                 $db->execute();
             }
 
-            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
             $menuitem = $db->loadResult();
 
             if (!$update)
                 return;
             if (!$result)
-                die("ContentBuilder main menu item not found!");
+                die("ContentBuilder NG main menu item not found!");
 
-            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder&task=list.display&id=%' And link <> 'index.php?option=com_contentbuilder&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder_ng&task=list.display&id=%' And link <> 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
             $name_exists = $db->loadResult();
 
             if ($name_exists) {
@@ -806,7 +806,7 @@ final class ContentbuilderLegacyHelper
                     ",lft,rgt) " .
                     "values (" .
                     "''," . "''," . $db->Quote($name) . ", " . $db->Quote($name) . ", 'main', 'component', '$parent_id', " .
-                    "'index.php?option=com_contentbuilder&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'," .
+                    "'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'," .
                     "1, " . intval($result) . ", 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png'" .
                     ",( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone), ( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet))"
                 );
@@ -836,7 +836,7 @@ final class ContentbuilderLegacyHelper
         }
 
         if ($plugin && !PluginHelper::isEnabled('contentbuilder_ng_themes', $plugin)) {
-            $msg = "ContentBuilder theme plugin not enabled: contentbuilder_ng_themes/{$plugin}";
+            $msg = "ContentBuilder NG theme plugin not enabled: contentbuilder_ng_themes/{$plugin}";
             Log::add($msg, Log::WARNING, 'com_contentbuilder_ng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }
@@ -848,7 +848,7 @@ final class ContentbuilderLegacyHelper
         $results = $eventResult->getArgument('result') ?: [];
         $out = implode('', $results);
         if ($plugin && $out === '') {
-            $msg = "ContentBuilder theme plugin returned empty sample: contentbuilder_ng_themes/{$plugin}";
+            $msg = "ContentBuilder NG theme plugin returned empty sample: contentbuilder_ng_themes/{$plugin}";
             Log::add($msg, Log::WARNING, 'com_contentbuilder_ng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }
@@ -895,7 +895,7 @@ final class ContentbuilderLegacyHelper
         }
 
         if ($plugin && !PluginHelper::isEnabled('contentbuilder_ng_themes', $plugin)) {
-            $msg = "ContentBuilder theme plugin not enabled: contentbuilder_ng_themes/{$plugin}";
+            $msg = "ContentBuilder NG theme plugin not enabled: contentbuilder_ng_themes/{$plugin}";
             Log::add($msg, Log::WARNING, 'com_contentbuilder_ng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }
@@ -907,7 +907,7 @@ final class ContentbuilderLegacyHelper
         $results = $eventResult->getArgument('result') ?: [];
         $out = implode('', $results);
         if ($plugin && $out === '') {
-            $msg = "ContentBuilder theme plugin returned empty editable sample: contentbuilder_ng_themes/{$plugin}";
+            $msg = "ContentBuilder NG theme plugin returned empty editable sample: contentbuilder_ng_themes/{$plugin}";
             Log::add($msg, Log::WARNING, 'com_contentbuilder_ng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }

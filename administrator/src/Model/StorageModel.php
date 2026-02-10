@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ContentBuilder Storage Model.
+ * ContentBuilder NG Storage Model.
  *
  * Handles CRUD and publish state for storage in the admin interface.
  *

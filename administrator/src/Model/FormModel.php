@@ -427,7 +427,7 @@ class FormModel extends AdminModel
             $data->form = ContentbuilderLegacyHelper::getForm($data->type, $data->reference_id);
             if (!$data->form->exists) {
                 Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 'error');
-                Factory::getApplication()->redirect('index.php?option=com_contentbuilder&task=forms.display&limitstart=' . $this->getState('limitstart', 0));
+                Factory::getApplication()->redirect('index.php?option=com_contentbuilder_ng&task=forms.display&limitstart=' . $this->getState('limitstart', 0));
             }
             if (isset($data->form->properties) && isset($data->form->properties->name)) {
                 $data->type_name = trim($data->form->properties->name);
@@ -1080,12 +1080,12 @@ class FormModel extends AdminModel
 
             $this->getTable('Elementoption')->reorder('form_id = ' . $cid);
 
-            $db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&task=list.display&id=" . intval($cid) . "'");
+            $db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($cid) . "'");
             $db->execute();
-            $db->setQuery("Select count(id) From #__menu Where `link` Like 'index.php?option=com_contentbuilder&task=list.display&id=%'");
+            $db->setQuery("Select count(id) From #__menu Where `link` Like 'index.php?option=com_contentbuilder_ng&task=list.display&id=%'");
             $amount = $db->loadResult();
             if (!$amount) {
-                $db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&viewcontainer=true'");
+                $db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder_ng&viewcontainer=true'");
                 $db->execute();
             }
 

@@ -17,7 +17,7 @@ class StoragefieldController extends BaseController
         $storageId = (int) $this->input->getInt('storage_id', 0);
         if (!$storageId) {
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder&view=storages', false),
+                Route::_('index.php?option=com_contentbuilder_ng&view=storages', false),
                 'Missing storage_id',
                 'error'
             );
@@ -34,7 +34,7 @@ class StoragefieldController extends BaseController
 
         if ($fieldname === '') {
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . $storageId, false),
+                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
                 Text::_('COM_CONTENTBUILDER_NG_FIELDNAME_REQUIRED'),
                 'warning'
             );
@@ -51,7 +51,7 @@ class StoragefieldController extends BaseController
             ]);
 
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . $storageId, false),
+                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
                 Text::_('COM_CONTENTBUILDER_NG_FIELD_ADDED'),
                 'message'
             );
@@ -59,7 +59,7 @@ class StoragefieldController extends BaseController
 
         } catch (\Throwable $e) {
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . $storageId, false),
+                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
                 $e->getMessage(),
                 'error'
             );

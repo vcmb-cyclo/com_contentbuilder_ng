@@ -1,6 +1,6 @@
 <?php
 /**
- * ContentBuilder Form table.
+ * ContentBuilder NG Form table.
  *
  * Table description.
  *

@@ -45,7 +45,7 @@ class HtmlView extends BaseHtmlView
 
 /*
         ToolbarHelper::title(
-            'ContentBuilder :: ' . Text::_('com_contentbuilder_ng'),
+            Text::_('COM_CONTENTBUILDER_NG') .' :: ' . Text::_('com_contentbuilder_ng'),
             'logo_icon_cb'
         );*/
 

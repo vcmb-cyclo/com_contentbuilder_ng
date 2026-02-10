@@ -120,7 +120,7 @@ class HtmlView extends BaseHtmlView
 							}
 						}
 					}
-					$subject->template = str_replace($match, Route::_('index.php?option=com_contentbuilder&view=details&id=' . Factory::getApplication()->input->getInt('id') . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $sub), $subject->template);
+					$subject->template = str_replace($match, Route::_('index.php?option=com_contentbuilder_ng&view=details&id=' . Factory::getApplication()->input->getInt('id') . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $sub), $subject->template);
 				}
 			}
 
@@ -142,7 +142,7 @@ class HtmlView extends BaseHtmlView
 							}
 						}
 					}
-					$table->toc = str_replace($match, Route::_('index.php?option=com_contentbuilder&view=details&id=' . Factory::getApplication()->input->getInt('id') . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $sub), $table->toc);
+					$table->toc = str_replace($match, Route::_('index.php?option=com_contentbuilder_ng&view=details&id=' . Factory::getApplication()->input->getInt('id') . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $sub), $table->toc);
 				}
 			}
 

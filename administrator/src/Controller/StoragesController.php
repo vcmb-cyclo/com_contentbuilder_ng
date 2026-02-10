@@ -1,6 +1,6 @@
 <?php
 /**
- * ContentBuilder Storages controller.
+ * ContentBuilder NG Storages controller.
  *
  * Handles actions (copy, delete, publish, ...) for storage list in the admin interface.
  *
@@ -112,7 +112,7 @@ final class StoragesController extends AdminController
         }
 
         $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder&task=storages.display&limitstart=' . $this->input->getInt('limitstart'), false),
+            Route::_('index.php?option=com_contentbuilder_ng&task=storages.display&limitstart=' . $this->input->getInt('limitstart'), false),
             Text::_('COM_CONTENTBUILDER_NG_COPIED')
         );
     }

@@ -33,7 +33,7 @@ class DatatableController extends BaseController
         }
 
         if (!$storageId) {
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilder&view=storage', false), 'Missing storage_id', 'error');
+            $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&view=storage', false), 'Missing storage_id', 'error');
             return false;
         }
 
@@ -44,7 +44,7 @@ class DatatableController extends BaseController
             $breturn = $service->createForStorage($storageId);
             if ($breturn) {
                 $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . $storageId, false),
+                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
                 Text::_('COM_CONTENTBUILDER_NG_TABLE_CREATED'),
                 'message'
                 );
@@ -53,7 +53,7 @@ class DatatableController extends BaseController
 
         } catch (\Throwable $e) {
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . $storageId, false),
+                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
                 $e->getMessage(),
                 'error'
             );
@@ -74,7 +74,7 @@ class DatatableController extends BaseController
 
         if (!$storageId) {
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder&view=storage', false),
+                Route::_('index.php?option=com_contentbuilder_ng&view=storage', false),
                 'Missing storage_id',
                 'error'
             );
@@ -85,14 +85,14 @@ class DatatableController extends BaseController
             (new DatatableService())->syncColumnsFromFields($storageId);
 
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . $storageId, false),
+                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
                 Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNCED'),
                 'message'
             );
             return true;
         } catch (\Throwable $e) {
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . $storageId, false),
+                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
                 $e->getMessage(),
                 'error'
             );

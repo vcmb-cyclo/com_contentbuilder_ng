@@ -81,7 +81,7 @@ class HtmlView extends BaseHtmlView
         $text  = $isNew ? Text::_('COM_CONTENTBUILDER_NG_NEW') : Text::_('COM_CONTENTBUILDER_NG_EDIT');
 
         ToolbarHelper::title(
-            'ContentBuilder :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_NG_FORM') : ($this->item->name ?? '')) .
+            Text::_('COM_CONTENTBUILDER_NG') .' :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_NG_FORM') : ($this->item->name ?? '')) .
                 ' : <small><small>[ ' . $text . ' ]</small></small>',
             'logo_left'
         );
@@ -103,7 +103,7 @@ class HtmlView extends BaseHtmlView
 
         if ($formId > 0) {
             $previewUrl = Uri::root()
-                . 'index.php?option=com_contentbuilder&task=edit.display&id='
+                . 'index.php?option=com_contentbuilder_ng&task=edit.display&id='
                 . $formId
                 . '&record_id=0';
             Toolbar::getInstance('toolbar')->appendButton(

@@ -208,7 +208,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 	if ($new_allowed) {
 		?>
 			<button class="btn btn-sm btn-primary"
-				onclick="location.href='<?php echo Route::_('index.php?option=com_contentbuilder&task=edit.display&backtolist=1&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&record_id=0'); ?>'"><?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?></button>
+				onclick="location.href='<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display&backtolist=1&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&record_id=0'); ?>'"><?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?></button>
 		<?php
 	}
 	-- END of BEGIN - NEW BUTTON */
@@ -228,7 +228,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 # Bug CB Joomla 4 (march 2023) - fix error search, delete, pagination, 404 error 
 Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 # by this block -->
-<form action="<?php echo Route::_('index.php?option=com_contentbuilder&task=list.display&id=' . (int) Factory::getApplication()->input->getInt('id') . '&Itemid=' . (int) Factory::getApplication()->input->getInt('Itemid', 0)); ?>"
+<form action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=list.display&id=' . (int) Factory::getApplication()->input->getInt('id') . '&Itemid=' . (int) Factory::getApplication()->input->getInt('Itemid', 0)); ?>"
 	method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm">
 
 	<!-- 2023-12-19 END -->
@@ -401,7 +401,7 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 
 								<?php if ($this->export_xls) : ?>
 									<a class="btn btn-sm btn-outline-success align-self-center"
-										href="<?php echo Route::_('index.php?option=com_contentbuilder&view=export&id=' . (int) Factory::getApplication()->input->getInt('id', 0) . '&type=xls&format=raw&tmpl=component'); ?>"
+										href="<?php echo Route::_('index.php?option=com_contentbuilder_ng&view=export&id=' . (int) Factory::getApplication()->input->getInt('id', 0) . '&type=xls&format=raw&tmpl=component'); ?>"
 										title="Export Excel">
 										<i class="fa fa-solid fa-file-excel"></i>
 									</a>
@@ -516,11 +516,11 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 			$n = count($this->items);
 			for ($i = 0; $i < $n; $i++) {
 				$row = $this->items[$i];
-				$link = Route::_('index.php?option=com_contentbuilder&task=details.display&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
-				$edit_link = Route::_('index.php?option=com_contentbuilder&task=edit.display&backtolist=1&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
+				$link = Route::_('index.php?option=com_contentbuilder_ng&task=details.display&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
+				$edit_link = Route::_('index.php?option=com_contentbuilder_ng&task=edit.display&backtolist=1&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
 					$isPublished = isset($this->published_items[$row->colRecord]) && $this->published_items[$row->colRecord];
 					$togglePublish = $isPublished ? 0 : 1;
-					$toggle_link = Route::_('index.php?option=com_contentbuilder&task=edit.publish&backtolist=1&id=' . $this->form_id . '&list_publish=' . $togglePublish . '&cid[]=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
+					$toggle_link = Route::_('index.php?option=com_contentbuilder_ng&task=edit.publish&backtolist=1&id=' . $this->form_id . '&list_publish=' . $togglePublish . '&cid[]=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
 					$select = '<input class="form-check-input" type="checkbox" name="cid[]" value="' . $row->colRecord . '"/>';
 				?>
 				<tr class="<?php echo "row$k"; ?>">
@@ -780,7 +780,7 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 	<?php
 	}
 	?>
-	<input type="hidden" name="option" value="com_contentbuilder" />
+	<input type="hidden" name="option" value="com_contentbuilder_ng" />
 	<input type="hidden" name="task" id="task" value="" />
 	<input type="hidden" name="view" id="view" value="list" />
 	<input type="hidden" name="boxchecked" value="0" />

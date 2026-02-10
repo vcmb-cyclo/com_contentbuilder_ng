@@ -119,7 +119,7 @@ class HtmlView extends BaseHtmlView
         $text  = $isNew ? Text::_('COM_CONTENTBUILDER_NG_NEW') : Text::_('COM_CONTENTBUILDER_NG_EDIT');
 
         ToolbarHelper::title(
-            'ContentBuilder :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_NG_STORAGES') : ($this->item->title ?? ''))
+            Text::_('COM_CONTENTBUILDER_NG') .' :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_NG_STORAGES') : ($this->item->title ?? ''))
             . ' : <small><small>[ ' . $text . ' ]</small></small>',
             'logo_left'
         );

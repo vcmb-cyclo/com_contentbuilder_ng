@@ -35,7 +35,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>')
         : '';
     $url = \Joomla\CMS\Router\Route::_(
-        'index.php?option=com_contentbuilder&task=form.edit&id=' . $formId
+        'index.php?option=com_contentbuilder_ng&task=form.edit&id=' . $formId
             . '&list[ordering]=' . $field . '&list[direction]=' . $nextDir
     );
 
@@ -833,7 +833,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                                     <?php echo $editable; ?>
                                     <?php
                                     if ($row->editable && !$this->item->edit_by_type) {
-                                        echo '<br/><br/>[<a href="index.php?option=com_contentbuilder&amp;view=elementoptions&amp;tmpl=component&amp;element_id=' . $row->id . '&amp;id=' . $this->item->id . '" title="" data-bs-toggle="modal" data-bs-target="#text-type-modal">' . $row->type . '</a>]';
+                                        echo '<br/><br/>[<a href="index.php?option=com_contentbuilder_ng&amp;view=elementoptions&amp;tmpl=component&amp;element_id=' . $row->id . '&amp;id=' . $this->item->id . '" title="" data-bs-toggle="modal" data-bs-target="#text-type-modal">' . $row->type . '</a>]';
                                     }
                                     ?>
                                 </td>
@@ -2091,7 +2091,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
                     </label>
                 </td>
                 <td>
-                    <?php echo '[<a href="index.php?option=com_contentbuilder&amp;view=users&amp;tmpl=component&amp;form_id=' . $this->item->id . '" title="" data-bs-toggle="modal" data-bs-target="#edit-modal">' . Text::_('COM_CONTENTBUILDER_NG_EDIT') . '</a>]'; ?>
+                    <?php echo '[<a href="index.php?option=com_contentbuilder_ng&amp;view=users&amp;tmpl=component&amp;form_id=' . $this->item->id . '" title="" data-bs-toggle="modal" data-bs-target="#edit-modal">' . Text::_('COM_CONTENTBUILDER_NG_EDIT') . '</a>]'; ?>
 
                 </td>
             </tr>
@@ -2319,7 +2319,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
 
     <div class="clr"></div>
 
-    <input type="hidden" name="option" value="com_contentbuilder" />
+    <input type="hidden" name="option" value="com_contentbuilder_ng" />
     <input type="hidden" name="id" value="<?php echo (int) $this->item->id; ?>" />
     <input type="hidden" name="jform[id]" value="<?php echo (int) $this->item->id; ?>" />
     <input type="hidden" name="task" value="" />

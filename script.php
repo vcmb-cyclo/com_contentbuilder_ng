@@ -59,7 +59,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
     // Starting logs.
     Log::add('---------------------------------------------------------', Log::INFO, 'com_contentbuilder_ng.install');
-    Log::add('[OK] ContentBuilder installation/update started.', Log::INFO, 'com_contentbuilder_ng.install');
+    Log::add('[OK] ContentBuilder NG installation/update started.', Log::INFO, 'com_contentbuilder_ng.install');
     Log::add('* PHP Version: ' . PHP_VERSION . '.', Log::INFO, 'com_contentbuilder_ng.install');
     Log::add('* Joomla Version : ' . JVERSION . '.', Log::INFO, 'com_contentbuilder_ng.install');
     Log::add('* User Agent: ' . ($_SERVER['HTTP_USER_AGENT'] ?? 'CLI') . '.', Log::INFO, 'com_contentbuilder_ng.install');
@@ -175,7 +175,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   public function install(InstallerAdapter $parent): bool
   {
     if (!version_compare(PHP_VERSION, '8.1', '>=')) {
-      Factory::getApplication()->enqueueMessage('"WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 8.1, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!"', 'error');
+      Factory::getApplication()->enqueueMessage('"WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder NG WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 8.1, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!"', 'error');
     }
 
 
@@ -190,7 +190,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   public function update(InstallerAdapter $parent): bool
   {
     if (!version_compare(PHP_VERSION, '8.1', '>=')) {
-      Factory::getApplication()->enqueueMessage('"WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 8.1, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!"', 'error');
+      Factory::getApplication()->enqueueMessage('"WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder NG WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 8.1, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!"', 'error');
     }
 
     return $this->installAndUpdate();
@@ -207,8 +207,20 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-    $db->setQuery("DELETE FROM #__menu WHERE `link` LIKE 'index.php?option=com_contentbuilder%'");
-    $db->execute();
+    try {
+      $conditions = array_merge(
+        $this->buildMenuLinkOptionWhereClauses($db, 'com_contentbuilder_ng'),
+        $this->buildMenuLinkOptionWhereClauses($db, 'com_contentbuilder')
+      );
+
+      $db->setQuery(
+        $db->getQuery(true)
+          ->delete($db->quoteName('#__menu'))
+          ->where('(' . implode(' OR ', $conditions) . ')')
+      )->execute();
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed to remove component menu entries on uninstall: ' . $e->getMessage(), Log::WARNING);
+    }
 
     $plugins = $this->getPlugins();
     $installer = new Installer();
@@ -506,15 +518,300 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   private function updateMenuLinks(string $legacyElement, string $targetElement): void
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
-    $like = $db->quote('%option=' . $legacyElement . '%');
+
+    $conditions = $this->buildMenuLinkOptionWhereClauses($db, $legacyElement);
+
     try {
       $db->setQuery(
-        "UPDATE #__menu SET `link` = REPLACE(`link`, 'option={$legacyElement}', 'option={$targetElement}') WHERE `link` LIKE {$like}"
+        $db->getQuery(true)
+          ->update($db->quoteName('#__menu'))
+          ->set(
+            $db->quoteName('link') . ' = REPLACE(' . $db->quoteName('link') . ', ' .
+            $db->quote('option=' . $legacyElement) . ', ' . $db->quote('option=' . $targetElement) . ')'
+          )
+          ->where('(' . implode(' OR ', $conditions) . ')')
       )->execute();
       $this->log("[OK] Updated menu links to point to {$targetElement}.");
     } catch (\Throwable $e) {
       $message = "[WARNING] Could not update menu links for legacy option: " . $e->getMessage();
       $this->log($message, Log::WARNING);
+    }
+  }
+
+  private function buildMenuLinkOptionWhereClauses(DatabaseInterface $db, string $option): array
+  {
+    $param = 'option=' . $option;
+
+    return [
+      $db->quoteName('link') . ' = ' . $db->quote('index.php?' . $param),
+      $db->quoteName('link') . ' LIKE ' . $db->quote('index.php?' . $param . '&%'),
+      $db->quoteName('link') . ' LIKE ' . $db->quote('%&' . $param),
+      $db->quoteName('link') . ' LIKE ' . $db->quote('%&' . $param . '&%'),
+    ];
+  }
+
+  private function normalizeBrokenTargetMenuLinks(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+    $passes = 0;
+    $total = 0;
+
+    // Earlier builds could transform com_contentbuilder_ng into com_contentbuilder_ng_ng.
+    while ($passes < 5) {
+      $passes++;
+      try {
+        $db->setQuery(
+          $db->getQuery(true)
+            ->update($db->quoteName('#__menu'))
+            ->set(
+              $db->quoteName('link') . ' = REPLACE(' . $db->quoteName('link') . ', ' .
+              $db->quote('option=com_contentbuilder_ng_ng') . ', ' . $db->quote('option=com_contentbuilder_ng') . ')'
+            )
+            ->where($db->quoteName('link') . ' LIKE ' . $db->quote('%option=com_contentbuilder_ng_ng%'))
+        )->execute();
+
+        $affected = (int) $db->getAffectedRows();
+        $total += $affected;
+
+        if ($affected === 0) {
+          break;
+        }
+      } catch (\Throwable $e) {
+        $this->log('[WARNING] Failed to normalize broken menu links: ' . $e->getMessage(), Log::WARNING);
+        break;
+      }
+    }
+
+    if ($total > 0) {
+      $this->log("[OK] Normalized {$total} broken com_contentbuilder_ng menu link(s).");
+    }
+  }
+
+  private function resolveMenuAlias(int $parentId, string $baseAlias): string
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+    $alias = $baseAlias;
+    $suffix = 2;
+
+    while ($suffix < 100) {
+      $query = $db->getQuery(true)
+        ->select('COUNT(1)')
+        ->from($db->quoteName('#__menu'))
+        ->where($db->quoteName('parent_id') . ' = ' . (int) $parentId)
+        ->where($db->quoteName('client_id') . ' = 1')
+        ->where($db->quoteName('alias') . ' = ' . $db->quote($alias));
+
+      $db->setQuery($query);
+      if ((int) $db->loadResult() === 0) {
+        return $alias;
+      }
+
+      $alias = $baseAlias . '-' . $suffix;
+      $suffix++;
+    }
+
+    return $baseAlias . '-' . time();
+  }
+
+  private function ensureAdministrationMainMenuEntry(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+    $targetElement = 'com_contentbuilder_ng';
+
+    try {
+      $componentId = (int) $db->setQuery(
+        $db->getQuery(true)
+          ->select($db->quoteName('extension_id'))
+          ->from($db->quoteName('#__extensions'))
+          ->where($db->quoteName('type') . ' = ' . $db->quote('component'))
+          ->where($db->quoteName('element') . ' = ' . $db->quote($targetElement))
+          ->where($db->quoteName('client_id') . ' = 1')
+      )->loadResult();
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed reading component extension id: ' . $e->getMessage(), Log::WARNING);
+      return;
+    }
+
+    if ($componentId === 0) {
+      $this->log('[WARNING] Cannot ensure admin menu entry: com_contentbuilder_ng extension id is missing.', Log::WARNING);
+      return;
+    }
+
+    $mainRows = [];
+    try {
+      $mainRows = $db->setQuery(
+        $db->getQuery(true)
+          ->select($db->quoteName(['id', 'alias', 'path']))
+          ->from($db->quoteName('#__menu'))
+          ->where($db->quoteName('client_id') . ' = 1')
+          ->where($db->quoteName('parent_id') . ' = 1')
+          ->where($db->quoteName('type') . ' = ' . $db->quote('component'))
+          ->where(
+            '(' .
+            $db->quoteName('component_id') . ' = ' . $componentId .
+            ' OR ' . $db->quoteName('link') . ' LIKE ' . $db->quote('index.php?option=com_contentbuilder_ng%') .
+            ')'
+          )
+          ->order($db->quoteName('id') . ' ASC')
+      )->loadAssocList() ?: [];
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed checking existing admin menu entry: ' . $e->getMessage(), Log::WARNING);
+      return;
+    }
+
+    if (!empty($mainRows)) {
+      $mainId = (int) $mainRows[0]['id'];
+      $alias = trim((string) ($mainRows[0]['alias'] ?? ''));
+      $path = trim((string) ($mainRows[0]['path'] ?? ''));
+
+      if ($alias === '') {
+        $alias = $this->resolveMenuAlias(1, 'contentbuilder_ng');
+      }
+      if ($path === '') {
+        $path = $alias;
+      }
+
+      try {
+        $db->setQuery(
+          $db->getQuery(true)
+            ->update($db->quoteName('#__menu'))
+            ->set($db->quoteName('title') . ' = ' . $db->quote('COM_CONTENTBUILDER_NG'))
+            ->set($db->quoteName('alias') . ' = ' . $db->quote($alias))
+            ->set($db->quoteName('path') . ' = ' . $db->quote($path))
+            ->set($db->quoteName('link') . ' = ' . $db->quote('index.php?option=com_contentbuilder_ng'))
+            ->set($db->quoteName('type') . ' = ' . $db->quote('component'))
+            ->set($db->quoteName('published') . ' = 1')
+            ->set($db->quoteName('component_id') . ' = ' . $componentId)
+            ->set($db->quoteName('client_id') . ' = 1')
+            ->where($db->quoteName('id') . ' = ' . $mainId)
+        )->execute();
+
+        $this->log('[OK] Administration component menu entry checked and updated.');
+      } catch (\Throwable $e) {
+        $this->log('[WARNING] Failed updating existing admin menu entry: ' . $e->getMessage(), Log::WARNING);
+      }
+
+      return;
+    }
+
+    $root = [];
+    try {
+      $root = $db->setQuery(
+        $db->getQuery(true)
+          ->select($db->quoteName(['id', 'rgt']))
+          ->from($db->quoteName('#__menu'))
+          ->where($db->quoteName('alias') . ' = ' . $db->quote('root'))
+          ->where($db->quoteName('client_id') . ' = 1')
+          ->order($db->quoteName('id') . ' ASC')
+      )->loadAssoc() ?: [];
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed loading admin menu root: ' . $e->getMessage(), Log::WARNING);
+    }
+
+    if (empty($root)) {
+      try {
+        $root = $db->setQuery(
+          $db->getQuery(true)
+            ->select($db->quoteName(['id', 'rgt']))
+            ->from($db->quoteName('#__menu'))
+            ->where($db->quoteName('id') . ' = 1')
+        )->loadAssoc() ?: [];
+      } catch (\Throwable $e) {
+        $this->log('[WARNING] Could not load fallback menu root: ' . $e->getMessage(), Log::WARNING);
+      }
+    }
+
+    if (empty($root)) {
+      $this->log('[ERROR] Cannot recreate admin menu entry: root node not found.', Log::ERROR);
+      return;
+    }
+
+    $rootId = (int) ($root['id'] ?? 1);
+    $rootRgt = (int) ($root['rgt'] ?? 0);
+    if ($rootRgt <= 0) {
+      $this->log('[ERROR] Cannot recreate admin menu entry: invalid root rgt value.', Log::ERROR);
+      return;
+    }
+
+    $alias = $this->resolveMenuAlias($rootId, 'contentbuilder_ng');
+
+    try {
+      $db->setQuery(
+        $db->getQuery(true)
+          ->update($db->quoteName('#__menu'))
+          ->set($db->quoteName('rgt') . ' = ' . $db->quoteName('rgt') . ' + 2')
+          ->where($db->quoteName('rgt') . ' >= ' . $rootRgt)
+      )->execute();
+
+      $db->setQuery(
+        $db->getQuery(true)
+          ->update($db->quoteName('#__menu'))
+          ->set($db->quoteName('lft') . ' = ' . $db->quoteName('lft') . ' + 2')
+          ->where($db->quoteName('lft') . ' > ' . $rootRgt)
+      )->execute();
+
+      $columns = [
+        'menutype',
+        'title',
+        'alias',
+        'note',
+        'path',
+        'link',
+        'type',
+        'published',
+        'parent_id',
+        'level',
+        'component_id',
+        'checked_out',
+        'checked_out_time',
+        'browserNav',
+        'access',
+        'img',
+        'template_style_id',
+        'params',
+        'lft',
+        'rgt',
+        'home',
+        'language',
+        'client_id',
+      ];
+
+      $values = [
+        $db->quote('main'),
+        $db->quote('COM_CONTENTBUILDER_NG'),
+        $db->quote($alias),
+        $db->quote(''),
+        $db->quote($alias),
+        $db->quote('index.php?option=com_contentbuilder_ng'),
+        $db->quote('component'),
+        1,
+        $rootId,
+        1,
+        $componentId,
+        0,
+        'NULL',
+        0,
+        1,
+        $db->quote('class:component'),
+        0,
+        $db->quote(''),
+        $rootRgt,
+        $rootRgt + 1,
+        0,
+        $db->quote('*'),
+        1,
+      ];
+
+      $db->setQuery(
+        $db->getQuery(true)
+          ->insert($db->quoteName('#__menu'))
+          ->columns($db->quoteName($columns))
+          ->values(implode(', ', $values))
+      )->execute();
+
+      $this->log('[OK] Administration component menu entry recreated.');
+    } catch (\Throwable $e) {
+      $this->log('[ERROR] Failed recreating administration menu entry: ' . $e->getMessage(), Log::ERROR);
     }
   }
 
@@ -584,7 +881,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
   }
 
-  private function ensurePluginsInstalled(?string $source = null): void
+  private function ensurePluginsInstalled(?string $source = null, bool $forceUpdate = false): void
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
     $installer = new Installer();
@@ -614,6 +911,16 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
           $path = $this->resolvePluginSourcePath($source, $folder, $element);
           if (!is_dir($path)) {
             $this->log("[WARNING] Plugin folder not found: {$path}", Log::WARNING);
+            continue;
+          }
+
+          if ($forceUpdate) {
+            $ok = $installer->install($path);
+            if ($ok) {
+              $this->log("[OK] Plugin refreshed: {$folder}/{$element}");
+            } else {
+              $this->log("[ERROR] Plugin refresh failed: {$folder}/{$element}", Log::ERROR);
+            }
             continue;
           }
 
@@ -822,8 +1129,11 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
 
     try {
+      $conditions = $this->buildMenuLinkOptionWhereClauses($db, $legacyElement);
       $db->setQuery(
-        "DELETE FROM #__menu WHERE `link` LIKE " . $db->quote('%option=' . $legacyElement . '%')
+        $db->getQuery(true)
+          ->delete($db->quoteName('#__menu'))
+          ->where('(' . implode(' OR ', $conditions) . ')')
       )->execute();
       $this->log("[OK] Legacy menu entries removed for {$legacyElement}.");
     } catch (\Throwable $e) {
@@ -966,12 +1276,17 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
                  $db->execute();
              }*/
 
-    $db->setQuery("Update #__menu Set `title` = 'com_contentbuilder_ng' Where `alias`='contentbuilder_ng'");
-    $db->execute();
+    try {
+      $db->setQuery("Update #__menu Set `title` = 'COM_CONTENTBUILDER_NG' Where `alias`='contentbuilder_ng'");
+      $db->execute();
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed to normalize admin menu title: ' . $e->getMessage(), Log::WARNING);
+    }
 
     $this->removeOldLibraries();
     $this->removeObsoleteFiles();
     $this->updateDateColumns();
+    $this->updateMenuLinks('com_contentbuilder', 'com_contentbuilder_ng');
 
     $source = null;
     if (is_object($parent) && method_exists($parent, 'getParent')) {
@@ -980,13 +1295,16 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
         $source = $parentInstaller->getPath('source');
       }
     }
-    $this->ensurePluginsInstalled($source);
+    $this->ensurePluginsInstalled($source, $type === 'update');
     $this->activatePlugins();
 
     if ($type === 'update') {
       $this->removeLegacyComponent();
       $this->removeLegacyPlugins();
     }
+
+    $this->normalizeBrokenTargetMenuLinks();
+    $this->ensureAdministrationMainMenuEntry();
 
     // On ne fait ça que sur update (et éventuellement discover_install si tu veux)
     if ($type !== 'update') {

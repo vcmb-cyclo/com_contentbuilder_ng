@@ -30,7 +30,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>')
         : '';
     $url = \Joomla\CMS\Router\Route::_(
-        'index.php?option=com_contentbuilder&task=storage.edit&id='
+        'index.php?option=com_contentbuilder_ng&task=storage.edit&id='
         . $storageId
         . '&list[start]=0'
         . '&list[ordering]=' . $field
@@ -70,7 +70,7 @@ if (typeof Joomla !== 'undefined') {
 }
 </script>
 
-<form action="<?php echo \Joomla\CMS\Router\Route::_('index.php?option=com_contentbuilder&task=storage.edit&id=' . (int) $this->item->id); ?>"
+<form action="<?php echo \Joomla\CMS\Router\Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . (int) $this->item->id); ?>"
     method="post" name="adminForm" id="adminForm" enctype="multipart/form-data">
 
 <?php
@@ -473,7 +473,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
     <div class="clr">
     </div>
 
-    <input type="hidden" name="option" value="com_contentbuilder" />
+    <input type="hidden" name="option" value="com_contentbuilder_ng" />
     <input type="hidden" name="id" value="<?php echo (int) $this->item->id; ?>">
     <input type="hidden" name="task" value="storage.edit">
     <input type="hidden" name="jform[id]" value="<?php echo (int) $this->item->id; ?>" />

@@ -227,7 +227,7 @@ class plgSystemContentbuilder_ng_system extends CMSPlugin implements SubscriberI
                 $this->db->setQuery("Select article.record_id, article.form_id From #__contentbuilder_ng_articles As article, #__content As content Where content.id = " . intval($id) . " And (content.state = 0 Or content.state = 1) And article.article_id = content.id");
                 $article = $this->db->loadAssoc();
                 if (is_array($article)) {
-                    $this->app->redirect('index.php?option=com_contentbuilder&task=edit.display&id=' . $article['form_id'] . "&record_id=" . $article['record_id'] . "&jsback=1&Itemid=" . Factory::getApplication()->input->getInt('Itemid', 0));
+                    $this->app->redirect('index.php?option=com_contentbuilder_ng&task=edit.display&id=' . $article['form_id'] . "&record_id=" . $article['record_id'] . "&jsback=1&Itemid=" . Factory::getApplication()->input->getInt('Itemid', 0));
                 }
             }
         }

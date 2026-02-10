@@ -1825,7 +1825,7 @@ var contentbuilder = new function(){
 
             $siteurl = $data['siteurl'] . 'index.php?option=com_users&task=registration.activate&token=' . $data['activation'];
             if ($bypass_plugin) {
-                $siteurl = $data['siteurl'] . 'index.php?option=com_contentbuilder&view=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $data['activation'] . '&verification_id=' . $verification_id . '&format=raw';
+                $siteurl = $data['siteurl'] . 'index.php?option=com_contentbuilder_ng&view=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $data['activation'] . '&verification_id=' . $verification_id . '&format=raw';
             }
 
             $emailBody = Text::_('COM_USERS_EMAIL_REGISTERED_WITH_ADMIN_ACTIVATION_BODY');
@@ -1847,7 +1847,7 @@ var contentbuilder = new function(){
 
             $siteurl = $data['siteurl'] . 'index.php?option=com_users&task=registration.activate&token=' . $data['activation'];
             if ($bypass_plugin) {
-                $siteurl = $data['siteurl'] . 'index.php?option=com_contentbuilder&view=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $data['activation'] . '&verification_id=' . $verification_id . '&format=raw';
+                $siteurl = $data['siteurl'] . 'index.php?option=com_contentbuilder_ng&view=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $data['activation'] . '&verification_id=' . $verification_id . '&format=raw';
             }
 
             $emailBody = Text::_('COM_USERS_EMAIL_REGISTERED_WITH_ACTIVATION_BODY');
@@ -1985,7 +1985,7 @@ var contentbuilder = new function(){
 
         $siteurl_ = $siteURL . "index.php?option=com_user&task=activate&activation=" . $user->get('activation');
         if ($bypass_plugin) {
-            $siteurl_ = $siteURL . 'index.php?option=com_contentbuilder&view=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $user->get('activation') . '&verification_id=' . $verification_id . '&format=raw';
+            $siteurl_ = $siteURL . 'index.php?option=com_contentbuilder_ng&view=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $user->get('activation') . '&verification_id=' . $verification_id . '&format=raw';
         }
 
         if ($useractivation == 1) {

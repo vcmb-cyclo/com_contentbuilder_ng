@@ -25,7 +25,7 @@ for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){par
 v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v;case'undefined':case'function':default:throw new SyntaxError('json_encode');}};return str('',{'':value});}catch(err){if(!(err instanceof SyntaxError)){throw new Error('Unexpected error type in json_encode()');}
 this.php_js=this.php_js||{};this.php_js.last_error_json=4;return null;}}
 
-// custom contentbuilder related
+// custom contentbuilder NG related
 
 var cbLastId = null;
 function cbRetrieveRatingResults(value){

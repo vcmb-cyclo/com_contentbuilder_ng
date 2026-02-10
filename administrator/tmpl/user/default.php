@@ -192,7 +192,7 @@ use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
     </div>
 
 
-    <input type="hidden" name="option" value="com_contentbuilder" />
+    <input type="hidden" name="option" value="com_contentbuilder_ng" />
     <input type="hidden" name="task" id="task" value="" />
     <input type="hidden" name="form_id" value="<?php echo Factory::getApplication()->input->getInt('form_id', 0); ?>" />
     <input type="hidden" name="joomla_userid" value="<?php echo $this->subject->id; ?>" />

@@ -1,6 +1,6 @@
 <?php
 /**
- * ContentBuilder initialisation.
+ * ContentBuilder NG initialisation.
  *
  * Component initialization.
  *

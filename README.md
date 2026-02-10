@@ -1,7 +1,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-ContentBuilder for Joomla 5.x, 6.x.
+ContentBuilder NG for Joomla 5.x, 6.x.
 
 ## Getting Started
 
