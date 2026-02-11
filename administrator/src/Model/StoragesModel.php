@@ -100,7 +100,7 @@ class StoragesModel extends ListModel
         }
 
         // Optionnel : whitelist rapide des colonnes triables
-        $allowedOrdering = ['a.id', 'a.name', 'a.title', 'a.published', 'a.ordering'];
+        $allowedOrdering = ['a.id', 'a.name', 'a.title', 'a.published', 'a.ordering', 'a.modified'];
         if (!in_array($ordering, $allowedOrdering, true)) {
             $ordering = 'a.ordering';
         }

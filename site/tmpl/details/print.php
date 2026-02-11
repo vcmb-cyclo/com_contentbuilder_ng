@@ -39,7 +39,7 @@ if (Factory::getApplication()->input->getInt('cb_show_author', 1)) {
     <?php if ($this->created): ?>
         <span class="small created-by">
             <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATED_ON'); ?>
-            <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?>
+            <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC4')); ?>
         </span>
     <?php endif; ?>
 
@@ -73,7 +73,7 @@ if (Factory::getApplication()->input->getInt('cb_show_author', 1)) {
         <?php if ($this->modified): ?>
             <span class="small created-by">
                 <?php echo Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON'); ?>
-                <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?>
+                <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC4')); ?>
             </span>
         <?php endif; ?>
 

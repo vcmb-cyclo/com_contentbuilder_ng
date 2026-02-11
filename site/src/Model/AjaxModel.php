@@ -15,7 +15,6 @@ namespace CB\Component\Contentbuilder_ng\Site\Model;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;

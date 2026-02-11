@@ -80,7 +80,6 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $plugins['contentbuilder_ng_themes'] = array();
     $plugins['contentbuilder_ng_themes'][] = 'khepri';
     $plugins['contentbuilder_ng_themes'][] = 'blank';
-    $plugins['contentbuilder_ng_themes'][] = 'joomla3';
     $plugins['contentbuilder_ng_themes'][] = 'joomla6';
     $plugins['system'] = array();
     $plugins['system'][] = 'contentbuilder_ng_system';
@@ -401,8 +400,142 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       }
     }
 
+    $this->migrateStoragesAuditColumns();
+
     $msg = '[OK] Date fields updated to support NULL correctly, if necessary.';
     $this->log($msg);
+  }
+
+  private function storageAuditColumnDefinition(string $column): string
+  {
+    return match ($column) {
+      'created' => 'DATETIME NULL DEFAULT CURRENT_TIMESTAMP',
+      'modified' => 'DATETIME NULL DEFAULT NULL',
+      'created_by' => 'VARCHAR(255) NOT NULL DEFAULT \'\'',
+      'modified_by' => 'VARCHAR(255) NOT NULL DEFAULT \'\'',
+      default => 'TEXT NULL',
+    };
+  }
+
+  private function getStoragesTableColumnsLower(): array
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+    try {
+      $columns = $db->getTableColumns('#__contentbuilder_ng_storages', false);
+      return array_change_key_case($columns ?: [], CASE_LOWER);
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Could not inspect #__contentbuilder_ng_storages columns: ' . $e->getMessage(), Log::WARNING);
+      return [];
+    }
+  }
+
+  private function migrateStoragesAuditColumns(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+    $columns = $this->getStoragesTableColumnsLower();
+    if (empty($columns)) {
+      return;
+    }
+
+    $legacyToStandard = [
+      'last_update' => 'modified',
+      'last_updated' => 'modified',
+      'createdby' => 'created_by',
+      'modifiedby' => 'modified_by',
+      'updated_by' => 'modified_by',
+    ];
+
+    foreach ($legacyToStandard as $legacy => $target) {
+      if (!array_key_exists($legacy, $columns)) {
+        continue;
+      }
+
+      $targetDefinition = $this->storageAuditColumnDefinition($target);
+
+      if (!array_key_exists($target, $columns)) {
+        try {
+          $db->setQuery(
+            'ALTER TABLE ' . $db->quoteName('#__contentbuilder_ng_storages') .
+            ' CHANGE ' . $db->quoteName($legacy) . ' ' . $db->quoteName($target) . ' ' . $targetDefinition
+          )->execute();
+          $this->log("[OK] Renamed storage audit column {$legacy} to {$target}.");
+          $columns = $this->getStoragesTableColumnsLower();
+          continue;
+        } catch (\Throwable $e) {
+          $this->log("[WARNING] Failed renaming storage audit column {$legacy} to {$target}: " . $e->getMessage(), Log::WARNING);
+        }
+      }
+
+      try {
+        if ($target === 'modified' || $target === 'created') {
+          $db->setQuery(
+            'UPDATE ' . $db->quoteName('#__contentbuilder_ng_storages') .
+            ' SET ' . $db->quoteName($target) . ' = ' . $db->quoteName($legacy) .
+            ' WHERE (' . $db->quoteName($target) . ' IS NULL OR ' . $db->quoteName($target) . " IN ('0000-00-00', '0000-00-00 00:00:00'))" .
+            ' AND ' . $db->quoteName($legacy) . ' IS NOT NULL' .
+            ' AND ' . $db->quoteName($legacy) . " NOT IN ('0000-00-00', '0000-00-00 00:00:00')"
+          )->execute();
+        } else {
+          $db->setQuery(
+            'UPDATE ' . $db->quoteName('#__contentbuilder_ng_storages') .
+            ' SET ' . $db->quoteName($target) . ' = ' . $db->quoteName($legacy) .
+            ' WHERE (' . $db->quoteName($target) . " = '' OR " . $db->quoteName($target) . ' IS NULL)' .
+            ' AND ' . $db->quoteName($legacy) . ' IS NOT NULL' .
+            ' AND ' . $db->quoteName($legacy) . " <> ''"
+          )->execute();
+        }
+      } catch (\Throwable $e) {
+        $this->log("[WARNING] Failed copying data from {$legacy} to {$target}: " . $e->getMessage(), Log::WARNING);
+      }
+
+      if ($legacy !== $target) {
+        try {
+          $db->setQuery(
+            'ALTER TABLE ' . $db->quoteName('#__contentbuilder_ng_storages') .
+            ' DROP COLUMN ' . $db->quoteName($legacy)
+          )->execute();
+          $this->log("[OK] Removed legacy storage audit column {$legacy}.");
+          $columns = $this->getStoragesTableColumnsLower();
+        } catch (\Throwable $e) {
+          $this->log("[WARNING] Failed removing legacy storage audit column {$legacy}: " . $e->getMessage(), Log::WARNING);
+        }
+      }
+    }
+
+    $required = ['created', 'modified', 'created_by', 'modified_by'];
+    foreach ($required as $column) {
+      if (array_key_exists($column, $columns)) {
+        continue;
+      }
+      try {
+        $db->setQuery(
+          'ALTER TABLE ' . $db->quoteName('#__contentbuilder_ng_storages') .
+          ' ADD COLUMN ' . $db->quoteName($column) . ' ' . $this->storageAuditColumnDefinition($column)
+        )->execute();
+        $this->log("[OK] Added storage audit column {$column}.");
+      } catch (\Throwable $e) {
+        $this->log("[WARNING] Failed adding storage audit column {$column}: " . $e->getMessage(), Log::WARNING);
+      }
+    }
+
+    $normalizationQueries = [
+      "ALTER TABLE `#__contentbuilder_ng_storages` MODIFY `created` DATETIME NULL DEFAULT CURRENT_TIMESTAMP",
+      "ALTER TABLE `#__contentbuilder_ng_storages` MODIFY `modified` DATETIME NULL DEFAULT NULL",
+      "ALTER TABLE `#__contentbuilder_ng_storages` MODIFY `created_by` VARCHAR(255) NOT NULL DEFAULT ''",
+      "ALTER TABLE `#__contentbuilder_ng_storages` MODIFY `modified_by` VARCHAR(255) NOT NULL DEFAULT ''",
+      "UPDATE `#__contentbuilder_ng_storages` SET `created` = NULL WHERE `created` IN ('0000-00-00', '0000-00-00 00:00:00')",
+      "UPDATE `#__contentbuilder_ng_storages` SET `modified` = NULL WHERE `modified` IN ('0000-00-00', '0000-00-00 00:00:00')",
+      "UPDATE `#__contentbuilder_ng_storages` SET `created_by` = '' WHERE `created_by` IS NULL",
+      "UPDATE `#__contentbuilder_ng_storages` SET `modified_by` = '' WHERE `modified_by` IS NULL",
+    ];
+
+    foreach ($normalizationQueries as $query) {
+      try {
+        $db->setQuery($query)->execute();
+      } catch (\Throwable $e) {
+        $this->log('[WARNING] Could not normalize storage audit columns: ' . $e->getMessage(), Log::WARNING);
+      }
+    }
   }
 
 
@@ -1257,6 +1390,39 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
   }
 
+  private function removeDeprecatedThemePlugins(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+    $installer = new Installer();
+    $installer->setDatabase(Factory::getContainer()->get('DatabaseDriver'));
+
+    $deprecated = [
+      ['folder' => 'contentbuilder_ng_themes', 'element' => 'joomla3'],
+    ];
+
+    foreach ($deprecated as $plugin) {
+      $folder = $plugin['folder'];
+      $element = $plugin['element'];
+
+      $query = $db->getQuery(true)
+        ->select($db->quoteName('extension_id'))
+        ->from($db->quoteName('#__extensions'))
+        ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
+        ->where($db->quoteName('folder') . ' = ' . $db->quote($folder))
+        ->where($db->quoteName('element') . ' = ' . $db->quote($element));
+
+      $db->setQuery($query);
+      $id = (int) $db->loadResult();
+
+      if ($id === 0) {
+        continue;
+      }
+
+      $this->log("[INFO] Removing deprecated theme plugin {$folder}/{$element} (id {$id}).");
+      $this->uninstallPluginById($installer, $id, $folder, $element);
+    }
+  }
+
   /**
    * Method to run after an install/update/uninstall method
    *
@@ -1299,6 +1465,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $this->activatePlugins();
 
     if ($type === 'update') {
+      $this->removeDeprecatedThemePlugins();
       $this->removeLegacyComponent();
       $this->removeLegacyPlugins();
     }

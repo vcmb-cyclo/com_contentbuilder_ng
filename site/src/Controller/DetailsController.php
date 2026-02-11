@@ -19,7 +19,6 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class DetailsController extends BaseController
@@ -142,7 +141,7 @@ class DetailsController extends BaseController
             }
         }
 
-        // Synchroniser Input + CBRequest (legacy)
+        // Synchroniser l'input pour les appels legacy encore présents.
         $this->input->set('id', $form_id);
         Factory::getApplication()->input->set('id', $form_id);
 

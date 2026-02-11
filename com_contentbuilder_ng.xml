@@ -102,7 +102,6 @@
 
 <plugins>
     <plugin group="contentbuilder_ng_themes">plugins/contentbuilder_ng_themes/blank</plugin>
-    <plugin group="contentbuilder_ng_themes">plugins/contentbuilder_ng_themes/joomla3</plugin>
     <plugin group="contentbuilder_ng_themes">plugins/contentbuilder_ng_themes/joomla6</plugin>
     <plugin group="contentbuilder_ng_themes">plugins/contentbuilder_ng_themes/khepri</plugin>
 </plugins>

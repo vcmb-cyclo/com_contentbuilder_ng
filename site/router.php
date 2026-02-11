@@ -7,8 +7,7 @@
  */
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
-
+use Joomla\CMS\Factory;
 
 function ContentbuilderBuildRoute(&$query) {
 
@@ -148,6 +147,8 @@ function ContentbuilderParseRoute(&$segments) {
 	            Factory::getApplication()->input->set('record_id', $vars['record_id']);
 	            Factory::getApplication()->input->set('title', $vars['title']);
 	            Factory::getApplication()->input->set('view', 'details');
+
+                break;
 
             case 'edit':
 

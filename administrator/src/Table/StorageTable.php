@@ -21,6 +21,10 @@ class StorageTable extends Table
     public $title = '';
     public $bytable = 0;
     public $ordering = 0;
+    public $created = null;
+    public $modified = null;
+    public $created_by = '';
+    public $modified_by = '';
     public $published = 0;
 
     /**

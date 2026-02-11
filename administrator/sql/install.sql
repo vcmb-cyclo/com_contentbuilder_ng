@@ -772,6 +772,16 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_storages`
     1
 ) NOT NULL DEFAULT '0',
     `ordering` int NOT NULL DEFAULT '0',
+    `created` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+    `modified` datetime NULL DEFAULT NULL,
+    `created_by` varchar
+(
+    255
+) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+    `modified_by` varchar
+(
+    255
+) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
     `published` tinyint
 (
     1

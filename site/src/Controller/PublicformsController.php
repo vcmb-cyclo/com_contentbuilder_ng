@@ -12,16 +12,15 @@ namespace CB\Component\Contentbuilder_ng\Site\Controller;
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\MVC\Controller\BaseController;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
 class PublicformsController extends BaseController
 {
 
-    function display($cachable = false, $urlparams = array())
+    function display($cachable = false, $urlparams = [])
     {
-        Factory::getApplication()->input->set('tmpl', Factory::getApplication()->input->getWord('tmpl',null));
-        Factory::getApplication()->input->set('layout', Factory::getApplication()->input->getWord('layout',null));
-        Factory::getApplication()->input->set('view', 'publicforms');
+        $this->input->set('tmpl', $this->input->getWord('tmpl', null));
+        $this->input->set('layout', $this->input->getWord('layout', null));
+        $this->input->set('view', 'publicforms');
 
         parent::display();
     }

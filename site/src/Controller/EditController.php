@@ -20,7 +20,6 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class EditController extends BaseController
@@ -322,7 +321,7 @@ class EditController extends BaseController
             }
         }
 
-        // Synchroniser Joomla Input + CBRequest (legacy)
+        // Synchroniser l'input pour les appels legacy encore présents.
         $this->input->set('id', $formId);
         Factory::getApplication()->input->set('id', $formId);
         $this->input->set('view', 'edit');

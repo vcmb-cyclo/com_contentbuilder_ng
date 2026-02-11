@@ -106,6 +106,10 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                         <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_ORDERBY'), 'a.ordering', $listDirn, $listOrder); ?>
                     </th>
 
+                    <th class="w-10 text-nowrap">
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON'), 'a.modified', $listDirn, $listOrder); ?>
+                    </th>
+
                     <th class="w-1 text-center">
                         <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'a.published', $listDirn, $listOrder); ?>
                     </th>
@@ -115,7 +119,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
             <tbody>
                 <?php if ($n === 0) : ?>
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-4">
+                        <td colspan="7" class="text-center text-muted py-4">
                             <?php echo Text::_('JGLOBAL_NO_MATCHING_RESULTS'); ?>
                         </td>
                     </tr>
@@ -125,6 +129,10 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                         $id        = (int) ($row->id ?? 0);
                         $name      = htmlspecialchars((string) ($row->name ?? ''), ENT_QUOTES, 'UTF-8');
                         $title     = htmlspecialchars((string) ($row->title ?? ''), ENT_QUOTES, 'UTF-8');
+                        $lastUpdateRaw = $row->modified ?? ($row->created ?? '');
+                        $lastUpdate = $lastUpdateRaw
+                            ? HTMLHelper::_('date', $lastUpdateRaw, Text::_('DATE_FORMAT_LC4'))
+                            : '-';
 
                         // ⚠️ Vérifie ta convention : task=storage.edit (singulier) ou storages.edit (pluriel)
                         $link = Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $id);
@@ -151,6 +159,10 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                             <?php endif; ?>
                         </td>
 
+                        <td class="text-nowrap">
+                            <?php echo htmlspecialchars((string) $lastUpdate, ENT_QUOTES, 'UTF-8'); ?>
+                        </td>
+
                         <td class="text-center">
                             <?php echo $published; ?>
                         </td>
@@ -161,7 +173,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 
             <tfoot>
                 <tr>
-                    <td colspan="6">
+                    <td colspan="7">
                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
 
                             <div class="d-flex flex-wrap align-items-center gap-2">

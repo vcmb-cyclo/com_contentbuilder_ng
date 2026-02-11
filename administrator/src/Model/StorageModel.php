@@ -225,6 +225,31 @@ class StorageModel extends AdminModel
             $table->title = trim($title) !== '' ? trim($title) : $newname;
         }
 
+        // Standard Joomla-style audit fields for storages.
+        $now = Factory::getDate()->toSql();
+        $user = Factory::getApplication()->getIdentity();
+        $actor = trim((string) (($user->username ?? '') !== '' ? $user->username : ($user->name ?? '')));
+        if ($actor === '') {
+            $actor = 'system';
+        }
+
+        $isNew = (int) ($table->id ?? 0) === 0;
+        if (
+            $isNew &&
+            (
+                empty($table->created) ||
+                str_starts_with((string) $table->created, '0000-00-00')
+            )
+        ) {
+            $table->created = $now;
+        }
+        if ($isNew && trim((string) ($table->created_by ?? '')) === '') {
+            $table->created_by = $actor;
+        }
+
+        $table->modified = $now;
+        $table->modified_by = $actor;
+
         Logger::info('StorageModel prepareTable', [
             'name' => $table->name,
             'title' => $table->title,
@@ -350,22 +375,21 @@ class StorageModel extends AdminModel
         }
     }
 
-    // Crée une table #__<storage.name> 
-    public function ensureDataTable(int $storageId): void
+    // Crée une table #__<storage.name> ou synchronise une table externe (bytable).
+    public function ensureDataTable(int $storageId, bool $isNew = false, ?string $oldName = null): void
     {
         $table = $this->getTable('Storage');
         $table->load($storageId);
 
-        // isNew = false ici (on ne fait pas d'import bytable)
-        $this->syncStorageDataTableOrBytable($storageId, false, $table);
-}
+        $this->syncStorageDataTableOrBytable($storageId, $isNew, $table, $oldName);
+    }
 
 
     /**
      * Crée/rename la table #__<storage.name> si !bytable
      * OU sync bytable => créer storage_fields depuis colonnes + ajouter colonnes system + import records si new
      */
-    private function syncStorageDataTableOrBytable(int $storageId, bool $isNew, \Joomla\CMS\Table\Table $table): void
+    private function syncStorageDataTableOrBytable(int $storageId, bool $isNew, \Joomla\CMS\Table\Table $table, ?string $oldName = null): void
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 
@@ -386,11 +410,13 @@ class StorageModel extends AdminModel
             $prefixedName = $db->getPrefix() . $name;
 
             $exists = isset($tables[$prefixedName]);
-            $oldName = $this->oldItem->name ?? null;
+            if ($oldName === null) {
+                $oldName = $this->oldItem->name ?? null;
+            }
 
             if (!$exists) {
                 // rename si l'ancienne existait
-                if (!empty($oldName)) {
+                if (!empty($oldName) && $oldName !== $name) {
                     $oldPrefixed = $db->getPrefix() . $oldName;
                     if (isset($tables[$oldPrefixed])) {
                         Logger::info('Rename data table', ['from' => $oldName, 'to' => $name]);

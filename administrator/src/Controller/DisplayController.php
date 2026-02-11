@@ -20,7 +20,7 @@ use Joomla\CMS\Language\Text;
 
 class DisplayController extends BaseController
 {
-    protected $default_view = 'test';
+    protected $default_view = 'storages';
 
     public function display($cachable = false, $urlparams = [])
     {

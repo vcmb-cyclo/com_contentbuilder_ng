@@ -23,6 +23,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\FormController as BaseFormController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
@@ -80,19 +81,83 @@ class StorageController extends BaseFormController
 
         // Pas de CSV → core
         if (!is_array($file) || empty($file['name']) || (int) ($file['size'] ?? 0) <= 0) {
+            $isNew = empty($data['id']);
+            /** @var \CB\Component\Contentbuilder_ng\Administrator\Model\StorageModel $model */
+            $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
+
+            // Conserver le nom de la table data existante pour permettre un RENAME lors d'un changement de nom.
+            $oldName = null;
+            if (!$isNew && $model) {
+                $existing = $model->getItem((int) $data['id']);
+                if ($existing && (int) ($existing->bytable ?? 0) === 0) {
+                    $oldName = (string) ($existing->name ?? '');
+                }
+            }
+
             $result = parent::save($key, $urlVar);
             if ($result === false) {
                 return false;
             }
 
-            // Récupère l'id
-            $jform = $this->input->post->get('jform', [], 'array');
-            $id = (int) ($jform['id'] ?? $this->input->getInt('id'));
+            // Récupère l'id réellement sauvegardé (création: id n'est pas dans le POST initial).
+            $id = 0;
+            if ($model) {
+                $id = (int) $model->getState($model->getName() . '.id', 0);
+            }
+            if (!$id) {
+                $jform = $this->input->post->get('jform', [], 'array');
+                $id = (int) ($jform['id'] ?? 0);
+            }
+            if (!$id) {
+                $id = (int) $this->input->getInt('id');
+            }
+            if (!$id) {
+                try {
+                    $redirect = (string) $this->getRedirect();
+                    $query = parse_url($redirect, PHP_URL_QUERY);
+                    if (is_string($query) && $query !== '') {
+                        parse_str($query, $queryVars);
+                        $id = (int) ($queryVars['id'] ?? 0);
+                    }
+                } catch (\Throwable $e) {
+                    Logger::exception($e);
+                }
+            }
+            if (!$id) {
+                try {
+                    $lookupName = '';
+                    $lookupBytable = null;
 
-            if ($id) {
-                /** @var \CB\Component\Contentbuilder_ng\Administrator\Model\StorageModel $model */
-                $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
-                $model->ensureDataTable($id);
+                    if (!empty($data['bytable'])) {
+                        $lookupName = (string) $data['bytable'];
+                        $lookupBytable = 1;
+                    } elseif (!empty($data['name'])) {
+                        $lookupName = (string) $data['name'];
+                        $lookupBytable = 0;
+                    }
+
+                    if ($lookupName !== '') {
+                        $db = Factory::getContainer()->get(DatabaseInterface::class);
+                        $query = $db->getQuery(true)
+                            ->select($db->quoteName('id'))
+                            ->from($db->quoteName('#__contentbuilder_ng_storages'))
+                            ->where($db->quoteName('name') . ' = ' . $db->quote($lookupName));
+
+                        if ($lookupBytable !== null) {
+                            $query->where($db->quoteName('bytable') . ' = ' . (int) $lookupBytable);
+                        }
+
+                        $query->order($db->quoteName('id') . ' DESC');
+                        $db->setQuery($query, 0, 1);
+                        $id = (int) $db->loadResult();
+                    }
+                } catch (\Throwable $e) {
+                    Logger::exception($e);
+                }
+            }
+
+            if ($id && $model) {
+                $model->ensureDataTable($id, $isNew, $oldName);
             }
 
             return $result;
@@ -145,6 +210,15 @@ class StorageController extends BaseFormController
 
         $this->setRedirect($link, Text::_('COM_CONTENTBUILDER_NG_SAVED'));
         return true;
+    }
+
+    /**
+     * Force apply task through this controller custom save flow.
+     */
+    public function apply($key = null, $urlVar = null)
+    {
+        $this->setTask('apply');
+        return $this->save($key, $urlVar);
     }
 
 

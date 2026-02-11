@@ -21,25 +21,33 @@ $listDirn  = strtolower($listDirn) === 'desc' ? 'desc' : 'asc';
 $storageId = (int) ($this->item->id ?? 0);
 $limitValue = (int) $this->state?->get('list.limit', 0);
 
-$sortLink = function (string $label, string $field) use ($listOrder, $listDirn, $storageId, $limitValue): string {
+$sortFields = ['id', 'name', 'title', 'group_definition', 'ordering', 'published'];
+$sortLinks = [];
+
+foreach ($sortFields as $field) {
     $isActive = ($listOrder === $field);
     $nextDir = ($isActive && $listDirn === 'asc') ? 'desc' : 'asc';
-    $indicator = $isActive
-        ? ($listDirn === 'asc'
-            ? ' <span class="ms-1 icon-sort icon-sort-asc" aria-hidden="true"></span>'
-            : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>')
-        : '';
-    $url = \Joomla\CMS\Router\Route::_(
-        'index.php?option=com_contentbuilder_ng&task=storage.edit&id='
-        . $storageId
-        . '&list[start]=0'
-        . '&list[ordering]=' . $field
-        . '&list[direction]=' . $nextDir
-        . '&list[limit]=' . max(0, $limitValue)
-    );
+    $indicator = '';
 
-    return '<a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . $indicator . '</a>';
-};
+    if ($isActive) {
+        $indicator = ($listDirn === 'asc')
+            ? ' <span class="ms-1 icon-sort icon-sort-asc" aria-hidden="true"></span>'
+            : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>';
+    }
+
+    $sortLinks[$field] = [
+        'url' => \Joomla\CMS\Router\Route::_(
+            'index.php?option=com_contentbuilder_ng&task=storage.display&layout=edit&id='
+            . $storageId
+            . '&list[start]=0'
+            . '&list[ordering]=' . $field
+            . '&list[direction]=' . $nextDir
+            . '&list[limit]=' . max(0, $limitValue),
+            false
+        ),
+        'indicator' => $indicator,
+    ];
+}
 
 ?>
 
@@ -375,26 +383,38 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                     <thead>
                         <tr>
                             <th width="5">
-                                <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_ID'), 'id', $listDirn, $listOrder); ?>
+                                <a href="<?php echo htmlspecialchars((string) $sortLinks['id']['url'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_ID'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['id']['indicator']; ?>
+                                </a>
                             </th>
                             <th width="20">
                                 <input class="form-check-input" type="checkbox" name="toggle" value=""
                                     onclick="Joomla.checkAll(this);" />
                             </th>
                             <th>
-                                <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_NAME'), 'name', $listDirn, $listOrder); ?>
+                                <a href="<?php echo htmlspecialchars((string) $sortLinks['name']['url'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_NAME'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['name']['indicator']; ?>
+                                </a>
                             </th>
                             <th>
-                                <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_STORAGE_TITLE'), 'title', $listDirn, $listOrder); ?>
+                                <a href="<?php echo htmlspecialchars((string) $sortLinks['title']['url'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_STORAGE_TITLE'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['title']['indicator']; ?>
+                                </a>
                             </th>
                             <th>
-                                <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_STORAGE_GROUP'), 'group_definition', $listDirn, $listOrder); ?>
+                                <a href="<?php echo htmlspecialchars((string) $sortLinks['group_definition']['url'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_STORAGE_GROUP'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['group_definition']['indicator']; ?>
+                                </a>
                             </th>
                             <th>
-                                <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_ORDERBY'), 'ordering', $listDirn, $listOrder); ?>
+                                <a href="<?php echo htmlspecialchars((string) $sortLinks['ordering']['url'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_ORDERBY'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['ordering']['indicator']; ?>
+                                </a>
                             </th>
                             <th>
-                                <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'published', $listDirn, $listOrder); ?>
+                                <a href="<?php echo htmlspecialchars((string) $sortLinks['published']['url'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['published']['indicator']; ?>
+                                </a>
                             </th>
                         </tr>
                     </thead>

@@ -36,7 +36,6 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 
@@ -295,9 +294,9 @@ class EditModel extends BaseDatabaseModel
                             $table = Table::getInstance('content');
                             $loaded = $table->load($article['id']);
                             if ($loaded) {
-                                // Convert to the JObject before adding other data.
+                                // Convert to stdClass before adding other data.
                                 $properties = $table->getProperties(1);
-                                $item = ArrayHelper::toObject($properties, 'JObject');
+                                $item = ArrayHelper::toObject($properties, \stdClass::class);
 
                                 if (property_exists($item, 'params')) {
                                     $registry = new Registry;

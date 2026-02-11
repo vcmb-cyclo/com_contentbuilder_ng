@@ -425,22 +425,34 @@ class FormModel extends AdminModel
         $data->form = null;
         if ($data->type && $data->reference_id) {
             $data->form = ContentbuilderLegacyHelper::getForm($data->type, $data->reference_id);
-            if (!$data->form->exists) {
-                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 'error');
-                Factory::getApplication()->redirect('index.php?option=com_contentbuilder_ng&task=forms.display&limitstart=' . $this->getState('limitstart', 0));
-            }
-            if (isset($data->form->properties) && isset($data->form->properties->name)) {
-                $data->type_name = trim($data->form->properties->name);
-            } else {
-                $data->type_name = '';
-            }
-            $data->title = trim($data->form->getPageTitle());
+            if (!$data->form || !$data->form->exists) {
+                if ((string) $data->type === 'com_breezingforms') {
+                    Factory::getApplication()->enqueueMessage(
+                        Text::sprintf('COM_CONTENTBUILDER_NG_BREEZINGFORMS_SOURCE_NOT_FOUND', (int) $data->reference_id),
+                        'warning'
+                    );
+                } else {
+                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 'warning');
+                }
 
-            // En charge de la sauvegarde de la partie Element
-            if (is_object($data->form)) {
-                ContentbuilderLegacyHelper::synchElements($data->id, $data->form);
-                $elements_table = $this->getTable('Elementoption');
-                $elements_table->reorder('form_id=' . $data->id);
+                // Keep the form editable and let admin choose a new source.
+                $data->reference_id = 0;
+                $data->form = null;
+                $data->type_name = '';
+            } else {
+                if (isset($data->form->properties) && isset($data->form->properties->name)) {
+                    $data->type_name = trim($data->form->properties->name);
+                } else {
+                    $data->type_name = '';
+                }
+                $data->title = trim($data->form->getPageTitle());
+
+                // En charge de la sauvegarde de la partie Element
+                if (is_object($data->form)) {
+                    ContentbuilderLegacyHelper::synchElements($data->id, $data->form);
+                    $elements_table = $this->getTable('Elementoption');
+                    $elements_table->reorder('form_id=' . $data->id);
+                }
             }
         }
 
