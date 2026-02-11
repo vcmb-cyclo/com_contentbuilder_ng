@@ -5,7 +5,7 @@
  *
  * Log file manager.
  *
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @subpackage  Site.Helper
  * @since       6.0.0
  * @author      Xavier DANO

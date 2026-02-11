@@ -1,7 +1,7 @@
 <?php
 /**
  * @version     6.0
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
@@ -15,6 +15,7 @@ use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 
 class plgContentbuilder_ng_validationNotempty extends CMSPlugin implements SubscriberInterface
@@ -24,8 +25,16 @@ class plgContentbuilder_ng_validationNotempty extends CMSPlugin implements Subsc
         return ['onValidate' => 'onValidate'];
     }
 
-    function onValidate($field, $fields, $record_id, $form, $value)
+    public function onValidate(Event $event): string
     {
+        $args = array_values($event->getArguments());
+        $field = isset($args[0]) && is_array($args[0]) ? $args[0] : [];
+        $record_id = isset($args[2]) ? (int) $args[2] : 0;
+        $form = $args[3] ?? null;
+        $value = $args[4] ?? null;
+        if (!$field) {
+            return '';
+        }
 
         $lang = Factory::getApplication()->getLanguage();
         $lang->load('plg_contentbuilder_ng_validation_notempty', JPATH_ADMINISTRATOR);

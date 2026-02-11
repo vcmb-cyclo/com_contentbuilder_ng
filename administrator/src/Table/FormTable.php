@@ -4,7 +4,7 @@
  *
  * Table description.
  *
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @subpackage  Administrator.Tables
  * @author      Markus Bopp / XDA+GIL
  * @copyright   Copyright (C) 2011–2026 by XDA+GIL

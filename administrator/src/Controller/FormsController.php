@@ -4,7 +4,7 @@
  *
  * Handles actions (copy, delete, publish, ...) for forms list in the admin interface.
  *
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @subpackage  Administrator.Controller
  * @author      Markus Bopp / XDA+GIL
  * @copyright   Copyright (C) 2011–2026 by XDA+GIL

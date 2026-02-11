@@ -102,14 +102,20 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::cancel('form.cancel', $isNew ? 'JTOOLBAR_CLOSE' : 'JTOOLBAR_CLOSE');
 
         if ($formId > 0) {
+            $previewUntil = time() + 600;
+            $previewPayload = $formId . '|' . $previewUntil;
+            $previewSig = hash_hmac('sha256', $previewPayload, (string) $app->get('secret'));
             $previewUrl = Uri::root()
                 . 'index.php?option=com_contentbuilder_ng&task=edit.display&id='
                 . $formId
-                . '&record_id=0';
+                . '&record_id=0'
+                . '&cb_preview=1'
+                . '&cb_preview_until=' . $previewUntil
+                . '&cb_preview_sig=' . $previewSig;
             Toolbar::getInstance('toolbar')->appendButton(
                 'Link',
                 'eye',
-                Text::_('JTOOLBAR_PREVIEW'),
+                Text::_('COM_CONTENTBUILDER_NG_PREVIEW'),
                 $previewUrl,
                 '_blank'
             );

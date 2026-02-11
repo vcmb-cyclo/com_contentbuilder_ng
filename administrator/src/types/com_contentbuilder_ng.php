@@ -1,7 +1,7 @@
 <?php
 /**
- * @package     ContentBuilder
- * @author      Markus Bopp
+ * @package     ContentBuilder NG
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @license     GNU/GPL
  * @copyright   Copyright (C) 2026 by XDA+GIL
@@ -16,9 +16,8 @@ use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
-class contentbuilder_ng_com_contentbuilder
+class contentbuilder_ng_com_contentbuilder_ng
 {
 
     public $properties = null;
@@ -632,7 +631,8 @@ class contentbuilder_ng_com_contentbuilder
     {
         $list = array();
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select `id`,`title`,`name` From #__contentbuilder_ng_storages Where published = 1 Order By `ordering`");
+        // In administrator context, allow selecting unpublished storages too.
+        $db->setQuery("Select `id`,`title`,`name` From #__contentbuilder_ng_storages Order By `ordering`");
         $rows = $db->loadAssocList();
         foreach ($rows as $row) {
             $list[$row['id']] = $row['title'] . ' (' . $row['name'] . ')';

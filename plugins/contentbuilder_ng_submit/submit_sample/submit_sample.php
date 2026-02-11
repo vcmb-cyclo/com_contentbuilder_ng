@@ -1,8 +1,8 @@
 <?php
 /**
  * @version     6.0
- * @package     ContentBuilder
- * @author      Markus Bopp
+ * @package     ContentBuilder NG
+ * @author      Markus Bopp/ XDA + GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
@@ -12,6 +12,7 @@
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 
 class plgContentbuilder_ng_submitSubmit_sample extends CMSPlugin implements SubscriberInterface
@@ -25,23 +26,25 @@ class plgContentbuilder_ng_submitSubmit_sample extends CMSPlugin implements Subs
         }
         
         /**
-         *
-         * @param mixed $record_id The record id, type as required by the type of storage
-         * @param stdClass $form the form object
-         * @param array $values indices are the element IDs as defined by the type of storage. Group values will be stored as array
+         * Joomla 6 event signature.
          */
-        function onBeforeSubmit($record_id, $form, array $values){
-            
+        public function onBeforeSubmit(Event $event): void
+        {
+            $args = array_values($event->getArguments());
+            $recordId = $args[0] ?? null;
+            $form = $args[1] ?? null;
+            $values = isset($args[2]) && is_array($args[2]) ? $args[2] : [];
         }
         
         /**
-         *
-         * @param mixed $record_id The record id, type as required by the type of storage
-         * @param int $article_id the article id, 0 if there isn't any
-         * @param stdClass $form the form object
-         * @param array $values indices are the element IDs as defined by the type of storage. Group values will be stored as array
+         * Joomla 6 event signature.
          */
-        function onAfterSubmit($record_id, $article_id, $form, array $values){
-            
+        public function onAfterSubmit(Event $event): void
+        {
+            $args = array_values($event->getArguments());
+            $recordId = $args[0] ?? null;
+            $articleId = isset($args[1]) ? (int) $args[1] : 0;
+            $form = $args[2] ?? null;
+            $values = isset($args[3]) && is_array($args[3]) ? $args[3] : [];
         }
 }

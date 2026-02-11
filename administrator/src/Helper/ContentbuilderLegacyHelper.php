@@ -1,6 +1,6 @@
 <?php
 /**
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp / XDA + GIL
  * @link        https://breezingforms.vcmb.fr
  * @license     GNU/GPL
@@ -30,7 +30,6 @@ use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
 use Joomla\Registry\Registry;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 final class ContentbuilderLegacyHelper
@@ -996,14 +995,40 @@ final class ContentbuilderLegacyHelper
 
     public static function getForms($type)
     {
-        if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/types/' . $type . '.php')) {
-            require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/types/' . $type . '.php');
-            $namespace = 'CB\\Component\\Contentbuilder_ng\\Administrator\\types\\';
-            $class     = $namespace . 'contentbuilder_ng_' . $type;
-            if (class_exists($class)) {
-                return call_user_func(array($class, "getFormsList"));
+        $type = trim((string) $type);
+        if ($type === '') {
+            return array();
+        }
+
+        $namespace = 'CB\\Component\\Contentbuilder_ng\\Administrator\\types\\';
+        $adminTypeCandidates = array($type);
+        if ($type === 'com_contentbuilder_ng') {
+            $adminTypeCandidates[] = 'com_contentbuilder';
+        } else if ($type === 'com_contentbuilder') {
+            $adminTypeCandidates[] = 'com_contentbuilder_ng';
+        }
+
+        foreach ($adminTypeCandidates as $adminType) {
+            $candidate = JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/types/' . $adminType . '.php';
+            if (file_exists($candidate)) {
+                require_once($candidate);
             }
-        } else if (file_exists(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php')) {
+        }
+
+        $classCandidates = array($namespace . 'contentbuilder_ng_' . $type);
+        if ($type === 'com_contentbuilder_ng') {
+            $classCandidates[] = $namespace . 'contentbuilder_ng_com_contentbuilder';
+        } else if ($type === 'com_contentbuilder') {
+            $classCandidates[] = $namespace . 'contentbuilder_ng_com_contentbuilder_ng';
+        }
+
+        foreach ($classCandidates as $class) {
+            if (class_exists($class)) {
+                return call_user_func(array($class, 'getFormsList'));
+            }
+        }
+
+        if (file_exists(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php')) {
             require_once(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php');
             $class = 'contentbuilder_ng_' . $type;
             if (class_exists($class)) {
@@ -1024,27 +1049,51 @@ final class ContentbuilderLegacyHelper
         ]);
         
         
-        if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/types/' . $type . '.php')) {
-            require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/types/' . $type . '.php');
-            if (isset($forms[$type][$reference_id])) {
-                return $forms[$type][$reference_id];
+        $type = trim((string) $type);
+        $namespace = 'CB\\Component\\Contentbuilder_ng\\Administrator\\types\\';
+        $adminTypeCandidates = array($type);
+        if ($type === 'com_contentbuilder_ng') {
+            $adminTypeCandidates[] = 'com_contentbuilder';
+        } else if ($type === 'com_contentbuilder') {
+            $adminTypeCandidates[] = 'com_contentbuilder_ng';
+        }
+
+        foreach ($adminTypeCandidates as $adminType) {
+            $candidate = JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/types/' . $adminType . '.php';
+            if (file_exists($candidate)) {
+                require_once($candidate);
+            }
+        }
+
+        if (isset($forms[$type][$reference_id])) {
+            return $forms[$type][$reference_id];
+        }
+
+        $classCandidates = array($namespace . 'contentbuilder_ng_' . $type);
+        if ($type === 'com_contentbuilder_ng') {
+            $classCandidates[] = $namespace . 'contentbuilder_ng_com_contentbuilder';
+        } else if ($type === 'com_contentbuilder') {
+            $classCandidates[] = $namespace . 'contentbuilder_ng_com_contentbuilder_ng';
+        }
+
+        foreach ($classCandidates as $class) {
+            if (!class_exists($class)) {
+                continue;
             }
 
-            $namespace = 'CB\\Component\\Contentbuilder_ng\\Administrator\\types\\';
-            $class     = $namespace . 'contentbuilder_ng_' . $type;
-            if (class_exists($class)) {
-                try {
-                    $form = new $class($reference_id);
-                } catch (\Throwable $e) {
-                    Logger::exception($e);
-                    throw $e;
-                }
-
-                $forms = array();
-                $forms[$type][$reference_id] = $form;
-                return $form;
+            try {
+                $form = new $class($reference_id);
+            } catch (\Throwable $e) {
+                Logger::exception($e);
+                throw $e;
             }
-        } else if (file_exists(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php')) {
+
+            $forms = array();
+            $forms[$type][$reference_id] = $form;
+            return $form;
+        }
+
+        if (file_exists(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php')) {
             require_once(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php');
             if (isset($forms[$type][$reference_id])) {
                 return $forms[$type][$reference_id];
@@ -1389,7 +1438,7 @@ final class ContentbuilderLegacyHelper
         $db->setQuery("Select `type`, reference_id, editable_template, editable_prepare, edit_by_type, act_as_registration, registration_name_field, registration_username_field, registration_email_field, registration_email_repeat_field, registration_password_field, registration_password_repeat_field From #__contentbuilder_ng_forms Where id = " . intval($contentbuilder_ng_form_id));
         $result = $db->loadAssoc();
 
-        if (is_array($result) && $result['editable_template']) {
+        if (is_array($result) && trim((string) ($result['editable_template'] ?? '')) !== '') {
 
             $user = null;
             if ($result['act_as_registration']) {
@@ -1417,6 +1466,13 @@ final class ContentbuilderLegacyHelper
             }
 
             $hasLabels = count($labels);
+            $db->setQuery(
+                "Select Count(1) From #__contentbuilder_ng_elements"
+                . " Where published = 1"
+                . " And editable = 1"
+                . " And form_id = " . intval($contentbuilder_ng_form_id)
+            );
+            $hasEditableElements = ((int) $db->loadResult()) > 0;
 
             $form_type = $result['type'];
             $form_reference_id = $result['reference_id'];
@@ -1480,7 +1536,14 @@ final class ContentbuilderLegacyHelper
             $the_init_scripts = "\n" . '<script type="text/javascript">' . "\n" . '<!--' . "\n";
 
             foreach ($items as $key => $item) {
-                $db->setQuery("Select * From #__contentbuilder_ng_elements Where published = 1 And editable = 1 And reference_id = " . $db->Quote($item['id']) . " And form_id = " . intval($contentbuilder_ng_form_id) . " Order By ordering");
+                $db->setQuery(
+                    "Select * From #__contentbuilder_ng_elements"
+                    . " Where published = 1"
+                    . ($hasEditableElements ? " And editable = 1" : "")
+                    . " And reference_id = " . $db->Quote($item['id'])
+                    . " And form_id = " . intval($contentbuilder_ng_form_id)
+                    . " Order By ordering"
+                );
                 $element = $db->loadAssoc();
 
                 $autocomplete = '';
@@ -1780,9 +1843,11 @@ final class ContentbuilderLegacyHelper
             return $template . $the_init_scripts . "\n" . '//-->' . '</script>' . "\n";
 
         } else {
-            // JError::raiseError(404, Text::_('COM_CONTENTBUILDER_NG_TEMPLATE_NOT_FOUND'));
-            // throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_TEMPLATE_NOT_FOUND'), 404);
-            Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_TEMPLATE_NOT_FOUND'), 'warning');
+            if (!is_array($result)) {
+                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 'error');
+            } else {
+                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TEMPLATE_NOT_SET'), 'error');
+            }
         }
 
         return '';
@@ -1791,8 +1856,7 @@ final class ContentbuilderLegacyHelper
     public static function createArticle($contentbuilder_ng_form_id, $record_id, array $record, array $elements_allowed, $title_field = '', $metadata = null, $config = array(), $full = false, $limited_options = true, $menu_cat_id = null)
     {
 
-        $tz = new DateTimeZone(Factory::getApplication()->get('offset'));
-        $tz = new DateTimeZone(Factory::getApplication()->get('offset'));
+        $tz = new \DateTimeZone(Factory::getApplication()->get('offset'));
 
         if (isset($config['publish_up']) && $config['publish_up']) {
             $config['publish_up'] = Factory::getDate($config['publish_up'], $tz);
@@ -2476,7 +2540,25 @@ final class ContentbuilderLegacyHelper
         ");
         $result = $db->loadAssoc();
 
-        $config = unserialize(base64_decode($result['config']));
+        if (!is_array($result)) {
+            $permissions = [
+                'published'   => false,
+                'limit_edit'  => false,
+                'limit_add'   => false,
+                'verify_view' => false,
+                'verify_new'  => false,
+                'verify_edit' => false,
+            ];
+            $session->set($key, $permissions);
+
+            return;
+        }
+
+        $decodedConfig = base64_decode((string) ($result['config'] ?? ''), true);
+        $config        = $decodedConfig !== false ? @unserialize($decodedConfig, ['allowed_classes' => false]) : [];
+        if (!is_array($config)) {
+            $config = [];
+        }
 
         $permissions = array();
 
@@ -2484,7 +2566,7 @@ final class ContentbuilderLegacyHelper
 
         $permissions['published'] = true;
 
-        if ($result['published'] !== null && !$result['published']) {
+        if (($result['published'] ?? null) !== null && !(bool) $result['published']) {
 
             $permissions['published'] = false;
 
@@ -2492,11 +2574,11 @@ final class ContentbuilderLegacyHelper
 
         $permissions['limit_edit'] = true;
 
-        if (intval($result['limit_edit']) > 0 && intval($result['user_limit_edit']) > 0 && $result['edited'] >= intval($result['user_limit_edit'])) {
+        if (intval($result['limit_edit'] ?? 0) > 0 && intval($result['user_limit_edit'] ?? 0) > 0 && intval($result['edited'] ?? 0) >= intval($result['user_limit_edit'] ?? 0)) {
 
             $permissions['limit_edit'] = false;
 
-        } else if (intval($result['limit_edit']) > 0 && intval($result['user_limit_edit']) <= 0 && $result['edited'] >= intval($result['limit_edit'])) {
+        } else if (intval($result['limit_edit'] ?? 0) > 0 && intval($result['user_limit_edit'] ?? 0) <= 0 && intval($result['edited'] ?? 0) >= intval($result['limit_edit'] ?? 0)) {
 
             $permissions['limit_edit'] = false;
 
@@ -2504,11 +2586,11 @@ final class ContentbuilderLegacyHelper
 
         $permissions['limit_add'] = true;
 
-        if (intval($result['limit_add']) > 0 && intval($result['user_limit_add']) > 0 && $result['amount_records'] >= intval($result['user_limit_add'])) {
+        if (intval($result['limit_add'] ?? 0) > 0 && intval($result['user_limit_add'] ?? 0) > 0 && intval($result['amount_records'] ?? 0) >= intval($result['user_limit_add'] ?? 0)) {
 
             $permissions['limit_add'] = false;
 
-        } else if (intval($result['limit_add']) > 0 && intval($result['user_limit_add']) <= 0 && $result['amount_records'] >= intval($result['limit_add'])) {
+        } else if (intval($result['limit_add'] ?? 0) > 0 && intval($result['user_limit_add'] ?? 0) <= 0 && intval($result['amount_records'] ?? 0) >= intval($result['limit_add'] ?? 0)) {
 
             $permissions['limit_add'] = false;
 
@@ -2517,60 +2599,60 @@ final class ContentbuilderLegacyHelper
         $jdate = Factory::getDate();
 
         $permissions['verify_view'] = true;
-        if ($result['verification_required_view']) {
-            $days = floatval($result['verification_days_view']) * 86400;
+        if (!empty($result['verification_required_view'])) {
+            $days = floatval($result['verification_days_view'] ?? 0) * 86400;
 
-            $date = !empty($result['verification_date_view']) ? strtotime($result['verification_date_view']) : 0;
+            $date = !empty($result['verification_date_view']) ? strtotime((string) $result['verification_date_view']) : 0;
             $valid_until = $date + $days;
             $now = strtotime($jdate->toSql());
 
-            if ($result['verified_view']) {
-                if ($now < $valid_until || floatval($result['verification_days_view']) <= 0) {
+            if (!empty($result['verified_view'])) {
+                if ($now < $valid_until || floatval($result['verification_days_view'] ?? 0) <= 0) {
                     $permissions['verify_view'] = true;
                 } else {
-                    $permissions['verify_view'] = trim($result['verification_url_view']) != '' ? trim($result['verification_url_view']) : false;
+                    $permissions['verify_view'] = trim((string) ($result['verification_url_view'] ?? '')) != '' ? trim((string) ($result['verification_url_view'] ?? '')) : false;
                 }
             } else {
-                $permissions['verify_view'] = trim($result['verification_url_view']) != '' ? trim($result['verification_url_view']) : false;
+                $permissions['verify_view'] = trim((string) ($result['verification_url_view'] ?? '')) != '' ? trim((string) ($result['verification_url_view'] ?? '')) : false;
             }
         }
 
         $permissions['verify_new'] = true;
-        if ($result['verification_required_new']) {
-            $days = floatval($result['verification_days_new']) * 86400;
+        if (!empty($result['verification_required_new'])) {
+            $days = floatval($result['verification_days_new'] ?? 0) * 86400;
 
-            $date = !empty($result['verification_date_new']) ? strtotime($result['verification_date_new']) : 0;
+            $date = !empty($result['verification_date_new']) ? strtotime((string) $result['verification_date_new']) : 0;
 
             $valid_until = $date + $days;
             $now = strtotime($jdate->toSql());
 
-            if ($result['verified_new']) {
-                if ($now < $valid_until || floatval($result['verification_days_new']) <= 0) {
+            if (!empty($result['verified_new'])) {
+                if ($now < $valid_until || floatval($result['verification_days_new'] ?? 0) <= 0) {
                     $permissions['verify_new'] = true;
                 } else {
-                    $permissions['verify_new'] = trim($result['verification_url_new']) != '' ? trim($result['verification_url_new']) : false;
+                    $permissions['verify_new'] = trim((string) ($result['verification_url_new'] ?? '')) != '' ? trim((string) ($result['verification_url_new'] ?? '')) : false;
                 }
             } else {
-                $permissions['verify_new'] = trim($result['verification_url_new']) != '' ? trim($result['verification_url_new']) : false;
+                $permissions['verify_new'] = trim((string) ($result['verification_url_new'] ?? '')) != '' ? trim((string) ($result['verification_url_new'] ?? '')) : false;
             }
         }
 
         $permissions['verify_edit'] = true;
-        if ($result['verification_required_edit']) {
-            $days = floatval($result['verification_days_edit']) * 86400;
+        if (!empty($result['verification_required_edit'])) {
+            $days = floatval($result['verification_days_edit'] ?? 0) * 86400;
 
-            $date = !empty($result['verification_date_edit']) ? strtotime($result['verification_date_edit']) : 0;
+            $date = !empty($result['verification_date_edit']) ? strtotime((string) $result['verification_date_edit']) : 0;
             $valid_until = $date + $days;
             $now = strtotime($jdate->toSql());
 
-            if ($result['verified_edit']) {
-                if ($now < $valid_until || floatval($result['verification_days_edit']) <= 0) {
+            if (!empty($result['verified_edit'])) {
+                if ($now < $valid_until || floatval($result['verification_days_edit'] ?? 0) <= 0) {
                     $permissions['verify_edit'] = true;
                 } else {
-                    $permissions['verify_edit'] = trim($result['verification_url_edit']) != '' ? trim($result['verification_url_edit']) : false;
+                    $permissions['verify_edit'] = trim((string) ($result['verification_url_edit'] ?? '')) != '' ? trim((string) ($result['verification_url_edit'] ?? '')) : false;
                 }
             } else {
-                $permissions['verify_edit'] = trim($result['verification_url_edit']) != '' ? trim($result['verification_url_edit']) : false;
+                $permissions['verify_edit'] = trim((string) ($result['verification_url_edit'] ?? '')) != '' ? trim((string) ($result['verification_url_edit'] ?? '')) : false;
             }
         }
 

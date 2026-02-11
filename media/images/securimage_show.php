@@ -1,6 +1,6 @@
 <?php
  /**
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @copyright Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
 */ 

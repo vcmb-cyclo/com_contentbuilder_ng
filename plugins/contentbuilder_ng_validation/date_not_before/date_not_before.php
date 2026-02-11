@@ -1,7 +1,7 @@
 <?php
 /**
  * @version     6.0
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
@@ -14,6 +14,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
 
@@ -24,7 +25,14 @@ class plgContentbuilder_ng_validationDate_not_before extends CMSPlugin implement
             return ['onValidate' => 'onValidate'];
         }
         
-        function onValidate($field, $fields, $record_id, $form, $value){
+        public function onValidate(Event $event): string{
+            $args = array_values($event->getArguments());
+            $field = isset($args[0]) && is_array($args[0]) ? $args[0] : [];
+            $fields = isset($args[1]) && is_array($args[1]) ? $args[1] : [];
+            $value = $args[4] ?? null;
+            if (!$field) {
+                return '';
+            }
             
             $lang = Factory::getApplication()->getLanguage();
             $lang->load('plg_contentbuilder_ng_validation_date_not_before', JPATH_ADMINISTRATOR);

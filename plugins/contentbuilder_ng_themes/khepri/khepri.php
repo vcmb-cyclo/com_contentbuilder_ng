@@ -1,7 +1,7 @@
 <?php
 /**
  * @version     6.0
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
@@ -12,12 +12,27 @@
 \defined('_JEXEC') or die ('Restricted access');
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Log\Log;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 class plgContentbuilder_ng_themesKhepri extends CMSPlugin implements SubscriberInterface
 {
+    private function pushEventResult(Event $event, string $value): void
+    {
+        $results = $event->getArgument('result') ?: [];
+
+        if (!is_array($results)) {
+            $results = [$results];
+        }
+
+        $results[] = $value;
+        $event->setArgument('result', $results);
+    }
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -988,8 +1003,27 @@ table.group-rules td select
 	 * 
 	 * @return string
 	 */
-	function onContentTemplateSample($contentbuilder_ng_form_id, $form)
+	function onContentTemplateSample($arg0, $arg1 = null)
 	{
+        $event = null;
+        if ($arg0 instanceof Event) {
+            $event = $arg0;
+            $args = $event->getArguments();
+            $contentbuilder_ng_form_id = (int) ($args[0] ?? 0);
+            $form = $args[1] ?? null;
+        } else {
+            $contentbuilder_ng_form_id = (int) $arg0;
+            $form = $arg1;
+        }
+
+        if (!$contentbuilder_ng_form_id || !is_object($form)) {
+            if ($event instanceof Event) {
+                $this->pushEventResult($event, '');
+                return;
+            }
+            return '';
+        }
+
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
 		$out = '<table border="0" width="100%" class="admintable adminlist"><tbody>' . "\n";
 		$names = $form->getElementNames();
@@ -1005,7 +1039,11 @@ table.group-rules td select
 			}
 		}
 		$out .= '</tbody></table>' . "\n";
-		return $out;
+        if ($event instanceof Event) {
+            $this->pushEventResult($event, $out);
+            return;
+        }
+		return (string) $out;
 	}
 
 	/**
@@ -1013,8 +1051,27 @@ table.group-rules td select
 	 * 
 	 * @return string
 	 */
-	function onEditableTemplateSample($contentbuilder_ng_form_id, $form)
+	function onEditableTemplateSample($arg0, $arg1 = null)
 	{
+        $event = null;
+        if ($arg0 instanceof Event) {
+            $event = $arg0;
+            $args = $event->getArguments();
+            $contentbuilder_ng_form_id = (int) ($args[0] ?? 0);
+            $form = $args[1] ?? null;
+        } else {
+            $contentbuilder_ng_form_id = (int) $arg0;
+            $form = $arg1;
+        }
+
+        if (!$contentbuilder_ng_form_id || !is_object($form)) {
+            if ($event instanceof Event) {
+                $this->pushEventResult($event, '');
+                return;
+            }
+            return '';
+        }
+
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
 		$checkEditable = $db->getQuery(true)
 			->select('COUNT(*)')
@@ -1048,6 +1105,10 @@ table.group-rules td select
 		foreach ($hidden as $hid) {
 			$out .= $hid;
 		}
-		return $out;
+        if ($event instanceof Event) {
+            $this->pushEventResult($event, $out);
+            return;
+        }
+		return (string) $out;
 	}
 }

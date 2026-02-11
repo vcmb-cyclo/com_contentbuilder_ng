@@ -1,7 +1,7 @@
 <?php
 /**
  * @version     6.0
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
  * @copyright   (C) 2026 by XDA+GIL
@@ -13,6 +13,7 @@
 
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 use Joomla\Registry\Registry;
 use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
@@ -70,8 +71,11 @@ class plgContentbuilder_ng_verifyPaypal extends CMSPlugin implements SubscriberI
      * @param string $plugin_settings A query string with the plugin options
      * @return string empty for nothing (default) or a string to render instead of the default
      */
-    function onViewport($link, $plugin_settings)
+    public function onViewport(Event $event): string
     {
+        $args = array_values($event->getArguments());
+        $link = (string) ($args[0] ?? '');
+        $plugin_settings = (string) ($args[1] ?? '');
 
         return '';
     }
@@ -83,8 +87,11 @@ class plgContentbuilder_ng_verifyPaypal extends CMSPlugin implements SubscriberI
      * @param type $options
      * @return string empty if everything is ok, else a message describing the problem 
      */
-    function onSetup($return_url, $options)
+    public function onSetup(Event $event): string
     {
+        $args = array_values($event->getArguments());
+        $return_url = (string) ($args[0] ?? '');
+        $options = isset($args[1]) && is_array($args[1]) ? $args[1] : [];
 
         if (isset($options['plugin_options']) && isset($options['plugin_options']['amount']) && is_numeric($options['plugin_options']['amount'])) {
 
@@ -109,8 +116,12 @@ class plgContentbuilder_ng_verifyPaypal extends CMSPlugin implements SubscriberI
      * @param string $return_url
      * @param array $options 
      */
-    function onForward($return_url, $options)
+    public function onForward(Event $event): void
     {
+        $args = array_values($event->getArguments());
+        $return_url = (string) ($args[0] ?? '');
+        $options = isset($args[1]) && is_array($args[1]) ? $args[1] : [];
+
         ob_end_clean();
 
         echo '
@@ -157,8 +168,11 @@ class plgContentbuilder_ng_verifyPaypal extends CMSPlugin implements SubscriberI
      * @param array $options
      * @return mixed boolean false on errors or an array with the payment data 
      */
-    function onVerify($return_url, $options)
+    public function onVerify(Event $event)
     {
+        $args = array_values($event->getArguments());
+        $return_url = (string) ($args[0] ?? '');
+        $options = isset($args[1]) && is_array($args[1]) ? $args[1] : [];
 
         // the paypal_ipn parameter has been attached in onForward
         // so if PayPal returns with this parameter we should use verification through IPN

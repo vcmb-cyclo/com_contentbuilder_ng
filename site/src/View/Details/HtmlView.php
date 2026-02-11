@@ -1,6 +1,6 @@
 <?php
 /**
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
  * @copyright   (C) 2026 by XDA+GIL
@@ -149,7 +149,7 @@ class HtmlView extends BaseHtmlView
 		$results = $eventObj->getArgument('result') ?: [];
 		$event->afterDisplayContent = trim(implode("\n", $results));
 
-		// if the slug has been used, we would like to stay in com_contentbuilder, so we re-arrange the resulting url a little
+		// if the slug has been used, we would like to stay in com_contentbuilder_ng, so we re-arrange the resulting url a little
 		if (strstr($subject->template, 'contentbuilder_ng_slug_used') !== false) {
 
 			$matches = array(array(), array());

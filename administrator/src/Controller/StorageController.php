@@ -5,7 +5,7 @@
  *
  * Handles actions for storage in the admin interface.
  *
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @subpackage  Administrator.Controller
  * @author      Xavier DANO
  * @copyright   Copyright (C) 2011–2026 by XDA+GIL
@@ -158,6 +158,7 @@ class StorageController extends BaseFormController
 
             if ($id && $model) {
                 $model->ensureDataTable($id, $isNew, $oldName);
+                $model->syncEditedFieldsFromRequest($id);
             }
 
             return $result;

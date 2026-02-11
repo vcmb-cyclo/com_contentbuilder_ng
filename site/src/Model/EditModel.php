@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
  * @copyright   (C) 2026 by XDA+GIL
@@ -248,7 +248,14 @@ class EditModel extends BaseDatabaseModel
 
     private function _buildQuery()
     {
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id) . ' And published = 1';
+        $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
+        $query = 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id);
+
+        if (!$isAdminPreview) {
+            $query .= ' And published = 1';
+        }
+
+        return $query;
     }
 
     /**
@@ -267,11 +274,14 @@ class EditModel extends BaseDatabaseModel
             }
 
             foreach ($this->_data as $data) {
+                $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
 
-                if (!$this->frontend && $data->display_in == 0) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
-                } else if ($this->frontend && $data->display_in == 1) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
+                if (!$isAdminPreview) {
+                    if (!$this->frontend && $data->display_in == 0) {
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
+                    } else if ($this->frontend && $data->display_in == 1) {
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
+                    }
                 }
 
                 $data->show_page_heading = $this->_show_page_heading;
@@ -285,8 +295,8 @@ class EditModel extends BaseDatabaseModel
                     $article = $this->getDatabase()->loadAssoc();
 
                     if ($data->create_articles) {
-                        Form::addFormPath(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/models/forms');
-                        Form::addFieldPath(JPATH_SITE . '/administrator/components/com_content/models/fields');
+                        Form::addFormPath(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/forms');
+                        Form::addFieldPath(JPATH_ADMINISTRATOR . '/components/com_content/models/fields');
                         $form = Form::getInstance('com_content.article', 'article', array('control' => 'Form', 'load_data' => true));
 
                         if (is_array($article)) {
@@ -467,7 +477,7 @@ class EditModel extends BaseDatabaseModel
                     Factory::getApplication()->getDocument()->addScriptDeclaration(
                         '
 <!--
-var contentbuilder = new function(){
+var contentbuilder_ng = new function(){
 
    this.items = {' . $items . '};
    var items = this.items;
@@ -618,12 +628,15 @@ var contentbuilder = new function(){
             throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
         }
 
-        foreach ($this->_data as $data) {
+        $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
 
-            if (!$this->frontend && $data->display_in == 0) {
-                throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
-            } else if ($this->frontend && $data->display_in == 1) {
-                throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
+        foreach ($this->_data as $data) {
+            if (!$isAdminPreview) {
+                if (!$this->frontend && $data->display_in == 0) {
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
+                } else if ($this->frontend && $data->display_in == 1) {
+                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
+                }
             }
 
             $data->form_id = $this->_id;
@@ -1397,7 +1410,8 @@ var contentbuilder = new function(){
                                 $date = Factory::getDate(strtotime($created_up . ' +' . intval($data->default_publish_down_days) . ' days'));
                                 $created_down = $date->toSql();
                             }
-                            $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_records (session_id,`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id, publish_up, publish_down) Values ('" . Factory::getApplication()->getSession()->getId() . "'," . $this->getDatabase()->Quote($data->type) . "," . $this->getDatabase()->Quote($last_update) . ",$is_future," . $this->getDatabase()->Quote($language) . "," . $this->getDatabase()->Quote(trim($sef)) . "," . $this->getDatabase()->Quote($data->auto_publish && !$is_future ? 1 : 0) . ", " . $this->getDatabase()->Quote($record_return) . ", " . $this->getDatabase()->Quote($data->form->getReferenceId()) . ", " . $this->getDatabase()->Quote($created_up) . ", " . $this->getDatabase()->Quote($created_down) . ")");
+                            $publishDownValue = (!empty($created_down)) ? $this->getDatabase()->Quote($created_down) : 'NULL';
+                            $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_records (session_id,`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id, publish_up, publish_down) Values ('" . Factory::getApplication()->getSession()->getId() . "'," . $this->getDatabase()->Quote($data->type) . "," . $this->getDatabase()->Quote($last_update) . ",$is_future," . $this->getDatabase()->Quote($language) . "," . $this->getDatabase()->Quote(trim($sef)) . "," . $this->getDatabase()->Quote($data->auto_publish && !$is_future ? 1 : 0) . ", " . $this->getDatabase()->Quote($record_return) . ", " . $this->getDatabase()->Quote($data->form->getReferenceId()) . ", " . $this->getDatabase()->Quote($created_up) . ", " . $publishDownValue . ")");
                             $this->getDatabase()->execute();
                         } else {
                             $this->getDatabase()->setQuery("Update #__contentbuilder_ng_records Set last_update = " . $this->getDatabase()->Quote($last_update) . ",lang_code = " . $this->getDatabase()->Quote($language) . ", sef = " . $this->getDatabase()->Quote(trim($sef ?? '')) . ", edited = edited + 1 Where `type` = " . $this->getDatabase()->Quote($data->type) . " And  `reference_id` = " . $this->getDatabase()->Quote($data->form->getReferenceId()) . " And record_id = " . $this->getDatabase()->Quote($record_return));

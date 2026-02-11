@@ -1,6 +1,6 @@
 <?php
 /**
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL 
@@ -101,7 +101,7 @@ class HtmlView extends BaseHtmlView
 			$eventResult = $dispatcher->dispatch('onContentAfterDisplay', new \Joomla\Event\Event('onContentAfterDisplay', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start)));
 			$results = $eventResult->getArgument('result') ?: [];
 
-			// if the slug has been used, we would like to stay in com_contentbuilder, so we re-arrange the resulting url a little
+			// if the slug has been used, we would like to stay in com_contentbuilder_ng, so we re-arrange the resulting url a little
 			if (strstr($subject->template, 'contentbuilder_ng_slug_used') !== false) {
 
 				$matches = array(array(), array());

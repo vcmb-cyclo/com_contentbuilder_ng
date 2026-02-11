@@ -1,7 +1,7 @@
 <?php
 /**
  * @version     6.0
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
@@ -11,6 +11,7 @@
 // No direct access
 \defined('_JEXEC') or die ('Restricted access');
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 
 
@@ -36,8 +37,11 @@ class plgContentbuilder_ng_verifyPassthrough extends CMSPlugin implements Subscr
      * @param string $plugin_settings The raw query string with the plugin options
      * @return string empty for nothing (default) or a string to render instead of the default
      */
-    function onViewport($link, $plugin_settings)
+    public function onViewport(Event $event): string
     {
+        $args = array_values($event->getArguments());
+        $link = (string) ($args[0] ?? '');
+        $plugin_settings = (string) ($args[1] ?? '');
 
         return '';
     }
@@ -49,8 +53,11 @@ class plgContentbuilder_ng_verifyPassthrough extends CMSPlugin implements Subscr
      * @param type $options
      * @return string empty if everything is ok, else a message describing the problem 
      */
-    function onSetup($return_url, $options)
+    public function onSetup(Event $event): string
     {
+        $args = array_values($event->getArguments());
+        $return_url = (string) ($args[0] ?? '');
+        $options = isset($args[1]) && is_array($args[1]) ? $args[1] : [];
 
         return '';
     }
@@ -61,8 +68,11 @@ class plgContentbuilder_ng_verifyPassthrough extends CMSPlugin implements Subscr
      * @param string $return_url
      * @param array $options 
      */
-    function onForward($return_url, $options)
+    public function onForward(Event $event): string
     {
+        $args = array_values($event->getArguments());
+        $return_url = (string) ($args[0] ?? '');
+        $options = isset($args[1]) && is_array($args[1]) ? $args[1] : [];
         return $return_url;
     }
 
@@ -73,8 +83,11 @@ class plgContentbuilder_ng_verifyPassthrough extends CMSPlugin implements Subscr
      * @param array $options
      * @return mixed boolean false on errors or an array with optional verification data (msg[string], is_test[0/1], data [array])
      */
-    function onVerify($return_url, $options)
+    public function onVerify(Event $event): array
     {
+        $args = array_values($event->getArguments());
+        $return_url = (string) ($args[0] ?? '');
+        $options = isset($args[1]) && is_array($args[1]) ? $args[1] : [];
 
         return array(
             'msg' => '',

@@ -2,7 +2,7 @@
 
 /**
  * @version     6.0
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Xavier DANO / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @license     GNU/GPL
@@ -12,10 +12,12 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Log\Log;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements SubscriberInterface
 {

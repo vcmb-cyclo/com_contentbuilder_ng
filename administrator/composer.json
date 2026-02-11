@@ -1,5 +1,5 @@
 {
-  "name": "xda-gil/com_contentbuilder",
+  "name": "xda-gil/com_contentbuilder_ng",
   "type": "joomla-component",
   "require": {
     "phpoffice/phpspreadsheet": "5.4.0"

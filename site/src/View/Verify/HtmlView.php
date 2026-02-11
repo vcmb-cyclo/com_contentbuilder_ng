@@ -5,7 +5,7 @@
  *
  * Verify view of the site interface
  *
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @subpackage  Site.View
  * @author      Xavier DANO
  * @copyright   Copyright (C) 2011–2026 by XDA+GIL

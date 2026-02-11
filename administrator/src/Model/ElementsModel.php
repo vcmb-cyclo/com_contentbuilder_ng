@@ -5,7 +5,7 @@
  *
  * Handles CRUD and publish state for element in the admin interface.
  *
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @subpackage  Administrator.Model
  * @author      Xavier DANO
  * @copyright   Copyright (C) 2011–2026 by XDA+GIL

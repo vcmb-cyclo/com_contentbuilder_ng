@@ -2,7 +2,7 @@
 /**
  * ContentBuilder NG Storage fields list model.
  *
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @subpackage  Administrator.Model
  * @copyright   Copyright (C) 2011–2026 by XDA+GIL
  * @license     GNU/GPL v2 or later

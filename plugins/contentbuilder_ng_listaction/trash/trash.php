@@ -1,7 +1,7 @@
 <?php
 /**
  * @version     6.0
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
@@ -13,6 +13,7 @@
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 
 class plgContentbuilder_ng_listactionTrash extends CMSPlugin implements SubscriberInterface
@@ -47,8 +48,15 @@ class plgContentbuilder_ng_listactionTrash extends CMSPlugin implements Subscrib
      * @param array $record_ids an array of record_id. Please note that the record_ids may be _non_numeric_
      * @return string error
      */
-    function onBeforeAction($form_id, $record_ids)
+    public function onBeforeAction(Event $event): string
     {
+        $args = array_values($event->getArguments());
+        $form_id = isset($args[0]) ? (int) $args[0] : 0;
+        $record_ids = $args[1] ?? [];
+        if (!is_array($record_ids)) {
+            $record_ids = [];
+        }
+
         $lang = $this->app->getLanguage();
         $lang->load('plg_contentbuilder_ng_listaction_trash', JPATH_ADMINISTRATOR);
 
@@ -68,7 +76,7 @@ class plgContentbuilder_ng_listactionTrash extends CMSPlugin implements Subscrib
      * @param type $previous_errors error messages thrown by onBeforeAction
      * @return type 
      */
-    function onAfterAction($form_id, $record_ids, $previous_errors)
+    public function onAfterAction(Event $event): string
     {
         return ''; // no error
     }
@@ -85,8 +93,13 @@ class plgContentbuilder_ng_listactionTrash extends CMSPlugin implements Subscrib
      * @param int $article_id 
      * @return string message
      */
-    function onAfterArticleCreation($form_id, $record_id, $article_id)
+    public function onAfterArticleCreation(Event $event): string
     {
+        $args = array_values($event->getArguments());
+        $form_id = isset($args[0]) ? (int) $args[0] : 0;
+        $record_id = $args[1] ?? null;
+        $article_id = isset($args[2]) ? (int) $args[2] : 0;
+
         $this->db->setQuery("Select action From #__contentbuilder_ng_list_records As lr, #__contentbuilder_ng_list_states As ls Where lr.state_id = ls.id And lr.form_id = ls.form_id And lr.form_id = " . intval($form_id) . " And lr.record_id = " . $this->db->Quote($record_id));
         $action = $this->db->loadResult();
 

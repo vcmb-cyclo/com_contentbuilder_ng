@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
@@ -24,6 +24,13 @@ $edit_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('edit') : Co
 $delete_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('delete') : ContentbuilderLegacyHelper::authorize('delete');
 $view_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('view') : ContentbuilderLegacyHelper::authorize('view');
 $fullarticle_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('fullarticle') : ContentbuilderLegacyHelper::authorize('fullarticle');
+$isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
+
+if ($isAdminPreview) {
+    // Admin preview should render the action bar even when frontend ACL checks fail.
+    $new_allowed = true;
+    $edit_allowed = true;
+}
 
 $input = Factory::getApplication()->input;
 $hasReturn = $input->getString('return', '') !== '';
@@ -68,8 +75,19 @@ $listHref = Route::_(
         . '&Itemid=' . $itemId
 );
 
-$backHref = $backToList ? $listHref : $detailsHref;
+$hasRecord = !in_array((string) $recordId, ['', '0'], true);
+$backHref = ($backToList || !$hasRecord) ? $listHref : $detailsHref;
 $showBack = $this->back_button && !$hasReturn;
+$previewHiddenFields = '';
+$previewEnabled = $input->getBool('cb_preview', false);
+$previewUntil = $input->getInt('cb_preview_until', 0);
+$previewSig = $input->getString('cb_preview_sig', '');
+if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
+    $previewHiddenFields =
+        '<input type="hidden" name="cb_preview" value="1" />' . "\n"
+        . '<input type="hidden" name="cb_preview_until" value="' . (int) $previewUntil . '" />' . "\n"
+        . '<input type="hidden" name="cb_preview_sig" value="' . htmlentities($previewSig, ENT_QUOTES, 'UTF-8') . '" />';
+}
 
 $customCss = <<<'CSS'
 .cbEditableWrapper .mb-3 {
@@ -542,6 +560,7 @@ CSS;
                 <input type="hidden" name="task" id="contentbuilder_ng_task" value="edit.save" />
                 <input type="hidden" name="backtolist" value="<?php echo Factory::getApplication()->input->getInt('backtolist', 0); ?>" />
                 <input type="hidden" name="return" value="<?php echo Factory::getApplication()->input->get('return', '', 'string'); ?>" />
+                <?php echo $previewHiddenFields; ?>
                 <?php echo HTMLHelper::_('form.token'); ?>
                 <?php
                 if ($this->edit_by_type) {
@@ -587,6 +606,7 @@ CSS;
                 <input type="hidden" name="task" id="contentbuilder_ng_task" value="edit.save" />
                 <input type="hidden" name="backtolist" value="<?php echo Factory::getApplication()->input->getInt('backtolist', 0); ?>" />
                 <input type="hidden" name="return" value="<?php echo Factory::getApplication()->input->get('return', '', 'string'); ?>" />
+                <?php echo $previewHiddenFields; ?>
                 <?php echo HTMLHelper::_('form.token'); ?>
             </form>
             <?php echo $this->event->beforeDisplayContent; ?>
@@ -606,7 +626,7 @@ CSS;
         <?php
         } else {
         ?>
-            <form class="form-horizontal name=" adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id',  '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
+            <form class="form-horizontal" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id',  '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
                 <?php echo $this->event->beforeDisplayContent; ?>
                 <?php echo $this->toc ?>
                 <?php echo $this->tpl ?>
@@ -622,6 +642,7 @@ CSS;
                 <input type="hidden" name="task" id="contentbuilder_ng_task" value="edit.save" />
                 <input type="hidden" name="backtolist" value="<?php echo Factory::getApplication()->input->getInt('backtolist', 0); ?>" />
                 <input type="hidden" name="return" value="<?php echo Factory::getApplication()->input->get('return', '', 'string'); ?>" />
+                <?php echo $previewHiddenFields; ?>
                 <?php echo HTMLHelper::_('form.token'); ?>
             </form>
             <?php

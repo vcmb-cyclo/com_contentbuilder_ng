@@ -5,7 +5,7 @@
  *
  * Handles CRUD and publish state for storage in the admin interface.
  *
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @subpackage  Administrator.Model
  * @author      Markus Bopp / XDA+GIL
  * @copyright   Copyright (C) 2011–2026 by XDA+GIL
@@ -677,6 +677,24 @@ class StorageModel extends AdminModel
         if (!$bytable) {
             $this->ensureMissingColumnsFromFields($storageId, (string)$storageTable->name);
         }
+    }
+
+    /**
+     * Applique les champs inline postés depuis la vue Storage (save/apply).
+     */
+    public function syncEditedFieldsFromRequest(int $storageId): void
+    {
+        if ($storageId < 1) {
+            return;
+        }
+
+        $storageTable = $this->getTable('Storage');
+        if (!$storageTable->load($storageId)) {
+            return;
+        }
+
+        $bytable = (int) ($storageTable->bytable ?? 0);
+        $this->syncEditedFields($storageId, $bytable, $storageTable);
     }
 
     /**

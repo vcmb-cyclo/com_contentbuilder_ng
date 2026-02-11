@@ -1,6 +1,6 @@
 <?php
 /**
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp / XDA + GIL
  * @link        https://breezingforms.vcmb.fr
  * @license     GNU/GPL

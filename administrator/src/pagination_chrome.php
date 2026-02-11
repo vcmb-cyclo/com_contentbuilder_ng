@@ -2,7 +2,7 @@
 /**
  *  Based on Joomla 3 JPagination Chrome
  * 
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp
  * @link        https://breezingforms.vcmb.fr
  * @license     GNU/GPL

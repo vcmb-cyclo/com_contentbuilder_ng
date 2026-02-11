@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL 
@@ -427,6 +427,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                         $name  = htmlspecialchars((string) ($row->name ?? ''), ENT_QUOTES, 'UTF-8');
                         $title = htmlspecialchars((string) ($row->title ?? ''), ENT_QUOTES, 'UTF-8');
                         $group_definition = htmlspecialchars((string) ($row->group_definition ?? ''), ENT_QUOTES, 'UTF-8');
+                        $isGroup = !empty($row->is_group);
 
                         $checked   = HTMLHelper::_('grid.id', $i, $id);
 
@@ -443,7 +444,40 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                             <td class="text-center"><?php echo $checked; ?></td>
                             <td><?php echo $name; ?></td>
                             <td><?php echo $title; ?></td>
-                            <td><?php echo $group_definition; ?></td>
+                            <td>
+                                <input type="hidden" name="itemNames[<?php echo $id; ?>]" value="<?php echo $name; ?>" />
+                                <input type="hidden" name="itemTitles[<?php echo $id; ?>]" value="<?php echo $title; ?>" />
+
+                                <input class="form-check-input" type="radio"
+                                    name="itemIsGroup[<?php echo $id; ?>]"
+                                    value="1"
+                                    id="itemIsGroup_<?php echo $id; ?>"
+                                    <?php echo $isGroup ? 'checked="checked"' : ''; ?> />
+                                <label for="itemIsGroup_<?php echo $id; ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
+                                </label>
+
+                                <input class="form-check-input" type="radio"
+                                    name="itemIsGroup[<?php echo $id; ?>]"
+                                    value="0"
+                                    id="itemIsGroupNo_<?php echo $id; ?>"
+                                    <?php echo !$isGroup ? 'checked="checked"' : ''; ?> />
+                                <label for="itemIsGroupNo_<?php echo $id; ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
+                                </label>
+
+                                <div id="itemGroupDefinitions_<?php echo $id; ?>">
+                                    <button type="button" class="btn btn-link btn-sm p-0"
+                                        onclick="document.getElementById('itemGroupDefinitions<?php echo $id; ?>').style.display='block'; this.parentNode.style.display='none'; document.getElementById('itemGroupDefinitions<?php echo $id; ?>').focus(); return false;">
+                                        [<?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT'); ?>]
+                                    </button>
+                                </div>
+                                <textarea class="form-control form-control-sm mt-1"
+                                    onblur="this.style.display='none'; document.getElementById('itemGroupDefinitions_<?php echo $id; ?>').style.display='block';"
+                                    id="itemGroupDefinitions<?php echo $id; ?>"
+                                    style="display:none; width:100%; height:50px;"
+                                    name="itemGroupDefinitions[<?php echo $id; ?>]"><?php echo $group_definition; ?></textarea>
+                            </td>
                           
                             <td class="order text-nowrap">
                                 <?php if ($canOrder) : ?>

@@ -1,7 +1,7 @@
 <?php
 /**
  * Default page.
- * @package     ContentBuilder
+ * @package     ContentBuilder NG
  * @author      Xavier DANO
  * @link        https://breezingforms.vcmb.fr
  * @license     GNU/GPL
