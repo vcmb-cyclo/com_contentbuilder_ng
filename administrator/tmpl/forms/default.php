@@ -115,7 +115,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                     <th>
                         <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_FORM_SOURCE'), 'a.title'); ?>
                     </th>
-                    <th>
+                    <th width="90" class="text-center">
                         <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_TYPE'), 'a.type'); ?>
                     </th>
                     <th>
@@ -123,13 +123,13 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                     </th>
 
 
-                    <th width="w-10 text-nowrap">
+                    <th class="w-10 text-nowrap">
                         <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_ORDERBY'), 'a.ordering'); ?>
                     </th>
-                    <th class="w-10 text-nowrap">
+                    <th class="text-nowrap">
                         <?php echo $sortLink(Text::_('JGLOBAL_MODIFIED'), 'a.modified'); ?>
                     </th>
-                    <th width="w-1 text-center">
+                    <th class="w-1 text-center">
                         <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'a.published'); ?>
                     </th>
                 </tr>
@@ -169,9 +169,18 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                                 ?>
                             </a>
                         </td>
-                        <td>
+                        <td class="text-center">
                             <a href="<?php echo $link; ?>">
-                                <?php echo $row->type; ?>
+                                <?php
+                                $typeCode = (string) ($row->type ?? '');
+                                $typeShortMap = [
+                                    'com_breezingforms'  => 'BF',
+                                    'com_contentbuilder_ng' => 'CB',
+                                    'com_contentbuilderng'  => 'CB',
+                                ];
+                                $typeShort = $typeShortMap[$typeCode] ?? $typeCode;
+                                echo htmlspecialchars($typeShort, ENT_QUOTES, 'UTF-8');
+                                ?>
                             </a>
                         </td>
                         <td>
@@ -191,7 +200,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                             </span>
                             <?php $disabled = $this->ordering ? '' : 'disabled="disabled"'; ?>
                         </td>
-                        <td>
+                        <td class="text-nowrap">
                             <?php
                             $m = $row->modified ?? '';
                             if ($m && $m !== '0000-00-00 00:00:00') {

@@ -132,11 +132,14 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::unpublish('storage.unpublish');
 
         $id = (int) ($this->item->id ?? 0);
+        $isExternalTable = ((int) ($this->item->bytable ?? 0) === 1);
 
         if ($id > 0) {
             // POST via task + token : on fait pointer vers une URL, mais le bouton doit poster (sinon token)
             // Astuce: utiliser un "custom" button JS submitTask
-            ToolbarHelper::custom('datatable.create', 'database', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_CREATE'), false);
+            if (!$isExternalTable) {
+                ToolbarHelper::custom('datatable.create', 'database', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_CREATE'), false);
+            }
             ToolbarHelper::custom('datatable.sync', 'refresh', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC'), false);
 
             $createTip = json_encode(Text::_('COM_CONTENTBUILDER_NG_DATATABLE_CREATE_TIP'), JSON_UNESCAPED_UNICODE);
