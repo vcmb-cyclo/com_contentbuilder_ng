@@ -163,8 +163,14 @@ class EditController extends BaseController
         if ($isAdminPreview) {
             $previewUntil = (int) $app->input->getInt('cb_preview_until', 0);
             $previewSig = (string) $app->input->getString('cb_preview_sig', '');
+            $previewActorId = (int) $app->input->getInt('cb_preview_actor_id', 0);
+            $previewActorName = (string) $app->input->getString('cb_preview_actor_name', '');
             if ($previewUntil > 0 && $previewSig !== '') {
-                $previewQuery = '&cb_preview=1&cb_preview_until=' . $previewUntil . '&cb_preview_sig=' . rawurlencode($previewSig);
+                $previewQuery = '&cb_preview=1'
+                    . '&cb_preview_until=' . $previewUntil
+                    . '&cb_preview_actor_id=' . $previewActorId
+                    . '&cb_preview_actor_name=' . rawurlencode($previewActorName)
+                    . '&cb_preview_sig=' . rawurlencode($previewSig);
             }
         }
         $listQuery = http_build_query(['list' => [
@@ -389,6 +395,8 @@ class EditController extends BaseController
 
         $until = (int) $this->input->getInt('cb_preview_until', 0);
         $sig   = (string) $this->input->getString('cb_preview_sig', '');
+        $actorId = (int) $this->input->getInt('cb_preview_actor_id', 0);
+        $actorName = trim((string) $this->input->getString('cb_preview_actor_name', ''));
 
         if ($until < time() || $sig === '') {
             return false;
@@ -401,7 +409,26 @@ class EditController extends BaseController
 
         $payload  = $formId . '|' . $until;
         $expected = hash_hmac('sha256', $payload, $secret);
+        $actorPayload = $payload . '|' . $actorId . '|' . $actorName;
+        $actorExpected = hash_hmac('sha256', $actorPayload, $secret);
 
-        return hash_equals($expected, $sig);
+        if (($actorId > 0 || $actorName !== '') && hash_equals($actorExpected, $sig)) {
+            $this->input->set('cb_preview_actor_id', $actorId);
+            $this->input->set('cb_preview_actor_name', $actorName);
+            Factory::getApplication()->input->set('cb_preview_actor_id', $actorId);
+            Factory::getApplication()->input->set('cb_preview_actor_name', $actorName);
+            return true;
+        }
+
+        if (hash_equals($expected, $sig)) {
+            // Legacy preview links (without actor) stay valid, but without actor propagation.
+            $this->input->set('cb_preview_actor_id', 0);
+            $this->input->set('cb_preview_actor_name', '');
+            Factory::getApplication()->input->set('cb_preview_actor_id', 0);
+            Factory::getApplication()->input->set('cb_preview_actor_name', '');
+            return true;
+        }
+
+        return false;
     }
 }

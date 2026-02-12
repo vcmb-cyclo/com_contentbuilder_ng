@@ -1,7 +1,7 @@
 <?php
 /**
  * @package     ContentBuilder NG
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @license     GNU/GPL
 */
@@ -15,6 +15,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\BaseController;
+use Joomla\Database\DatabaseInterface;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class ListController extends BaseController
@@ -243,16 +244,110 @@ class ListController extends BaseController
 
         // Permissions
         ContentbuilderLegacyHelper::setPermissions($formId, $recordId, $suffix);
-        ContentbuilderLegacyHelper::checkPermissions(
-            'listaccess',
-            Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_LISTACCESS_NOT_ALLOWED'),
-            $suffix
-        );
+        $isAdminPreview = $this->isValidAdminPreviewRequest($formId);
+        $this->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
+        Factory::getApplication()->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
+        if ($isAdminPreview) {
+            $this->enqueueUnpublishedPreviewNotice($formId);
+        }
+        if (!$isAdminPreview) {
+            ContentbuilderLegacyHelper::checkPermissions(
+                'listaccess',
+                Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_LISTACCESS_NOT_ALLOWED'),
+                $suffix
+            );
+        }
 
         // Piloter le rendu via l'input Joomla
         $layout = $this->input->getCmd('layout', null);
         $this->input->set('layout', ($layout === 'latest') ? null : $layout);
 
         return parent::display($cachable, $urlparams);
+    }
+
+    /**
+     * Validates a short-lived preview signature generated in admin toolbar.
+     */
+    private function isValidAdminPreviewRequest(int $formId): bool
+    {
+        if ($formId < 1 || !$this->input->getBool('cb_preview', false)) {
+            return false;
+        }
+
+        $until = (int) $this->input->getInt('cb_preview_until', 0);
+        $sig   = (string) $this->input->getString('cb_preview_sig', '');
+        $actorId = (int) $this->input->getInt('cb_preview_actor_id', 0);
+        $actorName = trim((string) $this->input->getString('cb_preview_actor_name', ''));
+
+        if ($until < time() || $sig === '') {
+            return false;
+        }
+
+        $secret = (string) Factory::getApplication()->get('secret');
+        if ($secret === '') {
+            return false;
+        }
+
+        $payload  = $formId . '|' . $until;
+        $expected = hash_hmac('sha256', $payload, $secret);
+        $actorPayload = $payload . '|' . $actorId . '|' . $actorName;
+        $actorExpected = hash_hmac('sha256', $actorPayload, $secret);
+
+        if (($actorId > 0 || $actorName !== '') && hash_equals($actorExpected, $sig)) {
+            $this->input->set('cb_preview_actor_id', $actorId);
+            $this->input->set('cb_preview_actor_name', $actorName);
+            Factory::getApplication()->input->set('cb_preview_actor_id', $actorId);
+            Factory::getApplication()->input->set('cb_preview_actor_name', $actorName);
+            return true;
+        }
+
+        if (hash_equals($expected, $sig)) {
+            $this->input->set('cb_preview_actor_id', 0);
+            $this->input->set('cb_preview_actor_name', '');
+            Factory::getApplication()->input->set('cb_preview_actor_id', 0);
+            Factory::getApplication()->input->set('cb_preview_actor_name', '');
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Shows the warning once per preview link when the form is unpublished.
+     */
+    private function enqueueUnpublishedPreviewNotice(int $formId): void
+    {
+        if ($formId < 1 || $this->isFormPublished($formId)) {
+            return;
+        }
+
+        $until = (int) $this->input->getInt('cb_preview_until', 0);
+        $sig = (string) $this->input->getString('cb_preview_sig', '');
+        $noticeKey = 'com_contentbuilder_ng.preview_notice.' . hash('sha256', $formId . '|' . $until . '|' . $sig);
+        $session = $this->app->getSession();
+
+        if ($session->get($noticeKey, false)) {
+            return;
+        }
+
+        $this->app->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_PREVIEW_UNPUBLISHED_NOTICE'), 'warning');
+        $session->set($noticeKey, true);
+    }
+
+    private function isFormPublished(int $formId): bool
+    {
+        try {
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
+            $query = $db->getQuery(true)
+                ->select($db->quoteName('published'))
+                ->from($db->quoteName('#__contentbuilder_ng_forms'))
+                ->where($db->quoteName('id') . ' = ' . (int) $formId);
+            $db->setQuery($query);
+            $published = $db->loadResult();
+        } catch (\Throwable $e) {
+            return true;
+        }
+
+        return (int) $published === 1;
     }
 }

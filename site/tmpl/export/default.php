@@ -34,7 +34,30 @@ $spreadsheet->getProperties()->setCreator("ContentBuilder_ng")->setLastModifiedB
 // https://phpspreadsheet.readthedocs.io/en/latest/topics/worksheets/adding-a-new-worksheet
 $spreadsheet->removeSheetByIndex(0);
 
-$worksheet1 = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, substr($this->data->title ?? 'default', 0, 31));
+// Spreadsheet sheet title must be non-empty and cannot contain []:*?/\ characters.
+$rawSheetTitle = '';
+if (!empty($this->data->name)) {
+    $rawSheetTitle = (string) $this->data->name;
+} elseif (!empty($this->data->title)) {
+    $rawSheetTitle = (string) $this->data->title;
+} elseif (!empty($this->data->form) && method_exists($this->data->form, 'getPageTitle')) {
+    $rawSheetTitle = (string) $this->data->form->getPageTitle();
+}
+$sheetTitle = preg_replace('/[\x00-\x1F\x7F\[\]\:\*\?\/\\\\]/u', ' ', $rawSheetTitle);
+$sheetTitle = trim((string) preg_replace('/\s+/u', ' ', (string) $sheetTitle));
+if ($sheetTitle === '') {
+    $sheetTitle = 'Export';
+}
+if (function_exists('mb_substr')) {
+    $sheetTitle = (string) mb_substr($sheetTitle, 0, 31);
+} else {
+    $sheetTitle = (string) substr($sheetTitle, 0, 31);
+}
+if ($sheetTitle === '') {
+    $sheetTitle = 'Export';
+}
+
+$worksheet1 = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, $sheetTitle);
 $spreadsheet->addSheet($worksheet1, 0);
 
 // LETTER -> A4.
@@ -171,16 +194,27 @@ if (!$userTimezone) {
 // Créer la date avec le fuseau horaire
 $date = Factory::getDate('now', $userTimezone);
 
-$query = $db->getQuery(true)
-    ->select($db->quoteName('name'))
-    ->from($db->quoteName('#__facileforms_forms'))
-    ->where($db->quoteName('id') . ' = ' . (int) $this->data->reference_id);
+$filenameTitle = $rawSheetTitle;
+if ($filenameTitle === '' && !empty($this->data->type) && $this->data->type === 'com_breezingforms') {
+    $query = $db->getQuery(true)
+        ->select($db->quoteName('name'))
+        ->from($db->quoteName('#__facileforms_forms'))
+        ->where($db->quoteName('id') . ' = ' . (int) $this->data->reference_id);
+    $db->setQuery($query);
+    $filenameTitle = (string) ($db->loadResult() ?: '');
+}
 
-$db->setQuery($query);
-$name = $db->loadResult() ?: 'Formulaire_inconnu';
+if ($filenameTitle === '') {
+    $filenameTitle = 'Export';
+}
 
+$safeFilenameTitle = preg_replace('/[^\pL\pN _.-]+/u', '_', $filenameTitle);
+$safeFilenameTitle = trim((string) preg_replace('/\s+/u', ' ', (string) $safeFilenameTitle));
+if ($safeFilenameTitle === '') {
+    $safeFilenameTitle = 'Export';
+}
 
-$filename = "CB_export_" . $name. '_' .$date->format('Y-m-d_Hi', true) . ".xlsx";
+$filename = "CB_export_" . $safeFilenameTitle . '_' . $date->format('Y-m-d_Hi', true) . ".xlsx";
 
 
 $spreadsheet->setActiveSheetIndex(0);

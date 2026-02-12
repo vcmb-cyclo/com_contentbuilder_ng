@@ -2,7 +2,7 @@
 
 /**
  * @package     ContentBuilder NG
- * @author      Markus Bopp / XDA + GIL
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     GNU/GPL
@@ -196,7 +196,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                             <?php
                             $m = $row->modified ?? '';
                             if ($m && $m !== '0000-00-00 00:00:00') {
-                                echo HTMLHelper::_('date', $m, Text::_('DATE_FORMAT_LC4'));
+                                echo HTMLHelper::_('date', $m, Text::_('DATE_FORMAT_LC2'));
                             } else {
                                 echo '-';
                             }

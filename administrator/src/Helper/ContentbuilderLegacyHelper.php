@@ -1,7 +1,7 @@
 <?php
 /**
  * @package     ContentBuilder NG
- * @author      Markus Bopp / XDA + GIL
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @license     GNU/GPL
  * @copyright   Copyright (C) 2026 by XDA+GIL
@@ -1546,6 +1546,31 @@ final class ContentbuilderLegacyHelper
                 );
                 $element = $db->loadAssoc();
 
+                // If a placeholder exists in the editable template for a non-editable/missing
+                // element, avoid leaking raw tokens like {Field:item}. Render a safe text fallback.
+                if (!is_array($element) || !$element) {
+                    $rawValue = ($failed_values !== null && isset($failed_values[$item['id']]))
+                        ? $failed_values[$item['id']]
+                        : ($hasRecords ? ($item['value'] ?? '') : '');
+
+                    if (is_array($rawValue)) {
+                        $rawValue = array_values(
+                            array_filter(
+                                $rawValue,
+                                static fn($v) => $v !== null && $v !== '' && $v !== 'cbGroupMark'
+                            )
+                        );
+                        $rawValue = implode(', ', $rawValue);
+                    }
+
+                    $fallbackLabel = htmlentities((string) ($item['label'] ?? ''), ENT_QUOTES, 'UTF-8');
+                    $fallbackValue = htmlentities((string) $rawValue, ENT_QUOTES, 'UTF-8');
+
+                    $template = str_replace('{' . $key . ':label}', '<label>' . $fallbackLabel . '</label>', $template);
+                    $template = str_replace('{' . $key . ':item}', $fallbackValue, $template);
+                    continue;
+                }
+
                 $autocomplete = '';
 
                 if ($result['act_as_registration']) {
@@ -1831,7 +1856,27 @@ final class ContentbuilderLegacyHelper
                         $the_init_scripts .= $elementCustomInit . "\n";
                     }
 
-                    if ($the_item) {
+                    $replaceTokens = false;
+                    if ($the_item === '' || $the_item === null) {
+                        $rawValue = ($failed_values !== null && isset($failed_values[$element['reference_id']]))
+                            ? $failed_values[$element['reference_id']]
+                            : ($hasRecords ? ($item['value'] ?? '') : ($element['default_value'] ?? ''));
+
+                        if (is_array($rawValue)) {
+                            $rawValue = array_values(
+                                array_filter(
+                                    $rawValue,
+                                    static fn($v) => $v !== null && $v !== '' && $v !== 'cbGroupMark'
+                                )
+                            );
+                            $rawValue = implode(', ', $rawValue);
+                        }
+
+                        $the_item = htmlentities((string) $rawValue, ENT_QUOTES, 'UTF-8');
+                        $replaceTokens = true;
+                    }
+
+                    if ($the_item !== '' || $replaceTokens) {
                         $tip = 'hasTip';
                         $tip_prefix = htmlentities($item['label'], ENT_QUOTES, 'UTF-8') . '::';
                         $template = str_replace('{' . $key . ':label}', '<label ' . ($elementHint ? 'class="editlinktip ' . $tip . '" title="' . $tip_prefix . $elementHint . '" ' : '') . 'for="cb_' . $item['id'] . '">' . $item['label'] . $asterisk . ($elementHint ? ' <img style="cursor: pointer;" src="' . Uri::root(true) . '/components/com_contentbuilder_ng/images/icon_info.png" border="0"/>' : '') . '</label>', $template);
@@ -1880,8 +1925,6 @@ final class ContentbuilderLegacyHelper
             $config['publish_down'] = null;
         }
 
-        $is15 = false;
-
         $tpl = self::getTemplate($contentbuilder_ng_form_id, $record_id, $record, $elements_allowed, true);
         if (!$tpl)
             return 0;
@@ -1893,15 +1936,7 @@ final class ContentbuilderLegacyHelper
             return 0;
         }
 
-        if ($is15 && $menu_cat_id !== null) {
-            if (intval($menu_cat_id) > -2) {
-                $menu_cat_id = explode(':', $menu_cat_id);
-                if (count($menu_cat_id) == 2) {
-                    $form['default_category'] = $menu_cat_id[1];
-                    $form['default_section'] = $menu_cat_id[0];
-                }
-            }
-        } else if ($menu_cat_id !== null && intval($menu_cat_id) > -2) {
+        if ($menu_cat_id !== null && intval($menu_cat_id) > -2) {
             $form['default_category'] = $menu_cat_id;
         }
 
@@ -2181,7 +2216,13 @@ final class ContentbuilderLegacyHelper
             }
 
             $dispatcher = Factory::getApplication()->getDispatcher();
-            $dispatcher->dispatch('onContentBeforeSave', new \Joomla\Event\Event('onContentBeforeSave', array('com_content.article', &$table, $isNew)));
+            $event = new \Joomla\CMS\Event\Model\BeforeSaveEvent('onContentBeforeSave', [
+                'context' => 'com_content.article',
+                'subject' => $table,
+                'isNew'   => $isNew,
+                'data'    => [],
+            ]);
+            $dispatcher->dispatch('onContentBeforeSave', $event);
         }
 
         $created_by = $created_by ? $created_by : $metadata->created_id;
@@ -2310,8 +2351,10 @@ final class ContentbuilderLegacyHelper
             // existing, update
         } else {
             $___datenow = Factory::getDate()->toSql();
-            $modified = $metadata->modified ? $metadata->modified : $___datenow;
-            $modified_by = $metadata->modified_id ? $metadata->modified_id : Factory::getApplication()->getIdentity()->get('id', 0);
+            $modified = $___datenow;
+            $currentUserId = (int) Factory::getApplication()->getIdentity()->get('id', 0);
+            $metadataModifiedBy = isset($metadata->modified_id) ? (int) $metadata->modified_id : 0;
+            $modified_by = $currentUserId > 0 ? $currentUserId : $metadataModifiedBy;
 
             if ($full) {
 
@@ -2388,7 +2431,7 @@ final class ContentbuilderLegacyHelper
             }
             $db->execute();
 
-            $___datenow = $datenow->toSql();
+            $___datenow = Factory::getDate()->toSql();
             $db->setQuery("Update #__contentbuilder_ng_articles Set `last_update` = " . $db->Quote($___datenow) . " Where `type` = " . $db->Quote($form['type']) . " And form_id = " . intval($contentbuilder_ng_form_id) . " And reference_id = " . $db->Quote($form['reference_id']) . " And record_id = " . $db->Quote($record_id));
             $db->execute();
         }
@@ -2413,7 +2456,11 @@ final class ContentbuilderLegacyHelper
         $cache->clean();
 
         $dispatcher = Factory::getApplication()->getDispatcher();
-        $dispatcher->dispatch('onContentCleanCache', new \Joomla\Event\Event('onContentCleanCache', $options));
+        $dispatcher->dispatch('onContentCleanCache', new \Joomla\CMS\Event\Model\AfterCleanCacheEvent('onContentCleanCache', [
+            'defaultgroup' => $options['defaultgroup'],
+            'cachebase'    => $options['cachebase'],
+            'result'       => true,
+        ]));
 
         //// trigger onContentAfterSave event
         $isNew = true;
@@ -2425,7 +2472,13 @@ final class ContentbuilderLegacyHelper
         }
 
         $dispatcher = Factory::getApplication()->getDispatcher();
-        $eventResult = $dispatcher->dispatch('onContentAfterSave', new \Joomla\Event\Event('onContentAfterSave', array('com_content.article', &$table, $isNew)));
+        $event = new \Joomla\CMS\Event\Model\AfterSaveEvent('onContentAfterSave', [
+            'context' => 'com_content.article',
+            'subject' => $table,
+            'isNew'   => $isNew,
+            'data'    => [],
+        ]);
+        $eventResult = $dispatcher->dispatch('onContentAfterSave', $event);
 
         PluginHelper::importPlugin('contentbuilder_ng_listaction');
 

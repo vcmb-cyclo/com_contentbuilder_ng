@@ -15,6 +15,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Uri\Uri;
 use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
@@ -38,6 +39,21 @@ $listQuery = http_build_query(['list' => [
     'ordering' => $listOrdering,
     'direction' => $listDirection,
 ]]);
+$previewQuery = '';
+$previewEnabled = $input->getBool('cb_preview', false);
+$previewUntil = $input->getInt('cb_preview_until', 0);
+$previewSig = (string) $input->getString('cb_preview_sig', '');
+$previewActorId = $input->getInt('cb_preview_actor_id', 0);
+$previewActorName = (string) $input->getString('cb_preview_actor_name', '');
+$isAdminPreview = $input->getBool('cb_preview_ok', false);
+$adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&task=form.edit&id=' . (int) $input->getInt('id', 0);
+if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
+    $previewQuery = '&cb_preview=1'
+        . '&cb_preview_until=' . $previewUntil
+        . '&cb_preview_actor_id=' . (int) $previewActorId
+        . '&cb_preview_actor_name=' . rawurlencode($previewActorName)
+        . '&cb_preview_sig=' . rawurlencode($previewSig);
+}
 
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 
@@ -80,12 +96,21 @@ if ($this->print_button):
     <div class="hidden-phone cbPrintBar d-flex justify-content-end mb-2">
         <a
             class="btn btn-sm btn-outline-secondary"
-            href="javascript:window.open('<?php echo Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=details.display&layout=print&tmpl=component&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0)) ?>','win2','status=no,toolbar=no,scrollbars=yes,titlebar=no,menubar=no,resizable=yes,width=640,height=480,directories=no,location=no');void(0);"><i
+            href="javascript:window.open('<?php echo Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=details.display&layout=print&tmpl=component&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0) . $previewQuery) ?>','win2','status=no,toolbar=no,scrollbars=yes,titlebar=no,menubar=no,resizable=yes,width=640,height=480,directories=no,location=no');void(0);"><i
                 class="fa fa-print" aria-hidden="true"></i> <?php echo Text::_('JGLOBAL_PRINT'); ?></a>
     </div>
 <?php
 endif;
 ?>
+
+<?php if ($isAdminPreview): ?>
+    <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <span><?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE'); ?></span>
+        <a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
+            <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>
+        </a>
+    </div>
+<?php endif; ?>
 
 <?php
 if ($this->show_page_heading && $this->page_title) {
@@ -113,7 +138,7 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
 
     <?php if ($edit_allowed) { ?>
         <a class="btn btn-sm btn-primary cbButton cbEditButton"
-            href="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '')); ?>"
+            href="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . $previewQuery); ?>"
             title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT'); ?>">
             <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT') ?>
         </a>
@@ -131,7 +156,7 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
     ?>
     <?php if ($this->show_back_button && Factory::getApplication()->input->getBool('cb_show_details_back_button', 1)): ?>
         <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton"
-            href="<?php echo Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0)); ?>"
+            href="<?php echo Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $previewQuery); ?>"
             title="<?php echo Text::_('COM_CONTENTBUILDER_NG_BACK'); ?>">
             <span class="icon-arrow-left me-1" aria-hidden="true"></span>
             <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK') ?>
@@ -167,7 +192,7 @@ if (Factory::getApplication()->input->getInt('cb_show_author', 1)) {
     <?php if ($this->created): ?>
         <span class="small created-by">
             <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATED_ON'); ?>
-            <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC4')); ?>
+            <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?>
         </span>
     <?php endif; ?>
 
@@ -207,7 +232,7 @@ if (Factory::getApplication()->input->getInt('cb_show_author', 1)) {
         <?php if ($this->modified): ?>
             <span class="small created-by">
                 <?php echo Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON'); ?>
-                <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC4')); ?>
+                <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?>
             </span>
         <?php endif; ?>
 

@@ -2,7 +2,7 @@
 
 /**
  * @package     ContentBuilder NG
- * @author      Markus Bopp / XDA + GIL
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
@@ -131,7 +131,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                         $title     = htmlspecialchars((string) ($row->title ?? ''), ENT_QUOTES, 'UTF-8');
                         $lastUpdateRaw = $row->modified ?? ($row->created ?? '');
                         $lastUpdate = $lastUpdateRaw
-                            ? HTMLHelper::_('date', $lastUpdateRaw, Text::_('DATE_FORMAT_LC4'))
+                            ? HTMLHelper::_('date', $lastUpdateRaw, Text::_('DATE_FORMAT_LC2'))
                             : '-';
 
                         // ⚠️ Vérifie ta convention : task=storage.edit (singulier) ou storages.edit (pluriel)

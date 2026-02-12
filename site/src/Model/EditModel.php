@@ -2,7 +2,7 @@
 
 /**
  * @package     ContentBuilder NG
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   (C) 2026 by XDA+GIL
  * @license     GNU/GPL
@@ -32,9 +32,8 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\User\User;
 use Joomla\CMS\User\UserHelper;
-use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\Event\Model\PrepareFormEvent;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
-use Joomla\Input\Input;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
@@ -44,12 +43,6 @@ class EditModel extends BaseDatabaseModel
     private $_record_id = 0;
 
     private $frontend = false;
-
-    private $is15 = true;
-
-    private $is16 = false;
-
-    private $is30 = false;
 
     private $_menu_item = false;
 
@@ -146,10 +139,6 @@ class EditModel extends BaseDatabaseModel
         $this->_db = Factory::getContainer()->get(DatabaseInterface::class);
         $app = Factory::getApplication();
         $option = 'com_contentbuilder_ng';
-
-        $this->is15 = false;
-        $this->is16 = false;
-        $this->is30 = true;
 
         Factory::getApplication()->input->set('cb_category_id', null);
 
@@ -330,7 +319,13 @@ class EditModel extends BaseDatabaseModel
 
                                 // Trigger the form preparation event.
                                 $dispatcher = Factory::getApplication()->getDispatcher();
-                                $eventResult = $dispatcher->dispatch('onContentPrepareForm', new \Joomla\Event\Event('onContentPrepareForm', array($form, $item)));
+                                $eventResult = $dispatcher->dispatch(
+                                    'onContentPrepareForm',
+                                    new PrepareFormEvent('onContentPrepareForm', [
+                                        'subject' => $form,
+                                        'data'    => $item,
+                                    ])
+                                );
                                 $results = $eventResult->getArgument('result') ?: [];
 
                                 // Check for errors encountered while preparing the form.
@@ -376,7 +371,6 @@ class EditModel extends BaseDatabaseModel
 
                     $data->back_button = Factory::getApplication()->input->getBool('latest', 0) && !Factory::getApplication()->input->getCmd('record_id', 0) ? false : $this->_show_back_button;
                     $data->latest = $this->_latest;
-                    $data->is15 = $this->is15;
                     $data->frontend = $this->frontend;
                     $data->form = ContentbuilderLegacyHelper::getForm($data->type, $data->reference_id);
                     if (!$data->form->exists) {
@@ -878,16 +872,21 @@ var contentbuilder_ng = new function(){
 
                         if ($noneditable_fields == null || !in_array($id, $noneditable_fields)) {
                             $value = '';
-                            $raw_value = Factory::getApplication()->input->post->get('cb_' . $id, '', 'raw');
-                            $is_array = is_array($raw_value) ? 'ARRAY' : 'STRING';
-                            if (isset($the_fields[$id]['options']->allow_raw) && $the_fields[$id]['options']->allow_raw) {
+                            $isGroupField = $data->form->isGroup($id);
+                            if ($isGroupField) {
+                                $groupValue = Factory::getApplication()->input->post->get('cb_' . $id, [], 'array');
+                                if (!is_array($groupValue)) {
+                                    $groupValue = array($groupValue);
+                                }
+                                $value = array_values(array_filter($groupValue, static fn($v) => $v !== null && $v !== '' && $v !== 'cbGroupMark'));
+                            } elseif (isset($the_fields[$id]['options']->allow_raw) && $the_fields[$id]['options']->allow_raw) {
                                 $value = Factory::getApplication()->input->post->get('cb_' . $id, '', 'raw');
                             } else if (isset($the_fields[$id]['options']->allow_html) && $the_fields[$id]['options']->allow_html) {
                                 $value = Factory::getApplication()->input->post->get('cb_' . $id, '', 'html');
                             } else {
                                 $value = Factory::getApplication()->input->post->get('cb_' . $id, '', 'raw');
                             }
-                            if (isset($the_fields[$id]['options']->transfer_format)) {
+                            if (!$isGroupField && isset($the_fields[$id]['options']->transfer_format)) {
                                 $value = ContentbuilderHelper::convertDate($value, $the_fields[$id]['options']->format, $the_fields[$id]['options']->transfer_format);
                             }
 
@@ -1134,16 +1133,21 @@ var contentbuilder_ng = new function(){
                                 }
 
                                 if (isset($the_fields[$id])) {
-                                    $raw_value = Factory::getApplication()->input->post->get('cb_' . $id, '', 'raw');
-                                    $is_array = is_array($raw_value) ? 'ARRAY' : 'STRING';
-                                    if (isset($the_fields[$id]['options']->allow_raw) && $the_fields[$id]['options']->allow_raw) {
+                                    $isGroupField = $data->form->isGroup($id);
+                                    if ($isGroupField) {
+                                        $groupValue = Factory::getApplication()->input->post->get('cb_' . $id, [], 'array');
+                                        if (!is_array($groupValue)) {
+                                            $groupValue = array($groupValue);
+                                        }
+                                        $value = array_values(array_filter($groupValue, static fn($v) => $v !== null && $v !== '' && $v !== 'cbGroupMark'));
+                                    } elseif (isset($the_fields[$id]['options']->allow_raw) && $the_fields[$id]['options']->allow_raw) {
                                         $value = Factory::getApplication()->input->post->get('cb_' . $id, '', 'raw');
                                     } else if (isset($the_fields[$id]['options']->allow_html) && $the_fields[$id]['options']->allow_html) {
                                         $value = Factory::getApplication()->input->post->get('cb_' . $id, '', 'html');
                                     } else {
                                         $value = Factory::getApplication()->input->post->get('cb_' . $id, '', 'raw');
                                     }
-                                    if (isset($the_fields[$id]['options']->transfer_format)) {
+                                    if (!$isGroupField && isset($the_fields[$id]['options']->transfer_format)) {
                                         $value = ContentbuilderHelper::convertDate($value, $the_fields[$id]['options']->format, $the_fields[$id]['options']->transfer_format);
                                     }
                                     $f = $the_fields[$id];
@@ -1348,18 +1352,9 @@ var contentbuilder_ng = new function(){
 
                         if ($data->force_login) {
                             if (!Factory::getApplication()->getIdentity()->get('id', 0)) {
-                                if (!$this->is15) {
-                                    Factory::getApplication()->input->set('return', base64_decode(Route::_('index.php?option=com_users&view=login&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false)));
-                                } else {
-                                    Factory::getApplication()->input->set('return', base64_decode(Route::_('index.php?option=com_user&view=login&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false)));
-                                }
+                                Factory::getApplication()->input->set('return', base64_decode(Route::_('index.php?option=com_users&view=login&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false)));
                             } else {
-
-                                if (!$this->is15) {
-                                    Factory::getApplication()->input->set('return', base64_decode(Route::_('index.php?option=com_users&view=profile&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false)));
-                                } else {
-                                    Factory::getApplication()->input->set('return', base64_decode(Route::_('index.php?option=com_user&view=user&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false)));
-                                }
+                                Factory::getApplication()->input->set('return', base64_decode(Route::_('index.php?option=com_users&view=profile&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false)));
                             }
                         } else if (trim($data->force_url)) {
                             Factory::getApplication()->input->set('ContentbuilderHelper::cbinternalCheck', 0);
@@ -2083,18 +2078,24 @@ var contentbuilder_ng = new function(){
                                     $article_ids[] = $article;
                                     $table = Table::getInstance('content');
                                     // Trigger the onContentBeforeDelete event.
-                                    if (!$this->is15 && $table->load($article)) {
+                                    if ($table->load($article)) {
                                         $dispatcher = Factory::getApplication()->getDispatcher();
-                                        $dispatcher->dispatch('onContentBeforeDelete', new \Joomla\Event\Event('onContentBeforeDelete', array('com_content.article', $table)));
+                                        $event = new \Joomla\CMS\Event\Model\BeforeDeleteEvent('onContentBeforeDelete', [
+                                            'context' => 'com_content.article',
+                                            'subject' => $table,
+                                        ]);
+                                        $dispatcher->dispatch('onContentBeforeDelete', $event);
                                     }
                                     $this->getDatabase()->setQuery("Delete From #__content Where id = " . intval($article));
                                     $this->getDatabase()->execute();
                                     // Trigger the onContentAfterDelete event.
                                     $table->reset();
-                                    if (!$this->is15) {
-                                        $dispatcher = Factory::getApplication()->getDispatcher();
-                                        $dispatcher->dispatch('onContentAfterDelete', new \Joomla\Event\Event('onContentAfterDelete', array('com_content.article', $table)));
-                                    }
+                                    $dispatcher = Factory::getApplication()->getDispatcher();
+                                    $event = new \Joomla\CMS\Event\Model\AfterDeleteEvent('onContentAfterDelete', [
+                                        'context' => 'com_content.article',
+                                        'subject' => $table,
+                                    ]);
+                                    $dispatcher->dispatch('onContentAfterDelete', $event);
                                 }
                                 $this->getDatabase()->setQuery("Delete From #__assets Where `name` In (" . implode(',', $article_items) . ")");
                                 $this->getDatabase()->execute();
@@ -2112,17 +2113,10 @@ var contentbuilder_ng = new function(){
             }
         }
 
-        if (!$this->is15) {
-            $cache = Factory::getCache('com_content');
-            $cache->clean();
-            $cache = Factory::getCache('com_contentbuilder_ng');
-            $cache->clean();
-        } else {
-            $cache = Factory::getCache('com_content');
-            $cache->clean();
-            $cache = Factory::getCache('com_contentbuilder_ng');
-            $cache->clean();
-        }
+        $cache = Factory::getCache('com_content');
+        $cache->clean();
+        $cache = Factory::getCache('com_contentbuilder_ng');
+        $cache->clean();
     }
 
     function change_list_states()
@@ -2292,15 +2286,11 @@ var contentbuilder_ng = new function(){
         $dispatcher = Factory::getApplication()->getDispatcher();
         $context = 'com_content.article';
         $value = Factory::getApplication()->input->getInt('list_publish', 0);
-        if (class_exists(\Joomla\CMS\Event\Model\AfterChangeStateEvent::class)) {
-            $event = new \Joomla\CMS\Event\Model\AfterChangeStateEvent('onContentChangeState', [
-                'context' => $context,
-                'subject' => $affected_articles,
-                'value' => $value,
-            ]);
-        } else {
-            $event = new \Joomla\Event\Event('onContentChangeState', [$context, $affected_articles, $value]);
-        }
+        $event = new \Joomla\CMS\Event\Model\AfterChangeStateEvent('onContentChangeState', [
+            'context' => $context,
+            'subject' => $affected_articles,
+            'value' => $value,
+        ]);
         $eventResult = $dispatcher->dispatch('onContentChangeState', $event);
         $result = $eventResult->getArgument('result') ?: [];
     }

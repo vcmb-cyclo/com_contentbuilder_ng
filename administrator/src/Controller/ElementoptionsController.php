@@ -1,7 +1,7 @@
 <?php
 /**
  * @package     ContentBuilder NG
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
@@ -12,10 +12,10 @@ namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\AdminController;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
 class ElementoptionsController extends AdminController
 {

@@ -2,10 +2,12 @@
 /**
  * @version     6.0
  * @package     ContentBuilder NG
- * @author      Markus Bopp/ XDA + GIL
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
+ * 
+ * Plugin example.
 */
 
 // No direct access
@@ -25,9 +27,6 @@ class plgContentbuilder_ng_submitSubmit_sample extends CMSPlugin implements Subs
             ];
         }
         
-        /**
-         * Joomla 6 event signature.
-         */
         public function onBeforeSubmit(Event $event): void
         {
             $args = array_values($event->getArguments());
@@ -36,9 +35,6 @@ class plgContentbuilder_ng_submitSubmit_sample extends CMSPlugin implements Subs
             $values = isset($args[2]) && is_array($args[2]) ? $args[2] : [];
         }
         
-        /**
-         * Joomla 6 event signature.
-         */
         public function onAfterSubmit(Event $event): void
         {
             $args = array_values($event->getArguments());

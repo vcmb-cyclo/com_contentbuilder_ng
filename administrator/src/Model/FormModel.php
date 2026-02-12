@@ -995,9 +995,6 @@ class FormModel extends AdminModel
 
     private function deleteByIds(array $cids): bool
     {
-        // Mode Joomla5
-        $is15 = false;
-
         $row = $this->getTable('Form', '');
         $db = $this->getDatabase();
 
@@ -1009,21 +1006,27 @@ class FormModel extends AdminModel
                 foreach ($articles as $article) {
                     $article_items[] = $db->Quote('com_content.article.' . $article);
                     $table = Table::getInstance('content');
+
                     // Trigger the onContentBeforeDelete event.
-                    if (!$is15 && $table->load($article)) {
+                    if ($table->load($article)) {
                         $dispatcher = Factory::getApplication()->getDispatcher();
-		                $eventObj = new \Joomla\Event\Event('onContentBeforeDisplay', ['com_content.article', &$table]);
-                    	$dispatcher->dispatch('onContentBeforeDisplay', $eventObj);
+                        $eventObj = new \Joomla\CMS\Event\Model\BeforeDeleteEvent('onContentBeforeDelete', [
+                            'context' => 'com_content.article',
+                            'subject' => $table,
+                        ]);
+                        $dispatcher->dispatch('onContentBeforeDelete', $eventObj);
                     }
                     $db->setQuery("Delete From #__content Where id = " . intval($article));
                     $db->execute();
+
                     // Trigger the onContentAfterDelete event.
                     $table->reset();
-                    if (!$is15) {
-                        $dispatcher = Factory::getApplication()->getDispatcher();
-		                $eventObj = new \Joomla\Event\Event('onContentAfterDelete', ['com_content.article', &$table]);
-                    	$dispatcher->dispatch('onContentAfterDelete', $eventObj);
-                    }
+                    $dispatcher = Factory::getApplication()->getDispatcher();
+                    $eventObj = new \Joomla\CMS\Event\Model\AfterDeleteEvent('onContentAfterDelete', [
+                        'context' => 'com_content.article',
+                        'subject' => $table,
+                    ]);
+                    $dispatcher->dispatch('onContentAfterDelete', $eventObj);
                 }
                 $db->setQuery("Delete From #__assets Where `name` In (" . implode(',', $article_items) . ")");
                 $db->execute();

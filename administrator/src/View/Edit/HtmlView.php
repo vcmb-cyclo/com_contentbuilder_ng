@@ -1,7 +1,7 @@
 <?php
 /**
  * @package     ContentBuilder NG
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     GNU/GPL
@@ -87,18 +87,50 @@ class HtmlView extends BaseHtmlView
 			$start = Factory::getApplication()->input->getInt('start', 0);
 
 			$dispatcher = Factory::getApplication()->getDispatcher();
-			$dispatcher->dispatch('onContentPrepare', new \Joomla\Event\Event('onContentPrepare', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start)));
+			$dispatcher->dispatch(
+				'onContentPrepare',
+				new \Joomla\CMS\Event\Content\ContentPrepareEvent('onContentPrepare', [
+					'context' => 'com_content.article',
+					'subject' => $table,
+					'params'  => $registry,
+					'page'    => $limitstart ? $limitstart : $start,
+				])
+			);
 			$subject->template = $table->text;
 
-			$eventResult = $dispatcher->dispatch('onContentAfterTitle', new \Joomla\Event\Event('onContentAfterTitle', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start)));
+			$eventResult = $dispatcher->dispatch(
+				'onContentAfterTitle',
+				new \Joomla\CMS\Event\Content\AfterTitleEvent('onContentAfterTitle', [
+					'context' => 'com_content.article',
+					'subject' => $table,
+					'params'  => $registry,
+					'page'    => $limitstart ? $limitstart : $start,
+				])
+			);
 			$results = $eventResult->getArgument('result') ?: [];
 			$event->afterDisplayTitle = trim(implode("\n", $results));
 
-			$eventResult = $dispatcher->dispatch('onContentBeforeDisplay', new \Joomla\Event\Event('onContentBeforeDisplay', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start)));
+			$eventResult = $dispatcher->dispatch(
+				'onContentBeforeDisplay',
+				new \Joomla\CMS\Event\Content\BeforeDisplayEvent('onContentBeforeDisplay', [
+					'context' => 'com_content.article',
+					'subject' => $table,
+					'params'  => $registry,
+					'page'    => $limitstart ? $limitstart : $start,
+				])
+			);
 			$results = $eventResult->getArgument('result') ?: [];
 			$event->beforeDisplayContent = trim(implode("\n", $results));
 
-			$eventResult = $dispatcher->dispatch('onContentAfterDisplay', new \Joomla\Event\Event('onContentAfterDisplay', array('com_content.article', &$table, &$registry, $limitstart ? $limitstart : $start)));
+			$eventResult = $dispatcher->dispatch(
+				'onContentAfterDisplay',
+				new \Joomla\CMS\Event\Content\AfterDisplayEvent('onContentAfterDisplay', [
+					'context' => 'com_content.article',
+					'subject' => $table,
+					'params'  => $registry,
+					'page'    => $limitstart ? $limitstart : $start,
+				])
+			);
 			$results = $eventResult->getArgument('result') ?: [];
 
 			// if the slug has been used, we would like to stay in com_contentbuilder_ng, so we re-arrange the resulting url a little
@@ -185,7 +217,6 @@ class HtmlView extends BaseHtmlView
 		if (isset($subject->sectioncategories))
 			$this->sectioncategories = $subject->sectioncategories;
 
-		$this->ais15 = $subject->is15;
 		if (isset($subject->lists))
 			$this->lists = $subject->lists; // special for 1.5
 		if (isset($subject->row))

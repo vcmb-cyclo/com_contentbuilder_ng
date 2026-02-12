@@ -30,6 +30,26 @@ $state_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('state') : 
 $publish_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('publish') : ContentbuilderLegacyHelper::authorize('publish');
 $rating_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('rating') : ContentbuilderLegacyHelper::authorize('rating');
 
+$input = Factory::getApplication()->input;
+$previewQuery = '';
+$previewEnabled = $input->getBool('cb_preview', false);
+$previewUntil = $input->getInt('cb_preview_until', 0);
+$previewSig = (string) $input->getString('cb_preview_sig', '');
+$previewActorId = $input->getInt('cb_preview_actor_id', 0);
+$previewActorName = (string) $input->getString('cb_preview_actor_name', '');
+$isAdminPreview = $input->getBool('cb_preview_ok', false);
+$adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&task=form.edit&id=' . (int) $input->getInt('id', 0);
+if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
+    $previewQuery = '&cb_preview=1'
+        . '&cb_preview_until=' . $previewUntil
+        . '&cb_preview_actor_id=' . (int) $previewActorId
+        . '&cb_preview_actor_name=' . rawurlencode($previewActorName)
+        . '&cb_preview_sig=' . rawurlencode($previewSig);
+}
+if ($isAdminPreview) {
+    $view_allowed = true;
+}
+
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 
 // Charge le manifeste joomla.asset.json du composant
@@ -201,6 +221,19 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 		<?php echo $this->page_title; ?>
 	</h1>
 <?php endif; ?>
+<?php if ($isAdminPreview): ?>
+	<div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+		<span><?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE'); ?></span>
+		<a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
+			<?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>
+		</a>
+	</div>
+<?php endif; ?>
+<?php if (!empty($this->preview_no_list_fields)): ?>
+	<div class="alert alert-warning mb-3">
+		<?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_NO_LIST_FIELDS'); ?>
+	</div>
+<?php endif; ?>
 <?php echo $this->intro_text; ?>
 <div style="float: right; text-align: right;">
 	<?php
@@ -228,7 +261,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 # Bug CB Joomla 4 (march 2023) - fix error search, delete, pagination, 404 error 
 Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 # by this block -->
-<form action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=list.display&id=' . (int) Factory::getApplication()->input->getInt('id') . '&Itemid=' . (int) Factory::getApplication()->input->getInt('Itemid', 0)); ?>"
+<form action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=list.display&id=' . (int) Factory::getApplication()->input->getInt('id') . '&Itemid=' . (int) Factory::getApplication()->input->getInt('Itemid', 0) . $previewQuery); ?>"
 	method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm">
 
 	<!-- 2023-12-19 END -->
@@ -516,8 +549,8 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 			$n = count($this->items);
 			for ($i = 0; $i < $n; $i++) {
 				$row = $this->items[$i];
-				$link = Route::_('index.php?option=com_contentbuilder_ng&task=details.display&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
-				$edit_link = Route::_('index.php?option=com_contentbuilder_ng&task=edit.display&backtolist=1&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
+				$link = Route::_('index.php?option=com_contentbuilder_ng&task=details.display&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . $previewQuery);
+				$edit_link = Route::_('index.php?option=com_contentbuilder_ng&task=edit.display&backtolist=1&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . $previewQuery);
 					$isPublished = isset($this->published_items[$row->colRecord]) && $this->published_items[$row->colRecord];
 					$togglePublish = $isPublished ? 0 : 1;
 					$toggle_link = Route::_('index.php?option=com_contentbuilder_ng&task=edit.publish&backtolist=1&id=' . $this->form_id . '&list_publish=' . $togglePublish . '&cid[]=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
@@ -779,6 +812,15 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 		<input type="hidden" name="tmpl" value="<?php echo Factory::getApplication()->input->get('tmpl', '', 'string'); ?>" />
 	<?php
 	}
+		if ($previewQuery !== '') {
+		?>
+			<input type="hidden" name="cb_preview" value="1" />
+			<input type="hidden" name="cb_preview_until" value="<?php echo (int) $previewUntil; ?>" />
+			<input type="hidden" name="cb_preview_actor_id" value="<?php echo (int) $previewActorId; ?>" />
+			<input type="hidden" name="cb_preview_actor_name" value="<?php echo htmlentities($previewActorName, ENT_QUOTES, 'UTF-8'); ?>" />
+			<input type="hidden" name="cb_preview_sig" value="<?php echo htmlentities($previewSig, ENT_QUOTES, 'UTF-8'); ?>" />
+		<?php
+		}
 	?>
 	<input type="hidden" name="option" value="com_contentbuilder_ng" />
 	<input type="hidden" name="task" id="task" value="" />

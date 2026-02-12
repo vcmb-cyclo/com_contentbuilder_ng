@@ -103,14 +103,23 @@ class HtmlView extends BaseHtmlView
 
         if ($formId > 0) {
             $previewUntil = time() + 600;
-            $previewPayload = $formId . '|' . $previewUntil;
+            $previewActorId = (int) $app->getIdentity()->get('id', 0);
+            $previewActorName = trim((string) $app->getIdentity()->get('name', ''));
+            if ($previewActorName === '') {
+                $previewActorName = trim((string) $app->getIdentity()->get('username', ''));
+            }
+            if ($previewActorName === '') {
+                $previewActorName = 'administrator';
+            }
+            $previewPayload = $formId . '|' . $previewUntil . '|' . $previewActorId . '|' . $previewActorName;
             $previewSig = hash_hmac('sha256', $previewPayload, (string) $app->get('secret'));
             $previewUrl = Uri::root()
-                . 'index.php?option=com_contentbuilder_ng&task=edit.display&id='
+                . 'index.php?option=com_contentbuilder_ng&task=list.display&id='
                 . $formId
-                . '&record_id=0'
                 . '&cb_preview=1'
                 . '&cb_preview_until=' . $previewUntil
+                . '&cb_preview_actor_id=' . $previewActorId
+                . '&cb_preview_actor_name=' . rawurlencode($previewActorName)
                 . '&cb_preview_sig=' . $previewSig;
             Toolbar::getInstance('toolbar')->appendButton(
                 'Link',

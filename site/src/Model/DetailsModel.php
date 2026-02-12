@@ -137,7 +137,14 @@ class DetailsModel extends ListModel
 
     private function _buildQuery()
     {
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id) . ' And published = 1';
+        $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
+        $query = 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id);
+
+        if (!$isAdminPreview) {
+            $query .= ' And published = 1';
+        }
+
+        return $query;
     }
 
     /**
@@ -156,11 +163,14 @@ class DetailsModel extends ListModel
             }
 
             foreach ($this->_data as $data) {
+                $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
 
-                if (!$this->frontend && $data->display_in == 0) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
-                } else if ($this->frontend && $data->display_in == 1) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
+                if (!$isAdminPreview) {
+                    if (!$this->frontend && $data->display_in == 0) {
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
+                    } else if ($this->frontend && $data->display_in == 1) {
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
+                    }
                 }
 
                 $data->form_id = $this->_id;
@@ -169,6 +179,10 @@ class DetailsModel extends ListModel
                 if ($data->type && $data->reference_id) {
 
                     $data->form = ContentbuilderLegacyHelper::getForm($data->type, $data->reference_id);
+                    $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
+                    if ($isAdminPreview && method_exists($data->form, 'synchRecords')) {
+                        $data->form->synchRecords();
+                    }
 
                     $data->labels = $data->form->getElementLabels();
                     $ids = array();
@@ -248,7 +262,15 @@ class DetailsModel extends ListModel
                     if (isset($rec2) && count($rec2)) {
                         $data->items = $rec2;
                     } else {
-                        $data->items = $data->form->getRecord($this->_record_id, $data->published_only, $this->frontend ? ($data->own_only_fe ? Factory::getApplication()->getIdentity()->get('id', 0) : -1) : ($data->own_only ? Factory::getApplication()->getIdentity()->get('id', 0) : -1), $this->frontend ? $data->show_all_languages_fe : true);
+                        $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
+                        $publishedOnly = $isAdminPreview ? false : (bool) $data->published_only;
+                        $ownerFilterUserId = $isAdminPreview
+                            ? -1
+                            : ($this->frontend
+                                ? ($data->own_only_fe ? Factory::getApplication()->getIdentity()->get('id', 0) : -1)
+                                : ($data->own_only ? Factory::getApplication()->getIdentity()->get('id', 0) : -1));
+                        $showAllLanguages = $isAdminPreview ? true : ($this->frontend ? $data->show_all_languages_fe : true);
+                        $data->items = $data->form->getRecord($this->_record_id, $publishedOnly, $ownerFilterUserId, $showAllLanguages);
                     }
 
                     if (count($data->items)) {
@@ -303,9 +325,9 @@ class DetailsModel extends ListModel
                                             $val2 = $ex2[1];
                                         }
                                         if (strtolower(trim($ex[1])) == 'date') {
-                                            $val = HTMLHelper::_('date', $ex2[0], Text::_('DATE_FORMAT_LC3'));
+                                            $val = HTMLHelper::_('date', $ex2[0], Text::_('DATE_FORMAT_LC2'));
                                             if (isset($ex2[1])) {
-                                                $val2 = HTMLHelper::_('date', $ex2[1], Text::_('DATE_FORMAT_LC3'));
+                                                $val2 = HTMLHelper::_('date', $ex2[1], Text::_('DATE_FORMAT_LC2'));
                                             }
                                         }
                                         if (count($ex2) == 2) {

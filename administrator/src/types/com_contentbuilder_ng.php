@@ -671,9 +671,19 @@ class contentbuilder_ng_com_contentbuilder_ng
 
             $lines = explode("\n", str_replace("\r", '', $result));
             foreach ($lines as $line) {
-                $cols = explode(";", $line);
+                $line = trim((string) $line);
+                if ($line === '') {
+                    continue;
+                }
+
+                $cols = explode(";", $line, 2);
                 if (count($cols) == 2) {
-                    $return[$cols[1]] = $cols[0];
+                    $label = trim((string) $cols[0]);
+                    $value = trim((string) $cols[1]);
+                    if ($value === '') {
+                        continue;
+                    }
+                    $return[$value] = $label;
                 }
             }
             return $return;
@@ -758,9 +768,10 @@ class contentbuilder_ng_com_contentbuilder_ng
         $record_id = intval($record_id);
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $insert_id = 0;
-        $user_id = 0;
-        $username = '';
-        $user_full_name = '';
+        $identity = Factory::getApplication()->getIdentity();
+        $user_id = (int) $identity->get('id', 0);
+        $username = trim((string) $identity->get('username', ''));
+        $user_full_name = trim((string) $identity->get('name', ''));
         $names = array();
 
         foreach ($this->elements as $element) {
@@ -769,10 +780,29 @@ class contentbuilder_ng_com_contentbuilder_ng
             }
         }
 
-        if (Factory::getApplication()->getIdentity()->get('id', 0) > 0) {
-            $username = Factory::getApplication()->getIdentity()->get('username', '');
-            $user_full_name = Factory::getApplication()->getIdentity()->get('name', '');
-            $user_id = Factory::getApplication()->getIdentity()->get('id', 0);
+        $input = Factory::getApplication()->input;
+        if ($input->getBool('cb_preview_ok', false)) {
+            $previewActorId = (int) $input->getInt('cb_preview_actor_id', 0);
+            $previewActorName = trim((string) $input->getString('cb_preview_actor_name', ''));
+            if ($previewActorId > 0) {
+                $user_id = $previewActorId;
+            }
+            if ($previewActorName !== '') {
+                $user_full_name = $previewActorName;
+                if ($username === '') {
+                    $username = $previewActorName;
+                }
+            }
+        }
+
+        if ($user_full_name === '') {
+            $user_full_name = $username;
+        }
+        if ($user_full_name === '') {
+            $user_full_name = 'guest';
+        }
+        if ($username === '') {
+            $username = $user_full_name;
         }
 
         $date = Factory::getDate();
@@ -815,11 +845,13 @@ class contentbuilder_ng_com_contentbuilder_ng
                         $value[] = trim($content);
                     }
                 }
+                $value = array_values(array_filter(array_map(static fn($v) => trim((string) $v), (array) $value), static fn($v) => $v !== '' && $v !== 'cbGroupMark'));
 
                 $groupdef = $this->getGroupDefinition($id);
 
                 foreach ($groupdef as $groupval => $grouplabel) {
-                    if (in_array($groupval, $value)) {
+                    $groupval = trim((string) $groupval);
+                    if ($groupval !== '' && in_array($groupval, $value, true)) {
                         $outVal .= $groupval . $options->seperator;
                     }
                 }

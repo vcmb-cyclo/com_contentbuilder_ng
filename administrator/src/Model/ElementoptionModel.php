@@ -1,7 +1,7 @@
 <?php
 /**
  * @package     ContentBuilder NG
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
@@ -36,10 +36,19 @@ class ElementoptionModel extends BaseDatabaseModel
 
         $this->_db = Factory::getContainer()->get(DatabaseInterface::class);
 
-        $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
+        $input = Factory::getApplication()->input;
+        $formId = $input->getInt('id', $input->getInt('form_id', 0));
+        $elementId = $input->getInt('element_id', 0);
 
-        $this->setIds(Factory::getApplication()->input->getInt('id', 0), Factory::getApplication()->input->getInt('element_id', ''));
+        // Fallback for list actions that send selected ids as cid[].
+        if ($elementId < 1) {
+            $cid = (array) $input->get('cid', [], 'array');
+            if (!empty($cid)) {
+                $elementId = (int) reset($cid);
+            }
+        }
+
+        $this->setIds($formId, $elementId);
     }
 
     /*
@@ -65,18 +74,43 @@ class ElementoptionModel extends BaseDatabaseModel
 
     function getData()
     {
-        // Lets load the data if it doesn't already exist
-        if (empty($this->_data)) {
+        // Lets load the data if it doesn't already exist.
+        // Store false when no row exists to avoid re-querying and null warnings downstream.
+        if ($this->_data === null) {
+            if ((int) $this->_element_id < 1 && (int) $this->_id > 0) {
+                // Fallback: no explicit element selected, use the first field of the current form.
+                $this->getDatabase()->setQuery(
+                    "SELECT id FROM #__contentbuilder_ng_elements WHERE form_id = "
+                    . (int) $this->_id
+                    . " ORDER BY ordering, id LIMIT 1"
+                );
+                $fallbackElementId = (int) $this->getDatabase()->loadResult();
+                if ($fallbackElementId > 0) {
+                    $this->_element_id = $fallbackElementId;
+                }
+            }
+
+            if ((int) $this->_element_id < 1) {
+                $this->_data = false;
+                return null;
+            }
+
             $query = $this->_buildQuery();
             $this->getDatabase()->setQuery($query);
-            $this->_data = $this->getDatabase()->loadObject();
-            if (is_object($this->_data)) {
-                $this->_data->options = $this->_data->options ? unserialize(base64_decode($this->_data->options)) : null;
-            }
-            return $this->_data;
+            $row = $this->getDatabase()->loadObject();
 
+            if (is_object($row)) {
+                $row->options = $row->options ? unserialize(base64_decode($row->options)) : null;
+                if (!empty($row->form_id)) {
+                    $this->_id = (int) $row->form_id;
+                }
+                $this->_data = $row;
+            } else {
+                $this->_data = false;
+            }
         }
-        return null;
+
+        return is_object($this->_data) ? $this->_data : null;
     }
 
     function getValidationPlugins()
@@ -90,12 +124,27 @@ class ElementoptionModel extends BaseDatabaseModel
 
     function getGroupDefinition()
     {
+        if ($this->_data === null) {
+            $this->getData();
+        }
+
+        if (!is_object($this->_data) || empty($this->_data->reference_id)) {
+            return array();
+        }
+
         $this->getDatabase()->setQuery("Select `type`, `reference_id` From #__contentbuilder_ng_forms Where id = " . intval($this->_id));
-        $form = $this->getDatabase()->loadAssoc();
-        $form = ContentbuilderLegacyHelper::getForm($form['type'], $form['reference_id']);
-        if ($form->isGroup($this->_data->reference_id)) {
+        $formRow = $this->getDatabase()->loadAssoc();
+
+        if (!is_array($formRow) || empty($formRow['type']) || empty($formRow['reference_id'])) {
+            return array();
+        }
+
+        $form = ContentbuilderLegacyHelper::getForm($formRow['type'], $formRow['reference_id']);
+
+        if ($form && $form->isGroup($this->_data->reference_id)) {
             return $form->getGroupDefinition($this->_data->reference_id);
         }
+
         return array();
     }
 

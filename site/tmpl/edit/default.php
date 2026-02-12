@@ -15,6 +15,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Uri\Uri;
 use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
@@ -55,6 +56,27 @@ $listQuery = http_build_query(['list' => [
     'ordering' => $listOrdering,
     'direction' => $listDirection,
 ]]);
+$previewHiddenFields = '';
+$previewEnabled = $input->getBool('cb_preview', false);
+$previewUntil = $input->getInt('cb_preview_until', 0);
+$previewSig = $input->getString('cb_preview_sig', '');
+$previewActorId = $input->getInt('cb_preview_actor_id', 0);
+$previewActorName = (string) $input->getString('cb_preview_actor_name', '');
+$previewQuery = '';
+$adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&task=form.edit&id=' . (int) $id;
+if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
+    $previewQuery = '&cb_preview=1'
+        . '&cb_preview_until=' . (int) $previewUntil
+        . '&cb_preview_actor_id=' . (int) $previewActorId
+        . '&cb_preview_actor_name=' . rawurlencode($previewActorName)
+        . '&cb_preview_sig=' . rawurlencode($previewSig);
+    $previewHiddenFields =
+        '<input type="hidden" name="cb_preview" value="1" />' . "\n"
+        . '<input type="hidden" name="cb_preview_until" value="' . (int) $previewUntil . '" />' . "\n"
+        . '<input type="hidden" name="cb_preview_actor_id" value="' . (int) $previewActorId . '" />' . "\n"
+        . '<input type="hidden" name="cb_preview_actor_name" value="' . htmlentities($previewActorName, ENT_QUOTES, 'UTF-8') . '" />' . "\n"
+        . '<input type="hidden" name="cb_preview_sig" value="' . htmlentities($previewSig, ENT_QUOTES, 'UTF-8') . '" />';
+}
 
 $detailsHref = Route::_(
     'index.php?option=com_contentbuilder_ng&task=details.display'
@@ -64,6 +86,7 @@ $detailsHref = Route::_(
         . ($tmpl !== '' ? '&tmpl=' . $tmpl : '')
         . '&Itemid=' . $itemId
         . ($listQuery !== '' ? '&' . $listQuery : '')
+        . $previewQuery
 );
 
 $listHref = Route::_(
@@ -73,75 +96,16 @@ $listHref = Route::_(
         . ($listQuery !== '' ? '&' . $listQuery : '')
         . ($tmpl !== '' ? '&tmpl=' . $tmpl : '')
         . '&Itemid=' . $itemId
+        . $previewQuery
 );
 
 $hasRecord = !in_array((string) $recordId, ['', '0'], true);
 $backHref = ($backToList || !$hasRecord) ? $listHref : $detailsHref;
 $showBack = $this->back_button && !$hasReturn;
-$previewHiddenFields = '';
-$previewEnabled = $input->getBool('cb_preview', false);
-$previewUntil = $input->getInt('cb_preview_until', 0);
-$previewSig = $input->getString('cb_preview_sig', '');
-if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
-    $previewHiddenFields =
-        '<input type="hidden" name="cb_preview" value="1" />' . "\n"
-        . '<input type="hidden" name="cb_preview_until" value="' . (int) $previewUntil . '" />' . "\n"
-        . '<input type="hidden" name="cb_preview_sig" value="' . htmlentities($previewSig, ENT_QUOTES, 'UTF-8') . '" />';
-}
 
-$customCss = <<<'CSS'
-.cbEditableWrapper .mb-3 {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 1rem;
-}
-
-.cbEditableWrapper .mb-3 > label.form-label {
-    flex: 0 0 240px;
-    max-width: 240px;
-    margin-bottom: 0;
-    padding-right: 0.5rem;
-    font-weight: 600;
-}
-
-.cbEditableWrapper .mb-3 > div {
-    flex: 1 1 320px;
-    min-width: 0;
-}
-
-.cbEditableWrapper .cbFormField input,
-.cbEditableWrapper .cbFormField select,
-.cbEditableWrapper .cbFormField textarea,
-.cbEditableWrapper .cbFormField .inputbox {
-    width: 100%;
-}
-
-.cbToolBar .btn {
-    margin-left: 0.5rem;
-}
-
-.cbToolBar .btn:first-child {
-    margin-left: 0;
-}
-
-@media (max-width: 768px) {
-    .cbEditableWrapper .mb-3 {
-        align-items: stretch;
-    }
-
-    .cbEditableWrapper .mb-3 > label.form-label,
-    .cbEditableWrapper .mb-3 > div {
-        flex: 1 1 100%;
-        max-width: 100%;
-        padding-right: 0;
-    }
-}
-CSS;
 ?>
 <?php Factory::getApplication()->getDocument()->addStyleDeclaration($this->theme_css); ?>
 <?php Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js); ?>
-<?php Factory::getApplication()->getDocument()->addStyleDeclaration($customCss); ?>
 <a name="article_up"></a>
 <script type="text/javascript">
     <!--
@@ -308,10 +272,18 @@ CSS;
     }
     ?>
     <?php echo  $this->event->afterDisplayTitle; ?>
+    <?php if ($isAdminPreview): ?>
+        <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <span><?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE'); ?></span>
+            <a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>
+            </a>
+        </div>
+    <?php endif; ?>
     <?php
     ob_start();
     ?>
-    <div class="cbToolBar mb-5" style="float: right; text-align: right;">
+    <div class="cbToolBar mb-5 d-flex flex-wrap justify-content-end gap-2">
         <?php
         if ($this->record_id && $edit_allowed && $this->create_articles && $fullarticle_allowed) {
         ?>
@@ -365,7 +337,6 @@ CSS;
 
     if (Factory::getApplication()->input->getInt('cb_show_top_bar', 1)) {
     ?>
-        <div style="clear:right;"></div>
     <?php
         echo $buttons;
     }
@@ -374,7 +345,7 @@ CSS;
     ?>
 
         <?php if ($this->created): ?>
-            <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_CREATED_ON'); ?> <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC4')); ?></span>
+            <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_CREATED_ON'); ?> <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?></span>
         <?php endif; ?>
 
         <?php if ($this->created_by): ?>
@@ -389,7 +360,7 @@ CSS;
         <?php if ($this->modified_by): ?>
 
             <?php if ($this->modified): ?>
-                <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON'); ?> <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC4')); ?></span>
+                <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON'); ?> <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?></span>
             <?php endif; ?>
 
             <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_BY'); ?> <?php echo $this->modified_by; ?></span>
@@ -579,7 +550,6 @@ CSS;
 
                 echo $buttons;
             ?>
-                <div style="clear:right;"></div>
             <?php
             }
             ?>
@@ -619,7 +589,6 @@ CSS;
 
                 echo $buttons;
             ?>
-                <div style="clear:right;"></div>
             <?php
             }
             ?>
@@ -650,7 +619,6 @@ CSS;
 
                 echo $buttons;
             ?>
-                <div style="clear:both;"></div>
             <?php
             }
             ?>

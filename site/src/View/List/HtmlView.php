@@ -1,7 +1,7 @@
 <?php
 /**
  * @package     ContentBuilder NG
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   (C) 2026 by XDA+GIL
  * @license     GNU/GPL
@@ -117,6 +117,7 @@ class HtmlView extends BaseHtmlView
         $this->items = $subject->items;
         $this->pagination = $pagination;
         $this->total = $total;
+        $this->preview_no_list_fields = !empty($subject->preview_no_list_fields);
         $own_only = Factory::getApplication()->isClient('site') ? $subject->own_only_fe : $subject->own_only;
         $this->own_only = $own_only;
         parent::display($tpl);

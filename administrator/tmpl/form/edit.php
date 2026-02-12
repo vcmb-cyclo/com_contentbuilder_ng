@@ -2,7 +2,7 @@
 
 /**
  * @package     ContentBuilder NG
- * @author      Markus Bopp / XDA + GIL
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     GNU/GPL
@@ -14,6 +14,7 @@
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Router\Route;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
 ?>
@@ -34,12 +35,21 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             ? ' <span class="ms-1 icon-sort icon-sort-asc" aria-hidden="true"></span>'
             : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>')
         : '';
-    $url = \Joomla\CMS\Router\Route::_(
+    $url = Route::_(
         'index.php?option=com_contentbuilder_ng&task=form.edit&id=' . $formId
             . '&list[ordering]=' . $field . '&list[direction]=' . $nextDir
     );
 
     return '<a href="' . $url . '">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . $indicator . '</a>';
+};
+
+$permHeaderLabel = static function (string $labelKey, string $tipKey): string {
+    $label = Text::_($labelKey);
+    $tip = Text::_($tipKey);
+
+    return '<span class="cb-perm-header-tip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="'
+        . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '" title="' . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '">'
+        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</span>';
 };
 ?>
 
@@ -1687,37 +1697,37 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             <thead>
                 <tr>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_GROUP') ?>
+                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_GROUP', 'COM_CONTENTBUILDER_NG_PERM_GROUP_TIP'); ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS') ?>
+                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS', 'COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS_TIP'); ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VIEW') ?>
+                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_VIEW', 'COM_CONTENTBUILDER_NG_PERM_VIEW_TIP'); ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_NEW') ?>
+                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_NEW', 'COM_CONTENTBUILDER_NG_PERM_NEW_TIP'); ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_EDIT') ?>
+                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_EDIT', 'COM_CONTENTBUILDER_NG_PERM_EDIT_TIP'); ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_DELETE') ?>
+                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_DELETE', 'COM_CONTENTBUILDER_NG_PERM_DELETE_TIP'); ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_STATE') ?>
+                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_STATE', 'COM_CONTENTBUILDER_NG_PERM_STATE_TIP'); ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH') ?>
+                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PUBLISH', 'COM_CONTENTBUILDER_NG_PUBLISH_TIP'); ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE') ?>
+                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE', 'COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE_TIP'); ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE') ?>
+                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE', 'COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE_TIP'); ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_RATING') ?>
+                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_RATING', 'COM_CONTENTBUILDER_NG_PERM_RATING_TIP'); ?>
                     </th>
                 </tr>
             </thead>
@@ -2383,9 +2393,22 @@ $wa->useScript('jquery');
         // Clés de stockage
         const KEY_VIEW = 'cb_active_view_tab';
         const KEY_PERM = 'cb_active_perm_tab';
+        const tooltipSelector = '[data-bs-toggle="tooltip"]';
 
         // Helpers
         const $ = (sel, root = document) => root.querySelector(sel);
+
+        function initBootstrapTooltips(root = document) {
+            if (!window.bootstrap || typeof window.bootstrap.Tooltip !== 'function') {
+                return;
+            }
+
+            root.querySelectorAll(tooltipSelector).forEach((el) => {
+                if (!window.bootstrap.Tooltip.getInstance(el)) {
+                    new window.bootstrap.Tooltip(el);
+                }
+            });
+        }
 
         function setHidden(name, value) {
             const el = document.querySelector(`input[name="jform[${name}]"]`);
@@ -2462,6 +2485,8 @@ $wa->useScript('jquery');
         persistJoomlaTabset('perm-pane', KEY_PERM, (id) => {
             setHidden('slideStartOffset', id);
         });
+
+        initBootstrapTooltips();
 
     })();
 </script>

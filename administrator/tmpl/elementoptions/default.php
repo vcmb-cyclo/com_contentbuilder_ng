@@ -2,7 +2,7 @@
 
 /**
  * @package     ContentBuilder NG
- * @author      Markus Bopp
+ * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     GNU/GPL
@@ -21,12 +21,25 @@ use Joomla\CMS\HTML\HTMLHelper;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 
+$element = $this->element ?? null;
+if (!is_object($element) || empty($element->id)) {
+?>
+    <div class="alert alert-danger">
+        <?php echo Text::_('COM_CONTENTBUILDER_NG_ERROR'); ?>: Invalid or missing `element_id`.
+    </div>
+<?php
+    return;
+}
+
 $plugins = ContentbuilderLegacyHelper::getFormElementsPlugins();
 
-\Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_ng_form_elements', $this->element->type);
+$elementType = is_string($this->element->type) ? $this->element->type : '';
+if ($elementType !== '') {
+    \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_ng_form_elements', $elementType);
+}
 
 $dispatcher = Factory::getApplication()->getDispatcher();
-$eventResult = $dispatcher->dispatch('onSettingsDisplay', new \Joomla\Event\Event('onSettingsDisplay', array($this->element->options)));
+$eventResult = $dispatcher->dispatch('onSettingsDisplay', new \Joomla\Event\Event('onSettingsDisplay', array($this->element->options ?? null)));
 $results = $eventResult->getArgument('result') ?: [];
 $dispatcher->clearListeners('onSettingsDisplay');
 
@@ -34,7 +47,7 @@ if (count($results)) {
     $results = $results[0];
 }
 
-$the_item = $results;
+$the_item = is_array($results) ? $results : [];
 $is_plugin = false;
 ?>
 <style type="text/css">
@@ -47,7 +60,7 @@ $is_plugin = false;
 
     <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE'); ?>
     <select class="form-select-sm" name="type_selection"
-        onchange="document.getElementById('type_change').value='1';document.getElementById('task').value='save';document.adminForm.submit();">
+        onchange="document.getElementById('type_change').value='1';">
         <option value="text" <?php echo $this->element->type == 'text' || $this->element->type == '' ? ' selected="selected"' : ''; ?>>
             <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_TEXT'); ?>
         </option>
@@ -85,7 +98,7 @@ $is_plugin = false;
         }
         ?>
     </select>
-    <button class="btn btn-sm btn-primary" onclick="document.getElementById('task').value='save';">
+    <button type="submit" class="btn btn-sm btn-primary" onclick="document.getElementById('task').value='elementoptions.save';">
         <?php echo Text::_('COM_CONTENTBUILDER_NG_SAVE'); ?>
     </button>
 
@@ -109,7 +122,7 @@ $is_plugin = false;
         ?>
                 <fieldset class="adminform">
                     <legend>
-                        <?php echo $the_item['element_type']; ?>
+                        <?php echo htmlentities($the_item['element_type'] ?? $this->element->type, ENT_QUOTES, 'UTF-8'); ?>
                     </legend>
                     <table class="admintable" width="95%">
                         <?php
@@ -131,7 +144,7 @@ $is_plugin = false;
                         ?>
                     </table>
                     <?php
-                    echo $the_item['settings'];
+                    echo $the_item['settings'] ?? '';
                     ?>
                 </fieldset>
                 <input type="hidden" name="field_type" value="<?php echo $this->element->type; ?>" />
@@ -782,7 +795,7 @@ $is_plugin = false;
                 <?php echo htmlentities($this->element->label, ENT_QUOTES, 'UTF-8'); ?>
             </h3>
             <?php
-            if (($is_plugin && $the_item['show_validation_settings']) || !$is_plugin) {
+            if (($is_plugin && !empty($the_item['show_validation_settings'])) || !$is_plugin) {
             ?>
                 <fieldset class="adminform">
                     <legend>
@@ -798,7 +811,7 @@ $is_plugin = false;
                             <td align="left">
                                 <input class="form-control form-control-sm" style="width:95%;" type="text"
                                     name="validation_message" id="validation_message"
-                                    value="<?php echo htmlentities($this->element->validation_message, ENT_QUOTES, 'UTF-8'); ?>" />
+                                    value="<?php echo htmlentities((string) ($this->element->validation_message ?? ''), ENT_QUOTES, 'UTF-8'); ?>" />
                             </td>
                         </tr>
                         <tr>
@@ -811,7 +824,7 @@ $is_plugin = false;
                                 <select class="form-select-sm" style="width: 95%;height: 100px;" multiple="multiple"
                                     name="validations[]" id="validations">
                                     <?php
-                                    $selected_validations = explode(',', $this->element->validations);
+                                    $selected_validations = explode(',', (string) ($this->element->validations ?? ''));
                                     foreach ($this->validations as $validation) {
                                     ?>
                                         <option <?php echo in_array($validation, $selected_validations) ? 'selected="selected" ' : ''; ?>value="<?php echo htmlentities($validation, ENT_QUOTES, 'UTF-8'); ?>">
@@ -842,7 +855,7 @@ $is_plugin = false;
             <?php
             }
 
-            if (($is_plugin && $the_item['show_init_code_settings']) || !$is_plugin) {
+            if (($is_plugin && !empty($the_item['show_init_code_settings'])) || !$is_plugin) {
             ?>
                 <fieldset class="adminform">
                     <legend>
@@ -867,7 +880,7 @@ $is_plugin = false;
                 </fieldset>
             <?php
             }
-            if (($is_plugin && $the_item['show_action_code_settings']) || !$is_plugin) {
+            if (($is_plugin && !empty($the_item['show_action_code_settings'])) || !$is_plugin) {
             ?>
                 <fieldset class="adminform">
                     <legend>
@@ -902,6 +915,7 @@ $is_plugin = false;
 
 
     <input type="hidden" name="option" value="com_contentbuilder_ng" />
+    <input type="hidden" name="view" value="elementoptions" />
     <input type="hidden" name="task" id="task" value="" />
     <input type="hidden" name="type_change" id="type_change" value="0" />
     <input type="hidden" name="id" value="<?php echo $this->element->form_id; ?>" />

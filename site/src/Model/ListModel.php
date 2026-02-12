@@ -274,7 +274,14 @@ class ListModel extends BaseListModel
      */
     private function _buildQuery()
     {
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id) . ' And published = 1';
+        $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
+        $query = 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id);
+
+        if (!$isAdminPreview) {
+            $query .= ' And published = 1';
+        }
+
+        return $query;
     }
 
     /**
@@ -296,10 +303,14 @@ class ListModel extends BaseListModel
             }
 
             foreach ($this->_data as $data) {
-                if (!$this->frontend && $data->display_in == 0) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
-                } else if ($this->frontend && $data->display_in == 1) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+                $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
+
+                if (!$isAdminPreview) {
+                    if (!$this->frontend && $data->display_in == 0) {
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+                    } else if ($this->frontend && $data->display_in == 1) {
+                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+                    }
                 }
 
                 // filter by category if requested by menu item
@@ -318,6 +329,11 @@ class ListModel extends BaseListModel
                     $data->form = ContentbuilderLegacyHelper::getForm($data->type, $data->reference_id);
                     if (!$data->form->exists) {
                         throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+                    }
+                    $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
+                    $data->preview_no_list_fields = false;
+                    if ($isAdminPreview && method_exists($data->form, 'synchRecords')) {
+                        $data->form->synchRecords();
                     }
                     $data->page_title = '';
                     if (Factory::getApplication()->input->getInt('cb_prefix_in_title', 1)) {
@@ -473,9 +489,9 @@ class ListModel extends BaseListModel
                                         $val2 = $ex2[1];
                                     }
                                     if (strtolower(trim($ex[1])) == 'date') {
-                                        $val = HTMLHelper::_('date', $ex2[0], Text::_('DATE_FORMAT_LC3'));
+                                        $val = HTMLHelper::_('date', $ex2[0], Text::_('DATE_FORMAT_LC2'));
                                         if (isset($ex2[1])) {
-                                            $val2 = HTMLHelper::_('date', $ex2[1], Text::_('DATE_FORMAT_LC3'));
+                                            $val2 = HTMLHelper::_('date', $ex2[1], Text::_('DATE_FORMAT_LC2'));
                                         }
                                     }
                                     if (count($ex2) == 2) {
@@ -557,6 +573,10 @@ class ListModel extends BaseListModel
                             $ids[] = $row['reference_id'];
                             $order_types['col' . $row['reference_id']] = $row['order_type'];
                         }
+
+                        if ($isAdminPreview && !count($rows)) {
+                            $data->preview_no_list_fields = true;
+                        }
                     }
                     // Allow sorting on the published state column.
                     $order_types['colPublished'] = 'UNSIGNED';
@@ -612,6 +632,15 @@ class ListModel extends BaseListModel
                         $ordering = '';
                     }
 
+                    $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
+                    $publishedOnly = $isAdminPreview ? false : (bool) $data->published_only;
+                    $ownerFilterUserId = $isAdminPreview
+                        ? -1
+                        : ($this->frontend
+                            ? ($data->own_only_fe ? Factory::getApplication()->getIdentity()->get('id', 0) : -1)
+                            : ($data->own_only ? Factory::getApplication()->getIdentity()->get('id', 0) : -1));
+                    $showAllLanguages = $isAdminPreview ? true : ($this->frontend ? $data->show_all_languages_fe : true);
+
                     $data->items = $data->form->getListRecords(
                         $ids,
                         $this->getState('formsd_filter'),
@@ -622,15 +651,15 @@ class ListModel extends BaseListModel
                         $order_types,
                         $direction,
                         0,
-                        $data->published_only,
-                        $this->frontend ? ($data->own_only_fe ? Factory::getApplication()->getIdentity()->get('id', 0) : -1) : ($data->own_only ? Factory::getApplication()->getIdentity()->get('id', 0) : -1),
+                        $publishedOnly,
+                        $ownerFilterUserId,
                         $this->getState('formsd_filter_state'),
                         $this->getState('formsd_filter_publish'),
                         $data->initial_sort_order == -1 ? -1 : 'col' . $data->initial_sort_order,
                         $data->initial_sort_order2 == -1 ? -1 : 'col' . $data->initial_sort_order2,
                         $data->initial_sort_order3 == -1 ? -1 : 'col' . $data->initial_sort_order3,
                         $this->_menu_filter,
-                        $this->frontend ? $data->show_all_languages_fe : true,
+                        $showAllLanguages,
                         $this->getState('formsd_filter_language'),
                         $act_as_registration,
                         $data,
