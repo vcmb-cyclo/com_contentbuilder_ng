@@ -138,6 +138,44 @@ class HtmlView extends BaseHtmlView
             // Astuce: utiliser un "custom" button JS submitTask
             ToolbarHelper::custom('datatable.create', 'database', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_CREATE'), false);
             ToolbarHelper::custom('datatable.sync', 'refresh', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC'), false);
+
+            $createTip = json_encode(Text::_('COM_CONTENTBUILDER_NG_DATATABLE_CREATE_TIP'), JSON_UNESCAPED_UNICODE);
+            $syncTip   = json_encode(Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC_TIP'), JSON_UNESCAPED_UNICODE);
+
+            $wa->addInlineScript(
+                "(function () {
+                    function getButton(task) {
+                        return document.querySelector('[data-task=\"' + task + '\"]')
+                            || document.querySelector('[onclick*=\"' + task + '\"]');
+                    }
+
+                    function applyTooltip(task, message) {
+                        var button = getButton(task);
+                        if (!button || !message) {
+                            return;
+                        }
+                        button.setAttribute('title', message);
+                        button.setAttribute('data-bs-title', message);
+                        button.setAttribute('data-bs-toggle', 'tooltip');
+                        button.setAttribute('data-bs-placement', 'bottom');
+
+                        if (window.bootstrap && window.bootstrap.Tooltip) {
+                            window.bootstrap.Tooltip.getOrCreateInstance(button);
+                        }
+                    }
+
+                    function init() {
+                        applyTooltip('datatable.create', " . $createTip . ");
+                        applyTooltip('datatable.sync', " . $syncTip . ");
+                    }
+
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', init, { once: true });
+                    } else {
+                        init();
+                    }
+                }());"
+            );
         }
         
         ToolbarHelper::deleteList(

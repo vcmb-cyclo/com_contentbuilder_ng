@@ -270,9 +270,9 @@ class ExportModel extends BaseDatabaseModel
                                         $val2 = $ex2[1];
                                     }
                                     if (strtolower(trim($ex[1])) == 'date') {
-                                        $val = HTMLHelper::_('date', $ex2[0], Text::_('DATE_FORMAT_LC2'));
+                                        $val = HTMLHelper::_('date', $ex2[0], Text::_('DATE_FORMAT_LC5'));
                                         if (isset($ex2[1])) {
-                                            $val2 = HTMLHelper::_('date', $ex2[1], Text::_('DATE_FORMAT_LC2'));
+                                            $val2 = HTMLHelper::_('date', $ex2[1], Text::_('DATE_FORMAT_LC5'));
                                         }
                                     }
                                     if (count($ex2) == 2) {

@@ -26,6 +26,7 @@ use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class FormsModel extends ListModel
 {
@@ -190,6 +191,35 @@ class FormsModel extends ListModel
         $query->order($db->escape($ordering . ' ' . $direction));
 
         return $query;
+    }
+
+    /**
+     * Adds a resolved source title for list rendering.
+     */
+    public function getItems(): array
+    {
+        $items = parent::getItems();
+
+        if (!$items) {
+            return $items;
+        }
+
+        foreach ($items as $item) {
+            $item->source_title = '';
+
+            if (!empty($item->type) && !empty($item->reference_id)) {
+                $form = ContentbuilderLegacyHelper::getForm((string) $item->type, (int) $item->reference_id);
+                if ($form && !empty($form->exists) && method_exists($form, 'getTitle')) {
+                    $item->source_title = trim((string) $form->getTitle());
+                }
+            }
+
+            if ($item->source_title === '') {
+                $item->source_title = trim((string) ($item->title ?? ''));
+            }
+        }
+
+        return $items;
     }
 
 

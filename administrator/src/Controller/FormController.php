@@ -297,7 +297,7 @@ class FormController extends BaseFormController
     // Toutes les tâches sur les ÉLÉMENTS (champs du formulaire)
     // ==================================================================
     // Ces tâches agissent sur les éléments sélectionnés dans l'édition d'un form
-    // Elles doivent utiliser ElementoptionModel
+    // Elles doivent utiliser ElementoptionsModel
  
     protected function postSaveHook(BaseDatabaseModel $model, $validData = [])
     {
@@ -398,7 +398,7 @@ class FormController extends BaseFormController
                 return false;
             }
 
-            $model = $this->getModel('Elementoption', 'Administrator', ['ignore_request' => true]);
+            $model = $this->getModel('Elementoptions', 'Administrator', ['ignore_request' => true]);
             $model->fieldUpdate($cids, $field, $value);
 
             $this->setRedirect(
@@ -428,7 +428,7 @@ class FormController extends BaseFormController
                 return false;
             }
 
-            $model = $this->getModel('Elementoption', 'Administrator', ['ignore_request' => true]);
+            $model = $this->getModel('Elementoptions', 'Administrator', ['ignore_request' => true]);
             $model->publish($cids, $state);
 
             $this->setRedirect(

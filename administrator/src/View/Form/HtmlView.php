@@ -96,8 +96,8 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::custom('form.editable', 'edit', '', Text::_('COM_CONTENTBUILDER_NG_EDITABLE'), false);
         ToolbarHelper::custom('form.not_editable', 'edit', '', Text::_('COM_CONTENTBUILDER_NG_NOT_EDITABLE'), false);
 
-        ToolbarHelper::publish('forms.publish');
-        ToolbarHelper::unpublish('forms.unpublish');
+        ToolbarHelper::publish('form.publish');
+        ToolbarHelper::unpublish('form.unpublish');
 
         ToolbarHelper::cancel('form.cancel', $isNew ? 'JTOOLBAR_CLOSE' : 'JTOOLBAR_CLOSE');
 

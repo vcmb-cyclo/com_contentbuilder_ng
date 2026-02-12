@@ -24,7 +24,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Database\DatabaseQuery;
 use Joomla\Utilities\ArrayHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Table\ElementoptionTable;
+use CB\Component\Contentbuilder_ng\Administrator\Table\ElementoptionsTable;
 
 class ElementsModel extends ListModel
 {
@@ -59,13 +59,14 @@ class ElementsModel extends ListModel
     }
 
 
-    public function getTable($name = 'Elementoption', $prefix = 'CB\\Component\\Contentbuilder_ng\\Administrator\\Table\\', $options = [])
+    public function getTable($name = 'Elementoptions', $prefix = 'CB\\Component\\Contentbuilder_ng\\Administrator\\Table\\', $options = [])
     {
         $db = $this->getDatabase();
 
-        // Instanciation directe (fiable en Joomla 4/5/6)
-        if ($name === 'Elementoption') {
-            return new ElementoptionTable($db);
+        // Instanciation directe (fiable en Joomla 4/5/6).
+        // Keep compatibility with both singular and plural callers.
+        if ($name === 'Elementoption' || $name === 'Elementoptions') {
+            return new ElementoptionsTable($db);
         }
 
         // Fallback standard Joomla si tu as d'autres tables ailleurs
@@ -215,7 +216,7 @@ class ElementsModel extends ListModel
             return false;
         }
 
-        $table = $this->getTable('Elementoption');
+        $table = $this->getTable('Elementoptions');
 
         if (!$table->load($pk)) {
             $this->setError($table->getError());
@@ -271,7 +272,7 @@ class ElementsModel extends ListModel
         });
 
 
-        $table = $this->getTable('Elementoption');
+        $table = $this->getTable('Elementoptions');
 
         // 3) Réassignation séquentielle 1..N dans le groupe
         $n = 1;
@@ -312,7 +313,7 @@ class ElementsModel extends ListModel
             return false;
         }
 
-        $table = $this->getTable('Elementoption');
+        $table = $this->getTable('Elementoptions');
         return (bool) $table->reorder('form_id = ' . (int) $formId);
     }
 

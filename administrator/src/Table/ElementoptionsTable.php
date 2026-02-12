@@ -1,6 +1,6 @@
 <?php
 /**
- * ContentBuilder NG Elementoption table.
+ * ContentBuilder NG Elementoptions table.
  *
  * Table description.
  *
@@ -20,7 +20,7 @@ namespace CB\Component\Contentbuilder_ng\Administrator\Table;
 use Joomla\CMS\Table\Table;
 use Joomla\Database\DatabaseDriver;
 
-class ElementoptionTable extends Table
+class ElementoptionsTable extends Table
 {
     /**
      * Primary Key

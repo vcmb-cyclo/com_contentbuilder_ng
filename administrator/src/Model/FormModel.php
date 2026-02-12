@@ -450,7 +450,7 @@ class FormModel extends AdminModel
                 // En charge de la sauvegarde de la partie Element
                 if (is_object($data->form)) {
                     ContentbuilderLegacyHelper::synchElements($data->id, $data->form);
-                    $elements_table = $this->getTable('Elementoption');
+                    $elements_table = $this->getTable('Elementoptions');
                     $elements_table->reorder('form_id=' . $data->id);
                 }
             }
@@ -1093,7 +1093,7 @@ class FormModel extends AdminModel
 
             $db->execute();
 
-            $this->getTable('Elementoption')->reorder('form_id = ' . $cid);
+            $this->getTable('Elementoptions')->reorder('form_id = ' . $cid);
 
             $db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($cid) . "'");
             $db->execute();

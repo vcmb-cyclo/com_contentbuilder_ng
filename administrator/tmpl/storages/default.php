@@ -107,7 +107,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                     </th>
 
                     <th class="w-10 text-nowrap">
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON'), 'a.modified', $listDirn, $listOrder); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('JGLOBAL_MODIFIED'), 'a.modified', $listDirn, $listOrder); ?>
                     </th>
 
                     <th class="w-1 text-center">
@@ -131,7 +131,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                         $title     = htmlspecialchars((string) ($row->title ?? ''), ENT_QUOTES, 'UTF-8');
                         $lastUpdateRaw = $row->modified ?? ($row->created ?? '');
                         $lastUpdate = $lastUpdateRaw
-                            ? HTMLHelper::_('date', $lastUpdateRaw, Text::_('DATE_FORMAT_LC2'))
+                            ? HTMLHelper::_('date', $lastUpdateRaw, Text::_('DATE_FORMAT_LC5'))
                             : '-';
 
                         // ⚠️ Vérifie ta convention : task=storage.edit (singulier) ou storages.edit (pluriel)

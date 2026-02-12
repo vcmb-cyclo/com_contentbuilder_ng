@@ -31,10 +31,10 @@ class ElementoptionsController extends AdminController
 
     function save()
     {
-        $model = $this->getModel('Elementoption', 'Administrator', ['ignore_request' => true])
-            ?: $this->getModel('Elementoption', 'Contentbuilder_ng', ['ignore_request' => true]);
+        $model = $this->getModel('Elementoptions', 'Administrator', ['ignore_request' => true])
+            ?: $this->getModel('Elementoptions', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
-            throw new \RuntimeException('ElementoptionModel not found');
+            throw new \RuntimeException('ElementoptionsModel not found');
         }
         $id = $model->store();
 

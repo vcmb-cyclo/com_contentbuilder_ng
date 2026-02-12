@@ -123,14 +123,14 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                     </th>
 
 
-                    <th width="120">
+                    <th width="w-10 text-nowrap">
                         <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_ORDERBY'), 'a.ordering'); ?>
                     </th>
-                    <th width="5">
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'a.published'); ?>
-                    </th>
-                    <th width="140">
+                    <th class="w-10 text-nowrap">
                         <?php echo $sortLink(Text::_('JGLOBAL_MODIFIED'), 'a.modified'); ?>
+                    </th>
+                    <th width="w-1 text-center">
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'a.published'); ?>
                     </th>
                 </tr>
             </thead>
@@ -163,7 +163,10 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                         </td>
                         <td>
                             <a href="<?php echo $link; ?>">
-                                <?php echo $row->title; ?>
+                                <?php
+                                $sourceTitle = (string) ($row->source_title ?? $row->title ?? '');
+                                echo htmlspecialchars($sourceTitle, ENT_QUOTES, 'UTF-8');
+                                ?>
                             </a>
                         </td>
                         <td>
@@ -189,18 +192,18 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                             <?php $disabled = $this->ordering ? '' : 'disabled="disabled"'; ?>
                         </td>
                         <td>
-                            <?php echo HTMLHelper::_('jgrid.published', (int) $row->published, $i, 'forms.', true, 'cb');
-                             ?>
-                        </td>
-                        <td>
                             <?php
                             $m = $row->modified ?? '';
                             if ($m && $m !== '0000-00-00 00:00:00') {
-                                echo HTMLHelper::_('date', $m, Text::_('DATE_FORMAT_LC2'));
+                                echo HTMLHelper::_('date', $m, Text::_('DATE_FORMAT_LC5'));
                             } else {
                                 echo '-';
                             }
                             ?>
+                        </td>
+                        <td>
+                            <?php echo HTMLHelper::_('jgrid.published', (int) $row->published, $i, 'forms.', true, 'cb');
+                             ?>
                         </td>
 
 
