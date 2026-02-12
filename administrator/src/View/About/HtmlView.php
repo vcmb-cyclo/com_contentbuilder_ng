@@ -48,6 +48,7 @@ class HtmlView extends BaseHtmlView
             Text::_('COM_CONTENTBUILDER_NG') .' :: ' . Text::_('COM_CONTENTBUILDER_NG_ABOUT'),
             'logo_left'
         );
+        ToolbarHelper::preferences('com_contentbuilder_ng');
 
 
         // 3️⃣ Affichage du layout

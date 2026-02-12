@@ -139,8 +139,8 @@ class HtmlView extends BaseHtmlView
             // Astuce: utiliser un "custom" button JS submitTask
             if (!$isExternalTable) {
                 ToolbarHelper::custom('datatable.create', 'database', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_CREATE'), false);
+                ToolbarHelper::custom('datatable.sync', 'refresh', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC'), false);
             }
-            ToolbarHelper::custom('datatable.sync', 'refresh', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC'), false);
 
             $createTip = json_encode(Text::_('COM_CONTENTBUILDER_NG_DATATABLE_CREATE_TIP'), JSON_UNESCAPED_UNICODE);
             $syncTip   = json_encode(Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC_TIP'), JSON_UNESCAPED_UNICODE);
