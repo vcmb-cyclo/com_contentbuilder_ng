@@ -281,9 +281,9 @@ class FormModel extends AdminModel
             $data->title = null;
             $data->created = null;
             $data->modified = null;
-            $data->metadata = true;
+            $data->metadata = false;
             $data->export_xls = true;
-            $data->print_button = true;
+            $data->print_button = false;
             $data->created_by = null;
             $data->modified_by = null;
             $data->published = null;
