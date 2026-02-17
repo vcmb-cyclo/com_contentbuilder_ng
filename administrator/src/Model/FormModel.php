@@ -282,7 +282,7 @@ class FormModel extends AdminModel
             $data->created = null;
             $data->modified = null;
             $data->metadata = true;
-            $data->export_xls = null;
+            $data->export_xls = true;
             $data->print_button = true;
             $data->created_by = null;
             $data->modified_by = null;
@@ -290,7 +290,7 @@ class FormModel extends AdminModel
             $data->display_in = null;
             $data->published_only = null;
             $data->show_id_column = true;
-            $data->select_column = false;
+            $data->select_column = true;
             $data->edit_button = false;
             $data->new_button = false;
             $data->list_states = false;
@@ -375,7 +375,7 @@ class FormModel extends AdminModel
             $data->registration_bypass_verification_name = '';
             $data->registration_bypass_verify_view = '';
 
-            $data->theme_plugin = '';
+            $data->theme_plugin = 'joomla6';
 
             $data->rating_slots = 5;
 
@@ -398,7 +398,7 @@ class FormModel extends AdminModel
 
             $data->apply_button_title = '';
 
-            $data->filter_exact_match = 0;
+            $data->filter_exact_match = 1;
 
             $data->ordering = 0;
         }
