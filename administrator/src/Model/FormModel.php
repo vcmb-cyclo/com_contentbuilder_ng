@@ -309,7 +309,7 @@ class FormModel extends AdminModel
             $data->initial_order_dir = 'desc';
             $data->default_section = 0;
             $data->default_category = 0;
-            $data->create_articles = 1;
+            $data->create_articles = 0;
             $data->title_field = 0;
             $data->delete_articles = 1;
             $data->edit_by_type = 0;
