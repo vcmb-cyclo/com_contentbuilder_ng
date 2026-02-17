@@ -43,6 +43,22 @@
             "dependencies": [
                 "core"
             ]
+        },
+        {
+            "name": "com_contentbuilder_ng.coloris.css",
+            "type": "style",
+            "uri": "https://cdn.jsdelivr.net/npm/@melloware/coloris@0.25.0/dist/coloris.min.css"
+        },
+        {
+            "name": "com_contentbuilder_ng.coloris.js",
+            "type": "script",
+            "uri": "https://cdn.jsdelivr.net/npm/@melloware/coloris@0.25.0/dist/umd/coloris.min.js",
+            "dependencies": [
+                "core"
+            ],
+            "attributes": {
+                "defer": true
+            }
         }
     ]
 }

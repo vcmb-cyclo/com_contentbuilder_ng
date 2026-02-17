@@ -23,6 +23,7 @@ class HtmlView extends BaseHtmlView
     protected string $componentCreationDate = '';
     protected string $componentAuthor = '';
     protected array $phpLibraries = [];
+    protected array $javascriptLibraries = [];
 
     public function display($tpl = null)
     {
@@ -80,6 +81,7 @@ class HtmlView extends BaseHtmlView
         $this->componentCreationDate = (string) ($versionInformation['creationDate'] ?? '');
         $this->componentAuthor = (string) ($versionInformation['author'] ?? '');
         $this->phpLibraries = $this->getInstalledPhpLibraries();
+        $this->javascriptLibraries = $this->getInstalledJavascriptLibraries();
 
         // 3️⃣ Affichage du layout
         parent::display($tpl);
@@ -362,5 +364,116 @@ class HtmlView extends BaseHtmlView
             ];
             $indexed[$name] = \count($libraries) - 1;
         }
+    }
+
+    private function getInstalledJavascriptLibraries(): array
+    {
+        $assetFile = JPATH_ROOT . '/media/com_contentbuilder_ng/joomla.asset.json';
+
+        if (!is_file($assetFile)) {
+            return [];
+        }
+
+        $jsonData = file_get_contents($assetFile);
+
+        if (!is_string($jsonData) || $jsonData === '') {
+            return [];
+        }
+
+        $assetData = json_decode($jsonData, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($assetData)) {
+            return [];
+        }
+
+        $assets = $assetData['assets'] ?? [];
+
+        if (!is_array($assets)) {
+            return [];
+        }
+
+        $libraries = [];
+
+        foreach ($assets as $asset) {
+            if (!is_array($asset)) {
+                continue;
+            }
+
+            $name = (string) ($asset['name'] ?? '');
+            $uri = (string) ($asset['uri'] ?? '');
+
+            if (!str_contains(strtolower($name . ' ' . $uri), 'coloris')) {
+                continue;
+            }
+
+            $type = strtolower((string) ($asset['type'] ?? ''));
+
+            if ($type !== 'script' && $type !== 'style') {
+                continue;
+            }
+
+            $key = 'coloris';
+
+            if (!isset($libraries[$key])) {
+                $libraries[$key] = [
+                    'name' => 'Coloris',
+                    'version' => $this->extractVersionFromUri($uri),
+                    'assets' => [],
+                    'source' => $this->extractHostFromUri($uri),
+                ];
+            }
+
+            if ($libraries[$key]['version'] === '' && $uri !== '') {
+                $libraries[$key]['version'] = $this->extractVersionFromUri($uri);
+            }
+
+            if (($libraries[$key]['source'] ?? '') === '' && $uri !== '') {
+                $libraries[$key]['source'] = $this->extractHostFromUri($uri);
+            }
+
+            $assetLabel = $type === 'script' ? 'JS' : 'CSS';
+
+            if (!in_array($assetLabel, $libraries[$key]['assets'], true)) {
+                $libraries[$key]['assets'][] = $assetLabel;
+            }
+        }
+
+        foreach ($libraries as &$library) {
+            sort($library['assets']);
+            $library['assets'] = implode(' + ', $library['assets']);
+            if (($library['version'] ?? '') === '') {
+                $library['version'] = Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE');
+            }
+            if (($library['source'] ?? '') === '') {
+                $library['source'] = Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE');
+            }
+        }
+        unset($library);
+
+        return array_values($libraries);
+    }
+
+    private function extractVersionFromUri(string $uri): string
+    {
+        if ($uri === '') {
+            return '';
+        }
+
+        if (preg_match('/@([0-9]+(?:\.[0-9]+){1,3})/', $uri, $matches)) {
+            return (string) $matches[1];
+        }
+
+        return '';
+    }
+
+    private function extractHostFromUri(string $uri): string
+    {
+        if ($uri === '') {
+            return '';
+        }
+
+        $host = parse_url($uri, PHP_URL_HOST);
+
+        return is_string($host) ? $host : '';
     }
 }

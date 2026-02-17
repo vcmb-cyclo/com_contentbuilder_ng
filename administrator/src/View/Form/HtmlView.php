@@ -37,6 +37,8 @@ class HtmlView extends BaseHtmlView
         // JS
         $wa = $app->getDocument()->getWebAssetManager();
         $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
+        $wa->useStyle('com_contentbuilder_ng.coloris.css');
+        $wa->useScript('com_contentbuilder_ng.coloris.js');
 
         $wa->addInlineStyle(
             '.icon-48-logo_icon_cb{background-image:url('

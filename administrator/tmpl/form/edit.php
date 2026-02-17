@@ -332,9 +332,38 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         }
     }
 
+    var cbColorisConfigured = false;
+    var cbColorisInitRetries = 0;
+
+    function cbInitColoris() {
+        if (cbColorisConfigured) {
+            return;
+        }
+
+        if (typeof window.Coloris !== 'function') {
+            if (cbColorisInitRetries < 12) {
+                cbColorisInitRetries++;
+                window.setTimeout(cbInitColoris, 250);
+            }
+            return;
+        }
+
+        window.Coloris({
+            el: 'input[data-cb-color-text="1"]',
+            alpha: false,
+            format: 'hex',
+            clearButton: false,
+            themeMode: 'light'
+        });
+        cbColorisConfigured = true;
+    }
+
     document.addEventListener('DOMContentLoaded', cbInitListStateColorControls);
+    document.addEventListener('DOMContentLoaded', cbInitColoris);
     window.addEventListener('load', cbInitListStateColorControls);
+    window.addEventListener('load', cbInitColoris);
     document.addEventListener('shown.bs.tab', cbInitListStateColorControls);
+    document.addEventListener('shown.bs.tab', cbInitColoris);
     document.addEventListener('input', function(event) {
         if (event.target && event.target.matches('input[data-cb-color-text="1"]')) {
             cbApplyListStateColorPreview(event.target);
@@ -359,6 +388,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
     });
     window.setTimeout(cbInitListStateColorControls, 300);
     window.setTimeout(cbInitListStateColorControls, 1200);
+    window.setTimeout(cbInitColoris, 300);
+    window.setTimeout(cbInitColoris, 1200);
 </script>
 <form action="index.php" method="post" name="adminForm" id="adminForm">
     <div class="w-100 row" style="margin-left: 20px; overflow-x: auto;">
