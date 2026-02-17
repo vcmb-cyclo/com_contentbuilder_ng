@@ -28,11 +28,15 @@ use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder_ng\Administrator\Service\DatatableService;
 
 class StorageModel extends AdminModel
 {
     /** @var object|null */
     protected ?object $oldItem = null;
+
+    /** @var array{from:string,to:string}|null */
+    private ?array $lastDataTableRename = null;
 
     /** Required for CSV file */
     private string $target_table = '';
@@ -378,10 +382,22 @@ class StorageModel extends AdminModel
     // Crée une table #__<storage.name> ou synchronise une table externe (bytable).
     public function ensureDataTable(int $storageId, bool $isNew = false, ?string $oldName = null): void
     {
+        $this->lastDataTableRename = null;
+
         $table = $this->getTable('Storage');
         $table->load($storageId);
 
         $this->syncStorageDataTableOrBytable($storageId, $isNew, $table, $oldName);
+    }
+
+    /**
+     * Returns info about the last successful data table rename in this request.
+     *
+     * @return array{from:string,to:string}|null
+     */
+    public function getLastDataTableRename(): ?array
+    {
+        return $this->lastDataTableRename;
     }
 
 
@@ -422,6 +438,17 @@ class StorageModel extends AdminModel
                         Logger::info('Rename data table', ['from' => $oldName, 'to' => $name]);
                         $db->setQuery("RENAME TABLE `#__" . $oldName . "` TO `#__" . $name . "`");
                         $db->execute();
+                        $this->lastDataTableRename = [
+                            'from' => $oldName,
+                            'to' => $name,
+                        ];
+
+                        try {
+                            (new DatatableService())->ensureInternalAuditColumns($storageId);
+                        } catch (\Throwable $e) {
+                            Logger::exception($e);
+                        }
+
                         return;
                     }
                 }
@@ -457,6 +484,12 @@ class StorageModel extends AdminModel
                 } catch (\Throwable $e) {
                     Logger::exception($e);
                 }
+            }
+
+            try {
+                (new DatatableService())->ensureInternalAuditColumns($storageId);
+            } catch (\Throwable $e) {
+                Logger::exception($e);
             }
 
             return;

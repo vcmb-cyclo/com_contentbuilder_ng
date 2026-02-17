@@ -17,6 +17,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\Folder;
 use Joomla\CMS\Installer\Installer;
 use Joomla\CMS\Log\Log;
+use Joomla\Registry\Registry;
 
 class com_contentbuilder_ngInstallerScript extends InstallerScript
 {
@@ -288,6 +289,9 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   {
     $paths = [
       JPATH_ADMINISTRATOR . '/components/com_contentbuilder/',
+      JPATH_SITE . '/components/com_contentbuilder/',
+      JPATH_ROOT . '/media/contentbuilder/',
+      JPATH_SITE . '/media/com_contentbuilder/',
       JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/classes/PHPExcel',
       JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/classes/PHPExcel.php',
       JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/librairies/PhpSpreadsheet',
@@ -401,6 +405,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
 
     $this->migrateStoragesAuditColumns();
+    $this->migrateInternalStorageDataTablesAuditColumns();
 
     $msg = '[OK] Date fields updated to support NULL correctly, if necessary.';
     $this->log($msg);
@@ -536,6 +541,164 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
         $this->log('[WARNING] Could not normalize storage audit columns: ' . $e->getMessage(), Log::WARNING);
       }
     }
+  }
+
+  private function migrateInternalStorageDataTablesAuditColumns(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+    $now = Factory::getDate()->toSql();
+
+    try {
+      $query = $db->getQuery(true)
+        ->select($db->quoteName(['id', 'name']))
+        ->from($db->quoteName('#__contentbuilder_ng_storages'))
+        ->where('(' . $db->quoteName('bytable') . ' = 0 OR ' . $db->quoteName('bytable') . ' IS NULL)')
+        ->where($db->quoteName('name') . " <> ''");
+
+      $db->setQuery($query);
+      $storages = $db->loadAssocList() ?: [];
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Could not load internal storages for audit migration: ' . $e->getMessage(), Log::WARNING);
+      return;
+    }
+
+    if (empty($storages)) {
+      return;
+    }
+
+    $processed = 0;
+    $updated = 0;
+    $missingTables = 0;
+
+    foreach ($storages as $storage) {
+      $processed++;
+
+      $storageId = (int) ($storage['id'] ?? 0);
+      $name = strtolower(trim((string) ($storage['name'] ?? '')));
+
+      if ($storageId < 1 || $name === '') {
+        continue;
+      }
+
+      if (!preg_match('/^[a-z0-9_]+$/', $name)) {
+        $this->log("[WARNING] Skipping internal storage {$storageId}: invalid table name {$name}.", Log::WARNING);
+        continue;
+      }
+
+      $tableAlias = '#__' . $name;
+      $tableQN = $db->quoteName($tableAlias);
+
+      try {
+        $columns = $db->getTableColumns($tableAlias, false);
+      } catch (\Throwable $e) {
+        $this->log("[WARNING] Could not inspect data table {$tableAlias} (storage {$storageId}): " . $e->getMessage(), Log::WARNING);
+        $missingTables++;
+        continue;
+      }
+
+      if (empty($columns)) {
+        $missingTables++;
+        continue;
+      }
+
+      $columns = array_change_key_case($columns, CASE_LOWER);
+      $tableChanged = false;
+
+      $requiredColumns = [
+        'id' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
+        'storage_id' => 'INT NOT NULL DEFAULT ' . $storageId,
+        'user_id' => 'INT NOT NULL DEFAULT 0',
+        'created' => 'DATETIME NOT NULL DEFAULT ' . $db->quote($now),
+        'created_by' => 'VARCHAR(255) NOT NULL DEFAULT \'\'',
+        'modified_user_id' => 'INT NOT NULL DEFAULT 0',
+        'modified' => 'DATETIME NULL DEFAULT NULL',
+        'modified_by' => 'VARCHAR(255) NOT NULL DEFAULT \'\'',
+      ];
+
+      foreach ($requiredColumns as $column => $definition) {
+        if (array_key_exists($column, $columns)) {
+          continue;
+        }
+
+        try {
+          $db->setQuery(
+            'ALTER TABLE ' . $tableQN
+            . ' ADD COLUMN ' . $db->quoteName($column) . ' ' . $definition
+          )->execute();
+          $columns[$column] = true;
+          $tableChanged = true;
+        } catch (\Throwable $e) {
+          $this->log(
+            "[WARNING] Failed adding audit column {$column} on {$tableAlias} (storage {$storageId}): " . $e->getMessage(),
+            Log::WARNING
+          );
+        }
+      }
+
+      if (array_key_exists('storage_id', $columns)) {
+        try {
+          $db->setQuery(
+            'UPDATE ' . $tableQN
+            . ' SET ' . $db->quoteName('storage_id') . ' = ' . $storageId
+            . ' WHERE ' . $db->quoteName('storage_id') . ' IS NULL OR ' . $db->quoteName('storage_id') . ' = 0'
+          )->execute();
+        } catch (\Throwable $e) {
+          $this->log(
+            "[WARNING] Failed normalizing storage_id on {$tableAlias} (storage {$storageId}): " . $e->getMessage(),
+            Log::WARNING
+          );
+        }
+      }
+
+      foreach (['created_by', 'modified_by'] as $actorColumn) {
+        if (!array_key_exists($actorColumn, $columns)) {
+          continue;
+        }
+        try {
+          $db->setQuery(
+            'UPDATE ' . $tableQN
+            . ' SET ' . $db->quoteName($actorColumn) . " = ''"
+            . ' WHERE ' . $db->quoteName($actorColumn) . ' IS NULL'
+          )->execute();
+        } catch (\Throwable $e) {
+          $this->log(
+            "[WARNING] Failed normalizing {$actorColumn} on {$tableAlias} (storage {$storageId}): " . $e->getMessage(),
+            Log::WARNING
+          );
+        }
+      }
+
+      foreach (['storage_id', 'user_id', 'created', 'modified_user_id', 'modified'] as $indexColumn) {
+        if (!array_key_exists($indexColumn, $columns)) {
+          continue;
+        }
+
+        try {
+          $db->setQuery(
+            'ALTER TABLE ' . $tableQN
+            . ' ADD INDEX (' . $db->quoteName($indexColumn) . ')'
+          )->execute();
+          $tableChanged = true;
+        } catch (\Throwable $e) {
+          $message = strtolower((string) $e->getMessage());
+          if (
+            strpos($message, 'duplicate') === false
+            && strpos($message, 'already exists') === false
+          ) {
+            $this->log(
+              "[WARNING] Failed adding index {$indexColumn} on {$tableAlias} (storage {$storageId}): " . $e->getMessage(),
+              Log::WARNING
+            );
+          }
+        }
+      }
+
+      if ($tableChanged) {
+        $updated++;
+      }
+    }
+
+    $this->log("[OK] Internal storage audit migration complete. Processed: {$processed}, updated: {$updated}, missing tables: {$missingTables}.");
   }
 
 
@@ -948,6 +1111,127 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
   }
 
+  private function ensureSubmenuQuickTasks(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+    try {
+      $componentId = (int) $db->setQuery(
+        $db->getQuery(true)
+          ->select($db->quoteName('extension_id'))
+          ->from($db->quoteName('#__extensions'))
+          ->where($db->quoteName('type') . ' = ' . $db->quote('component'))
+          ->where($db->quoteName('element') . ' = ' . $db->quote('com_contentbuilder_ng'))
+          ->where($db->quoteName('client_id') . ' = 1')
+      )->loadResult();
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed reading extension id for submenu quicktasks: ' . $e->getMessage(), Log::WARNING);
+      return;
+    }
+
+    if ($componentId === 0) {
+      return;
+    }
+
+    $targets = [
+      [
+        'label' => 'Storages',
+        'links' => [
+          'index.php?option=com_contentbuilder_ng&view=storages',
+          'index.php?option=com_contentbuilder_ng&task=storages.display',
+        ],
+        'quicktask' => 'index.php?option=com_contentbuilder_ng&task=storage.add',
+        'quicktask_title' => 'COM_CONTENTBUILDER_NG_MENUS_NEW_STORAGE',
+      ],
+      [
+        'label' => 'Views',
+        'links' => [
+          'index.php?option=com_contentbuilder_ng&view=forms',
+          'index.php?option=com_contentbuilder_ng&task=forms.display',
+        ],
+        'quicktask' => 'index.php?option=com_contentbuilder_ng&task=form.add',
+        'quicktask_title' => 'COM_CONTENTBUILDER_NG_MENUS_NEW_VIEW',
+      ],
+    ];
+
+    foreach ($targets as $target) {
+      $quotedLinks = array_map(
+        fn(string $link): string => $db->quote($link),
+        $target['links']
+      );
+
+      try {
+        $rows = $db->setQuery(
+          $db->getQuery(true)
+            ->select($db->quoteName(['id', 'params']))
+            ->from($db->quoteName('#__menu'))
+            ->where($db->quoteName('client_id') . ' = 1')
+            ->where($db->quoteName('type') . ' = ' . $db->quote('component'))
+            ->where($db->quoteName('component_id') . ' = ' . $componentId)
+            ->where($db->quoteName('parent_id') . ' > 1')
+            ->where($db->quoteName('link') . ' IN (' . implode(',', $quotedLinks) . ')')
+        )->loadAssocList() ?: [];
+      } catch (\Throwable $e) {
+        $this->log(
+          '[WARNING] Failed loading submenu entries for ' . $target['label'] . ': ' . $e->getMessage(),
+          Log::WARNING
+        );
+        continue;
+      }
+
+      if (empty($rows)) {
+        continue;
+      }
+
+      $updated = 0;
+      foreach ($rows as $row) {
+        $menuId = (int) ($row['id'] ?? 0);
+        if ($menuId === 0) {
+          continue;
+        }
+
+        $params = new Registry((string) ($row['params'] ?? ''));
+        $changed = false;
+
+        if ((string) $params->get('menu-quicktask') !== $target['quicktask']) {
+          $params->set('menu-quicktask', $target['quicktask']);
+          $changed = true;
+        }
+        if ((string) $params->get('menu-quicktask-title') !== $target['quicktask_title']) {
+          $params->set('menu-quicktask-title', $target['quicktask_title']);
+          $changed = true;
+        }
+        if ((string) $params->get('menu-quicktask-icon') !== 'plus') {
+          $params->set('menu-quicktask-icon', 'plus');
+          $changed = true;
+        }
+
+        if (!$changed) {
+          continue;
+        }
+
+        try {
+          $db->setQuery(
+            $db->getQuery(true)
+              ->update($db->quoteName('#__menu'))
+              ->set($db->quoteName('params') . ' = ' . $db->quote($params->toString('JSON')))
+              ->where($db->quoteName('id') . ' = ' . $menuId)
+          )->execute();
+          $updated++;
+        } catch (\Throwable $e) {
+          $this->log(
+            '[WARNING] Failed updating quicktask menu params for menu #' . $menuId . ': ' . $e->getMessage(),
+            Log::WARNING
+          );
+        }
+      }
+
+      if ($updated > 0) {
+        $this->log('[OK] Updated Joomla quicktask (+) for ' . $target['label'] . ' submenu (' . $updated . ' entry).');
+      }
+    }
+  }
+
   private function renameLegacyTables(): void
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
@@ -992,7 +1276,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-    // Active les plugins fournis par le package (Joomla 4/5/6)
+    // Active les plugins fournis par le package.
     $plugins = $this->getPlugins();
 
     foreach ($plugins as $folder => $elements) {
@@ -1346,6 +1630,73 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
   }
 
+  private function removeLegacyPluginFolders(): void
+  {
+    $pluginRoot = JPATH_ROOT . '/plugins';
+    if (!Folder::exists($pluginRoot)) {
+      $this->log('[INFO] Plugin root folder not found; skipping legacy plugin folder cleanup.');
+      return;
+    }
+
+    $paths = [];
+
+    // 1) Known legacy plugin folders derived from current NG plugin map.
+    foreach ($this->getPlugins() as $folder => $elements) {
+      foreach ($elements as $element) {
+        [$legacyFolder, $legacyElement] = $this->mapToLegacyPlugin($folder, $element);
+        if (!$legacyFolder || !$legacyElement) {
+          continue;
+        }
+        $paths[] = $pluginRoot . '/' . $legacyFolder . '/' . $legacyElement;
+      }
+    }
+
+    // 2) Catch-all legacy folders (group or element names starting with contentbuilder but not contentbuilder_ng).
+    $groupFolders = Folder::folders($pluginRoot, '.', false, true) ?: [];
+    foreach ($groupFolders as $groupPath) {
+      $groupName = basename($groupPath);
+      $groupLower = strtolower($groupName);
+
+      if (str_starts_with($groupLower, 'contentbuilder') && !str_starts_with($groupLower, 'contentbuilder_ng')) {
+        $paths[] = $groupPath;
+        continue;
+      }
+
+      if (!in_array($groupLower, ['content', 'system'], true)) {
+        continue;
+      }
+
+      $elements = Folder::folders($groupPath, '.', false, true) ?: [];
+      foreach ($elements as $elementPath) {
+        $elementLower = strtolower(basename($elementPath));
+        if (str_starts_with($elementLower, 'contentbuilder') && !str_starts_with($elementLower, 'contentbuilder_ng')) {
+          $paths[] = $elementPath;
+        }
+      }
+    }
+
+    $paths = array_values(array_unique(array_map(static fn($path) => rtrim((string) $path, '/\\'), $paths)));
+    if (empty($paths)) {
+      $this->log('[INFO] No legacy plugin folders detected on filesystem.');
+      return;
+    }
+
+    // Delete deeper paths first.
+    usort($paths, static fn($a, $b) => strlen($b) <=> strlen($a));
+
+    foreach ($paths as $path) {
+      if (!Folder::exists($path)) {
+        continue;
+      }
+
+      if (Folder::delete($path)) {
+        $this->log("[OK] Legacy plugin folder deleted: {$path}");
+      } else {
+        $this->log("[WARNING] Failed deleting legacy plugin folder: {$path}", Log::WARNING);
+      }
+    }
+  }
+
   private function mapToLegacyPlugin(string $folder, string $element): array
   {
     if ($folder === 'system' && $element === 'contentbuilder_ng_system') {
@@ -1396,30 +1747,127 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $installer = new Installer();
     $installer->setDatabase(Factory::getContainer()->get('DatabaseDriver'));
 
-    $deprecated = [
-      ['folder' => 'contentbuilder_ng_themes', 'element' => 'joomla3'],
+    $supportedThemes = [
+      'blank',
+      'joomla6',
+      'khepri',
     ];
 
-    foreach ($deprecated as $plugin) {
-      $folder = $plugin['folder'];
-      $element = $plugin['element'];
+    $query = $db->getQuery(true)
+      ->select([
+        $db->quoteName('extension_id'),
+        $db->quoteName('element'),
+      ])
+      ->from($db->quoteName('#__extensions'))
+      ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
+      ->where($db->quoteName('folder') . ' = ' . $db->quote('contentbuilder_ng_themes'));
+    $db->setQuery($query);
+    $installedThemes = $db->loadAssocList();
 
-      $query = $db->getQuery(true)
-        ->select($db->quoteName('extension_id'))
-        ->from($db->quoteName('#__extensions'))
-        ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
-        ->where($db->quoteName('folder') . ' = ' . $db->quote($folder))
-        ->where($db->quoteName('element') . ' = ' . $db->quote($element));
+    foreach ($installedThemes as $plugin) {
+      $id = (int) ($plugin['extension_id'] ?? 0);
+      $element = (string) ($plugin['element'] ?? '');
 
-      $db->setQuery($query);
-      $id = (int) $db->loadResult();
-
-      if ($id === 0) {
+      if ($id === 0 || $element === '' || in_array($element, $supportedThemes, true)) {
         continue;
       }
 
-      $this->log("[INFO] Removing deprecated theme plugin {$folder}/{$element} (id {$id}).");
-      $this->uninstallPluginById($installer, $id, $folder, $element);
+      $this->log("[INFO] Removing unsupported theme plugin contentbuilder_ng_themes/{$element} (id {$id}).");
+      $this->uninstallPluginById($installer, $id, 'contentbuilder_ng_themes', $element);
+    }
+  }
+
+  private function normalizeFormThemePlugins(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+    try {
+      $columns = $db->getTableColumns('#__contentbuilder_ng_forms', false);
+      if (!is_array($columns) || !array_key_exists('theme_plugin', $columns)) {
+        $this->log('[INFO] Theme normalization skipped: #__contentbuilder_ng_forms.theme_plugin column not found.');
+        return;
+      }
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Could not inspect #__contentbuilder_ng_forms columns: ' . $e->getMessage(), Log::WARNING);
+      return;
+    }
+
+    $supportedThemes = $this->getPlugins()['contentbuilder_ng_themes'] ?? ['joomla6'];
+    if (!in_array('joomla6', $supportedThemes, true)) {
+      $supportedThemes[] = 'joomla6';
+    }
+
+    $migratedLegacy = 0;
+    $migratedUnsupported = 0;
+
+    try {
+      $query = $db->getQuery(true)
+        ->update($db->quoteName('#__contentbuilder_ng_forms'))
+        ->set($db->quoteName('theme_plugin') . ' = ' . $db->quote('joomla6'))
+        ->where($db->quoteName('theme_plugin') . ' = ' . $db->quote('joomla3'));
+      $db->setQuery($query)->execute();
+      $migratedLegacy = (int) $db->getAffectedRows();
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed migrating joomla3 theme references: ' . $e->getMessage(), Log::WARNING);
+    }
+
+    try {
+      $query = $db->getQuery(true)
+        ->select('DISTINCT ' . $db->quoteName('theme_plugin'))
+        ->from($db->quoteName('#__contentbuilder_ng_forms'))
+        ->where($db->quoteName('theme_plugin') . ' IS NOT NULL')
+        ->where($db->quoteName('theme_plugin') . " <> ''");
+      $db->setQuery($query);
+      $storedThemes = $db->loadColumn() ?: [];
+      $unsupportedThemes = array_values(array_diff($storedThemes, $supportedThemes));
+
+      if (!empty($unsupportedThemes)) {
+        $quotedThemes = array_map(static fn($theme) => $db->quote((string) $theme), $unsupportedThemes);
+
+        $query = $db->getQuery(true)
+          ->update($db->quoteName('#__contentbuilder_ng_forms'))
+          ->set($db->quoteName('theme_plugin') . ' = ' . $db->quote('joomla6'))
+          ->where($db->quoteName('theme_plugin') . ' IN (' . implode(',', $quotedThemes) . ')');
+        $db->setQuery($query)->execute();
+        $migratedUnsupported = (int) $db->getAffectedRows();
+      }
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed normalizing unsupported theme references: ' . $e->getMessage(), Log::WARNING);
+    }
+
+    if ($migratedLegacy > 0 || $migratedUnsupported > 0) {
+      $this->log("[OK] Normalized form theme references to joomla6: {$migratedLegacy} legacy + {$migratedUnsupported} unsupported.");
+    } else {
+      $this->log('[INFO] No form theme references needed normalization.');
+    }
+  }
+
+  private function ensureFormsNewButtonColumn(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+    try {
+      $columns = $db->getTableColumns('#__contentbuilder_ng_forms', false);
+      if (!is_array($columns)) {
+        return;
+      }
+      if (array_key_exists('new_button', $columns)) {
+        return;
+      }
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Could not inspect #__contentbuilder_ng_forms columns for new_button: ' . $e->getMessage(), Log::WARNING);
+      return;
+    }
+
+    try {
+      $db->setQuery(
+        'ALTER TABLE ' . $db->quoteName('#__contentbuilder_ng_forms')
+        . ' ADD COLUMN ' . $db->quoteName('new_button')
+        . " TINYINT(1) NOT NULL DEFAULT '0'"
+      )->execute();
+      $this->log('[OK] Added #__contentbuilder_ng_forms.new_button column.');
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed adding #__contentbuilder_ng_forms.new_button column: ' . $e->getMessage(), Log::WARNING);
     }
   }
 
@@ -1452,6 +1900,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $this->removeOldLibraries();
     $this->removeObsoleteFiles();
     $this->updateDateColumns();
+    $this->ensureFormsNewButtonColumn();
     $this->updateMenuLinks('com_contentbuilder', 'com_contentbuilder_ng');
 
     $source = null;
@@ -1466,12 +1915,15 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
     if ($type === 'update') {
       $this->removeDeprecatedThemePlugins();
+      $this->normalizeFormThemePlugins();
       $this->removeLegacyComponent();
       $this->removeLegacyPlugins();
+      $this->removeLegacyPluginFolders();
     }
 
     $this->normalizeBrokenTargetMenuLinks();
     $this->ensureAdministrationMainMenuEntry();
+    $this->ensureSubmenuQuickTasks();
 
     // On ne fait ça que sur update (et éventuellement discover_install si tu veux)
     if ($type !== 'update') {

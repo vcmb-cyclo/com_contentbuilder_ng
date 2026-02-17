@@ -15,6 +15,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
+use Joomla\Database\DatabaseInterface;
 use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
@@ -27,16 +28,21 @@ class HtmlView extends BaseHtmlView
     public $item;
     public $state;
     public bool $frontend = false;
+    public ?int $storageRecordsCount = null;
 
     public function display($tpl = null): void
     {         
+        if ($this->getLayout() === 'help') {
+            parent::display($tpl);
+            return;
+        }
+
         $app = Factory::getApplication();
         $app->input->set('hidemainmenu', true);
 
         // JS
         $wa = $app->getDocument()->getWebAssetManager();
         $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
-        $wa->useScript('com_contentbuilder_ng.jscolor');
 
 		if (!$this->frontend) {
             // 1️⃣ Récupération du WebAssetManager
@@ -51,6 +57,7 @@ class HtmlView extends BaseHtmlView
                     display:inline-block;
                     width:48px;
                     height:48px;
+                    vertical-align:middle;
                 }'
             );
         }    
@@ -60,6 +67,7 @@ class HtmlView extends BaseHtmlView
 
         // Données (l’item)
         $this->item = $this->getModel()->getItem();
+        $this->storageRecordsCount = $this->getStorageRecordsCount($this->item);
 
         $this->tables     = $this->get('DbTables');
 
@@ -124,26 +132,24 @@ class HtmlView extends BaseHtmlView
             'logo_left'
         );
 
-        ToolbarHelper::apply('storage.apply');
-        ToolbarHelper::save('storage.save');
-
-        ToolbarHelper::custom('storage.save2new', 'save', '', Text::_('COM_CONTENTBUILDER_NG_SAVENEW'), false);
+        ToolbarHelper::saveGroup(
+            [
+                ['apply', 'storage.apply', 'JTOOLBAR_APPLY'],
+                ['save', 'storage.save', 'JTOOLBAR_SAVE'],
+                ['save2new', 'storage.save2new', 'JTOOLBAR_SAVE_AND_NEW'],
+            ],
+            'btn-success'
+        );
         ToolbarHelper::publish('storage.publish');
         ToolbarHelper::unpublish('storage.unpublish');
 
         $id = (int) ($this->item->id ?? 0);
         $isExternalTable = ((int) ($this->item->bytable ?? 0) === 1);
 
-        if ($id > 0) {
-            // POST via task + token : on fait pointer vers une URL, mais le bouton doit poster (sinon token)
-            // Astuce: utiliser un "custom" button JS submitTask
-            if (!$isExternalTable) {
-                ToolbarHelper::custom('datatable.create', 'database', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_CREATE'), false);
-                ToolbarHelper::custom('datatable.sync', 'refresh', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC'), false);
-            }
+        if ($id > 0 && !$isExternalTable) {
+            ToolbarHelper::custom('datatable.sync', 'refresh', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC'), false);
 
-            $createTip = json_encode(Text::_('COM_CONTENTBUILDER_NG_DATATABLE_CREATE_TIP'), JSON_UNESCAPED_UNICODE);
-            $syncTip   = json_encode(Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC_TIP'), JSON_UNESCAPED_UNICODE);
+            $syncTip = json_encode(Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC_TIP'), JSON_UNESCAPED_UNICODE);
 
             $wa->addInlineScript(
                 "(function () {
@@ -168,7 +174,6 @@ class HtmlView extends BaseHtmlView
                     }
 
                     function init() {
-                        applyTooltip('datatable.create', " . $createTip . ");
                         applyTooltip('datatable.sync', " . $syncTip . ");
                     }
 
@@ -188,7 +193,37 @@ class HtmlView extends BaseHtmlView
         );
 
         ToolbarHelper::cancel('storage.cancel', $isNew ? 'JTOOLBAR_CANCEL' : 'JTOOLBAR_CLOSE');
+        ToolbarHelper::help(
+            'COM_CONTENTBUILDER_NG_HELP_STORAGES_TITLE',
+            false,
+            Uri::base() . 'index.php?option=com_contentbuilder_ng&view=storage&layout=help&tmpl=component'
+        );
 
         parent::display($tpl);
+    }
+
+    private function getStorageRecordsCount(object $item): ?int
+    {
+        $name = trim((string) ($item->name ?? ''));
+
+        if ($name === '') {
+            return null;
+        }
+
+        $isExternalTable = ((int) ($item->bytable ?? 0) === 1);
+        $tableName = $isExternalTable ? $name : ('#__' . $name);
+
+        try {
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
+            $query = $db->getQuery(true)
+                ->select('COUNT(1)')
+                ->from($db->quoteName($tableName));
+
+            $db->setQuery($query);
+
+            return (int) $db->loadResult();
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 }

@@ -30,7 +30,6 @@ use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
@@ -238,19 +237,7 @@ class FormModel extends AdminModel
         $db = $this->getDatabase();
 
         $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_ng_themes' And `enabled` = 1");
-        $res = $db->loadColumn();
-
-        $i = 0;
-        foreach ($res as $theme) {
-            if ($theme == 'joomla3') {
-                unset($res[$i]);
-                $res = array_merge(array('joomla3'), $res);
-                break;
-            }
-            $i++;
-        }
-
-        return $res;
+        return $db->loadColumn();
     }
 
     function getVerificationPlugins()
@@ -305,6 +292,7 @@ class FormModel extends AdminModel
             $data->show_id_column = true;
             $data->select_column = false;
             $data->edit_button = false;
+            $data->new_button = false;
             $data->list_states = false;
             $data->config = null;
             $data->editable_prepare = null;
@@ -413,6 +401,10 @@ class FormModel extends AdminModel
             $data->filter_exact_match = 0;
 
             $data->ordering = 0;
+        }
+
+        if (!isset($data->new_button)) {
+            $data->new_button = 0;
         }
 
         $data->forms = array();
@@ -634,6 +626,7 @@ class FormModel extends AdminModel
             'show_id_column',
             'select_column',
             'edit_button',
+            'new_button',
             'list_state',
             'list_publish',
             'list_rating',
@@ -651,6 +644,14 @@ class FormModel extends AdminModel
         // Tag défaut
         if (empty($jform['tag'])) {
             $jform['tag'] = 'default';
+        }
+
+        $selectedThemePlugin = (string) ($jform['theme_plugin'] ?? '');
+        if ($selectedThemePlugin !== '') {
+            $availableThemePlugins = $this->getThemePlugins();
+            if (!in_array($selectedThemePlugin, $availableThemePlugins, true)) {
+                $jform['theme_plugin'] = 'joomla6';
+            }
         }
 
         // 4) Capture list_states puis on l'enlève du bind principal (car stocké ailleurs)
@@ -837,7 +838,7 @@ class FormModel extends AdminModel
         }
 
         // Config legacy
-        $jform['config'] = base64_encode(serialize($config));
+        $jform['config'] = ContentbuilderLegacyHelper::encodePackedData($config);
 
         // Last_update.
         $jform['last_update'] = Factory::getDate()->toSql();

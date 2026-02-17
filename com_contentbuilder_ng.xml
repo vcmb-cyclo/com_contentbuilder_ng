@@ -41,6 +41,7 @@
     <filename>controller.php</filename>
     <filename>router.php</filename>
     <filename>contentbuilder_ng.php</filename>
+    <folder>elements</folder>
     <folder>src</folder>
     <folder>tmpl</folder>
  </files>
@@ -57,8 +58,22 @@
 <administration>
     <menu>Contentbuilder_ng</menu>
     <submenu>
-        <menu view="storages">COM_CONTENTBUILDER_NG_STORAGES</menu>
-        <menu view="forms">COM_CONTENTBUILDER_NG_LIST</menu>
+        <menu view="storages">
+            COM_CONTENTBUILDER_NG_STORAGES
+            <params>
+                <menu-quicktask>index.php?option=com_contentbuilder_ng&amp;task=storage.add</menu-quicktask>
+                <menu-quicktask-title>COM_CONTENTBUILDER_NG_MENUS_NEW_STORAGE</menu-quicktask-title>
+                <menu-quicktask-icon>plus</menu-quicktask-icon>
+            </params>
+        </menu>
+        <menu view="forms">
+            COM_CONTENTBUILDER_NG_LIST
+            <params>
+                <menu-quicktask>index.php?option=com_contentbuilder_ng&amp;task=form.add</menu-quicktask>
+                <menu-quicktask-title>COM_CONTENTBUILDER_NG_MENUS_NEW_VIEW</menu-quicktask-title>
+                <menu-quicktask-icon>plus</menu-quicktask-icon>
+            </params>
+        </menu>
         <menu view="about">COM_CONTENTBUILDER_NG_ABOUT</menu>
     </submenu>
 

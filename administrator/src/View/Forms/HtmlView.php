@@ -23,6 +23,10 @@ class HtmlView extends BaseHtmlView
 {
     function display($tpl = null)
     {
+        if ($this->getLayout() === 'help') {
+            parent::display($tpl);
+            return;
+        }
 
         $wa = $this->document->getWebAssetManager();
         $wa->addInlineStyle(
@@ -34,6 +38,7 @@ class HtmlView extends BaseHtmlView
                 display:inline-block;
                 width:48px;
                 height:48px;
+                vertical-align:middle;
             }'
         );
 
@@ -47,6 +52,11 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::unpublish('forms.unpublish');
         ToolbarHelper::deleteList('JGLOBAL_CONFIRM_DELETE', 'forms.delete');
         ToolbarHelper::preferences('com_contentbuilder_ng');
+        ToolbarHelper::help(
+            'COM_CONTENTBUILDER_NG_HELP_VIEWS_TITLE',
+            false,
+            Uri::base() . 'index.php?option=com_contentbuilder_ng&view=forms&layout=help&tmpl=component'
+        );
 
         $items      = $this->getModel()->getItems();
         $pagination = $this->getModel()->getPagination();
@@ -57,6 +67,8 @@ class HtmlView extends BaseHtmlView
         $lists['order']      = (string) $state->get('list.ordering', 'a.ordering');
         $lists['order_Dir']  = (string) $state->get('list.direction', 'ASC');
         $lists['state']      = HTMLHelper::_('grid.state', (string) $state->get('filter.state', ''));
+        $lists['filter_state'] = (string) $state->get('filter.state', '');
+        $lists['filter_search'] = (string) $state->get('filter.search', '');
         $lists['filter_tag'] = (string) $state->get('filter.tag', '');
 
         $ordering = ($lists['order'] === 'a.ordering');

@@ -54,6 +54,7 @@ class HtmlView extends BaseHtmlView
                     display:inline-block;
                     width:48px;
                     height:48px;
+                    vertical-align:middle;
                 }'
             );
 
@@ -201,7 +202,10 @@ class HtmlView extends BaseHtmlView
 		$pattern = '#<hr\s+id=("|\')system-readmore("|\')\s*\/*>#i';
 		$subject->template = preg_replace($pattern, '', $subject->template);
 
-		PluginHelper::importPlugin('contentbuilder_ng_themes', $subject->theme_plugin);
+			$themePlugin = (string) ($subject->theme_plugin ?? '');
+			if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin)) {
+				PluginHelper::importPlugin('contentbuilder_ng_themes', 'joomla6');
+			}
 
 		$eventObj = new \Joomla\Event\Event('onContentTemplateCss', []);
 		$dispatcher->dispatch('onContentTemplateCss', $eventObj);

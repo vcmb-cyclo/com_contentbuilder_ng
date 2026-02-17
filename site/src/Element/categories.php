@@ -17,17 +17,14 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\FormField;
 use Joomla\Database\DatabaseInterface;
-use Joomla\Application\ApplicationInterface;
 
 class JFormFieldCategories extends FormField
 {
 
-    protected $type = 'Forms';
+    protected $type = 'Categories';
 
     protected function getInput()
     {
-        $class = $this->element['class'] ? $this->element['class'] : "text_area";
-
         // Initialise variables.
         $options = array();
 
@@ -68,29 +65,10 @@ class JFormFieldCategories extends FormField
         // Initialise variables.
         $user = Factory::getApplication()->getIdentity();
 
-        if (empty($id)) {
-            // New item, only have to check core.create.
-            foreach ($options as $i => $option) {
-                // Unset the option if the user isn't authorised for it.
-                if (!$user->authorise('core.create', 'com_content' . '.category.' . $option->value)) {
-                    unset($options[$i]);
-                }
-            }
-        } else {
-            // Existing item is a bit more complex. Need to account for core.edit and core.edit.own.
-            foreach ($options as $i => $option) {
-                // Unset the option if the user isn't authorised for it.
-                if (!$user->authorise('core.edit', $extension . '.category.' . $option->value)) {
-                    // As a backup, check core.edit.own
-                    if (!$user->authorise('core.edit.own', $extension . '.category.' . $option->value)) {
-                        // No core.edit nor core.edit.own - bounce this one
-                        unset($options[$i]);
-                    } else {
-                        // TODO I've got a funny feeling we need to check core.create here.
-                        // Maybe you can only get the list of categories you are allowed to create in?
-                        // Need to think about that. If so, this is the place to do the check.
-                    }
-                }
+        foreach ($options as $i => $option) {
+            // Unset the option if the user isn't authorised for it.
+            if (!$user->authorise('core.create', 'com_content.category.' . $option->value)) {
+                unset($options[$i]);
             }
         }
 
@@ -106,7 +84,8 @@ class JFormFieldCategories extends FormField
         // Merge any additional options in the XML definition.
         //$options = array_merge(parent::getOptions(), $options);
 
-        $out = '<select style="max-width: 200px;" name="' . $this->name . '" id="' . $this->id . '" class="' . $this->element['class'] . '">' . "\n";
+        $fieldClass = (string) ($this->element['class'] ?: '');
+        $out = '<select style="max-width: 200px;" name="' . $this->name . '" id="' . $this->id . '" class="' . $fieldClass . '">' . "\n";
 
         $out .= '<option value="-2">' . Text::_('COM_CONTENTBUILDER_NG_INHERIT') . '</option>' . "\n";
 

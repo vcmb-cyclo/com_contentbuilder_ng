@@ -17,8 +17,9 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Factory;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
+
+HTMLHelper::_('behavior.multiselect');
 
 $ordering  = (string) $this->state->get('list.ordering', 'u.id');
 $direction = strtolower((string) $this->state->get('list.direction', 'asc'));
@@ -66,7 +67,7 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
         <select class="form-select-sm"
             onchange="if(this.selectedIndex == 1 || this.selectedIndex == 2){document.adminForm.task.value=this.options[this.selectedIndex].value;document.adminForm.submit();}">
             <option> -
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_UNPUBLISHED'); ?> -
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_UPDATE_STATUS'); ?> -
             </option>
             <option value="users.publish">
                 <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>
@@ -104,15 +105,14 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
     <div style="clear:both;"></div>
 
     <div id="editcell">
-        <table class="adminlist table table-striped">
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th width="5">
                         <?php echo $sortLink('ID', 'u.id'); ?>
                     </th>
                     <th width="20">
-                        <input class="form-check-input" type="checkbox" name="toggle" value=""
-                            onclick="Joomla.checkAll(this);" />
+                        <?php echo HTMLHelper::_('grid.checkall'); ?>
                     </th>
                     <th>
                         <?php echo $sortLink('Name', 'u.name'); ?>

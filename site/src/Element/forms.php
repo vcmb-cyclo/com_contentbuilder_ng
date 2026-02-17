@@ -25,10 +25,10 @@ class JFormFieldForms extends FormField
 
 	protected function getInput()
 	{
-		$class = $this->element['class'] ? $this->element['class'] : "text_area";
+		$class = (string) ($this->element['class'] ?: '');
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
 		$db->setQuery("Select id,`name` From #__contentbuilder_ng_forms Where published = 1 Order By `ordering`");
 		$status = $db->loadObjectList();
-		return HTMLHelper::_('select.genericlist', $status, $this->name, '" onchange="if(typeof contentbuilder_ng_setFormId != \'undefined\') { contentbuilder_ng_setFormId(this.options[this.selectedIndex].value); }" class="' . $this->element['class'] . '"', 'id', 'name', $this->value);
+		return HTMLHelper::_('select.genericlist', $status, $this->name, '" onchange="if(typeof contentbuilder_ng_setFormId != \'undefined\') { contentbuilder_ng_setFormId(this.options[this.selectedIndex].value); }" class="' . $class . '"', 'id', 'name', $this->value);
 	}
 }

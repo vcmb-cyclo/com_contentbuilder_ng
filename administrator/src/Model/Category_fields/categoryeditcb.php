@@ -71,10 +71,7 @@ class JFormFieldCategoryEditCb extends ListField
 
         $options = $db->loadObjectList();
 
-        // Check for a database error.
-        //if ($db->getErrorNum()) {
-        //    JError::raiseWarning(500, $db->getErrorMessage());
-        //}
+        // Database exceptions are surfaced by the driver when query execution fails.
 
         // Pad the option text with spaces using depth level as a multiplier.
         for ($i = 0, $n = count($options); $i < $n; $i++) {

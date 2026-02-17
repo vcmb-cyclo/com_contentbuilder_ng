@@ -16,6 +16,7 @@ use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class contentbuilder_ng_com_contentbuilder_ng
 {
@@ -29,11 +30,15 @@ class contentbuilder_ng_com_contentbuilder_ng
     public $form_id = 0;
 
 
-    function __construct($id)
+    function __construct($id, $published = true)
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $this->form_id = intval($id);
-        $db->setQuery("Select * From #__contentbuilder_ng_storages Where id = " . intval($id) . " And published = 1 Order By `ordering`");
+        $db->setQuery(
+            "Select * From #__contentbuilder_ng_storages Where id = " . intval($id)
+            . ($published ? " And published = 1" : "")
+            . " Order By `ordering`"
+        );
         $this->properties = $db->loadObject();
         if ($this->properties instanceof \stdClass) {
             $this->exists = true;
@@ -830,7 +835,13 @@ class contentbuilder_ng_com_contentbuilder_ng
                 //$options = null;
 
                 if (isset($element['options'])) {
-                    $options = unserialize(base64_decode($element['options']));
+                    $options = ContentbuilderLegacyHelper::decodePackedData($element['options'], new \stdClass());
+                    if (is_array($options)) {
+                        $options = (object) $options;
+                    }
+                    if (!is_object($options)) {
+                        $options = new \stdClass();
+                    }
                 }
 
                 if (!isset($options->seperator)) {

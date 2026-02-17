@@ -16,7 +16,6 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 $frontend = Factory::getApplication()->isClient('site');
@@ -103,6 +102,8 @@ if ($this->print_button):
 endif;
 ?>
 
+<div class="cbDetailsWrapper">
+
 <?php if ($isAdminPreview): ?>
     <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
         <span><?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE'); ?></span>
@@ -115,7 +116,7 @@ endif;
 <?php
 if ($this->show_page_heading && $this->page_title) {
 ?>
-    <h1 class="contentheading display-6 mb-4">
+    <h1 class="display-6 mb-4">
         <?php echo $this->page_title; ?>
     </h1>
 <?php
@@ -216,10 +217,12 @@ if (Factory::getApplication()->input->getInt('cb_show_details_top_bar', 1) && ((
 }
 ?>
 
+<div class="cbDetailsBody">
 <?php echo $this->event->beforeDisplayContent; ?>
 <?php echo $this->toc ?>
 <?php echo $this->tpl ?>
 <?php echo $this->event->afterDisplayContent; ?>
+</div>
 
 
 <?php
@@ -257,3 +260,5 @@ if (Factory::getApplication()->input->getInt('cb_show_details_bottom_bar', 1)) {
 <?php
 }
 ?>
+
+</div>

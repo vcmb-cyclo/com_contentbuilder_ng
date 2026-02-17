@@ -49,6 +49,13 @@ if (count($results)) {
 
 $the_item = is_array($results) ? $results : [];
 $is_plugin = false;
+
+$renderCheckbox = static function (string $name, string $id, bool $checked = false, string $value = '1'): string {
+    return '<span class="form-check d-inline-block mb-0"><input class="form-check-input" type="checkbox" name="'
+        . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" id="' . htmlspecialchars($id, ENT_QUOTES, 'UTF-8')
+        . '" value="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"'
+        . ($checked ? ' checked="checked"' : '') . ' /></span>';
+};
 ?>
 <style type="text/css">
     label {
@@ -104,7 +111,7 @@ $is_plugin = false;
 
     <hr />
 
-    <div class="col100">
+    <div class="w-100">
         <?php
 
         // Démarrer les onglets
@@ -120,7 +127,7 @@ $is_plugin = false;
             case is_array($the_item) && in_array($this->element->type, $plugins):
                 $is_plugin = true;
         ?>
-                <fieldset class="adminform">
+                <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo htmlentities($the_item['element_type'] ?? $this->element->type, ENT_QUOTES, 'UTF-8'); ?>
                     </legend>
@@ -152,7 +159,7 @@ $is_plugin = false;
                 break;
             case 'captcha':
             ?>
-                <fieldset class="adminform">
+                <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_CAPTCHA'); ?>
                     </legend>
@@ -175,7 +182,7 @@ $is_plugin = false;
                 break;
             case 'upload':
             ?>
-                <fieldset class="adminform">
+                <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_UPLOAD'); ?>
                     </legend>
@@ -236,7 +243,7 @@ $is_plugin = false;
             case 'radiogroup':
             case 'select':
             ?>
-                <fieldset class="adminform">
+                <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo $this->element->type == 'checkboxgroup' ? Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_CHECKBOXGROUP') : ($this->element->type == 'select' ? Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_SELECT') : Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_RADIO')); ?>
                     </legend>
@@ -282,9 +289,10 @@ $is_plugin = false;
                                     <?php
                                     foreach ($this->group_definition as $key => $value) {
                                     ?>
-                                        <input class="form-check-input" <?php echo in_array($key, $def) ? 'checked="checked" ' : ''; ?>type="checkbox" name="default_value[]"
-                                            id="default_value<?php echo htmlentities($key, ENT_QUOTES, 'UTF-8'); ?>"
-                                            value="<?php echo htmlentities($key, ENT_QUOTES, 'UTF-8'); ?>" />
+                                        <?php
+                                        $defaultValueId = 'default_value' . htmlentities($key, ENT_QUOTES, 'UTF-8');
+                                        echo $renderCheckbox('default_value[]', $defaultValueId, in_array($key, $def), (string) $key);
+                                        ?>
                                         <label for="default_value<?php echo htmlentities($key, ENT_QUOTES, 'UTF-8'); ?>">
                                             <?php echo htmlentities($value, ENT_QUOTES, 'UTF-8'); ?>
                                         </label>
@@ -307,7 +315,7 @@ $is_plugin = false;
                                     </label>
                                 </td>
                                 <td align="left">
-                                    <input class="form-check-input" type="checkbox" name="multiple" id="multiple" value="1" <?php echo isset($this->element->options->multiple) && $this->element->options->multiple ? ' checked="checked"' : ''; ?> />
+                                    <?php echo $renderCheckbox('multiple', 'multiple', isset($this->element->options->multiple) && $this->element->options->multiple); ?>
                                 </td>
                             </tr>
                             <tr>
@@ -333,8 +341,7 @@ $is_plugin = false;
                                     </label>
                                 </td>
                                 <td align="left">
-                                    <input class="form-check-input" type="checkbox" name="horizontal" id="horizontal" value="1"
-                                        <?php echo isset($this->element->options->horizontal) && $this->element->options->horizontal ? ' checked="checked"' : ''; ?> />
+                                    <?php echo $renderCheckbox('horizontal', 'horizontal', isset($this->element->options->horizontal) && $this->element->options->horizontal); ?>
                                 </td>
                             </tr>
                             <tr>
@@ -407,7 +414,7 @@ $is_plugin = false;
                 break;
             case 'textarea':
             ?>
-                <fieldset class="adminform">
+                <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_TEXTAREA'); ?>
                     </legend>
@@ -487,12 +494,11 @@ $is_plugin = false;
                                 <label for="readonly">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_READONLY'); ?>:
                                 </label>
-                            </td>
-                            <td align="left">
-                                <input class="form-check-input" type="checkbox" name="readonly" value="1"
-                                    id="readonly""<?php echo isset($this->element->options->readonly) ? (intval($this->element->options->readonly) ? ' checked="checked"' : '') : ''; ?>" />
-                            </td>
-                        </tr>
+                                </td>
+                                <td align="left">
+                                    <?php echo $renderCheckbox('readonly', 'readonly', isset($this->element->options->readonly) && intval($this->element->options->readonly)); ?>
+                                </td>
+                            </tr>
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="allow_encoding">
@@ -525,7 +531,7 @@ $is_plugin = false;
             case 'calendar':
             ?>
 
-                <fieldset class="adminform">
+                <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_CALENDAR'); ?>
                     </legend>
@@ -606,12 +612,11 @@ $is_plugin = false;
                                 <label for="readonly">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_READONLY'); ?>:
                                 </label>
-                            </td>
-                            <td align="left">
-                                <input class="form-check-input" type="checkbox" name="readonly" value="1"
-                                    id="readonly""<?php echo isset($this->element->options->readonly) ? (intval($this->element->options->readonly) ? ' checked="checked"' : '') : ''; ?>" />
-                            </td>
-                        </tr>
+                                </td>
+                                <td align="left">
+                                    <?php echo $renderCheckbox('readonly', 'readonly', isset($this->element->options->readonly) && intval($this->element->options->readonly)); ?>
+                                </td>
+                            </tr>
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="calendar" />
@@ -621,7 +626,7 @@ $is_plugin = false;
             case 'text':
             ?>
 
-                <fieldset class="adminform">
+                <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_TEXT'); ?>
                     </legend>
@@ -690,23 +695,21 @@ $is_plugin = false;
                                 <label for="password">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_PASSWORD'); ?>:
                                 </label>
-                            </td>
-                            <td align="left">
-                                <input class="form-check-input" type="checkbox" name="password" value="1"
-                                    id="password""<?php echo isset($this->element->options->password) ? (intval($this->element->options->password) ? ' checked="checked"' : '') : ''; ?>" />
-                            </td>
-                        </tr>
+                                </td>
+                                <td align="left">
+                                    <?php echo $renderCheckbox('password', 'password', isset($this->element->options->password) && intval($this->element->options->password)); ?>
+                                </td>
+                            </tr>
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="readonly">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_READONLY'); ?>:
                                 </label>
-                            </td>
-                            <td align="left">
-                                <input class="form-check-input" type="checkbox" name="readonly" value="1"
-                                    id="readonly""<?php echo isset($this->element->options->readonly) ? (intval($this->element->options->readonly) ? ' checked="checked"' : '') : ''; ?>" />
-                            </td>
-                        </tr>
+                                </td>
+                                <td align="left">
+                                    <?php echo $renderCheckbox('readonly', 'readonly', isset($this->element->options->readonly) && intval($this->element->options->readonly)); ?>
+                                </td>
+                            </tr>
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="allow_encoding">
@@ -739,7 +742,7 @@ $is_plugin = false;
             case 'hidden':
             ?>
 
-                <fieldset class="adminform">
+                <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_HIDDEN'); ?>
                     </legend>
@@ -797,7 +800,7 @@ $is_plugin = false;
             <?php
             if (($is_plugin && !empty($the_item['show_validation_settings'])) || !$is_plugin) {
             ?>
-                <fieldset class="adminform">
+                <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_VALIDATION'); ?> (PHP)
                     </legend>
@@ -857,7 +860,7 @@ $is_plugin = false;
 
             if (($is_plugin && !empty($the_item['show_init_code_settings'])) || !$is_plugin) {
             ?>
-                <fieldset class="adminform">
+                <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_INIT'); ?> (JS)
                     </legend>
@@ -882,7 +885,7 @@ $is_plugin = false;
             }
             if (($is_plugin && !empty($the_item['show_action_code_settings'])) || !$is_plugin) {
             ?>
-                <fieldset class="adminform">
+                <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_ACTION'); ?> (PHP)
                     </legend>

@@ -42,10 +42,7 @@
             "uri": "com_contentbuilder_ng/js/jscolor/jscolor.js",
             "dependencies": [
                 "core"
-            ],
-            "attributes": {
-                "defer": true
-            }
+            ]
         }
     ]
 }

@@ -95,7 +95,10 @@ class HtmlView extends BaseHtmlView
                 }
 
                 if ($this->theme_css === '' && $this->theme_js === '' && property_exists($this->item, 'theme_plugin')) {
-                    PluginHelper::importPlugin('contentbuilder_ng_themes', $this->item->theme_plugin);
+                    $themePlugin = (string) ($this->item->theme_plugin ?? '');
+                    if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin)) {
+                        PluginHelper::importPlugin('contentbuilder_ng_themes', 'joomla6');
+                    }
                     $dispatcher = Factory::getApplication()->getDispatcher();
 
                     $eventObj = new \Joomla\Event\Event('onContentTemplateCss', []);

@@ -98,8 +98,7 @@ class ExportModel extends BaseDatabaseModel
             foreach ($lines as $line) {
                 $keyval = explode("\t", $line);
                 if (count($keyval) == 2) {
-                    $keyval[1] = str_replace(array("\n", "\r"), "", $keyval[1]);
-                    $keyval[1] = ContentbuilderLegacyHelper::execPhpValue($keyval[1]);
+                    $keyval[1] = ContentbuilderLegacyHelper::sanitizeHiddenFilterValue($keyval[1]);
                     if ($keyval[1] != '') {
                         $this->_menu_filter[$keyval[0]] = explode('|', $keyval[1]);
                     }
@@ -145,7 +144,7 @@ class ExportModel extends BaseDatabaseModel
      */
     private function _buildQuery()
     {
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id) . ' And published = 1';
+        return 'Select * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id) . ' And published = 1';
     }
 
     /**

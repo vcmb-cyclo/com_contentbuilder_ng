@@ -197,6 +197,10 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
 (
     1
 ) NOT NULL DEFAULT '0',
+    `new_button` tinyint
+(
+    1
+) NOT NULL DEFAULT '0',
     `list_state` tinyint
 (
     1

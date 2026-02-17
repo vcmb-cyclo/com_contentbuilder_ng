@@ -20,7 +20,7 @@ use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
 ?>
 <?php
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
-$wa->addInlineStyle('.saveorder.btn{background-color:#fff;border-color:#ced4da;color:#1b1b1b}.saveorder.btn:hover{background-color:#f8f9fa}.cb-order-slot{display:inline-block;width:24px;text-align:center}.cb-order-placeholder{visibility:hidden}.cb-order-input{margin-left:6px}.cb-order-head{vertical-align:middle;white-space:nowrap}.cb-order-head .saveorder{float:none!important;margin-left:6px}');
+$wa->addInlineStyle('.saveorder.btn{background-color:#fff;border-color:#ced4da;color:#1b1b1b}.saveorder.btn:hover{background-color:#f8f9fa}.cb-order-slot{display:inline-block;width:24px;text-align:center}.cb-order-placeholder{visibility:hidden}.cb-order-input{margin-left:6px}.cb-order-head{vertical-align:middle;white-space:nowrap}.cb-order-head .saveorder{float:none!important;margin-left:6px}.cb-item-label-cell{display:flex;flex-direction:column;gap:4px}.cb-item-label-display{cursor:pointer;width:100%;display:block}.cb-item-order-type{max-width:125px}');
 
 $listOrder = (string) ($this->listOrder ?? 'ordering');
 $listDirn  = strtolower((string) ($this->listDirn ?? 'asc'));
@@ -36,7 +36,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             : ' <span class="ms-1 icon-sort icon-sort-desc" aria-hidden="true"></span>')
         : '';
     $url = Route::_(
-        'index.php?option=com_contentbuilder_ng&task=form.edit&id=' . $formId
+        'index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . $formId
             . '&list[ordering]=' . $field . '&list[direction]=' . $nextDir
     );
 
@@ -50,6 +50,54 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
     return '<span class="cb-perm-header-tip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="'
         . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '" title="' . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '">'
         . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</span>';
+};
+
+$permissionColumns = [
+    ['key' => 'listaccess', 'label' => 'COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS_TIP'],
+    ['key' => 'view', 'label' => 'COM_CONTENTBUILDER_NG_PERM_VIEW', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_VIEW_TIP'],
+    ['key' => 'new', 'label' => 'COM_CONTENTBUILDER_NG_PERM_NEW', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_NEW_TIP'],
+    ['key' => 'edit', 'label' => 'COM_CONTENTBUILDER_NG_PERM_EDIT', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_EDIT_TIP'],
+    ['key' => 'delete', 'label' => 'COM_CONTENTBUILDER_NG_PERM_DELETE', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_DELETE_TIP'],
+    ['key' => 'state', 'label' => 'COM_CONTENTBUILDER_NG_PERM_STATE', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_STATE_TIP'],
+    ['key' => 'publish', 'label' => 'COM_CONTENTBUILDER_NG_PUBLISH', 'tip' => 'COM_CONTENTBUILDER_NG_PUBLISH_TIP'],
+    ['key' => 'fullarticle', 'label' => 'COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE_TIP'],
+    ['key' => 'language', 'label' => 'COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE_TIP'],
+    ['key' => 'rating', 'label' => 'COM_CONTENTBUILDER_NG_PERM_RATING', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_RATING_TIP'],
+];
+
+$defaultCheckedForNewPermissions = ['listaccess' => true, 'view' => true, 'new' => true];
+
+$renderCheckbox = static function (string $name, string $id, bool $checked = false, string $value = '1', array $attributes = []): string {
+    $html = '<span class="form-check d-inline-block mb-0">';
+    $html .= '<input class="form-check-input" type="checkbox"';
+
+    if ($name !== '') {
+        $html .= ' name="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '"';
+    }
+
+    $html .= ' id="' . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . '"';
+    $html .= ' value="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"';
+
+    if ($checked) {
+        $html .= ' checked="checked"';
+    }
+
+    foreach ($attributes as $attr => $attrValue) {
+        if ($attrValue === null || $attrValue === false) {
+            continue;
+        }
+
+        $html .= ' ' . htmlspecialchars((string) $attr, ENT_QUOTES, 'UTF-8');
+
+        if ($attrValue !== true) {
+            $html .= '="' . htmlspecialchars((string) $attrValue, ENT_QUOTES, 'UTF-8') . '"';
+        }
+    }
+
+    $html .= ' />';
+    $html .= '</span>';
+
+    return $html;
 };
 ?>
 
@@ -177,11 +225,146 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
             }
         }
     }
+
+    function cbNormalizeColorForPreview(value) {
+        if (typeof value !== 'string') {
+            return '';
+        }
+
+        var hex = value.trim().replace(/^#/, '');
+
+        if (/^[0-9a-fA-F]{3}$/.test(hex)) {
+            return (
+                hex.charAt(0) + hex.charAt(0) +
+                hex.charAt(1) + hex.charAt(1) +
+                hex.charAt(2) + hex.charAt(2)
+            ).toUpperCase();
+        }
+
+        if (/^[0-9a-fA-F]{6}$/.test(hex)) {
+            return hex.toUpperCase();
+        }
+
+        return '';
+    }
+
+    function cbNormalizeColorForNativePicker(value) {
+        var hex = cbNormalizeColorForPreview(value);
+        return hex ? '#' + hex : '';
+    }
+
+    function cbPreviewTextColor(hex) {
+        var red = parseInt(hex.substr(0, 2), 16);
+        var green = parseInt(hex.substr(2, 2), 16);
+        var blue = parseInt(hex.substr(4, 2), 16);
+        var luminance = ((red * 299) + (green * 587) + (blue * 114)) / 1000;
+        return luminance >= 160 ? '#000000' : '#FFFFFF';
+    }
+
+    function cbApplyListStateColorPreview(input) {
+        if (!input) {
+            return;
+        }
+
+        var hex = cbNormalizeColorForPreview(input.value);
+
+        if (!hex) {
+            input.style.backgroundColor = '';
+            input.style.color = '';
+            return;
+        }
+
+        input.style.backgroundColor = '#' + hex;
+        input.style.color = cbPreviewTextColor(hex);
+    }
+
+    function cbSyncNativePickerFromTextInput(textInput) {
+        if (!textInput) {
+            return;
+        }
+
+        var pickerId = textInput.getAttribute('data-cb-color-picker-target');
+
+        if (!pickerId) {
+            return;
+        }
+
+        var picker = document.getElementById(pickerId);
+
+        if (!picker) {
+            return;
+        }
+
+        var normalized = cbNormalizeColorForNativePicker(textInput.value);
+
+        if (normalized) {
+            picker.value = normalized;
+        }
+    }
+
+    function cbSyncTextInputFromNativePicker(pickerInput) {
+        if (!pickerInput) {
+            return;
+        }
+
+        var textId = pickerInput.getAttribute('data-cb-color-target');
+
+        if (!textId) {
+            return;
+        }
+
+        var textInput = document.getElementById(textId);
+
+        if (!textInput) {
+            return;
+        }
+
+        textInput.value = pickerInput.value.replace(/^#/, '').toUpperCase();
+        cbApplyListStateColorPreview(textInput);
+    }
+
+    function cbInitListStateColorControls() {
+        var inputs = document.querySelectorAll('input[data-cb-color-text="1"]');
+
+        for (var i = 0; i < inputs.length; i++) {
+            cbApplyListStateColorPreview(inputs[i]);
+            cbSyncNativePickerFromTextInput(inputs[i]);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', cbInitListStateColorControls);
+    window.addEventListener('load', cbInitListStateColorControls);
+    document.addEventListener('shown.bs.tab', cbInitListStateColorControls);
+    document.addEventListener('input', function(event) {
+        if (event.target && event.target.matches('input[data-cb-color-text="1"]')) {
+            cbApplyListStateColorPreview(event.target);
+            cbSyncNativePickerFromTextInput(event.target);
+            return;
+        }
+
+        if (event.target && event.target.matches('input[data-cb-color-picker="1"]')) {
+            cbSyncTextInputFromNativePicker(event.target);
+        }
+    });
+    document.addEventListener('change', function(event) {
+        if (event.target && event.target.matches('input[data-cb-color-text="1"]')) {
+            cbApplyListStateColorPreview(event.target);
+            cbSyncNativePickerFromTextInput(event.target);
+            return;
+        }
+
+        if (event.target && event.target.matches('input[data-cb-color-picker="1"]')) {
+            cbSyncTextInputFromNativePicker(event.target);
+        }
+    });
+    window.setTimeout(cbInitListStateColorControls, 300);
+    window.setTimeout(cbInitListStateColorControls, 1200);
 </script>
 <form action="index.php" method="post" name="adminForm" id="adminForm">
     <div class="w-100 row" style="margin-left: 20px; overflow-x: auto;">
 
         <?php
+        $advancedOptionsContent = '';
         // Démarrer les onglets
         echo HTMLHelper::_('uitab.startTabSet', 'view-pane', ['active' => 'tab0']);
         // Premier onglet
@@ -192,7 +375,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
             <tr>
                 <td valign="top">
 
-                    <fieldset class="adminform">
+                    <fieldset class="border rounded p-3 mb-3">
 
                         <label for="name">
                             <span class="editlinktip hasTip"
@@ -237,19 +420,9 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                 ?>
                             </select>
 
-                            <button type="button" class="btn-primary btn-sm"
-                                onclick="if(document.getElementById('advancedOptions').style.display == 'none'){document.getElementById('advancedOptions').style.display = '';}else{document.getElementById('advancedOptions').style.display = 'none';}">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_ADVANCED_OPTIONS'); ?>
-                            </button>
-
                         <?php
                         } else {
                         ?>
-                            <button type="button" class="btn-sm btn-primary"
-                                onclick="if(document.getElementById('advancedOptions').style.display == 'none'){document.getElementById('advancedOptions').style.display = '';}else{document.getElementById('advancedOptions').style.display = 'none';}">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_ADVANCED_OPTIONS'); ?>
-                            </button>
-
                             <div></div>
 
                             <div class="alert">
@@ -297,9 +470,8 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                 if ($this->item->type != 'com_contentbuilder_ng') {
                                 ?>
                                     <input type="hidden" name="jform[edit_by_type]" value="0" />
-                                    <input class="form-check-input" type="checkbox" id="edit_by_type" name="jform[edit_by_type]"
-                                        value="1" <?php echo $this->item->edit_by_type ? ' checked="checked"' : '' ?> />
-                                    <label for="edit_by_type">
+                                    <?php echo $renderCheckbox('jform[edit_by_type]', 'edit_by_type', (bool) $this->item->edit_by_type); ?>
+                                    <label class="form-check-label" for="edit_by_type">
                                         <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_EDIT'); ?>
                                     </label>
                                 <?php
@@ -310,15 +482,13 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                 }
                                 ?>
                                 <input type="hidden" name="jform[email_notifications]" value="0" />
-                                <input class="form-check-input" type="checkbox" id="email_notifications"
-                                    name="jform[email_notifications]" value="1" <?php echo $this->item->email_notifications ? ' checked="checked"' : '' ?> />
-                                <label for="email_notifications">
+                                <?php echo $renderCheckbox('jform[email_notifications]', 'email_notifications', (bool) $this->item->email_notifications); ?>
+                                <label class="form-check-label" for="email_notifications">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_EMAIL_NOTIFICATIONS'); ?>
                                 </label>
                                 <input type="hidden" name="jform[email_update_notifications]" value="0" />
-                                <input class="form-check-input" type="checkbox" id="email_update_notifications"
-                                    name="jform[email_update_notifications]" value="1" <?php echo $this->item->email_update_notifications ? ' checked="checked"' : '' ?> />
-                                <label for="email_update_notifications">
+                                <?php echo $renderCheckbox('jform[email_update_notifications]', 'email_update_notifications', (bool) $this->item->email_update_notifications); ?>
+                                <label class="form-check-label" for="email_update_notifications">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_EMAIL_UPDATE_NOTIFICATIONS'); ?>
                                 </label>
 
@@ -330,7 +500,8 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                         }
                         ?>
 
-                        <div class="bg-light p-3" style="display: none;" id="advancedOptions">
+                        <?php ob_start(); ?>
+                        <div class="bg-light p-3" id="advancedOptions">
 
                             <fieldset>
                                 <legend>
@@ -385,59 +556,55 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
 
 
                                 <input type="hidden" name="jform[show_id_column]" value="0" />
-                                <input class="form-check-input" type="checkbox" id="show_id_column"
-                                    name="jform[show_id_column]" value="1" <?php echo $this->item->show_id_column ? ' checked="checked"' : '' ?> /> <label for="show_id_column">
+                                <?php echo $renderCheckbox('jform[show_id_column]', 'show_id_column', (bool) $this->item->show_id_column); ?> <label class="form-check-label" for="show_id_column">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ID_COLUMN'); ?>
                                 </label>
                                 <input type="hidden" name="jform[select_column]" value="0" />
-                                <input class="form-check-input" type="checkbox" id="select_column" name="jform[select_column]"
-                                    value="1" <?php echo $this->item->select_column ? ' checked="checked"' : '' ?> />
-                                <label for="select_column">
+                                <?php echo $renderCheckbox('jform[select_column]', 'select_column', (bool) $this->item->select_column); ?>
+                                <label class="form-check-label" for="select_column">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_SELECT_COLUMN'); ?>
                                 </label>
                                 <input type="hidden" name="jform[list_state]" value="0" />
-                                <input class="form-check-input" type="checkbox" id="list_state" name="jform[list_state]"
-                                    value="1" <?php echo $this->item->list_state ? ' checked="checked"' : '' ?> />
-                                <label for="list_state">
+                                <?php echo $renderCheckbox('jform[list_state]', 'list_state', (bool) $this->item->list_state); ?>
+                                <label class="form-check-label" for="list_state">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?>
                                 </label>
                                 <input type="hidden" name="jform[edit_button]" value="0" />
-                                <input class="form-check-input" type="checkbox" id="edit_button" name="jform[edit_button]"
-                                    value="1" <?php echo $this->item->edit_button ? ' checked="checked"' : '' ?> />
-                                <label for="edit_button">
+                                <?php echo $renderCheckbox('jform[edit_button]', 'edit_button', (bool) $this->item->edit_button); ?>
+                                <label class="form-check-label" for="edit_button">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_BUTTON'); ?>
                                 </label>
+                                <input type="hidden" name="jform[new_button]" value="0" />
+                                <?php echo $renderCheckbox('jform[new_button]', 'new_button', (bool) ($this->item->new_button ?? 0)); ?>
+                                <label class="form-check-label" for="new_button">
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?>
+                                </label>
                                 <input type="hidden" name="jform[list_publish]" value="0" />
-                                <input class="form-check-input" type="checkbox" id="list_publish" name="jform[list_publish]"
-                                    value="1" <?php echo $this->item->list_publish ? ' checked="checked"' : '' ?> />
-                                <label for="list_publish">
+                                <?php echo $renderCheckbox('jform[list_publish]', 'list_publish', (bool) $this->item->list_publish); ?>
+                                <label class="form-check-label" for="list_publish">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>
                                 </label>
                                 <input type="hidden" name="jform[list_language]" value="0" />
-                                <input class="form-check-input" type="checkbox" id="list_language" name="jform[list_language]"
-                                    value="1" <?php echo $this->item->list_language ? ' checked="checked"' : '' ?> />
-                                <label for="list_language">
+                                <?php echo $renderCheckbox('jform[list_language]', 'list_language', (bool) $this->item->list_language); ?>
+                                <label class="form-check-label" for="list_language">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'); ?>
                                 </label>
                                 <input type="hidden" name="jform[list_article]" value="0" />
-                                <input class="form-check-input" type="checkbox" id="list_article" name="jform[list_article]"
-                                    value="1" <?php echo $this->item->list_article ? ' checked="checked"' : '' ?> />
-                                <label for="list_article">
+                                <?php echo $renderCheckbox('jform[list_article]', 'list_article', (bool) $this->item->list_article); ?>
+                                <label class="form-check-label" for="list_article">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE'); ?>
                                 </label>
                                 <input type="hidden" name="jform[list_author]" value="0" />
-                                <input class="form-check-input" type="checkbox" id="list_author" name="jform[list_author]"
-                                    value="1" <?php echo $this->item->list_author ? ' checked="checked"' : '' ?> />
-                                <label for="list_author">
+                                <?php echo $renderCheckbox('jform[list_author]', 'list_author', (bool) $this->item->list_author); ?>
+                                <label class="form-check-label" for="list_author">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_AUTHOR'); ?>
                                 </label>
 
 
 
                                 <input type="hidden" name="jform[export_xls]" value="0" />
-                                <input class="form-check-input" type="checkbox" name="jform[export_xls]" id="export_xls"
-                                    value="1" <?php echo $this->item->export_xls ? ' checked="checked"' : '' ?> />
-                                <label for="export_xls">
+                                <?php echo $renderCheckbox('jform[export_xls]', 'export_xls', (bool) $this->item->export_xls); ?>
+                                <label class="form-check-label" for="export_xls">
                                     <span class="editlinktip hasTip"
                                         title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_XLSEXPORT_TIP'); ?>">
                                         <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_XLSEXPORT'); ?>
@@ -445,9 +612,8 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                 </label>
 
                                 <input type="hidden" name="jform[print_button]" value="0" />
-                                <input class="form-check-input" type="checkbox" name="jform[print_button]" id="print_button"
-                                    value="1" <?php echo $this->item->print_button ? ' checked="checked"' : '' ?> />
-                                <label for="print_button">
+                                <?php echo $renderCheckbox('jform[print_button]', 'print_button', (bool) $this->item->print_button); ?>
+                                <label class="form-check-label" for="print_button">
                                     <span class="editlinktip hasTip"
                                         title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PRINTBUTTON_TIP'); ?>">
                                         <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PRINTBUTTON'); ?>
@@ -455,9 +621,8 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                 </label>
 
                                 <input type="hidden" name="jform[metadata]" value="0" />
-                                <input class="form-check-input" type="checkbox" name="jform[metadata]" id="metadata" value="1"
-                                    <?php echo $this->item->metadata ? ' checked="checked"' : '' ?> />
-                                <label for="metadata">
+                                <?php echo $renderCheckbox('jform[metadata]', 'metadata', (bool) $this->item->metadata); ?>
+                                <label class="form-check-label" for="metadata">
                                     <span class="editlinktip hasTip"
                                         title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_METADATA_TIP'); ?>">
                                         <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_METADATA'); ?>
@@ -465,9 +630,8 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                 </label>
 
                                 <input type="hidden" name="jform[show_filter]" value="0" />
-                                <input class="form-check-input" type="checkbox" name="jform[show_filter]" id="show_filter"
-                                    value="1" <?php echo $this->item->show_filter ? ' checked="checked"' : '' ?> />
-                                <label for="show_filter">
+                                <?php echo $renderCheckbox('jform[show_filter]', 'show_filter', (bool) $this->item->show_filter); ?>
+                                <label class="form-check-label" for="show_filter">
                                     <span class="editlinktip hasTip"
                                         title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_FILTER_TIP'); ?>">
                                         <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_FILTER'); ?>
@@ -475,9 +639,8 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                 </label>
 
                                 <input type="hidden" name="jform[show_records_per_page]" value="0" />
-                                <input class="form-check-input" type="checkbox" name="jform[show_records_per_page]"
-                                    id="show_records_per_page" value="1" <?php echo $this->item->show_records_per_page ? ' checked="checked"' : '' ?> />
-                                <label for="show_records_per_page">
+                                <?php echo $renderCheckbox('jform[show_records_per_page]', 'show_records_per_page', (bool) $this->item->show_records_per_page); ?>
+                                <label class="form-check-label" for="show_records_per_page">
                                     <span class="editlinktip hasTip"
                                         title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_RECORDS_PER_PAGE_TIP'); ?>">
                                         <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_RECORDS_PER_PAGE'); ?>
@@ -496,9 +659,8 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                 </legend>
                                 <div class="alert">
                                     <input type="hidden" name="jform[list_rating]" value="0" />
-                                    <input class="form-check-input" type="checkbox" id="list_rating" name="jform[list_rating]"
-                                        value="1" <?php echo $this->item->list_rating ? ' checked="checked"' : '' ?> />
-                                    <label for="list_rating">
+                                    <?php echo $renderCheckbox('jform[list_rating]', 'list_rating', (bool) $this->item->list_rating); ?>
+                                    <label class="form-check-label" for="list_rating">
                                         <?php echo Text::_('COM_CONTENTBUILDER_NG_RATING'); ?>
                                     </label>
 
@@ -648,9 +810,8 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                 </legend>
                                 <div class="alert">
                                     <input type="hidden" name="jform[filter_exact_match]" value="0" />
-                                    <input class="form-check-input" id="filter_exact_match" type="checkbox"
-                                        name="jform[filter_exact_match]" value="1" <?php echo $this->item->filter_exact_match ? ' checked="checked"' : '' ?> />
-                                    <label for="filter_exact_match">
+                                    <?php echo $renderCheckbox('jform[filter_exact_match]', 'filter_exact_match', (bool) $this->item->filter_exact_match); ?>
+                                    <label class="form-check-label" for="filter_exact_match">
                                         <span class="editlinktip hasTip"
                                             title="<?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_EXACT_MATCH_TIP'); ?>">
                                             <?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_EXACT_MATCH'); ?>
@@ -658,9 +819,8 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                     </label>
 
                                     <input type="hidden" name="jform[use_view_name_as_title]" value="0" />
-                                    <input class="form-check-input" id="use_view_name_as_title" type="checkbox"
-                                        name="jform[use_view_name_as_title]" value="1" <?php echo $this->item->use_view_name_as_title ? ' checked="checked"' : '' ?> />
-                                    <label for="use_view_name_as_title">
+                                    <?php echo $renderCheckbox('jform[use_view_name_as_title]', 'use_view_name_as_title', (bool) $this->item->use_view_name_as_title); ?>
+                                    <label class="form-check-label" for="use_view_name_as_title">
                                         <span class="editlinktip hasTip"
                                             title="<?php echo Text::_('COM_CONTENTBUILDER_NG_USE_VIEW_NAME_AS_TITLE_TIP'); ?>">
                                             <?php echo Text::_('COM_CONTENTBUILDER_NG_USE_VIEW_NAME_AS_TITLE'); ?>
@@ -668,9 +828,8 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                     </label>
 
                                     <input type="hidden" name="jform[published_only]" value="0" />
-                                    <input class="form-check-input" id="published_only" type="checkbox"
-                                        name="jform[published_only]" value="1" <?php echo $this->item->published_only ? ' checked="checked"' : '' ?> />
-                                    <label for="published_only">
+                                    <?php echo $renderCheckbox('jform[published_only]', 'published_only', (bool) $this->item->published_only); ?>
+                                    <label class="form-check-label" for="published_only">
                                         <span class="editlinktip hasTip"
                                             title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_ONLY_TIP'); ?>">
                                             <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_ONLY'); ?>
@@ -678,9 +837,8 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                     </label>
 
                                     <input type="hidden" name="jform[allow_external_filter]" value="0" />
-                                    <input class="form-check-input" type="checkbox" id="allow_external_filter"
-                                        name="jform[allow_external_filter]" value="1" <?php echo $this->item->allow_external_filter ? ' checked="checked"' : '' ?> />
-                                    <label for="allow_external_filter">
+                                    <?php echo $renderCheckbox('jform[allow_external_filter]', 'allow_external_filter', (bool) $this->item->allow_external_filter); ?>
+                                    <label class="form-check-label" for="allow_external_filter">
                                         <span class="editlinktip hasTip"
                                             title="<?php echo Text::_('COM_CONTENTBUILDER_NG_ALLOW_EXTERNAL_FILTER_TIP'); ?>">
                                             <?php echo Text::_('COM_CONTENTBUILDER_NG_ALLOW_EXTERNAL_FILTER'); ?>
@@ -690,6 +848,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                             </fieldset>
 
                         </div>
+                        <?php $advancedOptionsContent = ob_get_clean(); ?>
 
                     </fieldset>
 
@@ -701,45 +860,43 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
         </tr>
         <tr>
             <td valign="top">
-                <table class="adminlist table table-striped">
+                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th width="5">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_ID'); ?>
+                                <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_ID'), 'id'); ?>
                             </th>
                             <th width="20">
-                                <input type="hidden" name="jform[toggle]" value="0" />
-                                <input class="form-check-input" type="checkbox" name="jform[toggle]" value=""
-                                    onclick="Joomla.checkAll(this);" />
+                                <?php echo HTMLHelper::_('grid.checkall'); ?>
                             </th>
                             <th>
                                 <span class="editlinktip hasTip"
                                     title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LABEL_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LABEL'); ?>
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_LABEL'), 'label'); ?>
                                 </span>
                             </th>
                             <th>
                                 <span class="editlinktip hasTip"
                                     title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE'); ?>
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE'), 'list_include'); ?>
                                 </span>
                             </th>
                             <th>
                                 <span class="editlinktip hasTip"
                                     title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE'); ?>
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE'), 'search_include'); ?>
                                 </span>
                             </th>
                             <th>
                                 <span class="editlinktip hasTip"
                                     title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LINKABLE_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LINKABLE'); ?>
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_LINKABLE'), 'linkable'); ?>
                                 </span>
                             </th>
                             <th>
                                 <span class="editlinktip hasTip"
                                     title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EDITABLE'); ?>
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_EDITABLE'), 'editable'); ?>
                                 </span>
                             </th>
                             <th>
@@ -755,7 +912,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                 </span>
                             </th>
                             <th>
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'); ?>
+                                <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'published'); ?>
                             </th>
                             <th width="120" class="cb-order-head">
                                 <?php if (!empty($this->elements) && is_array($this->elements)) : ?>
@@ -789,7 +946,8 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                     <?php echo $checked; ?>
                                 </td>
                                 <td width="150" valign="top">
-                                    <div style="cursor:pointer;width: 100%;display:block;"
+                                    <div class="cb-item-label-cell">
+                                    <div class="cb-item-label-display"
                                         id="itemLabels_<?php echo $row->id ?>"
                                         onclick="document.getElementById('itemLabels<?php echo $row->id ?>').style.display='block';this.style.display='none';document.getElementById('itemLabels<?php echo $row->id ?>').focus();">
                                         <b>
@@ -802,9 +960,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                         name="jform[itemLabels][<?php echo $row->id ?>]"
                                         value="<?php echo htmlentities($row->label ?? '', ENT_QUOTES, 'UTF-8') ?>" />
 
-                                    <br />
-
-                                    <select class="form-select-sm" style="max-width: 125px;"
+                                    <select class="form-select form-select-sm cb-item-order-type"
                                         id="itemOrderTypes<?php echo $row->id ?>" name="jform[itemOrderTypes][<?php echo $row->id ?>]">
                                         <option value=""> -
                                             <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES'); ?> -
@@ -828,6 +984,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                             <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_DECIMAL'); ?>
                                         </option>
                                     </select>
+                                    </div>
 
                                 </td>
                                 <td valign="top">
@@ -843,7 +1000,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                                     <?php echo $editable; ?>
                                     <?php
                                     if ($row->editable && !$this->item->edit_by_type) {
-                                        echo '<br/><br/>[<a href="index.php?option=com_contentbuilder_ng&amp;view=elementoptions&amp;tmpl=component&amp;element_id=' . $row->id . '&amp;id=' . $this->item->id . '" title="" data-bs-toggle="modal" data-bs-target="#text-type-modal">' . $row->type . '</a>]';
+                                        echo '<div class="mt-1">[<a href="index.php?option=com_contentbuilder_ng&amp;view=elementoptions&amp;tmpl=component&amp;element_id=' . $row->id . '&amp;id=' . $this->item->id . '" title="" data-bs-toggle="modal" data-bs-target="#text-type-modal">' . $row->type . '</a>]</div>';
                                     }
                                     ?>
                                 </td>
@@ -921,6 +1078,9 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
 
         <?php
         echo HTMLHelper::_('uitab.endTab');
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab9', Text::_('COM_CONTENTBUILDER_NG_ADVANCED_OPTIONS'));
+        echo $advancedOptionsContent;
+        echo HTMLHelper::_('uitab.endTab');
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', Text::_('COM_CONTENTBUILDER_NG_LIST_INTRO_TEXT'));
         echo $this->form->renderField('intro_text');
         ?>
@@ -929,7 +1089,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
         echo HTMLHelper::_('uitab.endTab');
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', Text::_('COM_CONTENTBUILDER_NG_LIST_STATES'));
         ?>
-        <table class="adminlist table table-striped">
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th>
@@ -949,11 +1109,28 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
             <?php
             foreach ($this->item->list_states as $state) {
                 $k = 0;
+                $stateRawColor = (string) ($state['color'] ?? '');
+                $previewHex = strtoupper(ltrim(trim($stateRawColor), '#'));
+                if (preg_match('/^[0-9A-F]{3}$/', $previewHex)) {
+                    $previewHex = $previewHex[0] . $previewHex[0]
+                        . $previewHex[1] . $previewHex[1]
+                        . $previewHex[2] . $previewHex[2];
+                }
+                $stateColorStyle = '';
+                if (preg_match('/^[0-9A-F]{6}$/', $previewHex)) {
+                    $red = hexdec(substr($previewHex, 0, 2));
+                    $green = hexdec(substr($previewHex, 2, 2));
+                    $blue = hexdec(substr($previewHex, 4, 2));
+                    $textColor = ((($red * 299) + ($green * 587) + ($blue * 114)) / 1000) >= 160 ? '#000000' : '#FFFFFF';
+                    $stateColorStyle = 'background-color:#' . $previewHex . ';color:' . $textColor . ';';
+                }
+                $stateColorInputId = 'list_state_color_' . (int) $state['id'];
+                $stateColorPickerId = 'list_state_color_picker_' . (int) $state['id'];
+                $stateNativePickerValue = preg_match('/^[0-9A-F]{6}$/', $previewHex) ? '#' . $previewHex : '#FFFFFF';
             ?>
                 <tr class="<?php echo "row$k"; ?>">
                     <td>
-                        <input class="form-check-input" type="checkbox"
-                            name="jform[list_states][<?php echo $state['id']; ?>][published]" value="1" <?php echo $state['published'] ? ' checked="checked"' : '' ?> />
+                        <?php echo $renderCheckbox('jform[list_states][' . $state['id'] . '][published]', 'list_state_published_' . $state['id'], (bool) $state['published']); ?>
                     </td>
                     <td>
                         <input class="form-control form-control-sm w-100" type="text"
@@ -961,9 +1138,27 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                             value="<?php echo htmlentities($state['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                     </td>
                     <td>
-                        <input class="form-control form-control-sm w-100 color" type="text"
-                            value="<?php echo $state['color']; ?>"
-                            name="jform[list_states][<?php echo $state['id']; ?>][color]" /><br />
+                        <div class="d-flex align-items-center gap-2">
+                            <input
+                                class="form-control form-control-sm w-100"
+                                type="text"
+                                id="<?php echo $stateColorInputId; ?>"
+                                data-cb-color-text="1"
+                                data-cb-color-picker-target="<?php echo $stateColorPickerId; ?>"
+                                value="<?php echo htmlentities($stateRawColor, ENT_QUOTES, 'UTF-8'); ?>"
+                                style="<?php echo $stateColorStyle; ?>"
+                                name="jform[list_states][<?php echo $state['id']; ?>][color]" />
+                            <input
+                                class="form-control form-control-color form-control-sm"
+                                type="color"
+                                id="<?php echo $stateColorPickerId; ?>"
+                                data-cb-color-picker="1"
+                                data-cb-color-target="<?php echo $stateColorInputId; ?>"
+                                value="<?php echo $stateNativePickerValue; ?>"
+                                title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_STATES_COLOR'); ?>"
+                                aria-label="<?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_STATES_COLOR'); ?>"
+                                style="width: 3rem; min-width: 3rem; padding: 0.2rem;" />
+                        </div>
                     </td>
                     <td>
                         <select class="form-select-sm" name="jform[list_states][<?php echo $state['id']; ?>][action]">
@@ -992,7 +1187,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab3', Text::_('COM_CONTENTBUILDER_NG_DETAILS_TEMPLATE'));
 
         ?>
-        <table width="100%" class="adminform table table-striped">
+        <table width="100%" class="table table-striped">
             <tr>
                 <td width="20%">
                     <label for="create_sample"><span class="editlinktip hasTip"
@@ -1001,12 +1196,12 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                 </td>
                 <td>
                     <input type="hidden" name="jform[create_sample]" value="0" />
-                    <input class="form-check-input" id="create_sample" type="checkbox" name="jform[create_sample]" value="1" />
-                    <label for="create_sample">
+                    <?php echo $renderCheckbox('jform[create_sample]', 'create_sample', false); ?>
+                    <label class="form-check-label" for="create_sample">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_SAMPLE'); ?>
                     </label>
                     <input type="hidden" name="jform[create_articles]" value="0" />
-                    <input class="form-check-input" <?php echo $this->item->create_articles == 1 ? ' checked="checked"' : '' ?>type="checkbox" name="jform[create_articles]" id="create_articles" value="1" /><label
+                    <?php echo $renderCheckbox('jform[create_articles]', 'create_articles', (int) $this->item->create_articles === 1); ?><label class="form-check-label"
                         for="create_articles">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_ARTICLES'); ?>
                     </label>
@@ -1214,7 +1409,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                 </td>
                 <td>
                     <input type="hidden" name="jform[auto_publish]" value="0" />
-                    <input class="form-check-input" <?php echo $this->item->auto_publish == 1 ? ' checked="checked"' : '' ?>type="checkbox" name="jform[auto_publish]" id="auto_publish" value="1" />
+                    <?php echo $renderCheckbox('jform[auto_publish]', 'auto_publish', (int) $this->item->auto_publish === 1); ?>
                 </td>
                 <td width="20%">
                     <?php
@@ -1233,8 +1428,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                     if ($this->item->edit_by_type && $this->item->type == 'com_breezingforms') {
                     ?>
                         <input type="hidden" name="jform[protect_upload_directory]" value="0" />
-                        <input class="form-check-input" type="checkbox" value="1" name="jform[protect_upload_directory]"
-                            id="protect_upload_directory" <?php echo trim($this->item->protect_upload_directory) ? ' checked="checked"' : ''; ?> />
+                        <?php echo $renderCheckbox('jform[protect_upload_directory]', 'protect_upload_directory', trim((string) $this->item->protect_upload_directory) !== ''); ?>
                     <?php
                     }
                     ?>
@@ -1284,16 +1478,14 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
             <br />
             <br />
             <input type="hidden" name="jform[protect_upload_directory]" value="0" />
-            <input class="form-check-input" type="checkbox" value="1" name="jform[protect_upload_directory]"
-                id="protect_upload_directory" <?php echo trim($this->item->protect_upload_directory) ? ' checked="checked"' : ''; ?> /> <label for="protect_upload_directory">
+            <?php echo $renderCheckbox('jform[protect_upload_directory]', 'protect_upload_directory', trim((string) $this->item->protect_upload_directory) !== ''); ?> <label class="form-check-label" for="protect_upload_directory">
                 <?php echo Text::_('COM_CONTENTBUILDER_NG_PROTECT_UPLOAD_DIRECTORY'); ?>
             </label>
             <br />
             <br />
             <input type="hidden" name="jform[create_editable_sample]" value="0" />
-            <input class="form-check-input" type="checkbox" name="jform[create_editable_sample]" id="editable_sample"
-                value="1" <?php echo !empty($this->item->create_editable_sample) ? ' checked="checked"' : ''; ?> />
-            <label for="editable_sample">
+            <?php echo $renderCheckbox('jform[create_editable_sample]', 'editable_sample', !empty($this->item->create_editable_sample)); ?>
+            <label class="form-check-label" for="editable_sample">
                 <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_EDITABLE_SAMPLE'); ?>
             </label>
             <br />
@@ -1357,7 +1549,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
             </div>
             <div id="email_admins_div"
                 style="display:<?php echo Factory::getApplication()->getSession()->get('email_admins', '', 'com_contentbuilder_ng'); ?>">
-                <table width="100%" class="adminform table table-striped">
+                <table width="100%" class="table table-striped">
                     <tr>
                         <td width="20%">
                             <label for="email_admin_subject"><span class="editlinktip hasTip"
@@ -1423,8 +1615,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                         </td>
                         <td>
                             <input type="hidden" name="jform[email_admin_html]" value="0" />
-                            <input class="form-check-input" id="email_admin_html" type="checkbox" name="jform[email_admin_html]"
-                                value="1" <?php echo $this->item->email_admin_html ? ' checked="checked"' : ''; ?> />
+                            <?php echo $renderCheckbox('jform[email_admin_html]', 'email_admin_html', (bool) $this->item->email_admin_html); ?>
                         </td>
                     </tr>
                     <tr>
@@ -1435,9 +1626,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                         </td>
                         <td>
                             <input type="hidden" name="jform[email_admin_create_sample]" value="0" />
-                            <input class="form-check-input" id="email_admin_create_sample" type="checkbox"
-                                name="jform[email_admin_create_sample]" value="1"
-                                <?php echo !empty($this->item->email_admin_create_sample) ? ' checked="checked"' : ''; ?> />
+                            <?php echo $renderCheckbox('jform[email_admin_create_sample]', 'email_admin_create_sample', !empty($this->item->email_admin_create_sample)); ?>
                         </td>
                         <td width="20%">
                         </td>
@@ -1462,7 +1651,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                 </h3>
             </div>
             <div id="email_users_div">
-                <table width="100%" class="adminform table table-striped">
+                <table width="100%" class="table table-striped">
                     <tr>
                         <td width="20%">
                             <label for="email_subject">
@@ -1525,8 +1714,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                         </td>
                         <td>
                             <input type="hidden" name="jform[email_html]" value="0" />
-                            <input class="form-check-input" id="email_html" type="checkbox" name="jform[email_html]" value="1"
-                                <?php echo $this->item->email_html ? ' checked="checked"' : ''; ?> />
+                            <?php echo $renderCheckbox('jform[email_html]', 'email_html', (bool) $this->item->email_html); ?>
                         </td>
                     </tr>
                     <tr>
@@ -1537,9 +1725,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                         </td>
                         <td>
                             <input type="hidden" name="jform[email_create_sample]" value="0" />
-                            <input class="form-check-input" id="email_create_sample" type="checkbox"
-                                name="jform[email_create_sample]" value="1"
-                                <?php echo !empty($this->item->email_create_sample) ? ' checked="checked"' : ''; ?> />
+                            <?php echo $renderCheckbox('jform[email_create_sample]', 'email_create_sample', !empty($this->item->email_create_sample)); ?>
                         </td>
                         <td width="20%">
                         </td>
@@ -1567,7 +1753,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
         // Premier onglet
         echo HTMLHelper::_('uitab.addTab', 'perm-pane', 'permtab1', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_FRONTEND'));
         ?>
-        <table class="adminlist table table-striped">
+        <table class="table table-striped">
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="own_only_fe">
@@ -1579,7 +1765,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                 </td>
                 <td>
                     <input type="hidden" name="jform[own_only_fe]" value="0" />
-                    <input class="form-check-input" type="checkbox" name="jform[own_only_fe]" id="own_only_fe" value="1" <?php echo $this->item->own_only_fe ? ' checked="checked"' : ''; ?> />
+                    <?php echo $renderCheckbox('jform[own_only_fe]', 'own_only_fe', (bool) $this->item->own_only_fe); ?>
                 </td>
             </tr>
             <tr class="row0">
@@ -1593,8 +1779,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                 </td>
                 <td>
                     <input type="hidden" name="jform[limited_article_options_fe]" value="0" />
-                    <input class="form-check-input" type="checkbox" name="jform[limited_article_options_fe]"
-                        id="limited_article_options_fe" value="1" <?php echo $this->item->limited_article_options_fe ? ' checked="checked"' : ''; ?> />
+                    <?php echo $renderCheckbox('jform[limited_article_options_fe]', 'limited_article_options_fe', (bool) $this->item->limited_article_options_fe); ?>
                 </td>
             </tr>
             <tr class="row0">
@@ -1607,46 +1792,18 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                     </label>
                 </td>
                 <td>
-                    <input class="form-check-input" type="checkbox" name="jform[own_fe][listaccess]" id="own_fe_listaccess"
-                        value="1" <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['listaccess']) && $this->item->config['own_fe']['listaccess'] ? ' checked="checked"' : ''; ?> /> <label
-                        for="own_fe_listaccess">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own_fe][view]" id="own_fe_view" value="1" <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['view']) && $this->item->config['own_fe']['view'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VIEW'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own_fe][new]" id="own_fe_new" value="1" <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['new']) && $this->item->config['own_fe']['new'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_NEW'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own_fe][edit]" id="own_fe_edit" value="1" <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['edit']) && $this->item->config['own_fe']['edit'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_EDIT'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own_fe][delete]" id="own_fe_delete" value="1"
-                        <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['delete']) && $this->item->config['own_fe']['delete'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_delete">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_DELETE'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own_fe][state]" id="own_fe_state" value="1"
-                        <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['state']) && $this->item->config['own_fe']['state'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_state">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_STATE'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own_fe][publish]" id="own_fe_publish" value="1"
-                        <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['publish']) && $this->item->config['own_fe']['publish'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_publish">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own_fe][fullarticle]" id="own_fe_fullarticle"
-                        value="1" <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['fullarticle']) && $this->item->config['own_fe']['fullarticle'] ? ' checked="checked"' : ''; ?> /> <label
-                        for="own_fe_fullarticle">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own_fe][language]" id="own_fe_language"
-                        value="1" <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['language']) && $this->item->config['own_fe']['language'] ? ' checked="checked"' : ''; ?> /> <label
-                        for="own_fe_language">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own_fe][rating]" id="own_fe_rating" value="1"
-                        <?php echo isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']) && isset($this->item->config['own_fe']['rating']) && $this->item->config['own_fe']['rating'] ? ' checked="checked"' : ''; ?> /> <label for="own_fe_rating">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_RATING'); ?>
-                    </label>
+                    <?php foreach ($permissionColumns as $permissionColumn) : ?>
+                        <?php
+                        $permKey = $permissionColumn['key'];
+                        $permId = 'own_fe_' . $permKey;
+                        $permName = 'jform[own_fe][' . $permKey . ']';
+                        $isChecked = !empty($this->item->config['own_fe'][$permKey]);
+                        ?>
+                        <?php echo $renderCheckbox($permName, $permId, $isChecked); ?>
+                        <label class="form-check-label me-2" for="<?php echo $permId; ?>">
+                            <?php echo Text::_($permissionColumn['label']); ?>
+                        </label>
+                    <?php endforeach; ?>
                 </td>
             </tr>
             <tr class="row0">
@@ -1660,8 +1817,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                 </td>
                 <td>
                     <input type="hidden" name="jform[show_all_languages_fe]" value="0" />
-                    <input class="form-check-input" type="checkbox" name="jform[show_all_languages_fe]"
-                        id="show_all_languages_fe" value="1" <?php echo $this->item->show_all_languages_fe ? ' checked="checked"' : ''; ?> />
+                    <?php echo $renderCheckbox('jform[show_all_languages_fe]', 'show_all_languages_fe', (bool) $this->item->show_all_languages_fe); ?>
                 </td>
             </tr>
             <?php
@@ -1675,7 +1831,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                     </td>
                     <td>
                         <input type="hidden" name="jform[force_login]" value="0" />
-                        <input class="form-check-input" type="checkbox" name="jform[force_login]" id="force_login" value="1" <?php echo $this->item->force_login ? ' checked="checked"' : '' ?> />
+                        <?php echo $renderCheckbox('jform[force_login]', 'force_login', (bool) $this->item->force_login); ?>
                     </td>
                 </tr>
                 <tr class="row0">
@@ -1693,66 +1849,30 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
             }
             ?>
         </table>
-        <table class="adminlist table table-striped">
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th>
                         <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_GROUP', 'COM_CONTENTBUILDER_NG_PERM_GROUP_TIP'); ?>
                     </th>
-                    <th>
-                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS', 'COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS_TIP'); ?>
-                    </th>
-                    <th>
-                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_VIEW', 'COM_CONTENTBUILDER_NG_PERM_VIEW_TIP'); ?>
-                    </th>
-                    <th>
-                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_NEW', 'COM_CONTENTBUILDER_NG_PERM_NEW_TIP'); ?>
-                    </th>
-                    <th>
-                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_EDIT', 'COM_CONTENTBUILDER_NG_PERM_EDIT_TIP'); ?>
-                    </th>
-                    <th>
-                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_DELETE', 'COM_CONTENTBUILDER_NG_PERM_DELETE_TIP'); ?>
-                    </th>
-                    <th>
-                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_STATE', 'COM_CONTENTBUILDER_NG_PERM_STATE_TIP'); ?>
-                    </th>
-                    <th>
-                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PUBLISH', 'COM_CONTENTBUILDER_NG_PUBLISH_TIP'); ?>
-                    </th>
-                    <th>
-                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE', 'COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE_TIP'); ?>
-                    </th>
-                    <th>
-                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE', 'COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE_TIP'); ?>
-                    </th>
-                    <th>
-                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_RATING', 'COM_CONTENTBUILDER_NG_PERM_RATING_TIP'); ?>
-                    </th>
+                    <?php foreach ($permissionColumns as $permissionColumn) : ?>
+                        <th>
+                            <?php echo $permHeaderLabel($permissionColumn['label'], $permissionColumn['tip']); ?>
+                        </th>
+                    <?php endforeach; ?>
                 </tr>
             </thead>
             <tr>
-                <td style="background-color: #F0F0F0"></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="listaccess" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="view" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="new" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="edit" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="delete" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="state" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="publish" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="fullarticle" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="language" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'fe')" value="rating" /></td>
+                <td class="bg-light"></td>
+                <?php foreach ($permissionColumns as $permissionColumn) : ?>
+                    <?php
+                    $permKey = $permissionColumn['key'];
+                    $permId = 'perms_fe_select_' . $permKey;
+                    ?>
+                    <td class="bg-light">
+                        <?php echo $renderCheckbox('', $permId, false, $permKey, ['onclick' => "contentbuilder_ng_selectAll(this,'fe')"]); ?>
+                    </td>
+                <?php endforeach; ?>
             </tr>
 
             <?php
@@ -1763,32 +1883,21 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                     <td>
                         <?php echo $entry->text; ?>
                     </td>
-                    <td><input class="form-check-input" type="checkbox"
-                            name="jform[perms_fe][<?php echo $entry->value; ?>][listaccess]" value="1" <?php echo !$this->item->id ? ' checked="checked"' : (isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['listaccess']) && $this->item->config['permissions_fe'][$entry->value]['listaccess'] ? ' checked="checked"' : ''); ?> /></td>
-                    <td><input class="form-check-input" type="checkbox" name="jform[perms_fe][<?php echo $entry->value; ?>][view]"
-                            value="1" <?php echo !$this->item->id ? ' checked="checked"' : (isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['view']) && $this->item->config['permissions_fe'][$entry->value]['view'] ? ' checked="checked"' : ''); ?> />
-                    </td>
-                    <td><input class="form-check-input" type="checkbox" name="jform[perms_fe][<?php echo $entry->value; ?>][new]"
-                            value="1" <?php echo !$this->item->id ? ' checked="checked"' : (isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['new']) && $this->item->config['permissions_fe'][$entry->value]['new'] ? ' checked="checked"' : ''); ?> />
-                    </td>
-                    <td><input class="form-check-input" type="checkbox" name="jform[perms_fe][<?php echo $entry->value; ?>][edit]"
-                            value="1" <?php echo isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['edit']) && $this->item->config['permissions_fe'][$entry->value]['edit'] ? ' checked="checked"' : ''; ?> />
-                    </td>
-                    <td><input class="form-check-input" type="checkbox"
-                            name="jform[perms_fe][<?php echo $entry->value; ?>][delete]" value="1" <?php echo isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['delete']) && $this->item->config['permissions_fe'][$entry->value]['delete'] ? ' checked="checked"' : ''; ?> />
-                    </td>
-                    <td><input class="form-check-input" type="checkbox" name="jform[perms_fe][<?php echo $entry->value; ?>][state]"
-                            value="1" <?php echo isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['state']) && $this->item->config['permissions_fe'][$entry->value]['state'] ? ' checked="checked"' : ''; ?> />
-                    </td>
-                    <td><input class="form-check-input" type="checkbox"
-                            name="jform[perms_fe][<?php echo $entry->value; ?>][publish]" value="1" <?php echo isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['publish']) && $this->item->config['permissions_fe'][$entry->value]['publish'] ? ' checked="checked"' : ''; ?> /></td>
-                    <td><input class="form-check-input" type="checkbox"
-                            name="jform[perms_fe][<?php echo $entry->value; ?>][fullarticle]" value="1" <?php echo isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['fullarticle']) && $this->item->config['permissions_fe'][$entry->value]['fullarticle'] ? ' checked="checked"' : ''; ?> /></td>
-                    <td><input class="form-check-input" type="checkbox"
-                            name="jform[perms_fe][<?php echo $entry->value; ?>][language]" value="1" <?php echo isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['language']) && $this->item->config['permissions_fe'][$entry->value]['language'] ? ' checked="checked"' : ''; ?> /></td>
-                    <td><input class="form-check-input" type="checkbox"
-                            name="jform[perms_fe][<?php echo $entry->value; ?>][rating]" value="1" <?php echo isset($this->item->config['permissions_fe']) && isset($this->item->config['permissions_fe'][$entry->value]) && isset($this->item->config['permissions_fe'][$entry->value]['rating']) && $this->item->config['permissions_fe'][$entry->value]['rating'] ? ' checked="checked"' : ''; ?> />
-                    </td>
+                    <?php
+                    $groupPermissions = $this->item->config['permissions_fe'][$entry->value] ?? [];
+                    foreach ($permissionColumns as $permissionColumn) {
+                        $permKey = $permissionColumn['key'];
+                        $permName = 'jform[perms_fe][' . $entry->value . '][' . $permKey . ']';
+                        $permId = 'perms_fe_' . $entry->value . '_' . $permKey;
+                        $isChecked = !$this->item->id && !empty($defaultCheckedForNewPermissions[$permKey]);
+
+                        if (!$isChecked) {
+                            $isChecked = !empty($groupPermissions[$permKey]);
+                        }
+
+                        echo '<td>' . $renderCheckbox($permName, $permId, $isChecked) . '</td>';
+                    }
+                    ?>
                 </tr>
             <?php
                 $k = 1 - $k;
@@ -1797,204 +1906,13 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
         </table>
         <?php
         echo HTMLHelper::_('uitab.endTab');
-
-        /*  MODIF XDA - GILLES (REMOVE : PERMISSION - BACKEND BOTTON), */
-        /* Supprime le bouton PERMISSION - BACKEND, laisse FRONTEND seulement pour les droits */
-
-        /*
-        $title = Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_BACKEND');
-        echo $sliders->startPanel($title, "permtab0");
-        ?>
-        <table class="adminlist table table-striped">
-            <tr class="row0">
-                <td width="20%" align="right" class="key">
-                    <label for="own_only">
-                        <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN_OWNLY_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN_OWNLY'); ?>
-                        </span>:
-                    </label>
-                </td>
-                <td>
-                    <input type="hidden" name="jform[own_only]" value="0" />
-                    <input class="form-check-input" type="checkbox" name="jform[own_only]" id="own_only" value="1" <?php echo $this->item->own_only ? ' checked="checked"' : ''; ?> />
-                </td>
-            </tr>
-            <tr class="row0">
-                <td width="20%" align="right" class="key">
-                    <label for="limited_article_options">
-                        <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMITED_ARTICLE_OPTIONS_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMITED_ARTICLE_OPTIONS'); ?>
-                        </span>:
-                    </label>
-                </td>
-                <td>
-                    <input type="hidden" name="jform[limited_article_options]" value="0" />
-                    <input class="form-check-input" type="checkbox" name="jform[limited_article_options]"
-                        id="limited_article_options" value="1" <?php echo $this->item->limited_article_options ? ' checked="checked"' : ''; ?> />
-                </td>
-            </tr>
-            <tr class="row0">
-                <td width="20%" align="right" class="key">
-                    <label for="own_view">
-                        <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN'); ?>
-                        </span>:
-                    </label>
-                </td>
-                <td>
-                    <input class="form-check-input" type="checkbox" name="jform[own][listaccess]" id="own_listaccess" value="1"
-                        <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['listaccess']) && $this->item->config['own']['listaccess'] ? ' checked="checked"' : ''; ?> /><label for="own_listaccess">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own][view]" id="own_view" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['view']) && $this->item->config['own']['view'] ? ' checked="checked"' : ''; ?> /><label for="own_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VIEW'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own][new]" id="own_new" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['new']) && $this->item->config['own']['new'] ? ' checked="checked"' : ''; ?> /><label for="own_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_NEW'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own][edit]" id="own_edit" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['edit']) && $this->item->config['own']['edit'] ? ' checked="checked"' : ''; ?> /><label for="own_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_EDIT'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own][delete]" id="own_delete" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['delete']) && $this->item->config['own']['delete'] ? ' checked="checked"' : ''; ?> /> <label for="own_delete">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_DELETE'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own][state]" id="own_state" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['state']) && $this->item->config['own']['state'] ? ' checked="checked"' : ''; ?> /> <label for="own_state">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_STATE'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own][publish]" id="own_publish" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['publish']) && $this->item->config['own']['publish'] ? ' checked="checked"' : ''; ?> /> <label for="own_publish">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own][fullarticle]" id="own_fullarticle"
-                        value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['fullarticle']) && $this->item->config['own']['fullarticle'] ? ' checked="checked"' : ''; ?> /> <label for="own_fullarticle">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own][language]" id="own_language" value="1"
-                        <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['language']) && $this->item->config['own']['language'] ? ' checked="checked"' : ''; ?> /> <label for="own_language">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE'); ?>
-                    </label>
-                    <input class="form-check-input" type="checkbox" name="jform[own][rating]" id="own_rating" value="1" <?php echo isset($this->item->config['own']) && isset($this->item->config['own']) && isset($this->item->config['own']['rating']) && $this->item->config['own']['rating'] ? ' checked="checked"' : ''; ?> /> <label for="own_rating">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_RATING'); ?>
-                    </label>
-                </td>
-            </tr>
-        </table>
-
-        <table class="adminlist table table-striped">
-            <thead>
-                <tr>
-                    <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_GROUP') ?>
-                    </th>
-                    <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS') ?>
-                    </th>
-                    <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VIEW') ?>
-                    </th>
-                    <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_NEW') ?>
-                    </th>
-                    <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_EDIT') ?>
-                    </th>
-                    <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_DELETE') ?>
-                    </th>
-                    <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_STATE') ?>
-                    </th>
-                    <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH') ?>
-                    </th>
-                    <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE') ?>
-                    </th>
-                    <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE') ?>
-                    </th>
-                    <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_RATING') ?>
-                    </th>
-                </tr>
-            </thead>
-            <tr class="<?php echo "row0"; ?>">
-                <td style="background-color: #F0F0F0"></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'be')" value="listaccess" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'be')" value="view" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'be')" value="new" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'be')" value="edit" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'be')" value="delete" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'be')" value="state" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'be')" value="publish" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'be')" value="fullarticle" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'be')" value="language" /></td>
-                <td style="background-color: #F0F0F0"><input class="form-check-input" type="checkbox"
-                        onclick="contentbuilder_ng_selectAll(this,'be')" value="rating" /></td>
-            </tr>
-            <?php
-            foreach ($this->gmap as $entry) {
-
-                $k = 0;
-                ?>
-                <tr class="<?php echo "row$k"; ?>">
-                    <td>
-                        <?php echo $entry->text; ?>
-                    </td>
-                    <td><input class="form-check-input" type="checkbox"
-                            name="jform[perms][<?php echo $entry->value; ?>][listaccess]" value="1" <?php echo !$this->item->id ? ' checked="checked"' : (isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['listaccess']) && $this->item->config['permissions'][$entry->value]['listaccess'] ? ' checked="checked"' : ''); ?> /></td>
-                    <td><input class="form-check-input" type="checkbox" name="jform[perms][<?php echo $entry->value; ?>][view]"
-                            value="1" <?php echo !$this->item->id ? ' checked="checked"' : (isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['view']) && $this->item->config['permissions'][$entry->value]['view'] ? ' checked="checked"' : ''); ?> />
-                    </td>
-                    <td><input class="form-check-input" type="checkbox" name="jform[perms][<?php echo $entry->value; ?>][new]"
-                            value="1" <?php echo !$this->item->id ? ' checked="checked"' : (isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['new']) && $this->item->config['permissions'][$entry->value]['new'] ? ' checked="checked"' : ''); ?> /></td>
-                    <td><input class="form-check-input" type="checkbox" name="jform[perms][<?php echo $entry->value; ?>][edit]"
-                            value="1" <?php echo isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['edit']) && $this->item->config['permissions'][$entry->value]['edit'] ? ' checked="checked"' : ''; ?> /></td>
-                    <td><input class="form-check-input" type="checkbox" name="jform[perms][<?php echo $entry->value; ?>][delete]"
-                            value="1" <?php echo isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['delete']) && $this->item->config['permissions'][$entry->value]['delete'] ? ' checked="checked"' : ''; ?> />
-                    </td>
-                    <td><input class="form-check-input" type="checkbox" name="jform[perms][<?php echo $entry->value; ?>][state]"
-                            value="1" <?php echo isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['state']) && $this->item->config['permissions'][$entry->value]['state'] ? ' checked="checked"' : ''; ?> />
-                    </td>
-                    <td><input class="form-check-input" type="checkbox" name="jform[perms][<?php echo $entry->value; ?>][publish]"
-                            value="1" <?php echo isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['publish']) && $this->item->config['permissions'][$entry->value]['publish'] ? ' checked="checked"' : ''; ?> />
-                    </td>
-                    <td><input class="form-check-input" type="checkbox"
-                            name="jform[perms][<?php echo $entry->value; ?>][fullarticle]" value="1" <?php echo isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['fullarticle']) && $this->item->config['permissions'][$entry->value]['fullarticle'] ? ' checked="checked"' : ''; ?> /></td>
-                    <td><input class="form-check-input" type="checkbox" name="jform[perms][<?php echo $entry->value; ?>][language]"
-                            value="1" <?php echo isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['language']) && $this->item->config['permissions'][$entry->value]['language'] ? ' checked="checked"' : ''; ?> />
-                    </td>
-                    <td><input class="form-check-input" type="checkbox" name="jform[perms][<?php echo $entry->value; ?>][rating]"
-                            value="1" <?php echo isset($this->item->config['permissions']) && isset($this->item->config['permissions'][$entry->value]) && isset($this->item->config['permissions'][$entry->value]['rating']) && $this->item->config['permissions'][$entry->value]['rating'] ? ' checked="checked"' : ''; ?> />
-                    </td>
-                </tr>
-                <?php
-                $k = 1 - $k;
-            }
-            ?>
-        </table>
-        <?php
-
-        echo $sliders->endPanel();
-        */
-        //FIN MODIF XDA - GILLES
+        // Legacy backend permissions block removed in favor of Joomla 6 frontend permissions UI.
 
 
         echo HTMLHelper::_('uitab.addTab', 'perm-pane', 'permtab2', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_USERS'));
         ?>
 
-        <table class="adminlist table table-striped">
+        <table class="table table-striped">
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="limit_add">
@@ -2025,8 +1943,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                 </td>
                 <td>
                     <input type="hidden" name="jform[verification_required_view]" value="0" />
-                    <input class="form-check-input" type="checkbox" name="jform[verification_required_view]"
-                        id="verification_required_view" value="1" <?php echo $this->item->verification_required_view ? ' checked="checked"' : '' ?> /><label for="verification_required_view">
+                    <?php echo $renderCheckbox('jform[verification_required_view]', 'verification_required_view', (bool) $this->item->verification_required_view); ?><label class="form-check-label" for="verification_required_view">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_REQUIRED'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 50px;" id="verification_days_view"
@@ -2051,8 +1968,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                 </td>
                 <td>
                     <input type="hidden" name="jform[verification_required_new]" value="0" />
-                    <input class="form-check-input" type="checkbox" name="jform[verification_required_new]"
-                        id="verification_required_new" value="1" <?php echo $this->item->verification_required_new ? ' checked="checked"' : '' ?> /><label for="verification_required_new">
+                    <?php echo $renderCheckbox('jform[verification_required_new]', 'verification_required_new', (bool) $this->item->verification_required_new); ?><label class="form-check-label" for="verification_required_new">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_REQUIRED'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 50px;" id="verification_days_new"
@@ -2076,8 +1992,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                 </td>
                 <td>
                     <input type="hidden" name="jform[verification_required_edit]" value="0" />
-                    <input class="form-check-input" type="checkbox" name="jform[verification_required_edit]"
-                        id="verification_required_edit" value="1" <?php echo $this->item->verification_required_edit ? ' checked="checked"' : '' ?> /><label for="verification_required_edit">
+                    <?php echo $renderCheckbox('jform[verification_required_edit]', 'verification_required_edit', (bool) $this->item->verification_required_edit); ?><label class="form-check-label" for="verification_required_edit">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_REQUIRED'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 50px;" id="verification_days_edit"
@@ -2116,8 +2031,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                     </td>
                     <td>
                         <input type="hidden" name="jform[act_as_registration]" value="0" />
-                        <input class="form-check-input" type="checkbox" name="jform[act_as_registration]" id="act_as_registration"
-                            value="1" <?php echo $this->item->act_as_registration ? ' checked="checked"' : '' ?> />
+                        <?php echo $renderCheckbox('jform[act_as_registration]', 'act_as_registration', (bool) $this->item->act_as_registration); ?>
                         <br />
                         <br />
                         <select class="form-select-sm" name="jform[registration_name_field]" id="registration_name_field"
@@ -2228,7 +2142,7 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
                         </label>
                         <br />
                         <input type="hidden" name="jform[force_login]" value="0" />
-                        <input class="form-check-input" type="checkbox" name="jform[force_login]" id="force_login" value="1" <?php echo $this->item->force_login ? ' checked="checked"' : '' ?> />
+                        <?php echo $renderCheckbox('jform[force_login]', 'force_login', (bool) $this->item->force_login); ?>
                         <br />
                         <br />
                         <label for="force_url">
@@ -2352,21 +2266,25 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
 
 </form>
 <?php
-$modalParams['title'] = Text::_('COM_CONTENTBUILDER_NG_EDIT');
-$modalParams['url'] = '#';
-$modalParams['height'] = '400';
-$modalParams['width'] = '800';
-$modalParams['bodyHeight'] = 400;
-$modalParams['modalWidth'] = 800;
-echo HTMLHelper::_('bootstrap.renderModal', 'text-type-modal', $modalParams);
+$textTypeModalParams = [
+    'title' => Text::_('COM_CONTENTBUILDER_NG_EDIT'),
+    'url' => '#',
+    'height' => '100%',
+    'width' => '100%',
+    'bodyHeight' => 80,
+    'modalWidth' => 90,
+];
+echo HTMLHelper::_('bootstrap.renderModal', 'text-type-modal', $textTypeModalParams);
 
-$modalParams['title'] = Text::_('COM_CONTENTBUILDER_NG_EDIT');
-$modalParams['url'] = '#';
-$modalParams['height'] = '400';
-$modalParams['width'] = '800';
-$modalParams['bodyHeight'] = 400;
-$modalParams['modalWidth'] = 800;
-echo HTMLHelper::_('bootstrap.renderModal', 'edit-modal', $modalParams);
+$editModalParams = [
+    'title' => Text::_('COM_CONTENTBUILDER_NG_EDIT'),
+    'url' => '#',
+    'height' => '400',
+    'width' => '800',
+    'bodyHeight' => 60,
+    'modalWidth' => 80,
+];
+echo HTMLHelper::_('bootstrap.renderModal', 'edit-modal', $editModalParams);
 
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 $wa->useScript('jquery');
@@ -2376,17 +2294,20 @@ $wa->useScript('jquery');
 <script>
     let textTypeModal = document.getElementById('text-type-modal');
     textTypeModal.addEventListener('shown.bs.modal', function(event) {
-        jQuery('.modal-body').css('display', 'none');
-        jQuery('#text-type-modal').find('iframe').attr('src', event.relatedTarget.href);
-        jQuery('.modal-body').css('display', 'flex');
+        const modal = jQuery('#text-type-modal');
+        const body = modal.find('.modal-body');
+        body.css('display', 'none');
+        modal.find('iframe').attr('src', event.relatedTarget.href);
+        body.css('display', '');
     });
 
     let editModal = document.getElementById('edit-modal');
     editModal.addEventListener('shown.bs.modal', function(event) {
-        console.log(event.relatedTarget.href);
-        jQuery('.modal-body').css('display', 'none');
-        jQuery('#edit-modal').find('iframe').attr('src', event.relatedTarget.href);
-        jQuery('.modal-body').css('display', 'flex');
+        const modal = jQuery('#edit-modal');
+        const body = modal.find('.modal-body');
+        body.css('display', 'none');
+        modal.find('iframe').attr('src', event.relatedTarget.href);
+        body.css('display', '');
     });
 
     (() => {

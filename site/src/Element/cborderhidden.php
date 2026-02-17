@@ -18,7 +18,7 @@ use Joomla\CMS\Form\FormField;
 class JFormFieldCborderhidden extends FormField
 {
 
-    protected $type = 'Forms';
+    protected $type = 'Cborderhidden';
 
     protected function getInput()
     {

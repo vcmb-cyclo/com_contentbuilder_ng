@@ -16,7 +16,6 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\SubscriberInterface;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class plgSystemContentbuilder_ng_system extends CMSPlugin implements SubscriberInterface
@@ -66,7 +65,8 @@ class plgSystemContentbuilder_ng_system extends CMSPlugin implements SubscriberI
         }
 
         // managing auto-groups
-        if (CBRequest::getVar('option') == 'com_kunena' || CBRequest::getVar('option') == 'com_contentbuilder_ng') {
+        $option = Factory::getApplication()->input->getCmd('option', '');
+        if ($option === 'com_kunena' || $option === 'com_contentbuilder_ng') {
 
             $pluginParams = $this->params;
 
@@ -187,7 +187,9 @@ class plgSystemContentbuilder_ng_system extends CMSPlugin implements SubscriberI
                 $themes = $this->db->loadColumn();
                 foreach ($themes as $theme) {
                     if ($theme) {
-                        PluginHelper::importPlugin('contentbuilder_ng_themes', $theme);
+                        if (!PluginHelper::importPlugin('contentbuilder_ng_themes', $theme)) {
+                            PluginHelper::importPlugin('contentbuilder_ng_themes', 'joomla6');
+                        }
                         $dispatcher = $this->app->getDispatcher();
                         $eventresults_css = $dispatcher->dispatch('onContentTemplateCss', new \Joomla\Event\Event('onContentTemplateCss', array()));
                         $eventresults_js = $dispatcher->dispatch('onContentTemplateJavascript', new \Joomla\Event\Event('onContentTemplateJavascript', array()));
@@ -269,29 +271,21 @@ class plgSystemContentbuilder_ng_system extends CMSPlugin implements SubscriberI
             // published states END
         }
 
-        // joomla 1.5 and following obviously has problems when logging out and being in list view and the menu item access being registered.
-        // J! is then trying to redirect to com_content (for non-obvious reasons), using the view variable orginally used in contentbuilder and then it will 
-        // throw an error 500, view not found
-        // this will get rid of the view parameter and pass the rest of the url to the return parameter
-        $enc = base64_decode(Factory::getApplication()->input->get('return', '', 'string'));
-        if (is_string($enc)) {
+        // Keep logout return URLs stable when the return target points to com_contentbuilder_ng.
+        $enc = base64_decode(Factory::getApplication()->input->get('return', '', 'string'), true);
+        if (is_string($enc) && $enc !== '') {
             $enc = explode('?', $enc);
             count($enc) > 1 ? parse_str($enc[1], $out) : $out = array();
             if (isset($out['option']) && $out['option'] == 'com_contentbuilder_ng') {
-                $i = 0;
-                $length = count($out);
-                $return = '';
-                foreach ($out as $key => $value) {
-                    if (strtolower($key) != 'view') {
-                        $return .= $key . '=' . $value . ($i + 1 < $length ? '&' : '');
-                    }
-                    $i++;
-                }
-                Factory::getApplication()->input->set('return', base64_decode('index.php' . ($return ? '?' : '') . $return));
+                unset($out['view']);
+                $return = http_build_query($out, '', '&');
+                Factory::getApplication()->input->set('return', base64_encode('index.php' . ($return ? '?' : '') . $return));
             }
         }
 
-        if (in_array(CBRequest::getVar('option'), array('com_content'))) {
+        $option = Factory::getApplication()->input->getCmd('option', '');
+
+        if ($option === 'com_content') {
 
             $pluginParams = $this->params;
 
@@ -301,7 +295,7 @@ class plgSystemContentbuilder_ng_system extends CMSPlugin implements SubscriberI
             }
         }
 
-        if (CBRequest::getVar('option') == 'com_contentbuilder_ng') {
+        if ($option === 'com_contentbuilder_ng') {
 
             $this->db->setQuery("
                     Update 

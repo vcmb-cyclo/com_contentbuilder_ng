@@ -15,7 +15,7 @@ namespace CB\Component\Contentbuilder_ng\Administrator\Helper;
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\HTML\HTMLHelper;
 
 /**
  * includes a scands chars fix from user jajusain
@@ -107,6 +107,8 @@ class ContentbuilderHelper
 
     public static function is_internal_path($path)
     {
+        $path = (string) $path;
+
         if (strpos(strtolower($path), '{cbsite}') === 0) {
             $path = str_replace(array('{cbsite}', '{CBSite}'), array(JPATH_SITE, JPATH_SITE), $path);
         }
@@ -115,11 +117,30 @@ class ContentbuilderHelper
             return false;
         }
 
-        if (trim($path) && (@realpath($path) !== false || strpos(strtolower($path), strtolower(JPATH_SITE)) === 0) && strpos($path, '/') !== false) {
-            return true;
+        $path = trim(str_replace('\\', '/', $path));
+        if ($path === '') {
+            return false;
         }
 
-        return false;
+        $siteRoot = realpath(JPATH_SITE) ?: JPATH_SITE;
+        $siteRoot = rtrim(str_replace('\\', '/', $siteRoot), '/');
+
+        $isAbsolute = strpos($path, '/') === 0 || (bool) preg_match('#^[A-Za-z]:/#', $path);
+        $candidate = $isAbsolute ? $path : ($siteRoot . '/' . ltrim($path, '/'));
+        $candidate = str_replace('\\', '/', $candidate);
+
+        $real = @realpath($candidate);
+        if ($real === false) {
+            $realParent = @realpath(dirname($candidate));
+            if ($realParent === false) {
+                return false;
+            }
+            $real = rtrim(str_replace('\\', '/', $realParent), '/') . '/' . basename($candidate);
+        } else {
+            $real = str_replace('\\', '/', $real);
+        }
+
+        return strncasecmp($real, $siteRoot . '/', strlen($siteRoot) + 1) === 0 || strcasecmp($real, $siteRoot) === 0;
     }
 
     public static function cbinternal($value)
@@ -500,135 +521,140 @@ class ContentbuilderHelper
 
     public static function listIncludeInList($domain, $row, $i, $publish_icon = 'icon-publish', $unpublish_icon = 'icon-unpublish', $prefix = '')
     {
-        $icon = $row->list_include ? $publish_icon : $unpublish_icon;
-        $taskName = $row->list_include ? 'no_list_include' : 'list_include';
-        $task = $domain . '.' . $taskName;
-
-        $action = $row->list_include ? Text::_('COM_CONTENTBUILDER_NG_NO_LIST_INCLUDE') : Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE');
-
-        $href = '
-                    <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
-                    <span class="' . $icon . '" aria-hidden="true"></span></a>';
-        return $href;
+        return self::renderBooleanStateToggle(
+            !empty($row->list_include),
+            (int) $i,
+            (string) $prefix . (string) $domain . '.',
+            'list_include',
+            'no_list_include',
+            'COM_CONTENTBUILDER_NG_LIST_INCLUDE',
+            'COM_CONTENTBUILDER_NG_NO_LIST_INCLUDE'
+        );
     }
 
     public static function listIncludeInSearch($domain, $row, $i, $publish_icon = 'icon-publish', $unpublish_icon = 'icon-unpublish', $prefix = '')
     {
-        $icon = $row->search_include ? $publish_icon : $unpublish_icon;
-        $taskName = $row->search_include ? 'no_search_include' : 'search_include';
-        $task = $domain . '.' . $taskName;
-
-        $action = $row->search_include ? Text::_('COM_CONTENTBUILDER_NG_NO_SEARCH_INCLUDE') : Text::_('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE');
-
-        $href = '
-                    <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
-                    <span class="' . $icon . '" aria-hidden="true"></span></a>';
-
-        return $href;
+        return self::renderBooleanStateToggle(
+            !empty($row->search_include),
+            (int) $i,
+            (string) $prefix . (string) $domain . '.',
+            'search_include',
+            'no_search_include',
+            'COM_CONTENTBUILDER_NG_SEARCH_INCLUDE',
+            'COM_CONTENTBUILDER_NG_NO_SEARCH_INCLUDE'
+        );
     }
 
     public static function listLinkable($domain, $row, $i, $publish_icon = 'icon-publish', $unpublish_icon = 'icon-unpublish', $prefix = '')
     {
-        $icon = $row->linkable ? $publish_icon : $unpublish_icon;
-        $taskName = $row->linkable ? 'not_linkable' : 'linkable';
-        $task = $domain . '.' . $taskName;
-
-        $action = $row->linkable ? Text::_('COM_CONTENTBUILDER_NG_NOT_LINKABLE') : Text::_('COM_CONTENTBUILDER_NG_LINKABLE');
-
-        $href = '
-                    <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
-                    <span class="' . $icon . '" aria-hidden="true"></span></a>';
-
-        return $href;
+        return self::renderBooleanStateToggle(
+            !empty($row->linkable),
+            (int) $i,
+            (string) $prefix . (string) $domain . '.',
+            'linkable',
+            'not_linkable',
+            'COM_CONTENTBUILDER_NG_LINKABLE',
+            'COM_CONTENTBUILDER_NG_NOT_LINKABLE'
+        );
     }
 
     public static function listEditable($domain, $row, $i, $publish_icon = 'icon-publish', $unpublish_icon = 'icon-unpublish',  $prefix = '')
     {
-        $icon = $row->editable ? $publish_icon : $unpublish_icon;
-        $taskName = $row->editable ? 'not_editable' : 'editable';
-        $task = $domain . '.' . $taskName;
-
-        $action = $row->editable ? Text::_('COM_CONTENTBUILDER_NG_NOT_EDITABLE') : Text::_('COM_CONTENTBUILDER_NG_EDITABLE');
-
-        $href = '
-                    <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
-                    <span class="' . $icon . '" aria-hidden="true"></span></a>';
-
-        return $href;
+        return self::renderBooleanStateToggle(
+            !empty($row->editable),
+            (int) $i,
+            (string) $prefix . (string) $domain . '.',
+            'editable',
+            'not_editable',
+            'COM_CONTENTBUILDER_NG_EDITABLE',
+            'COM_CONTENTBUILDER_NG_NOT_EDITABLE'
+        );
     }
 
     public static function listVerifiedView($domain, $row, $i, $publish_icon = 'icon-publish', $unpublish_icon = 'icon-unpublish',  $prefix = '')
     {
-        $icon = $row->verified_view ? $publish_icon : $unpublish_icon;
-        $taskName = $row->verified_view ? 'not_verified_view' : 'verified_view';
-        $task = $domain . '.' . $taskName;
-
-        $action = $row->verified_view ? Text::_('COM_CONTENTBUILDER_NG_VERIFIED_VIEW') : Text::_('COM_CONTENTBUILDER_NG_VERIFIED_VIEW');
-
-        $href = '
-                    <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
-                    <span class="' . $icon . '" aria-hidden="true"></span></a>';
-
-        return $href;
+        return self::renderBooleanStateToggle(
+            !empty($row->verified_view),
+            (int) $i,
+            (string) $prefix . (string) $domain . '.',
+            'verified_view',
+            'not_verified_view',
+            'COM_CONTENTBUILDER_NG_VERIFIED_VIEW',
+            'COM_CONTENTBUILDER_NG_VERIFIED_VIEW'
+        );
     }
 
     public static function listVerifiedNew($domain, $row, $i, $publish_icon = 'icon-publish', $unpublish_icon = 'icon-unpublish',  $prefix = '')
     {
-        $icon = $row->verified_new ? $publish_icon : $unpublish_icon;
-        $taskName = $row->verified_new ? 'not_verified_new' : 'verified_new';
-        $task = $domain . '.' . $taskName;
-
-        $action = $row->verified_new ? Text::_('COM_CONTENTBUILDER_NG_VERIFIED_NEW') : Text::_('COM_CONTENTBUILDER_NG_VERIFIED_NEW');
-
-        $href = '
-                    <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
-                    <span class="' . $icon . '" aria-hidden="true"></span></a>';
-
-        return $href;
+        return self::renderBooleanStateToggle(
+            !empty($row->verified_new),
+            (int) $i,
+            (string) $prefix . (string) $domain . '.',
+            'verified_new',
+            'not_verified_new',
+            'COM_CONTENTBUILDER_NG_VERIFIED_NEW',
+            'COM_CONTENTBUILDER_NG_VERIFIED_NEW'
+        );
     }
 
     public static function listVerifiedEdit($domain, $row, $i, $publish_icon = 'icon-publish', $unpublish_icon = 'icon-unpublish',  $prefix = '')
     {
-        $icon = $row->verified_edit ? $publish_icon : $unpublish_icon;
-        $taskName = $row->verified_edit ? 'not_verified_edit' : 'verified_edit';
-        $task = $domain . '.' . $taskName;
-
-        $action = $row->verified_edit ? Text::_('COM_CONTENTBUILDER_NG_VERIFIED_EDIT') : Text::_('COM_CONTENTBUILDER_NG_VERIFIED_EDIT');
-
-        $href = '
-                    <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
-                    <span class="' . $icon . '" aria-hidden="true"></span></a>';
-
-        return $href;
+        return self::renderBooleanStateToggle(
+            !empty($row->verified_edit),
+            (int) $i,
+            (string) $prefix . (string) $domain . '.',
+            'verified_edit',
+            'not_verified_edit',
+            'COM_CONTENTBUILDER_NG_VERIFIED_EDIT',
+            'COM_CONTENTBUILDER_NG_VERIFIED_EDIT'
+        );
     }
 
     public static function listPublish($domain, $row, $i, $publish_icon = 'icon-publish', $unpublish_icon = 'icon-unpublish',  $prefix = '')
     {
-        $icon = $row->published ? $publish_icon : $unpublish_icon;
-        $taskName = $row->published ? 'unpublish' : 'publish';
-        $task = $domain . '.' . $taskName;
-
-        $action = $row->published ? Text::_('COM_CONTENTBUILDER_NG_UNPUBLISH') : Text::_('COM_CONTENTBUILDER_NG_PUBLISH');
-
-        $href = '
-                    <a href="javascript:void(0);" onclick="return listItemTask(\'cb' . $i . '\',\'' . $prefix . $task . '\')" title="' . $action . '">
-                    <span class="' . $icon . '" aria-hidden="true"></span></a>';
-
-        return $href;
+        return HTMLHelper::_(
+            'jgrid.published',
+            !empty($row->published) ? 1 : 0,
+            (int) $i,
+            (string) $prefix . (string) $domain . '.',
+            true,
+            'cb'
+        );
     }
 
     public static function publishButton($published, $url_publish, $url_unpublish, $imgY = 'tick.png', $imgX = 'publish_x.png', $allowed = true)
     {
+        $isPublished = (bool) $published;
+        $url = $isPublished ? (string) $url_unpublish : (string) $url_publish;
+        $action = $isPublished ? Text::_('COM_CONTENTBUILDER_NG_UNPUBLISH') : Text::_('COM_CONTENTBUILDER_NG_PUBLISH');
+        $iconClass = $isPublished ? 'publish' : 'unpublish';
+        $iconHtml = '<span class="icon-' . $iconClass . '" aria-hidden="true"></span>'
+            . '<span class="visually-hidden">' . htmlspecialchars($action, ENT_QUOTES, 'UTF-8') . '</span>';
 
-        $img = $published ? $imgY : $imgX;
-        $url = $published ? $url_unpublish : $url_publish;
-        $alt = $published ? Text::_('COM_CONTENTBUILDER_NG_PUBLISH') : Text::_('COM_CONTENTBUILDER_NG_UNPUBLISH');
-        $action = $published ? Text::_('COM_CONTENTBUILDER_NG_PUBLISH') : Text::_('COM_CONTENTBUILDER_NG_UNPUBLISH');
+        if ($allowed) {
+            return '<a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '" class="tbody-icon'
+                . ($isPublished ? ' active' : '') . '" title="' . htmlspecialchars($action, ENT_QUOTES, 'UTF-8')
+                . '">' . $iconHtml . '</a>';
+        }
 
-        $href = ($allowed ? '<a href="' . $url . '" title="' . $action . '">' : '') . '
-                     <img src="' . Uri::root(true) . '/components/com_contentbuilder_ng/images/_' . $img . '" border="0" alt="' . $alt . '" />' .
-            ($allowed ? '</a>' : '');
+        return '<span class="tbody-icon jgrid" title="' . htmlspecialchars($action, ENT_QUOTES, 'UTF-8') . '">'
+            . $iconHtml . '</span>';
+    }
 
-        return $href;
+    private static function renderBooleanStateToggle(
+        bool $value,
+        int $i,
+        string $prefix,
+        string $enableTask,
+        string $disableTask,
+        string $enableTitleKey,
+        string $disableTitleKey
+    ): string {
+        $states = [
+            1 => [$disableTask, '', $disableTitleKey, '', true, 'publish', 'publish'],
+            0 => [$enableTask, '', $enableTitleKey, '', true, 'unpublish', 'unpublish'],
+        ];
+
+        return HTMLHelper::_('jgrid.state', $states, $value ? 1 : 0, $i, $prefix, true, true, 'cb');
     }
 }

@@ -31,10 +31,18 @@ $saveOrder = ($order === 'a.ordering');
 
 $n = is_countable($this->items) ? count($this->items) : 0;
 
-// Joomla 6 native list start
+// Keep start synced with model state, then fallback to request.
 $app = Factory::getApplication();
 $list = (array) $app->input->get('list', [], 'array');
-$listStart = isset($list['start']) ? (int) $list['start'] : 0;
+$listStart = (int) ($this->pagination->start ?? ($this->lists['list.start'] ?? 0));
+if ($listStart < 0) {
+    $listStart = 0;
+}
+if (isset($list['start'])) {
+    $listStart = (int) $list['start'];
+} elseif ($app->input->get('limitstart', null, 'raw') !== null) {
+    $listStart = (int) $app->input->getInt('limitstart', 0);
+}
 $limitValue = (int) ($this->pagination->limit ?? 0);
 
 $limitOptions = [];
@@ -55,7 +63,14 @@ $limitSelect = HTMLHelper::_(
     $limitValue
 );
 
-$sortLink = function (string $label, string $field) use ($order, $orderDir, $limitValue): string {
+$filterSearch = (string) ($this->lists['filter_search'] ?? '');
+$filterStateRaw = strtoupper((string) ($this->lists['filter_state'] ?? ''));
+$filterState = in_array($filterStateRaw, ['P', '1', 'PUBLISHED'], true)
+    ? 'P'
+    : (in_array($filterStateRaw, ['U', '0', 'UNPUBLISHED'], true) ? 'U' : '');
+$filterTag = (string) ($this->lists['filter_tag'] ?? '');
+
+$sortLink = function (string $label, string $field) use ($order, $orderDir, $limitValue, $filterSearch, $filterState, $filterTag): string {
     $isActive = ($order === $field);
     $nextDir = ($isActive && $orderDir === 'asc') ? 'desc' : 'asc';
     $indicator = $isActive
@@ -66,6 +81,9 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
     $url = Route::_(
         'index.php?option=com_contentbuilder_ng&view=forms&list[start]=0&list[ordering]='
         . $field . '&list[direction]=' . $nextDir . '&list[limit]=' . $limitValue
+        . '&filter_search=' . rawurlencode($filterSearch)
+        . '&filter_state=' . rawurlencode($filterState)
+        . '&filter_tag=' . rawurlencode($filterTag)
     );
 
     return '<a href="' . $url . '">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . $indicator . '</a>';
@@ -78,26 +96,71 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
     id="adminForm">
 
     <div id="editcell">
-        <label for="filter_tag">
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_TAG'); ?>:
-        </label>
-        <select class="form-select-sm" id="filter_tag" name="filter_tag" onchange="document.adminForm.submit();">
-            <option value=""> -
-                <?php echo htmlentities(Text::_('COM_CONTENTBUILDER_NG_FILTER_TAG_ALL'), ENT_QUOTES, 'UTF-8') ?> -
-            </option>
-            <?php
-            foreach ($this->tags as $tag) {
-            ?>
-                <option value="<?php echo htmlentities($tag->tag, ENT_QUOTES, 'UTF-8') ?>" <?php echo strtolower($this->lists['filter_tag']) == strtolower($tag->tag) ? ' selected="selected"' : ''; ?>>
-                    <?php echo htmlentities($tag->tag, ENT_QUOTES, 'UTF-8') ?>
-                </option>
-            <?php
-            }
-            ?>
-        </select>
-        <br />
-        <br />
-        <table class="adminlist table table-striped">
+        <div class="js-stools mb-3">
+            <div class="clearfix">
+                <div class="js-stools-container-bar">
+                    <div class="btn-toolbar flex-wrap gap-2" role="toolbar">
+                        <div class="input-group input-group-sm" style="max-width: 380px;">
+                            <input
+                                type="text"
+                                name="filter_search"
+                                id="filter_search"
+                                class="form-control"
+                                value="<?php echo htmlspecialchars($filterSearch, ENT_QUOTES, 'UTF-8'); ?>"
+                                placeholder="<?php echo Text::_('JSEARCH_FILTER'); ?>">
+                            <button type="submit" class="btn btn-primary">
+                                <?php echo Text::_('JSEARCH_FILTER_SUBMIT'); ?>
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                onclick="document.getElementById('filter_search').value='';document.getElementById('filter_state').value='';document.getElementById('filter_tag').value='';document.adminForm.submit();">
+                                <?php echo Text::_('JSEARCH_FILTER_CLEAR'); ?>
+                            </button>
+                        </div>
+
+                        <div class="btn-group">
+                            <label for="filter_state" class="visually-hidden"><?php echo Text::_('JOPTION_SELECT_PUBLISHED'); ?></label>
+                            <select
+                                name="filter_state"
+                                id="filter_state"
+                                class="form-select form-select-sm js-select-submit-on-change"
+                                onchange="var form=document.adminForm;if(form){var start=form.elements['list[start]'];if(start){start.value=0;}var legacy=form.elements['limitstart'];if(legacy){legacy.value=0;}form.submit();}">
+                                <option value=""><?php echo Text::_('JOPTION_SELECT_PUBLISHED'); ?></option>
+                                <option value="P" <?php echo $filterState === 'P' ? 'selected="selected"' : ''; ?>>
+                                    <?php echo Text::_('JPUBLISHED'); ?>
+                                </option>
+                                <option value="U" <?php echo $filterState === 'U' ? 'selected="selected"' : ''; ?>>
+                                    <?php echo Text::_('JUNPUBLISHED'); ?>
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group">
+                            <label for="filter_tag" class="visually-hidden"><?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_TAG'); ?></label>
+                            <select
+                                class="form-select form-select-sm js-select-submit-on-change"
+                                id="filter_tag"
+                                name="filter_tag"
+                                onchange="var form=document.adminForm;if(form){var start=form.elements['list[start]'];if(start){start.value=0;}var legacy=form.elements['limitstart'];if(legacy){legacy.value=0;}form.submit();}">
+                                <option value="">
+                                    <?php echo htmlentities(Text::_('COM_CONTENTBUILDER_NG_FILTER_TAG_ALL'), ENT_QUOTES, 'UTF-8'); ?>
+                                </option>
+                                <?php foreach ($this->tags as $tag) : ?>
+                                    <option
+                                        value="<?php echo htmlentities($tag->tag, ENT_QUOTES, 'UTF-8'); ?>"
+                                        <?php echo strtolower($filterTag) === strtolower((string) $tag->tag) ? 'selected="selected"' : ''; ?>>
+                                        <?php echo htmlentities($tag->tag, ENT_QUOTES, 'UTF-8'); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th width="5">
@@ -211,8 +274,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                             ?>
                         </td>
                         <td>
-                            <?php echo HTMLHelper::_('jgrid.published', (int) $row->published, $i, 'forms.', true, 'cb');
-                             ?>
+                            <?php echo $published; ?>
                         </td>
 
 
@@ -249,6 +311,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
     <input type="hidden" name="option" value="com_contentbuilder_ng" />
     <input type="hidden" name="task" value="" />
     <input type="hidden" name="view" value="forms" />
+    <input type="hidden" name="limitstart" value="<?php echo (int) $listStart; ?>" />
     <input type="hidden" name="list[start]" value="<?php echo (int) $listStart; ?>" />
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="list[ordering]" value="<?php echo htmlspecialchars($order, ENT_QUOTES, 'UTF-8'); ?>">

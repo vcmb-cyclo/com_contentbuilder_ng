@@ -70,6 +70,9 @@ class StoragesModel extends ListModel
         // ✅ tes filtres custom, mais stockés dans l’état
         $filterState = $app->getUserStateFromRequest($this->context . '.filter.state', 'filter_state', '', 'cmd');
         $this->setState('filter.state', $filterState);
+
+        $search = trim((string) $app->getUserStateFromRequest($this->context . '.filter.search', 'filter_search', '', 'string'));
+        $this->setState('filter.search', $search);
     }
 
 
@@ -82,12 +85,36 @@ class StoragesModel extends ListModel
         $query->select('a.*')
             ->from($db->quoteName('#__contentbuilder_ng_storages', 'a'));
 
-        // Published filter (storages_filter_state: 'P' or 'U')
-        $filterState = (string) $this->getState('storages_filter_state');
+        // Published filter.
+        $filterState = strtoupper(trim((string) $this->getState('filter.state')));
+        $isPublishedFilter = in_array($filterState, ['P', '1', 'PUBLISHED'], true);
+        $isUnpublishedFilter = in_array($filterState, ['U', '0', 'UNPUBLISHED'], true);
 
-        if ($filterState === 'P' || $filterState === 'U') {
-            $published = ($filterState === 'P') ? 1 : 0;
+        if ($isPublishedFilter || $isUnpublishedFilter) {
+            $published = $isPublishedFilter ? 1 : 0;
             $query->where($db->quoteName('a.published') . ' = ' . (int) $published);
+        }
+
+        // Text search (supports "id:123").
+        $search = trim((string) $this->getState('filter.search'));
+
+        if ($search !== '') {
+            if (stripos($search, 'id:') === 0) {
+                $id = (int) substr($search, 3);
+
+                if ($id > 0) {
+                    $query->where($db->quoteName('a.id') . ' = ' . $id);
+                }
+            } else {
+                $token = $db->quote('%' . $db->escape($search, true) . '%', false);
+
+                $query->where(
+                    '('
+                    . $db->quoteName('a.name') . ' LIKE ' . $token
+                    . ' OR ' . $db->quoteName('a.title') . ' LIKE ' . $token
+                    . ')'
+                );
+            }
         }
 
         // Ordering (equivalent à ton buildOrderBy())

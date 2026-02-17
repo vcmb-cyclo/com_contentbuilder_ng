@@ -20,7 +20,7 @@ use Joomla\CMS\Form\FormField;
 class JFormFieldCbfilterhidden extends FormField
 {
 
-    protected $type = 'Forms';
+    protected $type = 'Cbfilterhidden';
 
     protected function getInput()
     {

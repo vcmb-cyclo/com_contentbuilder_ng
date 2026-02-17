@@ -16,9 +16,9 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\RatingHelper;
 
 $frontend = Factory::getApplication()->isClient('site');
 $language_allowed = ContentbuilderLegacyHelper::authorizeFe('language');
@@ -68,6 +68,22 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 	. '.cb-scroll-x::-webkit-scrollbar-track{background:rgba(0,0,0,.06);border-radius:999px}'
 	. '.cb-scroll-x::-webkit-scrollbar-thumb{background:rgba(13,110,253,.55);border-radius:999px}'
 	. '.cb-scroll-x::-webkit-scrollbar-thumb:hover{background:rgba(13,110,253,.75)}'
+	. '.cb-list-header{display:flex;justify-content:flex-end;align-items:center;margin:0 0 .75rem}'
+	. '.cb-list-actions{display:flex;align-items:center;gap:.5rem}'
+	. '.cb-list-actions .btn{border-radius:999px;padding-inline:1rem;font-weight:600}'
+	. '.cb-list-panel{border:1px solid var(--bs-border-color, #dee2e6);border-radius:.9rem;padding:.65rem .75rem;background:var(--bs-body-bg, #fff);box-shadow:0 .35rem .9rem rgba(0,0,0,.06)}'
+	. '.cb-list-filters td{padding:.4rem .15rem .75rem}'
+	. '.cb-list-filters .form-select,.cb-list-filters .form-control{border-radius:.5rem}'
+	. '.cb-list-filters .input-group-text{border-radius:.5rem 0 0 .5rem;background:var(--bs-tertiary-bg, #f8f9fa)}'
+	. '.cb-list-table{margin-top:.35rem!important}'
+	. '.cb-list-table th{font-size:.875rem;letter-spacing:.01em}'
+	. '.cb-list-table td,.cb-list-table th{vertical-align:middle}'
+	. '.cb-pagination-summary{font-weight:500}'
+	. '.cb-list-titlebar{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin:0 0 .9rem;padding:.65rem .9rem;border:1px solid rgba(13,110,253,.24);border-left:.35rem solid #0d6efd;border-radius:.85rem;background:linear-gradient(90deg,rgba(13,110,253,.11),rgba(13,110,253,.03));box-shadow:0 .35rem .9rem rgba(13,110,253,.12)}'
+	. '.cb-list-title{margin:0!important;font-weight:700;letter-spacing:.01em;color:#12395f}'
+	. '.cb-list-title::after{content:\"\";display:block;width:3.75rem;height:.2rem;margin-top:.45rem;border-radius:999px;background:linear-gradient(90deg,#0d6efd,#3f8cff)}'
+	. '@media (max-width: 767.98px){.cb-list-actions{width:100%;justify-content:flex-end}.cb-list-panel{padding:.55rem .45rem}}'
+	. '@media (max-width: 767.98px){.cb-list-titlebar{padding:.55rem .65rem;margin-bottom:.75rem}.cb-list-title{font-size:1.18rem}}'
 ); ?>
 <?php Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js); ?>
 <script>
@@ -217,9 +233,11 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 </script>
 
 <?php if ($this->page_title): ?>
-	<h1 class="h3 mb-3">
-		<?php echo $this->page_title; ?>
-	</h1>
+	<div class="cb-list-titlebar">
+		<h1 class="h3 cb-list-title">
+			<?php echo $this->page_title; ?>
+		</h1>
+	</div>
 <?php endif; ?>
 <?php if ($isAdminPreview): ?>
 	<div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
@@ -235,43 +253,45 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 	</div>
 <?php endif; ?>
 <?php echo $this->intro_text; ?>
-<div style="float: right; text-align: right;">
-	<?php
-	/** XDA+GN / BEGIN remove, Hide NEW button
-	if ($new_allowed) {
-		?>
-			<button class="btn btn-sm btn-primary"
-				onclick="location.href='<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display&backtolist=1&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&record_id=0'); ?>'"><?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?></button>
+<div class="cb-list-header">
+	<div class="cb-list-actions">
 		<?php
-	}
-	-- END of BEGIN - NEW BUTTON */
-	?>
-	<?php
-		if ($delete_allowed || $new_allowed) {
+		$showNewButton = ($new_allowed && !empty($this->new_button));
+		if ($showNewButton) {
 		?>
-			<div style="padding-bottom: 10px;"></div>
-		<?php
-		}
-	?>
+			<button class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
+				onclick="location.href='<?php echo Route::_(
+				    'index.php?option=com_contentbuilder_ng&task=edit.display&backtolist=1&id='
+				    . Factory::getApplication()->input->getInt('id', 0)
+				    . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '')
+				    . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '')
+				    . '&record_id=0'
+				    . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0)
+				    . $previewQuery
+				); ?>'">
+				<span class="icon-plus" aria-hidden="true"></span>
+				<?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?>
+			</button>
+		<?php } ?>
+	</div>
 </div>
-<div style="clear: both;"></div>
 
 <!-- 2023-12-19 XDA / GIL - BEGIN - Fix
 <form action="index.php" method=<php echo $___getpost;?>" name="adminForm" id
-# Bug CB Joomla 4 (march 2023) - fix error search, delete, pagination, 404 error 
+Fix search, delete, pagination and 404 behavior.
 Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
-# by this block -->
+by this block. -->
 <form action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=list.display&id=' . (int) Factory::getApplication()->input->getInt('id') . '&Itemid=' . (int) Factory::getApplication()->input->getInt('Itemid', 0) . $previewQuery); ?>"
 	method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm">
 
 	<!-- 2023-12-19 END -->
-	<div class="cb-scroll-x">
-		<table class="cbFilterTable" width="100%">
+	<div class="cb-scroll-x cb-list-panel">
+		<table class="cbFilterTable cb-list-filters" width="100%">
 			<?php if ($language_allowed) : ?>
 				<tr>
 					<td>
 						<div class="d-inline-flex align-items-center gap-1 me-2">
-							<select class="form-select form-select-sm" style="max-width: 100px;" name="list_language">
+								<select class="form-select form-select-sm" style="max-width: 100px;" name="list_language">
 								<option value="*"> -
 									<?php echo Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'); ?> -
 								</option>
@@ -283,11 +303,12 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 										<?php echo $filter_language; ?>
 									</option>
 								<?php endforeach; ?>
-							</select>
-							<button class="btn btn-sm btn-primary" onclick="contentbuilder_ng_language();">
-								<?php echo Text::_('COM_CONTENTBUILDER_NG_APPLY'); ?>
-							</button>
-						</div>
+								</select>
+								<button class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1" onclick="contentbuilder_ng_language();">
+									<span class="icon-check" aria-hidden="true"></span>
+									<?php echo Text::_('COM_CONTENTBUILDER_NG_APPLY'); ?>
+								</button>
+							</div>
 					</td>
 				</tr>
 			<?php endif; ?>
@@ -316,14 +337,14 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 								<select class="form-select form-select-sm" style="max-width: 160px;"
 									name="list_publish" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_BULK_OPTIONS'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>"
 									onchange="if (this.value !== '-1') { contentbuilder_ng_publish(); }">
-									<option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_UNPUBLISHED'); ?> -</option>
+									<option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDER_NG_UPDATE_STATUS'); ?> -</option>
 									<option value="1"><?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?></option>
 									<option value="0"><?php echo Text::_('COM_CONTENTBUILDER_NG_UNPUBLISH'); ?></option>
 								</select>
 							<?php endif; ?>
 
 							<?php if ($this->display_filter) : ?>
-								<div class="input-group input-group-sm" style="max-width: 360px;">
+									<div class="input-group input-group-sm" style="max-width: 360px;">
 									<span class="input-group-text">
 										<?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER'); ?>
 									</span>
@@ -336,20 +357,22 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 										value="<?php echo $this->escape($this->lists['filter']); ?>"
 										onchange="document.adminForm.submit();" />
 
-									<button type="submit" class="btn btn-primary" id="cbSearchButton">
-										<?php echo Text::_('COM_CONTENTBUILDER_NG_SEARCH'); ?>
-									</button>
+										<button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-1" id="cbSearchButton">
+											<span class="icon-search" aria-hidden="true"></span>
+											<?php echo Text::_('COM_CONTENTBUILDER_NG_SEARCH'); ?>
+										</button>
 
-									<button type="button" class="btn btn-outline-secondary"
-										onclick="document.getElementById('contentbuilder_ng_filter').value='';
+										<button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"
+											onclick="document.getElementById('contentbuilder_ng_filter').value='';
                 <?php echo $this->list_language && count($this->languages) ? "if(document.getElementById('list_language_filter')) document.getElementById('list_language_filter').selectedIndex=0;" : ""; ?>
                 <?php echo $this->list_state && count($this->states) ? "if(document.getElementById('list_state_filter')) document.getElementById('list_state_filter').selectedIndex=0;" : ""; ?>
                 <?php echo $this->list_publish ? "if(document.getElementById('list_publish_filter')) document.getElementById('list_publish_filter').selectedIndex=0;" : ""; ?>
                 document.adminForm.submit();">
-										<?php echo Text::_('COM_CONTENTBUILDER_NG_RESET'); ?>
-									</button>
-								</div>
-							<?php endif; ?>
+											<span class="icon-times" aria-hidden="true"></span>
+											<?php echo Text::_('COM_CONTENTBUILDER_NG_RESET'); ?>
+										</button>
+									</div>
+								<?php endif; ?>
 
 							<?php if ($this->list_state && count($this->states)) : ?>
 								<select class="form-select form-select-sm" style="max-width: 160px;"
@@ -370,7 +393,7 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 									name="list_publish_filter" id="list_publish_filter"
 									title="<?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER'); ?>: <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>"
 									onchange="document.adminForm.submit();">
-									<option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_UNPUBLISHED'); ?> -</option>
+									<option value="-1"> - <?php echo Text::_('JOPTION_SELECT_PUBLISHED'); ?> -</option>
 									<option value="1" <?php echo $this->lists['filter_publish'] == 1 ? 'selected' : ''; ?>>
 										<?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED') ?>
 									</option>
@@ -400,11 +423,12 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 							<?php if ($this->show_records_per_page || $this->export_xls) : ?>
 								<div class="d-flex align-items-center gap-2 ms-auto">
 
-									<?php if ($delete_allowed) : ?>
-										<button class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" onclick="contentbuilder_ng_delete();" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE'); ?>">
-											<span class="icon-trash" aria-hidden="true"></span>
-										</button>
-									<?php endif; ?>
+										<?php if ($delete_allowed) : ?>
+											<button class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 rounded-pill" onclick="contentbuilder_ng_delete();" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE'); ?>">
+												<span class="icon-trash" aria-hidden="true"></span>
+												<span class="d-none d-md-inline"><?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE'); ?></span>
+											</button>
+										<?php endif; ?>
 
 									<?php if ($this->show_records_per_page) : ?>
 										<div style="max-width: 120px;">
@@ -432,13 +456,14 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 										</div>
 									<?php endif; ?>
 
-								<?php if ($this->export_xls) : ?>
-									<a class="btn btn-sm btn-outline-success align-self-center"
-										href="<?php echo Route::_('index.php?option=com_contentbuilder_ng&view=export&id=' . (int) Factory::getApplication()->input->getInt('id', 0) . '&type=xls&format=raw&tmpl=component'); ?>"
-										title="Export Excel">
-										<i class="fa fa-solid fa-file-excel"></i>
-									</a>
-								<?php endif; ?>
+									<?php if ($this->export_xls) : ?>
+										<a class="btn btn-sm btn-outline-success align-self-center d-inline-flex align-items-center gap-1 rounded-pill"
+											href="<?php echo Route::_('index.php?option=com_contentbuilder_ng&view=export&id=' . (int) Factory::getApplication()->input->getInt('id', 0) . '&type=xls&format=raw&tmpl=component'); ?>"
+											title="Export Excel">
+											<span class="icon-download" aria-hidden="true"></span>
+											<span>Excel</span>
+										</a>
+									<?php endif; ?>
 
 							</div>
 						<?php endif; ?>
@@ -447,7 +472,7 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 				</td>
 			</tr>
 		</table>
-		<table class="mt-3 table table-striped table-hover">
+			<table class="table table-striped table-hover align-middle cb-list-table">
 			<thead>
 				<tr>
 					<?php
@@ -553,7 +578,7 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 				$edit_link = Route::_('index.php?option=com_contentbuilder_ng&task=edit.display&backtolist=1&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . $previewQuery);
 					$isPublished = isset($this->published_items[$row->colRecord]) && $this->published_items[$row->colRecord];
 					$togglePublish = $isPublished ? 0 : 1;
-					$toggle_link = Route::_('index.php?option=com_contentbuilder_ng&task=edit.publish&backtolist=1&id=' . $this->form_id . '&list_publish=' . $togglePublish . '&cid[]=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : ''));
+					$toggle_link = Route::_('index.php?option=com_contentbuilder_ng&task=edit.publish&backtolist=1&id=' . $this->form_id . '&list_publish=' . $togglePublish . '&cid[]=' . $row->colRecord . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . $previewQuery);
 					$select = '<input class="form-check-input" type="checkbox" name="cid[]" value="' . $row->colRecord . '"/>';
 				?>
 				<tr class="<?php echo "row$k"; ?>">
@@ -697,7 +722,7 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 					?>
 						<td class="hidden-phone">
 							<?php
-							echo ContentbuilderLegacyHelper::getRating(Factory::getApplication()->input->getInt('id', 0), $row->colRecord, $row->colRating, $this->rating_slots, Factory::getApplication()->input->getCmd('lang', ''), $rating_allowed, $row->colRatingCount, $row->colRatingSum);
+								echo RatingHelper::getRating(Factory::getApplication()->input->getInt('id', 0), $row->colRecord, $row->colRating, $this->rating_slots, Factory::getApplication()->input->getCmd('lang', ''), $rating_allowed, $row->colRatingCount, $row->colRatingSum);
 							?>
 						</td>
 					<?php
@@ -772,10 +797,10 @@ Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 					<tfoot>
 						<tr>
 							<td colspan="1000">
-								<nav class="pagination__wrapper d-flex flex-wrap align-items-center justify-content-start gap-2" aria-label="Pagination">
-									<div class="small text-muted me-2">
-										<?php echo $rangeStart . ' - ' . $rangeEnd . ' / ' . $pagTotal . ' items'; ?>
-									</div>
+									<nav class="pagination__wrapper d-flex flex-wrap align-items-center justify-content-start gap-2" aria-label="Pagination">
+										<div class="small text-muted me-2 cb-pagination-summary">
+											<?php echo $rangeStart . ' - ' . $rangeEnd . ' / ' . $pagTotal . ' items'; ?>
+										</div>
 									<?php if ($showPagination) : ?>
 										<ul class="pagination pagination-sm mb-0">
 											<li class="page-item<?php echo $pagCurrent <= 1 ? ' disabled' : ''; ?>">

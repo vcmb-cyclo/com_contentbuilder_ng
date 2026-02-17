@@ -63,7 +63,7 @@ class ElementsModel extends ListModel
     {
         $db = $this->getDatabase();
 
-        // Instanciation directe (fiable en Joomla 4/5/6).
+        // Direct instantiation for consistent table resolution.
         // Keep compatibility with both singular and plural callers.
         if ($name === 'Elementoption' || $name === 'Elementoptions') {
             return new ElementoptionsTable($db);
@@ -126,7 +126,23 @@ class ElementsModel extends ListModel
         $this->setState('list.start', $limitstart);
 
         // Tri
+        $context = 'com_contentbuilder_ng.elements';
+        $list = (array) $app->input->get('list', [], 'array');
+
+        $orderCol = (string) ($list['ordering'] ?? $app->getUserState($context . '.list.ordering', 'ordering'));
+        if (!in_array($orderCol, $this->filter_fields, true)) {
+            $orderCol = 'ordering';
+        }
+
+        $orderDirn = strtoupper((string) ($list['direction'] ?? $app->getUserState($context . '.list.direction', 'ASC')));
+        $orderDirn = $orderDirn === 'DESC' ? 'DESC' : 'ASC';
+
+        $app->setUserState($context . '.list.ordering', $orderCol);
+        $app->setUserState($context . '.list.direction', $orderDirn);
+
         parent::populateState($ordering, $direction);
+        $this->setState('list.ordering', $orderCol);
+        $this->setState('list.direction', $orderDirn);
     }
 
     /**
@@ -184,8 +200,12 @@ class ElementsModel extends ListModel
         }
 
         // Tri sécurisé (grâce à filter_fields)
-        $orderCol  = $this->getState('list.ordering', 'ordering');
-        $orderDirn = $this->getState('list.direction', 'asc');
+        $orderCol  = (string) $this->getState('list.ordering', 'ordering');
+        if (!in_array($orderCol, $this->filter_fields, true)) {
+            $orderCol = 'ordering';
+        }
+        $orderDirn = strtoupper((string) $this->getState('list.direction', 'ASC'));
+        $orderDirn = $orderDirn === 'DESC' ? 'DESC' : 'ASC';
 
         // Application du tri (tri principal + ordre de secours sur "ordering")
         $query->order($db->escape($orderCol) . ' ' . $db->escape($orderDirn) . ', ' . $db->escape('ordering') . ' ASC');

@@ -2,12 +2,15 @@
   "name": "xda-gil/com_contentbuilder_ng",
   "type": "joomla-component",
   "require": {
-    "phpoffice/phpspreadsheet": "5.4.0"
+    "bgli100/securimage": "^4.0",
+    "phpoffice/phpspreadsheet": "^5.4"
   },
   "config": {
     "optimize-autoloader": true,
     "preferred-install": "dist",
     "sort-packages": true
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11"
   }
 }
-

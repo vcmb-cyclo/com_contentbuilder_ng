@@ -11,6 +11,7 @@
 \defined('_JEXEC') or die ('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\SubscriberInterface;
 use Joomla\CMS\Plugin\PluginHelper;
@@ -169,7 +170,7 @@ class plgContentContentbuilder_ng_verify extends CMSPlugin implements Subscriber
 
                 if ($plugin && $verification_name && $verify_view) {
 
-                    $plugin_settings = 'return-site=' . ($return_site ? base64_decode($return_site) : '') . '&return-admin=' . ($return_admin ? base64_decode($return_admin) : '') . '&client=' . ($this->app->isClient('site') ? 0 : 1) . '&plugin=' . $plugin . '&verification_msg=' . urlencode($verification_msg) . '&verification_name=' . urlencode($verification_name) . '&verify_view=' . $verify_view . '&verify_levels=' . $verify_levels . '&require_view=' . $require_view . '&plugin_options=' . base64_decode($this->buildStr($plugin_options));
+                    $plugin_settings = 'return-site=' . ($return_site ? base64_encode($return_site) : '') . '&return-admin=' . ($return_admin ? base64_encode($return_admin) : '') . '&client=' . ($this->app->isClient('site') ? 0 : 1) . '&plugin=' . $plugin . '&verification_msg=' . urlencode($verification_msg) . '&verification_name=' . urlencode($verification_name) . '&verify_view=' . $verify_view . '&verify_levels=' . $verify_levels . '&require_view=' . $require_view . '&plugin_options=' . base64_encode($this->buildStr($plugin_options));
 
                     $this->app->getSession()->clear($plugin . $verification_name, 'com_contentbuilder_ng.verify.' . $plugin . $verification_name);
                     $this->app->getSession()->set($plugin . $verification_name, $plugin_settings, 'com_contentbuilder_ng.verify.' . $plugin . $verification_name);

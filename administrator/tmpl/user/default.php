@@ -14,7 +14,12 @@
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
+
+$renderCheckbox = static function (string $name, string $id, bool $checked = false): string {
+    return '<span class="form-check d-inline-block mb-0"><input class="form-check-input" type="checkbox" name="'
+        . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" id="' . htmlspecialchars($id, ENT_QUOTES, 'UTF-8')
+        . '" value="1"' . ($checked ? ' checked="checked"' : '') . ' /></span>';
+};
 
 ?>
 <style type="text/css">
@@ -34,8 +39,8 @@ use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 <form action="index.php" method="post" name="adminForm" id="adminForm">
     <div style="clear:both;"></div>
 
-    <div class="col100">
-        <table class="adminlist table table-striped">
+    <div class="w-100">
+        <table class="table table-striped">
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ID'); ?>
@@ -105,9 +110,7 @@ use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
                     echo HTMLHelper::_('calendar', $this->subject->verification_date_view, 'verification_date_view', 'verification_date_view', '%Y-%m-%d %H:%M:00', $calAttr);
 
                     ?>
-                    <input class="form-check-input" type="checkbox" id="verified_view" name="verified_view" value="1"
-                        <?php echo $this->subject->verified_view ? ' checked="checked"' : ''; ?> /> <label
-                        for="verified_view">
+                    <?php echo $renderCheckbox('verified_view', 'verified_view', (bool) $this->subject->verified_view); ?> <label class="form-check-label" for="verified_view">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_VIEW'); ?>
                     </label>
 
@@ -137,9 +140,7 @@ use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
                     echo HTMLHelper::_('calendar', $this->subject->verification_date_new, 'verification_date_new', 'verification_date_new', '%Y-%m-%d %H:%M:00', $calAttr);
                     ?>
 
-                    <input class="form-check-input" type="checkbox" id="verified_new" name="verified_new" value="1"
-                        <?php echo $this->subject->verified_new ? ' checked="checked"' : ''; ?> /> <label
-                        for="verified_new">
+                    <?php echo $renderCheckbox('verified_new', 'verified_new', (bool) $this->subject->verified_new); ?> <label class="form-check-label" for="verified_new">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_NEW'); ?>
                     </label>
 
@@ -169,9 +170,7 @@ use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
                     echo HTMLHelper::_('calendar', $this->subject->verification_date_edit, 'verification_date_edit', 'verification_date_edit', '%Y-%m-%d %H:%M:00', $calAttr);
                     ?>
 
-                    <input class="form-check-input" type="checkbox" id="verified_edit" name="verified_edit" value="1"
-                        <?php echo $this->subject->verified_edit ? ' checked="checked"' : ''; ?> /> <label
-                        for="verified_edit">
+                    <?php echo $renderCheckbox('verified_edit', 'verified_edit', (bool) $this->subject->verified_edit); ?> <label class="form-check-label" for="verified_edit">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_EDIT'); ?>
                     </label>
 
@@ -184,7 +183,7 @@ use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
                     </label>
                 </td>
                 <td>
-                    <input class="form-check-input" type="checkbox" id="published" name="published" value="1" <?php echo $this->subject->published ? ' checked="checked"' : ''; ?> />
+                    <?php echo $renderCheckbox('published', 'published', (bool) $this->subject->published); ?>
 
                 </td>
             </tr>

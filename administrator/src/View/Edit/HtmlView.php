@@ -21,7 +21,6 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Table\Table;
 use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
 class HtmlView extends BaseHtmlView
 {
@@ -190,15 +189,17 @@ class HtmlView extends BaseHtmlView
 			ToolbarHelper::title($subject->page_title, 'logo_left');
 		}
 
-		PluginHelper::importPlugin('contentbuilder_ng_themes', $subject->theme_plugin);
+			$themePlugin = (string) ($subject->theme_plugin ?? '');
+			if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin)) {
+				PluginHelper::importPlugin('contentbuilder_ng_themes', 'joomla6');
+			}
 		$dispatcher = Factory::getApplication()->getDispatcher();
         $eventResult = $dispatcher->dispatch('onEditableTemplateCss', new \Joomla\Event\Event('onEditableTemplateCss', array()));
         $results = $eventResult->getArgument('result') ?: [];
 		$theme_css = implode('', $results);
 		$this->theme_css = $theme_css;
 
-		PluginHelper::importPlugin('contentbuilder_ng_themes', $subject->theme_plugin);
-		$dispatcher = Factory::getApplication()->getDispatcher();
+			$dispatcher = Factory::getApplication()->getDispatcher();
         $eventResult = $dispatcher->dispatch('onEditableTemplateJavascript', new \Joomla\Event\Event('onEditableTemplateJavascript', array()));
         $results = $eventResult->getArgument('result') ?: [];
 		$theme_js = implode('', $results);

@@ -16,7 +16,6 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 $frontend = Factory::getApplication()->isClient('site');
@@ -102,6 +101,15 @@ $listHref = Route::_(
 $hasRecord = !in_array((string) $recordId, ['', '0'], true);
 $backHref = ($backToList || !$hasRecord) ? $listHref : $detailsHref;
 $showBack = $this->back_button && !$hasReturn;
+$showColumnHeader = $input->getInt('cb_show_column_header', 1) === 1;
+$columnHeaderHtml = '';
+
+if ($showColumnHeader) {
+    $columnHeaderHtml = '<div class="cbColumnHeader d-none d-md-grid" aria-hidden="true">'
+        . '<div class="cbColumnHeaderLabel">' . Text::_('COM_CONTENTBUILDER_NG_COLUMN_HEADER_FIELD') . '</div>'
+        . '<div class="cbColumnHeaderValue">' . Text::_('COM_CONTENTBUILDER_NG_COLUMN_HEADER_VALUE') . '</div>'
+        . '</div>';
+}
 
 ?>
 <?php Factory::getApplication()->getDocument()->addStyleDeclaration($this->theme_css); ?>
@@ -262,16 +270,6 @@ $showBack = $this->back_button && !$hasReturn;
     -->
 </script>
 <div class="cbEditableWrapper" id="cbEditableWrapper<?php echo $this->id; ?>">
-    <?php
-    if ($this->show_page_heading && $this->page_title) {
-    ?>
-        <h1 class="contentheading display-6 mb-4">
-            <?php echo $this->page_title; ?>
-        </h1>
-    <?php
-    }
-    ?>
-    <?php echo  $this->event->afterDisplayTitle; ?>
     <?php if ($isAdminPreview): ?>
         <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
             <span><?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE'); ?></span>
@@ -280,6 +278,16 @@ $showBack = $this->back_button && !$hasReturn;
             </a>
         </div>
     <?php endif; ?>
+    <?php
+    if ($this->show_page_heading && $this->page_title) {
+    ?>
+        <h1 class="display-6 mb-4">
+            <?php echo $this->page_title; ?>
+        </h1>
+    <?php
+    }
+    ?>
+    <?php echo  $this->event->afterDisplayTitle; ?>
     <?php
     ob_start();
     ?>
@@ -388,8 +396,8 @@ $showBack = $this->back_button && !$hasReturn;
 
                 <div id="cbArticleOptions" style="display:none;">
 
-                    <fieldset class="adminform">
-                        <ul class="adminformlist">
+                    <fieldset class="border rounded p-3 mb-3">
+                        <ul class="list-unstyled mb-0">
                             <li><?php echo $this->article_options->getLabel('alias'); ?>
                                 <?php echo $this->article_options->getInput('alias'); ?></li>
 
@@ -419,8 +427,8 @@ $showBack = $this->back_button && !$hasReturn;
                         <div class="clr"></div>
                     </fieldset>
 
-                    <fieldset class="panelform">
-                        <ul class="adminformlist">
+                    <fieldset class="border rounded p-3 mb-3">
+                        <ul class="list-unstyled mb-0">
 
                             <?php
                             if (!$this->limited_options && Factory::getApplication()->isClient('administrator')) {
@@ -484,8 +492,8 @@ $showBack = $this->back_button && !$hasReturn;
                                 <?php if (isset($fieldSet->description) && trim($fieldSet->description)) : ?>
                                     <p class="tip"><?php echo $this->escape(Text::_($fieldSet->description)); ?></p>
                                 <?php endif; ?>
-                                <fieldset class="panelform">
-                                    <ul class="adminformlist">
+                                <fieldset class="border rounded p-3 mb-3">
+                                    <ul class="list-unstyled mb-0">
                                         <?php foreach ($this->article_options->getFieldset($name) as $field) : ?>
                                             <li><?php echo $field->label; ?><?php echo $field->input; ?></li>
                                         <?php endforeach; ?>
@@ -496,7 +504,7 @@ $showBack = $this->back_button && !$hasReturn;
                     <?php
                     }
                     ?>
-                    <fieldset class="panelform">
+                    <fieldset class="border rounded p-3 mb-3">
                         <?php echo $this->article_options->getLabel('metadesc'); ?>
                         <?php echo $this->article_options->getInput('metadesc'); ?>
 
@@ -542,6 +550,7 @@ $showBack = $this->back_button && !$hasReturn;
             ?>
             <?php echo $this->event->beforeDisplayContent; ?>
             <?php echo $this->toc ?>
+            <?php echo $columnHeaderHtml; ?>
             <?php echo $this->tpl ?>
             <?php echo $this->event->afterDisplayContent; ?>
             <br />
@@ -581,6 +590,7 @@ $showBack = $this->back_button && !$hasReturn;
             </form>
             <?php echo $this->event->beforeDisplayContent; ?>
             <?php echo $this->toc ?>
+            <?php echo $columnHeaderHtml; ?>
             <?php echo $this->tpl ?>
             <?php echo $this->event->afterDisplayContent; ?>
             <br />
@@ -598,6 +608,7 @@ $showBack = $this->back_button && !$hasReturn;
             <form class="form-horizontal" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id',  '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
                 <?php echo $this->event->beforeDisplayContent; ?>
                 <?php echo $this->toc ?>
+                <?php echo $columnHeaderHtml; ?>
                 <?php echo $this->tpl ?>
                 <?php echo $this->event->afterDisplayContent; ?>
                 <?php

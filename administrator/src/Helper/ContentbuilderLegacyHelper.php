@@ -35,10 +35,186 @@ use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 final class ContentbuilderLegacyHelper
 {
 
+    private static function startsWithIgnoreCase(string $value, string $prefix): bool
+    {
+        return strncasecmp($value, $prefix, strlen($prefix)) === 0;
+    }
+
+    private static function normalizePathSeparators(string $path): string
+    {
+        $path = str_replace('\\', '/', $path);
+        $path = preg_replace('#/+#', '/', $path) ?? $path;
+        return $path;
+    }
+
+    private static function containsIncompleteClass($value): bool
+    {
+        if ($value instanceof \__PHP_Incomplete_Class) {
+            return true;
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                if (self::containsIncompleteClass($item)) {
+                    return true;
+                }
+            }
+        } elseif (is_object($value)) {
+            foreach ((array) $value as $item) {
+                if (self::containsIncompleteClass($item)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Decode base64 packed payload.
+     * New format: base64("j:" + json)
+     * Legacy format: base64(serialize(...))
+     */
+    public static function decodePackedData($raw, $default = null, bool $assoc = false)
+    {
+        if ($raw === null || $raw === '') {
+            return $default;
+        }
+
+        $decoded = base64_decode((string) $raw, true);
+        if ($decoded === false) {
+            return $default;
+        }
+
+        $jsonPayload = null;
+        if (strpos($decoded, 'j:') === 0) {
+            $jsonPayload = substr($decoded, 2);
+        } elseif (strpos(ltrim($decoded), '{') === 0 || strpos(ltrim($decoded), '[') === 0) {
+            $jsonPayload = $decoded;
+        }
+
+        if ($jsonPayload !== null) {
+            try {
+                $jsonDecoded = json_decode($jsonPayload, $assoc, 512, JSON_THROW_ON_ERROR);
+                return $jsonDecoded;
+            } catch (\Throwable $e) {
+                return $default;
+            }
+        }
+
+        try {
+            $unserialized = @unserialize($decoded, ['allowed_classes' => ['stdClass']]);
+        } catch (\Throwable $e) {
+            return $default;
+        }
+
+        if ($unserialized === false && $decoded !== 'b:0;') {
+            return $default;
+        }
+
+        if (self::containsIncompleteClass($unserialized)) {
+            return $default;
+        }
+
+        if ($assoc && (is_array($unserialized) || is_object($unserialized))) {
+            $json = json_encode($unserialized);
+            if (is_string($json)) {
+                $assocDecoded = json_decode($json, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    return $assocDecoded;
+                }
+            }
+        }
+
+        return $unserialized;
+    }
+
+    /**
+     * Encode payload to base64 JSON (prefixed with j:).
+     * Falls back to legacy serialize() if JSON encoding fails.
+     */
+    public static function encodePackedData($value): string
+    {
+        try {
+            $json = json_encode($value, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            return base64_encode('j:' . $json);
+        } catch (\Throwable $e) {
+            return base64_encode(serialize($value));
+        }
+    }
+
+    /**
+     * Resolve "hidden filter" values safely without eval().
+     * Supports only known dynamic tokens.
+     */
+    public static function sanitizeHiddenFilterValue(string $value): string
+    {
+        $value = trim(str_replace(["\r", "\n"], '', $value));
+
+        if ($value === '') {
+            return '';
+        }
+
+        if (self::startsWithIgnoreCase($value, '$value') || self::startsWithIgnoreCase($value, '<?php')) {
+            Log::add(
+                'Blocked legacy PHP expression in hidden filter value.',
+                Log::WARNING,
+                'com_contentbuilder_ng'
+            );
+            return '';
+        }
+
+        $identity = Factory::getApplication()->getIdentity();
+        $now = Factory::getDate();
+        $replacements = [
+            '{userid}' => (string) $identity->get('id', 0),
+            '{username}' => (string) $identity->get('username', 'anonymous'),
+            '{name}' => (string) $identity->get('name', 'Anonymous'),
+            '{date}' => (string) $now->toSql(),
+            '{time}' => (string) $now->format('H:i:s'),
+            '{datetime}' => (string) $now->format('Y-m-d H:i:s'),
+        ];
+
+        return strtr($value, $replacements);
+    }
+
     public static function makeSafeFolder($path)
     {
-        $regex = array('#[^A-Za-z0-9\.:_\\\/-]#');
-        return preg_replace($regex, '_', $path);
+        $path = self::normalizePathSeparators((string) $path);
+        $path = preg_replace('#[^A-Za-z0-9\.:_/\-]#', '_', $path) ?? $path;
+
+        $segments = explode('/', $path);
+        $safeSegments = [];
+
+        foreach ($segments as $segment) {
+            if ($segment === '' || $segment === '.') {
+                continue;
+            }
+            if ($segment === '..') {
+                continue;
+            }
+            // Prevent hidden traversal attempts like "..foo"
+            $segment = ltrim($segment, '.');
+            if ($segment === '') {
+                continue;
+            }
+            $safeSegments[] = $segment;
+        }
+
+        $rebuilt = implode('/', $safeSegments);
+
+        // Preserve absolute unix path
+        if (strpos($path, '/') === 0) {
+            return '/' . $rebuilt;
+        }
+
+        // Preserve windows drive prefix when provided
+        if (preg_match('#^[A-Za-z]:/#', $path)) {
+            $drive = substr($path, 0, 2);
+            return $drive . '/' . preg_replace('#^[A-Za-z]:/#', '', $rebuilt);
+        }
+
+        return $rebuilt;
     }
 
     public static function getPagination($limitstart, $limit, $total)
@@ -159,213 +335,26 @@ final class ContentbuilderLegacyHelper
         return $c;
     }
 
+    /**
+     * @deprecated 6.1.0 Use RatingHelper::getRating() instead.
+     */
     public static function getRating($form_id, $record_id, $colRating, $rating_slots, $lang, $rating_allowed, $rating_count, $rating_sum)
     {
-
-        static $cssLoaded;
-
-        if (!$cssLoaded) {
-
-            Factory::getApplication()->getDocument()->addStyleDeclaration('.cbVotingDisplay, .cbVotingStarButtonWrapper {
-	height: 20px;
-	width: 100px;
-}
-
-.cbVotingStarButtonWrapper {
-	position: absolute;
-	z-index: 100;	
-}
-
-.cbVotingDisplay {
-	background-image: url(' . Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/bg_votingStarOff.png);
-	background-repeat: repeat-x;
-        height: auto;
-}
-
-.cbVotingStars {
-	position: relative;
-	float: left;
-	height: 20px;
-	overflow: hidden;
-	background-image: url(' . Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/bg_votingStarOn.png);
-	background-repeat: repeat-x;
-}
-
-.cbVotingStarButton {
-	display: inline;
-	height: 20px;
-	width: 20px;
-	float: left;
-	cursor: pointer;
-}
-
-.cbRating{ width: 30px; }
-.cbRatingUpDown{text-align: center; width: 90px; }
-.cbRatingImage {margin: auto; display: block;}
-.cbRatingCount {text-align: center; font-size: 11px;}
-.cbRatingVotes {text-align: center; font-size: 11px;} 
-
-.cbRatingImage2{
-    width: 30px;
-    height: 30px;
-    background-image: url(' . Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/thumbs_down.png);
-    background-repeat: no-repeat;
-}
-
-.cbRatingImage{ 
-    width: 30px;
-    height: 30px;
-    background-image: url(' . Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/thumbs_up.png);
-    background-repeat: no-repeat;
-}');
-
-            $cssLoaded = true;
-        }
-
-        ob_start();
-        if ($rating_count) {
-            $percentage2 = round(($colRating / 5) * 100, 2);
-            $percentage3 = 100 - $percentage2;
-        } else {
-            $percentage2 = 0;
-            $percentage3 = 0;
-        }
-        $percentage = round(($colRating / $rating_slots) * ($rating_slots * 20));
-        if ($rating_slots > 2) {
-            ?>
-            <div class="cbVotingDisplay" style="width: <?php echo ($rating_slots * 20); ?>px;">
-                <div class="cbVotingStarButtonWrapper">
-                    <?php
-        }
-        $rating_link = '';
-        if ($rating_allowed) {
-            if (Factory::getApplication()->isClient('site')) {
-                $rating_link = Uri::root(true) . (Factory::getApplication()->isClient('administrator') ? '/administrator' : (Factory::getApplication()->input->getCmd('lang', '') && 
-                Factory::getConfig()->get('sef') && Factory::getConfig()->get('sef_rewrite') ? '/' . Factory::getApplication()->input->getCmd('lang', '') : '')) . '/?option=com_contentbuilder_ng&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
-            } else {
-                $rating_link = 'index.php?option=com_contentbuilder_ng&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
-            }
-        }
-        for ($x = 1; $x <= $rating_slots; $x++) {
-            if ($rating_link) {
-                if ($rating_slots > 2) {
-                    ?>
-                            <div onmouseout="document.getElementById('cbVotingStars<?php echo $record_id; ?>').style.width=<?php echo $percentage; ?>+'px';"
-                                onmouseover="document.getElementById('cbVotingStars<?php echo $record_id; ?>').style.width=(<?php echo $x; ?>*20)+'px';"
-                                class="cbVotingStarButton" id="cbVotingStarButton_<?php echo $x; ?>"
-                                onclick="cbRate('<?php echo $rating_link . '&rate=' . $x; ?>','cbRatingMsg<?php echo $record_id; ?>');">
-                            </div>
-                            <?php
-                } else if ($rating_slots == 2) {
-                    ?>
-                                <div class="cbRatingUpDown">
-                                    <div style="float: left;">
-                                        <div class="cbRatingImage" style="cursor:pointer;"
-                                            onclick="cbRate('<?php echo $rating_link . '&rate=5'; ?>','cbRatingMsg<?php echo $record_id; ?>');">
-                                        </div>
-                                        <div align="center" class="cbRatingCount">
-                                        <?php echo $percentage2 ? $percentage2 . '%' : ''; ?>
-                                        </div>
-                                    </div>
-                                    <div style="float: right;">
-                                        <div class="cbRatingImage2" style="cursor:pointer;"
-                                            onclick="cbRate('<?php echo $rating_link . '&rate=1'; ?>','cbRatingMsg<?php echo $record_id; ?>');">
-                                        </div>
-                                        <div align="center" class="cbRatingCount">
-                                        <?php echo $percentage3 ? $percentage3 . '%' : ''; ?>
-                                        </div>
-                                    </div>
-                                    <div style="clear: both;"></div>
-                                    <div align="center" class="cbRatingVotes">
-                                    <?php echo $rating_count == 1 ? $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_NG_VOTES_SINGULAR') : $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_NG_VOTES_PLURAL'); ?>
-                                    </div>
-                                </div>
-                                <?php
-                                break;
-                } else {
-                    ?>
-                                <div class="cbRating">
-                                    <div class="cbRatingImage" style="cursor:pointer;"
-                                        onclick="cbRate('<?php echo $rating_link . '&rate=' . $x; ?>','cbRatingMsg<?php echo $record_id; ?>');">
-                                    </div>
-                                    <div align="center" id="cbRatingMsg<?php echo $record_id; ?>Counter" class="cbRatingCount">
-                                    <?php echo $rating_count; ?>
-                                    </div>
-                                    <div align="center" class="cbRatingVotes">
-                                    <?php echo $rating_count == 1 ? Text::_('COM_CONTENTBUILDER_NG_VOTES_SINGULAR') : Text::_('COM_CONTENTBUILDER_NG_VOTES_PLURAL'); ?>
-                                    </div>
-                                </div>
-                            <?php
-                }
-            } else {
-                if ($rating_slots > 2) {
-                    ?>
-                            <div class="cbVotingStarButton" style="cursor:default;" id="cbVotingStarButton_<?php echo $x; ?>"></div>
-                            <?php
-                } else if ($rating_slots == 2) {
-                    ?>
-                                <div class="cbRatingUpDown">
-                                    <div style="float: left;">
-                                        <div class="cbRatingImage" style="cursor:default;"></div>
-                                        <div align="center" class="cbRatingCount">
-                                        <?php echo $percentage2 ? $percentage2 . '%' : ''; ?>
-                                        </div>
-                                    </div>
-                                    <div style="float: right;">
-                                        <div class="cbRatingImage2" style="cursor:default;"></div>
-                                        <div align="center" class="cbRatingCount">
-                                        <?php echo $percentage3 ? $percentage3 . '%' : ''; ?>
-                                        </div>
-                                    </div>
-                                    <div style="clear: both;"></div>
-                                    <div align="center" class="cbRatingVotes">
-                                    <?php echo $rating_count == 1 ? $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_NG_VOTES_SINGULAR') : $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_NG_VOTES_PLURAL'); ?>
-                                    </div>
-                                </div>
-                                <?php
-                                break;
-                } else {
-                    ?>
-                                <div class="cbRating">
-                                    <div class="cbRatingImage" style="cursor:default;"></div>
-                                    <div align="center" class="cbRatingCount">
-                                    <?php echo $rating_count; ?>
-                                    </div>
-                                    <div align="center" class="cbRatingVotes">
-                                    <?php echo $rating_count == 1 ? Text::_('COM_CONTENTBUILDER_NG_VOTES_SINGULAR') : Text::_('COM_CONTENTBUILDER_NG_VOTES_PLURAL'); ?>
-                                    </div>
-                                </div>
-                            <?php
-                }
-            }
-        }
-        if ($rating_slots > 2) {
-            ?>
-                </div>
-                <div class="cbVotingStars" id="cbVotingStars<?php echo $record_id; ?>" style="width: <?php echo $percentage; ?>px;">
-                </div>
-                <div style="clear: left;"></div>
-                <div align="center" class="cbRatingVotes">
-                    <?php echo $rating_count == 1 ? $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_NG_VOTES_SINGULAR') : $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_NG_VOTES_PLURAL'); ?>
-                </div>
-            </div>
-            <?php
-        }
-        ?>
-        <div style="display:none;" class="cbRatingMsg" id="cbRatingMsg<?php echo $record_id; ?>"></div>
-        <?php
-        $c = ob_get_contents();
-        ob_end_clean();
-        return $c;
+        return RatingHelper::getRating(
+            $form_id,
+            $record_id,
+            $colRating,
+            $rating_slots,
+            $lang,
+            $rating_allowed,
+            $rating_count,
+            $rating_sum
+        );
     }
 
     public static function execPhpValue($code)
     {
-        if (strpos(strtolower(trim($code)), '$value') === 0) {
-            eval($code);
-            return $value;
-        }
-        return $code;
+        return self::sanitizeHiddenFilterValue((string) $code);
     }
 
     public static function execPhp($result)
@@ -506,7 +495,7 @@ final class ContentbuilderLegacyHelper
                         }
 
                         $allow_html = false;
-                        $options = unserialize(base64_decode($wrapper['options']));
+                        $options = self::decodePackedData($wrapper['options'], null, false);
 
                         if ($options instanceof \stdClass) {
                             if (isset($options->allow_html) && $options->allow_html) {
@@ -940,7 +929,7 @@ final class ContentbuilderLegacyHelper
                 $db->setQuery("Select Max(ordering) + 1 From #__contentbuilder_ng_elements Where form_id = " . intval($contentbuilder_ng_form_id));
                 $ordering = $db->loadResult();
 
-                $db->setQuery("Insert Into #__contentbuilder_ng_elements (`label`,`form_id`,`reference_id`,`type`,`options`, `ordering`) Values (" . $db->Quote($title) . "," . $db->Quote($contentbuilder_ng_form_id) . "," . $db->Quote($reference_id) . ",'text','" . base64_encode(serialize($options)) . "', " . ($ordering ? $ordering : 0) . ")");
+                $db->setQuery("Insert Into #__contentbuilder_ng_elements (`label`,`form_id`,`reference_id`,`type`,`options`, `ordering`) Values (" . $db->Quote($title) . "," . $db->Quote($contentbuilder_ng_form_id) . "," . $db->Quote($reference_id) . ",'text','" . self::encodePackedData($options) . "', " . ($ordering ? $ordering : 0) . ")");
                 $db->execute();
             }
         }
@@ -1065,6 +1054,11 @@ final class ContentbuilderLegacyHelper
             }
         }
 
+        $app = Factory::getApplication();
+        $isAdminPreview = $app->input->getBool('cb_preview_ok', false);
+        $isAdministrator = $app->isClient('administrator');
+        $allowUnpublishedSource = $isAdminPreview || $isAdministrator;
+
         if (isset($forms[$type][$reference_id])) {
             return $forms[$type][$reference_id];
         }
@@ -1083,12 +1077,30 @@ final class ContentbuilderLegacyHelper
 
             try {
                 $form = new $class($reference_id);
+                $exists = !property_exists($form, 'exists') || (bool) ($form->exists ?? false);
+
+                // In admin context (or signed preview), allow loading unpublished
+                // source forms/storages by retrying constructors that support
+                // a "$published" argument.
+                if ($allowUnpublishedSource && !$exists) {
+                    try {
+                        $previewForm = new $class($reference_id, false);
+                        if (is_object($previewForm)) {
+                            $form = $previewForm;
+                            $exists = !property_exists($form, 'exists') || (bool) ($form->exists ?? false);
+                        }
+                    } catch (\ArgumentCountError|\TypeError $e) {
+                        // Class signature does not support a publish flag; keep initial instance.
+                    }
+                }
             } catch (\Throwable $e) {
                 Logger::exception($e);
                 throw $e;
             }
 
-            $forms = array();
+            if (!is_array($forms)) {
+                $forms = array();
+            }
             $forms[$type][$reference_id] = $form;
             return $form;
         }
@@ -1103,11 +1115,25 @@ final class ContentbuilderLegacyHelper
             if (class_exists($class)) {
                 try {
                     $form = new $class($reference_id);
+                    $exists = !property_exists($form, 'exists') || (bool) ($form->exists ?? false);
+
+                    if ($allowUnpublishedSource && !$exists) {
+                        try {
+                            $previewForm = new $class($reference_id, false);
+                            if (is_object($previewForm)) {
+                                $form = $previewForm;
+                            }
+                        } catch (\ArgumentCountError|\TypeError $e) {
+                            // Class signature does not support a publish flag; keep initial instance.
+                        }
+                    }
                 } catch (\Throwable $e) {
                     Logger::exception($e);
                     throw $e;
                 }
-                $forms = array();
+                if (!is_array($forms)) {
+                    $forms = array();
+                }
                 $forms[$type][$reference_id] = $form;
                 return $form;
             }
@@ -1176,8 +1202,8 @@ final class ContentbuilderLegacyHelper
 
             foreach ($labels_ as $label_) {
                 $labels[$label_['reference_id']] = $label_['label'];
-                $opts = unserialize(base64_decode($label_['options']));
-                if ($opts && ((isset($opts->allow_html) && $opts->allow_html) || (isset($opts->allow_raw) && $opts->allow_raw))) {
+                $opts = self::decodePackedData($label_['options'], null, false);
+                if (is_object($opts) && ((isset($opts->allow_html) && $opts->allow_html) || (isset($opts->allow_raw) && $opts->allow_raw))) {
                     $allow_html[$label_['reference_id']] = $opts;
                 }
             }
@@ -1340,8 +1366,8 @@ final class ContentbuilderLegacyHelper
 
             foreach ($labels_ as $label_) {
                 $labels[$label_['reference_id']] = $label_['label'];
-                $opts = unserialize(base64_decode($label_['options']));
-                if ($opts && isset($opts->allow_html) && $opts->allow_html) {
+                $opts = self::decodePackedData($label_['options'], null, false);
+                if (is_object($opts) && isset($opts->allow_html) && $opts->allow_html) {
                     $allow_html[$label_['reference_id']] = $opts;
                 }
             }
@@ -1620,8 +1646,7 @@ final class ContentbuilderLegacyHelper
                         $asterisk = ' <span class="cbRequired" style="color:red;">*</span>';
                     }
 
-                    $decodedOptions = base64_decode((string) $elementOptions, true);
-                    $options = $decodedOptions !== false ? @unserialize($decodedOptions) : null;
+                    $options = self::decodePackedData($elementOptions, null, false);
                     if (!is_object($options)) {
                         $options = new \stdClass();
                     }
@@ -2607,8 +2632,7 @@ final class ContentbuilderLegacyHelper
             return;
         }
 
-        $decodedConfig = base64_decode((string) ($result['config'] ?? ''), true);
-        $config        = $decodedConfig !== false ? @unserialize($decodedConfig, ['allowed_classes' => false]) : [];
+        $config = self::decodePackedData($result['config'] ?? '', [], true);
         if (!is_array($config)) {
             $config = [];
         }

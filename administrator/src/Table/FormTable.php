@@ -63,6 +63,7 @@ class FormTable extends Table
     public $metadata = 1;
     public $export_xls = 0;
     public $edit_button = 0;
+    public $new_button = 0;
     public $list_state = 0;
     public $list_publish = 0;
     public $list_rating = 0;

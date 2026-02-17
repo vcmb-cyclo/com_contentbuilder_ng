@@ -28,6 +28,11 @@ class HtmlView extends BaseHtmlView
 
         // Get data from the model
         $subject = $this->get('Data');
+        $themePlugin = (string) ($subject->theme_plugin ?? '');
+        if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin)) {
+            $themePlugin = 'joomla6';
+            PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin);
+        }
 
         // 1️⃣ Récupération du WebAssetManager
         $document = $this->getDocument();
@@ -44,6 +49,7 @@ class HtmlView extends BaseHtmlView
                     display:inline-block;
                     width:24px;
                     height:24px;
+                    vertical-align:middle;
                 }'
             );
 
@@ -65,8 +71,6 @@ class HtmlView extends BaseHtmlView
         $lists['filter_language'] = $state->get('formsd_filter_language');
         $lists['liststart'] = (int) $state->get('list.start');
 
-        PluginHelper::importPlugin('contentbuilder_ng_themes', $subject->theme_plugin);
-
         $dispatcher = Factory::getApplication()->getDispatcher();
         $eventResult = $dispatcher->dispatch('onListViewCss', new \Joomla\Event\Event('onListViewCss', array()));
         $results = $eventResult->getArgument('result') ?: [];
@@ -74,7 +78,6 @@ class HtmlView extends BaseHtmlView
         $theme_css = implode('', $results);
         $this->theme_css = $theme_css;
 
-        PluginHelper::importPlugin('contentbuilder_ng_themes', $subject->theme_plugin);
         $eventResult = $dispatcher->dispatch('onListViewJavascript', new \Joomla\Event\Event('onListViewJavascript', array()));
         $results = $eventResult->getArgument('result') ?: [];
 
@@ -98,6 +101,7 @@ class HtmlView extends BaseHtmlView
         $this->export_xls = $subject->export_xls;
         $this->display_filter = $subject->display_filter;
         $this->edit_button = $subject->edit_button;
+        $this->new_button = (int) ($subject->new_button ?? 0);
         $this->select_column = $subject->select_column;
         $this->states = $subject->states;
         $this->list_state = $subject->list_state;

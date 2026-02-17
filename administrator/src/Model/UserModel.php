@@ -13,7 +13,6 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
 class UserModel extends BaseDatabaseModel
 {
@@ -43,7 +42,7 @@ class UserModel extends BaseDatabaseModel
     }
 
     private function _buildQuery(){
-        return 'Select SQL_CALC_FOUND_ROWS users.*, contentbuilder_ng_users.limit_edit, contentbuilder_ng_users.limit_add, contentbuilder_ng_users.id As cb_id, contentbuilder_ng_users.form_id, contentbuilder_ng_users.verification_date_edit, contentbuilder_ng_users.verification_date_new, contentbuilder_ng_users.verification_date_view, contentbuilder_ng_users.verified_view, contentbuilder_ng_users.verified_new, contentbuilder_ng_users.verified_edit, contentbuilder_ng_users.records, contentbuilder_ng_users.published From #__users As users Left Join #__contentbuilder_ng_users As contentbuilder_ng_users On ( users.id = contentbuilder_ng_users.userid And contentbuilder_ng_users.form_id = '.Factory::getApplication()->input->getInt('form_id',0).' ) Where users.id = ' . $this->_id;
+        return 'Select users.*, contentbuilder_ng_users.limit_edit, contentbuilder_ng_users.limit_add, contentbuilder_ng_users.id As cb_id, contentbuilder_ng_users.form_id, contentbuilder_ng_users.verification_date_edit, contentbuilder_ng_users.verification_date_new, contentbuilder_ng_users.verification_date_view, contentbuilder_ng_users.verified_view, contentbuilder_ng_users.verified_new, contentbuilder_ng_users.verified_edit, contentbuilder_ng_users.records, contentbuilder_ng_users.published From #__users As users Left Join #__contentbuilder_ng_users As contentbuilder_ng_users On ( users.id = contentbuilder_ng_users.userid And contentbuilder_ng_users.form_id = '.Factory::getApplication()->input->getInt('form_id',0).' ) Where users.id = ' . $this->_id;
                 
     }
     

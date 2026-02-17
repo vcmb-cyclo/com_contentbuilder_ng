@@ -140,7 +140,7 @@ class UsersModel extends ListModel
         return $query;
     }
 
-    // ✅ Modernise tes actions publish/unpublish (évite SQL concat + CBRequest)
+    // Modernized publish/unpublish actions with query builder and typed input.
     public function setPublished(): void
     {
         $app  = Factory::getApplication();

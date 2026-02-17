@@ -74,6 +74,9 @@ class FormsModel extends ListModel
         $filterState = $app->getUserStateFromRequest($this->context . '.filter.state', 'filter_state', '', 'cmd');
         $this->setState('filter.state', $filterState);
 
+        $search = trim((string) $app->getUserStateFromRequest($this->context . '.filter.search', 'filter_search', '', 'string'));
+        $this->setState('filter.search', $search);
+
         $input = $app->input;
         $user = $app->getIdentity();
         $profileKey = 'com_contentbuilder_ng.filter_tag';
@@ -152,7 +155,7 @@ class FormsModel extends ListModel
 
     protected function getListQuery(): QueryInterface
     {
-        $db    = $this->getDatabase();          // Joomla 4/5/6
+        $db    = $this->getDatabase();
         $query = $db->getQuery(true);
 
         // Base query
@@ -160,10 +163,12 @@ class FormsModel extends ListModel
             ->from($db->quoteName('#__contentbuilder_ng_forms', 'a'));
 
         // Published filter (filter.state : 'P' or 'U')
-        $filterState = (string) $this->getState('filter.state');
+        $filterState = strtoupper(trim((string) $this->getState('filter.state')));
+        $isPublishedFilter = in_array($filterState, ['P', '1', 'PUBLISHED'], true);
+        $isUnpublishedFilter = in_array($filterState, ['U', '0', 'UNPUBLISHED'], true);
 
-        if ($filterState === 'P' || $filterState === 'U') {
-            $published = ($filterState === 'P') ? 1 : 0;
+        if ($isPublishedFilter || $isUnpublishedFilter) {
+            $published = $isPublishedFilter ? 1 : 0;
             $query->where($db->quoteName('a.published') . ' = ' . (int) $published);
         }
 
@@ -171,6 +176,28 @@ class FormsModel extends ListModel
         $filterTag = (string) $this->getState('filter.tag');
         if ($filterTag !== '') {
             $query->where($db->quoteName('a.tag') . ' = ' . $db->quote($filterTag));
+        }
+
+        // Text search (supports "id:123").
+        $search = trim((string) $this->getState('filter.search'));
+        if ($search !== '') {
+            if (stripos($search, 'id:') === 0) {
+                $id = (int) substr($search, 3);
+
+                if ($id > 0) {
+                    $query->where($db->quoteName('a.id') . ' = ' . $id);
+                }
+            } else {
+                $token = $db->quote('%' . $db->escape($search, true) . '%', false);
+
+                $query->where(
+                    '('
+                    . $db->quoteName('a.name') . ' LIKE ' . $token
+                    . ' OR ' . $db->quoteName('a.tag') . ' LIKE ' . $token
+                    . ' OR ' . $db->quoteName('a.title') . ' LIKE ' . $token
+                    . ')'
+                );
+            }
         }
 
         // Ordering

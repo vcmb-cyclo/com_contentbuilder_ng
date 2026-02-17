@@ -14,12 +14,37 @@
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
 
 $listOrder = $this->state ? (string) $this->state->get('list.ordering', 'ordering') : 'ordering';
 $listDirn  = $this->state ? (string) $this->state->get('list.direction', 'asc') : 'asc';
 $listDirn  = strtolower($listDirn) === 'desc' ? 'desc' : 'asc';
 $storageId = (int) ($this->item->id ?? 0);
 $limitValue = (int) $this->state?->get('list.limit', 0);
+$fields = $this->fields ?? [];
+$fieldsCount = is_countable($fields) ? count($fields) : 0;
+$recordsCount = isset($this->storageRecordsCount) ? $this->storageRecordsCount : null;
+$storageModeKey = ((int) ($this->item->bytable ?? 0) === 1)
+    ? 'COM_CONTENTBUILDER_NG_STORAGE_MODE_EXTERNAL'
+    : 'COM_CONTENTBUILDER_NG_STORAGE_MODE_INTERNAL';
+$storageName = trim((string) ($this->item->name ?? ''));
+$storageTitle = trim((string) ($this->item->title ?? ''));
+$dataTableName = $storageName !== '' ? $storageName : '-';
+$createdBy = trim((string) ($this->item->created_by ?? ''));
+$modifiedBy = trim((string) ($this->item->modified_by ?? ''));
+$isPublished = ((int) ($this->item->published ?? 0) === 1);
+$publishedIconClass = $isPublished ? 'icon-publish text-success' : 'icon-unpublish text-danger';
+$publishedIconTitle = $isPublished ? Text::_('JPUBLISHED') : Text::_('JUNPUBLISHED');
+
+$formatDate = static function ($date): string {
+    $value = trim((string) $date);
+
+    if ($value === '' || str_starts_with($value, '0000-00-00')) {
+        return '-';
+    }
+
+    return HTMLHelper::_('date', $value, Text::_('DATE_FORMAT_LC5'));
+};
 
 $sortFields = ['id', 'name', 'title', 'group_definition', 'ordering', 'published'];
 $sortLinks = [];
@@ -49,6 +74,12 @@ foreach ($sortFields as $field) {
     ];
 }
 
+$renderCheckbox = static function (string $name, string $id, bool $checked = false): string {
+    return '<span class="form-check d-inline-block mb-0"><input class="form-check-input" type="checkbox" name="'
+        . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" id="' . htmlspecialchars($id, ENT_QUOTES, 'UTF-8')
+        . '" value="1"' . ($checked ? ' checked="checked"' : '') . ' /></span>';
+};
+
 ?>
 
 <script>
@@ -56,7 +87,7 @@ function listItemTask(id, task) {
     var form = document.getElementById('adminForm');
     if (!form) return false;
 
-    form.querySelectorAll('input[type="checkbox"][name^="cb"]').forEach(function (cb) {
+    form.querySelectorAll('input[type="checkbox"][id^="cb"]').forEach(function (cb) {
         cb.checked = false;
     });
 
@@ -92,7 +123,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
         <tr>
             <td width="200" valign="top">
 
-                <fieldset class="adminform">
+                <fieldset class="border rounded p-3 mb-3">
                     <table width="100%">
                         <tr>
                             <td style="min-width: 150px;">
@@ -213,13 +244,11 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                 <br />
                                 <label for="csv_drop_records">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_UPDATE_FROM_CSV_DROP_RECORDS'); ?>
-                                </label> <input class="form-check-input" type="checkbox" id="csv_drop_records"
-                                    name="jform[csv_drop_records]" value="1" checked="checked" />
+                                </label> <?php echo $renderCheckbox('jform[csv_drop_records]', 'csv_drop_records', true); ?>
                                 <br />
                                 <label for="csv_published">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_AUTO_PUBLISH'); ?>
-                                </label> <input class="form-check-input" type="checkbox" id="csv_published"
-                                    name="jform[csv_published]" value="1" checked="checked" />
+                                </label> <?php echo $renderCheckbox('jform[csv_published]', 'csv_published', true); ?>
                                 <br />
                                 <label for="csv_delimiter">
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_UPDATE_FROM_CSV_DELIMITER'); ?>
@@ -289,7 +318,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                 <?php
                 if (!$this->item->bytable) {
                 ?>
-                    <fieldset class="adminform">
+                    <fieldset class="border rounded p-3 mb-3">
                     <?php if ((int) $this->item->id === 0) : ?>
                     <div class="alert alert-info">
                         Enregistrez d’abord le stockage, puis vous pourrez ajouter des champs.
@@ -388,8 +417,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                 </a>
                             </th>
                             <th width="20">
-                                <input class="form-check-input" type="checkbox" name="toggle" value=""
-                                    onclick="Joomla.checkAll(this);" />
+                                <?php echo HTMLHelper::_('grid.checkall'); ?>
                             </th>
                             <th>
                                 <a href="<?php echo htmlspecialchars((string) $sortLinks['name']['url'], ENT_QUOTES, 'UTF-8'); ?>">
@@ -418,10 +446,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                             </th>
                         </tr>
                     </thead>
-                    <?php
-                    $fields = $this->fields ?? [];
-                    $n      = is_countable($fields) ? count($fields) : 0;
-                    ?>
+                    <?php $n = $fieldsCount; ?>
                     <?php foreach ($fields as $i => $row) :
                         $id    = (int) ($row->id ?? 0);
                         $name  = htmlspecialchars((string) ($row->name ?? ''), ENT_QUOTES, 'UTF-8');
@@ -431,9 +456,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
 
                         $checked   = HTMLHelper::_('grid.id', $i, $id);
 
-                        // ✅ RECO : passer en jgrid.published (tu l’as déjà validé côté listes)
-                        // Important : le prefix "storage." doit matcher tes tasks côté controller
-                        $published = HTMLHelper::_('jgrid.published', $row->published, $i, 'storage.', true);
+                        $published = ContentbuilderHelper::listPublish('storage', $row, $i);
 
                         // ordering: n’active les flèches que si ordering est vrai
                         $canOrder = !empty($this->ordering);
@@ -521,6 +544,67 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
 
     <?php
     echo HTMLHelper::_('uitab.endTab');
+    echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', Text::_('COM_CONTENTBUILDER_NG_STORAGE_INFORMATION'));
+    ?>
+
+    <div class="mb-2">
+        <span class="badge text-bg-light border">
+            <?php echo Text::_('COM_CONTENTBUILDER_NG_ID'); ?> #<?php echo (int) ($this->item->id ?? 0); ?>
+        </span>
+    </div>
+
+    <div class="card border rounded-3 mb-3">
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <tbody>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_NAME'); ?></th>
+                        <td colspan="3"><?php echo htmlspecialchars($storageName !== '' ? $storageName : '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_TITLE'); ?></th>
+                        <td colspan="3"><?php echo htmlspecialchars($storageTitle !== '' ? $storageTitle : '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'); ?></th>
+                        <td colspan="3">
+                            <span class="<?php echo $publishedIconClass; ?>" aria-hidden="true" title="<?php echo htmlspecialchars($publishedIconTitle, ENT_QUOTES, 'UTF-8'); ?>"></span>
+                            <span class="visually-hidden"><?php echo htmlspecialchars($publishedIconTitle, ENT_QUOTES, 'UTF-8'); ?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_TABLE'); ?></th>
+                        <td><?php echo htmlspecialchars($dataTableName, ENT_QUOTES, 'UTF-8'); ?></td>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_MODE'); ?></th>
+                        <td><?php echo htmlspecialchars(Text::_($storageModeKey), ENT_QUOTES, 'UTF-8'); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_FIELDS_COUNT'); ?></th>
+                        <td colspan="3"><?php echo (int) $fieldsCount; ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_RECORDS_COUNT'); ?></th>
+                        <td colspan="3"><?php echo $recordsCount === null ? '-' : (int) $recordsCount; ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="width: 240px;"><?php echo Text::_('COM_CONTENTBUILDER_NG_CREATED_ON'); ?></th>
+                        <td><?php echo htmlspecialchars($formatDate($this->item->created ?? null), ENT_QUOTES, 'UTF-8'); ?></td>
+                        <th scope="row" style="width: 240px;"><?php echo Text::_('JGLOBAL_FIELD_CREATED_BY_LABEL'); ?></th>
+                        <td><?php echo htmlspecialchars($createdBy !== '' ? $createdBy : '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('JGLOBAL_FIELD_MODIFIED_LABEL'); ?></th>
+                        <td><?php echo htmlspecialchars($formatDate($this->item->modified ?? null), ENT_QUOTES, 'UTF-8'); ?></td>
+                        <th scope="row"><?php echo Text::_('JGLOBAL_FIELD_MODIFIED_BY_LABEL'); ?></th>
+                        <td><?php echo htmlspecialchars($modifiedBy !== '' ? $modifiedBy : '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <?php
+    echo HTMLHelper::_('uitab.endTab');
     echo HTMLHelper::_('uitab.endTabSet');
     ?>
 
@@ -537,6 +621,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
     <input type="hidden" name="filter_order_Dir" value="<?php echo htmlspecialchars($listDirn, ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="list[ordering]" value="<?php echo htmlspecialchars($listOrder, ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="list[direction]" value="<?php echo htmlspecialchars($listDirn, ENT_QUOTES, 'UTF-8'); ?>" />
+    <input type="hidden" name="limitstart" value="<?php echo (int) $this->state?->get('list.start', 0); ?>" />
     <input type="hidden" name="list[start]" value="<?php echo (int) $this->state?->get('list.start', 0); ?>" />
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="tabStartOffset" value="<?php echo Factory::getApplication()->getSession()->get('tabStartOffset', 0); ?>" />

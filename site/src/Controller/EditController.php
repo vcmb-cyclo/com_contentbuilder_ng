@@ -115,15 +115,10 @@ class EditController extends BaseController
             $msg = Text::_('COM_CONTENTBUILDER_NG_SAVED');
             $return = Factory::getApplication()->input->get('return', '', 'string');
             if ($return) {
-                $return = base64_decode($return);
-
-                if (!Factory::getApplication()->input->getBool('ContentbuilderHelper::cbinternalCheck', 1)) {
+                $decodedReturn = base64_decode($return, true);
+                if ($decodedReturn !== false && Uri::isInternal($decodedReturn)) {
                     Factory::getApplication()->enqueueMessage($msg, 'warning');
-                    Factory::getApplication()->redirect($return);
-                }
-                if (Uri::isInternal($return)) {
-                    Factory::getApplication()->enqueueMessage($msg, 'warning');
-                    Factory::getApplication()->redirect($return);
+                    Factory::getApplication()->redirect($decodedReturn);
                 }
             }
 
@@ -199,6 +194,32 @@ class EditController extends BaseController
     {
         ContentbuilderLegacyHelper::checkPermissions('delete', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_DELETE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
 
+        $selectedItems = array_values(
+            array_filter(
+                array_map('intval', (array) $this->input->get('cid', [], 'array')),
+                static fn(int $id): bool => $id > 0
+            )
+        );
+
+        if ($selectedItems === []) {
+            $listQuery = $this->buildListQuery();
+            $previewQuery = $this->buildPreviewQuery();
+            $link = Route::_(
+                'index.php?option=com_contentbuilder_ng&task=list.display&backtolist=1&id='
+                . Factory::getApplication()->input->getInt('id', 0)
+                . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '')
+                . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '')
+                . '&record_id='
+                . ($listQuery !== '' ? '&' . $listQuery : '')
+                . $previewQuery
+                . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0),
+                false
+            );
+            $this->setRedirect($link, Text::_('JERROR_NO_ITEMS_SELECTED'), 'warning');
+
+            return;
+        }
+
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
             ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
@@ -220,6 +241,7 @@ class EditController extends BaseController
         Factory::getApplication()->input->set('record_id', 0);
 
         $listQuery = $this->buildListQuery();
+        $previewQuery = $this->buildPreviewQuery();
         $link = Route::_(
             'index.php?option=com_contentbuilder_ng&task=list.display&backtolist=1&id='
             . Factory::getApplication()->input->getInt('id', 0)
@@ -227,6 +249,7 @@ class EditController extends BaseController
             . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '')
             . '&record_id='
             . ($listQuery !== '' ? '&' . $listQuery : '')
+            . $previewQuery
             . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0),
             false
         );
@@ -272,7 +295,8 @@ class EditController extends BaseController
             $msg = Text::_('COM_CONTENTBUILDER_NG_PUNPUBLISHED');
         }
         $listQuery = $this->buildListQuery();
-        $link = Route::_('index.php?option=com_contentbuilder_ng&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
+        $previewQuery = $this->buildPreviewQuery();
+        $link = Route::_('index.php?option=com_contentbuilder_ng&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . $previewQuery . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false);
         $this->setRedirect($link, $msg, 'message');
     }
 
@@ -328,6 +352,28 @@ class EditController extends BaseController
             'ordering' => $ordering,
             'direction' => $direction,
         ]]);
+    }
+
+    private function buildPreviewQuery(): string
+    {
+        if (!$this->input->getBool('cb_preview', false)) {
+            return '';
+        }
+
+        $until = (int) $this->input->getInt('cb_preview_until', 0);
+        $sig = trim((string) $this->input->getString('cb_preview_sig', ''));
+        if ($until <= 0 || $sig === '') {
+            return '';
+        }
+
+        $actorId = (int) $this->input->getInt('cb_preview_actor_id', 0);
+        $actorName = trim((string) $this->input->getString('cb_preview_actor_name', ''));
+
+        return '&cb_preview=1'
+            . '&cb_preview_until=' . $until
+            . '&cb_preview_actor_id=' . $actorId
+            . '&cb_preview_actor_name=' . rawurlencode($actorName)
+            . '&cb_preview_sig=' . rawurlencode($sig);
     }
 
     public function display($cachable = false, $urlparams = array())

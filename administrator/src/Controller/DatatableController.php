@@ -44,9 +44,15 @@ class DatatableController extends BaseController
             $breturn = $service->createForStorage($storageId);
             if ($breturn) {
                 $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
-                Text::_('COM_CONTENTBUILDER_NG_TABLE_CREATED'),
-                'message'
+                    Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
+                    Text::_('COM_CONTENTBUILDER_NG_TABLE_CREATED'),
+                    'message'
+                );
+            } else {
+                $this->setRedirect(
+                    Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
+                    Text::_('COM_CONTENTBUILDER_NG_TABLE_ALREADY_EXISTS'),
+                    'warning'
                 );
             }
             return true;

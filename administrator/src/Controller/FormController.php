@@ -163,6 +163,12 @@ class FormController extends BaseFormController
 
     protected function getRedirectToItemAppend($recordId = null, $urlVar = 'id')
     {
+        // Preserve Joomla core behavior for "Save & New":
+        // the redirect must not carry the current record id.
+        if ($recordId === null && $this->getTask() === 'save2new') {
+            return parent::getRedirectToItemAppend(null, $urlVar);
+        }
+
         // Si le core ne passe pas l'id, on tente de le retrouver
         if (!$recordId) {
             // 1) depuis jform (POST)

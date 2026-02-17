@@ -159,6 +159,20 @@ class StorageController extends BaseFormController
             if ($id && $model) {
                 $model->ensureDataTable($id, $isNew, $oldName);
                 $model->syncEditedFieldsFromRequest($id);
+
+                $renameInfo = $model->getLastDataTableRename();
+                if (is_array($renameInfo) && !empty($renameInfo['from']) && !empty($renameInfo['to'])) {
+                    $renameMessage = Text::sprintf(
+                        'COM_CONTENTBUILDER_NG_STORAGE_TABLE_RENAMED',
+                        '#__' . (string) $renameInfo['from'],
+                        '#__' . (string) $renameInfo['to']
+                    );
+
+                    $currentMessage = trim((string) ($this->message ?? ''));
+                    $this->setMessage(
+                        $currentMessage !== '' ? ($currentMessage . ' ' . $renameMessage) : $renameMessage
+                    );
+                }
             }
 
             return $result;
@@ -321,7 +335,7 @@ class StorageController extends BaseFormController
             throw new \RuntimeException('StorageModel not found');
         }
 
-        // IMPORTANT : ton model delete() doit utiliser $pks, pas CBRequest (je t’ai donné le patch)
+        // The model delete() consumes selected primary keys from the request payload.
         try {
             $ok = $model->delete($cid);
             if (!$ok) {

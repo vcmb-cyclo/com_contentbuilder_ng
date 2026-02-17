@@ -19,18 +19,24 @@ use Joomla\CMS\Toolbar\Toolbar;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
 {
     public function display($tpl = null)
     {
+        if ($this->getLayout() === 'help') {
+            parent::display($tpl);
+            return;
+        }
+
         $app = Factory::getApplication();
         $app->input->set('hidemainmenu', true);
 
         // JS
         $wa = $app->getDocument()->getWebAssetManager();
-        $wa->useScript('com_contentbuilder_ng.jscolor');
+        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
 
         $wa->addInlineStyle(
             '.icon-48-logo_icon_cb{background-image:url('
@@ -86,9 +92,14 @@ class HtmlView extends BaseHtmlView
             'logo_left'
         );
 
-        ToolbarHelper::apply('form.apply');
-        ToolbarHelper::save('form.save');
-        ToolbarHelper::save2new('form.save2new');
+        ToolbarHelper::saveGroup(
+            [
+                ['apply', 'form.apply', 'JTOOLBAR_APPLY'],
+                ['save', 'form.save', 'JTOOLBAR_SAVE'],
+                ['save2new', 'form.save2new', 'JTOOLBAR_SAVE_AND_NEW'],
+            ],
+            'btn-success'
+        );
 
         ToolbarHelper::custom('form.list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE'), false);
         ToolbarHelper::custom('form.no_list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_NG_NO_LIST_INCLUDE'), false);
@@ -130,15 +141,21 @@ class HtmlView extends BaseHtmlView
             );
         }
 
+        ToolbarHelper::help(
+            'COM_CONTENTBUILDER_NG_HELP_VIEWS_TITLE',
+            false,
+            Uri::base() . 'index.php?option=com_contentbuilder_ng&view=form&layout=help&tmpl=component'
+        );
+
         // Compat template / listes
-        $this->listOrder = (string) $this->state?->get('list.ordering', 'a.ordering');
+        $this->listOrder = (string) $this->state?->get('list.ordering', 'ordering');
         $this->listDirn  = (string) $this->state?->get('list.direction', 'ASC');
 
         $lists['order']     = $this->listOrder;
         $lists['order_Dir'] = $this->listDirn;
 
         // ordering actif seulement si tri par ordering
-        $this->ordering = in_array($this->listOrder, ['ordering', 'a.ordering'], true);
+        $this->ordering = ($this->listOrder === 'ordering');
 
 
         // Données additionnelles
@@ -155,8 +172,8 @@ class HtmlView extends BaseHtmlView
         $this->gmap = $db->loadObjectList() ?? [];
 
 
-        // ✅ Décode config de manière robuste (très probable cause ids 9/11)
-        $this->item->config = $this->decodeLegacyConfig($this->item->config ?? null);
+        $config = ContentbuilderLegacyHelper::decodePackedData($this->item->config ?? null, null, true);
+        $this->item->config = is_array($config) ? $config : null;
 
         $this->list_states_action_plugins = $this->get('ListStatesActionPlugins') ?? [];
         $this->verification_plugins       = $this->get('VerificationPlugins') ?? [];
@@ -167,35 +184,4 @@ class HtmlView extends BaseHtmlView
         parent::display($tpl);
     }
 
-    /**
-     * Décode l'ancien format base64 + serialize, de façon tolérante.
-     * Retourne array|null sans faire planter l'édition si la donnée est corrompue.
-     */
-    private function decodeLegacyConfig($raw): ?array
-    {
-        if ($raw === null || $raw === '') {
-            return null;
-        }
-
-        // Base64 strict
-        $decoded = base64_decode((string) $raw, true);
-        if ($decoded === false) {
-            // Donnée pas en base64 => on évite de casser l'édition
-            return null;
-        }
-
-        // Unserialize sécurisé (pas d'objets)
-        try {
-            $data = @unserialize($decoded, ['allowed_classes' => false]);
-        } catch (\Throwable $e) {
-            return null;
-        }
-
-        // Unserialize peut retourner false si corrompu (sauf cas b:0;)
-        if ($data === false && $decoded !== 'b:0;') {
-            return null;
-        }
-
-        return is_array($data) ? $data : null;
-    }
 }

@@ -78,55 +78,89 @@ class EditModel extends BaseDatabaseModel
         return is_object($item) && property_exists($item, 'form') ? $item->form : null;
     }
 
+    private function normalizePath(string $path): string
+    {
+        $path = str_replace('\\', '/', $path);
+        return preg_replace('#/+#', '/', $path) ?? $path;
+    }
+
+    private function toSafePathToken($value): string
+    {
+        if (is_array($value)) {
+            $value = array_values(array_filter($value, static fn($v) => $v !== null && $v !== '' && $v !== 'cbGroupMark'));
+            $value = implode('/', array_map(static fn($v) => (string) $v, $value));
+        }
+
+        $value = trim((string) $value);
+        if ($value === '') {
+            return '_empty_';
+        }
+
+        $value = preg_replace('#[^A-Za-z0-9._/\-]#', '_', $value) ?? $value;
+        return $value === '' ? '_empty_' : $value;
+    }
+
+    private function isSafeStoragePath(string $path): bool
+    {
+        $siteRoot = realpath(JPATH_SITE);
+        if ($siteRoot === false) {
+            return false;
+        }
+
+        $siteRoot = rtrim($this->normalizePath($siteRoot), '/');
+        $realPath = realpath($path);
+        if ($realPath === false) {
+            return false;
+        }
+
+        $realPath = $this->normalizePath($realPath);
+        return strncasecmp($realPath, $siteRoot . '/', strlen($siteRoot) + 1) === 0 || strcasecmp($realPath, $siteRoot) === 0;
+    }
+
     function createPathByTokens($path, array $names)
     {
-
-        if (strpos($path, '|') === false) {
-            return $path;
+        $path = (string) $path;
+        if (trim($path) === '') {
+            return '';
         }
 
         $path = str_replace('|', '/', $path);
+        $path = str_replace(array('{CBSite}', '{cbsite}'), JPATH_SITE, $path);
 
         foreach ($names as $id => $name) {
             $value = Factory::getApplication()->input->post->get('cb_' . $id, '', 'raw');
-            $is_array = is_array($value) ? 'ARRAY' : 'STRING';
-            if ($is_array == 'ARRAY' && count($value)) {
-                $arrvals = array();
-                foreach ($value as $val) {
-                    if ($val != 'cbGroupMark') {
-                        $arrvals[] = $val;
-                    }
-                }
-                $value = implode('/', $arrvals);
-            }
-            if (trim($value) == '') {
-                $value = '_empty_';
-            }
+            $value = $this->toSafePathToken($value);
             $path = str_replace('{' . strtolower($name) . ':value}', $value, $path);
         }
 
-        $path = str_replace('{userid}', Factory::getApplication()->getIdentity()->get('id', 0), $path);
-        $path = str_replace('{username}', Factory::getApplication()->getIdentity()->get('username', 'anonymous') . '_' . Factory::getApplication()->getIdentity()->get('id', 0), $path);
-        $path = str_replace('{name}', Factory::getApplication()->getIdentity()->get('name', 'Anonymous') . '_' . Factory::getApplication()->getIdentity()->get('id', 0), $path);
+        $path = str_replace('{userid}', (string) Factory::getApplication()->getIdentity()->get('id', 0), $path);
+        $path = str_replace('{username}', $this->toSafePathToken(Factory::getApplication()->getIdentity()->get('username', 'anonymous') . '_' . Factory::getApplication()->getIdentity()->get('id', 0)), $path);
+        $path = str_replace('{name}', $this->toSafePathToken(Factory::getApplication()->getIdentity()->get('name', 'Anonymous') . '_' . Factory::getApplication()->getIdentity()->get('id', 0)), $path);
 
         $_now = Factory::getDate();
 
-        $path = str_replace('{date}', $_now->toSql(), $path);
-        $path = str_replace('{time}', $_now->format('H:i:s'), $path);
-        $path = str_replace('{date}', $_now->toSql(), $path);
-        $path = str_replace('{datetime}', $_now->format('Y-m-d H:i:s'), $path);
+        $path = str_replace('{date}', $_now->format('Y-m-d'), $path);
+        $path = str_replace('{time}', $_now->format('His'), $path);
+        $path = str_replace('{datetime}', $_now->format('Y-m-d_His'), $path);
 
         $endpath = ContentbuilderLegacyHelper::makeSafeFolder($path);
-        $parts = explode('/', $endpath);
-        $inner_path = '';
-        foreach ($parts as $part) {
-            if (!is_dir($inner_path . $part)) {
-                $inner_path .= '/';
-            }
-            Folder::create($inner_path . $part);
-            $inner_path .= $part;
+        $endpath = $this->normalizePath($endpath);
+
+        $isAbsolute = strpos($endpath, '/') === 0 || (bool) preg_match('#^[A-Za-z]:/#', $endpath);
+        if (!$isAbsolute) {
+            $endpath = rtrim($this->normalizePath(JPATH_SITE), '/') . '/' . ltrim($endpath, '/');
         }
-        return $endpath;
+
+        if (!Folder::exists($endpath) && !Folder::create($endpath)) {
+            return '';
+        }
+
+        if (!$this->isSafeStoragePath($endpath) || !ContentbuilderHelper::is_internal_path($endpath)) {
+            return '';
+        }
+
+        $real = realpath($endpath);
+        return $real === false ? '' : $this->normalizePath($real);
     }
 
     public function __construct(
@@ -184,7 +218,7 @@ class EditModel extends BaseDatabaseModel
                 $keyval = explode("\t", $line);
                 if (count($keyval) == 2) {
                     $keyval[1] = str_replace(array("\n", "\r"), "", $keyval[1]);
-                    $keyval[1] = ContentbuilderLegacyHelper::execPhpValue($keyval[1]);
+                    $keyval[1] = ContentbuilderLegacyHelper::sanitizeHiddenFilterValue($keyval[1]);
                     if ($keyval[1] != '') {
                         $this->_menu_filter[$keyval[0]] = explode('|', $keyval[1]);
                     }
@@ -238,7 +272,7 @@ class EditModel extends BaseDatabaseModel
     private function _buildQuery()
     {
         $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
-        $query = 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id);
+        $query = 'Select * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id);
 
         if (!$isAdminPreview) {
             $query .= ' And published = 1';
@@ -328,17 +362,7 @@ class EditModel extends BaseDatabaseModel
                                 );
                                 $results = $eventResult->getArgument('result') ?: [];
 
-                                // Check for errors encountered while preparing the form.
-                                /*
-                                         if (count($results) && in_array(false, $results, true)) {
-                                             // Get the last error.
-                                             $error = $dispatcher->getError();
-
-                                             // Convert to a JException if necessary.
-                                             if (!JError::isError($error)) {
-                                                 throw new \Exception($error);
-                                             }
-                                         }*/
+                                // Keep event results for compatibility; exceptions are handled upstream.
 
                                 $form->bind($item);
 
@@ -667,15 +691,24 @@ var contentbuilder_ng = new function(){
                             case 'captcha':
                             case 'textarea':
                                 if ($special_field['type'] == 'upload') {
-                                    $options = unserialize(base64_decode($special_field['options']));
+                                    $options = ContentbuilderLegacyHelper::decodePackedData($special_field['options'], null, false);
+                                    if (!is_object($options)) {
+                                        $options = new \stdClass();
+                                    }
                                     $special_field['options'] = $options;
                                     $the_upload_fields[$special_field['reference_id']] = $special_field;
                                 } else if ($special_field['type'] == 'captcha') {
-                                    $options = unserialize(base64_decode($special_field['options']));
+                                    $options = ContentbuilderLegacyHelper::decodePackedData($special_field['options'], null, false);
+                                    if (!is_object($options)) {
+                                        $options = new \stdClass();
+                                    }
                                     $special_field['options'] = $options;
                                     $the_captcha_field = $special_field;
                                 } else if ($special_field['type'] == 'textarea') {
-                                    $options = unserialize(base64_decode($special_field['options']));
+                                    $options = ContentbuilderLegacyHelper::decodePackedData($special_field['options'], null, false);
+                                    if (!is_object($options)) {
+                                        $options = new \stdClass();
+                                    }
                                     $special_field['options'] = $options;
                                     if (isset($special_field['options']->allow_html) && $special_field['options']->allow_html) {
                                         $the_html_fields[$special_field['reference_id']] = $special_field;
@@ -683,7 +716,10 @@ var contentbuilder_ng = new function(){
                                         $the_fields[$special_field['reference_id']] = $special_field;
                                     }
                                 } else if ($special_field['type'] == 'text') {
-                                    $options = unserialize(base64_decode($special_field['options']));
+                                    $options = ContentbuilderLegacyHelper::decodePackedData($special_field['options'], null, false);
+                                    if (!is_object($options)) {
+                                        $options = new \stdClass();
+                                    }
                                     $special_field['options'] = $options;
                                     if ($data->act_as_registration && $data->registration_username_field == $special_field['reference_id']) {
                                         $the_username_field = $special_field;
@@ -703,7 +739,10 @@ var contentbuilder_ng = new function(){
                                 }
                                 break;
                             default:
-                                $options = unserialize(base64_decode($special_field['options']));
+                                $options = ContentbuilderLegacyHelper::decodePackedData($special_field['options'], null, false);
+                                if (!is_object($options)) {
+                                    $options = new \stdClass();
+                                }
                                 $special_field['options'] = $options;
                                 $the_fields[$special_field['reference_id']] = $special_field;
                         }
@@ -713,7 +752,16 @@ var contentbuilder_ng = new function(){
                     if ($the_captcha_field !== null && !in_array($the_captcha_field['reference_id'], $noneditable_fields)) {
 
                         if (!class_exists('Securimage')) {
-                            require_once(JPATH_SITE . '/components/com_contentbuilder_ng/images/securimage/securimage.php');
+                            $composerAutoload = JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/vendor/autoload.php';
+                            $vendorSecurimage = JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/vendor/bgli100/securimage/securimage.php';
+
+                            if (is_file($composerAutoload)) {
+                                require_once $composerAutoload;
+                            }
+
+                            if (!class_exists('Securimage') && is_file($vendorSecurimage)) {
+                                require_once $vendorSecurimage;
+                            }
                         }
 
                         $securimage = new Securimage();
@@ -914,7 +962,7 @@ var contentbuilder_ng = new function(){
                                                         if (strpos(strtolower($_file), '{cbsite}') === 0) {
                                                             $_file = str_replace(array('{cbsite}', '{CBSite}'), array(JPATH_SITE, JPATH_SITE), $_file);
                                                         }
-                                                        if (file_exists($_file)) {
+                                                        if (ContentbuilderHelper::is_internal_path($_file) && file_exists($_file)) {
                                                             File::delete($_file);
                                                         }
                                                         $values[$id] = '';
@@ -1041,14 +1089,19 @@ var contentbuilder_ng = new function(){
                                                     }
                                                 }
                                                 foreach ($files_to_delete as $file_to_delete) {
-                                                    if (file_exists($file_to_delete)) {
+                                                    if (ContentbuilderHelper::is_internal_path($file_to_delete) && file_exists($file_to_delete)) {
                                                         File::delete($file_to_delete);
                                                     }
                                                 }
                                             }
 
                                             // final upload file moving
-                                            $uploaded = File::upload($src, $dest . '/' . $filename, false, true);
+                                            if (!ContentbuilderHelper::is_internal_path($dest)) {
+                                                $uploaded = false;
+                                                $msg = Text::_('COM_CONTENTBUILDER_NG_UPLOAD_FAILED');
+                                            } else {
+                                                $uploaded = File::upload($src, $dest . '/' . $filename, false, true);
+                                            }
 
                                             if (!$uploaded) {
                                                 $msg = Text::_('COM_CONTENTBUILDER_NG_UPLOAD_FAILED');
@@ -1092,7 +1145,7 @@ var contentbuilder_ng = new function(){
 
                                     $all_errors = implode('', $results);
                                     if (!empty($all_errors)) {
-                                        if (isset($values[$id]) && file_exists($values[$id])) {
+                                        if (isset($values[$id]) && ContentbuilderHelper::is_internal_path($values[$id]) && file_exists($values[$id])) {
                                             File::delete($values[$id]);
                                         }
                                         Factory::getApplication()->input->set('cb_submission_failed', 1);
@@ -1352,13 +1405,13 @@ var contentbuilder_ng = new function(){
 
                         if ($data->force_login) {
                             if (!Factory::getApplication()->getIdentity()->get('id', 0)) {
-                                Factory::getApplication()->input->set('return', base64_decode(Route::_('index.php?option=com_users&view=login&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false)));
+                                Factory::getApplication()->input->set('return', base64_encode(Route::_('index.php?option=com_users&view=login&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false)));
                             } else {
-                                Factory::getApplication()->input->set('return', base64_decode(Route::_('index.php?option=com_users&view=profile&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false)));
+                                Factory::getApplication()->input->set('return', base64_encode(Route::_('index.php?option=com_users&view=profile&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0), false)));
                             }
                         } else if (trim($data->force_url)) {
                             Factory::getApplication()->input->set('ContentbuilderHelper::cbinternalCheck', 0);
-                            Factory::getApplication()->input->set('return', base64_decode(trim($data->force_url)));
+                            Factory::getApplication()->input->set('return', base64_encode(trim($data->force_url)));
                         }
                     }
 
@@ -1447,7 +1500,7 @@ var contentbuilder_ng = new function(){
                     $data->page_title = $data->use_view_name_as_title ? $data->name : $data->form->getPageTitle();
 
                     //if(!count($data->items)){
-                    //     JError::raiseError(404, Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'));
+                    //     throw new \RuntimeException(Text::_('COM_CONTENTBUILDER_NG_RECORD_NOT_FOUND'), 404);
                     //}
 
                     $this->getDatabase()->setQuery("Select articles.`id` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($this->_id) . " And articles.record_id = " . $this->getDatabase()->Quote($record_return));
@@ -1991,7 +2044,7 @@ var contentbuilder_ng = new function(){
         $subject = sprintf(Text::_('Account details for'), $name, $sitename);
         $subject = html_entity_decode($subject, ENT_QUOTES);
 
-        $siteurl_ = $siteURL . "index.php?option=com_user&task=activate&activation=" . $user->get('activation');
+        $siteurl_ = $siteURL . "index.php?option=com_users&task=registration.activate&token=" . $user->get('activation');
         if ($bypass_plugin) {
             $siteurl_ = $siteURL . 'index.php?option=com_contentbuilder_ng&view=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $user->get('activation') . '&verification_id=' . $verification_id . '&format=raw';
         }
@@ -2017,7 +2070,13 @@ var contentbuilder_ng = new function(){
             $mailfrom = $rows[0]->email;
         }
 
-        JUtility::sendMail($mailfrom, $fromname, $email, $subject, $message);
+        Factory::getContainer()->get(MailerFactoryInterface::class)->createMailer()->sendMail(
+            $mailfrom,
+            $fromname,
+            $email,
+            $subject,
+            $message
+        );
 
         // Send notification to all administrators
         $subject2 = sprintf(Text::_('Account details for'), $name, $sitename);
@@ -2028,7 +2087,13 @@ var contentbuilder_ng = new function(){
             if ($row->sendEmail) {
                 $message2 = sprintf(Text::_('SEND_MSG_ADMIN'), $row->name, $sitename, $name, $email, $username);
                 $message2 = html_entity_decode($message2, ENT_QUOTES);
-                JUtility::sendMail($mailfrom, $fromname, $row->email, $subject2, $message2);
+                Factory::getContainer()->get(MailerFactoryInterface::class)->createMailer()->sendMail(
+                    $mailfrom,
+                    $fromname,
+                    $row->email,
+                    $subject2,
+                    $message2
+                );
             }
         }
     }
@@ -2139,8 +2204,8 @@ var contentbuilder_ng = new function(){
         $items = Factory::getApplication()->input->get('cid', [], 'array');
 
         $dispatcher = Factory::getApplication()->getDispatcher();
-        $dispatcher->dispatch('onBeforeAction', new \Joomla\Event\Event('onBeforeAction', array($this->_id, $items)));
-        $results = isset($eventResult) ? ($eventResult->getArgument('result') ?: []) : [];
+        $eventResult = $dispatcher->dispatch('onBeforeAction', new \Joomla\Event\Event('onBeforeAction', array($this->_id, $items)));
+        $results = $eventResult->getArgument('result') ?: [];
         $error = implode('', $results);
 
         if ($error) {

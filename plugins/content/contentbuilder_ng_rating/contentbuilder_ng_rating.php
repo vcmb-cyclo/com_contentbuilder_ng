@@ -19,6 +19,7 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\SubscriberInterface;
 use Joomla\Registry\Registry;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\RatingHelper;
 
 class plgContentContentbuilder_ng_rating extends CMSPlugin implements SubscriberInterface
 {
@@ -193,7 +194,7 @@ class plgContentContentbuilder_ng_rating extends CMSPlugin implements Subscriber
                         }
                     }
 
-                    $out = ContentbuilderLegacyHelper::getRating($form_id, $record_id, $rating, $rating_slots, Factory::getApplication()->input->getCmd('lang', ''), $rating_allowed, $rating_count, $rating_sum);
+                    $out = RatingHelper::getRating($form_id, $record_id, $rating, $rating_slots, Factory::getApplication()->input->getCmd('lang', ''), $rating_allowed, $rating_count, $rating_sum);
 
                     $article->text = str_replace($matches[0][$i], $out, $article->text);
 

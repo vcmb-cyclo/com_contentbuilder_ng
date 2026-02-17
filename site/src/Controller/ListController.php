@@ -14,6 +14,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Session\Session;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\Database\DatabaseInterface;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
@@ -22,11 +23,59 @@ class ListController extends BaseController
 {
     public function delete(): void
     {
+        Session::checkToken('post') or jexit(Text::_('JINVALID_TOKEN'));
+
         ContentbuilderLegacyHelper::checkPermissions(
             'delete',
             Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_DELETE_NOT_ALLOWED'),
             '_fe'
         );
+
+        $selectedItems = array_values(
+            array_filter(
+                array_map('intval', (array) $this->input->get('cid', [], 'array')),
+                static fn(int $id): bool => $id > 0
+            )
+        );
+
+        if ($selectedItems === []) {
+            $list = (array) $this->input->get('list', [], 'array');
+            $option = 'com_contentbuilder_ng';
+            $previewQuery = $this->buildPreviewQuery();
+            $limit = isset($list['limit']) ? $this->input->getInt('list[limit]', 0) : 0;
+            if ($limit === 0) {
+                $limit = (int) $this->app->getUserState($option . '.list.limit', 0);
+            }
+            if ($limit === 0) {
+                $limit = (int) $this->app->get('list_limit');
+            }
+            $start = isset($list['start']) ? $this->input->getInt('list[start]', 0) : 0;
+            if (!$start) {
+                $start = (int) $this->app->getUserState($option . '.list.start', 0);
+            }
+            $ordering = isset($list['ordering']) ? $this->input->getCmd('list[ordering]', '') : '';
+            if ($ordering === '') {
+                $ordering = (string) $this->app->getUserState($option . '.formsd_filter_order', '');
+            }
+            $direction = isset($list['direction']) ? $this->input->getCmd('list[direction]', '') : '';
+            if ($direction === '') {
+                $direction = (string) $this->app->getUserState($option . '.formsd_filter_order_Dir', '');
+            }
+            $link = Route::_(
+                'index.php?option=com_contentbuilder_ng&task=list.display&id='
+                . $this->input->getInt('id', 0)
+                . '&list[limit]=' . $limit
+                . '&list[start]=' . $start
+                . '&list[ordering]=' . $ordering
+                . '&list[direction]=' . $direction
+                . $previewQuery
+                . '&Itemid=' . $this->input->getInt('Itemid', 0),
+                false
+            );
+            $this->setRedirect($link, Text::_('JERROR_NO_ITEMS_SELECTED'), 'warning');
+
+            return;
+        }
 
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
             ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
@@ -59,6 +108,7 @@ class ListController extends BaseController
 
         $list = (array) $this->input->get('list', [], 'array');
         $option = 'com_contentbuilder_ng';
+        $previewQuery = $this->buildPreviewQuery();
         $limit = isset($list['limit']) ? $this->input->getInt('list[limit]', 0) : 0;
         if ($limit === 0) {
             $limit = (int) $this->app->getUserState($option . '.list.limit', 0);
@@ -85,6 +135,7 @@ class ListController extends BaseController
             . '&list[start]=' . $start
             . '&list[ordering]=' . $ordering
             . '&list[direction]=' . $direction
+            . $previewQuery
             . '&Itemid=' . $this->input->getInt('Itemid', 0),
             false
         );
@@ -94,6 +145,8 @@ class ListController extends BaseController
 
     public function state(): void
     {
+        Session::checkToken('post') or jexit(Text::_('JINVALID_TOKEN'));
+
         ContentbuilderLegacyHelper::checkPermissions(
             'state',
             Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'),
@@ -117,6 +170,7 @@ class ListController extends BaseController
 
         $list = (array) $this->input->get('list', [], 'array');
         $option = 'com_contentbuilder_ng';
+        $previewQuery = $this->buildPreviewQuery();
         $limit = isset($list['limit']) ? $this->input->getInt('list[limit]', 0) : 0;
         if ($limit === 0) {
             $limit = (int) $this->app->getUserState($option . '.list.limit', 0);
@@ -143,6 +197,7 @@ class ListController extends BaseController
             . '&list[start]=' . $start
             . '&list[ordering]=' . $ordering
             . '&list[direction]=' . $direction
+            . $previewQuery
             . '&Itemid=' . $this->input->getInt('Itemid', 0),
             false
         );
@@ -151,6 +206,8 @@ class ListController extends BaseController
 
     public function publish(): void
     {
+        Session::checkToken('post') or jexit(Text::_('JINVALID_TOKEN'));
+
         ContentbuilderLegacyHelper::checkPermissions(
             'publish',
             Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'),
@@ -178,6 +235,7 @@ class ListController extends BaseController
 
         $list = (array) $this->input->get('list', [], 'array');
         $option = 'com_contentbuilder_ng';
+        $previewQuery = $this->buildPreviewQuery();
         $limit = isset($list['limit']) ? $this->input->getInt('list[limit]', 0) : 0;
         if ($limit === 0) {
             $limit = (int) $this->app->getUserState($option . '.list.limit', 0);
@@ -204,6 +262,7 @@ class ListController extends BaseController
             . '&list[start]=' . $start
             . '&list[ordering]=' . $ordering
             . '&list[direction]=' . $direction
+            . $previewQuery
             . '&Itemid=' . $this->input->getInt('Itemid', 0),
             false
         );
@@ -349,5 +408,27 @@ class ListController extends BaseController
         }
 
         return (int) $published === 1;
+    }
+
+    private function buildPreviewQuery(): string
+    {
+        if (!$this->input->getBool('cb_preview', false)) {
+            return '';
+        }
+
+        $until = (int) $this->input->getInt('cb_preview_until', 0);
+        $sig = trim((string) $this->input->getString('cb_preview_sig', ''));
+        if ($until <= 0 || $sig === '') {
+            return '';
+        }
+
+        $actorId = (int) $this->input->getInt('cb_preview_actor_id', 0);
+        $actorName = trim((string) $this->input->getString('cb_preview_actor_name', ''));
+
+        return '&cb_preview=1'
+            . '&cb_preview_until=' . $until
+            . '&cb_preview_actor_id=' . $actorId
+            . '&cb_preview_actor_name=' . rawurlencode($actorName)
+            . '&cb_preview_sig=' . rawurlencode($sig);
     }
 }

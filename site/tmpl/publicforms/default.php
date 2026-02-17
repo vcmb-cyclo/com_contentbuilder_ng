@@ -22,7 +22,7 @@ use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelp
 $th = 'th';
 if ($this->page_heading) {
     ?>
-    <h1 class="contentheading">
+    <h1 class="display-6 mb-4">
         <?php echo Factory::getApplication()->getDocument()->getTitle(); ?>
     </h1>
     <?php
@@ -60,7 +60,7 @@ if ($this->page_heading) {
                 if ($this->show_id) {
                     ?>
 
-                    <<?php echo $th; ?> width="5" class="sectiontableheader">
+                    <<?php echo $th; ?> width="5" class="align-middle text-nowrap small text-uppercase">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ID'); ?>
                         <?php //echo HTMLHelper::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_NG_ID' ), 'id', $this->lists['order_Dir'], $this->lists['order'] );     ?>
                     </<?php echo $th; ?>>
@@ -69,7 +69,7 @@ if ($this->page_heading) {
                 }
                 ?>
 
-                <<?php echo $th; ?> style="width: 200px !important;" class="sectiontableheader">
+                <<?php echo $th; ?> style="width: 200px !important;" class="align-middle text-nowrap small text-uppercase">
                     <?php echo Text::_('COM_CONTENTBUILDER_NG_VIEW_NAME'); ?>
                     <?php // echo HTMLHelper::_('grid.sort', Text::_( 'COM_CONTENTBUILDER_NG_VIEW_NAME' ), 'name', $this->lists['order_Dir'], $this->lists['order'] );     ?>
                 </<?php echo $th; ?>>
@@ -78,7 +78,7 @@ if ($this->page_heading) {
                 if ($this->show_tags) {
                     ?>
 
-                    <<?php echo $th; ?> class="sectiontableheader">
+                    <<?php echo $th; ?> class="align-middle text-nowrap small text-uppercase">
                         <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_TAG'), 'tag', $this->lists['order_Dir'], $this->lists['order']); ?>
                     </<?php echo $th; ?>>
 
@@ -90,7 +90,7 @@ if ($this->page_heading) {
                 if ($this->introtext) {
                     ?>
 
-                    <<?php echo $th; ?> class="sectiontableheader">
+                    <<?php echo $th; ?> class="align-middle text-nowrap small text-uppercase">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_INTROTEXT'); ?>
                     </<?php echo $th; ?>>
 
@@ -102,7 +102,7 @@ if ($this->page_heading) {
                 if ($this->show_permissions) {
                     ?>
 
-                    <<?php echo $th; ?> class="sectiontableheader">
+                    <<?php echo $th; ?> class="align-middle text-nowrap small text-uppercase">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ACCESS_VIEW'); ?>
                     </<?php echo $th; ?>>
 
@@ -114,7 +114,7 @@ if ($this->page_heading) {
                 if ($this->show_permissions_new) {
                     ?>
 
-                    <<?php echo $th; ?> class="sectiontableheader">
+                    <<?php echo $th; ?> class="align-middle text-nowrap small text-uppercase">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ACCESS_NEW'); ?>
                     </<?php echo $th; ?>>
 
@@ -126,7 +126,7 @@ if ($this->page_heading) {
                 if ($this->show_permissions_edit) {
                     ?>
 
-                    <<?php echo $th; ?> class="sectiontableheader">
+                    <<?php echo $th; ?> class="align-middle text-nowrap small text-uppercase">
                         <?php echo Text::_('COM_CONTENTBUILDER_NG_ACCESS_EDIT'); ?>
                     </<?php echo $th; ?>>
 
@@ -147,7 +147,7 @@ if ($this->page_heading) {
                 $link_ = '<a href="' . $link . '">' . htmlentities($row->name, ENT_QUOTES, 'UTF-8') . '</a>';
             }
             ?>
-            <tr class="<?php echo "row$k"; ?>">
+            <tr class="<?php echo"row$k"; ?>">
 
                 <?php
                 if ($this->show_id) {

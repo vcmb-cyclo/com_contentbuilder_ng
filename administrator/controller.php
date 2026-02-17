@@ -14,7 +14,6 @@ namespace CB\Component\Contentbuilder_ng\Administrator;
 
 Use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Controller\BaseController;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
 class ContentbuilderController extends BaseController
 {

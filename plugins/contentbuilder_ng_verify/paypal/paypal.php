@@ -16,7 +16,6 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 use Joomla\Registry\Registry;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
 class plgContentbuilder_ng_verifyPaypal extends CMSPlugin implements SubscriberInterface
 {

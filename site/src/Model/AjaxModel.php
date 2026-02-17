@@ -15,6 +15,7 @@ namespace CB\Component\Contentbuilder_ng\Site\Model;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+use Joomla\CMS\Session\Session;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
@@ -83,6 +84,13 @@ class AjaxModel extends BaseDatabaseModel
                     if (!ContentbuilderLegacyHelper::authorize('rating')) {
                         return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDER_NG_RATING_NOT_ALLOWED')));
                     }
+                }
+
+                if (strtoupper((string) Factory::getApplication()->input->getMethod()) !== 'POST') {
+                    return json_encode(array('code' => 1, 'msg' => Text::_('JINVALID_TOKEN')));
+                }
+                if (!Session::checkToken('post') && !Session::checkToken('get')) {
+                    return json_encode(array('code' => 1, 'msg' => Text::_('JINVALID_TOKEN')));
                 }
 
                 $this->getDatabase()->setQuery("Select `type`, `reference_id`, `rating_slots` From #__contentbuilder_ng_forms Where id = " . $this->_id);

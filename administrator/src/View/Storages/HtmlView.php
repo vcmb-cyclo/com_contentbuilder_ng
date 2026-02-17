@@ -35,6 +35,11 @@ class HtmlView extends BaseHtmlView
      */
     public function display($tpl = null)
     {
+        if ($this->getLayout() === 'help') {
+            parent::display($tpl);
+            return;
+        }
+
         // Récupération des données du modèle
         $this->items      = (array) ($this->getModel()->getItems() ?? []);
         $this->pagination = $this->getModel()->getPagination();
@@ -80,6 +85,11 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::unpublish('storages.unpublish');
 
         ToolbarHelper::preferences('com_contentbuilder_ng');
+        ToolbarHelper::help(
+            'COM_CONTENTBUILDER_NG_HELP_STORAGES_TITLE',
+            false,
+            Uri::base() . 'index.php?option=com_contentbuilder_ng&view=storages&layout=help&tmpl=component'
+        );
     }
 
     /**
@@ -101,6 +111,7 @@ class HtmlView extends BaseHtmlView
                 display:inline-block;
                 width:48px;
                 height:48px;
+                vertical-align:middle;
             }'
         );
 

@@ -14,21 +14,20 @@
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 
 Factory::getApplication()->getDocument()->addStyleDeclaration($this->theme_css);
 Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js);
 ?>
 
-<div align="center">
-    <button class="button" onclick="window.print()">
+<div class="text-center mb-3">
+    <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
         <?php echo Text::_('COM_CONTENTBUILDER_NG_PRINT') ?>
     </button>
-    <button class="button" onclick="self.close()">
+    <button class="btn btn-sm btn-outline-secondary" onclick="self.close()">
         <?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE') ?>
     </button>
 </div>
-<h1 class="contentheading">
+<h1 class="display-6 mb-4">
     <?php echo $this->page_title; ?>
 </h1>
 <?php echo $this->event->afterDisplayTitle; ?>

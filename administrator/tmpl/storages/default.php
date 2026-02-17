@@ -14,6 +14,7 @@
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
 
 // Charge les scripts Joomla nécessaires (checkAll, submit, etc.)
 HTMLHelper::_('behavior.core');
@@ -48,30 +49,41 @@ $limitSelect = HTMLHelper::_(
     $limitValue
 );
 
+$filterSearch = (string) $this->state->get('filter.search', '');
+$filterStateRaw = strtoupper((string) $this->state->get('filter.state', ''));
+$filterState = in_array($filterStateRaw, ['P', '1', 'PUBLISHED'], true)
+    ? 'P'
+    : (in_array($filterStateRaw, ['U', '0', 'UNPUBLISHED'], true) ? 'U' : '');
+
 $___tableOrdering = "Joomla.tableOrdering = function";
 ?>
 <script type="text/javascript">
 <?php echo $___tableOrdering; ?>(order, dir, task) {
-    var form = document.adminForm;
-    if (!form) {
-        return;
-    }
+var form = document.adminForm;
+if (!form) {
+    return;
+}
 
     task = task || 'storages.display';
 
-    var setValue = function(name, value) {
-        var element = form.elements[name];
-        if (element) {
-            element.value = value;
-        }
-    };
+var setValue = function(name, value) {
+    var element = form.elements[name];
+    if (element) {
+        element.value = value;
+    }
+};
 
-    setValue('filter_order', order);
-    setValue('filter_order_Dir', dir);
-    setValue('list[ordering]', order);
-    setValue('list[direction]', dir);
-    setValue('list[start]', 0);
-    setValue('task', task);
+var setStart = function(value) {
+    setValue('limitstart', value);
+    setValue('list[start]', value);
+};
+
+setValue('filter_order', order);
+setValue('filter_order_Dir', dir);
+setValue('list[ordering]', order);
+setValue('list[direction]', dir);
+setStart(0);
+setValue('task', task);
 
     form.submit();
 };
@@ -81,6 +93,50 @@ $___tableOrdering = "Joomla.tableOrdering = function";
     method="post"
     name="adminForm"
     id="adminForm">
+
+    <div class="js-stools mb-3">
+        <div class="clearfix">
+            <div class="js-stools-container-bar">
+                <div class="btn-toolbar flex-wrap gap-2" role="toolbar">
+                    <div class="input-group input-group-sm" style="max-width: 380px;">
+                        <input
+                            type="text"
+                            name="filter_search"
+                            id="filter_search"
+                            class="form-control"
+                            value="<?php echo htmlspecialchars($filterSearch, ENT_QUOTES, 'UTF-8'); ?>"
+                            placeholder="<?php echo Text::_('JSEARCH_FILTER'); ?>">
+                        <button type="submit" class="btn btn-primary">
+                            <?php echo Text::_('JSEARCH_FILTER_SUBMIT'); ?>
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            onclick="document.getElementById('filter_search').value='';document.getElementById('filter_state').value='';document.adminForm.submit();">
+                            <?php echo Text::_('JSEARCH_FILTER_CLEAR'); ?>
+                        </button>
+                    </div>
+
+                    <div class="btn-group">
+                        <label for="filter_state" class="visually-hidden"><?php echo Text::_('JOPTION_SELECT_PUBLISHED'); ?></label>
+                        <select
+                            name="filter_state"
+                            id="filter_state"
+                            class="form-select form-select-sm js-select-submit-on-change"
+                            onchange="var form=document.adminForm;if(form){var start=form.elements['list[start]'];if(start){start.value=0;}var legacy=form.elements['limitstart'];if(legacy){legacy.value=0;}form.submit();}">
+                            <option value=""><?php echo Text::_('JOPTION_SELECT_PUBLISHED'); ?></option>
+                            <option value="P" <?php echo $filterState === 'P' ? 'selected="selected"' : ''; ?>>
+                                <?php echo Text::_('JPUBLISHED'); ?>
+                            </option>
+                            <option value="U" <?php echo $filterState === 'U' ? 'selected="selected"' : ''; ?>>
+                                <?php echo Text::_('JUNPUBLISHED'); ?>
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="table-responsive">
         <table class="table table-striped">
@@ -138,7 +194,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
                         $link = Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $id);
 
                         $checked   = HTMLHelper::_('grid.id', $i, $id);
-                        $published = HTMLHelper::_('jgrid.published', $row->published, $i, 'storages.', true);
+                        $published = ContentbuilderHelper::listPublish('storages', $row, $i);
 
                     ?>
                     <tr>
@@ -197,6 +253,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 
     <input type="hidden" name="option" value="com_contentbuilder_ng">
     <input type="hidden" name="task" value="storages.display">
+    <input type="hidden" name="limitstart" value="<?php echo (int) $listStart; ?>">
     <input type="hidden" name="list[start]" value="<?php echo (int) $listStart; ?>">
     <input type="hidden" name="boxchecked" value="0">
     <input type="hidden" name="filter_order" value="<?php echo htmlspecialchars($listOrder, ENT_QUOTES, 'UTF-8'); ?>">

@@ -26,7 +26,6 @@ use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder_ng\Administrator\CBRequest;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class VerifyModel extends BaseDatabaseModel
@@ -34,6 +33,44 @@ class VerifyModel extends BaseDatabaseModel
 
     private $frontend = false;
     var $app;
+
+    private function decodePackedQueryString(string $encoded): array
+    {
+        if ($encoded === '') {
+            return [];
+        }
+
+        $decoded = base64_decode($encoded, true);
+        $payload = $decoded !== false ? $decoded : $encoded;
+        parse_str($payload, $opts);
+
+        return is_array($opts) ? $opts : [];
+    }
+
+    private function decodeInternalReturn(?string $encoded): string
+    {
+        $encoded = trim((string) $encoded);
+        if ($encoded === '') {
+            return '';
+        }
+
+        $decoded = base64_decode($encoded, true);
+        if ($decoded === false || !Uri::isInternal($decoded)) {
+            return '';
+        }
+
+        return $decoded;
+    }
+
+    private function safeRedirectTarget(?string $target, string $fallback = 'index.php'): string
+    {
+        $target = trim((string) $target);
+        if ($target !== '' && Uri::isInternal($target)) {
+            return $target;
+        }
+
+        return $fallback;
+    }
 
     public function __construct(
         $config,
@@ -84,16 +121,9 @@ class VerifyModel extends BaseDatabaseModel
             $this->app->redirect('index.php');
         }
 
-        if (isset($out['plugin_options'])) {
-            $options = base64_decode($out['plugin_options']);
-            parse_str($options, $opts);
-            $out['plugin_options'] = $opts;
-            if (!count($out['plugin_options'])) {
-                $out['plugin_options'] = array();
-            }
-        } else {
-            $out['plugin_options'] = array();
-        }
+        $out['plugin_options'] = isset($out['plugin_options'])
+            ? $this->decodePackedQueryString((string) $out['plugin_options'])
+            : [];
 
         $_now = Factory::getDate();
 
@@ -103,7 +133,7 @@ class VerifyModel extends BaseDatabaseModel
         //if($ver >= 5){
         //    $this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_verifications Where `verification_date` IS NULL And ip = " . $this->getDatabase()->Quote($_SERVER['REMOTE_ADDR']));
         //    $this->getDatabase()->execute();
-        //    JError::raiseError(500, 'Penetration Denied');
+        //    throw new \RuntimeException('Penetration denied', 500);
         //}
 
         //$this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_verifications Where Timestampdiff(Second, `start_date`, '".strtotime($_now->toSQL())."') > 86400 And `verification_date` IS NULL");
@@ -138,7 +168,7 @@ class VerifyModel extends BaseDatabaseModel
             }
 
             if (intval($user_id) == 0) {
-                $this->app->redirect('index.php?option=com_contentbuilder_ng&lang=' . Factory::getApplication()->input->getCmd('lang', '') . '&return=' . base64_decode(Uri::getInstance()->toString()) . '&task=edit.display&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
+                $this->app->redirect('index.php?option=com_contentbuilder_ng&lang=' . Factory::getApplication()->input->getCmd('lang', '') . '&return=' . base64_encode(Uri::getInstance()->toString()) . '&task=edit.display&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
             }
 
             $rec = $form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, $user_id, 0, -1, -1, -1, -1, array(), true, null);
@@ -149,7 +179,7 @@ class VerifyModel extends BaseDatabaseModel
             }
 
             if (!$form->getListRecordsTotal($ids)) {
-                $this->app->redirect('index.php?option=com_contentbuilder_ng&lang=' . Factory::getApplication()->input->getCmd('lang', '') . '&return=' . base64_decode(Uri::getInstance()->toString()) . '&task=edit.display&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
+                $this->app->redirect('index.php?option=com_contentbuilder_ng&lang=' . Factory::getApplication()->input->getCmd('lang', '') . '&return=' . base64_encode(Uri::getInstance()->toString()) . '&task=edit.display&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
             }
         }
 
@@ -236,7 +266,7 @@ class VerifyModel extends BaseDatabaseModel
                 $forward = implode('', $forward_result);
 
                 if ($forward) {
-                    $this->app->redirect($forward);
+                    $this->app->redirect($this->safeRedirectTarget($forward));
                 }
             } else {
 
@@ -361,10 +391,15 @@ class VerifyModel extends BaseDatabaseModel
 
                 $this->app->enqueueMessage($msg, 'warning');
 
+                $returnSite = $this->decodeInternalReturn($out['return-site'] ?? '');
+                $returnAdmin = $this->decodeInternalReturn($out['return-admin'] ?? '');
+
                 if (!$out['client']) {
-                    $this->app->redirect($redirect_view ? $redirect_view : (!$out['client'] && isset($out['return-site']) && $out['return-site'] ? base64_decode($out['return-site']) : 'index.php'));
+                    $target = $redirect_view ? $redirect_view : ($returnSite ?: 'index.php');
+                    $this->app->redirect($this->safeRedirectTarget($target));
                 } else {
-                    $this->app->redirect($redirect_view ? $redirect_view : ($out['client'] && isset($out['return-admin']) && $out['return-admin'] ? base64_decode($out['return-admin']) : 'index.php'));
+                    $target = $redirect_view ? $redirect_view : ($returnAdmin ?: 'index.php');
+                    $this->app->redirect($this->safeRedirectTarget($target));
                 }
             }
         } else {
