@@ -235,9 +235,64 @@ class FormModel extends AdminModel
     function getThemePlugins()
     {
         $db = $this->getDatabase();
+        $themes = [];
 
-        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_ng_themes' And `enabled` = 1");
-        return $db->loadColumn();
+        $queries = [
+            "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_ng_themes' And `enabled` = 1",
+            "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_ng_themes'",
+            "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_themes_ng'",
+        ];
+
+        foreach ($queries as $query) {
+            try {
+                $db->setQuery($query);
+                $rows = $db->loadColumn() ?: [];
+            } catch (\Throwable $e) {
+                $rows = [];
+            }
+
+            foreach ($rows as $row) {
+                $row = trim((string) $row);
+                if ($row !== '') {
+                    $themes[] = $row;
+                }
+            }
+        }
+
+        // Last-resort fallback: scan plugin directories if extension rows are missing.
+        foreach ([JPATH_ROOT . '/plugins/contentbuilder_ng_themes', JPATH_ROOT . '/plugins/contentbuilder_themes_ng'] as $path) {
+            if (!Folder::exists($path)) {
+                continue;
+            }
+            foreach (Folder::folders($path) as $folder) {
+                $folder = trim((string) $folder);
+                if ($folder !== '') {
+                    $themes[] = $folder;
+                }
+            }
+        }
+
+        $themes = array_values(array_unique($themes));
+
+        if (empty($themes)) {
+            return ['joomla6', 'blank', 'khepri'];
+        }
+
+        usort($themes, static function (string $a, string $b): int {
+            $order = ['joomla6' => 0, 'blank' => 1, 'khepri' => 2];
+            $rankA = $order[$a] ?? 99;
+            $rankB = $order[$b] ?? 99;
+            if ($rankA !== $rankB) {
+                return $rankA <=> $rankB;
+            }
+            return strcasecmp($a, $b);
+        });
+
+        if (!in_array('joomla6', $themes, true)) {
+            array_unshift($themes, 'joomla6');
+        }
+
+        return array_values(array_unique($themes));
     }
 
     function getVerificationPlugins()
