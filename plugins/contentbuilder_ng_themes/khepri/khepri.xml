@@ -7,7 +7,7 @@
   <license>GNU/GPLv2</license>
   <authorEmail>noreply@vcmb.fr</authorEmail>
   <authorUrl>breezingforms.vcmb.fr</authorUrl>
-  <version>6.0.0-RC6</version>
+  <version>6.1.0-RC6</version>
   <description><![CDATA[A khepri based theme for ContentBuilder Content-Templates]]></description>
   <files>
     <filename plugin="khepri">khepri.php</filename>
