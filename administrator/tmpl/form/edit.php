@@ -586,97 +586,153 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                 </legend>
 
 
-                                <input type="hidden" name="jform[show_id_column]" value="0" />
-                                <?php echo $renderCheckbox('jform[show_id_column]', 'show_id_column', (bool) $this->item->show_id_column); ?> <label class="form-check-label" for="show_id_column">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ID_COLUMN'); ?>
-                                </label>
-                                <input type="hidden" name="jform[select_column]" value="0" />
-                                <?php echo $renderCheckbox('jform[select_column]', 'select_column', (bool) $this->item->select_column); ?>
-                                <label class="form-check-label" for="select_column">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_SELECT_COLUMN'); ?>
-                                </label>
-                                <input type="hidden" name="jform[list_state]" value="0" />
-                                <?php echo $renderCheckbox('jform[list_state]', 'list_state', (bool) $this->item->list_state); ?>
-                                <label class="form-check-label" for="list_state">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?>
-                                </label>
-                                <input type="hidden" name="jform[edit_button]" value="0" />
-                                <?php echo $renderCheckbox('jform[edit_button]', 'edit_button', (bool) $this->item->edit_button); ?>
-                                <label class="form-check-label" for="edit_button">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_BUTTON'); ?>
-                                </label>
-                                <input type="hidden" name="jform[new_button]" value="0" />
-                                <?php echo $renderCheckbox('jform[new_button]', 'new_button', (bool) ($this->item->new_button ?? 0)); ?>
-                                <label class="form-check-label" for="new_button">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?>
-                                </label>
-                                <input type="hidden" name="jform[list_publish]" value="0" />
-                                <?php echo $renderCheckbox('jform[list_publish]', 'list_publish', (bool) $this->item->list_publish); ?>
-                                <label class="form-check-label" for="list_publish">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>
-                                </label>
-                                <input type="hidden" name="jform[list_language]" value="0" />
-                                <?php echo $renderCheckbox('jform[list_language]', 'list_language', (bool) $this->item->list_language); ?>
-                                <label class="form-check-label" for="list_language">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'); ?>
-                                </label>
-                                <input type="hidden" name="jform[list_article]" value="0" />
-                                <?php echo $renderCheckbox('jform[list_article]', 'list_article', (bool) $this->item->list_article); ?>
-                                <label class="form-check-label" for="list_article">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE'); ?>
-                                </label>
-                                <input type="hidden" name="jform[list_author]" value="0" />
-                                <?php echo $renderCheckbox('jform[list_author]', 'list_author', (bool) $this->item->list_author); ?>
-                                <label class="form-check-label" for="list_author">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_AUTHOR'); ?>
-                                </label>
+                                <div class="row gx-3 gy-1 mt-0">
+                                    <div class="col-12 col-xl-7">
+                                        <div class="border rounded bg-white p-3 h-100">
+                                            <h4 class="h6 text-secondary mb-2">
+                                                <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_DATA_OPTIONS'); ?>
+                                            </h4>
+                                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                            <div>
+                                                <input type="hidden" name="jform[show_id_column]" value="0" />
+                                                <?php echo $renderCheckbox('jform[show_id_column]', 'show_id_column', (bool) $this->item->show_id_column); ?>
+                                                <label class="form-check-label" for="show_id_column">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_ID_COLUMN_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ID_COLUMN'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="jform[select_column]" value="0" />
+                                                <?php echo $renderCheckbox('jform[select_column]', 'select_column', (bool) $this->item->select_column); ?>
+                                                <label class="form-check-label" for="select_column">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_SELECT_COLUMN_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SELECT_COLUMN'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="jform[list_state]" value="0" />
+                                                <?php echo $renderCheckbox('jform[list_state]', 'list_state', (bool) $this->item->list_state); ?>
+                                                <label class="form-check-label" for="list_state">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_STATE_COLUMN_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="jform[list_publish]" value="0" />
+                                                <?php echo $renderCheckbox('jform[list_publish]', 'list_publish', (bool) $this->item->list_publish); ?>
+                                                <label class="form-check-label" for="list_publish">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PUBLISH_COLUMN_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="jform[list_language]" value="0" />
+                                                <?php echo $renderCheckbox('jform[list_language]', 'list_language', (bool) $this->item->list_language); ?>
+                                                <label class="form-check-label" for="list_language">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_LANGUAGE_COLUMN_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="jform[list_article]" value="0" />
+                                                <?php echo $renderCheckbox('jform[list_article]', 'list_article', (bool) $this->item->list_article); ?>
+                                                <label class="form-check-label" for="list_article">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_ARTICLE_COLUMN_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="jform[list_author]" value="0" />
+                                                <?php echo $renderCheckbox('jform[list_author]', 'list_author', (bool) $this->item->list_author); ?>
+                                                <label class="form-check-label" for="list_author">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_AUTHOR_COLUMN_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_AUTHOR'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="jform[metadata]" value="0" />
+                                                <?php echo $renderCheckbox('jform[metadata]', 'metadata', (bool) $this->item->metadata); ?>
+                                                <label class="form-check-label" for="metadata">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_METADATA_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_METADATA'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="jform[show_filter]" value="0" />
+                                                <?php echo $renderCheckbox('jform[show_filter]', 'show_filter', (bool) $this->item->show_filter); ?>
+                                                <label class="form-check-label" for="show_filter">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_FILTER_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_FILTER'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="jform[show_records_per_page]" value="0" />
+                                                <?php echo $renderCheckbox('jform[show_records_per_page]', 'show_records_per_page', (bool) $this->item->show_records_per_page); ?>
+                                                <label class="form-check-label" for="show_records_per_page">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_RECORDS_PER_PAGE_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_RECORDS_PER_PAGE'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-
-
-                                <input type="hidden" name="jform[export_xls]" value="0" />
-                                <?php echo $renderCheckbox('jform[export_xls]', 'export_xls', (bool) $this->item->export_xls); ?>
-                                <label class="form-check-label" for="export_xls">
-                                    <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_XLSEXPORT_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_XLSEXPORT'); ?>
-                                    </span>
-                                </label>
-
-                                <input type="hidden" name="jform[print_button]" value="0" />
-                                <?php echo $renderCheckbox('jform[print_button]', 'print_button', (bool) $this->item->print_button); ?>
-                                <label class="form-check-label" for="print_button">
-                                    <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PRINTBUTTON_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PRINTBUTTON'); ?>
-                                    </span>
-                                </label>
-
-                                <input type="hidden" name="jform[metadata]" value="0" />
-                                <?php echo $renderCheckbox('jform[metadata]', 'metadata', (bool) $this->item->metadata); ?>
-                                <label class="form-check-label" for="metadata">
-                                    <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_METADATA_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_METADATA'); ?>
-                                    </span>
-                                </label>
-
-                                <input type="hidden" name="jform[show_filter]" value="0" />
-                                <?php echo $renderCheckbox('jform[show_filter]', 'show_filter', (bool) $this->item->show_filter); ?>
-                                <label class="form-check-label" for="show_filter">
-                                    <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_FILTER_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_FILTER'); ?>
-                                    </span>
-                                </label>
-
-                                <input type="hidden" name="jform[show_records_per_page]" value="0" />
-                                <?php echo $renderCheckbox('jform[show_records_per_page]', 'show_records_per_page', (bool) $this->item->show_records_per_page); ?>
-                                <label class="form-check-label" for="show_records_per_page">
-                                    <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_RECORDS_PER_PAGE_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_RECORDS_PER_PAGE'); ?>
-                                    </span>
-                                </label>
+                                    <div class="col-12 col-xl-5">
+                                        <div class="border rounded bg-white p-3 h-100">
+                                            <h4 class="h6 text-secondary mb-2">
+                                                <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_BUTTON_OPTIONS'); ?>
+                                            </h4>
+                                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                            <div>
+                                                <input type="hidden" name="jform[edit_button]" value="0" />
+                                                <?php echo $renderCheckbox('jform[edit_button]', 'edit_button', (bool) $this->item->edit_button); ?>
+                                                <label class="form-check-label" for="edit_button">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_EDIT_BUTTON_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_BUTTON'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="jform[new_button]" value="0" />
+                                                <?php echo $renderCheckbox('jform[new_button]', 'new_button', (bool) ($this->item->new_button ?? 0)); ?>
+                                                <label class="form-check-label" for="new_button">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_NEW_BUTTON_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="jform[export_xls]" value="0" />
+                                                <?php echo $renderCheckbox('jform[export_xls]', 'export_xls', (bool) $this->item->export_xls); ?>
+                                                <label class="form-check-label" for="export_xls">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_XLSEXPORT_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_XLSEXPORT'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="jform[print_button]" value="0" />
+                                                <?php echo $renderCheckbox('jform[print_button]', 'print_button', (bool) $this->item->print_button); ?>
+                                                <label class="form-check-label" for="print_button">
+                                                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PRINTBUTTON_TIP'); ?>">
+                                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PRINTBUTTON'); ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
                             </fieldset>
 
@@ -1482,7 +1538,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         }
 
         $params = array('syntax' => 'php');
-        echo $this->form->renderField('details_prepare');
+        echo $this->form->renderField('details_prepare', null, $this->item->details_prepare);
 
         //echo '<textarea name="jform[details_prepare]" style="width:100%;height: 500px;">'.htmlentities($this->item->details_prepare, ENT_QUOTES, 'UTF-8').'</textarea>';
         ?>
@@ -1544,7 +1600,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             }
 
             $params = array('syntax' => 'php');
-            echo $this->form->renderField('editable_prepare');
+            echo $this->form->renderField('editable_prepare', null, $this->item->editable_prepare);
         }
 
         echo HTMLHelper::_('uitab.endTab');

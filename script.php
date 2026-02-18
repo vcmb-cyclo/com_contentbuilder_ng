@@ -137,6 +137,32 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     return $version;
   }
 
+  private function getIncomingPackageVersion(?InstallerAdapter $parent): string
+  {
+    if ($parent) {
+      try {
+        if (method_exists($parent, 'getManifest')) {
+          $manifest = $parent->getManifest();
+          if ($manifest instanceof \SimpleXMLElement) {
+            $version = trim((string) ($manifest->version ?? ''));
+            if ($version !== '') {
+              return $version;
+            }
+
+            $attrVersion = trim((string) ($manifest['version'] ?? ''));
+            if ($attrVersion !== '') {
+              return $attrVersion;
+            }
+          }
+        }
+      } catch (\Throwable) {
+        // Ignore and fallback below.
+      }
+    }
+
+    return 'unknown';
+  }
+
 
   function installAndUpdate(): bool
   {
@@ -264,8 +290,10 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
 
     $db = Factory::getContainer()->get(DatabaseInterface::class);
+    $incomingVersion = $this->getIncomingPackageVersion($parent);
 
     // === LOG POUR DÉBOGAGE ===
+    $this->log('[OK] ContentBuilder NG Version ' . $incomingVersion . '.');
     $this->log('Preflight installation method call, parameter : ' . $type . '.');
     $this->log('[OK] Detected current version in manifest_cache : ' . $this->getCurrentInstalledVersion() . '.');
 
@@ -1313,6 +1341,14 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $installer->setDatabase(Factory::getContainer()->get('DatabaseDriver'));
 
     $plugins = $this->getPlugins();
+    $refreshTotal = 0;
+    $refreshIndex = 0;
+
+    if ($forceUpdate) {
+      foreach ($plugins as $elements) {
+        $refreshTotal += count($elements);
+      }
+    }
 
     foreach ($plugins as $folder => $elements) {
       foreach ($elements as $element) {
@@ -1340,11 +1376,13 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
           }
 
           if ($forceUpdate) {
+            $refreshIndex++;
+            $rank = $refreshTotal > 0 ? " ({$refreshIndex}/{$refreshTotal})" : '';
             $ok = $installer->install($path);
             if ($ok) {
-              $this->log("[OK] Plugin refreshed: {$folder}/{$element}");
+              $this->log("[OK] Plugin refreshed{$rank}: {$folder}/{$element}");
             } else {
-              $this->log("[ERROR] Plugin refresh failed: {$folder}/{$element}", Log::ERROR);
+              $this->log("[ERROR] Plugin refresh failed{$rank}: {$folder}/{$element}", Log::ERROR);
             }
             continue;
           }

@@ -178,7 +178,7 @@ class StorageController extends BaseFormController
             return $result;
         }
 
-        // CSV → 1) sauvegarde core du storage, 2) import
+        // File import (CSV/Excel) → 1) core save storage, 2) import
         $file['name'] = File::makeSafe($file['name']);
 
         try {
@@ -187,8 +187,8 @@ class StorageController extends BaseFormController
             $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
 
             Logger::info('Controller got model class', ['class' => get_class($model)]);
-            $id = $model->save($data);
-            if (!$id) {
+            $saved = $model->save($data);
+            if (!$saved) {
                 $this->setRedirect(
                     Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . (int) ($data['id'] ?? 0), false),
                     $model->getError() ?: 'Save failed',
@@ -197,12 +197,63 @@ class StorageController extends BaseFormController
                 return false;
             }
 
-            // (B) Import CSV (en sachant sur quel storage bosser)
-            $ok = $model->storeCsv($file, (int) $id); // <= idéalement tu changes la signature
+            // IMPORTANT: AdminModel::save() returns bool, not the saved id.
+            // Resolve the effective storage id to avoid importing into an unrelated row (e.g. id=1).
+            $id = (int) $model->getState($model->getName() . '.id', 0);
+            if (!$id) {
+                $id = (int) ($data['id'] ?? 0);
+            }
+            if (!$id) {
+                $id = (int) $this->input->getInt('id');
+            }
+            if (!$id) {
+                try {
+                    $lookupName = '';
+                    $lookupBytable = null;
+
+                    if (!empty($data['bytable'])) {
+                        $lookupName = (string) $data['bytable'];
+                        $lookupBytable = 1;
+                    } elseif (!empty($data['name'])) {
+                        $lookupName = (string) $data['name'];
+                        $lookupBytable = 0;
+                    }
+
+                    if ($lookupName !== '') {
+                        $db = Factory::getContainer()->get(DatabaseInterface::class);
+                        $query = $db->getQuery(true)
+                            ->select($db->quoteName('id'))
+                            ->from($db->quoteName('#__contentbuilder_ng_storages'))
+                            ->where($db->quoteName('name') . ' = ' . $db->quote($lookupName));
+
+                        if ($lookupBytable !== null) {
+                            $query->where($db->quoteName('bytable') . ' = ' . (int) $lookupBytable);
+                        }
+
+                        $query->order($db->quoteName('id') . ' DESC');
+                        $db->setQuery($query, 0, 1);
+                        $id = (int) $db->loadResult();
+                    }
+                } catch (\Throwable $e) {
+                    Logger::exception($e);
+                }
+            }
+
+            if (!$id) {
+                $this->setRedirect(
+                    Route::_('index.php?option=com_contentbuilder_ng&task=storages.display', false),
+                    $model->getError() ?: 'Save succeeded but storage id could not be resolved',
+                    'error'
+                );
+                return false;
+            }
+
+            // (B) Import file (CSV/Excel)
+            $ok = $model->storeCsv($file, (int) $id);
             if (!$ok) {
                 $this->setRedirect(
                     Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . (int) $id, false),
-                    $model->getError() ?: 'CSV import failed',
+                    $model->getError() ?: 'Import failed',
                     'error'
                 );
                 return false;

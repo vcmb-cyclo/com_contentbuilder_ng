@@ -35,6 +35,8 @@ $modifiedBy = trim((string) ($this->item->modified_by ?? ''));
 $isPublished = ((int) ($this->item->published ?? 0) === 1);
 $publishedIconClass = $isPublished ? 'icon-publish text-success' : 'icon-unpublish text-danger';
 $publishedIconTitle = $isPublished ? Text::_('JPUBLISHED') : Text::_('JUNPUBLISHED');
+$csvToggleTooltip = 'Show or hide CSV/Excel import options.';
+$addFieldTooltip = 'Add a new field to this storage.';
 
 $formatDate = static function ($date): string {
     $value = trim((string) $date);
@@ -46,7 +48,7 @@ $formatDate = static function ($date): string {
     return HTMLHelper::_('date', $value, Text::_('DATE_FORMAT_LC5'));
 };
 
-$sortFields = ['id', 'name', 'title', 'group_definition', 'ordering', 'published'];
+$sortFields = ['name', 'title', 'group_definition', 'ordering', 'published'];
 $sortLinks = [];
 
 foreach ($sortFields as $field) {
@@ -106,6 +108,35 @@ function listItemTask(id, task) {
 
 if (typeof Joomla !== 'undefined') {
     Joomla.listItemTask = listItemTask;
+}
+
+function toggleCsvUploadOptions() {
+    var panel = document.getElementById('csvUpload');
+    if (!panel) return false;
+
+    var isHidden = panel.style.display === 'none' || window.getComputedStyle(panel).display === 'none';
+    panel.style.display = isHidden ? '' : 'none';
+
+    var trigger = document.getElementById('csvToggleButton');
+    if (trigger) {
+        trigger.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+    }
+
+    return false;
+}
+
+function initStorageTooltips() {
+    if (!window.bootstrap || !window.bootstrap.Tooltip) return;
+
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+        window.bootstrap.Tooltip.getOrCreateInstance(el);
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStorageTooltips, { once: true });
+} else {
+    initStorageTooltips();
 }
 </script>
 
@@ -206,18 +237,25 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                         <tr id="csvUploadHead">
                             <td width="100">
                                 <br />
-                                <div class="mb-3"
-                                    onclick="if(document.getElementById('csvUpload').style.display == 'none'){document.getElementById('csvUpload').style.display='';}else{document.getElementById('csvUpload').style.display='none'}"
-                                    style="cursor:pointer;">
-                                    <b>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_UPDATE_FROM_CSV'); ?>
-                                    </b>
-                                </div>
+                                <button
+                                    type="button"
+                                    id="csvToggleButton"
+                                    class="btn btn-outline-secondary btn-sm mb-2"
+                                    onclick="return toggleCsvUploadOptions();"
+                                    title="<?php echo htmlspecialchars($csvToggleTooltip, ENT_QUOTES, 'UTF-8'); ?>"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    aria-controls="csvUpload"
+                                    aria-expanded="false"
+                                >
+                                    <i class="fa fa-file-excel me-1" aria-hidden="true"></i>
+                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_UPDATE_FROM_CSV'); ?>
+                                </button>
                             </td>
                         </tr>
                         <tr style="display: none;" id="csvUpload">
                             <td>
-                                <input size="9" type="file" id="csv_file" name="csv_file" />
+                                <input size="9" type="file" id="csv_file" name="csv_file" accept=".csv,.xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
                                 <br />
                                 Max.
                                 <?php
@@ -323,12 +361,22 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                     <div class="alert alert-info">
                         Enregistrez d’abord le stockage, puis vous pourrez ajouter des champs.
                     </div>
-                    <button class="btn btn-success" disabled>Ajouter le champ</button>
+                    <button
+                        type="button"
+                        class="btn btn-success"
+                        disabled
+                        title="<?php echo htmlspecialchars($addFieldTooltip, ENT_QUOTES, 'UTF-8'); ?>"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                    >+ Add Field</button>
                     <?php else : ?>
                     <button type="button"
                         class="btn btn-success"
+                        title="<?php echo htmlspecialchars($addFieldTooltip, ENT_QUOTES, 'UTF-8'); ?>"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
                         onclick="Joomla.submitbutton('storage.addfield');">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_NEW_FIELD'); ?>
+                        + Add Field
                     </button>
                         <table class="admintable" width="100%">
                             <tr>
@@ -411,11 +459,6 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                 <table class="table table-striped m-3" style="min-width: 697px;">
                     <thead>
                         <tr>
-                            <th width="5">
-                                <a href="<?php echo htmlspecialchars((string) $sortLinks['id']['url'], ENT_QUOTES, 'UTF-8'); ?>">
-                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_ID'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['id']['indicator']; ?>
-                                </a>
-                            </th>
                             <th width="20">
                                 <?php echo HTMLHelper::_('grid.checkall'); ?>
                             </th>
@@ -462,8 +505,6 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                         $canOrder = !empty($this->ordering);
                     ?>
                         <tr class="row<?php echo $i % 2; ?>">
-                            <td><?php echo $id; ?></td>
-
                             <td class="text-center"><?php echo $checked; ?></td>
                             <td><?php echo $name; ?></td>
                             <td><?php echo $title; ?></td>
@@ -519,7 +560,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
 
                     <tfoot>
                         <tr>
-                            <td colspan="11">
+                            <td colspan="6">
                                 <div class="pagination pagination-toolbar">
                                     <div class="cbPagesCounter">
                                         <?php if (!empty($this->pagination)) {
@@ -586,13 +627,13 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                         <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_RECORDS_COUNT'); ?></th>
                         <td colspan="3"><?php echo $recordsCount === null ? '-' : (int) $recordsCount; ?></td>
                     </tr>
-                    <tr>
+                    <tr class="text-secondary">
                         <th scope="row" style="width: 240px;"><?php echo Text::_('COM_CONTENTBUILDER_NG_CREATED_ON'); ?></th>
                         <td><?php echo htmlspecialchars($formatDate($this->item->created ?? null), ENT_QUOTES, 'UTF-8'); ?></td>
                         <th scope="row" style="width: 240px;"><?php echo Text::_('JGLOBAL_FIELD_CREATED_BY_LABEL'); ?></th>
                         <td><?php echo htmlspecialchars($createdBy !== '' ? $createdBy : '-', ENT_QUOTES, 'UTF-8'); ?></td>
                     </tr>
-                    <tr>
+                    <tr class="text-secondary">
                         <th scope="row"><?php echo Text::_('JGLOBAL_FIELD_MODIFIED_LABEL'); ?></th>
                         <td><?php echo htmlspecialchars($formatDate($this->item->modified ?? null), ENT_QUOTES, 'UTF-8'); ?></td>
                         <th scope="row"><?php echo Text::_('JGLOBAL_FIELD_MODIFIED_BY_LABEL'); ?></th>

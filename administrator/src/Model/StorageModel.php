@@ -28,6 +28,7 @@ use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\VendorHelper;
 use CB\Component\Contentbuilder_ng\Administrator\Service\DatatableService;
 
 class StorageModel extends AdminModel
@@ -40,6 +41,7 @@ class StorageModel extends AdminModel
 
     /** Required for CSV file */
     private string $target_table = '';
+    private int $storageId = 0;
 
     public function __construct(
         $config,
@@ -812,29 +814,127 @@ class StorageModel extends AdminModel
     }
 
 
-    function storeCsv($file)
+    function storeCsv($file, ?int $storageId = null)
     {
         $data = Factory::getApplication()->input->post->getArray();
 
-        if (isset($data['bytable']) && $data['bytable']) {
-            return Text::_('COM_CONTENTBUILDER_NG_CANNOT_USE_CSV_WITH_FOREIGN_TABLE');
+        $resolvedStorageId = (int) ($storageId ?? 0);
+        if ($resolvedStorageId <= 0) {
+            $resolvedStorageId = (int) ($data['id'] ?? 0);
+        }
+        if ($resolvedStorageId <= 0) {
+            $resolvedStorageId = (int) $this->getState($this->getName() . '.id', 0);
+        }
+        if ($resolvedStorageId <= 0) {
+            $this->setError(Text::_('COM_CONTENTBUILDER_NG_ERROR'));
+            return false;
         }
 
+        $storage = $this->getItem($resolvedStorageId);
+        if (!$storage) {
+            $this->setError(Text::_('COM_CONTENTBUILDER_NG_ERROR'));
+            return false;
+        }
+        if (!empty($storage->bytable)) {
+            $this->setError(Text::_('COM_CONTENTBUILDER_NG_CANNOT_USE_CSV_WITH_FOREIGN_TABLE'));
+            return false;
+        }
+
+        $this->storageId = $resolvedStorageId;
+        $this->target_table = trim((string) ($storage->name ?? ''));
+        if ($this->target_table === '') {
+            $this->setError(Text::_('COM_CONTENTBUILDER_NG_ERROR'));
+            return false;
+        }
+
+        $data['id'] = $this->storageId;
         if (isset($data['bytable'])) {
             unset($data['bytable']);
+        }
+
+        $extension = strtolower((string) pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION));
+        $supportedExtensions = ['csv', 'xlsx', 'xls'];
+        if (!in_array($extension, $supportedExtensions, true)) {
+            $this->setError(Text::_('COM_CONTENTBUILDER_NG_STORAGE_IMPORT_UNSUPPORTED_FORMAT'));
+            return false;
         }
 
         $dest = JPATH_SITE . '/tmp/' . md5(mt_rand(0, mt_getrandmax())) . '_' . $file['name'];
         $uploaded = File::upload($file['tmp_name'], $dest, false, true);
 
-        if ($uploaded) {
-            @ini_set('auto_detect_line_endings', TRUE);
-            $retval = $this->csv_file_to_table($dest, $data);
-            File::delete($dest);
-            return $retval;
+        if (!$uploaded) {
+            $this->setError(Text::_('COM_CONTENTBUILDER_NG_ERROR'));
+            return false;
         }
 
-        return false;
+        $sourceFile = $dest;
+        $tmpFiles = [$dest];
+
+        if (in_array($extension, ['xlsx', 'xls'], true)) {
+            $delimiter = Factory::getApplication()->input->get('csv_delimiter', ',', 'string');
+            $converted = $this->convertSpreadsheetFileToCsv($dest, $delimiter);
+            if ($converted === null) {
+                foreach ($tmpFiles as $tmpFile) {
+                    if (is_file($tmpFile)) {
+                        File::delete($tmpFile);
+                    }
+                }
+                return false;
+            }
+            $sourceFile = $converted;
+            $tmpFiles[] = $converted;
+        }
+
+        @ini_set('auto_detect_line_endings', TRUE);
+        $retval = $this->csv_file_to_table($sourceFile, $data);
+
+        foreach ($tmpFiles as $tmpFile) {
+            if (is_file($tmpFile)) {
+                File::delete($tmpFile);
+            }
+        }
+
+        if (is_string($retval)) {
+            $this->setError($retval);
+            return false;
+        }
+
+        return $retval ?: false;
+    }
+
+    private function convertSpreadsheetFileToCsv(string $sourceFile, string $delimiter = ','): ?string
+    {
+        try {
+            VendorHelper::load();
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+            $this->setError($e->getMessage());
+            return null;
+        }
+
+        $spreadsheet = null;
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($sourceFile);
+            $csvPath = JPATH_SITE . '/tmp/' . md5(mt_rand(0, mt_getrandmax())) . '_import.csv';
+
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($spreadsheet);
+            $writer->setSheetIndex(0);
+            $writer->setDelimiter($delimiter !== '' ? $delimiter : ',');
+            $writer->setEnclosure('"');
+            $writer->setLineEnding("\n");
+            $writer->setUseBOM(false);
+            $writer->save($csvPath);
+
+            return $csvPath;
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+            $this->setError($e->getMessage());
+            return null;
+        } finally {
+            if ($spreadsheet !== null) {
+                $spreadsheet->disconnectWorksheets();
+            }
+        }
     }
 
     function utf8_fopen_read($fileName, $encoding)
@@ -933,15 +1033,15 @@ class StorageModel extends AdminModel
                 $data['fieldtitle'] = $column;
                 $data['is_group'] = false;
                 $fieldnames[] = $this->store($data);
-                $data['id'] = $this->_id;
+                $data['id'] = $this->storageId;
             }
 
             if (Factory::getApplication()->input->getBool('csv_drop_records', false)) {
                 $this->getDatabase()->setQuery("Truncate Table #__" . $this->target_table);
                 $this->getDatabase()->execute();
-                $this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_records Where `type` = 'com_contentbuilder_ng' And reference_id = " . $this->getDatabase()->Quote($this->_id));
+                $this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_records Where `type` = 'com_contentbuilder_ng' And reference_id = " . $this->getDatabase()->Quote($this->storageId));
                 $this->getDatabase()->execute();
-                $this->getDatabase()->setQuery("Delete a.*, c.* From #__contentbuilder_ng_articles As a, #__content As c Where c.id = a.article_id And a.`type` = 'com_contentbuilder_ng' And a.reference_id = " . $this->getDatabase()->Quote($this->_id));
+                $this->getDatabase()->setQuery("Delete a.*, c.* From #__contentbuilder_ng_articles As a, #__content As c Where c.id = a.article_id And a.`type` = 'com_contentbuilder_ng' And a.reference_id = " . $this->getDatabase()->Quote($this->storageId));
                 $this->getDatabase()->execute();
             }
 
@@ -953,12 +1053,12 @@ class StorageModel extends AdminModel
                 $query = "$insert_query_prefix (" . join(", ", $this->quote_all_array($data)) . ")";
                 $this->getDatabase()->setQuery($query);
                 $this->getDatabase()->execute();
-                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_records (`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id) Values ('com_contentbuilder_ng'," . $this->getDatabase()->Quote($last_update) . ",0,'*',''," . Factory::getApplication()->input->getInt('csv_published', 0) . ", " . $this->getDatabase()->Quote(intval($this->getDatabase()->insertid())) . ", " . $this->getDatabase()->Quote($this->_id) . ")");
+                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_records (`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id) Values ('com_contentbuilder_ng'," . $this->getDatabase()->Quote($last_update) . ",0,'*',''," . Factory::getApplication()->input->getInt('csv_published', 0) . ", " . $this->getDatabase()->Quote(intval($this->getDatabase()->insertid())) . ", " . $this->getDatabase()->Quote($this->storageId) . ")");
                 $this->getDatabase()->execute();
             }
             fclose($handle);
         }
-        return $this->_id;
+        return $this->storageId;
     }
 
     function quote_all_array($values)

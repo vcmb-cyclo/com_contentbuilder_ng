@@ -12,7 +12,7 @@ namespace CB\Component\Contentbuilder_ng\Administrator\View\Forms;
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
 
-//use Joomla\CMS\Factory;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Toolbar\ToolbarHelper;
@@ -48,8 +48,18 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::custom('forms.copy', 'copy', '', Text::_('COM_CONTENTBUILDER_NG_COPY'));
         ToolbarHelper::editList('form.edit');
 
-        ToolbarHelper::publish('forms.publish');
-        ToolbarHelper::unpublish('forms.unpublish');
+        $toolbar = Factory::getApplication()->getDocument()->getToolbar('toolbar');
+
+        $statusDropdown = $toolbar->dropdownButton('forms-status-group');
+        $statusDropdown->text('Actions');
+        $statusDropdown->toggleSplit(false);
+        $statusDropdown->icon('fa fa-ellipsis-h');
+        $statusDropdown->buttonClass('btn btn-action');
+        $statusDropdown->listCheck(true);
+
+        $statusChildToolbar = $statusDropdown->getChildToolbar();
+        $statusChildToolbar->publish('forms.publish')->icon('icon-publish text-success')->listCheck(true);
+        $statusChildToolbar->unpublish('forms.unpublish')->icon('icon-unpublish text-danger')->listCheck(true);
         ToolbarHelper::deleteList('JGLOBAL_CONFIRM_DELETE', 'forms.delete');
         ToolbarHelper::preferences('com_contentbuilder_ng');
         ToolbarHelper::help(

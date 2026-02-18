@@ -15,7 +15,6 @@ namespace CB\Component\Contentbuilder_ng\Administrator\View\Form;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Toolbar\Toolbar;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
@@ -103,14 +102,133 @@ class HtmlView extends BaseHtmlView
             'btn-success'
         );
 
-        ToolbarHelper::custom('form.list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE'), false);
-        ToolbarHelper::custom('form.no_list_include', 'menu', '', Text::_('COM_CONTENTBUILDER_NG_NO_LIST_INCLUDE'), false);
+        $toolbar = $app->getDocument()->getToolbar('toolbar');
 
-        ToolbarHelper::custom('form.editable', 'edit', '', Text::_('COM_CONTENTBUILDER_NG_EDITABLE'), false);
-        ToolbarHelper::custom('form.not_editable', 'edit', '', Text::_('COM_CONTENTBUILDER_NG_NOT_EDITABLE'), false);
+        $statusDropdown = $toolbar->dropdownButton('form-status-group');
+        $statusDropdown->text('Actions');
+        $statusDropdown->toggleSplit(false);
+        $statusDropdown->icon('fa fa-ellipsis-h');
+        $statusDropdown->buttonClass('btn btn-action');
+        $statusDropdown->listCheck(false);
 
-        ToolbarHelper::publish('form.publish');
-        ToolbarHelper::unpublish('form.unpublish');
+        $statusChildToolbar = $statusDropdown->getChildToolbar();
+        $statusChildToolbar->standardButton('list_include')
+            ->task('form.list_include')
+            ->text('COM_CONTENTBUILDER_NG_LIST_INCLUDE')
+            ->icon('fa fa-list text-success')
+            ->listCheck(true);
+        $statusChildToolbar->standardButton('no_list_include')
+            ->task('form.no_list_include')
+            ->text('COM_CONTENTBUILDER_NG_NO_LIST_INCLUDE')
+            ->icon('fa fa-list text-danger')
+            ->listCheck(true);
+        $statusChildToolbar->standardButton('search_include')
+            ->task('form.search_include')
+            ->text('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE')
+            ->icon('fa fa-search text-success')
+            ->listCheck(true);
+        $statusChildToolbar->standardButton('no_search_include')
+            ->task('form.no_search_include')
+            ->text('COM_CONTENTBUILDER_NG_NO_SEARCH_INCLUDE')
+            ->icon('fa fa-search text-danger')
+            ->listCheck(true);
+        $statusChildToolbar->standardButton('editable')
+            ->task('form.editable')
+            ->text('COM_CONTENTBUILDER_NG_EDITABLE')
+            ->icon('fa fa-pen text-success')
+            ->listCheck(true);
+        $statusChildToolbar->standardButton('not_editable')
+            ->task('form.not_editable')
+            ->text('COM_CONTENTBUILDER_NG_NOT_EDITABLE')
+            ->icon('fa fa-pen text-danger')
+            ->listCheck(true);
+        $statusChildToolbar->publish('form.publish')->icon('icon-publish text-success')->listCheck(true);
+        $statusChildToolbar->unpublish('form.unpublish')->icon('icon-unpublish text-danger')->listCheck(true);
+
+        // Keep right-side toolbar alignment stable and visually disable Actions until at least one row is selected.
+        $wa->addInlineStyle(
+            '#toolbar-form-status-group.cb-disabled{opacity:.55;pointer-events:none;}'
+            . '#toolbar-form-status-group.cb-disabled button,'
+            . '#toolbar-form-status-group.cb-disabled a{pointer-events:none;}'
+        );
+        $wa->addInlineScript(
+            "(function () {
+                function getActionsHost() {
+                    return document.getElementById('toolbar-form-status-group')
+                        || document.querySelector('joomla-toolbar-button[id*=\"form-status-group\"]')
+                        || document.querySelector('[id$=\"form-status-group\"]');
+                }
+
+                function hasSelectedRows() {
+                    return document.querySelectorAll('input[name=\"cid[]\"]:checked').length > 0;
+                }
+
+                function getHelpHost() {
+                    return document.getElementById('toolbar-help')
+                        || document.querySelector('[id*=\"toolbar-help\"]');
+                }
+
+                function getPreviewHost() {
+                    var previewLink = document.querySelector('a[href*=\"cb_preview=1\"]');
+                    if (!previewLink) {
+                        return null;
+                    }
+
+                    return previewLink.closest('joomla-toolbar-button, .toolbar-button, .btn-wrapper')
+                        || previewLink.parentElement;
+                }
+
+                function alignRightButtons() {
+                    var previewHost = getPreviewHost();
+                    var helpHost = getHelpHost();
+
+                    if (previewHost) {
+                        previewHost.style.marginInlineStart = 'auto';
+
+                        if (helpHost && helpHost.parentNode === previewHost.parentNode && previewHost.nextElementSibling !== helpHost) {
+                            previewHost.parentNode.insertBefore(helpHost, previewHost.nextSibling);
+                        }
+
+                        return;
+                    }
+
+                    if (helpHost) {
+                        helpHost.style.marginInlineStart = 'auto';
+                    }
+                }
+
+                function syncActionsState() {
+                    var host = getActionsHost();
+                    if (!host) {
+                        return;
+                    }
+
+                    var disabled = !hasSelectedRows();
+                    host.classList.toggle('cb-disabled', disabled);
+                    host.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+                }
+
+                function init() {
+                    document.addEventListener('change', function (event) {
+                        var target = event.target;
+                        if (!target) {
+                            return;
+                        }
+                        if (target.matches('input[name=\"cid[]\"]') || target.matches('#checkall-toggle')) {
+                            syncActionsState();
+                        }
+                    });
+                    alignRightButtons();
+                    syncActionsState();
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', init, { once: true });
+                } else {
+                    init();
+                }
+            }());"
+        );
 
         ToolbarHelper::cancel('form.cancel', $isNew ? 'JTOOLBAR_CLOSE' : 'JTOOLBAR_CLOSE');
 
@@ -134,7 +252,7 @@ class HtmlView extends BaseHtmlView
                 . '&cb_preview_actor_id=' . $previewActorId
                 . '&cb_preview_actor_name=' . rawurlencode($previewActorName)
                 . '&cb_preview_sig=' . $previewSig;
-            Toolbar::getInstance('toolbar')->appendButton(
+            $toolbar->appendButton(
                 'Link',
                 'eye',
                 Text::_('COM_CONTENTBUILDER_NG_PREVIEW'),

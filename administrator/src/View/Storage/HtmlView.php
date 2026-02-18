@@ -140,8 +140,18 @@ class HtmlView extends BaseHtmlView
             ],
             'btn-success'
         );
-        ToolbarHelper::publish('storage.publish');
-        ToolbarHelper::unpublish('storage.unpublish');
+
+        $toolbar = $app->getDocument()->getToolbar('toolbar');
+        $dropdown = $toolbar->dropdownButton('storage-status-group');
+        $dropdown->text('Actions');
+        $dropdown->toggleSplit(false);
+        $dropdown->icon('fa fa-ellipsis-h');
+        $dropdown->buttonClass('btn btn-action');
+        $dropdown->listCheck(true);
+
+        $childToolbar = $dropdown->getChildToolbar();
+        $childToolbar->publish('storage.publish')->icon('icon-publish text-success')->listCheck(true);
+        $childToolbar->unpublish('storage.unpublish')->icon('icon-unpublish text-danger')->listCheck(true);
 
         $id = (int) ($this->item->id ?? 0);
         $isExternalTable = ((int) ($this->item->bytable ?? 0) === 1);

@@ -12,6 +12,7 @@ namespace CB\Component\Contentbuilder_ng\Administrator\View\Storages;
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
 use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
@@ -81,8 +82,18 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::addNew('storage.add');
         ToolbarHelper::editList('storage.edit');
         ToolbarHelper::deleteList('JGLOBAL_CONFIRM_DELETE', 'storage.delete');
-        ToolbarHelper::publish('storages.publish');
-        ToolbarHelper::unpublish('storages.unpublish');
+        $toolbar = Factory::getApplication()->getDocument()->getToolbar('toolbar');
+
+        $statusDropdown = $toolbar->dropdownButton('storages-status-group');
+        $statusDropdown->text('Actions');
+        $statusDropdown->toggleSplit(false);
+        $statusDropdown->icon('fa fa-ellipsis-h');
+        $statusDropdown->buttonClass('btn btn-action');
+        $statusDropdown->listCheck(true);
+
+        $statusChildToolbar = $statusDropdown->getChildToolbar();
+        $statusChildToolbar->publish('storages.publish')->icon('icon-publish text-success')->listCheck(true);
+        $statusChildToolbar->unpublish('storages.unpublish')->icon('icon-unpublish text-danger')->listCheck(true);
 
         ToolbarHelper::preferences('com_contentbuilder_ng');
         ToolbarHelper::help(
