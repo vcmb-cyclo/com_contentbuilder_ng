@@ -962,6 +962,153 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
   }
 
+  private function deduplicateTargetComponentExtensions(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+    $targetElement = 'com_contentbuilder_ng';
+
+    try {
+      $rows = $db->setQuery(
+        $db->getQuery(true)
+          ->select($db->quoteName(['extension_id', 'enabled', 'manifest_cache']))
+          ->from($db->quoteName('#__extensions'))
+          ->where($db->quoteName('type') . ' = ' . $db->quote('component'))
+          ->where($db->quoteName('element') . ' = ' . $db->quote($targetElement))
+          ->where($db->quoteName('client_id') . ' = 1')
+          ->order($db->quoteName('extension_id') . ' DESC')
+      )->loadAssocList() ?: [];
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed reading component duplicates: ' . $e->getMessage(), Log::WARNING);
+      return;
+    }
+
+    $rows = array_values(array_filter($rows, static function (array $row): bool {
+      return (int) ($row['extension_id'] ?? 0) > 0;
+    }));
+
+    if (count($rows) <= 1) {
+      return;
+    }
+
+    $ids = array_values(array_unique(array_map(
+      static fn(array $row): int => (int) ($row['extension_id'] ?? 0),
+      $rows
+    )));
+
+    $menuRefCounts = [];
+    foreach ($ids as $id) {
+      $menuRefCounts[$id] = 0;
+    }
+
+    try {
+      $refs = $db->setQuery(
+        $db->getQuery(true)
+          ->select([
+            $db->quoteName('component_id'),
+            'COUNT(1) AS refs',
+          ])
+          ->from($db->quoteName('#__menu'))
+          ->where($db->quoteName('client_id') . ' = 1')
+          ->where($db->quoteName('component_id') . ' IN (' . implode(',', $ids) . ')')
+          ->group($db->quoteName('component_id'))
+      )->loadAssocList() ?: [];
+
+      foreach ($refs as $ref) {
+        $refId = (int) ($ref['component_id'] ?? 0);
+        if ($refId > 0) {
+          $menuRefCounts[$refId] = (int) ($ref['refs'] ?? 0);
+        }
+      }
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed reading menu references for duplicate components: ' . $e->getMessage(), Log::WARNING);
+    }
+
+    $keepId = 0;
+    $bestEnabled = -1;
+    $bestHasManifest = -1;
+    $bestMenuRefs = -1;
+    $bestId = -1;
+
+    foreach ($rows as $row) {
+      $id = (int) ($row['extension_id'] ?? 0);
+      if ($id <= 0) {
+        continue;
+      }
+
+      $enabled = (int) ($row['enabled'] ?? 0);
+      $hasManifest = trim((string) ($row['manifest_cache'] ?? '')) !== '' ? 1 : 0;
+      $menuRefs = (int) ($menuRefCounts[$id] ?? 0);
+
+      $isBetter = false;
+      if ($keepId === 0) {
+        $isBetter = true;
+      } elseif ($enabled > $bestEnabled) {
+        $isBetter = true;
+      } elseif ($enabled === $bestEnabled && $hasManifest > $bestHasManifest) {
+        $isBetter = true;
+      } elseif ($enabled === $bestEnabled && $hasManifest === $bestHasManifest && $menuRefs > $bestMenuRefs) {
+        $isBetter = true;
+      } elseif ($enabled === $bestEnabled && $hasManifest === $bestHasManifest && $menuRefs === $bestMenuRefs && $id > $bestId) {
+        $isBetter = true;
+      }
+
+      if ($isBetter) {
+        $keepId = $id;
+        $bestEnabled = $enabled;
+        $bestHasManifest = $hasManifest;
+        $bestMenuRefs = $menuRefs;
+        $bestId = $id;
+      }
+    }
+
+    if ($keepId <= 0) {
+      return;
+    }
+
+    $removeIds = array_values(array_filter($ids, static fn(int $id): bool => $id !== $keepId));
+    if (empty($removeIds)) {
+      return;
+    }
+
+    try {
+      $db->setQuery(
+        $db->getQuery(true)
+          ->update($db->quoteName('#__menu'))
+          ->set($db->quoteName('component_id') . ' = ' . $keepId)
+          ->where($db->quoteName('component_id') . ' IN (' . implode(',', $removeIds) . ')')
+      )->execute();
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed remapping menu component ids during dedupe: ' . $e->getMessage(), Log::WARNING);
+    }
+
+    foreach (['#__schemas', '#__update_sites_extensions'] as $table) {
+      try {
+        $db->setQuery(
+          $db->getQuery(true)
+            ->delete($db->quoteName($table))
+            ->where($db->quoteName('extension_id') . ' IN (' . implode(',', $removeIds) . ')')
+        )->execute();
+      } catch (\Throwable $e) {
+        $this->log('[WARNING] Failed cleaning ' . $table . ' during component dedupe: ' . $e->getMessage(), Log::WARNING);
+      }
+    }
+
+    try {
+      $db->setQuery(
+        $db->getQuery(true)
+          ->delete($db->quoteName('#__extensions'))
+          ->where($db->quoteName('extension_id') . ' IN (' . implode(',', $removeIds) . ')')
+      )->execute();
+
+      $deleted = (int) $db->getAffectedRows();
+      $this->log(
+        "[OK] Deduplicated {$targetElement} component rows: kept extension_id {$keepId}, removed {$deleted} duplicate(s)."
+      );
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed deleting duplicate component rows: ' . $e->getMessage(), Log::WARNING);
+    }
+  }
+
   private function resolveMenuAlias(int $parentId, string $baseAlias): string
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
@@ -1980,6 +2127,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       $this->removeLegacyPlugins();
     }
 
+    $this->deduplicateTargetComponentExtensions();
     $this->normalizeBrokenTargetMenuLinks();
     $this->ensureAdministrationMainMenuEntry();
     $this->ensureSubmenuQuickTasks();
