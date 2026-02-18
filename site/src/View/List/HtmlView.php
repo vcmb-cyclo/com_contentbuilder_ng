@@ -59,7 +59,9 @@ class HtmlView extends BaseHtmlView
 
 
         $pagination = $this->getModel()->getPagination();
-        $pagination->showLimitBox = true;
+        if (\is_object($pagination) && property_exists($pagination, 'showLimitBox')) {
+            $pagination->showLimitBox = true;
+        }
         $total = $this->get('Total');
 
         $state = $this->get('state');
