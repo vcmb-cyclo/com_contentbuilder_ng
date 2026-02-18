@@ -29,6 +29,7 @@ class HtmlView extends BaseHtmlView
     public $theme_css = '';
     public $theme_js = '';
     public $show_page_heading = false;
+    public $form_name = '';
     public $page_title = '';
     public $event;
     public $record_id = 0;
@@ -112,6 +113,10 @@ CSS;
                 // Model exposes the rendered markup as $item->template; accept null/empty here.
                 if (($this->tpl === null || $this->tpl === '') && property_exists($this->item, 'template')) {
                     $this->tpl = $this->item->template;
+                }
+
+                if ($this->form_name === '' && property_exists($this->item, 'name')) {
+                    $this->form_name = (string) $this->item->name;
                 }
 
                 if ($this->id === 0 && property_exists($this->item, 'form_id')) {

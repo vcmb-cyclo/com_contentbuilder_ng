@@ -46,6 +46,14 @@ $previewActorId = $input->getInt('cb_preview_actor_id', 0);
 $previewActorName = (string) $input->getString('cb_preview_actor_name', '');
 $isAdminPreview = $input->getBool('cb_preview_ok', false);
 $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&task=form.edit&id=' . (int) $input->getInt('id', 0);
+$previewFormName = trim((string) ($this->form_name ?? ''));
+if ($previewFormName === '') {
+    $previewFormName = trim((string) ($this->page_title ?? ''));
+}
+if ($previewFormName === '') {
+    $previewFormName = Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE');
+}
+$previewFormName = htmlspecialchars($previewFormName, ENT_QUOTES, 'UTF-8');
 if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
     $previewQuery = '&cb_preview=1'
         . '&cb_preview_until=' . $previewUntil
@@ -107,7 +115,7 @@ endif;
 <?php if ($isAdminPreview): ?>
     <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
         <span>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDER_NG_PREVIEW_TAB_CONTENT_TEMPLATE')); ?>
+            <?php echo Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CURRENT_FORM', $previewFormName) . ' - ' . Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDER_NG_PREVIEW_TAB_CONTENT_TEMPLATE')); ?>
         </span>
         <a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
             <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>

@@ -391,6 +391,7 @@ CSS;
 
 		$this->show_page_heading = $subject->show_page_heading;
 		$this->tpl = $subject->template;
+		$this->form_name = $subject->name ?? '';
 		$this->page_title = $subject->page_title;
 		$this->created = $subject->created;
 		$this->created_by = $subject->created_by;
