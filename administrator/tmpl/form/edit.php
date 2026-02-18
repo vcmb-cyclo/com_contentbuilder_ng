@@ -253,6 +253,22 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         return hex ? '#' + hex : '';
     }
 
+    function cbUpdateColorisDefaultFromInput(input) {
+        if (!input || typeof window.Coloris !== 'function') {
+            return;
+        }
+
+        var normalized = cbNormalizeColorForNativePicker(input.value);
+
+        if (!normalized) {
+            return;
+        }
+
+        window.Coloris({
+            defaultColor: normalized
+        });
+    }
+
     function cbPreviewTextColor(hex) {
         var red = parseInt(hex.substr(0, 2), 16);
         var green = parseInt(hex.substr(2, 2), 16);
@@ -353,7 +369,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             alpha: false,
             format: 'hex',
             clearButton: false,
-            themeMode: 'light'
+            themeMode: 'light',
+            defaultColor: '#FFFFFF'
         });
         cbColorisConfigured = true;
     }
@@ -364,10 +381,21 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
     window.addEventListener('load', cbInitColoris);
     document.addEventListener('shown.bs.tab', cbInitListStateColorControls);
     document.addEventListener('shown.bs.tab', cbInitColoris);
+    document.addEventListener('pointerdown', function(event) {
+        if (event.target && event.target.matches('input[data-cb-color-text="1"]')) {
+            cbUpdateColorisDefaultFromInput(event.target);
+        }
+    }, true);
+    document.addEventListener('focusin', function(event) {
+        if (event.target && event.target.matches('input[data-cb-color-text="1"]')) {
+            cbUpdateColorisDefaultFromInput(event.target);
+        }
+    });
     document.addEventListener('input', function(event) {
         if (event.target && event.target.matches('input[data-cb-color-text="1"]')) {
             cbApplyListStateColorPreview(event.target);
             cbSyncNativePickerFromTextInput(event.target);
+            cbUpdateColorisDefaultFromInput(event.target);
             return;
         }
 
