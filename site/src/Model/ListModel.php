@@ -207,23 +207,25 @@ class ListModel extends BaseListModel
     protected function populateState($ordering = null, $direction = null)
     {
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
         parent::populateState($ordering, $direction);
 
         $list = (array) $app->input->get('list', [], 'array');
+        $paginationStateKey = $this->getPaginationStateKeyPrefix();
+        $limitKey = $paginationStateKey . '.limit';
+        $startKey = $paginationStateKey . '.start';
 
         // Joomla 6-only pagination state.
         $limit = isset($list['limit']) ? (int) $list['limit'] : 0;
         if ($limit === 0) {
-            $limit = (int) $app->getUserState($option . '.list.limit', 0);
+            $limit = (int) $app->getUserState($limitKey, 0);
         }
         if ($limit === 0) {
             $limit = (int) $app->get('list_limit');
         }
 
         $start = isset($list['start']) ? (int) $list['start'] : 0;
-        if (!$start) {
-            $start = (int) $app->getUserState($option . '.list.start', 0);
+        if ($start <= 0) {
+            $start = (int) $app->getUserState($startKey, 0);
         }
 
         // ✅ RESET page si on change un filtre (ou clique Search/Reset)
@@ -238,11 +240,38 @@ class ListModel extends BaseListModel
         }
 
         // Persist pagination state across bulk actions and redirects.
-        $app->setUserState($option . '.list.limit', (int) $limit);
-        $app->setUserState($option . '.list.start', (int) $start);
+        $app->setUserState($limitKey, (int) $limit);
+        $app->setUserState($startKey, (int) $start);
 
         $this->setState('list.limit', (int) $limit);
         $this->setState('list.start', (int) $start);
+    }
+
+    private function getPaginationStateKeyPrefix(): string
+    {
+        $app = Factory::getApplication();
+        $option = 'com_contentbuilder_ng';
+
+        $formId = (int) $this->_id;
+        if ($formId < 1) {
+            $formId = (int) $app->input->getInt('id', 0);
+        }
+
+        if ($formId < 1 && $app->isClient('site')) {
+            $menu = $app->getMenu()->getActive();
+            if ($menu) {
+                $formId = (int) $menu->getParams()->get('form_id', 0);
+            }
+        }
+
+        $layout = (string) $app->input->getCmd('layout', 'default');
+        if ($layout === '') {
+            $layout = 'default';
+        }
+
+        $itemId = (int) $app->input->getInt('Itemid', 0);
+
+        return $option . '.liststate.' . $formId . '.' . $layout . '.' . $itemId;
     }
 
 

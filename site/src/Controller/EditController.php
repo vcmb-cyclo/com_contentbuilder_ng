@@ -26,6 +26,15 @@ class EditController extends BaseController
 {
     private bool $frontend;
 
+    private function applyPreviewContextForAction(): bool
+    {
+        $formId = (int) $this->input->getInt('id', 0);
+        $isAdminPreview = $this->isValidAdminPreviewRequest($formId);
+        $this->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
+        Factory::getApplication()->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
+        return $isAdminPreview;
+    }
+
     public function __construct(
         $config,
         MVCFactoryInterface $factory,
@@ -68,10 +77,7 @@ class EditController extends BaseController
 
     public function save($apply = false)
     {
-        $formId = Factory::getApplication()->input->getInt('id', 0);
-        $isAdminPreview = $this->isValidAdminPreviewRequest($formId);
-        $this->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
-        Factory::getApplication()->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
+        $isAdminPreview = $this->applyPreviewContextForAction();
 
         if (Factory::getApplication()->isClient('site') && Factory::getApplication()->input->getInt('Itemid', 0)) {
             $menu = Factory::getApplication()->getMenu();
@@ -133,27 +139,6 @@ class EditController extends BaseController
         }
 
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
-        $list = (array) $app->input->get('list', [], 'array');
-        $limit = isset($list['limit']) ? $app->input->getInt('list[limit]', 0) : 0;
-        if ($limit === 0) {
-            $limit = (int) $app->getUserState($option . '.list.limit', 0);
-        }
-        if ($limit === 0) {
-            $limit = (int) $app->get('list_limit');
-        }
-        $start = isset($list['start']) ? $app->input->getInt('list[start]', 0) : 0;
-        if ($start === 0) {
-            $start = (int) $app->getUserState($option . '.list.start', 0);
-        }
-        $ordering = isset($list['ordering']) ? $app->input->getCmd('list[ordering]', '') : '';
-        if ($ordering === '') {
-            $ordering = (string) $app->getUserState($option . 'formsd_filter_order', '');
-        }
-        $direction = isset($list['direction']) ? $app->input->getCmd('list[direction]', '') : '';
-        if ($direction === '') {
-            $direction = (string) $app->getUserState($option . 'formsd_filter_order_Dir', '');
-        }
         $previewQuery = '';
         if ($isAdminPreview) {
             $previewUntil = (int) $app->input->getInt('cb_preview_until', 0);
@@ -168,12 +153,7 @@ class EditController extends BaseController
                     . '&cb_preview_sig=' . rawurlencode($previewSig);
             }
         }
-        $listQuery = http_build_query(['list' => [
-            'limit' => $limit,
-            'start' => $start,
-            'ordering' => $ordering,
-            'direction' => $direction,
-        ]]);
+        $listQuery = $this->buildListQuery();
 
         if (Factory::getApplication()->input->getString('cb_controller', '') == 'edit') {
             $link = Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=edit.display&return=' . Factory::getApplication()->input->get('return', '', 'string') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $previewQuery, false);
@@ -192,7 +172,10 @@ class EditController extends BaseController
 
     public function delete()
     {
-        ContentbuilderLegacyHelper::checkPermissions('delete', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_DELETE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        $isAdminPreview = $this->applyPreviewContextForAction();
+        if (!$isAdminPreview) {
+            ContentbuilderLegacyHelper::checkPermissions('delete', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_DELETE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        }
 
         $selectedItems = array_values(
             array_filter(
@@ -233,7 +216,22 @@ class EditController extends BaseController
             $ok = false;
             $this->app->enqueueMessage($e->getMessage(), 'warning');
         }
-        $msg = $ok ? Text::_('COM_CONTENTBUILDER_NG_ENTRIES_DELETED') : Text::_('COM_CONTENTBUILDER_NG_ERROR');
+        if ($ok) {
+            $deletedCount = count($selectedItems);
+            if ($deletedCount > 1) {
+                $msg = Text::plural('JLIB_APPLICATION_N_ITEMS_DELETED', $deletedCount);
+                if (
+                    $msg === 'JLIB_APPLICATION_N_ITEMS_DELETED'
+                    || str_starts_with($msg, 'JLIB_APPLICATION_N_ITEMS_DELETED_')
+                ) {
+                    $msg = Text::_('COM_CONTENTBUILDER_NG_ENTRIES_DELETED') . ' (' . $deletedCount . ')';
+                }
+            } else {
+                $msg = Text::_('COM_CONTENTBUILDER_NG_ENTRIES_DELETED');
+            }
+        } else {
+            $msg = Text::_('COM_CONTENTBUILDER_NG_ERROR');
+        }
         $type = $ok ? 'message' : 'warning';
 
         // Clear record context to avoid redirects back to details/edit for a deleted record.
@@ -259,7 +257,10 @@ class EditController extends BaseController
 
     public function state()
     {
-        ContentbuilderLegacyHelper::checkPermissions('state', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        $isAdminPreview = $this->applyPreviewContextForAction();
+        if (!$isAdminPreview) {
+            ContentbuilderLegacyHelper::checkPermissions('state', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        }
 
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
             ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
@@ -275,8 +276,10 @@ class EditController extends BaseController
 
     public function publish()
     {
-
-        ContentbuilderLegacyHelper::checkPermissions('publish', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        $isAdminPreview = $this->applyPreviewContextForAction();
+        if (!$isAdminPreview) {
+            ContentbuilderLegacyHelper::checkPermissions('publish', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        }
 
         $model = $this->getModel('Edit', 'Site');
         if (!$model) {
@@ -302,8 +305,10 @@ class EditController extends BaseController
 
     public function language()
     {
-
-        ContentbuilderLegacyHelper::checkPermissions('language', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_CHANGE_LANGUAGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        $isAdminPreview = $this->applyPreviewContextForAction();
+        if (!$isAdminPreview) {
+            ContentbuilderLegacyHelper::checkPermissions('language', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_CHANGE_LANGUAGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+        }
 
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
             ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
@@ -319,21 +324,36 @@ class EditController extends BaseController
 
     private function buildListQuery(): string
     {
+        $state = $this->resolveListState();
+
+        return http_build_query(['list' => [
+            'limit' => $state['limit'],
+            'start' => $state['start'],
+            'ordering' => $state['ordering'],
+            'direction' => $state['direction'],
+        ]]);
+    }
+
+    private function resolveListState(): array
+    {
         $app = Factory::getApplication();
         $option = 'com_contentbuilder_ng';
-        $list = (array) $app->input->get('list', [], 'array');
+        $list = (array) $this->input->get('list', [], 'array');
+        $stateKeyPrefix = $this->getPaginationStateKeyPrefix();
+        $limitKey = $stateKeyPrefix . '.limit';
+        $startKey = $stateKeyPrefix . '.start';
 
         $limit = isset($list['limit']) ? $app->input->getInt('list[limit]', 0) : 0;
         if ($limit === 0) {
-            $limit = (int) $app->getUserState($option . '.list.limit', 0);
+            $limit = (int) $app->getUserState($limitKey, 0);
         }
         if ($limit === 0) {
             $limit = (int) $app->get('list_limit');
         }
 
         $start = isset($list['start']) ? $app->input->getInt('list[start]', 0) : 0;
-        if ($start === 0) {
-            $start = (int) $app->getUserState($option . '.list.start', 0);
+        if ($start <= 0) {
+            $start = (int) $app->getUserState($startKey, 0);
         }
 
         $ordering = isset($list['ordering']) ? $app->input->getCmd('list[ordering]', '') : '';
@@ -346,12 +366,35 @@ class EditController extends BaseController
             $direction = (string) $app->getUserState($option . 'formsd_filter_order_Dir', '');
         }
 
-        return http_build_query(['list' => [
-            'limit' => $limit,
-            'start' => $start,
-            'ordering' => $ordering,
-            'direction' => $direction,
-        ]]);
+        return [
+            'limit' => (int) $limit,
+            'start' => (int) $start,
+            'ordering' => (string) $ordering,
+            'direction' => (string) $direction,
+        ];
+    }
+
+    private function getPaginationStateKeyPrefix(): string
+    {
+        $app = Factory::getApplication();
+        $option = 'com_contentbuilder_ng';
+
+        $formId = (int) $this->input->getInt('id', 0);
+        if ($formId < 1) {
+            $menu = $app->getMenu()->getActive();
+            if ($menu) {
+                $formId = (int) $menu->getParams()->get('form_id', 0);
+            }
+        }
+
+        $layout = (string) $this->input->getCmd('layout', 'default');
+        if ($layout === '') {
+            $layout = 'default';
+        }
+
+        $itemId = (int) $this->input->getInt('Itemid', 0);
+
+        return $option . '.liststate.' . $formId . '.' . $layout . '.' . $itemId;
     }
 
     private function buildPreviewQuery(): string

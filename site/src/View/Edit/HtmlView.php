@@ -53,6 +53,34 @@ class HtmlView extends BaseHtmlView
     protected $item;
     protected $form;
 
+    private function getFallbackEditThemeCss(): string
+    {
+        return <<<'CSS'
+.cbEditableWrapper{
+    max-width:1120px;
+    margin:.7rem auto 1.4rem;
+    padding:.85rem .95rem .95rem;
+    border:1px solid rgba(36,61,86,.12);
+    border-radius:.85rem;
+    background:radial-gradient(circle at top right,rgba(13,110,253,.08),transparent 38%),linear-gradient(180deg,#fff 0,#f8fbff 100%);
+    box-shadow:0 .55rem 1.2rem rgba(16,32,56,.08)
+}
+.cbEditableWrapper .cbToolBar{padding:.38rem .46rem;border:1px solid rgba(45,73,104,.14);border-radius:.72rem;background:rgba(255,255,255,.85)}
+.cbEditableWrapper .cbToolBar.mb-5{margin-bottom:.85rem!important}
+.cbEditableWrapper .cbToolBar .cbButton.btn{border-radius:999px;font-weight:600;font-size:.85rem;padding:.34rem .78rem}
+.cbEditableWrapper fieldset.border.rounded.p-3.mb-3{padding:.68rem!important;margin-bottom:.58rem!important;border-radius:.72rem!important}
+.cbEditableWrapper .mb-3{margin-bottom:.58rem!important}
+.cbEditableWrapper .form-label,.cbEditableWrapper label{font-size:.86rem;margin-bottom:.22rem}
+.cbEditableWrapper :is(input[type="text"],input[type="email"],input[type="number"],input[type="date"],input[type="datetime-local"],input[type="time"],input[type="url"],input[type="password"],textarea,select){min-height:2.05rem;padding:.34rem .52rem}
+.cbEditableWrapper .form-select.form-select-sm,.cbEditableWrapper .form-control.form-control-sm{min-height:1.92rem;font-size:.88rem;padding-top:.24rem;padding-bottom:.24rem}
+@media (max-width:767.98px){
+    .cbEditableWrapper{margin-top:.45rem;padding:.72rem .64rem .78rem;border-radius:.72rem}
+    .cbEditableWrapper .cbToolBar{padding:.32rem}
+    .cbEditableWrapper .cbToolBar .cbButton.btn{width:100%;justify-content:center}
+}
+CSS;
+    }
+
     public function display($tpl = null): void
     {
         $model = $this->getModel();
@@ -101,13 +129,16 @@ class HtmlView extends BaseHtmlView
                     }
                     $dispatcher = Factory::getApplication()->getDispatcher();
 
-                    $eventObj = new \Joomla\Event\Event('onContentTemplateCss', []);
-                    $dispatcher->dispatch('onContentTemplateCss', $eventObj);
+                    $eventObj = new \Joomla\Event\Event('onEditableTemplateCss', []);
+                    $dispatcher->dispatch('onEditableTemplateCss', $eventObj);
                     $results = $eventObj->getArgument('result') ?: [];
-                    $this->theme_css = implode('', $results);
+                    $this->theme_css = trim(implode('', $results));
+                    if ($this->theme_css === '') {
+                        $this->theme_css = $this->getFallbackEditThemeCss();
+                    }
 
-                    $eventObj = new \Joomla\Event\Event('onContentTemplateJavascript', []);
-                    $dispatcher->dispatch('onContentTemplateJavascript', $eventObj);
+                    $eventObj = new \Joomla\Event\Event('onEditableTemplateJavascript', []);
+                    $dispatcher->dispatch('onEditableTemplateJavascript', $eventObj);
                     $results = $eventObj->getArgument('result') ?: [];
                     $this->theme_js = implode('', $results);
                 }

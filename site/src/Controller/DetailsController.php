@@ -94,21 +94,12 @@ class DetailsController extends BaseController
                 $auth = $this->frontend ? ContentbuilderLegacyHelper::authorizeFe('new') : ContentbuilderLegacyHelper::authorize('new');
 
                 if ($auth) {
-                    $app = Factory::getApplication();
-                    $option = 'com_contentbuilder_ng';
-                    $list = (array) $app->input->get('list', [], 'array');
-                    $limit = isset($list['limit']) ? $app->input->getInt('list[limit]', 0) : (int) $app->getUserState($option . '.list.limit', 0);
-                    if ($limit === 0) {
-                        $limit = (int) $app->get('list_limit');
-                    }
-                    $start = isset($list['start']) ? $app->input->getInt('list[start]', 0) : (int) $app->getUserState($option . '.list.start', 0);
-                    $ordering = isset($list['ordering']) ? $app->input->getCmd('list[ordering]', '') : (string) $app->getUserState($option . 'formsd_filter_order', '');
-                    $direction = isset($list['direction']) ? $app->input->getCmd('list[direction]', '') : (string) $app->getUserState($option . 'formsd_filter_order_Dir', '');
+                    $state = $this->resolveListState();
                     $listQuery = http_build_query(['list' => [
-                        'limit' => $limit,
-                        'start' => $start,
-                        'ordering' => $ordering,
-                        'direction' => $direction,
+                        'limit' => $state['limit'],
+                        'start' => $state['start'],
+                        'ordering' => $state['ordering'],
+                        'direction' => $state['direction'],
                     ]]);
 
                     Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder_ng&task=edit.display&latest=1&backtolist=' . Factory::getApplication()->input->getInt('backtolist', 0) . '&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&record_id=' . ($listQuery !== '' ? '' : '') . ($listQuery !== '' ? '&' . $listQuery : ''), false));
@@ -172,6 +163,62 @@ class DetailsController extends BaseController
         }
 
         parent::display();
+    }
+
+    private function resolveListState(): array
+    {
+        $app = Factory::getApplication();
+        $option = 'com_contentbuilder_ng';
+        $list = (array) $app->input->get('list', [], 'array');
+        $stateKeyPrefix = $this->getPaginationStateKeyPrefix();
+        $limitKey = $stateKeyPrefix . '.limit';
+        $startKey = $stateKeyPrefix . '.start';
+
+        $limit = isset($list['limit']) ? $app->input->getInt('list[limit]', 0) : 0;
+        if ($limit === 0) {
+            $limit = (int) $app->getUserState($limitKey, 0);
+        }
+        if ($limit === 0) {
+            $limit = (int) $app->get('list_limit');
+        }
+
+        $start = isset($list['start']) ? $app->input->getInt('list[start]', 0) : 0;
+        if ($start <= 0) {
+            $start = (int) $app->getUserState($startKey, 0);
+        }
+
+        $ordering = isset($list['ordering']) ? $app->input->getCmd('list[ordering]', '') : (string) $app->getUserState($option . 'formsd_filter_order', '');
+        $direction = isset($list['direction']) ? $app->input->getCmd('list[direction]', '') : (string) $app->getUserState($option . 'formsd_filter_order_Dir', '');
+
+        return [
+            'limit' => (int) $limit,
+            'start' => (int) $start,
+            'ordering' => (string) $ordering,
+            'direction' => (string) $direction,
+        ];
+    }
+
+    private function getPaginationStateKeyPrefix(): string
+    {
+        $app = Factory::getApplication();
+        $option = 'com_contentbuilder_ng';
+
+        $formId = (int) $app->input->getInt('id', 0);
+        if ($formId < 1) {
+            $menu = $app->getMenu()->getActive();
+            if ($menu) {
+                $formId = (int) $menu->getParams()->get('form_id', 0);
+            }
+        }
+
+        $layout = (string) $app->input->getCmd('layout', 'default');
+        if ($layout === '') {
+            $layout = 'default';
+        }
+
+        $itemId = (int) $app->input->getInt('Itemid', 0);
+
+        return $option . '.liststate.' . $formId . '.' . $layout . '.' . $itemId;
     }
 
     /**

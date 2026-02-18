@@ -39,35 +39,15 @@ class ListController extends BaseController
         );
 
         if ($selectedItems === []) {
-            $list = (array) $this->input->get('list', [], 'array');
-            $option = 'com_contentbuilder_ng';
+            $state = $this->resolveListState();
             $previewQuery = $this->buildPreviewQuery();
-            $limit = isset($list['limit']) ? $this->input->getInt('list[limit]', 0) : 0;
-            if ($limit === 0) {
-                $limit = (int) $this->app->getUserState($option . '.list.limit', 0);
-            }
-            if ($limit === 0) {
-                $limit = (int) $this->app->get('list_limit');
-            }
-            $start = isset($list['start']) ? $this->input->getInt('list[start]', 0) : 0;
-            if (!$start) {
-                $start = (int) $this->app->getUserState($option . '.list.start', 0);
-            }
-            $ordering = isset($list['ordering']) ? $this->input->getCmd('list[ordering]', '') : '';
-            if ($ordering === '') {
-                $ordering = (string) $this->app->getUserState($option . '.formsd_filter_order', '');
-            }
-            $direction = isset($list['direction']) ? $this->input->getCmd('list[direction]', '') : '';
-            if ($direction === '') {
-                $direction = (string) $this->app->getUserState($option . '.formsd_filter_order_Dir', '');
-            }
             $link = Route::_(
                 'index.php?option=com_contentbuilder_ng&task=list.display&id='
                 . $this->input->getInt('id', 0)
-                . '&list[limit]=' . $limit
-                . '&list[start]=' . $start
-                . '&list[ordering]=' . $ordering
-                . '&list[direction]=' . $direction
+                . '&list[limit]=' . $state['limit']
+                . '&list[start]=' . $state['start']
+                . '&list[ordering]=' . $state['ordering']
+                . '&list[direction]=' . $state['direction']
                 . $previewQuery
                 . '&Itemid=' . $this->input->getInt('Itemid', 0),
                 false
@@ -99,42 +79,37 @@ class ListController extends BaseController
             $this->app->enqueueMessage($e->getMessage(), 'warning');
         }
 
-        $msg = $ok ? Text::_('COM_CONTENTBUILDER_NG_ENTRIES_DELETED') : Text::_('COM_CONTENTBUILDER_NG_ERROR');
+        if ($ok) {
+            $deletedCount = count($selectedItems);
+            if ($deletedCount > 1) {
+                $msg = Text::plural('JLIB_APPLICATION_N_ITEMS_DELETED', $deletedCount);
+                if (
+                    $msg === 'JLIB_APPLICATION_N_ITEMS_DELETED'
+                    || str_starts_with($msg, 'JLIB_APPLICATION_N_ITEMS_DELETED_')
+                ) {
+                    $msg = Text::_('COM_CONTENTBUILDER_NG_ENTRIES_DELETED') . ' (' . $deletedCount . ')';
+                }
+            } else {
+                $msg = Text::_('COM_CONTENTBUILDER_NG_ENTRIES_DELETED');
+            }
+        } else {
+            $msg = Text::_('COM_CONTENTBUILDER_NG_ERROR');
+        }
         $type = $ok ? 'message' : 'warning';
 
         // Clear record context to avoid redirects back to a deleted record.
         $this->input->set('record_id', 0);
         Factory::getApplication()->input->set('record_id', 0);
 
-        $list = (array) $this->input->get('list', [], 'array');
-        $option = 'com_contentbuilder_ng';
+        $state = $this->resolveListState();
         $previewQuery = $this->buildPreviewQuery();
-        $limit = isset($list['limit']) ? $this->input->getInt('list[limit]', 0) : 0;
-        if ($limit === 0) {
-            $limit = (int) $this->app->getUserState($option . '.list.limit', 0);
-        }
-        if ($limit === 0) {
-            $limit = (int) $this->app->get('list_limit');
-        }
-        $start = isset($list['start']) ? $this->input->getInt('list[start]', 0) : 0;
-        if (!$start) {
-            $start = (int) $this->app->getUserState($option . '.list.start', 0);
-        }
-        $ordering = isset($list['ordering']) ? $this->input->getCmd('list[ordering]', '') : '';
-        if ($ordering === '') {
-            $ordering = (string) $this->app->getUserState($option . '.formsd_filter_order', '');
-        }
-        $direction = isset($list['direction']) ? $this->input->getCmd('list[direction]', '') : '';
-        if ($direction === '') {
-            $direction = (string) $this->app->getUserState($option . '.formsd_filter_order_Dir', '');
-        }
         $link = Route::_(
             'index.php?option=com_contentbuilder_ng&task=list.display&id='
             . $this->input->getInt('id', 0)
-            . '&list[limit]=' . $limit
-            . '&list[start]=' . $start
-            . '&list[ordering]=' . $ordering
-            . '&list[direction]=' . $direction
+            . '&list[limit]=' . $state['limit']
+            . '&list[start]=' . $state['start']
+            . '&list[ordering]=' . $state['ordering']
+            . '&list[direction]=' . $state['direction']
             . $previewQuery
             . '&Itemid=' . $this->input->getInt('Itemid', 0),
             false
@@ -168,35 +143,15 @@ class ListController extends BaseController
 
         $model->change_list_states();
 
-        $list = (array) $this->input->get('list', [], 'array');
-        $option = 'com_contentbuilder_ng';
+        $state = $this->resolveListState();
         $previewQuery = $this->buildPreviewQuery();
-        $limit = isset($list['limit']) ? $this->input->getInt('list[limit]', 0) : 0;
-        if ($limit === 0) {
-            $limit = (int) $this->app->getUserState($option . '.list.limit', 0);
-        }
-        if ($limit === 0) {
-            $limit = (int) $this->app->get('list_limit');
-        }
-        $start = isset($list['start']) ? $this->input->getInt('list[start]', 0) : 0;
-        if (!$start) {
-            $start = (int) $this->app->getUserState($option . '.list.start', 0);
-        }
-        $ordering = isset($list['ordering']) ? $this->input->getCmd('list[ordering]', '') : '';
-        if ($ordering === '') {
-            $ordering = (string) $this->app->getUserState($option . '.formsd_filter_order', '');
-        }
-        $direction = isset($list['direction']) ? $this->input->getCmd('list[direction]', '') : '';
-        if ($direction === '') {
-            $direction = (string) $this->app->getUserState($option . '.formsd_filter_order_Dir', '');
-        }
         $link = Route::_(
             'index.php?option=com_contentbuilder_ng&task=list.display&id='
             . $this->input->getInt('id', 0)
-            . '&list[limit]=' . $limit
-            . '&list[start]=' . $start
-            . '&list[ordering]=' . $ordering
-            . '&list[direction]=' . $direction
+            . '&list[limit]=' . $state['limit']
+            . '&list[start]=' . $state['start']
+            . '&list[ordering]=' . $state['ordering']
+            . '&list[direction]=' . $state['direction']
             . $previewQuery
             . '&Itemid=' . $this->input->getInt('Itemid', 0),
             false
@@ -233,35 +188,15 @@ class ListController extends BaseController
             ? Text::_('COM_CONTENTBUILDER_NG_PUBLISHED')
             : Text::_('COM_CONTENTBUILDER_NG_PUNPUBLISHED');
 
-        $list = (array) $this->input->get('list', [], 'array');
-        $option = 'com_contentbuilder_ng';
+        $state = $this->resolveListState();
         $previewQuery = $this->buildPreviewQuery();
-        $limit = isset($list['limit']) ? $this->input->getInt('list[limit]', 0) : 0;
-        if ($limit === 0) {
-            $limit = (int) $this->app->getUserState($option . '.list.limit', 0);
-        }
-        if ($limit === 0) {
-            $limit = (int) $this->app->get('list_limit');
-        }
-        $start = isset($list['start']) ? $this->input->getInt('list[start]', 0) : 0;
-        if (!$start) {
-            $start = (int) $this->app->getUserState($option . '.list.start', 0);
-        }
-        $ordering = isset($list['ordering']) ? $this->input->getCmd('list[ordering]', '') : '';
-        if ($ordering === '') {
-            $ordering = (string) $this->app->getUserState($option . '.formsd_filter_order', '');
-        }
-        $direction = isset($list['direction']) ? $this->input->getCmd('list[direction]', '') : '';
-        if ($direction === '') {
-            $direction = (string) $this->app->getUserState($option . '.formsd_filter_order_Dir', '');
-        }
         $link = Route::_(
             'index.php?option=com_contentbuilder_ng&task=list.display&id='
             . $this->input->getInt('id', 0)
-            . '&list[limit]=' . $limit
-            . '&list[start]=' . $start
-            . '&list[ordering]=' . $ordering
-            . '&list[direction]=' . $direction
+            . '&list[limit]=' . $state['limit']
+            . '&list[start]=' . $state['start']
+            . '&list[ordering]=' . $state['ordering']
+            . '&list[direction]=' . $state['direction']
             . $previewQuery
             . '&Itemid=' . $this->input->getInt('Itemid', 0),
             false
@@ -322,6 +257,69 @@ class ListController extends BaseController
         $this->input->set('layout', ($layout === 'latest') ? null : $layout);
 
         return parent::display($cachable, $urlparams);
+    }
+
+    private function resolveListState(): array
+    {
+        $app = Factory::getApplication();
+        $option = 'com_contentbuilder_ng';
+        $list = (array) $this->input->get('list', [], 'array');
+        $stateKeyPrefix = $this->getPaginationStateKeyPrefix();
+        $limitKey = $stateKeyPrefix . '.limit';
+        $startKey = $stateKeyPrefix . '.start';
+
+        $limit = isset($list['limit']) ? $this->input->getInt('list[limit]', 0) : 0;
+        if ($limit === 0) {
+            $limit = (int) $app->getUserState($limitKey, 0);
+        }
+        if ($limit === 0) {
+            $limit = (int) $app->get('list_limit');
+        }
+
+        $start = isset($list['start']) ? $this->input->getInt('list[start]', 0) : 0;
+        if ($start <= 0) {
+            $start = (int) $app->getUserState($startKey, 0);
+        }
+
+        $ordering = isset($list['ordering']) ? $this->input->getCmd('list[ordering]', '') : '';
+        if ($ordering === '') {
+            $ordering = (string) $app->getUserState($option . '.formsd_filter_order', '');
+        }
+
+        $direction = isset($list['direction']) ? $this->input->getCmd('list[direction]', '') : '';
+        if ($direction === '') {
+            $direction = (string) $app->getUserState($option . '.formsd_filter_order_Dir', '');
+        }
+
+        return [
+            'limit' => (int) $limit,
+            'start' => (int) $start,
+            'ordering' => (string) $ordering,
+            'direction' => (string) $direction,
+        ];
+    }
+
+    private function getPaginationStateKeyPrefix(): string
+    {
+        $app = Factory::getApplication();
+        $option = 'com_contentbuilder_ng';
+
+        $formId = (int) $this->input->getInt('id', 0);
+        if ($formId < 1) {
+            $menu = $app->getMenu()->getActive();
+            if ($menu) {
+                $formId = (int) $menu->getParams()->get('form_id', 0);
+            }
+        }
+
+        $layout = (string) $this->input->getCmd('layout', 'default');
+        if ($layout === '') {
+            $layout = 'default';
+        }
+
+        $itemId = (int) $this->input->getInt('Itemid', 0);
+
+        return $option . '.liststate.' . $formId . '.' . $layout . '.' . $itemId;
     }
 
     /**

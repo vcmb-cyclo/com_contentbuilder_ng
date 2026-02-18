@@ -243,7 +243,9 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 <?php endif; ?>
 <?php if ($isAdminPreview): ?>
 	<div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-		<span><?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE'); ?></span>
+		<span>
+			<?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDER_NG_PREVIEW_TAB_VIEW')); ?>
+		</span>
 		<a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
 			<?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>
 		</a>
@@ -458,14 +460,14 @@ by this block. -->
 										</div>
 									<?php endif; ?>
 
-									<?php if ($this->export_xls) : ?>
-										<a class="btn btn-sm btn-outline-success align-self-center d-inline-flex align-items-center gap-1 rounded-pill"
-											href="<?php echo Route::_('index.php?option=com_contentbuilder_ng&view=export&id=' . (int) Factory::getApplication()->input->getInt('id', 0) . '&type=xls&format=raw&tmpl=component'); ?>"
-											title="Export Excel">
-											<span class="icon-download" aria-hidden="true"></span>
-											<span>Excel</span>
-										</a>
-									<?php endif; ?>
+										<?php if ($this->export_xls) : ?>
+											<a class="btn btn-sm btn-outline-success align-self-center d-inline-flex align-items-center gap-1 rounded-pill"
+												href="<?php echo Route::_('index.php?option=com_contentbuilder_ng&view=export&id=' . (int) Factory::getApplication()->input->getInt('id', 0) . '&type=xls&format=raw&tmpl=component'); ?>"
+												title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EXPORT_XLSX_TOOLTIP'); ?>">
+												<span class="icon-download" aria-hidden="true"></span>
+												<span>XLSX</span>
+											</a>
+										<?php endif; ?>
 
 							</div>
 						<?php endif; ?>

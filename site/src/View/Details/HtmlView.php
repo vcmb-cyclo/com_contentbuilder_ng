@@ -35,6 +35,140 @@ class HtmlView extends BaseHtmlView
     protected $item;
     protected $form;
 
+    private function resolveSiblingRecordIdsByRecordId(object $subject, int $currentRecordId): array
+    {
+        if (
+            $currentRecordId < 1
+            || !isset($subject->type)
+            || trim((string) $subject->type) === ''
+            || !isset($subject->reference_id)
+            || trim((string) $subject->reference_id) === ''
+        ) {
+            return ['previous' => 0, 'next' => 0];
+        }
+
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
+
+        $baseWhere = [
+            $db->quoteName('type') . ' = ' . $db->quote((string) $subject->type),
+            $db->quoteName('reference_id') . ' = ' . $db->quote((string) $subject->reference_id),
+        ];
+
+        if (!$isAdminPreview && !empty($subject->published_only)) {
+            $baseWhere[] = $db->quoteName('published') . ' = 1';
+        }
+
+        try {
+            $prevQuery = $db->getQuery(true)
+                ->select($db->quoteName('record_id'))
+                ->from($db->quoteName('#__contentbuilder_ng_records'))
+                ->where($baseWhere)
+                ->where($db->quoteName('record_id') . ' < ' . (int) $currentRecordId)
+                ->order($db->quoteName('record_id') . ' DESC');
+
+            $db->setQuery($prevQuery, 0, 1);
+            $previous = (int) $db->loadResult();
+
+            $nextQuery = $db->getQuery(true)
+                ->select($db->quoteName('record_id'))
+                ->from($db->quoteName('#__contentbuilder_ng_records'))
+                ->where($baseWhere)
+                ->where($db->quoteName('record_id') . ' > ' . (int) $currentRecordId)
+                ->order($db->quoteName('record_id') . ' ASC');
+
+            $db->setQuery($nextQuery, 0, 1);
+            $next = (int) $db->loadResult();
+        } catch (\Throwable $e) {
+            return ['previous' => 0, 'next' => 0];
+        }
+
+        return ['previous' => $previous, 'next' => $next];
+    }
+
+    private function getListPaginationStateKeys(int $formId): array
+    {
+        $app = Factory::getApplication();
+        $option = 'com_contentbuilder_ng';
+        $layout = (string) $app->input->getCmd('layout', 'default');
+
+        if ($layout === '') {
+            $layout = 'default';
+        }
+
+        $itemId = (int) $app->input->getInt('Itemid', 0);
+        $prefix = $option . '.liststate.' . $formId . '.' . $layout . '.' . $itemId;
+
+        return [
+            'limit' => $prefix . '.limit',
+            'start' => $prefix . '.start',
+        ];
+    }
+
+    private function resolveSiblingRecordIds(object $subject): array
+    {
+        $app = Factory::getApplication();
+        $currentRecordId = (int) $app->input->getInt('record_id', 0);
+        $fallback = $this->resolveSiblingRecordIdsByRecordId($subject, $currentRecordId);
+
+        if ($currentRecordId < 1) {
+            return $fallback;
+        }
+
+        $originalList = (array) $app->input->get('list', [], 'array');
+        $formId = (int) $app->input->getInt('id', 0);
+        $paginationKeys = $this->getListPaginationStateKeys($formId);
+        $limitStateBackup = $app->getUserState($paginationKeys['limit'], null);
+        $startStateBackup = $app->getUserState($paginationKeys['start'], null);
+
+        try {
+            // Reuse the list model so Previous/Next follows the exact active list ordering and filters.
+            $listForNavigation = $originalList;
+            $listForNavigation['start'] = 0;
+            $listForNavigation['limit'] = 1000000;
+            $app->input->set('list', $listForNavigation);
+
+            $factory = $app->bootComponent('com_contentbuilder_ng')->getMVCFactory();
+            $listModel = $factory->createModel('List', 'Site', ['ignore_request' => false]);
+
+            if (!$listModel || !method_exists($listModel, 'getData')) {
+                return $fallback;
+            }
+
+            $listData = $listModel->getData();
+            $items = (is_object($listData) && isset($listData->items) && is_array($listData->items))
+                ? $listData->items
+                : [];
+
+            if (!$items) {
+                return $fallback;
+            }
+
+            $recordIds = [];
+            foreach ($items as $row) {
+                if (is_object($row) && isset($row->colRecord)) {
+                    $recordIds[] = (int) $row->colRecord;
+                }
+            }
+
+            $position = array_search($currentRecordId, $recordIds, true);
+            if ($position === false) {
+                return $fallback;
+            }
+
+            return [
+                'previous' => $position > 0 ? (int) $recordIds[$position - 1] : 0,
+                'next' => ($position + 1) < count($recordIds) ? (int) $recordIds[$position + 1] : 0,
+            ];
+        } catch (\Throwable $e) {
+            return $fallback;
+        } finally {
+            $app->input->set('list', $originalList);
+            $app->setUserState($paginationKeys['limit'], $limitStateBackup);
+            $app->setUserState($paginationKeys['start'], $startStateBackup);
+        }
+    }
+
     private function getFallbackDetailsThemeCss(): string
     {
         return <<<'CSS'
@@ -51,6 +185,8 @@ class HtmlView extends BaseHtmlView
 .cbDetailsWrapper>h1.display-6::after{content:"";display:block;width:4.5rem;height:.24rem;margin-top:.55rem;border-radius:999px;background:linear-gradient(90deg,#0d6efd 0,#3f8cff 100%)}
 .cbDetailsWrapper .cbToolBar{padding:.35rem 0;background:transparent}
 .cbDetailsWrapper .cbToolBar .cbButton.btn{border-radius:999px;font-weight:600;padding-inline:.95rem;box-shadow:0 .32rem .85rem rgba(16,32,56,.12)}
+.cbDetailsWrapper .cbTitleRecordNav .cbButton.btn{border-radius:999px;font-weight:600;letter-spacing:.01em;font-size:.84rem;padding:.32rem .76rem;box-shadow:0 .2rem .56rem rgba(16,32,56,.11);display:inline-flex;align-items:center}
+.cbDetailsWrapper .cbTitleRecordNav .cbButton.btn [class^="icon-"],.cbDetailsWrapper .cbTitleRecordNav .cbButton.btn [class*=" icon-"]{color:#0d6efd}
 .cbDetailsWrapper .cbDetailsBody{margin:.55rem 0 .75rem;padding:1rem 1rem .6rem;border:1px solid rgba(36,61,86,.14);border-radius:.85rem;background:#fff;box-shadow:0 .32rem .85rem rgba(16,32,56,.05)}
 .cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed{margin:0;padding:0;list-style:none;display:grid;gap:.58rem}
 .cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed>li{margin:0;padding:.72rem .82rem;border:1px solid rgba(36,61,86,.14);border-radius:.72rem;background:linear-gradient(180deg,#fff 0,#f7fbff 100%);display:grid;grid-template-columns:minmax(190px,31%) 1fr;gap:.72rem;align-items:start;box-shadow:0 .24rem .62rem rgba(16,32,56,.05)}
@@ -270,6 +406,9 @@ CSS;
 
 		$this->print_button = $subject->print_button;
 		$this->show_back_button = $subject->show_back_button;
+		$siblings = $this->resolveSiblingRecordIds($subject);
+		$this->prev_record_id = (int) ($siblings['previous'] ?? 0);
+		$this->next_record_id = (int) ($siblings['next'] ?? 0);
 
 		parent::display($tpl);
 	}

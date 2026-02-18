@@ -948,6 +948,13 @@ class contentbuilder_ng_com_contentbuilder_ng
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         ArrayHelper::toInteger($items);
+        if (!is_object($this->properties) || trim((string) ($this->properties->name ?? '')) === '') {
+            throw new \RuntimeException('Storage source is not available for delete action.');
+        }
+        $tableName = trim((string) ($this->bytable . $this->properties->name));
+        if ($tableName === '') {
+            throw new \RuntimeException('Storage table name is empty for delete action.');
+        }
         if (count($items)) {
             $db->setQuery("Select reference_id From #__contentbuilder_ng_elements Where `type` = 'upload' And form_id = " . intval($form_id));
             $refs = $db->loadColumn();
@@ -963,7 +970,7 @@ class contentbuilder_ng_com_contentbuilder_ng
                     }
                     $_names = rtrim($_names, ',');
                     if ($_names != '') {
-                        $db->setQuery("Select $_names From " . $this->bytable . $this->properties->name . " Where id In (" . implode(',', $items) . ")");
+                        $db->setQuery("Select $_names From " . $tableName . " Where id In (" . implode(',', $items) . ")");
                         $upload_fields = $db->loadAssocList();
                         $length = count($upload_fields);
                         for ($i = 0; $i < $length; $i++) {
@@ -979,7 +986,7 @@ class contentbuilder_ng_com_contentbuilder_ng
                     }
                 }
             }
-            $db->setQuery("Delete From " . $this->bytable . $this->properties->name . " Where id In (" . implode(',', $items) . ")");
+            $db->setQuery("Delete From " . $tableName . " Where id In (" . implode(',', $items) . ")");
             $db->execute();
         }
         return true;

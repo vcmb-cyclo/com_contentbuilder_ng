@@ -1674,7 +1674,18 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
 
     if ($folder === 'contentbuilder_ng_themes') {
-      return $source . '/plugins/contentbuilder_themes_ng/' . $element;
+      $candidates = [
+        $source . '/plugins/contentbuilder_themes_ng/' . $element,
+        $source . '/plugins/contentbuilder_themes/' . $element,
+      ];
+
+      foreach ($candidates as $candidate) {
+        if (is_dir($candidate)) {
+          return $candidate;
+        }
+      }
+
+      return $candidates[0];
     }
 
     if ($folder === 'content' && str_starts_with($element, 'contentbuilder_ng_')) {
@@ -1685,6 +1696,61 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     if (str_starts_with($folder, 'contentbuilder_ng_')) {
       $short = substr($folder, strlen('contentbuilder_ng_'));
       return $source . '/plugins/plg_' . $short . '_' . $element;
+    }
+
+    return null;
+  }
+
+  private function resolveInstallSourcePath($parent): ?string
+  {
+    $candidates = [];
+    $pushCandidate = static function (array &$list, $path): void {
+      $path = trim((string) ($path ?? ''));
+      if ($path === '') {
+        return;
+      }
+
+      if (is_file($path)) {
+        $path = dirname($path);
+      }
+
+      $path = rtrim($path, '/\\');
+      if ($path === '') {
+        return;
+      }
+
+      if (!in_array($path, $list, true)) {
+        $list[] = $path;
+      }
+    };
+
+    if (is_object($parent)) {
+      if (method_exists($parent, 'getPath')) {
+        $pushCandidate($candidates, $parent->getPath('source'));
+        $pushCandidate($candidates, $parent->getPath('manifest'));
+      }
+
+      if (method_exists($parent, 'getParent')) {
+        $parentInstaller = $parent->getParent();
+        if (is_object($parentInstaller) && method_exists($parentInstaller, 'getPath')) {
+          $pushCandidate($candidates, $parentInstaller->getPath('source'));
+          $pushCandidate($candidates, $parentInstaller->getPath('manifest'));
+        }
+      }
+    }
+
+    $pushCandidate($candidates, __DIR__);
+
+    foreach ($candidates as $candidate) {
+      if (is_dir($candidate . '/plugins')) {
+        return $candidate;
+      }
+    }
+
+    foreach ($candidates as $candidate) {
+      if (is_dir($candidate) && is_dir($candidate . '/administrator') && is_dir($candidate . '/site')) {
+        return $candidate;
+      }
     }
 
     return null;
@@ -2110,12 +2176,11 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $this->ensureFormsNewButtonColumn();
     $this->updateMenuLinks('com_contentbuilder', 'com_contentbuilder_ng');
 
-    $source = null;
-    if (is_object($parent) && method_exists($parent, 'getParent')) {
-      $parentInstaller = $parent->getParent();
-      if ($parentInstaller && method_exists($parentInstaller, 'getPath')) {
-        $source = $parentInstaller->getPath('source');
-      }
+    $source = $this->resolveInstallSourcePath($parent);
+    if ($source && is_dir($source)) {
+      $this->log('[INFO] Plugin install source resolved: ' . $source, Log::INFO, false);
+    } else {
+      $this->log('[WARNING] Plugin install source not resolved; missing plugins may not be installable in this run.', Log::WARNING);
     }
     $this->ensurePluginsInstalled($source, $type === 'update');
     $this->activatePlugins();

@@ -106,7 +106,9 @@ endif;
 
 <?php if ($isAdminPreview): ?>
     <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <span><?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE'); ?></span>
+        <span>
+            <?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDER_NG_PREVIEW_TAB_CONTENT_TEMPLATE')); ?>
+        </span>
         <a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
             <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>
         </a>
@@ -114,9 +116,54 @@ endif;
 <?php endif; ?>
 
 <?php
+$prevRecordId = property_exists($this, 'prev_record_id') ? (int) $this->prev_record_id : 0;
+$nextRecordId = property_exists($this, 'next_record_id') ? (int) $this->next_record_id : 0;
+$detailsNavBaseLink = 'index.php?option=com_contentbuilder_ng&title=' . $input->get('title', '', 'string')
+    . '&task=details.display&id=' . $input->getInt('id', 0)
+    . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '')
+    . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '')
+    . '&Itemid=' . $input->getInt('Itemid', 0)
+    . ($listQuery !== '' ? '&' . $listQuery : '')
+    . $previewQuery;
+$showCloseButton = $this->show_back_button && Factory::getApplication()->input->getBool('cb_show_details_back_button', 1);
+$closeListLink = Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $previewQuery);
+?>
+
+<?php
 if ($this->show_page_heading && $this->page_title) {
 ?>
     <h1 class="display-6 mb-4">
+        <?php if ($prevRecordId > 0 || $nextRecordId > 0 || $showCloseButton): ?>
+            <span class="cbTitleRecordNav d-inline-flex flex-wrap gap-2 float-end ms-2 mb-2">
+                <?php if ($prevRecordId > 0): ?>
+                    <a
+                        class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbPrevButton"
+                        href="<?php echo Route::_($detailsNavBaseLink . '&record_id=' . $prevRecordId); ?>"
+                        title="<?php echo Text::_('JPREVIOUS'); ?>">
+                        <span class="icon-arrow-left me-1" aria-hidden="true"></span>
+                        <?php echo Text::_('JPREVIOUS'); ?>
+                    </a>
+                <?php endif; ?>
+                <?php if ($nextRecordId > 0): ?>
+                    <a
+                        class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbNextButton"
+                        href="<?php echo Route::_($detailsNavBaseLink . '&record_id=' . $nextRecordId); ?>"
+                        title="<?php echo Text::_('JNEXT'); ?>">
+                        <?php echo Text::_('JNEXT'); ?>
+                        <span class="icon-arrow-right ms-1" aria-hidden="true"></span>
+                    </a>
+                <?php endif; ?>
+                <?php if ($showCloseButton): ?>
+                    <a
+                        class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbCloseButton"
+                        href="<?php echo $closeListLink; ?>"
+                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>">
+                        <span class="icon-times me-1" aria-hidden="true"></span>
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>
+                    </a>
+                <?php endif; ?>
+            </span>
+        <?php endif; ?>
         <?php echo $this->page_title; ?>
     </h1>
 <?php
@@ -155,12 +202,12 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
     <?php
     }
     ?>
-    <?php if ($this->show_back_button && Factory::getApplication()->input->getBool('cb_show_details_back_button', 1)): ?>
+    <?php if ($showCloseButton && (!$this->show_page_heading || !$this->page_title)): ?>
         <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton"
-            href="<?php echo Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $previewQuery); ?>"
-            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_BACK'); ?>">
-            <span class="icon-arrow-left me-1" aria-hidden="true"></span>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK') ?>
+            href="<?php echo $closeListLink; ?>"
+            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>">
+            <span class="icon-times me-1" aria-hidden="true"></span>
+            <?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE') ?>
         </a>
     <?php endif; ?>
 
@@ -204,15 +251,6 @@ if (Factory::getApplication()->input->getInt('cb_show_author', 1)) {
         </span><br />
     <?php endif; ?>
 
-<?php
-}
-?>
-
-<?php
-if (Factory::getApplication()->input->getInt('cb_show_details_top_bar', 1) && ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) && $this->show_back_button) || $delete_allowed || $edit_allowed)) {
-?>
-    <br />
-    <br />
 <?php
 }
 ?>

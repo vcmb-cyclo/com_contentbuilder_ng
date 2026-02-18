@@ -272,7 +272,9 @@ if ($showColumnHeader) {
 <div class="cbEditableWrapper" id="cbEditableWrapper<?php echo $this->id; ?>">
     <?php if ($isAdminPreview): ?>
         <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-            <span><?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE'); ?></span>
+            <span>
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDER_NG_PREVIEW_TAB_EDITABLE_TEMPLATE')); ?>
+            </span>
             <a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
                 <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>
             </a>
@@ -550,8 +552,10 @@ if ($showColumnHeader) {
             ?>
             <?php echo $this->event->beforeDisplayContent; ?>
             <?php echo $this->toc ?>
-            <?php echo $columnHeaderHtml; ?>
-            <?php echo $this->tpl ?>
+            <div class="cbEditableBody">
+                <?php echo $columnHeaderHtml; ?>
+                <?php echo $this->tpl ?>
+            </div>
             <?php echo $this->event->afterDisplayContent; ?>
             <br />
             <?php
@@ -590,8 +594,10 @@ if ($showColumnHeader) {
             </form>
             <?php echo $this->event->beforeDisplayContent; ?>
             <?php echo $this->toc ?>
-            <?php echo $columnHeaderHtml; ?>
-            <?php echo $this->tpl ?>
+            <div class="cbEditableBody">
+                <?php echo $columnHeaderHtml; ?>
+                <?php echo $this->tpl ?>
+            </div>
             <?php echo $this->event->afterDisplayContent; ?>
             <br />
             <?php
@@ -608,8 +614,10 @@ if ($showColumnHeader) {
             <form class="form-horizontal" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id',  '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
                 <?php echo $this->event->beforeDisplayContent; ?>
                 <?php echo $this->toc ?>
-                <?php echo $columnHeaderHtml; ?>
-                <?php echo $this->tpl ?>
+                <div class="cbEditableBody">
+                    <?php echo $columnHeaderHtml; ?>
+                    <?php echo $this->tpl ?>
+                </div>
                 <?php echo $this->event->afterDisplayContent; ?>
                 <?php
                 if (Factory::getApplication()->input->get('tmpl', '', 'string') != '') {

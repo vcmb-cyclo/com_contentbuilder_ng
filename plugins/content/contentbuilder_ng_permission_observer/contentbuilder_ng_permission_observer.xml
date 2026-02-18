@@ -2,12 +2,12 @@
 <extension type="plugin" group="content" version="6.0" method="upgrade">
 	<name>ContentBuilder NG Permission Observer</name>
 	<creationDate>December 2025</creationDate>
-	<author>Xavier DANO</author>
+	<author>XDA+GIL</author>
         <license>GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html</license>
 	<copyright>This Joomla! component is released under the GNU/GPL license</copyright>
 	<authorEmail>noreply@vcmb.fr</authorEmail>
 	<authorUrl>breezingforms.vcmb.fr</authorUrl>
-	<version>6.0.0-RC4</version>
+	<version>6.0.0-RC5</version>
 	<administration></administration>
 	<description>
 	<![CDATA[
