@@ -658,7 +658,8 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       . $this->formatBytesForLog($installerInfo['size_bytes'] ?? null)
       . '.'
     );
-    $this->log('[OK] ContentBuilder NG Version ' . $incomingVersion . '.');
+    $incomingVersionHtml = htmlspecialchars($incomingVersion, ENT_QUOTES, 'UTF-8');
+    $this->log('[OK] ContentBuilder NG Version <strong>' . $incomingVersionHtml . '</strong>.');
     $this->log('Preflight installation method call, parameter : ' . $type . '.');
     $this->log('[OK] Detected current version in manifest_cache : ' . $this->getCurrentInstalledVersion() . '.');
 
