@@ -63,7 +63,7 @@ class ElementoptionsTable extends Table
      */
     public $ordering = 0;
 
-    public $linkable = 1;
+    public $linkable = 0;
 
     public $editable = 0;
 

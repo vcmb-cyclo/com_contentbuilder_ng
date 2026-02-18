@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_elements`
     `linkable` tinyint
 (
     1
-) NOT NULL DEFAULT '1',
+) NOT NULL DEFAULT '0',
     `editable` tinyint
 (
     1

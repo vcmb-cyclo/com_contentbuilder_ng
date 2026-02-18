@@ -132,6 +132,16 @@ class HtmlView extends BaseHtmlView
             ->text('COM_CONTENTBUILDER_NG_NO_SEARCH_INCLUDE')
             ->icon('fa fa-search text-danger')
             ->listCheck(true);
+        $statusChildToolbar->standardButton('linkable')
+            ->task('form.linkable')
+            ->text('COM_CONTENTBUILDER_NG_LINKABLE')
+            ->icon('fa fa-link text-success')
+            ->listCheck(true);
+        $statusChildToolbar->standardButton('not_linkable')
+            ->task('form.not_linkable')
+            ->text('COM_CONTENTBUILDER_NG_NOT_LINKABLE')
+            ->icon('fa fa-link text-danger')
+            ->listCheck(true);
         $statusChildToolbar->standardButton('editable')
             ->task('form.editable')
             ->text('COM_CONTENTBUILDER_NG_EDITABLE')

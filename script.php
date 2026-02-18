@@ -2143,6 +2143,32 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
   }
 
+  private function ensureElementsLinkableDefault(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+    try {
+      $columns = $db->getTableColumns('#__contentbuilder_ng_elements', false);
+      if (!is_array($columns) || !array_key_exists('linkable', $columns)) {
+        return;
+      }
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Could not inspect #__contentbuilder_ng_elements.linkable column: ' . $e->getMessage(), Log::WARNING);
+      return;
+    }
+
+    try {
+      $db->setQuery(
+        'ALTER TABLE ' . $db->quoteName('#__contentbuilder_ng_elements')
+        . ' MODIFY ' . $db->quoteName('linkable')
+        . " TINYINT(1) NOT NULL DEFAULT '0'"
+      )->execute();
+      $this->log('[OK] Ensured #__contentbuilder_ng_elements.linkable default is 0.');
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed to set #__contentbuilder_ng_elements.linkable default to 0: ' . $e->getMessage(), Log::WARNING);
+    }
+  }
+
   /**
    * Method to run after an install/update/uninstall method
    *
@@ -2174,6 +2200,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $this->ensureMediaListTemplateInstalled();
     $this->updateDateColumns();
     $this->ensureFormsNewButtonColumn();
+    $this->ensureElementsLinkableDefault();
     $this->updateMenuLinks('com_contentbuilder', 'com_contentbuilder_ng');
 
     $source = $this->resolveInstallSourcePath($parent);
