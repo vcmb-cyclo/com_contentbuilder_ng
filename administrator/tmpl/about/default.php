@@ -23,6 +23,28 @@ $authorValue = (string) ($this->componentAuthor ?: Text::_('COM_CONTENTBUILDER_N
 
 ?>
 <style>
+    .cb-about-intro {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .cb-about-intro-media {
+        flex: 0 0 auto;
+    }
+    .cb-about-intro-content {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .cb-about-intro-content p {
+        margin: 0;
+        padding: 0;
+        text-align: left;
+    }
+    @media (max-width: 767.98px) {
+        .cb-about-intro {
+            flex-wrap: wrap;
+        }
+    }
     .cb-about-version-card {
         background:
             radial-gradient(circle at 100% 0%, rgba(13, 110, 253, .10), transparent 48%),
@@ -130,8 +152,8 @@ $authorValue = (string) ($this->componentAuthor ?: Text::_('COM_CONTENTBUILDER_N
     name="adminForm"
     id="adminForm"
 >
-<div class="d-flex flex-wrap align-items-center gap-3 mt-3 mb-3">
-    <div class="flex-shrink-0">
+<div class="cb-about-intro mt-3 mb-3">
+    <div class="cb-about-intro-media">
         <img
             src="<?php echo htmlspecialchars(Uri::root(true) . '/media/com_contentbuilder_ng/images/piranha_50x500_blanc.png', ENT_QUOTES, 'UTF-8'); ?>"
             alt="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_PIRANHA_IMAGE_ALT'), ENT_QUOTES, 'UTF-8'); ?>"
@@ -140,7 +162,7 @@ $authorValue = (string) ($this->componentAuthor ?: Text::_('COM_CONTENTBUILDER_N
             loading="lazy"
         />
     </div>
-    <div class="flex-grow-1">
+    <div class="cb-about-intro-content">
         <p class="mb-0">
             <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_DESC'); ?>
             <a href="https://breezingforms.vcmb.fr" target="_blank" rel="noopener noreferrer">VCMB migration</a>

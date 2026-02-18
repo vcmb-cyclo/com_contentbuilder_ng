@@ -15,4 +15,8 @@ The Joomla aliases have been removed to prepare Joomla 6.
 ## Download plugin
     Click on tag label.
     Download "Source code (zip)" file.
+
+## License
+ContentBuilder NG is licensed under GNU/GPL v2 or later (`GPL-2.0-or-later`).
+https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
     
