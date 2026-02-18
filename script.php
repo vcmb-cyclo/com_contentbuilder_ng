@@ -375,6 +375,34 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
   }
 
+  private function ensureMediaListTemplateInstalled(): void
+  {
+    $source = JPATH_SITE . '/components/com_contentbuilder_ng/tmpl/list/default.php';
+    $target = JPATH_ROOT . '/media/com_contentbuilder_ng/images/list/tmpl/default.php';
+    $targetDir = \dirname($target);
+
+    if (File::exists($target)) {
+      return;
+    }
+
+    if (!File::exists($source)) {
+      $this->log("[WARNING] Missing source list template {$source}; cannot install media list template.", Log::WARNING);
+      return;
+    }
+
+    if (!Folder::exists($targetDir) && !Folder::create($targetDir)) {
+      $this->log("[WARNING] Could not create media template directory {$targetDir}.", Log::WARNING);
+      return;
+    }
+
+    if (!File::copy($source, $target)) {
+      $this->log("[WARNING] Could not install media list template {$target}.", Log::WARNING);
+      return;
+    }
+
+    $this->log('[OK] Installed missing media list template: images/list/tmpl/default.php.');
+  }
+
   /**
    * method to change the DATE default value for strict MySQL databases.
    *
@@ -627,7 +655,22 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       try {
         $columns = $db->getTableColumns($tableAlias, false);
       } catch (\Throwable $e) {
-        $this->log("[WARNING] Could not inspect data table {$tableAlias} (storage {$storageId}): " . $e->getMessage(), Log::WARNING);
+        $exceptionMessage = (string) $e->getMessage();
+        $isMissingTable = stripos($exceptionMessage, "doesn't exist") !== false
+          || stripos($exceptionMessage, 'does not exist') !== false;
+
+        if ($isMissingTable) {
+          $this->log(
+            "[INFO] Data table {$tableAlias} (storage {$storageId}) is missing, skipping its audit migration.",
+            Log::INFO
+          );
+        } else {
+          $this->log(
+            "[WARNING] Could not inspect data table {$tableAlias} (storage {$storageId}): {$exceptionMessage}. Continuing installation.",
+            Log::WARNING
+          );
+        }
+
         $missingTables++;
         continue;
       }
@@ -1915,6 +1958,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
     $this->removeOldLibraries();
     $this->removeObsoleteFiles();
+    $this->ensureMediaListTemplateInstalled();
     $this->updateDateColumns();
     $this->ensureFormsNewButtonColumn();
     $this->updateMenuLinks('com_contentbuilder', 'com_contentbuilder_ng');
