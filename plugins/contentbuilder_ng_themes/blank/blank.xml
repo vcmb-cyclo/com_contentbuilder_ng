@@ -7,7 +7,7 @@
   <license>GNU/GPLv2</license>
   <authorEmail>noreply@vcmb.fr</authorEmail>
   <authorUrl>breezingforms.vcmb.fr</authorUrl>
-  <version>6.0.0-RC5</version>
+  <version>6.0.0-RC6</version>
   <description><![CDATA[A blank theme without any style]]></description>
   <files>
     <filename plugin="blank">blank.php</filename>

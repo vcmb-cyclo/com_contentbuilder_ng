@@ -1,7 +1,7 @@
 {
     "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
     "name": "com_contentbuilder_ng",
-    "version": "6.1.0-RC1",
+    "version": "6.1.0-RC6",
     "description": "Assets pour le composant ContentBuilder_ng",
     "assets": [
         {
