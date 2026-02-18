@@ -98,9 +98,13 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     return $plugins;
   }
 
-  private function log(string $message, int $priority = Log::INFO): void
+  private function log(string $message, int $priority = Log::INFO, bool $enqueue = true): void
   {
     Log::add($message, $priority, 'com_contentbuilder_ng.install');
+
+    if (!$enqueue) {
+      return;
+    }
 
     $app = Factory::getApplication();
     $type = match ($priority) {
@@ -317,7 +321,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
           $this->log("[ERROR] Failed to delete {$path} file.", Log::ERROR);
         }
       } else {
-        $this->log("[OK] No previous {$path} found.");
+        $this->log("[OK] No previous {$path} found.", Log::INFO, false);
       }
     }
   }
@@ -338,7 +342,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
           $this->log("[ERROR] Failed to remove obsolete file {$path}.", Log::ERROR);
         }
       } else {
-        $this->log("[OK] Obsolete file {$path} not found.");
+        $this->log("[OK] Obsolete file {$path} not found.", Log::INFO, false);
       }
     }
   }
