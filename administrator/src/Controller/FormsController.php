@@ -89,6 +89,17 @@ final class FormsController extends AdminController
         return [];
     }
 
+    private function resolvePluralMessage(string $key, int $count, string $fallbackKey): string
+    {
+        $message = Text::plural($key, $count);
+
+        if ($message === $key || str_starts_with($message, $key . '_')) {
+            return Text::_($fallbackKey);
+        }
+
+        return $message;
+    }
+
     public function delete(): void
     {
         // Vérif CSRF.
@@ -111,9 +122,12 @@ final class FormsController extends AdminController
             $model->delete($cid);
 
             $count = count($cid);
-            // Message Joomla standard (tu peux aussi faire tes propres Text::sprintf)
             $this->setMessage(
-                Text::plural('JLIB_APPLICATION_N_ITEMS_DELETED', $count),
+                $this->resolvePluralMessage(
+                    'JLIB_APPLICATION_N_ITEMS_DELETED',
+                    $count,
+                    'COM_CONTENTBUILDER_NG_ENTRIES_DELETED'
+                ),
                 'message'
             );
         } catch (\Throwable $e) {
@@ -147,11 +161,14 @@ final class FormsController extends AdminController
         try {
             $model->copy($cid);
 
-            // Message Joomla standard (tu peux aussi faire tes propres Text::sprintf)
             $count = count($cid);
 
             $this->setMessage(
-                Text::plural('JLIB_APPLICATION_N_ITEMS_COPIED', $count),
+                $this->resolvePluralMessage(
+                    'JLIB_APPLICATION_N_ITEMS_COPIED',
+                    $count,
+                    'JLIB_APPLICATION_SAVE_SUCCESS'
+                ),
                 'message'
             );
         } catch (\Throwable $e) {
