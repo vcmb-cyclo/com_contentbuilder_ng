@@ -78,6 +78,8 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 	. '.cb-list-table{margin-top:.35rem!important}'
 	. '.cb-list-table th{font-size:.875rem;letter-spacing:.01em}'
 	. '.cb-list-table td,.cb-list-table th{vertical-align:middle}'
+	. '.cb-list-table .hidden-phone{display:table-cell!important}'
+	. '.cb-list-table select[onchange*="contentbuilder_ng_state_single"]{display:inline-block!important;width:auto!important;min-width:0!important;max-width:100%!important}'
 	. '.cb-pagination-summary{font-weight:500}'
 	. '.cb-list-titlebar{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin:0 0 .9rem;padding:.65rem .9rem;border:1px solid rgba(13,110,253,.24);border-left:.35rem solid #0d6efd;border-radius:.85rem;background:linear-gradient(90deg,rgba(13,110,253,.11),rgba(13,110,253,.03));box-shadow:0 .35rem .9rem rgba(13,110,253,.12)}'
 	. '.cb-list-title{margin:0!important;font-weight:700;letter-spacing:.01em;color:#12395f}'
@@ -631,11 +633,11 @@ by this block. -->
 							style="background-color: #<?php echo isset($this->state_colors[$row->colRecord]) ? $this->state_colors[$row->colRecord] : 'FFFFFF'; ?>;">
 							<?php if ($state_allowed && count($this->states)) : ?>
 								<?php $currentStateTitle = $this->state_titles[$row->colRecord] ?? ''; ?>
-								<select
-									class="form-select form-select-sm"
-									style="min-width: 140px;"
-									onchange="contentbuilder_ng_state_single(this.value, <?php echo (int) $row->colRecord; ?>);"
-									title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?>">
+									<select
+										class="form-select form-select-sm"
+										style="display:inline-block;width:auto;min-width:0;max-width:100%;"
+										onchange="contentbuilder_ng_state_single(this.value, <?php echo (int) $row->colRecord; ?>);"
+										title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?>">
 									<option value="" <?php echo $currentStateTitle === '' ? 'selected' : ''; ?>>-</option>
 									<?php foreach ($this->states as $state) : ?>
 										<option value="<?php echo (int) $state['id']; ?>" <?php echo $currentStateTitle === $state['title'] ? 'selected' : ''; ?>>

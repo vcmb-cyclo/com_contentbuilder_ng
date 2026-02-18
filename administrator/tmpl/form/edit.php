@@ -253,11 +253,24 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         return hex ? '#' + hex : '';
     }
 
+    function cbSyncTextInputToColorisFormat(textInput) {
+        if (!textInput) {
+            return;
+        }
+
+        var normalized = cbNormalizeColorForNativePicker(textInput.value);
+
+        if (normalized) {
+            textInput.value = normalized.toUpperCase();
+        }
+    }
+
     function cbUpdateColorisDefaultFromInput(input) {
         if (!input || typeof window.Coloris !== 'function') {
             return;
         }
 
+        cbSyncTextInputToColorisFormat(input);
         var normalized = cbNormalizeColorForNativePicker(input.value);
 
         if (!normalized) {
@@ -335,7 +348,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             return;
         }
 
-        textInput.value = pickerInput.value.replace(/^#/, '').toUpperCase();
+        textInput.value = pickerInput.value.toUpperCase();
         cbApplyListStateColorPreview(textInput);
     }
 
@@ -343,6 +356,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         var inputs = document.querySelectorAll('input[data-cb-color-text="1"]');
 
         for (var i = 0; i < inputs.length; i++) {
+            cbSyncTextInputToColorisFormat(inputs[i]);
             cbApplyListStateColorPreview(inputs[i]);
             cbSyncNativePickerFromTextInput(inputs[i]);
         }
@@ -1241,6 +1255,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 }
                 $stateColorInputId = 'list_state_color_' . (int) $state['id'];
                 $stateColorPickerId = 'list_state_color_picker_' . (int) $state['id'];
+                $stateColorInputValue = preg_match('/^[0-9A-F]{6}$/', $previewHex) ? '#' . $previewHex : $stateRawColor;
                 $stateNativePickerValue = preg_match('/^[0-9A-F]{6}$/', $previewHex) ? '#' . $previewHex : '#FFFFFF';
             ?>
                 <tr class="<?php echo "row$k"; ?>">
@@ -1260,7 +1275,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                 id="<?php echo $stateColorInputId; ?>"
                                 data-cb-color-text="1"
                                 data-cb-color-picker-target="<?php echo $stateColorPickerId; ?>"
-                                value="<?php echo htmlentities($stateRawColor, ENT_QUOTES, 'UTF-8'); ?>"
+                                value="<?php echo htmlentities($stateColorInputValue, ENT_QUOTES, 'UTF-8'); ?>"
                                 style="<?php echo $stateColorStyle; ?>"
                                 name="jform[list_states][<?php echo $state['id']; ?>][color]" />
                             <input

@@ -337,6 +337,49 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
     box-shadow: 0 0.32rem 0.85rem rgba(16, 32, 56, 0.05);
 }
 
+.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.58rem;
+}
+
+.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed > li {
+    margin: 0;
+    padding: 0.72rem 0.82rem;
+    border: 1px solid rgba(36, 61, 86, 0.14);
+    border-radius: 0.72rem;
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+    display: grid;
+    grid-template-columns: minmax(190px, 31%) 1fr;
+    gap: 0.72rem;
+    align-items: start;
+    box-shadow: 0 0.24rem 0.62rem rgba(16, 32, 56, 0.05);
+}
+
+.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed > li:nth-child(odd) {
+    border-left: 0.22rem solid rgba(13, 110, 253, 0.4);
+}
+
+.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed > li strong.list-title {
+    margin: 0;
+    color: #2b4a70;
+    font-size: 0.79rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.35;
+}
+
+.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed > li > div {
+    margin: 0;
+    color: #162f4d;
+    font-size: 0.97rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
 .cbDetailsWrapper .cbDetailsBody > :last-child {
     margin-bottom: 0;
 }
@@ -387,6 +430,16 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
 
     .cbDetailsWrapper .cbDetailsBody {
         padding: 0.8rem 0.75rem 0.4rem;
+    }
+
+    .cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed > li {
+        grid-template-columns: 1fr;
+        gap: 0.42rem;
+        padding: 0.62rem 0.66rem;
+    }
+
+    .cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed > li strong.list-title {
+        font-size: 0.75rem;
     }
 }
 CSS;

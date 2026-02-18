@@ -59,6 +59,23 @@ class FormModel extends AdminModel
         $this->option = 'com_contentbuilder_ng';
     }
 
+    private function normalizeListStateColor($value): string
+    {
+        $hex = strtoupper(ltrim(trim((string) $value), '#'));
+
+        if (preg_match('/^[0-9A-F]{3}$/', $hex)) {
+            $hex = $hex[0] . $hex[0]
+                . $hex[1] . $hex[1]
+                . $hex[2] . $hex[2];
+        }
+
+        if (!preg_match('/^[0-9A-F]{6}$/', $hex)) {
+            return 'FFFFFF';
+        }
+
+        return $hex;
+    }
+
     public function getForm($data = [], $loadData = true)
     {
         return $this->loadForm(
@@ -929,7 +946,7 @@ class FormModel extends AdminModel
                         "UPDATE #__contentbuilder_ng_list_states
                      SET published = " . (isset($item['published']) && $item['published'] ? 1 : 0) . ",
                          `title`    = " . $db->quote(stripslashes(strip_tags((string) ($item['title'] ?? '')))) . ",
-                         color      = " . $db->quote(stripslashes(strip_tags((string) ($item['color'] ?? 'FFFFFF')))) . ",
+                         color      = " . $db->quote($this->normalizeListStateColor($item['color'] ?? 'FFFFFF')) . ",
                          action     = " . $db->quote((string) ($item['action'] ?? '')) . "
                      WHERE form_id = " . (int) $formId . " AND id = " . (int) $sid
                     );
