@@ -271,6 +271,10 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       $db->execute();
     }
 
+    if ($type === 'update') {
+      $this->disableLegacyContentbuilderPlugins('preflight');
+    }
+
     if ($type !== 'uninstall') {
       $this->renameLegacyTables();
       $this->migrateLegacyContentbuilderName();
@@ -1457,8 +1461,6 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   private function removeLegacyComponent(): void
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
-    $installer = new Installer();
-    $installer->setDatabase(Factory::getContainer()->get('DatabaseDriver'));
 
     $legacyElement = 'com_contentbuilder';
     $targetElement = 'com_contentbuilder_ng';
@@ -1491,9 +1493,9 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       return;
     }
 
-    $this->log("[INFO] Removing legacy component {$legacyElement} (id {$legacyId}).");
+    $this->log("[INFO] Legacy component {$legacyElement} detected (id {$legacyId}). Disabling it (safe mode, no uninstall).");
 
-    // Update menu links to target before uninstall to preserve entries.
+    // Keep admin links pointing to NG even when legacy component stays installed but disabled.
     $this->updateMenuLinks($legacyElement, $targetElement);
     try {
       $db->setQuery(
@@ -1512,17 +1514,6 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
 
     try {
-      $ok = (bool) $installer->uninstall('component', $legacyId, 1);
-      if ($ok) {
-        $this->log("[OK] Legacy component uninstalled: {$legacyElement} (id {$legacyId}).");
-        return;
-      }
-      $this->log("[WARNING] Legacy component uninstall failed: {$legacyElement} (id {$legacyId}). Forcing DB cleanup.", Log::WARNING);
-    } catch (\Throwable $e) {
-      $this->log("[WARNING] Legacy component uninstall error for {$legacyElement} (id {$legacyId}): " . $e->getMessage(), Log::WARNING);
-    }
-
-    try {
       $db->setQuery(
         $db->getQuery(true)
           ->update($db->quoteName('#__extensions'))
@@ -1534,99 +1525,82 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       $this->log("[WARNING] Failed to disable legacy component {$legacyElement}: " . $e->getMessage(), Log::WARNING);
     }
 
-    try {
-      $db->setQuery(
-        $db->getQuery(true)
-          ->delete($db->quoteName('#__extensions'))
-          ->where($db->quoteName('extension_id') . ' = ' . (int) $legacyId)
-      )->execute();
-      $this->log("[OK] Legacy component DB entry removed: {$legacyElement} (id {$legacyId}).");
-    } catch (\Throwable $e) {
-      $this->log("[ERROR] Failed to remove legacy component DB entry {$legacyElement}: " . $e->getMessage(), Log::ERROR);
-    }
-
-    try {
-      $conditions = $this->buildMenuLinkOptionWhereClauses($db, $legacyElement);
-      $db->setQuery(
-        $db->getQuery(true)
-          ->delete($db->quoteName('#__menu'))
-          ->where('(' . implode(' OR ', $conditions) . ')')
-      )->execute();
-      $this->log("[OK] Legacy menu entries removed for {$legacyElement}.");
-    } catch (\Throwable $e) {
-      $this->log("[WARNING] Failed removing legacy menu entries for {$legacyElement}: " . $e->getMessage(), Log::WARNING);
-    }
-
-    try {
-      $db->setQuery(
-        $db->getQuery(true)
-          ->delete($db->quoteName('#__assets'))
-          ->where($db->quoteName('name') . ' = ' . $db->quote($legacyElement))
-      )->execute();
-      $this->log("[OK] Legacy asset removed for {$legacyElement}.");
-    } catch (\Throwable $e) {
-      $this->log("[WARNING] Failed removing legacy asset for {$legacyElement}: " . $e->getMessage(), Log::WARNING);
-    }
+    $this->log("[INFO] Legacy component uninstall intentionally skipped to avoid destructive uninstall SQL/hooks.");
   }
 
-  private function removeLegacyPlugins(): void
+  private function getLegacyContentbuilderPlugins(): array
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
-    $installer = new Installer();
-    $installer->setDatabase(Factory::getContainer()->get('DatabaseDriver'));
-
-    $this->log('[INFO] Removing legacy ContentBuilder plugins (non-_ng).');
-
-    $handled = [];
-
-    // 1) Deterministic legacy candidates derived from current plugin list.
-    foreach ($this->getPlugins() as $folder => $elements) {
-      foreach ($elements as $element) {
-        [$legacyFolder, $legacyElement] = $this->mapToLegacyPlugin($folder, $element);
-        if (!$legacyFolder || !$legacyElement) {
-          continue;
-        }
-
-        $query = $db->getQuery(true)
-          ->select($db->quoteName('extension_id'))
-          ->from($db->quoteName('#__extensions'))
-          ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
-          ->where($db->quoteName('folder') . ' = ' . $db->quote($legacyFolder))
-          ->where($db->quoteName('element') . ' = ' . $db->quote($legacyElement));
-
-        $db->setQuery($query);
-        $id = (int) $db->loadResult();
-        if ($id === 0 || isset($handled[$id])) {
-          continue;
-        }
-
-        $handled[$id] = true;
-        $this->uninstallPluginById($installer, $id, $legacyFolder, $legacyElement);
-      }
-    }
-
-    // 2) Catch-all removal: any remaining plugin with contentbuilder* but not contentbuilder_ng*
     $likeLegacy = $db->quote('contentbuilder%');
     $likeNg = $db->quote('contentbuilder_ng%');
     $folderCond = $db->quoteName('folder') . ' LIKE ' . $likeLegacy . ' AND ' . $db->quoteName('folder') . ' NOT LIKE ' . $likeNg;
     $elementCond = $db->quoteName('element') . ' LIKE ' . $likeLegacy . ' AND ' . $db->quoteName('element') . ' NOT LIKE ' . $likeNg;
 
     $query = $db->getQuery(true)
-      ->select($db->quoteName(['extension_id', 'folder', 'element']))
+      ->select($db->quoteName(['extension_id', 'folder', 'element', 'enabled']))
       ->from($db->quoteName('#__extensions'))
       ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
       ->where("(($folderCond) OR ($elementCond))");
 
-    $db->setQuery($query);
-    $rows = $db->loadObjectList() ?: [];
+    try {
+      $db->setQuery($query);
+      return $db->loadAssocList() ?: [];
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed to detect legacy ContentBuilder plugins: ' . $e->getMessage(), Log::WARNING);
+      return [];
+    }
+  }
 
+  private function disableLegacyContentbuilderPlugins(string $context = 'update'): int
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+    $rows = $this->getLegacyContentbuilderPlugins();
+
+    if (empty($rows)) {
+      $this->log("[INFO] No legacy ContentBuilder plugins found during {$context}.");
+      return 0;
+    }
+
+    $ids = [];
+    $alreadyDisabled = 0;
     foreach ($rows as $row) {
-      $id = (int) $row->extension_id;
-      if ($id === 0 || isset($handled[$id])) {
-        continue;
+      $id = (int) ($row['extension_id'] ?? 0);
+      if ($id > 0) {
+        $ids[] = $id;
       }
-      $handled[$id] = true;
-      $this->uninstallPluginById($installer, $id, (string) $row->folder, (string) $row->element);
+      if ((int) ($row['enabled'] ?? 0) === 0) {
+        $alreadyDisabled++;
+      }
+    }
+    $ids = array_values(array_unique($ids));
+
+    if (empty($ids)) {
+      return 0;
+    }
+
+    try {
+      $db->setQuery(
+        $db->getQuery(true)
+          ->update($db->quoteName('#__extensions'))
+          ->set($db->quoteName('enabled') . ' = 0')
+          ->where($db->quoteName('extension_id') . ' IN (' . implode(',', $ids) . ')')
+      )->execute();
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed disabling legacy ContentBuilder plugins: ' . $e->getMessage(), Log::WARNING);
+      return 0;
+    }
+
+    $disabledNow = max(0, count($ids) - $alreadyDisabled);
+    $this->log("[OK] Legacy ContentBuilder plugins disabled ({$disabledNow} newly disabled, " . count($ids) . " total) during {$context}.");
+
+    return count($ids);
+  }
+
+  private function removeLegacyPlugins(): void
+  {
+    $disabled = $this->disableLegacyContentbuilderPlugins('postflight');
+    if ($disabled > 0) {
+      $this->log('[INFO] Legacy plugins are disabled (not uninstalled) to avoid destructive uninstall hooks.');
     }
   }
 
@@ -1918,7 +1892,6 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       $this->normalizeFormThemePlugins();
       $this->removeLegacyComponent();
       $this->removeLegacyPlugins();
-      $this->removeLegacyPluginFolders();
     }
 
     $this->normalizeBrokenTargetMenuLinks();
