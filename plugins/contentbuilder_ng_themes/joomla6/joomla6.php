@@ -136,10 +136,10 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
 }
 
 .cbEditableWrapper .cbEditableBody {
-    margin: 0.55rem 0 0.75rem;
-    padding: 0.82rem 0.88rem 0.48rem;
+    margin: 0.4rem 0 0.55rem;
+    padding: 0.62rem 0.68rem 0.3rem;
     border: 1px solid rgba(36, 61, 86, 0.14);
-    border-radius: 0.82rem;
+    border-radius: 0.72rem;
     background: linear-gradient(180deg, #fbfdff 0%, #f2f7fc 100%);
     box-shadow: 0 0.28rem 0.72rem rgba(16, 32, 56, 0.05);
 }
@@ -147,14 +147,14 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
 .cbEditableWrapper .cbColumnHeader {
     grid-template-columns: minmax(156px, 30%) minmax(0, 1fr);
     align-items: center;
-    gap: 0.55rem;
-    margin: 0.08rem 0 0.42rem;
-    padding: 0.34rem 0.56rem;
+    gap: 0.4rem;
+    margin: 0.04rem 0 0.28rem;
+    padding: 0.26rem 0.46rem;
     border: 1px solid rgba(36, 61, 86, 0.16);
     border-radius: 0.6rem;
     background: #eef4ff;
     color: #2a3f5e;
-    font-size: 0.74rem;
+    font-size: 0.71rem;
     font-weight: 700;
     letter-spacing: 0.03em;
     text-transform: uppercase;
@@ -223,19 +223,19 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
 }
 
 .cbEditableWrapper fieldset.border.rounded.p-3.mb-3 {
-    padding: 0.68rem !important;
-    margin-bottom: 0.58rem !important;
+    padding: 0.52rem !important;
+    margin-bottom: 0.4rem !important;
 }
 
 .cbEditableWrapper .cbEditableBody > .mb-3 {
-    margin: 0 0 0.46rem !important;
-    padding: 0.54rem 0.62rem;
+    margin: 0 0 0.34rem !important;
+    padding: 0.4rem 0.5rem;
     border: 1px solid rgba(36, 61, 86, 0.14);
-    border-radius: 0.68rem;
+    border-radius: 0.58rem;
     background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
     display: grid;
     grid-template-columns: minmax(176px, 31%) minmax(0, 1fr);
-    gap: 0.62rem;
+    gap: 0.46rem;
     align-items: center;
     box-shadow: 0 0.16rem 0.5rem rgba(16, 32, 56, 0.04);
 }
@@ -252,11 +252,11 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
 .cbEditableWrapper .cbEditableBody > .mb-3 > label.form-label {
     margin: 0 !important;
     color: #2b4a70;
-    font-size: 0.77rem;
+    font-size: 0.74rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    line-height: 1.35;
+    line-height: 1.22;
 }
 
 .cbEditableWrapper .cbEditableBody > .mb-3 > div:last-child {
@@ -292,10 +292,10 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
 
 .cbEditableWrapper .form-select.form-select-sm,
 .cbEditableWrapper .form-control.form-control-sm {
-    min-height: 1.92rem;
-    font-size: 0.88rem;
-    padding-top: 0.24rem;
-    padding-bottom: 0.24rem;
+    min-height: 1.78rem;
+    font-size: 0.84rem;
+    padding-top: 0.18rem;
+    padding-bottom: 0.18rem;
 }
 
 .cbEditableWrapper .cbEditableBody > .mb-3 :is(
@@ -310,13 +310,13 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
     textarea,
     select
 ) {
-    min-height: 1.82rem;
-    font-size: 0.85rem;
-    padding: 0.26rem 0.46rem;
+    min-height: 1.64rem;
+    font-size: 0.83rem;
+    padding: 0.2rem 0.4rem;
 }
 
 .cbEditableWrapper .cbEditableBody > .mb-3 textarea {
-    min-height: 4.4rem;
+    min-height: 3.8rem;
 }
 
 .cbEditableWrapper :is(
@@ -438,10 +438,10 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
 }
 
 .cbDetailsWrapper .cbDetailsBody {
-    margin: 0.35rem 0 0.52rem;
-    padding: 0.66rem 0.7rem 0.34rem;
+    margin: 0.24rem 0 0.4rem;
+    padding: 0.54rem 0.58rem 0.24rem;
     border: 1px solid rgba(36, 61, 86, 0.14);
-    border-radius: 0.72rem;
+    border-radius: 0.64rem;
     background: #ffffff;
     box-shadow: 0 0.24rem 0.62rem rgba(16, 32, 56, 0.05);
 }
@@ -451,18 +451,18 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
     padding: 0;
     list-style: none;
     display: grid;
-    gap: 0.42rem;
+    gap: 0.3rem;
 }
 
 .cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed > li {
     margin: 0;
-    padding: 0.52rem 0.62rem;
+    padding: 0.4rem 0.5rem;
     border: 1px solid rgba(36, 61, 86, 0.14);
-    border-radius: 0.62rem;
+    border-radius: 0.54rem;
     background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
     display: grid;
     grid-template-columns: minmax(190px, 31%) 1fr;
-    gap: 0.56rem;
+    gap: 0.42rem;
     align-items: start;
     box-shadow: 0 0.14rem 0.42rem rgba(16, 32, 56, 0.04);
 }
@@ -474,18 +474,18 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
 .cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed > li strong.list-title {
     margin: 0;
     color: #2b4a70;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    line-height: 1.3;
+    line-height: 1.22;
 }
 
 .cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed > li > div {
     margin: 0;
     color: #162f4d;
-    font-size: 0.9rem;
-    line-height: 1.38;
+    font-size: 0.86rem;
+    line-height: 1.3;
     overflow-wrap: anywhere;
 }
 
@@ -493,14 +493,14 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.38rem;
+    gap: 0.3rem;
 }
 
 .cbDetailsWrapper .cbDetailsBody .list-group.list-group-flush > .list-group-item {
     margin: 0;
-    padding: 0.5rem 0.58rem;
+    padding: 0.4rem 0.48rem;
     border: 1px solid rgba(36, 61, 86, 0.14);
-    border-radius: 0.6rem;
+    border-radius: 0.54rem;
     background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
     box-shadow: 0 0.14rem 0.42rem rgba(16, 32, 56, 0.04);
 }
@@ -510,8 +510,8 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
 }
 
 .cbDetailsWrapper .cbDetailsBody .list-group.list-group-flush > .list-group-item .row {
-    --bs-gutter-x: 0.56rem;
-    --bs-gutter-y: 0.16rem;
+    --bs-gutter-x: 0.45rem;
+    --bs-gutter-y: 0.1rem;
     margin: 0;
     align-items: center !important;
 }
@@ -528,19 +528,19 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
 .cbDetailsWrapper .cbDetailsBody .list-group.list-group-flush > .list-group-item .form-label {
     margin: 0 !important;
     color: #2b4a70;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    line-height: 1.3;
+    line-height: 1.22;
 }
 
 .cbDetailsWrapper .cbDetailsBody .list-group.list-group-flush > .list-group-item .form-control-plaintext {
     margin: 0;
     padding: 0 !important;
     color: #162f4d;
-    font-size: 0.9rem;
-    line-height: 1.38;
+    font-size: 0.86rem;
+    line-height: 1.3;
     overflow-wrap: anywhere;
 }
 
@@ -579,14 +579,14 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
     }
 
     .cbEditableWrapper .cbEditableBody {
-        padding: 0.7rem 0.66rem 0.36rem;
+        padding: 0.56rem 0.52rem 0.24rem;
     }
 
     .cbEditableWrapper .cbEditableBody > .mb-3 {
         grid-template-columns: 1fr;
-        gap: 0.36rem;
-        padding: 0.52rem 0.56rem;
-        margin-bottom: 0.4rem !important;
+        gap: 0.28rem;
+        padding: 0.42rem 0.46rem;
+        margin-bottom: 0.3rem !important;
     }
 
     .cbEditableWrapper .cbEditableBody > .mb-3 > .form-label,
@@ -595,8 +595,8 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
     }
 
     .cbEditableWrapper fieldset.border.rounded.p-3.mb-3 {
-        padding: 0.56rem !important;
-        margin-bottom: 0.45rem !important;
+        padding: 0.46rem !important;
+        margin-bottom: 0.34rem !important;
     }
 
     .cbDetailsWrapper {
@@ -615,13 +615,13 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
     }
 
     .cbDetailsWrapper .cbDetailsBody {
-        padding: 0.62rem 0.58rem 0.28rem;
+        padding: 0.52rem 0.48rem 0.2rem;
     }
 
     .cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed > li {
         grid-template-columns: 1fr;
-        gap: 0.42rem;
-        padding: 0.54rem 0.58rem;
+        gap: 0.28rem;
+        padding: 0.44rem 0.48rem;
     }
 
     .cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed > li strong.list-title {
@@ -629,7 +629,7 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
     }
 
     .cbDetailsWrapper .cbDetailsBody .list-group.list-group-flush > .list-group-item {
-        padding: 0.46rem 0.5rem;
+        padding: 0.4rem 0.44rem;
     }
 
     .cbDetailsWrapper .cbDetailsBody .list-group.list-group-flush > .list-group-item .col-3,
@@ -639,7 +639,7 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
     }
 
     .cbDetailsWrapper .cbDetailsBody .list-group.list-group-flush > .list-group-item .form-control-plaintext {
-        font-size: 0.86rem;
+        font-size: 0.82rem;
     }
 }
 CSS;

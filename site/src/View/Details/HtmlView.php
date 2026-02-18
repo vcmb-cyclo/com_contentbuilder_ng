@@ -174,12 +174,12 @@ class HtmlView extends BaseHtmlView
         return <<<'CSS'
 .cbDetailsWrapper{
     max-width:1120px;
-    margin:1rem auto 2rem;
-    padding:1.1rem 1.25rem 1.35rem;
+    margin:.7rem auto 1.35rem;
+    padding:.82rem .92rem .98rem;
     border:1px solid rgba(36,61,86,.12);
-    border-radius:1rem;
+    border-radius:.86rem;
     background:radial-gradient(circle at top right,rgba(13,110,253,.08),transparent 38%),linear-gradient(180deg,#fff 0,#f8fbff 100%);
-    box-shadow:0 .9rem 2rem rgba(16,32,56,.08)
+    box-shadow:0 .6rem 1.35rem rgba(16,32,56,.08)
 }
 .cbDetailsWrapper>h1.display-6{margin-bottom:1rem!important;font-weight:700;letter-spacing:.01em}
 .cbDetailsWrapper>h1.display-6::after{content:"";display:block;width:4.5rem;height:.24rem;margin-top:.55rem;border-radius:999px;background:linear-gradient(90deg,#0d6efd 0,#3f8cff 100%)}
@@ -187,16 +187,16 @@ class HtmlView extends BaseHtmlView
 .cbDetailsWrapper .cbToolBar .cbButton.btn{border-radius:999px;font-weight:600;padding-inline:.95rem;box-shadow:0 .32rem .85rem rgba(16,32,56,.12)}
 .cbDetailsWrapper .cbTitleRecordNav .cbButton.btn{border-radius:999px;font-weight:600;letter-spacing:.01em;font-size:.84rem;padding:.32rem .76rem;box-shadow:0 .2rem .56rem rgba(16,32,56,.11);display:inline-flex;align-items:center}
 .cbDetailsWrapper .cbTitleRecordNav .cbButton.btn [class^="icon-"],.cbDetailsWrapper .cbTitleRecordNav .cbButton.btn [class*=" icon-"]{color:#0d6efd}
-.cbDetailsWrapper .cbDetailsBody{margin:.55rem 0 .75rem;padding:1rem 1rem .6rem;border:1px solid rgba(36,61,86,.14);border-radius:.85rem;background:#fff;box-shadow:0 .32rem .85rem rgba(16,32,56,.05)}
-.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed{margin:0;padding:0;list-style:none;display:grid;gap:.58rem}
-.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed>li{margin:0;padding:.72rem .82rem;border:1px solid rgba(36,61,86,.14);border-radius:.72rem;background:linear-gradient(180deg,#fff 0,#f7fbff 100%);display:grid;grid-template-columns:minmax(190px,31%) 1fr;gap:.72rem;align-items:start;box-shadow:0 .24rem .62rem rgba(16,32,56,.05)}
-.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed>li strong.list-title{margin:0;color:#2b4a70;font-size:.79rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;line-height:1.35}
-.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed>li>div{margin:0;color:#162f4d;font-size:.97rem;line-height:1.55;overflow-wrap:anywhere}
+.cbDetailsWrapper .cbDetailsBody{margin:.24rem 0 .4rem;padding:.54rem .58rem .24rem;border:1px solid rgba(36,61,86,.14);border-radius:.64rem;background:#fff;box-shadow:0 .24rem .62rem rgba(16,32,56,.05)}
+.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed{margin:0;padding:0;list-style:none;display:grid;gap:.3rem}
+.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed>li{margin:0;padding:.4rem .5rem;border:1px solid rgba(36,61,86,.14);border-radius:.54rem;background:linear-gradient(180deg,#fff 0,#f7fbff 100%);display:grid;grid-template-columns:minmax(190px,31%) 1fr;gap:.42rem;align-items:start;box-shadow:0 .14rem .42rem rgba(16,32,56,.04)}
+.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed>li strong.list-title{margin:0;color:#2b4a70;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;line-height:1.22}
+.cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed>li>div{margin:0;color:#162f4d;font-size:.86rem;line-height:1.3;overflow-wrap:anywhere}
 @media (max-width:767.98px){
-    .cbDetailsWrapper{margin-top:.6rem;padding:.9rem .8rem 1rem;border-radius:.8rem}
+    .cbDetailsWrapper{margin-top:.45rem;padding:.62rem .56rem .66rem;border-radius:.72rem}
     .cbDetailsWrapper .cbToolBar .cbButton.btn{width:100%;justify-content:center}
-    .cbDetailsWrapper .cbDetailsBody{padding:.8rem .75rem .4rem}
-    .cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed>li{grid-template-columns:1fr;gap:.42rem;padding:.62rem .66rem}
+    .cbDetailsWrapper .cbDetailsBody{padding:.52rem .48rem .2rem}
+    .cbDetailsWrapper .cbDetailsBody ul.category.list-striped.list-condensed>li{grid-template-columns:1fr;gap:.28rem;padding:.44rem .48rem}
 }
 CSS;
     }

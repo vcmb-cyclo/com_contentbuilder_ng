@@ -2,7 +2,7 @@
 <updates>
 	<update>
 		<name>Contentbuilder_ng</name>
-		<description>ContentBuilder NG Update</description>
+		<description>ContentBuilder NG Update 6.1.0-RC6</description>
 		<element>com_contentbuilder_ng</element>
 		<type>component</type>
 		<client>1</client>

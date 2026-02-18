@@ -252,7 +252,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 <?php if ($isAdminPreview): ?>
 	<div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
 		<span>
-			<?php echo Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CURRENT_FORM', $previewFormName) . ' - ' . Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDER_NG_PREVIEW_TAB_VIEW')); ?>
+			<?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CURRENT_FORM', $previewFormName) . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDER_NG_PREVIEW_TAB_VIEW')); ?>
 		</span>
 		<a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
 			<?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>
