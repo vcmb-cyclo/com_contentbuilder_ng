@@ -70,32 +70,37 @@ $___getpost = 'post';
 $___tableOrdering = "Joomla.tableOrdering = function";
 ?>
 <?php Factory::getApplication()->getDocument()->addStyleDeclaration($this->theme_css); ?>
-<?php Factory::getApplication()->getDocument()->addStyleDeclaration(
-	'.cb-scroll-x{overflow-x:auto;padding-bottom:.35rem;box-shadow:inset 0 -1px 0 rgba(0,0,0,.08)}'
-	. '.cb-scroll-x::-webkit-scrollbar{height:12px}'
-	. '.cb-scroll-x::-webkit-scrollbar-track{background:rgba(0,0,0,.06);border-radius:999px}'
-	. '.cb-scroll-x::-webkit-scrollbar-thumb{background:rgba(13,110,253,.55);border-radius:999px}'
-	. '.cb-scroll-x::-webkit-scrollbar-thumb:hover{background:rgba(13,110,253,.75)}'
-	. '.cb-list-header{display:flex;justify-content:flex-end;align-items:center;margin:0 0 .75rem}'
-	. '.cb-list-actions{display:flex;align-items:center;gap:.5rem}'
-	. '.cb-list-actions .btn{border-radius:999px;padding-inline:1rem;font-weight:600}'
-	. '.cb-list-panel{border:1px solid var(--bs-border-color, #dee2e6);border-radius:.9rem;padding:.65rem .75rem;background:var(--bs-body-bg, #fff);box-shadow:0 .35rem .9rem rgba(0,0,0,.06)}'
-	. '.cb-list-filters td{padding:.4rem .15rem .75rem}'
-	. '.cb-list-filters .form-select,.cb-list-filters .form-control{border-radius:.5rem}'
-	. '.cb-list-filters .input-group-text{border-radius:.5rem 0 0 .5rem;background:var(--bs-tertiary-bg, #f8f9fa)}'
-	. '.cb-list-table{margin-top:.35rem!important}'
-	. '.cb-list-table th{font-size:.875rem;letter-spacing:.01em}'
-	. '.cb-list-table td,.cb-list-table th{vertical-align:middle}'
-	. '.cb-list-table .hidden-phone{display:table-cell!important}'
-	. '.cb-list-table select[onchange*="contentbuilder_ng_state_single"]{display:inline-block!important;width:auto!important;min-width:0!important;max-width:100%!important}'
-	. '.cb-pagination-summary{font-weight:500}'
-	. '.cb-list-titlebar{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin:0 0 .9rem;padding:.65rem .9rem;border:1px solid rgba(13,110,253,.24);border-left:.35rem solid #0d6efd;border-radius:.85rem;background:linear-gradient(90deg,rgba(13,110,253,.11),rgba(13,110,253,.03));box-shadow:0 .35rem .9rem rgba(13,110,253,.12)}'
-	. '.cb-list-title{margin:0!important;font-weight:700;letter-spacing:.01em;color:#12395f}'
-	. '.cb-list-title::after{content:\"\";display:block;width:3.75rem;height:.2rem;margin-top:.45rem;border-radius:999px;background:linear-gradient(90deg,#0d6efd,#3f8cff)}'
-	. '@media (max-width: 767.98px){.cb-list-actions{width:100%;justify-content:flex-end}.cb-list-panel{padding:.55rem .45rem}}'
-	. '@media (max-width: 767.98px){.cb-list-titlebar{padding:.55rem .65rem;margin-bottom:.75rem}.cb-list-title{font-size:1.18rem}}'
-); ?>
 <?php Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js); ?>
+<?php
+Factory::getApplication()->getDocument()->addStyleDeclaration(
+	<<<'CSS'
+.cb-list-sticky{
+	position:sticky;
+	top:var(--cb-list-sticky-top,.5rem);
+	z-index:1080;
+	margin:0 0 .75rem;
+}
+.cb-list-sticky .cb-list-panel{
+	margin:0;
+}
+.cb-list-sticky .cb-list-header{
+	margin:0 0 .55rem;
+}
+.cb-list-sticky .cb-list-actions{
+	flex-wrap:wrap;
+	justify-content:flex-end;
+}
+.cb-list-sticky .cb-list-filters{
+	margin:0;
+}
+@media (max-width:767.98px){
+	.cb-list-sticky{
+		top:0;
+	}
+}
+CSS
+);
+?>
 <script>
 	Joomla.tableOrdering = function(order, dir, task) {
 		var form = document.getElementById('adminForm');
@@ -265,39 +270,33 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 	</div>
 <?php endif; ?>
 <?php echo $this->intro_text; ?>
-<div class="cb-list-header">
-	<div class="cb-list-actions">
-		<?php
-		$showNewButton = ($new_allowed && !empty($this->new_button));
-		if ($showNewButton) {
-		?>
-			<button class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
-				onclick="location.href='<?php echo Route::_(
-				    'index.php?option=com_contentbuilder_ng&task=edit.display&backtolist=1&id='
-				    . Factory::getApplication()->input->getInt('id', 0)
-				    . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '')
-				    . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '')
-				    . '&record_id=0'
-				    . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0)
-				    . $previewQuery
-				); ?>'">
-				<span class="icon-plus" aria-hidden="true"></span>
-				<?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?>
-			</button>
-		<?php } ?>
-	</div>
-</div>
 
 <!-- 2023-12-19 XDA / GIL - BEGIN - Fix
 <form action="index.php" method=<php echo $___getpost;?>" name="adminForm" id
 Fix search, delete, pagination and 404 behavior.
 Replace line 144 of media/com_contentbuilder_ng/images/list/tmpl/default.php
 by this block. -->
-<form action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=list.display&id=' . (int) Factory::getApplication()->input->getInt('id') . '&Itemid=' . (int) Factory::getApplication()->input->getInt('Itemid', 0) . $previewQuery); ?>"
-	method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm">
+	<form action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=list.display&id=' . (int) Factory::getApplication()->input->getInt('id') . '&Itemid=' . (int) Factory::getApplication()->input->getInt('Itemid', 0) . $previewQuery); ?>"
+		method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm">
 
 	<!-- 2023-12-19 END -->
-	<div class="cb-scroll-x cb-list-panel">
+	<?php
+	$showNewButton = ($new_allowed && !empty($this->new_button));
+	$newRecordLink = '';
+	if ($showNewButton) {
+		$newRecordLink = Route::_(
+			'index.php?option=com_contentbuilder_ng&task=edit.display&backtolist=1&id='
+			. Factory::getApplication()->input->getInt('id', 0)
+			. (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '')
+			. (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '')
+			. '&record_id=0'
+			. '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0)
+			. $previewQuery
+		);
+	}
+	?>
+	<div class="cb-list-sticky">
+		<div class="cb-list-panel cb-list-sticky-panel">
 		<table class="cbFilterTable cb-list-filters" width="100%">
 			<?php if ($language_allowed) : ?>
 				<tr>
@@ -431,9 +430,18 @@ by this block. -->
 
 						</div>
 
-						<!-- DROITE : limitbox + excel (indépendants du filtre) -->
-							<?php if ($this->show_records_per_page || $this->export_xls) : ?>
+						<!-- DROITE : actions + limitbox + excel -->
+							<?php if ($showNewButton || $delete_allowed || $this->show_records_per_page || $this->export_xls) : ?>
 								<div class="d-flex align-items-center gap-2 ms-auto">
+
+										<?php if ($showNewButton) : ?>
+											<a class="btn btn-sm btn-outline-primary align-self-center d-inline-flex align-items-center gap-1 rounded-pill cb-list-new-btn"
+												href="<?php echo $newRecordLink; ?>"
+												title="<?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?>">
+												<span class="icon-plus" aria-hidden="true"></span>
+												<span><?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?></span>
+											</a>
+										<?php endif; ?>
 
 										<?php if ($delete_allowed) : ?>
 											<button class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 rounded-pill" onclick="contentbuilder_ng_delete();" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE'); ?>">
@@ -480,10 +488,13 @@ by this block. -->
 							</div>
 						<?php endif; ?>
 
-					</div>
-				</td>
-			</tr>
-		</table>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div class="cb-scroll-x cb-list-panel cb-list-data-panel">
 			<table class="table table-striped table-hover align-middle cb-list-table">
 			<thead>
 				<tr>

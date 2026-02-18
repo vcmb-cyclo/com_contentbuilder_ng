@@ -179,7 +179,7 @@ class PublicformsModel extends ListModel
         $filter_state = '';
 
         if ($this->getState('forms_filter_tag') != '') {
-            $filter_state .= ' And Lower(`tag`) Like ' . $this->getDatabase()->Quote(strtolower($this->getState('forms_filter_tag'))) . ' ';
+            $filter_state .= ' And Lower(`tag`) Like ' . $this->getDatabase()->quote(strtolower($this->getState('forms_filter_tag'))) . ' ';
         }
 
         $in = '';

@@ -21,6 +21,15 @@ use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 class plgContentbuilder_ng_themesKhepri extends CMSPlugin implements SubscriberInterface
 {
+    private const THEME_NAME = 'khepri';
+
+    private function acceptsThemeEvent(Event $event): bool
+    {
+        $requestedTheme = trim((string) ($event->getArgument('theme') ?? ''));
+
+        return $requestedTheme === '' || $requestedTheme === self::THEME_NAME;
+    }
+
     private function pushEventResult(Event $event, string $value): void
     {
         $results = $event->getArgument('result') ?: [];
@@ -53,10 +62,18 @@ class plgContentbuilder_ng_themesKhepri extends CMSPlugin implements SubscriberI
 	 * 
 	 * @return string
 	 */
-	function onContentTemplateJavascript()
+	function onContentTemplateJavascript($event = null)
 	{
+		if ($event instanceof Event && !$this->acceptsThemeEvent($event)) {
+			return;
+		}
 
-		return '';
+		$out = '';
+		if ($event instanceof Event) {
+			$this->pushEventResult($event, $out);
+			return;
+		}
+		return $out;
 	}
 
 	/**
@@ -65,10 +82,18 @@ class plgContentbuilder_ng_themesKhepri extends CMSPlugin implements SubscriberI
 	 * 
 	 * @return string
 	 */
-	function onEditableTemplateJavascript()
+	function onEditableTemplateJavascript($event = null)
 	{
+		if ($event instanceof Event && !$this->acceptsThemeEvent($event)) {
+			return;
+		}
 
-		return '';
+		$out = '';
+		if ($event instanceof Event) {
+			$this->pushEventResult($event, $out);
+			return;
+		}
+		return $out;
 	}
 
 	/**
@@ -77,10 +102,18 @@ class plgContentbuilder_ng_themesKhepri extends CMSPlugin implements SubscriberI
 	 * 
 	 * @return string
 	 */
-	function onListViewJavascript()
+	function onListViewJavascript($event = null)
 	{
+		if ($event instanceof Event && !$this->acceptsThemeEvent($event)) {
+			return;
+		}
 
-		return '';
+		$out = '';
+		if ($event instanceof Event) {
+			$this->pushEventResult($event, $out);
+			return;
+		}
+		return $out;
 	}
 
 	/**
@@ -89,8 +122,16 @@ class plgContentbuilder_ng_themesKhepri extends CMSPlugin implements SubscriberI
 	 * 
 	 * @return string
 	 */
-	function onContentTemplateCss()
+	function onContentTemplateCss($event = null)
 	{
+		if ($event instanceof Event && !$this->acceptsThemeEvent($event)) {
+			return;
+		}
+
+		if ($event instanceof Event) {
+			$this->pushEventResult($event, $this->onContentTemplateCss(null));
+			return;
+		}
 
 		return '/* Administrator forms, lists */
 fieldset.adminform {
@@ -980,10 +1021,18 @@ table.group-rules td select
 	 * 
 	 * @return string
 	 */
-	function onEditableTemplateCss()
+	function onEditableTemplateCss($event = null)
 	{
+		if ($event instanceof Event && !$this->acceptsThemeEvent($event)) {
+			return;
+		}
 
-		return $this->onContentTemplateCss();
+		$out = $this->onContentTemplateCss(null);
+		if ($event instanceof Event) {
+			$this->pushEventResult($event, $out);
+			return;
+		}
+		return $out;
 	}
 
 	/**
@@ -992,10 +1041,66 @@ table.group-rules td select
 	 * 
 	 * @return string
 	 */
-	function onListViewCss()
+	function onListViewCss($event = null)
 	{
+		if ($event instanceof Event && !$this->acceptsThemeEvent($event)) {
+			return;
+		}
 
-		return '';
+		$out = <<<'CSS'
+.cb-list-titlebar{
+    margin:0 0 .55rem;
+    padding:.42rem .55rem;
+    border:1px solid #b7c4d0;
+    border-radius:.22rem;
+    background:linear-gradient(180deg,#f7f9fb 0,#e5ecf4 100%);
+}
+.cb-list-title{
+    margin:0!important;
+    color:#1f3d5b;
+    font:700 1.06rem/1.2 "Trebuchet MS",Tahoma,Arial,sans-serif;
+}
+.cb-list-title::after{
+    content:"";
+    display:block;
+    width:3rem;
+    height:2px;
+    margin-top:.32rem;
+    background:#7b98b6;
+}
+.cb-list-actions .btn{
+    border-radius:.2rem;
+    font-weight:600;
+}
+.cb-list-panel{
+    border:1px solid #bec9d4;
+    border-radius:.22rem;
+    padding:.48rem .54rem;
+    background:#f8fbfd;
+}
+.cb-list-table{
+    border:1px solid #c6d1dc;
+    background:#fff;
+}
+.cb-list-table thead th{
+    background:linear-gradient(180deg,#e7edf3 0,#d5dee8 100%);
+    border-color:#bfcbd7;
+    color:#1f3d5b;
+}
+.cb-list-table tbody td{
+    border-color:#d4dde6;
+}
+.cb-list-filters .form-control,
+.cb-list-filters .form-select{
+    border-color:#bfcbd7;
+    border-radius:.2rem;
+}
+CSS;
+		if ($event instanceof Event) {
+			$this->pushEventResult($event, $out);
+			return;
+		}
+		return $out;
 	}
 
 	/**
@@ -1008,6 +1113,9 @@ table.group-rules td select
         $event = null;
         if ($arg0 instanceof Event) {
             $event = $arg0;
+            if (!$this->acceptsThemeEvent($event)) {
+                return;
+            }
             $args = $event->getArguments();
             $contentbuilder_ng_form_id = (int) ($args[0] ?? 0);
             $form = $args[1] ?? null;
@@ -1056,6 +1164,9 @@ table.group-rules td select
         $event = null;
         if ($arg0 instanceof Event) {
             $event = $arg0;
+            if (!$this->acceptsThemeEvent($event)) {
+                return;
+            }
             $args = $event->getArguments();
             $contentbuilder_ng_form_id = (int) ($args[0] ?? 0);
             $form = $args[1] ?? null;

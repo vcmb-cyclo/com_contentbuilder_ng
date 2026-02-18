@@ -158,7 +158,7 @@ class AjaxModel extends BaseDatabaseModel
                     $this->getDatabase()->execute();
 
                     // test if already voted
-                    $this->getDatabase()->setQuery("Select `form_id` From #__contentbuilder_ng_rating_cache Where `record_id` = " . $this->getDatabase()->Quote(Factory::getApplication()->input->getCmd('record_id', '')) . " And `form_id` = " . $this->_id . " And `ip` = " . $this->getDatabase()->Quote($_SERVER['REMOTE_ADDR']));
+                    $this->getDatabase()->setQuery("Select `form_id` From #__contentbuilder_ng_rating_cache Where `record_id` = " . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')) . " And `form_id` = " . $this->_id . " And `ip` = " . $this->getDatabase()->quote($_SERVER['REMOTE_ADDR']));
                     $cached = $this->getDatabase()->loadResult();
                     $rated = Factory::getApplication()->getSession()->get('rated' . $this->_id . Factory::getApplication()->input->getCmd('record_id', ''), false, 'com_contentbuilder_ng.rating');
 
@@ -169,16 +169,16 @@ class AjaxModel extends BaseDatabaseModel
                     }
 
                     // adding vote
-                    $this->getDatabase()->setQuery("Update #__contentbuilder_ng_records Set rating_count = rating_count + 1, rating_sum = rating_sum + " . $rating . ", lastip = " . $this->getDatabase()->Quote($_SERVER['REMOTE_ADDR']) . " Where `type` = " . $this->getDatabase()->Quote($result['type']) . " And `reference_id` = " . $this->getDatabase()->Quote($result['reference_id']) . " And `record_id` = " . $this->getDatabase()->Quote(Factory::getApplication()->input->getCmd('record_id', '')));
+                    $this->getDatabase()->setQuery("Update #__contentbuilder_ng_records Set rating_count = rating_count + 1, rating_sum = rating_sum + " . $rating . ", lastip = " . $this->getDatabase()->quote($_SERVER['REMOTE_ADDR']) . " Where `type` = " . $this->getDatabase()->quote($result['type']) . " And `reference_id` = " . $this->getDatabase()->quote($result['reference_id']) . " And `record_id` = " . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')));
                     $this->getDatabase()->execute();
 
                     // adding vote to cache
                     $___now = $_now->toSql();
-                    $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_rating_cache (`record_id`,`form_id`,`ip`,`date`) Values (" . $this->getDatabase()->Quote(Factory::getApplication()->input->getCmd('record_id', '')) . ", " . $this->_id . "," . $this->getDatabase()->Quote($_SERVER['REMOTE_ADDR']) . ",'" . $___now . "')");
+                    $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_rating_cache (`record_id`,`form_id`,`ip`,`date`) Values (" . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')) . ", " . $this->_id . "," . $this->getDatabase()->quote($_SERVER['REMOTE_ADDR']) . ",'" . $___now . "')");
                     $this->getDatabase()->execute();
 
                     // updating article's votes if there is an article bound to the record & view
-                    $this->getDatabase()->setQuery("Select a.article_id From #__contentbuilder_ng_articles As a, #__content As c Where c.id = a.article_id And (c.state = 1 Or c.state = 0) And a.form_id = " . $this->_id . " And a.record_id = " . $this->getDatabase()->Quote(Factory::getApplication()->input->getCmd('record_id', '')));
+                    $this->getDatabase()->setQuery("Select a.article_id From #__contentbuilder_ng_articles As a, #__content As c Where c.id = a.article_id And (c.state = 1 Or c.state = 0) And a.form_id = " . $this->_id . " And a.record_id = " . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')));
                     $article_id = $this->getDatabase()->loadResult();
 
                     if ($article_id) {
@@ -197,13 +197,13 @@ class AjaxModel extends BaseDatabaseModel
                                     cr.rating_sum = cbr.rating_sum,
                                     cr.lastip = cbr.lastip
                                 Where
-                                    cbr.record_id = " . $this->getDatabase()->Quote(Factory::getApplication()->input->getCmd('record_id', '')) . "
+                                    cbr.record_id = " . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')) . "
                                 And
                                     cbr.record_id = cba.record_id
                                 And
-                                    cbr.reference_id = " . $this->getDatabase()->Quote($result['reference_id']) . "
+                                    cbr.reference_id = " . $this->getDatabase()->quote($result['reference_id']) . "
                                 And
-                                    cbr.`type` = " . $this->getDatabase()->Quote($result['type']) . " 
+                                    cbr.`type` = " . $this->getDatabase()->quote($result['type']) . " 
                                 And 
                                     cba.form_id = " . $this->_id . "
                                 And
@@ -225,7 +225,7 @@ class AjaxModel extends BaseDatabaseModel
                                     $article_id,
                                     $rating,
                                     1,
-                                    " . $this->getDatabase()->Quote($_SERVER['REMOTE_ADDR']) . "
+                                    " . $this->getDatabase()->quote($_SERVER['REMOTE_ADDR']) . "
                                 )");
                             $this->getDatabase()->execute();
                         }

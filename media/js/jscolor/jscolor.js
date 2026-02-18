@@ -71,15 +71,15 @@ var jscolor = {
 		var e = document.getElementsByTagName('input');
 		for(var i=0; i<e.length; i+=1) {
 			var m;
-			if(!e[i].color && e[i].className && (m = e[i].className.match(matchClass))) {
-				var prop = {};
-				if(m[3]) {
-					try {
-						eval('prop='+m[3]);
-					} catch(eInvalidProp) {}
+				if(!e[i].color && e[i].className && (m = e[i].className.match(matchClass))) {
+					var prop = {};
+					if(m[3]) {
+						try {
+							eval('prop='+m[3]);
+						} catch(eInvalidProp) {}
+					}
+					e[i].color = new jscolor.color(e[i], prop);
 				}
-				e[i].color = new jscolor.color(e[i], prop);
-			}
 		}
 	},
 

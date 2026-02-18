@@ -21,7 +21,6 @@ use Joomla\CMS\Environment\Browser;
 
 class contentbuilder_ng_com_breezingforms
 {
-
     public $properties = null;
     public $elements = null;
     private $total = 0;
@@ -109,14 +108,14 @@ class contentbuilder_ng_com_breezingforms
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $where_add = '';
         if ($where_field != '' && $where != '') {
-            $db->setQuery("Select Distinct s.`record` From #__facileforms_subrecords As s, #__facileforms_records As r Where r.form = " . $this->properties->id . " And r.id = s.record And s.`element` = " . intval($where_field) . " And s.`value` <> '' And s.`value` = " . $db->Quote($where) . "  Order By s.`value`");
+            $db->setQuery("Select Distinct s.`record` From #__facileforms_subrecords As s, #__facileforms_records As r Where r.form = " . $this->properties->id . " And r.id = s.record And s.`element` = " . intval($where_field) . " And s.`value` <> '' And s.`value` = " . $db->quote($where) . "  Order By s.`value`");
 
             $l = $db->loadColumn();
 
             if (count($l)) {
                 $where_fields = '';
                 foreach ($l as $ll) {
-                    $where_fields .= $db->Quote($ll) . ',';
+                    $where_fields .= $db->quote($ll) . ',';
                 }
                 $where_fields = rtrim($where_fields, ',');
                 $where_add = " And r.`id` In (" . $where_fields . ") ";
@@ -172,7 +171,7 @@ class contentbuilder_ng_com_breezingforms
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-        $db->setQuery("Select metakey, metadesc, author, robots, rights, xreference From #__contentbuilder_ng_records Where `type` = 'com_breezingforms' And reference_id = " . $db->Quote($this->properties->id) . " And record_id = " . $db->Quote($record_id));
+        $db->setQuery("Select metakey, metadesc, author, robots, rights, xreference From #__contentbuilder_ng_records Where `type` = 'com_breezingforms' And reference_id = " . $db->quote($this->properties->id) . " And record_id = " . $db->quote($record_id));
         $metadata = $db->loadObject();
 
         $data->metadesc = '';
@@ -272,9 +271,9 @@ class contentbuilder_ng_com_breezingforms
                 " . ($published_only || !$show_all_languages || $show_all_languages ? " Left Join #__contentbuilder_ng_records As joined_records On ( joined_records.`type` = 'com_breezingforms' And joined_records.record_id = r.id And joined_records.reference_id = r.form ) " : "") . "
                 
             Where
-                r.id = " . $db->Quote(intval($record_id)) . " And
+                r.id = " . $db->quote(intval($record_id)) . " And
                 joined_records.`type` = 'com_breezingforms'
-                " . (!$show_all_languages ? " And ( joined_records.sef = " . $db->Quote(Factory::getApplication()->input->getCmd('lang', '')) . " Or joined_records.sef = '' Or joined_records.sef is Null ) " : '') . "
+                " . (!$show_all_languages ? " And ( joined_records.sef = " . $db->quote(Factory::getApplication()->input->getCmd('lang', '')) . " Or joined_records.sef = '' Or joined_records.sef is Null ) " : '') . "
                 " . ($show_all_languages ? " And ( joined_records.id is Null Or joined_records.id Is Not Null ) " : '') . "
                 " . (intval($own_only) > -1 ? ' And r.user_id=' . intval($own_only) . ' ' : '') . "
                 " . ($published_only ? " And joined_records.published = 1 " : '') . "
@@ -522,8 +521,8 @@ class contentbuilder_ng_com_breezingforms
         $search = '';
         if ($filter && $strlen > 0 && $strlen <= 1000) {
             $length = count($searchable_elements);
-            $search .= "( (colRecord = " . $db->Quote($filter) . ") Or ";
-            $search .= " ( (r.user_full_name = " . $db->Quote($filter) . ") ) ";
+            $search .= "( (colRecord = " . $db->quote($filter) . ") Or ";
+            $search .= " ( (r.user_full_name = " . $db->quote($filter) . ") ) ";
             if ($strlen > 1) {
                 foreach ($searchable_elements as $searchable_element) {
                     if (!$form->filter_exact_match) {
@@ -532,10 +531,10 @@ class contentbuilder_ng_com_breezingforms
                         $limited_count = count($limited);
                         $limited_count = $limited_count > 10 ? 10 : $limited_count;
                         for ($x = 0; $x < $limited_count; $x++) {
-                            $search .= " Or (`col" . intval($searchable_element) . "` Like " . $db->Quote('%' . $limited[$x] . '%') . ") ";
+                            $search .= " Or (`col" . intval($searchable_element) . "` Like " . $db->quote('%' . $limited[$x] . '%') . ") ";
                         }
                     } else {
-                        $search .= " Or (`col" . intval($searchable_element) . "` Like " . $db->Quote('%' . $filter . '%') . ") ";
+                        $search .= " Or (`col" . intval($searchable_element) . "` Like " . $db->quote('%' . $filter . '%') . ") ";
                     }
                 }
             }
@@ -560,34 +559,34 @@ class contentbuilder_ng_com_breezingforms
                         case 'number':
                             if (count($ex) == 2) {
                                 if (trim($ex[0])) {
-                                    $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`),  Decimal) >= ' . $db->Quote(trim($ex[0])) . ' And Convert(Trim(`col' . intval($filter_record_id) . '`), Decimal) <= ' . $db->Quote(trim($ex[1])) . ')';
+                                    $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`),  Decimal) >= ' . $db->quote(trim($ex[0])) . ' And Convert(Trim(`col' . intval($filter_record_id) . '`), Decimal) <= ' . $db->quote(trim($ex[1])) . ')';
                                 } else {
-                                    $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Decimal) <= ' . $db->Quote(trim($ex[1])) . ')';
+                                    $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Decimal) <= ' . $db->quote(trim($ex[1])) . ')';
                                 }
                             } else if (count($ex) > 0) {
-                                $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`),  Decimal) >= ' . $db->Quote(trim($ex[0])) . ' )';
+                                $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`),  Decimal) >= ' . $db->quote(trim($ex[0])) . ' )';
                             }
                             break;
                         case 'date':
                             if (count($ex) == 2) {
 
                                 //if(trim($ex[0])){
-                                //    $search .= '(Convert(Trim(`col'.intval($filter_record_id).'`),  Datetime) >= ' . $db->Quote(trim($ex[0])) . ' And Convert(Trim(`col'.intval($filter_record_id).'`), Datetime) <= ' . $db->Quote(trim($ex[1])) . ')'; 
+                                //    $search .= '(Convert(Trim(`col'.intval($filter_record_id).'`),  Datetime) >= ' . $db->quote(trim($ex[0])) . ' And Convert(Trim(`col'.intval($filter_record_id).'`), Datetime) <= ' . $db->quote(trim($ex[1])) . ')'; 
                                 //}else{
-                                //    $search .= '(Convert(Trim(`col'.intval($filter_record_id).'`), Datetime) <= ' . $db->Quote(trim($ex[1])) . ')'; 
+                                //    $search .= '(Convert(Trim(`col'.intval($filter_record_id).'`), Datetime) <= ' . $db->quote(trim($ex[1])) . ')'; 
                                 //}
 
                                 if (trim($ex[0])) {
-                                    if ($db->Quote(trim($ex[1])) == "''") {
-                                        $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) >= ' . $db->Quote(trim($ex[0])) . ')';
+                                    if ($db->quote(trim($ex[1])) == "''") {
+                                        $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) >= ' . $db->quote(trim($ex[0])) . ')';
                                     } else {
-                                        $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) >= ' . $db->Quote(trim($ex[0])) . ' And Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) <= ' . $db->Quote(trim($ex[1])) . ')';
+                                        $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) >= ' . $db->quote(trim($ex[0])) . ' And Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) <= ' . $db->quote(trim($ex[1])) . ')';
                                     }
                                 } else {
-                                    $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) <= ' . $db->Quote(trim($ex[1])) . ')';
+                                    $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) <= ' . $db->quote(trim($ex[1])) . ')';
                                 }
                             } else if (count($ex) > 0) {
-                                $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`),  Datetime) >= ' . $db->Quote(trim($ex[0])) . ' )';
+                                $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`),  Datetime) >= ' . $db->quote(trim($ex[0])) . ' )';
                             }
                             break;
                     }
@@ -597,7 +596,7 @@ class contentbuilder_ng_com_breezingforms
                     $size = count($ex);
                     $i = 0;
                     foreach ($ex as $groupval) {
-                        $search .= ' ( Trim(`col' . intval($filter_record_id) . '`) Like ' . $db->Quote('%' . trim($groupval) . '%') . ' ) ';
+                        $search .= ' ( Trim(`col' . intval($filter_record_id) . '`) Like ' . $db->quote('%' . trim($groupval) . '%') . ' ) ';
                         if ($i + 1 < $size) {
                             $search .= ' Or ';
                         }
@@ -606,7 +605,7 @@ class contentbuilder_ng_com_breezingforms
                 } else {
                     $i = 0;
                     foreach ($terms as $term) {
-                        $search .= 'Trim(`col' . intval($filter_record_id) . '`) Like ' . $db->Quote(trim($term));
+                        $search .= 'Trim(`col' . intval($filter_record_id) . '`) Like ' . $db->quote(trim($term));
                         if ($i + 1 < $cnt) {
                             $search .= ' Or ';
                         }
@@ -706,16 +705,16 @@ class contentbuilder_ng_com_breezingforms
                 Where
                 " . (intval($published) == 0 ? "(joined_records.published Is Null Or joined_records.published = 0) And" : "") . "
                 " . (intval($published) == 1 ? "joined_records.published = 1 And" : "") . "
-                " . ($record_id ? ' r.id = ' . $db->Quote($record_id) . ' And ' : '') . "
+                " . ($record_id ? ' r.id = ' . $db->quote($record_id) . ' And ' : '') . "
                 r.form = " . $this->properties->id . " And
                 " . ($article_category_filter > -1 ? ' content.catid = ' . intval($article_category_filter) . ' And ' : '') . "
                 joined_records.reference_id = r.form And
                 joined_records.record_id = r.id And
                 joined_records.`type` = 'com_breezingforms'
 
-                " . (!$show_all_languages ? " And ( joined_records.sef = " . $db->Quote(Factory::getApplication()->input->getCmd('lang', '')) . " Or joined_records.sef = '' Or joined_records.sef is Null ) " : '') . "
+                " . (!$show_all_languages ? " And ( joined_records.sef = " . $db->quote(Factory::getApplication()->input->getCmd('lang', '')) . " Or joined_records.sef = '' Or joined_records.sef is Null ) " : '') . "
                 " . ($show_all_languages ? " And ( joined_records.id is Null Or joined_records.id Is Not Null ) " : '') . "
-                " . ($lang_code !== null ? " And joined_records.lang_code = " . $db->Quote($lang_code) : '') . "
+                " . ($lang_code !== null ? " And joined_records.lang_code = " . $db->quote($lang_code) : '') . "
                 " . (intval($own_only) > -1 ? ' And r.user_id=' . intval($own_only) . ' ' : '') . "
                 " . (intval($state) > 0 ? " And list.state_id = " . intval($state) : "") . "
                 " . ($published_only ? " And joined_records.published = 1 " : '') . "
@@ -876,7 +875,7 @@ class contentbuilder_ng_com_breezingforms
             $db->setQuery("Select `name` From #__facileforms_elements Where id = " . intval($element_id));
             $name = $db->loadResult();
             if ($name) {
-                $db->setQuery("Select `data1` From #__facileforms_elements Where `type` In ('Radio Button', 'Checkbox') And name = " . $db->Quote(trim($name)));
+                $db->setQuery("Select `data1` From #__facileforms_elements Where `type` In ('Radio Button', 'Checkbox') And name = " . $db->quote(trim($name)));
                 $values = $db->loadColumn();
 
                 foreach ($values as $value) {
@@ -943,7 +942,7 @@ class contentbuilder_ng_com_breezingforms
     public function saveRecordUserData($record_id, $user_id, $fullname, $username)
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Update #__facileforms_records Set user_id = " . intval($user_id) . ", username = " . $db->Quote($username) . ", user_full_name = " . $db->Quote($fullname) . " Where id = " . $db->Quote($record_id));
+        $db->setQuery("Update #__facileforms_records Set user_id = " . intval($user_id) . ", username = " . $db->quote($username) . ", user_full_name = " . $db->quote($fullname) . " Where id = " . $db->quote($record_id));
         $db->execute();
     }
 
@@ -962,9 +961,9 @@ class contentbuilder_ng_com_breezingforms
         if (!$record_id) {
             $username = '-';
             $user_full_name = '-';
-            if (Factory::getApplication()->getIdentity()->get('id', 0) > 0) {
-                $username = Factory::getApplication()->getIdentity()->get('username', '');
-                $user_full_name = Factory::getApplication()->getIdentity()->get('name', '');
+            if ((int) (Factory::getApplication()->getIdentity()->id ?? 0) > 0) {
+                $username = (string) (Factory::getApplication()->getIdentity()->username ?? '');
+                $user_full_name = (string) (Factory::getApplication()->getIdentity()->name ?? '');
             }
             $now = Factory::getDate()->toSql();
             $db->setQuery("Insert Into #__facileforms_records (
@@ -980,15 +979,15 @@ class contentbuilder_ng_com_breezingforms
                 `user_full_name`
             ) Values (
                 '" . $now . "',
-                " . $db->Quote($this->properties->id) . ",
-                " . $db->Quote($this->properties->title) . ",
-                " . $db->Quote($this->properties->name) . ",
-                " . $db->Quote($_SERVER['REMOTE_ADDR']) . ",
-                " . $db->Quote(Browser::getInstance()->getAgentString()) . ",
-                " . $db->Quote(Browser::getInstance()->getPlatform()) . ",
-                " . $db->Quote(Factory::getApplication()->getIdentity()->get('id', 0)) . ",
-                " . $db->Quote($username) . ",
-                " . $db->Quote($user_full_name) . "
+                " . $db->quote($this->properties->id) . ",
+                " . $db->quote($this->properties->title) . ",
+                " . $db->quote($this->properties->name) . ",
+                " . $db->quote($_SERVER['REMOTE_ADDR']) . ",
+                " . $db->quote(Browser::getInstance()->getAgentString()) . ",
+                " . $db->quote(Browser::getInstance()->getPlatform()) . ",
+                " . $db->quote((int) (Factory::getApplication()->getIdentity()->id ?? 0)) . ",
+                " . $db->quote($username) . ",
+                " . $db->quote($user_full_name) . "
             )");
             $db->execute();
             $insert_id = $db->insertid();
@@ -1013,11 +1012,11 @@ class contentbuilder_ng_com_breezingforms
                         Values
                         (
                             $insert_id,
-                            " . $db->Quote($value) . ",
-                            " . $db->Quote($id) . ",
-                            " . $db->Quote($the_element['title']) . ",
-                            " . $db->Quote($the_element['name']) . ",
-                            " . $db->Quote($the_element['type']) . "
+                            " . $db->quote($value) . ",
+                            " . $db->quote($id) . ",
+                            " . $db->quote($the_element['title']) . ",
+                            " . $db->quote($the_element['name']) . ",
+                            " . $db->quote($the_element['type']) . "
                         )"
                     );
                     $db->execute();
@@ -1026,9 +1025,9 @@ class contentbuilder_ng_com_breezingforms
                         Delete From 
                             #__facileforms_subrecords
                         Where
-                            element = " . $db->Quote($id) . "
+                            element = " . $db->quote($id) . "
                         And
-                            record = " . $db->Quote(intval($record_id)) . "
+                            record = " . $db->quote(intval($record_id)) . "
                     ");
                     $db->execute();
                     $db->setQuery("Select `title`,`name`,`type` From #__facileforms_elements Where id = " . intval($id));
@@ -1045,12 +1044,12 @@ class contentbuilder_ng_com_breezingforms
                         )
                         Values
                         (
-                            " . $db->Quote(intval($record_id)) . ",
-                            " . $db->Quote($value) . ",
-                            " . $db->Quote($id) . ",
-                            " . $db->Quote($the_element['title']) . ",
-                            " . $db->Quote($the_element['name']) . ",
-                            " . $db->Quote($the_element['type']) . "
+                            " . $db->quote(intval($record_id)) . ",
+                            " . $db->quote($value) . ",
+                            " . $db->quote($id) . ",
+                            " . $db->quote($the_element['title']) . ",
+                            " . $db->quote($the_element['name']) . ",
+                            " . $db->quote($the_element['type']) . "
                         )"
                     );
                     $db->execute();
@@ -1074,30 +1073,30 @@ class contentbuilder_ng_com_breezingforms
 
                 foreach ($groupdef as $groupval => $grouplabel) {
                     if (!in_array($groupval, $value)) {
-                        $del[] = $db->Quote($groupval);
+                        $del[] = $db->quote($groupval);
                     } else {
-                        $db->setQuery("Select id From #__facileforms_subrecords Where `value` = " . $db->Quote($groupval) . " And record = " . $db->Quote($record_id) . " And element = " . $db->Quote($id));
+                        $db->setQuery("Select id From #__facileforms_subrecords Where `value` = " . $db->quote($groupval) . " And record = " . $db->quote($record_id) . " And element = " . $db->quote($id));
                         $exists = $db->loadResult();
                         if (!$exists) {
-                            $db->setQuery("Insert Into #__facileforms_subrecords (`value`, record, element, `title`, `name`, `type`) Values (" . $db->Quote($groupval) . "," . $db->Quote($record_id) . "," . $db->Quote($id) . "," . $db->Quote($the_element['title']) . "," . $db->Quote($the_element['name']) . "," . $db->Quote($the_element['type']) . ")");
+                            $db->setQuery("Insert Into #__facileforms_subrecords (`value`, record, element, `title`, `name`, `type`) Values (" . $db->quote($groupval) . "," . $db->quote($record_id) . "," . $db->quote($id) . "," . $db->quote($the_element['title']) . "," . $db->quote($the_element['name']) . "," . $db->quote($the_element['type']) . ")");
                             $db->execute();
                         }
                     }
                 }
                 if (count($del)) {
-                    $db->setQuery("Delete From #__facileforms_subrecords Where `value` In (" . implode(',', $del) . ") And record = " . $db->Quote($record_id) . " And element = " . $db->Quote($id));
+                    $db->setQuery("Delete From #__facileforms_subrecords Where `value` In (" . implode(',', $del) . ") And record = " . $db->quote($record_id) . " And element = " . $db->quote($id));
                     $db->execute();
                 }
                 /**
                  * Restore the input order based on the group definition
                  */
                 foreach ($groupdef as $groupval => $grouplabel) {
-                    $db->setQuery("Select id From #__facileforms_subrecords Where `value` = " . $db->Quote($groupval) . " And record = " . $db->Quote($record_id) . " And element = " . $db->Quote($id));
+                    $db->setQuery("Select id From #__facileforms_subrecords Where `value` = " . $db->quote($groupval) . " And record = " . $db->quote($record_id) . " And element = " . $db->quote($id));
                     $old_id = $db->loadResult();
                     $db->setQuery("Select `title`,`name`,`type` From #__facileforms_elements Where id = " . intval($id));
                     $the_element = $db->loadAssoc();
                     if ($old_id) {
-                        $db->setQuery("Insert Into #__facileforms_subrecords (`value`, record, element, `title`, `name`, `type`) Values (" . $db->Quote($groupval) . "," . $db->Quote($record_id) . "," . $db->Quote($id) . "," . $db->Quote($the_element['title']) . "," . $db->Quote($the_element['name']) . "," . $db->Quote($the_element['type']) . ")");
+                        $db->setQuery("Insert Into #__facileforms_subrecords (`value`, record, element, `title`, `name`, `type`) Values (" . $db->quote($groupval) . "," . $db->quote($record_id) . "," . $db->quote($id) . "," . $db->quote($the_element['title']) . "," . $db->quote($the_element['name']) . "," . $db->quote($the_element['type']) . ")");
                         $db->execute();
                         $db->setQuery("Delete From #__facileforms_subrecords Where id = " . $old_id);
                         $db->execute();

@@ -24,6 +24,7 @@ class HtmlView extends BaseHtmlView
     protected string $componentAuthor = '';
     protected array $phpLibraries = [];
     protected array $javascriptLibraries = [];
+    protected array $auditReport = [];
 
     public function display($tpl = null)
     {
@@ -63,6 +64,13 @@ class HtmlView extends BaseHtmlView
             'logo_left'
         );
         ToolbarHelper::custom(
+            'about.runAudit',
+            'search',
+            '',
+            Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT'),
+            false
+        );
+        ToolbarHelper::custom(
             'about.migratePackedData',
             'refresh',
             '',
@@ -82,6 +90,8 @@ class HtmlView extends BaseHtmlView
         $this->componentAuthor = (string) ($versionInformation['author'] ?? '');
         $this->phpLibraries = $this->getInstalledPhpLibraries();
         $this->javascriptLibraries = $this->getInstalledJavascriptLibraries();
+        $auditReport = Factory::getApplication()->getUserState('com_contentbuilder_ng.about.audit', []);
+        $this->auditReport = is_array($auditReport) ? $auditReport : [];
 
         // 3️⃣ Affichage du layout
         parent::display($tpl);

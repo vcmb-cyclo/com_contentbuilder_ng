@@ -16,11 +16,10 @@ use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\PackedDataHelper;
 
 class contentbuilder_ng_com_contentbuilder_ng
 {
-
     public $properties = null;
     public $elements = null;
     public $view_elements = null;
@@ -100,7 +99,7 @@ class contentbuilder_ng_com_contentbuilder_ng
             $db->setQuery("Select `name` From #__contentbuilder_ng_storage_fields Where id = " . intval($where_field) . " And storage_id = " . intval($this->properties->id) . " And published = 1 Order By `ordering`");
             $where_name = $db->loadResult();
             if ($where_name) {
-                $where_add = " And `" . $where_name . "` = " . $db->Quote($where) . " ";
+                $where_add = " And `" . $where_name . "` = " . $db->quote($where) . " ";
             }
         }
         if ($name) {
@@ -144,7 +143,7 @@ class contentbuilder_ng_com_contentbuilder_ng
     {
         $data = new \stdClass();
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select metakey, metadesc, author, robots, rights, xreference From #__contentbuilder_ng_records Where `type` = 'com_contentbuilder_ng' And reference_id = " . $db->Quote($this->properties->id) . " And record_id = " . $db->Quote($record_id));
+        $db->setQuery("Select metakey, metadesc, author, robots, rights, xreference From #__contentbuilder_ng_records Where `type` = 'com_contentbuilder_ng' And reference_id = " . $db->quote($this->properties->id) . " And record_id = " . $db->quote($record_id));
         $metadata = $db->loadObject();
 
         $data->metadesc = '';
@@ -230,9 +229,9 @@ class contentbuilder_ng_com_contentbuilder_ng
                 " . ($published_only || !$show_all_languages || $show_all_languages ? " Left Join #__contentbuilder_ng_records As joined_records On ( joined_records.`type` = 'com_contentbuilder_ng' And joined_records.record_id = r.id And joined_records.reference_id = r.storage_id ) " : "") . "
                 
             Where
-                r.id = " . $db->Quote(intval($record_id)) . " And
+                r.id = " . $db->quote(intval($record_id)) . " And
                 joined_records.`type` = 'com_contentbuilder_ng'
-                " . (!$show_all_languages ? " And ( joined_records.sef = " . $db->Quote(Factory::getApplication()->input->getCmd('lang', '')) . " Or joined_records.sef = '' Or joined_records.sef is Null ) " : '') . "
+                " . (!$show_all_languages ? " And ( joined_records.sef = " . $db->quote(Factory::getApplication()->input->getCmd('lang', '')) . " Or joined_records.sef = '' Or joined_records.sef is Null ) " : '') . "
                 " . ($show_all_languages ? " And ( joined_records.id is Null Or joined_records.id Is Not Null ) " : '') . "
                 " . (intval($own_only) > -1 ? ' And r.user_id=' . intval($own_only) . ' ' : '') . "
                 " . ($published_only ? " And joined_records.published = 1 " : '') . "
@@ -341,9 +340,9 @@ class contentbuilder_ng_com_contentbuilder_ng
         $search = '';
         if ($strlen > 0 && $strlen <= 1000) {
             $length = count($searchable_elements);
-            $search .= "( (colRecord = " . $db->Quote($filter) . ") ";
-            $search .= " Or ( ( r.created_by Like " . $db->Quote('%' . $filter . '%') . " ) ) ";
-            $search .= " Or ( ( r.modified_by Like " . $db->Quote('%' . $filter . '%') . " ) ) ";
+            $search .= "( (colRecord = " . $db->quote($filter) . ") ";
+            $search .= " Or ( ( r.created_by Like " . $db->quote('%' . $filter . '%') . " ) ) ";
+            $search .= " Or ( ( r.modified_by Like " . $db->quote('%' . $filter . '%') . " ) ) ";
             if ($strlen > 1) {
                 foreach ($searchable_elements as $searchable_element) {
                     // TODO: how to deal with terms in this?
@@ -352,10 +351,10 @@ class contentbuilder_ng_com_contentbuilder_ng
                         $limited_count = count($limited);
                         $limited_count = $limited_count > 10 ? 10 : $limited_count;
                         for ($x = 0; $x < $limited_count; $x++) {
-                            $search .= " Or (Replace(`col" . intval($searchable_element) . "`,' ','') Like  " . $db->Quote('%' . str_replace(' ', '', $limited[$x]) . '%') . ") ";
+                            $search .= " Or (Replace(`col" . intval($searchable_element) . "`,' ','') Like  " . $db->quote('%' . str_replace(' ', '', $limited[$x]) . '%') . ") ";
                         }
                     } else {
-                        $search .= " Or (Replace(`col" . intval($searchable_element) . "`,' ','') Like " . $db->Quote('%' . str_replace(' ', '', $filter) . '%') . ") ";
+                        $search .= " Or (Replace(`col" . intval($searchable_element) . "`,' ','') Like " . $db->quote('%' . str_replace(' ', '', $filter) . '%') . ") ";
                     }
                 }
             }
@@ -380,12 +379,12 @@ class contentbuilder_ng_com_contentbuilder_ng
                         case 'number':
                             if (count($ex) == 2) {
                                 if (trim($ex[0])) {
-                                    $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`),  Decimal) >= ' . $db->Quote(trim($ex[0])) . ' And Convert(Trim(`col' . intval($filter_record_id) . '`), Decimal) <= ' . $db->Quote(trim($ex[1])) . ')';
+                                    $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`),  Decimal) >= ' . $db->quote(trim($ex[0])) . ' And Convert(Trim(`col' . intval($filter_record_id) . '`), Decimal) <= ' . $db->quote(trim($ex[1])) . ')';
                                 } else {
-                                    $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Decimal) <= ' . $db->Quote(trim($ex[1])) . ')';
+                                    $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Decimal) <= ' . $db->quote(trim($ex[1])) . ')';
                                 }
                             } else if (count($ex) > 0) {
-                                $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`),  Decimal) >= ' . $db->Quote(trim($ex[0])) . ' )';
+                                $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`),  Decimal) >= ' . $db->quote(trim($ex[0])) . ' )';
 
                             }
                             break;
@@ -393,22 +392,22 @@ class contentbuilder_ng_com_contentbuilder_ng
                             if (count($ex) == 2) {
 
                                 //if(trim($ex[0])){
-                                //    $search .= '(Convert(Trim(`col'.intval($filter_record_id).'`),  Datetime) >= ' . $db->Quote(trim($ex[0])) . ' And Convert(Trim(`col'.intval($filter_record_id).'`), Datetime) <= ' . $db->Quote(trim($ex[1])) . ')'; 
+                                //    $search .= '(Convert(Trim(`col'.intval($filter_record_id).'`),  Datetime) >= ' . $db->quote(trim($ex[0])) . ' And Convert(Trim(`col'.intval($filter_record_id).'`), Datetime) <= ' . $db->quote(trim($ex[1])) . ')'; 
                                 //}else{
-                                //    $search .= '(Convert(Trim(`col'.intval($filter_record_id).'`), Datetime) <= ' . $db->Quote(trim($ex[1])) . ')'; 
+                                //    $search .= '(Convert(Trim(`col'.intval($filter_record_id).'`), Datetime) <= ' . $db->quote(trim($ex[1])) . ')'; 
                                 //}
 
                                 if (trim($ex[0])) {
-                                    if ($db->Quote(trim($ex[1])) == "''") {
-                                        $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) >= ' . $db->Quote(trim($ex[0])) . ')';
+                                    if ($db->quote(trim($ex[1])) == "''") {
+                                        $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) >= ' . $db->quote(trim($ex[0])) . ')';
                                     } else {
-                                        $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) >= ' . $db->Quote(trim($ex[0])) . ' And Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) <= ' . $db->Quote(trim($ex[1])) . ')';
+                                        $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) >= ' . $db->quote(trim($ex[0])) . ' And Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) <= ' . $db->quote(trim($ex[1])) . ')';
                                     }
                                 } else {
-                                    $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) <= ' . $db->Quote(trim($ex[1])) . ')';
+                                    $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`), Datetime) <= ' . $db->quote(trim($ex[1])) . ')';
                                 }
                             } else if (count($ex) > 0) {
-                                $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`),  Datetime) >= ' . $db->Quote(trim($ex[0])) . ' )';
+                                $search .= '(Convert(Trim(`col' . intval($filter_record_id) . '`),  Datetime) >= ' . $db->quote(trim($ex[0])) . ' )';
 
                             }
                             break;
@@ -420,7 +419,7 @@ class contentbuilder_ng_com_contentbuilder_ng
                     $size = count($ex);
                     $i = 0;
                     foreach ($ex as $groupval) {
-                        $search .= ' ( Trim(`col' . intval($filter_record_id) . '`) Like ' . $db->Quote('%' . trim($groupval) . '%') . ' ) ';
+                        $search .= ' ( Trim(`col' . intval($filter_record_id) . '`) Like ' . $db->quote('%' . trim($groupval) . '%') . ' ) ';
                         if ($i + 1 < $size) {
                             $search .= ' Or ';
                         }
@@ -430,7 +429,7 @@ class contentbuilder_ng_com_contentbuilder_ng
                 } else {
                     $i = 0;
                     foreach ($terms as $term) {
-                        $search .= 'Trim(`col' . intval($filter_record_id) . '`) Like ' . $db->Quote(trim($term));
+                        $search .= 'Trim(`col' . intval($filter_record_id) . '`) Like ' . $db->quote(trim($term));
                         if ($i + 1 < $cnt) {
                             $search .= ' Or ';
                         }
@@ -563,14 +562,14 @@ class contentbuilder_ng_com_contentbuilder_ng
                 Where
                 " . (intval($published) == 0 ? "(joined_records.published Is Null Or joined_records.published = 0) And" : "") . "
                 " . (intval($published) == 1 ? "joined_records.published = 1 And" : "") . "
-                " . ($record_id ? ' r.id = ' . $db->Quote($record_id) . ' And ' : '') . "
+                " . ($record_id ? ' r.id = ' . $db->quote($record_id) . ' And ' : '') . "
                 " . ($article_category_filter > -1 ? ' content.catid = ' . intval($article_category_filter) . ' And ' : '') . "
                 joined_records.reference_id = r.storage_id And
                 joined_records.record_id = r.id And
                 joined_records.`type` = 'com_contentbuilder_ng'
-                " . (!$show_all_languages ? " And ( joined_records.sef = " . $db->Quote(Factory::getApplication()->input->getCmd('lang', '')) . " Or joined_records.sef = '' Or joined_records.sef is Null ) " : '') . "
+                " . (!$show_all_languages ? " And ( joined_records.sef = " . $db->quote(Factory::getApplication()->input->getCmd('lang', '')) . " Or joined_records.sef = '' Or joined_records.sef is Null ) " : '') . "
                 " . ($show_all_languages ? " And ( joined_records.id is Null Or joined_records.id Is Not Null ) " : '') . "
-                " . ($lang_code !== null ? " And joined_records.lang_code = " . $db->Quote($lang_code) : '') . "
+                " . ($lang_code !== null ? " And joined_records.lang_code = " . $db->quote($lang_code) : '') . "
                 " . (intval($own_only) > -1 ? ' And r.user_id=' . intval($own_only) . ' ' : '') . "
                 " . (intval($state) > 0 ? " And list.state_id = " . intval($state) : "") . "
                 " . ($published_only ? " And joined_records.published = 1 " : '') . "
@@ -757,7 +756,7 @@ class contentbuilder_ng_com_contentbuilder_ng
             return;
         }
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Update " . $this->bytable . $this->properties->name . " Set user_id = " . intval($user_id) . ", created_by = " . $db->Quote($fullname) . " Where id = " . $db->Quote($record_id));
+        $db->setQuery("Update " . $this->bytable . $this->properties->name . " Set user_id = " . intval($user_id) . ", created_by = " . $db->quote($fullname) . " Where id = " . $db->quote($record_id));
         $db->execute();
     }
 
@@ -829,13 +828,13 @@ class contentbuilder_ng_com_contentbuilder_ng
 
             } else {
 
-                $db->setQuery("Select e.* From #__contentbuilder_ng_elements As e, #__contentbuilder_ng_forms As f Where e.reference_id = " . $db->Quote($id) . " And f.reference_id = " . $db->Quote($this->form_id) . " And e.form_id = f.id Order By ordering");
+                $db->setQuery("Select e.* From #__contentbuilder_ng_elements As e, #__contentbuilder_ng_forms As f Where e.reference_id = " . $db->quote($id) . " And f.reference_id = " . $db->quote($this->form_id) . " And e.form_id = f.id Order By ordering");
                 $element = $db->loadAssoc();
 
                 //$options = null;
 
                 if (isset($element['options'])) {
-                    $options = ContentbuilderLegacyHelper::decodePackedData($element['options'], new \stdClass());
+                    $options = PackedDataHelper::decodePackedData($element['options'], new \stdClass());
                     if (is_array($options)) {
                         $options = (object) $options;
                     }
@@ -889,7 +888,7 @@ class contentbuilder_ng_com_contentbuilder_ng
             $i = 0;
             foreach ($names as $id => $keys) {
                 $the_keys .= '`' . $keys['name'] . '`' . ($i + 1 < $cnt ? ',' : '');
-                $the_values .= $db->Quote($keys['value']) . ($i + 1 < $cnt ? ',' : '');
+                $the_values .= $db->quote($keys['value']) . ($i + 1 < $cnt ? ',' : '');
                 $i++;
             }
 
@@ -908,8 +907,8 @@ class contentbuilder_ng_com_contentbuilder_ng
                 $the_keys
             ) Values (
                 '" . $now . "',
-                " . $db->Quote($user_id) . ",
-                " . $db->Quote($user_full_name) . "
+                " . $db->quote($user_id) . ",
+                " . $db->quote($user_full_name) . "
                 $the_values
             )");
             $db->execute();
@@ -922,7 +921,7 @@ class contentbuilder_ng_com_contentbuilder_ng
 
             $i = 0;
             foreach ($names as $id => $keys) {
-                $the_values .= '`' . $keys['name'] . '` = ' . $db->Quote($keys['value']) . ($i + 1 < $cnt ? ',' : '');
+                $the_values .= '`' . $keys['name'] . '` = ' . $db->quote($keys['value']) . ($i + 1 < $cnt ? ',' : '');
                 $i++;
             }
 
@@ -932,8 +931,8 @@ class contentbuilder_ng_com_contentbuilder_ng
 
             $db->setQuery("Update " . $this->bytable . $this->properties->name . " Set
                `modified` = '" . $now . "',
-               `modified_user_id` = " . $db->Quote($user_id) . ",
-               `modified_by` = " . $db->Quote($user_full_name) . "
+               `modified_user_id` = " . $db->quote($user_id) . ",
+               `modified_by` = " . $db->quote($user_full_name) . "
                $the_values
                Where
                id = $record_id

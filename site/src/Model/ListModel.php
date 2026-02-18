@@ -384,7 +384,7 @@ class ListModel extends BaseListModel
                         $data->initial_sort_order == 'Rand' &&
                         (empty($data->rand_date_update) || $now->toUnix() - strtotime($data->rand_date_update) >= $data->rand_update)
                     ) {
-                        $this->getDatabase()->setQuery("UPDATE #__contentbuilder_ng_records SET rand_date = '" . $___now . "' + interval rand()*10000 day Where `type` = " . $this->getDatabase()->Quote($data->type) . " And reference_id = " . $this->getDatabase()->Quote($data->reference_id));
+                        $this->getDatabase()->setQuery("UPDATE #__contentbuilder_ng_records SET rand_date = '" . $___now . "' + interval rand()*10000 day Where `type` = " . $this->getDatabase()->quote($data->type) . " And reference_id = " . $this->getDatabase()->quote($data->reference_id));
                         $this->getDatabase()->execute();
                         $this->getDatabase()->setQuery("Update #__contentbuilder_ng_forms Set rand_date_update = '" . $___now . "'");
                         $this->getDatabase()->execute();
@@ -584,7 +584,7 @@ class ListModel extends BaseListModel
 
                     $ids = array();
                     foreach ($data->labels as $reference_id => $label) {
-                        $ids[] = $this->getDatabase()->Quote($reference_id);
+                        $ids[] = $this->getDatabase()->quote($reference_id);
                     }
                     $searchable_elements = ContentbuilderLegacyHelper::getListSearchableElements($this->_id);
                     $data->display_filter = count($searchable_elements) && $data->show_filter;
@@ -665,8 +665,8 @@ class ListModel extends BaseListModel
                     $ownerFilterUserId = $isAdminPreview
                         ? -1
                         : ($this->frontend
-                            ? ($data->own_only_fe ? Factory::getApplication()->getIdentity()->get('id', 0) : -1)
-                            : ($data->own_only ? Factory::getApplication()->getIdentity()->get('id', 0) : -1));
+                            ? ($data->own_only_fe ? (int) (Factory::getApplication()->getIdentity()->id ?? 0) : -1)
+                            : ($data->own_only ? (int) (Factory::getApplication()->getIdentity()->id ?? 0) : -1));
                     $showAllLanguages = $isAdminPreview ? true : ($this->frontend ? $data->show_all_languages_fe : true);
 
                     $data->items = $data->form->getListRecords(

@@ -434,7 +434,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
     window.setTimeout(cbInitColoris, 1200);
 </script>
 <form action="index.php" method="post" name="adminForm" id="adminForm">
-    <div class="w-100 row" style="margin-left: 20px; overflow-x: auto;">
+    <div class="w-100 row g-0" style="max-width: 100%; overflow-x: auto;">
 
         <?php
         $advancedOptionsContent = '';
@@ -606,14 +606,45 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                 <select class="form-select-sm" name="jform[theme_plugin]" id="theme_plugin">
                                     <?php
                                     foreach ($this->theme_plugins as $theme_plugin) {
+                                        $isDarkTheme = ((string) $theme_plugin === 'dark');
                                     ?>
-                                        <option value="<?php echo $theme_plugin; ?>" <?php echo $theme_plugin == $this->item->theme_plugin ? ' selected="selected"' : ''; ?>>
-                                            <?php echo $theme_plugin; ?>
+                                        <option value="<?php echo htmlspecialchars((string) $theme_plugin, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $theme_plugin == $this->item->theme_plugin ? ' selected="selected"' : ''; ?><?php echo $isDarkTheme ? ' style="background:#111;color:#fff;font-weight:700;"' : ''; ?>>
+                                            <?php echo htmlspecialchars((string) $theme_plugin, ENT_QUOTES, 'UTF-8'); ?>
                                         </option>
                                     <?php
                                     }
                                     ?>
                                 </select>
+                                <style>
+                                    #theme_plugin option[value="dark"] {
+                                        background: #111;
+                                        color: #fff;
+                                        font-weight: 700;
+                                    }
+                                </style>
+                                <script>
+                                    (function() {
+                                        var themeSelect = document.getElementById('theme_plugin');
+                                        if (!themeSelect) {
+                                            return;
+                                        }
+
+                                        var applyThemeSelectStyle = function() {
+                                            if (themeSelect.value === 'dark') {
+                                                themeSelect.style.backgroundColor = '#111';
+                                                themeSelect.style.color = '#fff';
+                                                themeSelect.style.borderColor = '#333';
+                                            } else {
+                                                themeSelect.style.backgroundColor = '';
+                                                themeSelect.style.color = '';
+                                                themeSelect.style.borderColor = '';
+                                            }
+                                        };
+
+                                        themeSelect.addEventListener('change', applyThemeSelectStyle);
+                                        applyThemeSelectStyle();
+                                    })();
+                                </script>
 
                             </fieldset>
 

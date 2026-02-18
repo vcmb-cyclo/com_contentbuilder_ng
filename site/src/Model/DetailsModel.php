@@ -187,7 +187,7 @@ class DetailsModel extends ListModel
                     $data->labels = $data->form->getElementLabels();
                     $ids = array();
                     foreach ($data->labels as $reference_id => $label) {
-                        $ids[] = $this->getDatabase()->Quote($reference_id);
+                        $ids[] = $this->getDatabase()->quote($reference_id);
                     }
 
                     if (count($ids)) {
@@ -201,7 +201,7 @@ class DetailsModel extends ListModel
 
                     if ($this->_latest) {
 
-                        $rec = $data->form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, Factory::getApplication()->getIdentity()->get('id', 0), 0, -1, -1, -1, -1, array(), true, null);
+                        $rec = $data->form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, (int) (Factory::getApplication()->getIdentity()->id ?? 0), 0, -1, -1, -1, -1, array(), true, null);
 
                         if (count($rec) > 0) {
                             $rec = $rec[0];
@@ -258,8 +258,8 @@ class DetailsModel extends ListModel
                         $ownerFilterUserId = $isAdminPreview
                             ? -1
                             : ($this->frontend
-                                ? ($data->own_only_fe ? Factory::getApplication()->getIdentity()->get('id', 0) : -1)
-                                : ($data->own_only ? Factory::getApplication()->getIdentity()->get('id', 0) : -1));
+                                ? ($data->own_only_fe ? (int) (Factory::getApplication()->getIdentity()->id ?? 0) : -1)
+                                : ($data->own_only ? (int) (Factory::getApplication()->getIdentity()->id ?? 0) : -1));
                         $showAllLanguages = $isAdminPreview ? true : ($this->frontend ? $data->show_all_languages_fe : true);
                         $data->items = $data->form->getRecord($this->_record_id, $publishedOnly, $ownerFilterUserId, $showAllLanguages);
                     }

@@ -11,4 +11,8 @@ namespace CB\Component\Contentbuilder_ng\Site\Model;
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
-require_once JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/Model/VerifyModel.php';
+use CB\Component\Contentbuilder_ng\Administrator\Model\VerifyModel as AdministratorVerifyModel;
+
+class VerifyModel extends AdministratorVerifyModel
+{
+}

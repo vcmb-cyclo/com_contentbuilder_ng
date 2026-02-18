@@ -18,7 +18,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\PackedDataHelper;
 use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
@@ -244,10 +244,10 @@ class HtmlView extends BaseHtmlView
 
         if ($formId > 0) {
             $previewUntil = time() + 600;
-            $previewActorId = (int) $app->getIdentity()->get('id', 0);
-            $previewActorName = trim((string) $app->getIdentity()->get('name', ''));
+            $previewActorId = (int) ($app->getIdentity()->id ?? 0);
+            $previewActorName = trim((string) ($app->getIdentity()->name ?? ''));
             if ($previewActorName === '') {
-                $previewActorName = trim((string) $app->getIdentity()->get('username', ''));
+                $previewActorName = trim((string) ($app->getIdentity()->username ?? ''));
             }
             if ($previewActorName === '') {
                 $previewActorName = 'administrator';
@@ -302,7 +302,7 @@ class HtmlView extends BaseHtmlView
         $this->gmap = $db->loadObjectList() ?? [];
 
 
-        $config = ContentbuilderLegacyHelper::decodePackedData($this->item->config ?? null, null, true);
+        $config = PackedDataHelper::decodePackedData($this->item->config ?? null, null, true);
         $this->item->config = is_array($config) ? $config : null;
 
         $this->list_states_action_plugins = $this->get('ListStatesActionPlugins') ?? [];

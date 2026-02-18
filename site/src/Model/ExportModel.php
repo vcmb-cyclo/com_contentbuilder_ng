@@ -312,7 +312,7 @@ class ExportModel extends BaseDatabaseModel
                     $order_types = array();
                     $ids = array();
                     foreach ($data->labels as $reference_id => $label) {
-                        $ids[] = $this->getDatabase()->Quote($reference_id);
+                        $ids[] = $this->getDatabase()->quote($reference_id);
                     }
                     if (count($ids)) {
                         $this->getDatabase()->setQuery("Select Distinct `id`,`label`, reference_id, `order_type` From #__contentbuilder_ng_elements Where form_id = " . intval($this->_id) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
@@ -343,7 +343,7 @@ class ExportModel extends BaseDatabaseModel
                         $act_as_registration[$data->registration_email_field] = 'registration_email_field';
                     }
                     $data->items = $data->form->getListRecords($ids, $this->getState('formsd_filter'), $searchable_elements, 0, 0, $this->getState('formsd_filter_order'), $order_types, $this->getState('formsd_filter_order_Dir'), 0, $data->published_only, $this->frontend && $data->own_only_fe ? 
-                                    Factory::getApplication()->getIdentity()->get('id', 0) : -1, $this->getState('formsd_filter_state'), $this->getState('formsd_filter_publish'), $data->initial_sort_order == -1 ? -1 : 'col' . $data->initial_sort_order, $data->initial_sort_order2 == -1 ? -1 : 'col' . $data->initial_sort_order2, $data->initial_sort_order3 == -1 ? -1 : 'col' . $data->initial_sort_order3, $this->_menu_filter, $this->frontend ? $data->show_all_languages_fe : true, $this->getState('formsd_filter_language'), $act_as_registration, $data, $this->getState('article_category_filter'));
+                                    (int) (Factory::getApplication()->getIdentity()->id ?? 0) : -1, $this->getState('formsd_filter_state'), $this->getState('formsd_filter_publish'), $data->initial_sort_order == -1 ? -1 : 'col' . $data->initial_sort_order, $data->initial_sort_order2 == -1 ? -1 : 'col' . $data->initial_sort_order2, $data->initial_sort_order3 == -1 ? -1 : 'col' . $data->initial_sort_order3, $this->_menu_filter, $this->frontend ? $data->show_all_languages_fe : true, $this->getState('formsd_filter_language'), $act_as_registration, $data, $this->getState('article_category_filter'));
                 }
 
                 return $data;

@@ -34,7 +34,6 @@ use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 final class ContentbuilderLegacyHelper
 {
-
     private static function startsWithIgnoreCase(string $value, string $prefix): bool
     {
         return strncasecmp($value, $prefix, strlen($prefix)) === 0;
@@ -77,56 +76,7 @@ final class ContentbuilderLegacyHelper
      */
     public static function decodePackedData($raw, $default = null, bool $assoc = false)
     {
-        if ($raw === null || $raw === '') {
-            return $default;
-        }
-
-        $decoded = base64_decode((string) $raw, true);
-        if ($decoded === false) {
-            return $default;
-        }
-
-        $jsonPayload = null;
-        if (strpos($decoded, 'j:') === 0) {
-            $jsonPayload = substr($decoded, 2);
-        } elseif (strpos(ltrim($decoded), '{') === 0 || strpos(ltrim($decoded), '[') === 0) {
-            $jsonPayload = $decoded;
-        }
-
-        if ($jsonPayload !== null) {
-            try {
-                $jsonDecoded = json_decode($jsonPayload, $assoc, 512, JSON_THROW_ON_ERROR);
-                return $jsonDecoded;
-            } catch (\Throwable $e) {
-                return $default;
-            }
-        }
-
-        try {
-            $unserialized = @unserialize($decoded, ['allowed_classes' => ['stdClass']]);
-        } catch (\Throwable $e) {
-            return $default;
-        }
-
-        if ($unserialized === false && $decoded !== 'b:0;') {
-            return $default;
-        }
-
-        if (self::containsIncompleteClass($unserialized)) {
-            return $default;
-        }
-
-        if ($assoc && (is_array($unserialized) || is_object($unserialized))) {
-            $json = json_encode($unserialized);
-            if (is_string($json)) {
-                $assocDecoded = json_decode($json, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    return $assocDecoded;
-                }
-            }
-        }
-
-        return $unserialized;
+        return PackedDataHelper::decodePackedData($raw, $default, $assoc);
     }
 
     /**
@@ -135,12 +85,7 @@ final class ContentbuilderLegacyHelper
      */
     public static function encodePackedData($value): string
     {
-        try {
-            $json = json_encode($value, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            return base64_encode('j:' . $json);
-        } catch (\Throwable $e) {
-            return base64_encode(serialize($value));
-        }
+        return PackedDataHelper::encodePackedData($value);
     }
 
     /**
@@ -623,9 +568,9 @@ final class ContentbuilderLegacyHelper
                      )
                      Values
                      (
-                        " . $db->Quote($name) . ",
+                        " . $db->quote($name) . ",
                         'option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "',
-                        " . $db->Quote($name) . ",
+                        " . $db->quote($name) . ",
                         'com_contentbuilder_ng',
                         'media/com_contentbuilder_ng/images/logo_icon_cb.png',
                         1,
@@ -637,8 +582,8 @@ final class ContentbuilderLegacyHelper
                 $db->setQuery(
                     "Update #__components
                      Set
-                     `name` = " . $db->Quote($name) . ",
-                     `admin_menu_alt` = " . $db->Quote($name) . ",
+                     `name` = " . $db->quote($name) . ",
+                     `admin_menu_alt` = " . $db->quote($name) . ",
                      `parent` = $parent_id
                      Where id = $menuitem
                "
@@ -691,7 +636,7 @@ final class ContentbuilderLegacyHelper
             if (!$result)
                 die("ContentBuilder main menu item not found!");
 
-            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder_ng&task=list.display&id=%' And link <> 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where alias = " . $db->quote($name) . " And link Like 'index.php?option=com_contentbuilder_ng&task=list.display&id=%' And link <> 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
             $name_exists = $db->loadResult();
 
             if ($name_exists) {
@@ -707,7 +652,7 @@ final class ContentbuilderLegacyHelper
                     "ordering, level, component_id, client_id, img" .
                     ",lft,rgt) " .
                     "values (" .
-                    "" . $db->Quote($name) . ", " . $db->Quote($name) . ", 'main', '$parent_id', " .
+                    "" . $db->quote($name) . ", " . $db->quote($name) . ", 'main', '$parent_id', " .
                     "'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'," .
                     "'0', 1, " . intval($result) . ", 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png'" .
                     ",( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone), ( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet))"
@@ -723,7 +668,7 @@ final class ContentbuilderLegacyHelper
             } else {
 
                 $db->setQuery(
-                    "Update #__menu Set `title` = " . $db->Quote($name) . ", alias = " . $db->Quote($name) . ", `parent_id` = '$parent_id' Where id = $menuitem"
+                    "Update #__menu Set `title` = " . $db->quote($name) . ", alias = " . $db->quote($name) . ", `parent_id` = '$parent_id' Where id = $menuitem"
                 );
                 $db->execute();
 
@@ -777,7 +722,7 @@ final class ContentbuilderLegacyHelper
             if (!$result)
                 die("ContentBuilder NG main menu item not found!");
 
-            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder_ng&task=list.display&id=%' And link <> 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where alias = " . $db->quote($name) . " And link Like 'index.php?option=com_contentbuilder_ng&task=list.display&id=%' And link <> 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
             $name_exists = $db->loadResult();
 
             if ($name_exists) {
@@ -793,7 +738,7 @@ final class ContentbuilderLegacyHelper
                     "level, component_id, client_id, img" .
                     ",lft,rgt) " .
                     "values (" .
-                    "''," . "''," . $db->Quote($name) . ", " . $db->Quote($name) . ", 'main', 'component', '$parent_id', " .
+                    "''," . "''," . $db->quote($name) . ", " . $db->quote($name) . ", 'main', 'component', '$parent_id', " .
                     "'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'," .
                     "1, " . intval($result) . ", 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png'" .
                     ",( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone), ( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet))"
@@ -809,7 +754,7 @@ final class ContentbuilderLegacyHelper
             } else {
 
                 $db->setQuery(
-                    "Update #__menu Set `title` = " . $db->Quote($name) . ", alias = " . $db->Quote($name) . ", `parent_id` = '$parent_id' Where id = $menuitem"
+                    "Update #__menu Set `title` = " . $db->quote($name) . ", alias = " . $db->quote($name) . ", `parent_id` = '$parent_id' Where id = $menuitem"
                 );
                 $db->execute();
 
@@ -832,7 +777,7 @@ final class ContentbuilderLegacyHelper
         PluginHelper::importPlugin('contentbuilder_ng_themes', $plugin);
 
         $dispatcher = Factory::getApplication()->getDispatcher();
-        $eventResult = $dispatcher->dispatch('onContentTemplateSample', new \Joomla\Event\Event('onContentTemplateSample', array($contentbuilder_ng_form_id, $form)));
+        $eventResult = $dispatcher->dispatch('onContentTemplateSample', new \Joomla\Event\Event('onContentTemplateSample', [$contentbuilder_ng_form_id, $form, 'theme' => $plugin]));
         $results = $eventResult->getArgument('result') ?: [];
         $out = implode('', $results);
         if ($plugin && $out === '') {
@@ -855,7 +800,7 @@ final class ContentbuilderLegacyHelper
         }
         $names = $form->getElementNames();
         foreach ($names as $reference_id => $name) {
-            $db->setQuery("Select id, `type` From #__contentbuilder_ng_elements Where published = 1 And form_id = " . intval($contentbuilder_ng_form_id) . " And reference_id = " . $db->Quote($reference_id));
+            $db->setQuery("Select id, `type` From #__contentbuilder_ng_elements Where published = 1 And form_id = " . intval($contentbuilder_ng_form_id) . " And reference_id = " . $db->quote($reference_id));
             $result = $db->loadAssoc();
             if (is_array($result)) {
                 if ($result['type'] != 'hidden') {
@@ -891,7 +836,7 @@ final class ContentbuilderLegacyHelper
         PluginHelper::importPlugin('contentbuilder_ng_themes', $plugin);
 
         $dispatcher = Factory::getApplication()->getDispatcher();
-        $eventResult = $dispatcher->dispatch('onEditableTemplateSample', new \Joomla\Event\Event('onEditableTemplateSample', array($contentbuilder_ng_form_id, $form)));
+        $eventResult = $dispatcher->dispatch('onEditableTemplateSample', new \Joomla\Event\Event('onEditableTemplateSample', [$contentbuilder_ng_form_id, $form, 'theme' => $plugin]));
         $results = $eventResult->getArgument('result') ?: [];
         $out = implode('', $results);
         if ($plugin && $out === '') {
@@ -920,8 +865,8 @@ final class ContentbuilderLegacyHelper
             $options->password = 0;
             $options->readonly = 0;
             $options->seperator = ',';
-            $ids[] = $db->Quote($reference_id);
-            $db->setQuery("Select id, `type`, `options` From #__contentbuilder_ng_elements Where form_id = " . intval($contentbuilder_ng_form_id) . " And reference_id = " . $db->Quote($reference_id));
+            $ids[] = $db->quote($reference_id);
+            $db->setQuery("Select id, `type`, `options` From #__contentbuilder_ng_elements Where form_id = " . intval($contentbuilder_ng_form_id) . " And reference_id = " . $db->quote($reference_id));
             $assoc = $db->loadAssoc();
 
             if (!is_array($assoc)) {
@@ -929,7 +874,7 @@ final class ContentbuilderLegacyHelper
                 $db->setQuery("Select Max(ordering) + 1 From #__contentbuilder_ng_elements Where form_id = " . intval($contentbuilder_ng_form_id));
                 $ordering = $db->loadResult();
 
-                $db->setQuery("Insert Into #__contentbuilder_ng_elements (`label`,`form_id`,`reference_id`,`type`,`options`, `ordering`) Values (" . $db->Quote($title) . "," . $db->Quote($contentbuilder_ng_form_id) . "," . $db->Quote($reference_id) . ",'text','" . self::encodePackedData($options) . "', " . ($ordering ? $ordering : 0) . ")");
+                $db->setQuery("Insert Into #__contentbuilder_ng_elements (`label`,`form_id`,`reference_id`,`type`,`options`, `ordering`) Values (" . $db->quote($title) . "," . $db->quote($contentbuilder_ng_form_id) . "," . $db->quote($reference_id) . ",'text','" . self::encodePackedData($options) . "', " . ($ordering ? $ordering : 0) . ")");
                 $db->execute();
             }
         }
@@ -1430,9 +1375,9 @@ final class ContentbuilderLegacyHelper
             $item = null;
 
             $template = str_replace(array('{RECORD_ID}', '{record_id}'), $record_id, $template);
-            $template = str_replace(array('{USER_ID}', '{user_id}'), Factory::getApplication()->getIdentity()->get('id'), $template);
-            $template = str_replace(array('{USERNAME}', '{username}'), Factory::getApplication()->getIdentity()->get('username'), $template);
-            $template = str_replace(array('{USER_FULL_NAME}', '{user_full_name}'), Factory::getApplication()->getIdentity()->get('name'), $template);
+            $template = str_replace(array('{USER_ID}', '{user_id}'), Factory::getApplication()->getIdentity()->id, $template);
+            $template = str_replace(array('{USERNAME}', '{username}'), Factory::getApplication()->getIdentity()->username, $template);
+            $template = str_replace(array('{USER_FULL_NAME}', '{user_full_name}'), Factory::getApplication()->getIdentity()->name, $template);
             $template = str_replace(array('{VIEW_NAME}', '{view_name}'), $result['name'], $template);
             $template = str_replace(array('{VIEW_ID}', '{view_id}'), $contentbuilder_ng_form_id, $template);
             $template = str_replace(array('{IP}', '{ip}'), $_SERVER['REMOTE_ADDR'], $template);
@@ -1473,8 +1418,8 @@ final class ContentbuilderLegacyHelper
                     $meta = $form->getRecordMetadata($record_id);
                     $db->setQuery("Select * From #__users Where id = " . $meta->created_id);
                     $user = $db->loadObject();
-                } else if (Factory::getApplication()->getIdentity()->get('id', 0)) {
-                    $db->setQuery("Select * From #__users Where id = " . Factory::getApplication()->getIdentity()->get('id', 0));
+                } else if ((int) (Factory::getApplication()->getIdentity()->id ?? 0)) {
+                    $db->setQuery("Select * From #__users Where id = " . (int) (Factory::getApplication()->getIdentity()->id ?? 0));
                     $user = $db->loadObject();
                 }
             }
@@ -1566,7 +1511,7 @@ final class ContentbuilderLegacyHelper
                     "Select * From #__contentbuilder_ng_elements"
                     . " Where published = 1"
                     . ($hasEditableElements ? " And editable = 1" : "")
-                    . " And reference_id = " . $db->Quote($item['id'])
+                    . " And reference_id = " . $db->quote($item['id'])
                     . " And form_id = " . intval($contentbuilder_ng_form_id)
                     . " Order By ordering"
                 );
@@ -1972,8 +1917,8 @@ final class ContentbuilderLegacyHelper
                 $meta = $form_->getRecordMetadata($record_id);
                 $db->setQuery("Select * From #__users Where id = " . $meta->created_id);
                 $user = $db->loadObject();
-            } else if (Factory::getApplication()->getIdentity()->get('id', 0)) {
-                $db->setQuery("Select * From #__users Where id = " . Factory::getApplication()->getIdentity()->get('id', 0));
+            } else if ((int) (Factory::getApplication()->getIdentity()->id ?? 0)) {
+                $db->setQuery("Select * From #__users Where id = " . (int) (Factory::getApplication()->getIdentity()->id ?? 0));
                 $user = $db->loadObject();
             }
         }
@@ -2027,7 +1972,7 @@ final class ContentbuilderLegacyHelper
 
         // retrieve the publish state from the list view
         $state = 1;
-        $db->setQuery("Select published, is_future, publish_up, publish_down From #__contentbuilder_ng_records Where `type` = " . $db->Quote($form['type']) . " And reference_id = " . $db->Quote($form['reference_id']) . " And record_id = " . $db->Quote($record_id));
+        $db->setQuery("Select published, is_future, publish_up, publish_down From #__contentbuilder_ng_records Where `type` = " . $db->quote($form['type']) . " And reference_id = " . $db->quote($form['reference_id']) . " And record_id = " . $db->quote($record_id));
         $state = $db->loadAssoc();
         $publish_up_record = $state['publish_up'];
         $publish_down_record = $state['publish_down'];
@@ -2036,7 +1981,7 @@ final class ContentbuilderLegacyHelper
         // save/update articles
         $alias = '';
 
-        $db->setQuery("Select articles.`article_id`, content.`alias` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($contentbuilder_ng_form_id) . " And articles.record_id = " . $db->Quote($record_id));
+        $db->setQuery("Select articles.`article_id`, content.`alias` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($contentbuilder_ng_form_id) . " And articles.record_id = " . $db->quote($record_id));
         $article = $db->loadAssoc();
         if (is_array($article)) {
             $alias = $article['alias'];
@@ -2082,7 +2027,7 @@ final class ContentbuilderLegacyHelper
 
         $ignore_lang_code = '*';
         if ($form['default_lang_code_ignore']) {
-            $db->setQuery("Select lang_code From #__languages Where published = 1 And sef = " . $db->Quote(Factory::getApplication()->input->getCmd('lang', '')));
+            $db->setQuery("Select lang_code From #__languages Where published = 1 And sef = " . $db->quote(Factory::getApplication()->input->getCmd('lang', '')));
             $ignore_lang_code = $db->loadResult();
             if (!$ignore_lang_code) {
                 $ignore_lang_code = '*';
@@ -2113,14 +2058,14 @@ final class ContentbuilderLegacyHelper
             $language = isset($config['language']) ? $config['language'] : $language;
 
             if ($form['article_record_impact_language'] && isset($config['language'])) {
-                $db->setQuery("Select sef From #__languages Where published = 1 And lang_code = " . $db->Quote($config['language']));
+                $db->setQuery("Select sef From #__languages Where published = 1 And lang_code = " . $db->quote($config['language']));
                 $sef = $db->loadResult();
 
                 if ($sef === null) {
                     $sef = '';
                 }
 
-                $db->setQuery("Update #__contentbuilder_ng_records Set sef = " . $db->Quote($sef) . ", lang_code = " . $db->Quote($config['language']) . " Where `type` = " . $db->Quote($form['type']) . " And reference_id = " . $db->Quote($form['reference_id']) . " And record_id = " . $db->Quote($record_id));
+                $db->setQuery("Update #__contentbuilder_ng_records Set sef = " . $db->quote($sef) . ", lang_code = " . $db->quote($config['language']) . " Where `type` = " . $db->quote($form['type']) . " And reference_id = " . $db->quote($form['reference_id']) . " And record_id = " . $db->quote($record_id));
                 $db->execute();
             }
 
@@ -2140,10 +2085,10 @@ final class ContentbuilderLegacyHelper
 
                 $db->setQuery(
                     "UPDATE #__contentbuilder_ng_records 
-                    SET " . $setPart . " publish_up = " . ($publishUp ? $db->Quote($publishUp) : 'NULL') . " 
-                    WHERE `type` = " . $db->Quote($form['type']) . " 
-                    AND reference_id = " . $db->Quote($form['reference_id']) . " 
-                    AND record_id = " . $db->Quote($record_id)
+                    SET " . $setPart . " publish_up = " . ($publishUp ? $db->quote($publishUp) : 'NULL') . " 
+                    WHERE `type` = " . $db->quote($form['type']) . " 
+                    AND reference_id = " . $db->quote($form['reference_id']) . " 
+                    AND record_id = " . $db->quote($record_id)
                 );
                 $db->execute();
             }
@@ -2163,10 +2108,10 @@ final class ContentbuilderLegacyHelper
 
                 $db->setQuery(
                     "UPDATE #__contentbuilder_ng_records 
-                    SET " . $setPart . " publish_down = " . ($publishDown ? $db->Quote($publishDown) : 'NULL') . " 
-                    WHERE `type` = " . $db->Quote($form['type']) . " 
-                    AND reference_id = " . $db->Quote($form['reference_id']) . " 
-                    AND record_id = " . $db->Quote($record_id)
+                    SET " . $setPart . " publish_down = " . ($publishDown ? $db->quote($publishDown) : 'NULL') . " 
+                    WHERE `type` = " . $db->quote($form['type']) . " 
+                    AND reference_id = " . $db->quote($form['reference_id']) . " 
+                    AND record_id = " . $db->quote($record_id)
                 );
 
                 $db->execute();
@@ -2228,7 +2173,7 @@ final class ContentbuilderLegacyHelper
                 }
             }
 
-            $db->setQuery("Update #__contentbuilder_ng_records Set robots = " . $db->Quote($robots) . ", author = " . $db->Quote($author) . ", rights = " . $db->Quote($rights) . ", xreference = " . $db->Quote($xreference) . ", metakey = " . $db->Quote($metakey) . ", metadesc = " . $db->Quote($metadesc) . " Where `type` = " . $db->Quote($form['type']) . " And reference_id = " . $db->Quote($form['reference_id']) . " And record_id = " . $db->Quote($record_id));
+            $db->setQuery("Update #__contentbuilder_ng_records Set robots = " . $db->quote($robots) . ", author = " . $db->quote($author) . ", rights = " . $db->quote($rights) . ", xreference = " . $db->quote($xreference) . ", metakey = " . $db->quote($metakey) . ", metadesc = " . $db->quote($metadesc) . " Where `type` = " . $db->quote($form['type']) . " And reference_id = " . $db->quote($form['reference_id']) . " And record_id = " . $db->quote($record_id));
             $db->execute();
 
             // Trigger the onContentBeforeSave event.
@@ -2312,30 +2257,30 @@ final class ContentbuilderLegacyHelper
                         (
                           '{\"image_intro\":\"\",\"image_intro_alt\":\"\",\"float_intro\":\"\",\"image_intro_caption\":\"\",\"image_fulltext\":\"\",\"image_fulltext_alt\":\"\",\"float_fulltext\":\"\",\"image_fulltext_caption\":\"\"}',
                           '{\"urla\":\"\",\"urlatext\":\"\",\"targeta\":\"\",\"urlb\":\"\",\"urlbtext\":\"\",\"targetb\":\"\",\"urlc\":\"\",\"urlctext\":\"\",\"targetc\":\"\"}',
-                          " . $db->Quote($label) . ",
-                          " . $db->Quote($alias) . ",
-                          " . $db->Quote($introtext) . ",
-                          " . $db->Quote($fulltext) . ",
-                          " . $db->Quote($state) . ",
+                          " . $db->quote($label) . ",
+                          " . $db->quote($alias) . ",
+                          " . $db->quote($introtext) . ",
+                          " . $db->quote($fulltext) . ",
+                          " . $db->quote($state) . ",
                           " . intval($form['default_category']) . ",
-                          " . $db->Quote($created) . ",
-                          " . $db->Quote($created_by ? $created_by : Factory::getApplication()->getIdentity()->get('id', 0)) . ",
-                          " . $db->Quote($created) . ",
-                          " . $db->Quote($created_by ? $created_by : Factory::getApplication()->getIdentity()->get('id', 0)) . ",
+                          " . $db->quote($created) . ",
+                          " . $db->quote($created_by ? $created_by : (int) (Factory::getApplication()->getIdentity()->id ?? 0)) . ",
+                          " . $db->quote($created) . ",
+                          " . $db->quote($created_by ? $created_by : (int) (Factory::getApplication()->getIdentity()->id ?? 0)) . ",
                           NULL,
                           NULL,
-                          " . ($publish_up ? $db->Quote($publish_up) : 'NULL') . ",
-                          " . ($publish_down ? $db->Quote($publish_down) : 'NULL') . ",
-                          " . $db->Quote($attribs != '' ? $attribs : '{"article_layout":"","show_title":"","link_titles":"","show_tags":"","show_intro":"","info_block_position":"","info_block_show_title":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_hits":"","show_noauth":"","urls_position":"","alternative_readmore":"","article_page_title":"","show_publishing_options":"","show_article_options":"","show_urls_images_backend":"","show_urls_images_frontend":""}') . ",
+                          " . ($publish_up ? $db->quote($publish_up) : 'NULL') . ",
+                          " . ($publish_down ? $db->quote($publish_down) : 'NULL') . ",
+                          " . $db->quote($attribs != '' ? $attribs : '{"article_layout":"","show_title":"","link_titles":"","show_tags":"","show_intro":"","info_block_position":"","info_block_show_title":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_hits":"","show_noauth":"","urls_position":"","alternative_readmore":"","article_page_title":"","show_publishing_options":"","show_article_options":"","show_urls_images_backend":"","show_urls_images_frontend":""}') . ",
                           '1',
-                          " . $db->Quote($metakey) . ",
-                          " . $db->Quote($metadesc) . ",
-                          " . $db->Quote($meta != '' ? $meta : '{"robots":"","author":"","rights":""}') . ",
-                          " . $db->Quote($access) . ",
-                          " . $db->Quote($created_by_alias) . ",
-                          " . $db->Quote($ordering) . ",
-                          " . $db->Quote($featured) . ",
-                          " . $db->Quote($language) . "
+                          " . $db->quote($metakey) . ",
+                          " . $db->quote($metadesc) . ",
+                          " . $db->quote($meta != '' ? $meta : '{"robots":"","author":"","rights":""}') . ",
+                          " . $db->quote($access) . ",
+                          " . $db->quote($created_by_alias) . ",
+                          " . $db->quote($ordering) . ",
+                          " . $db->quote($featured) . ",
+                          " . $db->quote($language) . "
                         )
             ");
             $db->execute();
@@ -2344,7 +2289,7 @@ final class ContentbuilderLegacyHelper
             $datenow = Factory::getDate();
             $___datenow = $datenow->toSql();
 
-            $db->setQuery("Insert Into #__contentbuilder_ng_articles (`type`,`reference_id`,`last_update`,`article_id`,`record_id`,`form_id`) Values (" . $db->Quote($form['type']) . "," . $db->Quote($form['reference_id']) . "," . $db->Quote($___datenow) . ",$article," . $db->Quote($record_id) . "," . intval($contentbuilder_ng_form_id) . ")");
+            $db->setQuery("Insert Into #__contentbuilder_ng_articles (`type`,`reference_id`,`last_update`,`article_id`,`record_id`,`form_id`) Values (" . $db->quote($form['type']) . "," . $db->quote($form['reference_id']) . "," . $db->quote($___datenow) . ",$article," . $db->quote($record_id) . "," . intval($contentbuilder_ng_form_id) . ")");
             $db->execute();
             $db->setQuery("Update #__content Set introtext = concat('<div style=\'display:none;\'><!--(cbArticleId:$article)--></div>', introtext) Where id = $article");
             $db->execute();
@@ -2377,7 +2322,7 @@ final class ContentbuilderLegacyHelper
         } else {
             $___datenow = Factory::getDate()->toSql();
             $modified = $___datenow;
-            $currentUserId = (int) Factory::getApplication()->getIdentity()->get('id', 0);
+            $currentUserId = (int) (Factory::getApplication()->getIdentity()->id ?? 0);
             $metadataModifiedBy = isset($metadata->modified_id) ? (int) $metadata->modified_id : 0;
             $modified_by = $currentUserId > 0 ? $currentUserId : $metadataModifiedBy;
 
@@ -2386,28 +2331,28 @@ final class ContentbuilderLegacyHelper
                 $db->setQuery("Update 
                         #__content 
                             Set
-                             `title` = " . $db->Quote($label) . ",
-                             `alias` = " . $db->Quote($alias) . ",
-                             `introtext` = " . $db->Quote('<div style=\'display:none;\'><!--(cbArticleId:' . $article . ')--></div>' . $introtext) . ",
-                             `fulltext` = " . $db->Quote($fulltext . '<div style=\'display:none;\'><!--(cbArticleId:' . $article . ')--></div>') . ",
-                             `state` = " . $db->Quote($state) . ",
+                             `title` = " . $db->quote($label) . ",
+                             `alias` = " . $db->quote($alias) . ",
+                             `introtext` = " . $db->quote('<div style=\'display:none;\'><!--(cbArticleId:' . $article . ')--></div>' . $introtext) . ",
+                             `fulltext` = " . $db->quote($fulltext . '<div style=\'display:none;\'><!--(cbArticleId:' . $article . ')--></div>') . ",
+                             `state` = " . $db->quote($state) . ",
                              `catid` = " . intval($form['default_category']) . ",
-                             `modified` = " . $db->Quote($modified) . ",
-                             `modified_by` = " . $db->Quote($modified_by ? $modified_by : Factory::getApplication()->getIdentity()->get('id', 0)) . ",
-                             `attribs` = " . $db->Quote($attribs != '' ? $attribs : '{"article_layout":"","show_title":"","link_titles":"","show_tags":"","show_intro":"","info_block_position":"","info_block_show_title":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_hits":"","show_noauth":"","urls_position":"","alternative_readmore":"","article_page_title":"","show_publishing_options":"","show_article_options":"","show_urls_images_backend":"","show_urls_images_frontend":""}') . ",
-                             `metakey` = " . $db->Quote($metakey) . ",
-                             `metadesc` = " . $db->Quote($metadesc) . ",
-                             `metadata` = " . $db->Quote($meta != '' ? $meta : '{"robots":"","author":"","rights":""}') . ",
+                             `modified` = " . $db->quote($modified) . ",
+                             `modified_by` = " . $db->quote($modified_by ? $modified_by : (int) (Factory::getApplication()->getIdentity()->id ?? 0)) . ",
+                             `attribs` = " . $db->quote($attribs != '' ? $attribs : '{"article_layout":"","show_title":"","link_titles":"","show_tags":"","show_intro":"","info_block_position":"","info_block_show_title":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_hits":"","show_noauth":"","urls_position":"","alternative_readmore":"","article_page_title":"","show_publishing_options":"","show_article_options":"","show_urls_images_backend":"","show_urls_images_frontend":""}') . ",
+                             `metakey` = " . $db->quote($metakey) . ",
+                             `metadesc` = " . $db->quote($metadesc) . ",
+                             `metadata` = " . $db->quote($meta != '' ? $meta : '{"robots":"","author":"","rights":""}') . ",
                              `version` = `version`+1,
-                             `created` = " . $db->Quote($created) . ",
-                             `created_by` = " . $db->Quote($created_by) . ",
-                             `created_by_alias` = " . $db->Quote($created_by_alias) . ",
-                             `publish_up` = " . ($publish_up != '' ? $db->Quote($publish_up) : 'NULL') . ",
-                             `publish_down` = " . ($publish_down != '' ? $db->Quote($publish_down) : 'NULL') . ",
-                             `access` = " . $db->Quote($access) . ",
-                             `ordering` = " . $db->Quote($ordering) . ",
-                             featured = " . $db->Quote($featured) . ",
-                             language = " . $db->Quote($language) . "
+                             `created` = " . $db->quote($created) . ",
+                             `created_by` = " . $db->quote($created_by) . ",
+                             `created_by_alias` = " . $db->quote($created_by_alias) . ",
+                             `publish_up` = " . ($publish_up != '' ? $db->quote($publish_up) : 'NULL') . ",
+                             `publish_down` = " . ($publish_down != '' ? $db->quote($publish_down) : 'NULL') . ",
+                             `access` = " . $db->quote($access) . ",
+                             `ordering` = " . $db->quote($ordering) . ",
+                             featured = " . $db->quote($featured) . ",
+                             language = " . $db->quote($language) . "
                         Where id = $article
                 ");
 
@@ -2442,22 +2387,22 @@ final class ContentbuilderLegacyHelper
                 $db->setQuery("Update 
                         #__content 
                             Set
-                             `title` = " . $db->Quote($label) . ",
-                             `alias` = " . $db->Quote($alias) . ",
-                             `introtext` = " . $db->Quote('<div style=\'display:none;\'><!--(cbArticleId:' . $article . ')--></div>' . $introtext) . ",
-                             `fulltext` = " . $db->Quote($fulltext . '<div style=\'display:none;\'><!--(cbArticleId:' . $article . ')--></div>') . ",
-                             `state` = " . $db->Quote($state) . ",
-                             `modified` = " . $db->Quote($modified) . ",
-                             `modified_by` = " . $db->Quote($modified_by ? $modified_by : Factory::getApplication()->getIdentity()->get('id', 0)) . ",
+                             `title` = " . $db->quote($label) . ",
+                             `alias` = " . $db->quote($alias) . ",
+                             `introtext` = " . $db->quote('<div style=\'display:none;\'><!--(cbArticleId:' . $article . ')--></div>' . $introtext) . ",
+                             `fulltext` = " . $db->quote($fulltext . '<div style=\'display:none;\'><!--(cbArticleId:' . $article . ')--></div>') . ",
+                             `state` = " . $db->quote($state) . ",
+                             `modified` = " . $db->quote($modified) . ",
+                             `modified_by` = " . $db->quote($modified_by ? $modified_by : (int) (Factory::getApplication()->getIdentity()->id ?? 0)) . ",
                              `version` = `version`+1,
-                             language=" . $db->Quote($language) . "
+                             language=" . $db->quote($language) . "
                         Where id = $article
                 ");
             }
             $db->execute();
 
             $___datenow = Factory::getDate()->toSql();
-            $db->setQuery("Update #__contentbuilder_ng_articles Set `last_update` = " . $db->Quote($___datenow) . " Where `type` = " . $db->Quote($form['type']) . " And form_id = " . intval($contentbuilder_ng_form_id) . " And reference_id = " . $db->Quote($form['reference_id']) . " And record_id = " . $db->Quote($record_id));
+            $db->setQuery("Update #__contentbuilder_ng_articles Set `last_update` = " . $db->quote($___datenow) . " Where `type` = " . $db->quote($form['type']) . " And form_id = " . intval($contentbuilder_ng_form_id) . " And reference_id = " . $db->quote($form['reference_id']) . " And record_id = " . $db->quote($record_id));
             $db->execute();
         }
 
@@ -2544,16 +2489,16 @@ final class ContentbuilderLegacyHelper
                 $namespace = 'CB\\Component\\Contentbuilder_ng\\Administrator\\types\\';
                 $type     = $namespace . 'contentbuilder_ng_' . $type;
                 if (class_exists($type)) {
-                    $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, Factory::getApplication()->getIdentity()->get('id', 0));
-                    //$num_records_query = $type::getNumRecordsQuery($reference_id, Factory::getApplication()->getIdentity()->get('id', 0));
+                    $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, (int) (Factory::getApplication()->getIdentity()->id ?? 0));
+                    //$num_records_query = $type::getNumRecordsQuery($reference_id, (int) (Factory::getApplication()->getIdentity()->id ?? 0));
                 }
             } else if (file_exists(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php')) {
                 require_once(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php');
                 $namespace = '';
                 $type     = $namespace . 'contentbuilder_ng_' . $type;
                 if (class_exists($type)) {
-                    $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, Factory::getApplication()->getIdentity()->get('id', 0));
-                    //$num_records_query = $type::getNumRecordsQuery($reference_id, Factory::getApplication()->getIdentity()->get('id', 0));
+                    $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, (int) (Factory::getApplication()->getIdentity()->id ?? 0));
+                    //$num_records_query = $type::getNumRecordsQuery($reference_id, (int) (Factory::getApplication()->getIdentity()->id ?? 0));
                 }
             }
         }
@@ -2566,14 +2511,14 @@ final class ContentbuilderLegacyHelper
             $size = count($record_id);
             foreach($record_id As $rec_id){
                 if($i+1 < $size){
-                    $rec .= $db->Quote($rec_id).',';
+                    $rec .= $db->quote($rec_id).',';
                 } else {
-                    $rec .= $db->Quote($rec_id);
+                    $rec .= $db->quote($rec_id);
                 }
                 $i++;
             }
         } else {
-           $rec = $db->Quote($record_id);
+           $rec = $db->quote($record_id);
         }*/
 
         $db->setQuery("
@@ -2606,10 +2551,10 @@ final class ContentbuilderLegacyHelper
                 #__contentbuilder_ng_forms As forms
                 Left Join 
                     #__contentbuilder_ng_users As contentbuilder_ng_users
-                On ( contentbuilder_ng_users.form_id = forms.id And contentbuilder_ng_users.userid = " . Factory::getApplication()->getIdentity()->get('id', 0) . " )
+                On ( contentbuilder_ng_users.form_id = forms.id And contentbuilder_ng_users.userid = " . (int) (Factory::getApplication()->getIdentity()->id ?? 0) . " )
                 " . ($record_id && !is_array($record_id) ? "Left Join 
                     #__contentbuilder_ng_records As contentbuilder_ng_records
-                On ( contentbuilder_ng_records.`type` = " . $db->Quote(isset($_type) ? $_type : '') . " And contentbuilder_ng_records.reference_id = forms.reference_id And contentbuilder_ng_records.record_id = " . $db->Quote($record_id) . " )
+                On ( contentbuilder_ng_records.`type` = " . $db->quote(isset($_type) ? $_type : '') . " And contentbuilder_ng_records.reference_id = forms.reference_id And contentbuilder_ng_records.record_id = " . $db->quote($record_id) . " )
                 " : '') . "
             Where 
                 forms.id = " . intval($form_id) . "
@@ -2973,7 +2918,7 @@ final class ContentbuilderLegacyHelper
         if (!isset($permissions['own' . $suffix])) {
             $gids = array();
 
-            $groups = Access::getGroupsByUser(Factory::getApplication()->getIdentity()->get('id', 0));
+            $groups = Access::getGroupsByUser((int) (Factory::getApplication()->getIdentity()->id ?? 0));
 
             foreach ($groups as $gid) {
                 $gids[] = $gid;
@@ -3010,9 +2955,9 @@ final class ContentbuilderLegacyHelper
                         } else {
                             if (is_array($user_return['record_id'])) {
                                 foreach ($user_return['record_id'] as $recid) {
-                                    $db->setQuery("Select session_id From #__contentbuilder_ng_records Where `record_id` = " . $db->Quote($recid) . " And `type` = " . $db->Quote($typerefid['type']) . " And `reference_id` = " . $db->Quote($typerefid['reference_id']) . "");
+                                    $db->setQuery("Select session_id From #__contentbuilder_ng_records Where `record_id` = " . $db->quote($recid) . " And `type` = " . $db->quote($typerefid['type']) . " And `reference_id` = " . $db->quote($typerefid['reference_id']) . "");
                                     $session_id = $db->loadResult();
-                                    if ($form && $session_id != Factory::getApplication()->getSession()->getId() && !$form->isOwner(Factory::getApplication()->getIdentity()->get('id', 0), $recid)) {
+                                    if ($form && $session_id != Factory::getApplication()->getSession()->getId() && !$form->isOwner((int) (Factory::getApplication()->getIdentity()->id ?? 0), $recid)) {
                                         $allowed = false;
                                         break;
                                     } else {
@@ -3021,10 +2966,10 @@ final class ContentbuilderLegacyHelper
                                 }
                             } else {
 
-                                $db->setQuery("Select session_id From #__contentbuilder_ng_records Where `record_id` = " . $db->Quote($user_return['record_id']) . " And `type` = " . $db->Quote($typerefid['type']) . " And `reference_id` = " . $db->Quote($typerefid['reference_id']) . "");
+                                $db->setQuery("Select session_id From #__contentbuilder_ng_records Where `record_id` = " . $db->quote($user_return['record_id']) . " And `type` = " . $db->quote($typerefid['type']) . " And `reference_id` = " . $db->quote($typerefid['reference_id']) . "");
                                 $session_id = $db->loadResult();
 
-                                if ($form && ($user_return['record_id'] == false || $session_id == Factory::getApplication()->getSession()->getId() || ($form->isOwner(Factory::getApplication()->getIdentity()->get('id', 0), $user_return['record_id'])))) {
+                                if ($form && ($user_return['record_id'] == false || $session_id == Factory::getApplication()->getSession()->getId() || ($form->isOwner((int) (Factory::getApplication()->getIdentity()->id ?? 0), $user_return['record_id'])))) {
                                     $allowed = true;
                                 }
                             }
@@ -3089,7 +3034,7 @@ final class ContentbuilderLegacyHelper
         $itemcnt = count($items);
         $i = 0;
         foreach ($items as $item) {
-            $imp .= $db->Quote($item->colRecord) . ($i + 1 < $itemcnt ? ',' : '');
+            $imp .= $db->quote($item->colRecord) . ($i + 1 < $itemcnt ? ',' : '');
             $i++;
         }
         if ($imp) {
@@ -3110,7 +3055,7 @@ final class ContentbuilderLegacyHelper
         $itemcnt = count($items);
         $i = 0;
         foreach ($items as $item) {
-            $imp .= $db->Quote($item->colRecord) . ($i + 1 < $itemcnt ? ',' : '');
+            $imp .= $db->quote($item->colRecord) . ($i + 1 < $itemcnt ? ',' : '');
             $i++;
         }
         if ($imp) {
@@ -3134,12 +3079,12 @@ final class ContentbuilderLegacyHelper
             $i = 0;
 
             foreach ($items as $item) {
-                $imp .= $db->Quote($item->colRecord) . ($i + 1 < $itemcnt ? ',' : '');
+                $imp .= $db->quote($item->colRecord) . ($i + 1 < $itemcnt ? ',' : '');
                 $i++;
             }
 
             if ($imp) {
-                $db->setQuery("Select records.published, records.record_id From #__contentbuilder_ng_records As records Where `type` = " . $db->Quote($type) . " And reference_id = " . $db->Quote($reference_id) . " And records.record_id In (" . $imp . ")");
+                $db->setQuery("Select records.published, records.record_id From #__contentbuilder_ng_records As records Where `type` = " . $db->quote($type) . " And reference_id = " . $db->quote($reference_id) . " And records.record_id In (" . $imp . ")");
                 $published = $db->loadAssocList();
                 foreach ($published as $publish) {
                     $out[$publish['record_id']] = $publish['published'];
@@ -3160,12 +3105,12 @@ final class ContentbuilderLegacyHelper
             $i = 0;
 
             foreach ($items as $item) {
-                $imp .= $db->Quote($item->colRecord) . ($i + 1 < $itemcnt ? ',' : '');
+                $imp .= $db->quote($item->colRecord) . ($i + 1 < $itemcnt ? ',' : '');
                 $i++;
             }
 
             if ($imp) {
-                $db->setQuery("Select records.lang_code, records.record_id From #__contentbuilder_ng_records As records Where reference_id = " . $db->Quote($reference_id) . " And records.record_id In (" . $imp . ")");
+                $db->setQuery("Select records.lang_code, records.record_id From #__contentbuilder_ng_records As records Where reference_id = " . $db->quote($reference_id) . " And records.record_id In (" . $imp . ")");
                 $codes = $db->loadAssocList();
                 foreach ($codes as $code) {
                     $out[$code['record_id']] = $code['lang_code'];

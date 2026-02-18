@@ -67,12 +67,14 @@ if (is_object($item)) {
     $params = $item->getParams();
     $queryView = (string) ($item->query['view'] ?? '');
     $requestView = $input->getCmd('view', '');
+    $requestFormId = $input->getInt('id', 0);
     $requestRecordId = $input->getString('record_id', '');
     $hasRequestView = $requestView !== '';
     $hasRequestRecordId = $requestRecordId !== '';
 
-    $formId = $params->get('form_id', null);
-    if ($formId !== null) {
+    // Préserve l'id explicite de l'URL (ex: task=list.display&id=15), sinon fallback menu form_id.
+    $formId = (int) $params->get('form_id', 0);
+    if ($requestFormId <= 0 && $formId > 0) {
         $input->set('id', $formId);
     }
 
@@ -112,6 +114,15 @@ if (is_object($item)) {
 
 $controller = trim($input->getWord('controller', ''));
 $view = $input->getCmd('view', '');
+$task = $input->getCmd('task', '');
+$taskController = '';
+
+if ($task !== '') {
+    $dotPos = strpos($task, '.');
+    if ($dotPos !== false) {
+        $taskController = substr($task, 0, $dotPos);
+    }
+}
 
 if ($view === 'details' || ($view === 'latest' && $input->getCmd('controller', '') === '')) {
     $controller = 'details';
@@ -128,7 +139,16 @@ if ($controller === '') {
     $controller = 'list';
 }
 
-$task = $input->getCmd('task', '');
+// Task explicite prioritaire (ex: task=list.display), même si le menu actif est "latest/details".
+if ($taskController !== '') {
+    $controller = $taskController;
+    $input->set('controller', $taskController);
+
+    if ($view === '' || $view === 'latest') {
+        $input->set('view', $taskController);
+    }
+}
+
 if ($task === '') {
     $input->set('view', $controller);
     $input->set('task', $controller . '.display');

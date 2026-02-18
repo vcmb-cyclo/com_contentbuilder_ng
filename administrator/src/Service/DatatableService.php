@@ -66,6 +66,185 @@ class DatatableService
         }
     }
 
+    /** Retourne les colonnes déjà indexées (quel que soit le nom d’index). */
+    private function getIndexedColumns(string $tableQN): array
+    {
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $indexedColumns = [];
+
+        try {
+            $db->setQuery('SHOW INDEX FROM ' . $tableQN);
+            $rows = $db->loadAssocList() ?: [];
+
+            foreach ($rows as $row) {
+                $columnName = strtolower((string) ($row['Column_name'] ?? $row['column_name'] ?? ''));
+                if ($columnName !== '') {
+                    $indexedColumns[$columnName] = true;
+                }
+            }
+        } catch (\Throwable $e) {
+            Logger::warning('Could not inspect existing indexes', [
+                'table' => $tableQN,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return $indexedColumns;
+    }
+
+    /**
+     * Retourne la définition des index présents sur la table.
+     *
+     * @return array<string,array{non_unique:int,index_type:string,columns:array<int,array{name:string,sub_part:string,collation:string}>,signature:string}>
+     */
+    private function getTableIndexes(string $tableQN): array
+    {
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $indexMap = [];
+
+        $db->setQuery('SHOW INDEX FROM ' . $tableQN);
+        $rows = $db->loadAssocList() ?: [];
+
+        foreach ($rows as $row) {
+            $keyName = (string) ($row['Key_name'] ?? $row['key_name'] ?? '');
+
+            if ($keyName === '') {
+                continue;
+            }
+
+            $seqInIndex = (int) ($row['Seq_in_index'] ?? $row['seq_in_index'] ?? 0);
+            if ($seqInIndex < 1) {
+                $seqInIndex = count($indexMap[$keyName]['columns'] ?? []) + 1;
+            }
+
+            $columnName = strtolower((string) ($row['Column_name'] ?? $row['column_name'] ?? ''));
+            if ($columnName === '') {
+                $columnName = strtolower(trim((string) ($row['Expression'] ?? $row['expression'] ?? '')));
+            }
+
+            if ($columnName === '') {
+                continue;
+            }
+
+            if (!isset($indexMap[$keyName])) {
+                $indexMap[$keyName] = [
+                    'non_unique' => (int) ($row['Non_unique'] ?? $row['non_unique'] ?? 1),
+                    'index_type' => strtoupper((string) ($row['Index_type'] ?? $row['index_type'] ?? 'BTREE')),
+                    'columns' => [],
+                    'signature' => '',
+                ];
+            }
+
+            $indexMap[$keyName]['columns'][$seqInIndex] = [
+                'name' => $columnName,
+                'sub_part' => (string) ($row['Sub_part'] ?? $row['sub_part'] ?? ''),
+                'collation' => strtoupper((string) ($row['Collation'] ?? $row['collation'] ?? 'A')),
+            ];
+        }
+
+        foreach ($indexMap as &$indexDefinition) {
+            ksort($indexDefinition['columns'], SORT_NUMERIC);
+            $indexDefinition['columns'] = array_values($indexDefinition['columns']);
+            $indexDefinition['signature'] = $this->indexDefinitionSignature($indexDefinition);
+        }
+        unset($indexDefinition);
+
+        return $indexMap;
+    }
+
+    private function indexDefinitionSignature(array $indexDefinition): string
+    {
+        $columnParts = [];
+
+        foreach ((array) ($indexDefinition['columns'] ?? []) as $columnDefinition) {
+            $columnParts[] = implode(':', [
+                (string) ($columnDefinition['name'] ?? ''),
+                (string) ($columnDefinition['sub_part'] ?? ''),
+                (string) ($columnDefinition['collation'] ?? ''),
+            ]);
+        }
+
+        return implode('|', [
+            (string) ($indexDefinition['non_unique'] ?? 1),
+            strtoupper((string) ($indexDefinition['index_type'] ?? 'BTREE')),
+            implode(',', $columnParts),
+        ]);
+    }
+
+    private function removeDuplicateIndexes(string $tableQN, string $tableName, int $storageId): int
+    {
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $removed = 0;
+
+        try {
+            $tableIndexes = $this->getTableIndexes($tableQN);
+        } catch (\Throwable $e) {
+            Logger::warning('Could not inspect indexes for duplicate cleanup', [
+                'table' => $tableName,
+                'storageId' => $storageId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return 0;
+        }
+
+        $signatures = [];
+
+        foreach ($tableIndexes as $keyName => $indexDefinition) {
+            if (strtoupper((string) $keyName) === 'PRIMARY') {
+                continue;
+            }
+
+            $signature = (string) ($indexDefinition['signature'] ?? '');
+            if ($signature === '') {
+                continue;
+            }
+
+            $signatures[$signature][] = (string) $keyName;
+        }
+
+        foreach ($signatures as $duplicateNames) {
+            if (count($duplicateNames) < 2) {
+                continue;
+            }
+
+            usort(
+                $duplicateNames,
+                static fn(string $a, string $b): int => strcasecmp($a, $b)
+            );
+
+            $keptIndex = array_shift($duplicateNames);
+
+            foreach ($duplicateNames as $duplicateName) {
+                try {
+                    $db->setQuery(
+                        "ALTER TABLE $tableQN DROP INDEX " . $db->quoteName($duplicateName)
+                    );
+                    $db->execute();
+                    $removed++;
+                } catch (\Throwable $e) {
+                    Logger::warning('Failed removing duplicate index', [
+                        'table' => $tableName,
+                        'storageId' => $storageId,
+                        'keptIndex' => $keptIndex,
+                        'dropIndex' => $duplicateName,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+
+        if ($removed > 0) {
+            Logger::info('Removed duplicate indexes on storage table', [
+                'table' => $tableName,
+                'storageId' => $storageId,
+                'removed' => $removed,
+            ]);
+        }
+
+        return $removed;
+    }
+
     /**
      * Ensure standard audit columns + indexes exist for an internal storage data table.
      */
@@ -106,6 +285,9 @@ class DatatableService
             $safeColName = strtolower((string) $colName);
             $cols[$safeColName] = $colDef;
         }
+
+        $this->removeDuplicateIndexes($tableQN, '#__' . $tableName, $storageId);
+        $indexedColumns = $this->getIndexedColumns($tableQN);
 
         $addColumn = static function (string $sql) use ($db): void {
             $db->setQuery($sql);
@@ -231,15 +413,28 @@ class DatatableService
             if (!isset($cols[$indexCol])) {
                 continue;
             }
+            if (isset($indexedColumns[$indexCol])) {
+                continue;
+            }
 
             try {
                 $db->setQuery("ALTER TABLE $tableQN ADD INDEX (" . $db->quoteName($indexCol) . ")");
                 $db->execute();
+                $indexedColumns[$indexCol] = true;
             } catch (\Throwable $e) {
                 // Ignore duplicate index errors; keep only unexpected ones in logs.
                 $message = strtolower((string) $e->getMessage());
+                if (strpos($message, 'too many keys') !== false) {
+                    Logger::warning('Max index count reached, skipping remaining audit index additions', [
+                        'table' => '#__' . $tableName,
+                        'storageId' => $storageId,
+                    ]);
+                    break;
+                }
                 if (strpos($message, 'duplicate') === false && strpos($message, 'already exists') === false) {
                     Logger::exception($e);
+                } else {
+                    $indexedColumns[$indexCol] = true;
                 }
             }
         }

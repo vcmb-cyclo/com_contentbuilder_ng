@@ -11,6 +11,7 @@ namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
 
 \defined('_JEXEC') or die('Restricted access');
 
+use CB\Component\Contentbuilder_ng\Administrator\Helper\DatabaseAuditHelper;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\PackedDataMigrationHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
@@ -91,6 +92,53 @@ final class AboutController extends BaseController
         } catch (\Throwable $e) {
             $this->setMessage(
                 Text::sprintf('COM_CONTENTBUILDER_NG_PACKED_MIGRATION_FAILED', $e->getMessage()),
+                'error'
+            );
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&view=about', false));
+    }
+
+    public function runAudit(): void
+    {
+        $this->checkToken();
+
+        $app = Factory::getApplication();
+        $user = $app->getIdentity();
+
+        if (!$user->authorise('core.manage', 'com_contentbuilder_ng')) {
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+
+        try {
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilder_ng.about.audit', $report);
+
+            $issuesTotal = (int) ($report['summary']['issues_total'] ?? 0);
+            $scannedTables = (int) ($report['scanned_tables'] ?? 0);
+            $errorsCount = count((array) ($report['errors'] ?? []));
+
+            if ($issuesTotal === 0 && $errorsCount === 0) {
+                $this->setMessage(
+                    Text::sprintf('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_SUMMARY_CLEAN', $scannedTables),
+                    'message'
+                );
+            } else {
+                $message = Text::sprintf(
+                    'COM_CONTENTBUILDER_NG_ABOUT_AUDIT_SUMMARY_ISSUES',
+                    $issuesTotal,
+                    $scannedTables
+                );
+
+                if ($errorsCount > 0) {
+                    $message .= ' ' . Text::sprintf('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_SUMMARY_PARTIAL', $errorsCount);
+                }
+
+                $this->setMessage($message, 'warning');
+            }
+        } catch (\Throwable $e) {
+            $this->setMessage(
+                Text::sprintf('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_FAILED', $e->getMessage()),
                 'error'
             );
         }

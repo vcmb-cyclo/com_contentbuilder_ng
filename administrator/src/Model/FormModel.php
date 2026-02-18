@@ -32,6 +32,7 @@ use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\PackedDataHelper;
 
 class FormModel extends AdminModel
 {
@@ -254,13 +255,12 @@ class FormModel extends AdminModel
         $db = $this->getDatabase();
         $themes = [];
 
-        $queries = [
+        $enabledQueries = [
             "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_ng_themes' And `enabled` = 1",
-            "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_ng_themes'",
-            "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_themes_ng'",
+            "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_themes_ng' And `enabled` = 1",
         ];
 
-        foreach ($queries as $query) {
+        foreach ($enabledQueries as $query) {
             try {
                 $db->setQuery($query);
                 $rows = $db->loadColumn() ?: [];
@@ -272,6 +272,30 @@ class FormModel extends AdminModel
                 $row = trim((string) $row);
                 if ($row !== '') {
                     $themes[] = $row;
+                }
+            }
+        }
+
+        // If no enabled plugin row could be found, keep a safe fallback list.
+        if (empty($themes)) {
+            $fallbackQueries = [
+                "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_ng_themes'",
+                "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_themes_ng'",
+            ];
+
+            foreach ($fallbackQueries as $query) {
+                try {
+                    $db->setQuery($query);
+                    $rows = $db->loadColumn() ?: [];
+                } catch (\Throwable $e) {
+                    $rows = [];
+                }
+
+                foreach ($rows as $row) {
+                    $row = trim((string) $row);
+                    if ($row !== '') {
+                        $themes[] = $row;
+                    }
                 }
             }
         }
@@ -291,12 +315,16 @@ class FormModel extends AdminModel
 
         $themes = array_values(array_unique($themes));
 
+        if (!in_array('dark', $themes, true)) {
+            $themes[] = 'dark';
+        }
+
         if (empty($themes)) {
-            return ['joomla6', 'blank', 'khepri'];
+            return ['joomla6', 'dark', 'blank', 'khepri'];
         }
 
         usort($themes, static function (string $a, string $b): int {
-            $order = ['joomla6' => 0, 'blank' => 1, 'khepri' => 2];
+            $order = ['joomla6' => 0, 'dark' => 1, 'blank' => 2, 'khepri' => 3];
             $rankA = $order[$a] ?? 99;
             $rankB = $order[$b] ?? 99;
             if ($rankA !== $rankB) {
@@ -910,7 +938,7 @@ class FormModel extends AdminModel
         }
 
         // Config legacy
-        $jform['config'] = ContentbuilderLegacyHelper::encodePackedData($config);
+        $jform['config'] = PackedDataHelper::encodePackedData($config);
 
         // Last_update.
         $jform['last_update'] = Factory::getDate()->toSql();
@@ -1077,7 +1105,7 @@ class FormModel extends AdminModel
             if (count($articles)) {
                 $article_items = array();
                 foreach ($articles as $article) {
-                    $article_items[] = $db->Quote('com_content.article.' . $article);
+                    $article_items[] = $db->quote('com_content.article.' . $article);
                     $table = Table::getInstance('content');
 
                     // Trigger the onContentBeforeDelete event.
@@ -1193,7 +1221,7 @@ class FormModel extends AdminModel
         if ($cnt) {
             $new_items = array();
             for ($i = 0; $i < $cnt; $i++) {
-                $new_items[] = $db->Quote($references[$i]);
+                $new_items[] = $db->quote($references[$i]);
             }
             $db->setQuery("Delete From #__contentbuilder_ng_articles Where `form_id` Not In (" . implode(',', $new_items) . ") ");
             $db->execute();

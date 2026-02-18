@@ -59,11 +59,11 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
 
     // Starting logs.
-    Log::add('---------------------------------------------------------', Log::INFO, 'com_contentbuilder_ng.install');
-    Log::add('[OK] ContentBuilder NG installation/update started.', Log::INFO, 'com_contentbuilder_ng.install');
-    Log::add('* PHP Version: ' . PHP_VERSION . '.', Log::INFO, 'com_contentbuilder_ng.install');
-    Log::add('* Joomla Version : ' . JVERSION . '.', Log::INFO, 'com_contentbuilder_ng.install');
-    Log::add('* User Agent: ' . ($_SERVER['HTTP_USER_AGENT'] ?? 'CLI') . '.', Log::INFO, 'com_contentbuilder_ng.install');
+    $this->writeInstallLogEntry('---------------------------------------------------------', Log::INFO);
+    $this->writeInstallLogEntry('[OK] ContentBuilder NG installation/update started.', Log::INFO);
+    $this->writeInstallLogEntry('* PHP Version: ' . PHP_VERSION . '.', Log::INFO);
+    $this->writeInstallLogEntry('* Joomla Version : ' . JVERSION . '.', Log::INFO);
+    $this->writeInstallLogEntry('* User Agent: ' . ($_SERVER['HTTP_USER_AGENT'] ?? 'CLI') . '.', Log::INFO);
   }
 
   function getPlugins()
@@ -82,6 +82,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $plugins['contentbuilder_ng_themes'][] = 'khepri';
     $plugins['contentbuilder_ng_themes'][] = 'blank';
     $plugins['contentbuilder_ng_themes'][] = 'joomla6';
+    $plugins['contentbuilder_ng_themes'][] = 'dark';
     $plugins['system'] = array();
     $plugins['system'][] = 'contentbuilder_ng_system';
     $plugins['contentbuilder_ng_submit'] = array();
@@ -98,9 +99,62 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     return $plugins;
   }
 
+  private function resolveJoomlaTimezoneName(): string
+  {
+    $timezoneName = '';
+
+    try {
+      $app = Factory::getApplication();
+      if (is_object($app) && method_exists($app, 'get')) {
+        $timezoneName = trim((string) $app->get('offset', ''));
+      }
+    } catch (\Throwable) {
+      // Ignore and fallback below.
+    }
+
+    if ($timezoneName === '') {
+      try {
+        $timezoneName = trim((string) Factory::getConfig()->get('offset', ''));
+      } catch (\Throwable) {
+        $timezoneName = '';
+      }
+    }
+
+    if ($timezoneName === '') {
+      $timezoneName = 'UTC';
+    }
+
+    try {
+      new \DateTimeZone($timezoneName);
+    } catch (\Throwable) {
+      $timezoneName = 'UTC';
+    }
+
+    return $timezoneName;
+  }
+
+  private function writeInstallLogEntry(string $message, int $priority = Log::INFO): void
+  {
+    $previousTimezone = date_default_timezone_get();
+    $targetTimezone = $this->resolveJoomlaTimezoneName();
+    $switchedTimezone = false;
+
+    if ($previousTimezone !== $targetTimezone) {
+      $switchedTimezone = (bool) @date_default_timezone_set($targetTimezone);
+    }
+
+    try {
+      Log::add($message, $priority, 'com_contentbuilder_ng.install');
+    } finally {
+      if ($switchedTimezone) {
+        @date_default_timezone_set($previousTimezone);
+      }
+    }
+  }
+
   private function log(string $message, int $priority = Log::INFO, bool $enqueue = true): void
   {
-    Log::add($message, $priority, 'com_contentbuilder_ng.install');
+    $this->writeInstallLogEntry($message, $priority);
 
     if (!$enqueue) {
       return;
@@ -114,6 +168,171 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     };
 
     $app->enqueueMessage($message, $type);
+  }
+
+  private function getIndexedColumns(DatabaseInterface $db, string $tableQN): array
+  {
+    $indexedColumns = [];
+
+    try {
+      $db->setQuery('SHOW INDEX FROM ' . $tableQN);
+      $indexRows = $db->loadAssocList() ?: [];
+
+      foreach ($indexRows as $indexRow) {
+        $columnName = strtolower((string) ($indexRow['Column_name'] ?? $indexRow['column_name'] ?? ''));
+        if ($columnName !== '') {
+          $indexedColumns[$columnName] = true;
+        }
+      }
+    } catch (\Throwable $e) {
+      $this->log(
+        '[WARNING] Could not inspect existing indexes on ' . $tableQN . ': ' . $e->getMessage(),
+        Log::WARNING
+      );
+    }
+
+    return $indexedColumns;
+  }
+
+  private function getTableIndexes(DatabaseInterface $db, string $tableQN): array
+  {
+    $indexMap = [];
+
+    $db->setQuery('SHOW INDEX FROM ' . $tableQN);
+    $rows = $db->loadAssocList() ?: [];
+
+    foreach ($rows as $row) {
+      $keyName = (string) ($row['Key_name'] ?? $row['key_name'] ?? '');
+
+      if ($keyName === '') {
+        continue;
+      }
+
+      $seqInIndex = (int) ($row['Seq_in_index'] ?? $row['seq_in_index'] ?? 0);
+      if ($seqInIndex < 1) {
+        $seqInIndex = count($indexMap[$keyName]['columns'] ?? []) + 1;
+      }
+
+      $columnName = strtolower((string) ($row['Column_name'] ?? $row['column_name'] ?? ''));
+      if ($columnName === '') {
+        $columnName = strtolower(trim((string) ($row['Expression'] ?? $row['expression'] ?? '')));
+      }
+
+      if ($columnName === '') {
+        continue;
+      }
+
+      if (!isset($indexMap[$keyName])) {
+        $indexMap[$keyName] = [
+          'non_unique' => (int) ($row['Non_unique'] ?? $row['non_unique'] ?? 1),
+          'index_type' => strtoupper((string) ($row['Index_type'] ?? $row['index_type'] ?? 'BTREE')),
+          'columns' => [],
+        ];
+      }
+
+      $indexMap[$keyName]['columns'][$seqInIndex] = [
+        'name' => $columnName,
+        'sub_part' => (string) ($row['Sub_part'] ?? $row['sub_part'] ?? ''),
+        'collation' => strtoupper((string) ($row['Collation'] ?? $row['collation'] ?? 'A')),
+      ];
+    }
+
+    foreach ($indexMap as &$indexDefinition) {
+      ksort($indexDefinition['columns'], SORT_NUMERIC);
+      $indexDefinition['columns'] = array_values($indexDefinition['columns']);
+      $indexDefinition['signature'] = $this->indexDefinitionSignature($indexDefinition);
+    }
+    unset($indexDefinition);
+
+    return $indexMap;
+  }
+
+  private function indexDefinitionSignature(array $indexDefinition): string
+  {
+    $columnParts = [];
+
+    foreach ((array) ($indexDefinition['columns'] ?? []) as $columnDefinition) {
+      $columnParts[] = implode(':', [
+        (string) ($columnDefinition['name'] ?? ''),
+        (string) ($columnDefinition['sub_part'] ?? ''),
+        (string) ($columnDefinition['collation'] ?? ''),
+      ]);
+    }
+
+    return implode('|', [
+      (string) ($indexDefinition['non_unique'] ?? 1),
+      strtoupper((string) ($indexDefinition['index_type'] ?? 'BTREE')),
+      implode(',', $columnParts),
+    ]);
+  }
+
+  private function removeDuplicateIndexes(DatabaseInterface $db, string $tableQN, string $tableAlias, int $storageId = 0): int
+  {
+    $removedIndexes = 0;
+
+    try {
+      $tableIndexes = $this->getTableIndexes($db, $tableQN);
+    } catch (\Throwable $e) {
+      $this->log(
+        "[WARNING] Could not inspect indexes on {$tableAlias} for duplicate cleanup: " . $e->getMessage(),
+        Log::WARNING
+      );
+
+      return 0;
+    }
+
+    if ($tableIndexes === []) {
+      return 0;
+    }
+
+    $signatures = [];
+
+    foreach ($tableIndexes as $keyName => $indexDefinition) {
+      if (strtoupper((string) $keyName) === 'PRIMARY') {
+        continue;
+      }
+
+      $signature = (string) ($indexDefinition['signature'] ?? '');
+      if ($signature === '') {
+        continue;
+      }
+
+      $signatures[$signature][] = (string) $keyName;
+    }
+
+    foreach ($signatures as $duplicateNames) {
+      if (count($duplicateNames) < 2) {
+        continue;
+      }
+
+      usort(
+        $duplicateNames,
+        static fn(string $a, string $b): int => strcasecmp($a, $b)
+      );
+
+      $keptIndexName = array_shift($duplicateNames);
+
+      foreach ($duplicateNames as $duplicateName) {
+        try {
+          $db->setQuery(
+            'ALTER TABLE ' . $tableQN
+            . ' DROP INDEX ' . $db->quoteName($duplicateName)
+          )->execute();
+
+          $removedIndexes++;
+          $storageSuffix = $storageId > 0 ? " (storage {$storageId})" : '';
+          $this->log("[OK] Removed duplicate index {$duplicateName} on {$tableAlias}{$storageSuffix}; kept {$keptIndexName}.");
+        } catch (\Throwable $e) {
+          $storageSuffix = $storageId > 0 ? " (storage {$storageId})" : '';
+          $this->log(
+            "[WARNING] Failed removing duplicate index {$duplicateName} on {$tableAlias}{$storageSuffix}: " . $e->getMessage(),
+            Log::WARNING
+          );
+        }
+      }
+    }
+
+    return $removedIndexes;
   }
 
   private function getCurrentInstalledVersion(): string
@@ -161,6 +380,130 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
 
     return 'unknown';
+  }
+
+  private function getInstallerPackageInfo($parent): array
+  {
+    $candidates = [];
+    $pushCandidate = static function (array &$list, $path): void {
+      $path = trim((string) ($path ?? ''));
+
+      if ($path === '') {
+        return;
+      }
+
+      if (!in_array($path, $list, true)) {
+        $list[] = $path;
+      }
+    };
+
+    if (is_object($parent)) {
+      if (method_exists($parent, 'getPath')) {
+        foreach (['packagefile', 'package', 'archive', 'source', 'manifest'] as $key) {
+          try {
+            $pushCandidate($candidates, $parent->getPath($key));
+          } catch (\Throwable) {
+            // Ignore path accessor issues.
+          }
+        }
+      }
+
+      if (method_exists($parent, 'getParent')) {
+        try {
+          $parentInstaller = $parent->getParent();
+        } catch (\Throwable) {
+          $parentInstaller = null;
+        }
+
+        if (is_object($parentInstaller) && method_exists($parentInstaller, 'getPath')) {
+          foreach (['packagefile', 'package', 'archive', 'source', 'manifest'] as $key) {
+            try {
+              $pushCandidate($candidates, $parentInstaller->getPath($key));
+            } catch (\Throwable) {
+              // Ignore path accessor issues.
+            }
+          }
+        }
+      }
+    }
+
+    $installerName = trim((string) ($_FILES['install_package']['name'] ?? ''));
+    $sizeBytes = null;
+
+    if (isset($_FILES['install_package']['size']) && is_numeric($_FILES['install_package']['size'])) {
+      $sizeBytes = (int) $_FILES['install_package']['size'];
+    }
+
+    $selectedPath = null;
+
+    foreach ($candidates as $candidate) {
+      if (is_dir($candidate)) {
+        continue;
+      }
+
+      if (!is_file($candidate)) {
+        continue;
+      }
+
+      $filename = strtolower(basename($candidate));
+      if (
+        str_ends_with($filename, '.zip')
+        || str_ends_with($filename, '.tar')
+        || str_ends_with($filename, '.tar.gz')
+        || str_ends_with($filename, '.tgz')
+      ) {
+        $selectedPath = $candidate;
+        break;
+      }
+
+      if ($selectedPath === null) {
+        $selectedPath = $candidate;
+      }
+    }
+
+    if ($selectedPath !== null && is_file($selectedPath)) {
+      if ($installerName === '') {
+        $installerName = basename($selectedPath);
+      }
+
+      if ($sizeBytes === null) {
+        $size = filesize($selectedPath);
+        if ($size !== false) {
+          $sizeBytes = (int) $size;
+        }
+      }
+    }
+
+    if ($installerName === '') {
+      $installerName = 'unknown';
+    }
+
+    return [
+      'name' => $installerName,
+      'size_bytes' => $sizeBytes,
+    ];
+  }
+
+  private function formatBytesForLog(?int $bytes): string
+  {
+    if ($bytes === null || $bytes < 0) {
+      return 'unknown';
+    }
+
+    $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    $value = (float) $bytes;
+    $unitIndex = 0;
+
+    while ($value >= 1024 && $unitIndex < count($units) - 1) {
+      $value /= 1024;
+      $unitIndex++;
+    }
+
+    $formatted = $unitIndex === 0
+      ? (string) (int) $value
+      : number_format($value, 2, '.', '');
+
+    return $formatted . ' ' . $units[$unitIndex] . ' (' . $bytes . ' bytes)';
   }
 
 
@@ -291,8 +634,30 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
     $db = Factory::getContainer()->get(DatabaseInterface::class);
     $incomingVersion = $this->getIncomingPackageVersion($parent);
+    $installerInfo = $this->getInstallerPackageInfo($parent);
+    $timezoneName = (string) Factory::getApplication()->get('offset', '');
+    if ($timezoneName === '') {
+      $timezoneName = (string) Factory::getConfig()->get('offset', 'UTC');
+    }
+
+    try {
+      $timezone = new \DateTimeZone($timezoneName !== '' ? $timezoneName : 'UTC');
+    } catch (\Throwable) {
+      $timezone = new \DateTimeZone('UTC');
+    }
+
+    $startedAt = (new \DateTimeImmutable('now', $timezone))->format('Y-m-d H:i:s T');
 
     // === LOG POUR DÉBOGAGE ===
+    $this->log(
+      '[OK] Préflight : '
+      . $startedAt
+      . ' | Installateur : '
+      . $installerInfo['name']
+      . ' | Taille : '
+      . $this->formatBytesForLog($installerInfo['size_bytes'] ?? null)
+      . '.'
+    );
     $this->log('[OK] ContentBuilder NG Version ' . $incomingVersion . '.');
     $this->log('Preflight installation method call, parameter : ' . $type . '.');
     $this->log('[OK] Detected current version in manifest_cache : ' . $this->getCurrentInstalledVersion() . '.');
@@ -633,6 +998,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $processed = 0;
     $updated = 0;
     $missingTables = 0;
+    $duplicatesRemoved = 0;
 
     foreach ($storages as $storage) {
       $processed++;
@@ -682,6 +1048,12 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
       $columns = array_change_key_case($columns, CASE_LOWER);
       $tableChanged = false;
+      $removedForTable = $this->removeDuplicateIndexes($db, $tableQN, $tableAlias, $storageId);
+      if ($removedForTable > 0) {
+        $duplicatesRemoved += $removedForTable;
+        $tableChanged = true;
+      }
+      $indexedColumns = $this->getIndexedColumns($db, $tableQN);
 
       $requiredColumns = [
         'id' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
@@ -751,15 +1123,26 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
         if (!array_key_exists($indexColumn, $columns)) {
           continue;
         }
+        if (isset($indexedColumns[$indexColumn])) {
+          continue;
+        }
 
         try {
           $db->setQuery(
             'ALTER TABLE ' . $tableQN
             . ' ADD INDEX (' . $db->quoteName($indexColumn) . ')'
           )->execute();
+          $indexedColumns[$indexColumn] = true;
           $tableChanged = true;
         } catch (\Throwable $e) {
           $message = strtolower((string) $e->getMessage());
+          if (strpos($message, 'too many keys') !== false) {
+            $this->log(
+              "[WARNING] Max index count reached on {$tableAlias} (storage {$storageId}); skipping remaining index additions.",
+              Log::WARNING
+            );
+            break;
+          }
           if (
             strpos($message, 'duplicate') === false
             && strpos($message, 'already exists') === false
@@ -768,6 +1151,8 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
               "[WARNING] Failed adding index {$indexColumn} on {$tableAlias} (storage {$storageId}): " . $e->getMessage(),
               Log::WARNING
             );
+          } else {
+            $indexedColumns[$indexColumn] = true;
           }
         }
       }
@@ -777,7 +1162,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       }
     }
 
-    $this->log("[OK] Internal storage audit migration complete. Processed: {$processed}, updated: {$updated}, missing tables: {$missingTables}.");
+    $this->log("[OK] Internal storage audit migration complete. Processed: {$processed}, updated: {$updated}, missing tables: {$missingTables}, duplicate indexes removed: {$duplicatesRemoved}.");
   }
 
 
@@ -2022,6 +2407,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $supportedThemes = [
       'blank',
       'joomla6',
+      'dark',
       'khepri',
     ];
 
@@ -2112,6 +2498,71 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     } else {
       $this->log('[INFO] No form theme references needed normalization.');
     }
+  }
+
+  private function normalizeLegacyComponentTypes(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+    $targetType = 'com_contentbuilder_ng';
+    $legacyTypes = [
+      'com_contentbuilder',
+      'com_contentbuilderng',
+    ];
+    $quotedLegacyTypes = array_map(static fn($legacyType) => $db->quote($legacyType), $legacyTypes);
+
+    $tables = [
+      '#__contentbuilder_ng_forms',
+      '#__contentbuilder_ng_records',
+      '#__contentbuilder_ng_articles',
+      '#__contentbuilder_ng_resource_access',
+    ];
+
+    $totalUpdated = 0;
+    $normalizedTables = 0;
+
+    foreach ($tables as $table) {
+      try {
+        $columns = $db->getTableColumns($table, false);
+        $columns = is_array($columns) ? array_change_key_case($columns, CASE_LOWER) : [];
+        if (!array_key_exists('type', $columns)) {
+          $this->log("[INFO] Type normalization skipped: {$table}.type column not found.");
+          continue;
+        }
+      } catch (\Throwable $e) {
+        $this->log("[WARNING] Could not inspect {$table} columns for type normalization: " . $e->getMessage(), Log::WARNING);
+        continue;
+      }
+
+      try {
+        $query = $db->getQuery(true)
+          ->update($db->quoteName($table))
+          ->set($db->quoteName('type') . ' = ' . $db->quote($targetType))
+          ->where($db->quoteName('type') . ' IN (' . implode(',', $quotedLegacyTypes) . ')');
+        $db->setQuery($query)->execute();
+        $updated = (int) $db->getAffectedRows();
+
+        if ($updated > 0) {
+          $this->log("[OK] Normalized {$updated} legacy type row(s) in {$table}.");
+          $totalUpdated += $updated;
+        }
+
+        $normalizedTables++;
+      } catch (\Throwable $e) {
+        $this->log("[WARNING] Failed normalizing legacy types in {$table}: " . $e->getMessage(), Log::WARNING);
+      }
+    }
+
+    if ($normalizedTables === 0) {
+      $this->log('[INFO] Legacy type normalization skipped: no compatible tables found.');
+      return;
+    }
+
+    if ($totalUpdated === 0) {
+      $this->log('[INFO] No legacy com_contentbuilder type value needed normalization.');
+      return;
+    }
+
+    $this->log("[OK] Legacy type normalization completed: {$totalUpdated} row(s) updated.");
   }
 
   private function ensureFormsNewButtonColumn(): void
@@ -2215,6 +2666,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     if ($type === 'update') {
       $this->removeDeprecatedThemePlugins();
       $this->normalizeFormThemePlugins();
+      $this->normalizeLegacyComponentTypes();
       $this->removeLegacyComponent();
       $this->removeLegacyPlugins();
     }

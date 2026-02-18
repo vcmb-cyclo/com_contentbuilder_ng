@@ -17,7 +17,17 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+
+$toUnicodeSlug = static function (string $string): string {
+    $str = preg_replace('/\xE3\x80\x80/', ' ', $string) ?? $string;
+    $str = str_replace('-', ' ', $str);
+    $str = preg_replace('#[:\#\*"@+=;!&\.%()\]\/\'\\\\|\[]#', ' ', $str) ?? $str;
+    $str = str_replace('?', '', $str);
+    $str = trim(strtolower($str));
+    $str = preg_replace('#\x20+#', '-', $str) ?? $str;
+
+    return $str;
+};
 
 $th = 'th';
 if ($this->page_heading) {
@@ -143,7 +153,7 @@ if ($this->page_heading) {
             $row = $this->items[$i];
             $link_ = htmlentities($row->name, ENT_QUOTES, 'UTF-8');
             if (($this->show_permissions && $this->perms[$row->id]['view']) || !$this->show_permissions) {
-                $link = Route::_('index.php?option=com_contentbuilder_ng&title=' . ContentbuilderLegacyHelper::stringURLUnicodeSlug($row->name) . '&task=list.display&id=' . $row->id);
+                $link = Route::_('index.php?option=com_contentbuilder_ng&title=' . $toUnicodeSlug((string) $row->name) . '&task=list.display&id=' . $row->id);
                 $link_ = '<a href="' . $link . '">' . htmlentities($row->name, ENT_QUOTES, 'UTF-8') . '</a>';
             }
             ?>

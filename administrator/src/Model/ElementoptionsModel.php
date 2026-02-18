@@ -22,6 +22,7 @@ use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Administrator\Helper\PackedDataHelper;
 
 class ElementoptionsModel extends BaseDatabaseModel
 {
@@ -100,7 +101,7 @@ class ElementoptionsModel extends BaseDatabaseModel
             $row = $this->getDatabase()->loadObject();
 
             if (is_object($row)) {
-                $decodedOptions = ContentbuilderLegacyHelper::decodePackedData($row->options ?? '', null);
+                $decodedOptions = PackedDataHelper::decodePackedData($row->options ?? '', null);
                 if (is_array($decodedOptions)) {
                     $decodedOptions = (object) $decodedOptions;
                 }
@@ -155,7 +156,7 @@ class ElementoptionsModel extends BaseDatabaseModel
     function store()
     {
         if (Factory::getApplication()->input->getInt('type_change', 0)) {
-            $this->getDatabase()->setQuery("Update #__contentbuilder_ng_elements Set `type`=" . $this->getDatabase()->Quote(Factory::getApplication()->input->getCmd('type_selection', '')) . " Where id = " . $this->_element_id);
+            $this->getDatabase()->setQuery("Update #__contentbuilder_ng_elements Set `type`=" . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('type_selection', '')) . " Where id = " . $this->_element_id);
             $this->getDatabase()->execute();
             return 1;
         }
@@ -180,7 +181,7 @@ class ElementoptionsModel extends BaseDatabaseModel
 
                 $the_item = $results;
 
-                $query = " `options`='" . ContentbuilderLegacyHelper::encodePackedData($the_item['options']) . "', `type`=" . $this->getDatabase()->Quote(Factory::getApplication()->input->getCmd('field_type', '')) . ", `change_type`=" . $this->getDatabase()->Quote(Factory::getApplication()->input->getCmd('field_type', '')) . ", `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($the_item['default_value']) . " ";
+                $query = " `options`='" . PackedDataHelper::encodePackedData($the_item['options']) . "', `type`=" . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('field_type', '')) . ", `change_type`=" . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('field_type', '')) . ", `hint`=" . $this->getDatabase()->quote($hint) . ", `default_value`=" . $this->getDatabase()->quote($the_item['default_value']) . " ";
                 break;
 
             case '':
@@ -204,7 +205,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                 $options->allow_raw = $allow_raw;
                 $options->allow_html = $allow_html;
 
-                $query = " `options`='" . ContentbuilderLegacyHelper::encodePackedData($options) . "', `type`='text', `change_type`='text', `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($default_value) . " ";
+                $query = " `options`='" . PackedDataHelper::encodePackedData($options) . "', `type`='text', `change_type`='text', `hint`=" . $this->getDatabase()->quote($hint) . ", `default_value`=" . $this->getDatabase()->quote($default_value) . " ";
                 break;
 
             case 'textarea':
@@ -227,7 +228,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                 $options->allow_raw = $allow_raw;
                 $options->allow_html = $allow_html;
 
-                $query = " `options`='" . ContentbuilderLegacyHelper::encodePackedData($options) . "', `type`='textarea', `change_type`='textarea', `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($default_value) . " ";
+                $query = " `options`='" . PackedDataHelper::encodePackedData($options) . "', `type`='textarea', `change_type`='textarea', `hint`=" . $this->getDatabase()->quote($hint) . ", `default_value`=" . $this->getDatabase()->quote($default_value) . " ";
                 break;
 
             case 'checkboxgroup':
@@ -263,7 +264,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                     $options->horizontal_length = Factory::getApplication()->input->get('horizontal_length', '', 'string');
                 }
 
-                $query = " `options`='" . ContentbuilderLegacyHelper::encodePackedData($options) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($default_value) . " ";
+                $query = " `options`='" . PackedDataHelper::encodePackedData($options) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->getDatabase()->quote($hint) . ", `default_value`=" . $this->getDatabase()->quote($default_value) . " ";
                 break;
 
             case 'upload':
@@ -374,7 +375,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                 $options->allowed_file_extensions = Factory::getApplication()->input->get('allowed_file_extensions', '', 'string');
                 $options->max_filesize = Factory::getApplication()->input->get('max_filesize', '', 'string');
 
-                $query = " `options`='" . ContentbuilderLegacyHelper::encodePackedData($options) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($default_value) . " ";
+                $query = " `options`='" . PackedDataHelper::encodePackedData($options) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->getDatabase()->quote($hint) . ", `default_value`=" . $this->getDatabase()->quote($default_value) . " ";
                 break;
             case 'captcha':
                 $default_value = Factory::getApplication()->input->get('default_value', '', 'string');
@@ -382,7 +383,7 @@ class ElementoptionsModel extends BaseDatabaseModel
 
                 $options = new \stdClass();
 
-                $query = " `options`='" . ContentbuilderLegacyHelper::encodePackedData($options) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($default_value) . " ";
+                $query = " `options`='" . PackedDataHelper::encodePackedData($options) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->getDatabase()->quote($hint) . ", `default_value`=" . $this->getDatabase()->quote($default_value) . " ";
                 break;
             case 'calendar':
                 $length = Factory::getApplication()->input->get('length', '', 'string');
@@ -400,7 +401,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                 $options->format = $format;
                 $options->transfer_format = $transfer_format;
 
-                $query = " `options`='" . ContentbuilderLegacyHelper::encodePackedData($options) . "', `type`='calendar', `change_type`='calendar', `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($default_value) . " ";
+                $query = " `options`='" . PackedDataHelper::encodePackedData($options) . "', `type`='calendar', `change_type`='calendar', `hint`=" . $this->getDatabase()->quote($hint) . ", `default_value`=" . $this->getDatabase()->quote($default_value) . " ";
 
                 break;
             case 'hidden':
@@ -413,7 +414,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                 $options->allow_raw = $allow_raw;
                 $options->allow_html = $allow_html;
 
-                $query = " `options`='" . ContentbuilderLegacyHelper::encodePackedData($options) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->getDatabase()->Quote($hint) . ", `default_value`=" . $this->getDatabase()->Quote($default_value) . " ";
+                $query = " `options`='" . PackedDataHelper::encodePackedData($options) . "', `type`='" . $type . "', `change_type`='" . $type . "', `hint`=" . $this->getDatabase()->quote($hint) . ", `default_value`=" . $this->getDatabase()->quote($default_value) . " ";
                 break;
         }
 
@@ -425,11 +426,11 @@ class ElementoptionsModel extends BaseDatabaseModel
             $validations = Factory::getApplication()->input->get('validations', [], 'array');
             $validations = is_array($validations) ? $validations : [];
 
-            $other = " `validations`=" . $this->getDatabase()->Quote(implode(',', $validations)) . ", ";
-            $other .= " `custom_init_script`=" . $this->getDatabase()->Quote($custom_init_script) . ", ";
-            $other .= " `custom_action_script`=" . $this->getDatabase()->Quote($custom_action_script) . ", ";
-            $other .= " `custom_validation_script`=" . $this->getDatabase()->Quote($custom_validation_script) . ", ";
-            $other .= " `validation_message`=" . $this->getDatabase()->Quote($validation_message) . ", ";
+            $other = " `validations`=" . $this->getDatabase()->quote(implode(',', $validations)) . ", ";
+            $other .= " `custom_init_script`=" . $this->getDatabase()->quote($custom_init_script) . ", ";
+            $other .= " `custom_action_script`=" . $this->getDatabase()->quote($custom_action_script) . ", ";
+            $other .= " `custom_validation_script`=" . $this->getDatabase()->quote($custom_validation_script) . ", ";
+            $other .= " `validation_message`=" . $this->getDatabase()->quote($validation_message) . ", ";
 
             $this->getDatabase()->setQuery("Update #__contentbuilder_ng_elements Set $other $query Where id = " . $this->_element_id);
             $this->getDatabase()->execute();

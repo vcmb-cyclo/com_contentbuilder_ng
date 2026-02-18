@@ -20,6 +20,18 @@ use Joomla\CMS\HTML\HTMLHelper;
 $versionValue = (string) ($this->componentVersion ?: Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE'));
 $creationDateValue = (string) ($this->componentCreationDate ?: Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE'));
 $authorValue = (string) ($this->componentAuthor ?: Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE'));
+$auditReport = is_array($this->auditReport ?? null) ? $this->auditReport : [];
+$auditSummary = (array) ($auditReport['summary'] ?? []);
+$duplicateIndexes = (array) ($auditReport['duplicate_indexes'] ?? []);
+$legacyTables = (array) ($auditReport['legacy_tables'] ?? []);
+$tableEncodingIssues = (array) ($auditReport['table_encoding_issues'] ?? []);
+$columnEncodingIssues = (array) ($auditReport['column_encoding_issues'] ?? []);
+$mixedTableCollations = (array) ($auditReport['mixed_table_collations'] ?? []);
+$auditErrors = (array) ($auditReport['errors'] ?? []);
+$hasAuditReport = $auditReport !== [];
+$columnEncodingIssueLimit = 200;
+$columnEncodingIssuesDisplayed = array_slice($columnEncodingIssues, 0, $columnEncodingIssueLimit);
+$columnEncodingIssueHiddenCount = max(0, count($columnEncodingIssues) - count($columnEncodingIssuesDisplayed));
 
 ?>
 <style>
@@ -167,6 +179,210 @@ $authorValue = (string) ($this->componentAuthor ?: Text::_('COM_CONTENTBUILDER_N
             <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_DESC'); ?>
             <a href="https://breezingforms.vcmb.fr" target="_blank" rel="noopener noreferrer">VCMB migration</a>
         </p>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h3 class="h6 card-title mb-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_TITLE'); ?></h3>
+
+        <?php if (!$hasAuditReport) : ?>
+            <div class="alert alert-info mb-0">
+                <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_EMPTY'); ?>
+            </div>
+        <?php else : ?>
+            <p class="text-muted small mb-2">
+                <?php echo Text::sprintf(
+                    'COM_CONTENTBUILDER_NG_ABOUT_AUDIT_LAST_RUN',
+                    (string) ($auditReport['generated_at'] ?? Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE')),
+                    (int) ($auditReport['scanned_tables'] ?? 0)
+                ); ?>
+            </p>
+
+            <div class="table-responsive mb-3">
+                <table class="table table-sm table-striped align-middle mb-0">
+                    <tbody>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_ISSUES_TOTAL'); ?></th>
+                        <td><?php echo (int) ($auditSummary['issues_total'] ?? 0); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_DUPLICATE_GROUPS'); ?></th>
+                        <td><?php echo (int) ($auditSummary['duplicate_index_groups'] ?? 0); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_DUPLICATE_TO_DROP'); ?></th>
+                        <td><?php echo (int) ($auditSummary['duplicate_indexes_to_drop'] ?? 0); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_LEGACY_TABLES'); ?></th>
+                        <td><?php echo (int) ($auditSummary['legacy_tables'] ?? 0); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_TABLE_ENCODING_ISSUES'); ?></th>
+                        <td><?php echo (int) ($auditSummary['table_encoding_issues'] ?? 0); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_COLUMN_ENCODING_ISSUES'); ?></th>
+                        <td><?php echo (int) ($auditSummary['column_encoding_issues'] ?? 0); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_MIXED_COLLATIONS'); ?></th>
+                        <td><?php echo max(0, count($mixedTableCollations) - 1); ?></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <?php if ((int) ($auditSummary['issues_total'] ?? 0) === 0 && empty($auditErrors)) : ?>
+                <div class="alert alert-success mb-3">
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_ISSUES'); ?>
+                </div>
+            <?php endif; ?>
+
+            <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_DUPLICATE_GROUPS'); ?></h4>
+            <?php if (empty($duplicateIndexes)) : ?>
+                <div class="alert alert-info">
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_DUPLICATE_INDEXES'); ?>
+                </div>
+            <?php else : ?>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead>
+                        <tr>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_TABLE'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_INDEX_KEEP'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_INDEX_DROP'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_INDEXES'); ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($duplicateIndexes as $duplicateIndex) : ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars((string) ($duplicateIndex['table'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars((string) ($duplicateIndex['keep'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars(implode(', ', (array) ($duplicateIndex['drop'] ?? [])), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars(implode(', ', (array) ($duplicateIndex['indexes'] ?? [])), ENT_QUOTES, 'UTF-8'); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+
+            <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_LEGACY_TABLES'); ?></h4>
+            <?php if (empty($legacyTables)) : ?>
+                <div class="alert alert-info">
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_LEGACY_TABLES'); ?>
+                </div>
+            <?php else : ?>
+                <ul class="mb-0">
+                    <?php foreach ($legacyTables as $legacyTable) : ?>
+                        <li><?php echo htmlspecialchars((string) $legacyTable, ENT_QUOTES, 'UTF-8'); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+
+            <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_TABLE_ENCODING_ISSUES'); ?></h4>
+            <?php if (empty($tableEncodingIssues)) : ?>
+                <div class="alert alert-info">
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_TABLE_ENCODING_ISSUES'); ?>
+                </div>
+            <?php else : ?>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead>
+                        <tr>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_TABLE'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_COLLATION'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_EXPECTED'); ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($tableEncodingIssues as $tableIssue) : ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars((string) ($tableIssue['table'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars((string) (($tableIssue['collation'] ?? '') !== '' ? $tableIssue['collation'] : Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars((string) ($tableIssue['expected'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+
+            <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_COLUMN_ENCODING_ISSUES'); ?></h4>
+            <?php if (empty($columnEncodingIssuesDisplayed)) : ?>
+                <div class="alert alert-info">
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_COLUMN_ENCODING_ISSUES'); ?>
+                </div>
+            <?php else : ?>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead>
+                        <tr>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_TABLE'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_COLUMN'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_CHARSET'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_COLLATION'); ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($columnEncodingIssuesDisplayed as $columnIssue) : ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars((string) ($columnIssue['table'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars((string) ($columnIssue['column'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars((string) (($columnIssue['charset'] ?? '') !== '' ? $columnIssue['charset'] : Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars((string) (($columnIssue['collation'] ?? '') !== '' ? $columnIssue['collation'] : Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE')), ENT_QUOTES, 'UTF-8'); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php if ($columnEncodingIssueHiddenCount > 0) : ?>
+                    <p class="text-muted small mb-0">
+                        <?php echo Text::sprintf('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_TRUNCATED', $columnEncodingIssueHiddenCount); ?>
+                    </p>
+                <?php endif; ?>
+            <?php endif; ?>
+
+            <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_MIXED_COLLATIONS'); ?></h4>
+            <?php if (count($mixedTableCollations) <= 1) : ?>
+                <div class="alert alert-info">
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_MIXED_COLLATIONS'); ?>
+                </div>
+            <?php else : ?>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead>
+                        <tr>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_COLLATION'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_COUNT'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_TABLE'); ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($mixedTableCollations as $collationStat) : ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars((string) ($collationStat['collation'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo (int) ($collationStat['count'] ?? 0); ?></td>
+                                <td><?php echo htmlspecialchars(implode(', ', (array) ($collationStat['tables'] ?? [])), ENT_QUOTES, 'UTF-8'); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($auditErrors)) : ?>
+                <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_ERRORS'); ?></h4>
+                <ul class="mb-0">
+                    <?php foreach ($auditErrors as $auditError) : ?>
+                        <li><?php echo htmlspecialchars((string) $auditError, ENT_QUOTES, 'UTF-8'); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        <?php endif; ?>
     </div>
 </div>
 

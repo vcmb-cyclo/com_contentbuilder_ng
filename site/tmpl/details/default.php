@@ -45,6 +45,7 @@ $previewSig = (string) $input->getString('cb_preview_sig', '');
 $previewActorId = $input->getInt('cb_preview_actor_id', 0);
 $previewActorName = (string) $input->getString('cb_preview_actor_name', '');
 $isAdminPreview = $input->getBool('cb_preview_ok', false);
+$showTopBar = $input->getInt('cb_show_details_top_bar', 1) === 1;
 $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&task=form.edit&id=' . (int) $input->getInt('id', 0);
 $previewFormName = trim((string) ($this->form_name ?? ''));
 if ($previewFormName === '') {
@@ -61,6 +62,12 @@ if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
         . '&cb_preview_actor_name=' . rawurlencode($previewActorName)
         . '&cb_preview_sig=' . rawurlencode($previewSig);
 }
+$printLink = Route::_('index.php?option=com_contentbuilder_ng&title=' . $input->get('title', '', 'string')
+    . ($input->get('tmpl', '', 'string') != '' ? '&tmpl=' . $input->get('tmpl', '', 'string') : '')
+    . ($input->get('layout', '', 'string') != '' ? '&layout=' . $input->get('layout', '', 'string') : '')
+    . '&task=details.display&layout=print&tmpl=component&id=' . $input->getInt('id', 0)
+    . '&record_id=' . $input->getCmd('record_id', 0)
+    . $previewQuery);
 
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 
@@ -86,6 +93,37 @@ $wa->useScript('com_contentbuilder_ng.contentbuilder_ng');
 
 <?php Factory::getApplication()->getDocument()->addStyleDeclaration($this->theme_css); ?>
 <?php Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js); ?>
+<?php
+Factory::getApplication()->getDocument()->addStyleDeclaration(
+    <<<'CSS'
+.cbDetailsWrapper .cbToolBar.cbToolBar--top{
+    position:sticky;
+    top:var(--cb-details-sticky-top, .5rem);
+    z-index:1090;
+    margin:.25rem 0 .9rem !important;
+    padding:.42rem .5rem;
+    border:1px solid rgba(36,61,86,.2);
+    border-radius:.72rem;
+    background:rgba(255,255,255,.96);
+    box-shadow:0 .38rem .95rem rgba(16,32,56,.15);
+    backdrop-filter:blur(6px);
+}
+.cbDetailsWrapper .cbToolBar.cbToolBar--top .btn{
+    white-space:nowrap;
+}
+@media (max-width:767.98px){
+    .cbDetailsWrapper .cbToolBar.cbToolBar--top{
+        top:0;
+        padding:.38rem;
+    }
+    .cbDetailsWrapper .cbToolBar.cbToolBar--top .btn{
+        flex:1 1 calc(50% - .5rem);
+        justify-content:center;
+    }
+}
+CSS
+);
+?>
 <script type="text/javascript">
     <!--
     function contentbuilder_ng_delete() {
@@ -97,19 +135,14 @@ $wa->useScript('com_contentbuilder_ng.contentbuilder_ng');
     //
     -->
 </script>
-<?php
-if ($this->print_button):
-?>
+<?php if (!$showTopBar && $this->print_button): ?>
     <div class="hidden-phone cbPrintBar d-flex justify-content-end mb-2">
         <a
             class="btn btn-sm btn-outline-secondary"
-            href="javascript:window.open('<?php echo Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=details.display&layout=print&tmpl=component&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0) . $previewQuery) ?>','win2','status=no,toolbar=no,scrollbars=yes,titlebar=no,menubar=no,resizable=yes,width=640,height=480,directories=no,location=no');void(0);"><i
+            href="javascript:window.open('<?php echo $printLink; ?>','win2','status=no,toolbar=no,scrollbars=yes,titlebar=no,menubar=no,resizable=yes,width=640,height=480,directories=no,location=no');void(0);"><i
                 class="fa fa-print" aria-hidden="true"></i> <?php echo Text::_('JGLOBAL_PRINT'); ?></a>
     </div>
-<?php
-endif;
-?>
-
+<?php endif; ?>
 <div class="cbDetailsWrapper">
 
 <?php if ($isAdminPreview): ?>
@@ -134,14 +167,20 @@ $detailsNavBaseLink = 'index.php?option=com_contentbuilder_ng&title=' . $input->
     . ($listQuery !== '' ? '&' . $listQuery : '')
     . $previewQuery;
 $showCloseButton = $this->show_back_button && Factory::getApplication()->input->getBool('cb_show_details_back_button', 1);
-$closeListLink = Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $previewQuery);
+$closeListLink = Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&view=list&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $previewQuery);
+$showActionToolbar = (
+    (Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) && $this->show_back_button)
+    || $delete_allowed
+    || $edit_allowed
+    || ($showTopBar && ($this->print_button || $prevRecordId > 0 || $nextRecordId > 0 || $showCloseButton))
+);
 ?>
 
 <?php
 if ($this->show_page_heading && $this->page_title) {
 ?>
     <h1 class="display-6 mb-4">
-        <?php if ($prevRecordId > 0 || $nextRecordId > 0 || $showCloseButton): ?>
+        <?php if (!$showTopBar && ($prevRecordId > 0 || $nextRecordId > 0 || $showCloseButton)): ?>
             <span class="cbTitleRecordNav d-inline-flex flex-wrap gap-2 float-end ms-2 mb-2">
                 <?php if ($prevRecordId > 0): ?>
                     <a
@@ -184,13 +223,53 @@ ob_start();
 ?>
 
 <?php
-if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) && $this->show_back_button) || $delete_allowed || $edit_allowed) {
+if ($showActionToolbar) {
 ?>
 
     <div class="cbToolBar d-flex justify-content-end gap-2 flex-wrap mb-3">
     <?php
 }
     ?>
+
+    <?php if ($showTopBar && $this->print_button): ?>
+        <a
+            class="hidden-phone btn btn-sm btn-outline-secondary cbButton cbPrintButton"
+            href="javascript:window.open('<?php echo $printLink; ?>','win2','status=no,toolbar=no,scrollbars=yes,titlebar=no,menubar=no,resizable=yes,width=640,height=480,directories=no,location=no');void(0);"
+            title="<?php echo Text::_('JGLOBAL_PRINT'); ?>">
+            <i class="fa fa-print" aria-hidden="true"></i>
+            <?php echo Text::_('JGLOBAL_PRINT'); ?>
+        </a>
+    <?php endif; ?>
+
+    <?php if ($showTopBar && $prevRecordId > 0): ?>
+        <a
+            class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbPrevButton"
+            href="<?php echo Route::_($detailsNavBaseLink . '&record_id=' . $prevRecordId); ?>"
+            title="<?php echo Text::_('JPREVIOUS'); ?>">
+            <span class="icon-arrow-left me-1" aria-hidden="true"></span>
+            <?php echo Text::_('JPREVIOUS'); ?>
+        </a>
+    <?php endif; ?>
+
+    <?php if ($showTopBar && $nextRecordId > 0): ?>
+        <a
+            class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbNextButton"
+            href="<?php echo Route::_($detailsNavBaseLink . '&record_id=' . $nextRecordId); ?>"
+            title="<?php echo Text::_('JNEXT'); ?>">
+            <?php echo Text::_('JNEXT'); ?>
+            <span class="icon-arrow-right ms-1" aria-hidden="true"></span>
+        </a>
+    <?php endif; ?>
+
+    <?php if ($showTopBar && $showCloseButton): ?>
+        <a
+            class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbCloseButton"
+            href="<?php echo $closeListLink; ?>"
+            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>">
+            <span class="icon-times me-1" aria-hidden="true"></span>
+            <?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>
+        </a>
+    <?php endif; ?>
 
     <?php if ($edit_allowed) { ?>
         <a class="btn btn-sm btn-primary cbButton cbEditButton"
@@ -210,7 +289,7 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
     <?php
     }
     ?>
-    <?php if ($showCloseButton && (!$this->show_page_heading || !$this->page_title)): ?>
+    <?php if (!$showTopBar && $showCloseButton && (!$this->show_page_heading || !$this->page_title)): ?>
         <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton"
             href="<?php echo $closeListLink; ?>"
             title="<?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>">
@@ -220,7 +299,7 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
     <?php endif; ?>
 
     <?php
-    if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) && $this->show_back_button) || $delete_allowed || $edit_allowed) {
+    if ($showActionToolbar) {
     ?>
 
     </div>
@@ -233,11 +312,13 @@ if ((Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) 
 $buttons = ob_get_contents();
 ob_end_clean();
 
-if (Factory::getApplication()->input->getInt('cb_show_details_top_bar', 1)) {
+if ($showTopBar) {
 ?>
     <div style="clear:right;"></div>
 <?php
-    echo $buttons;
+    if ($buttons !== '') {
+        echo str_replace('class="cbToolBar ', 'class="cbToolBar cbToolBar--top ', $buttons);
+    }
 }
 ?>
 
@@ -300,7 +381,9 @@ if (Factory::getApplication()->input->getInt('cb_show_author', 1)) {
 
 <?php
 if (Factory::getApplication()->input->getInt('cb_show_details_bottom_bar', 1)) {
-    echo $buttons;
+    if ($buttons !== '') {
+        echo str_replace('class="cbToolBar ', 'class="cbToolBar cbToolBar--bottom ', $buttons);
+    }
 ?>
     <div style="clear:right;"></div>
 <?php

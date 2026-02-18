@@ -131,7 +131,7 @@ final class PackedDataMigrationHelper
                 $summary['candidates']++;
 
                 $sentinel = new \stdClass();
-                $decoded = ContentbuilderLegacyHelper::decodePackedData($raw, $sentinel, false);
+                $decoded = PackedDataHelper::decodePackedData($raw, $sentinel, false);
 
                 if ($decoded === $sentinel) {
                     $tableStats['errors']++;
@@ -139,7 +139,7 @@ final class PackedDataMigrationHelper
                     continue;
                 }
 
-                $encoded = ContentbuilderLegacyHelper::encodePackedData($decoded);
+                $encoded = PackedDataHelper::encodePackedData($decoded);
 
                 if ($encoded === $raw) {
                     $tableStats['unchanged']++;

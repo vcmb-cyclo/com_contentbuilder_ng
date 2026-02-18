@@ -23,7 +23,9 @@ class ListController extends BaseController
 {
     public function delete(): void
     {
-        Session::checkToken('post') or jexit(Text::_('JINVALID_TOKEN'));
+        if (!Session::checkToken('post')) {
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
+        }
 
         ContentbuilderLegacyHelper::checkPermissions(
             'delete',
@@ -120,7 +122,9 @@ class ListController extends BaseController
 
     public function state(): void
     {
-        Session::checkToken('post') or jexit(Text::_('JINVALID_TOKEN'));
+        if (!Session::checkToken('post')) {
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
+        }
 
         ContentbuilderLegacyHelper::checkPermissions(
             'state',
@@ -161,7 +165,9 @@ class ListController extends BaseController
 
     public function publish(): void
     {
-        Session::checkToken('post') or jexit(Text::_('JINVALID_TOKEN'));
+        if (!Session::checkToken('post')) {
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
+        }
 
         ContentbuilderLegacyHelper::checkPermissions(
             'publish',

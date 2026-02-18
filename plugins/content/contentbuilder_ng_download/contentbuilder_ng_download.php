@@ -222,7 +222,7 @@ class plgContentContentbuilder_ng_download extends CMSPlugin implements Subscrib
                     if ($form) {
 
                         $protect = $data['protect_upload_directory'];
-                        $record = $form->getRecord($data['record_id'], $data['published_only'], $frontend ? ($data['own_only_fe'] ? $this->app->getIdentity()->get('id', 0) : -1) : ($data['own_only'] ? $this->app->getIdentity()->get('id', 0) : -1), true);
+                        $record = $form->getRecord($data['record_id'], $data['published_only'], $frontend ? ($data['own_only_fe'] ? (int) ($this->app->getIdentity()->id ?? 0) : -1) : ($data['own_only'] ? (int) ($this->app->getIdentity()->id ?? 0) : -1), true);
                         $default_title = $data['title_field'];
                         $form_id = $data['form_id'];
                         $record_id = $data['record_id'];

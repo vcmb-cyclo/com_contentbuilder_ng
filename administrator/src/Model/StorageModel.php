@@ -1039,9 +1039,9 @@ class StorageModel extends AdminModel
             if (Factory::getApplication()->input->getBool('csv_drop_records', false)) {
                 $this->getDatabase()->setQuery("Truncate Table #__" . $this->target_table);
                 $this->getDatabase()->execute();
-                $this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_records Where `type` = 'com_contentbuilder_ng' And reference_id = " . $this->getDatabase()->Quote($this->storageId));
+                $this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_records Where `type` = 'com_contentbuilder_ng' And reference_id = " . $this->getDatabase()->quote($this->storageId));
                 $this->getDatabase()->execute();
-                $this->getDatabase()->setQuery("Delete a.*, c.* From #__contentbuilder_ng_articles As a, #__content As c Where c.id = a.article_id And a.`type` = 'com_contentbuilder_ng' And a.reference_id = " . $this->getDatabase()->Quote($this->storageId));
+                $this->getDatabase()->setQuery("Delete a.*, c.* From #__contentbuilder_ng_articles As a, #__content As c Where c.id = a.article_id And a.`type` = 'com_contentbuilder_ng' And a.reference_id = " . $this->getDatabase()->quote($this->storageId));
                 $this->getDatabase()->execute();
             }
 
@@ -1053,7 +1053,7 @@ class StorageModel extends AdminModel
                 $query = "$insert_query_prefix (" . join(", ", $this->quote_all_array($data)) . ")";
                 $this->getDatabase()->setQuery($query);
                 $this->getDatabase()->execute();
-                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_records (`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id) Values ('com_contentbuilder_ng'," . $this->getDatabase()->Quote($last_update) . ",0,'*',''," . Factory::getApplication()->input->getInt('csv_published', 0) . ", " . $this->getDatabase()->Quote(intval($this->getDatabase()->insertid())) . ", " . $this->getDatabase()->Quote($this->storageId) . ")");
+                $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_records (`type`,last_update,is_future,lang_code, sef, published, record_id, reference_id) Values ('com_contentbuilder_ng'," . $this->getDatabase()->quote($last_update) . ",0,'*',''," . Factory::getApplication()->input->getInt('csv_published', 0) . ", " . $this->getDatabase()->quote(intval($this->getDatabase()->insertid())) . ", " . $this->getDatabase()->quote($this->storageId) . ")");
                 $this->getDatabase()->execute();
             }
             fclose($handle);
@@ -1076,7 +1076,7 @@ class StorageModel extends AdminModel
         if (is_null($value))
             return "''";
 
-        $value = $this->getDatabase()->Quote($value);
+        $value = $this->getDatabase()->quote($value);
         return $value;
     }
 

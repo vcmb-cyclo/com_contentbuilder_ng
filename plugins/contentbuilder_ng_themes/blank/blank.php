@@ -13,12 +13,23 @@
 
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Log\Log;
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 class plgContentbuilder_ng_themesBlank extends CMSPlugin implements SubscriberInterface
 {
+    private const THEME_NAME = 'blank';
+
+    private function acceptsThemeEvent(Event $event): bool
+    {
+        $requestedTheme = trim((string) ($event->getArgument('theme') ?? ''));
+
+        return $requestedTheme === '' || $requestedTheme === self::THEME_NAME;
+    }
+
     private function pushEventResult(Event $event, string $value): void
     {
         $results = $event->getArgument('result') ?: [];
@@ -51,10 +62,18 @@ class plgContentbuilder_ng_themesBlank extends CMSPlugin implements SubscriberIn
      * 
      * @return string
      */
-    function onContentTemplateJavascript()
+    function onContentTemplateJavascript($event = null)
     {
+        if ($event instanceof Event && !$this->acceptsThemeEvent($event)) {
+            return;
+        }
 
-        return '';
+        $out = '';
+        if ($event instanceof Event) {
+            $this->pushEventResult($event, $out);
+            return;
+        }
+        return $out;
     }
 
     /**
@@ -63,10 +82,18 @@ class plgContentbuilder_ng_themesBlank extends CMSPlugin implements SubscriberIn
      * 
      * @return string
      */
-    function onEditableTemplateJavascript()
+    function onEditableTemplateJavascript($event = null)
     {
+        if ($event instanceof Event && !$this->acceptsThemeEvent($event)) {
+            return;
+        }
 
-        return '';
+        $out = '';
+        if ($event instanceof Event) {
+            $this->pushEventResult($event, $out);
+            return;
+        }
+        return $out;
     }
 
     /**
@@ -75,10 +102,18 @@ class plgContentbuilder_ng_themesBlank extends CMSPlugin implements SubscriberIn
      * 
      * @return string
      */
-    function onListViewJavascript()
+    function onListViewJavascript($event = null)
     {
+        if ($event instanceof Event && !$this->acceptsThemeEvent($event)) {
+            return;
+        }
 
-        return '';
+        $out = '';
+        if ($event instanceof Event) {
+            $this->pushEventResult($event, $out);
+            return;
+        }
+        return $out;
     }
 
     /**
@@ -87,10 +122,18 @@ class plgContentbuilder_ng_themesBlank extends CMSPlugin implements SubscriberIn
      * 
      * @return string
      */
-    function onContentTemplateCss()
+    function onContentTemplateCss($event = null)
     {
+        if ($event instanceof Event && !$this->acceptsThemeEvent($event)) {
+            return;
+        }
 
-        return '';
+        $out = '';
+        if ($event instanceof Event) {
+            $this->pushEventResult($event, $out);
+            return;
+        }
+        return $out;
     }
 
     /**
@@ -99,10 +142,18 @@ class plgContentbuilder_ng_themesBlank extends CMSPlugin implements SubscriberIn
      * 
      * @return string
      */
-    function onEditableTemplateCss()
+    function onEditableTemplateCss($event = null)
     {
+        if ($event instanceof Event && !$this->acceptsThemeEvent($event)) {
+            return;
+        }
 
-        return $this->onContentTemplateCss();
+        $out = $this->onContentTemplateCss(null);
+        if ($event instanceof Event) {
+            $this->pushEventResult($event, $out);
+            return;
+        }
+        return $out;
     }
 
     /**
@@ -111,10 +162,18 @@ class plgContentbuilder_ng_themesBlank extends CMSPlugin implements SubscriberIn
      * 
      * @return string
      */
-    function onListViewCss()
+    function onListViewCss($event = null)
     {
+        if ($event instanceof Event && !$this->acceptsThemeEvent($event)) {
+            return;
+        }
 
-        return '';
+        $out = '';
+        if ($event instanceof Event) {
+            $this->pushEventResult($event, $out);
+            return;
+        }
+        return $out;
     }
 
     /**
@@ -127,6 +186,9 @@ class plgContentbuilder_ng_themesBlank extends CMSPlugin implements SubscriberIn
         $event = null;
         if ($arg0 instanceof Event) {
             $event = $arg0;
+            if (!$this->acceptsThemeEvent($event)) {
+                return;
+            }
             $args = $event->getArguments();
             $contentbuilder_ng_form_id = (int) ($args[0] ?? 0);
             $form = $args[1] ?? null;
@@ -175,6 +237,9 @@ class plgContentbuilder_ng_themesBlank extends CMSPlugin implements SubscriberIn
         $event = null;
         if ($arg0 instanceof Event) {
             $event = $arg0;
+            if (!$this->acceptsThemeEvent($event)) {
+                return;
+            }
             $args = $event->getArguments();
             $contentbuilder_ng_form_id = (int) ($args[0] ?? 0);
             $form = $args[1] ?? null;

@@ -129,20 +129,23 @@ CSS;
 
                 if ($this->theme_css === '' && $this->theme_js === '' && property_exists($this->item, 'theme_plugin')) {
                     $themePlugin = (string) ($this->item->theme_plugin ?? '');
+                    $fallbackTheme = false;
                     if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin)) {
-                        PluginHelper::importPlugin('contentbuilder_ng_themes', 'joomla6');
+                        $themePlugin = 'joomla6';
+                        PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin);
+                        $fallbackTheme = true;
                     }
                     $dispatcher = Factory::getApplication()->getDispatcher();
 
-                    $eventObj = new \Joomla\Event\Event('onEditableTemplateCss', []);
+                    $eventObj = new \Joomla\Event\Event('onEditableTemplateCss', ['theme' => $themePlugin]);
                     $dispatcher->dispatch('onEditableTemplateCss', $eventObj);
                     $results = $eventObj->getArgument('result') ?: [];
                     $this->theme_css = trim(implode('', $results));
-                    if ($this->theme_css === '') {
+                    if ($this->theme_css === '' && ($fallbackTheme || $themePlugin === 'joomla6')) {
                         $this->theme_css = $this->getFallbackEditThemeCss();
                     }
 
-                    $eventObj = new \Joomla\Event\Event('onEditableTemplateJavascript', []);
+                    $eventObj = new \Joomla\Event\Event('onEditableTemplateJavascript', ['theme' => $themePlugin]);
                     $dispatcher->dispatch('onEditableTemplateJavascript', $eventObj);
                     $results = $eventObj->getArgument('result') ?: [];
                     $this->theme_js = implode('', $results);

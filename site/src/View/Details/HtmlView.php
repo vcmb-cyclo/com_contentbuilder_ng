@@ -26,7 +26,6 @@ use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
 use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class HtmlView extends BaseHtmlView
 {
@@ -201,6 +200,19 @@ class HtmlView extends BaseHtmlView
 CSS;
     }
 
+    private function toUnicodeSlug(string $string): string
+    {
+        // Keep legacy slug behavior while decoupling from ContentbuilderLegacyHelper.
+        $str = preg_replace('/\xE3\x80\x80/', ' ', $string) ?? $string;
+        $str = str_replace('-', ' ', $str);
+        $str = preg_replace('#[:\#\*"@+=;!&\.%()\]\/\'\\\\|\[]#', ' ', $str) ?? $str;
+        $str = str_replace('?', '', $str);
+        $str = trim(strtolower($str));
+        $str = preg_replace('#\x20+#', '-', $str) ?? $str;
+
+        return $str;
+    }
+
 	function display($tpl = null)
 	{
 		// Get data from the model
@@ -230,7 +242,7 @@ CSS;
 		$event = new \stdClass();
 
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
-		$db->setQuery("Select articles.`article_id` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($subject->form_id) . " And articles.record_id = " . $db->Quote($subject->record_id));
+		$db->setQuery("Select articles.`article_id` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($subject->form_id) . " And articles.record_id = " . $db->quote($subject->record_id));
 		$article = $db->loadResult();
 
 		$table = Table::getInstance('content');
@@ -247,7 +259,7 @@ CSS;
 		$table->cbrecord = $subject;
 		$table->text = $table->cbrecord->template;
 
-		$alias = $table->alias ? ContentbuilderLegacyHelper::stringURLUnicodeSlug($table->alias) : ContentbuilderLegacyHelper::stringURLUnicodeSlug($subject->page_title);
+            $alias = $table->alias ? $this->toUnicodeSlug((string) $table->alias) : $this->toUnicodeSlug((string) $subject->page_title);
 		if (trim(str_replace('-', '', $alias)) == '') {
 			$datenow = Factory::getDate();
 			$alias = $datenow->format("%Y-%m-%d-%H-%M-%S");
@@ -369,19 +381,22 @@ CSS;
 		$subject->template = preg_replace($pattern, '', $subject->template);
 
 			$themePlugin = (string) ($subject->theme_plugin ?? '');
+			$fallbackTheme = false;
 			if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin)) {
-				PluginHelper::importPlugin('contentbuilder_ng_themes', 'joomla6');
+				$themePlugin = 'joomla6';
+				PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin);
+				$fallbackTheme = true;
 			}
 
-		$eventObj = new \Joomla\Event\Event('onContentTemplateCss', []);
+		$eventObj = new \Joomla\Event\Event('onContentTemplateCss', ['theme' => $themePlugin]);
 		$dispatcher->dispatch('onContentTemplateCss', $eventObj);
 		$results = $eventObj->getArgument('result') ?: [];
 		$this->theme_css = trim(implode('', $results));
-		if ($this->theme_css === '') {
+		if ($this->theme_css === '' && ($fallbackTheme || $themePlugin === 'joomla6')) {
 			$this->theme_css = $this->getFallbackDetailsThemeCss();
 		}
 
-		$eventObj = new \Joomla\Event\Event('onContentTemplateJavascript', []);
+		$eventObj = new \Joomla\Event\Event('onContentTemplateJavascript', ['theme' => $themePlugin]);
 		$dispatcher->dispatch('onContentTemplateJavascript', $eventObj);
 		$results = $eventObj->getArgument('result') ?: [];
 		$this->theme_js = implode('', $results);

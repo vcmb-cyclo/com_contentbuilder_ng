@@ -20,7 +20,6 @@ use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Table\Table;
 use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class HtmlView extends BaseHtmlView
 {
@@ -30,6 +29,19 @@ class HtmlView extends BaseHtmlView
 	protected $article_settings;
 	protected $article_options;
     private bool $frontend;
+
+    private function toUnicodeSlug(string $string): string
+    {
+        // Keep legacy slug behavior while decoupling from ContentbuilderLegacyHelper.
+        $str = preg_replace('/\xE3\x80\x80/', ' ', $string) ?? $string;
+        $str = str_replace('-', ' ', $str);
+        $str = preg_replace('#[:\#\*"@+=;!&\.%()\]\/\'\\\\|\[]#', ' ', $str) ?? $str;
+        $str = str_replace('?', '', $str);
+        $str = trim(strtolower($str));
+        $str = preg_replace('#\x20+#', '-', $str) ?? $str;
+
+        return $str;
+    }
 
 	function display($tpl = null)
 	{
@@ -50,7 +62,7 @@ class HtmlView extends BaseHtmlView
 
 		if ($subject->edit_by_type) {
 
-			Factory::getContainer()->get(DatabaseInterface::class)->setQuery("Select articles.`article_id` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($subject->form_id) . " And articles.record_id = " . Factory::getContainer()->get(DatabaseInterface::class)->Quote($subject->record_id));
+			Factory::getContainer()->get(DatabaseInterface::class)->setQuery("Select articles.`article_id` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($subject->form_id) . " And articles.record_id = " . Factory::getContainer()->get(DatabaseInterface::class)->quote($subject->record_id));
 			$article = Factory::getContainer()->get(DatabaseInterface::class)->loadResult();
 
 			$table = Table::getInstance('content');
@@ -67,7 +79,7 @@ class HtmlView extends BaseHtmlView
 			$table->cbrecord = $subject;
 			$table->text = $table->cbrecord->template;
 
-			$alias = $table->alias ? ContentbuilderLegacyHelper::stringURLUnicodeSlug($table->alias) : ContentbuilderLegacyHelper::stringURLUnicodeSlug($subject->page_title);
+				$alias = $table->alias ? $this->toUnicodeSlug((string) $table->alias) : $this->toUnicodeSlug((string) $subject->page_title);
 			if (trim(str_replace('-', '', $alias)) == '') {
 				$datenow = Factory::getDate();
 				$alias = $datenow->format("%Y-%m-%d-%H-%M-%S");
@@ -194,13 +206,13 @@ class HtmlView extends BaseHtmlView
 				PluginHelper::importPlugin('contentbuilder_ng_themes', 'joomla6');
 			}
 		$dispatcher = Factory::getApplication()->getDispatcher();
-        $eventResult = $dispatcher->dispatch('onEditableTemplateCss', new \Joomla\Event\Event('onEditableTemplateCss', array()));
+        $eventResult = $dispatcher->dispatch('onEditableTemplateCss', new \Joomla\Event\Event('onEditableTemplateCss', ['theme' => $themePlugin]));
         $results = $eventResult->getArgument('result') ?: [];
 		$theme_css = implode('', $results);
 		$this->theme_css = $theme_css;
 
 			$dispatcher = Factory::getApplication()->getDispatcher();
-        $eventResult = $dispatcher->dispatch('onEditableTemplateJavascript', new \Joomla\Event\Event('onEditableTemplateJavascript', array()));
+        $eventResult = $dispatcher->dispatch('onEditableTemplateJavascript', new \Joomla\Event\Event('onEditableTemplateJavascript', ['theme' => $themePlugin]));
         $results = $eventResult->getArgument('result') ?: [];
 		$theme_js = implode('', $results);
 		$this->theme_js = $theme_js;

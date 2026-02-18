@@ -7,7 +7,7 @@
     <authorUrl>https://breezingforms.vcmb.fr</authorUrl>
     <copyright>Copyright 2011 - 2026 by XDA+GIL</copyright>
     <license>GNU/GPL v2 or later</license>
-    <version>6.1.0-RC6</version>
+    <version>6.1.0-RC7</version>
     <description>COM_CONTENTBUILDER_NG_XML_DESCRIPTION</description>
 
     <!-- ===================== -->
@@ -118,6 +118,7 @@
 <plugins>
     <plugin group="contentbuilder_ng_themes" plugin="blank">plugins/contentbuilder_ng_themes/blank</plugin>
     <plugin group="contentbuilder_ng_themes" plugin="joomla6">plugins/contentbuilder_ng_themes/joomla6</plugin>
+    <plugin group="contentbuilder_ng_themes" plugin="dark">plugins/contentbuilder_ng_themes/dark</plugin>
     <plugin group="contentbuilder_ng_themes" plugin="khepri">plugins/contentbuilder_ng_themes/khepri</plugin>
 </plugins>
 

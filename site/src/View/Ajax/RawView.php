@@ -20,4 +20,6 @@ namespace CB\Component\Contentbuilder_ng\Site\View\Ajax;
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
-//require_once(JPATH_COMPONENT_ADMINISTRATOR .'/views/ajax/view.raw.php');
+class RawView extends HtmlView
+{
+}

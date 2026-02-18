@@ -29,6 +29,7 @@ class DetailsController extends BaseController
     protected $viewPrefix = 'CB\\Component\\Contentbuilder_ng\\Site\\View';
 
     private bool $frontend;
+    private $_show_back_button = true;
 
     public function __construct(
         $config,
@@ -66,7 +67,7 @@ class DetailsController extends BaseController
             $labels = $form->getElementLabels();
             $ids = array();
             foreach ($labels as $reference_id => $label) {
-                $ids[] = $db->Quote($reference_id);
+                $ids[] = $db->quote($reference_id);
             }
 
             if (count($ids)) {
@@ -78,7 +79,7 @@ class DetailsController extends BaseController
                 }
             }
 
-            $rec = $form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, Factory::getApplication()->getIdentity()->get('id', 0), 0, -1, -1, -1, -1, array(), true, null);
+            $rec = $form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, (int) (Factory::getApplication()->getIdentity()->id ?? 0), 0, -1, -1, -1, -1, array(), true, null);
 
             if (count($rec) > 0) {
                 $rec = $rec[0];
