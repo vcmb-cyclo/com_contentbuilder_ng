@@ -933,7 +933,6 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <label class="form-check-label" for="show_preview_link">
                                                         <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PREVIEW_LINK_TIP'); ?>">
                                                             <span class="icon-eye" aria-hidden="true"></span>
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
