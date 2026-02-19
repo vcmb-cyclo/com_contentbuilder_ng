@@ -38,7 +38,11 @@ $previewSig = (string) $input->getString('cb_preview_sig', '');
 $previewActorId = $input->getInt('cb_preview_actor_id', 0);
 $previewActorName = (string) $input->getString('cb_preview_actor_name', '');
 $isAdminPreview = $input->getBool('cb_preview_ok', false);
+$adminReturnContext = trim((string) $input->getCmd('cb_admin_return', ''));
 $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&task=form.edit&id=' . (int) $input->getInt('id', 0);
+if ($adminReturnContext === 'forms') {
+    $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&view=forms';
+}
 $previewFormName = trim((string) ($this->form_name ?? ''));
 if ($previewFormName === '') {
     $previewFormName = trim((string) ($this->page_title ?? ''));
@@ -52,7 +56,8 @@ if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
         . '&cb_preview_until=' . $previewUntil
         . '&cb_preview_actor_id=' . (int) $previewActorId
         . '&cb_preview_actor_name=' . rawurlencode($previewActorName)
-        . '&cb_preview_sig=' . rawurlencode($previewSig);
+        . '&cb_preview_sig=' . rawurlencode($previewSig)
+        . ($adminReturnContext !== '' ? '&cb_admin_return=' . rawurlencode($adminReturnContext) : '');
 }
 if ($isAdminPreview) {
     $view_allowed = true;
@@ -255,15 +260,16 @@ CSS
 	</div>
 <?php endif; ?>
 <?php if ($isAdminPreview): ?>
-	<div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-		<span>
-			<?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CURRENT_FORM', $previewFormName) . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDER_NG_PREVIEW_TAB_VIEW')); ?>
-		</span>
-		<a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
-			<?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>
-		</a>
-	</div>
-<?php endif; ?>
+		<div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+			<span>
+				<?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CURRENT_FORM', $previewFormName) . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDER_NG_PREVIEW_TAB_VIEW')); ?>
+			</span>
+			<a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
+				<span class="icon-arrow-left me-1" aria-hidden="true"></span>
+				<?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>
+			</a>
+		</div>
+	<?php endif; ?>
 <?php if (!empty($this->preview_no_list_fields)): ?>
 	<div class="alert alert-warning mb-3">
 		<?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_NO_LIST_FIELDS'); ?>
@@ -282,6 +288,8 @@ by this block. -->
 	<!-- 2023-12-19 END -->
 	<?php
 	$showNewButton = ($new_allowed && !empty($this->new_button));
+	$showStickyButtonBar = !empty($this->button_bar_sticky);
+	$showPreviewLink = !empty($this->show_preview_link);
 	$newRecordLink = '';
 	if ($showNewButton) {
 		$newRecordLink = Route::_(
@@ -295,7 +303,7 @@ by this block. -->
 		);
 	}
 	?>
-	<div class="cb-list-sticky">
+	<div class="<?php echo $showStickyButtonBar ? 'cb-list-sticky' : ''; ?>">
 		<div class="cb-list-panel cb-list-sticky-panel">
 		<table class="cbFilterTable cb-list-filters" width="100%">
 			<?php if ($language_allowed) : ?>
@@ -499,6 +507,15 @@ by this block. -->
 			<thead>
 				<tr>
 					<?php
+					if ($showPreviewLink) {
+					?>
+						<th class="table-light" width="20">
+							<span class="icon-eye" aria-hidden="true"></span>
+							<span class="visually-hidden"><?php echo Text::_('COM_CONTENTBUILDER_NG_DETAILS'); ?></span>
+						</th>
+					<?php
+					}
+
 					if ($this->show_id_column) {
 					?>
 						<th class="table-light hidden-phone" width="5">
@@ -606,6 +623,20 @@ by this block. -->
 				?>
 				<tr class="<?php echo "row$k"; ?>">
 					<?php
+					if ($showPreviewLink) {
+					?>
+						<td>
+							<?php if ($view_allowed || $this->own_only) : ?>
+								<a class="text-primary" href="<?php echo $link; ?>"
+									title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DETAILS'); ?>">
+									<span class="icon-eye" aria-hidden="true"></span>
+									<span class="visually-hidden"><?php echo Text::_('COM_CONTENTBUILDER_NG_DETAILS'); ?></span>
+								</a>
+							<?php endif; ?>
+						</td>
+					<?php
+					}
+
 					if ($this->show_id_column) {
 					?>
 						<td class="hidden-phone">

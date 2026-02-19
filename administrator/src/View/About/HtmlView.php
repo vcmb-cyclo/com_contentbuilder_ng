@@ -90,8 +90,10 @@ class HtmlView extends BaseHtmlView
         $this->componentAuthor = (string) ($versionInformation['author'] ?? '');
         $this->phpLibraries = $this->getInstalledPhpLibraries();
         $this->javascriptLibraries = $this->getInstalledJavascriptLibraries();
-        $auditReport = Factory::getApplication()->getUserState('com_contentbuilder_ng.about.audit', []);
+        $app = Factory::getApplication();
+        $auditReport = $app->getUserState('com_contentbuilder_ng.about.audit', []);
         $this->auditReport = is_array($auditReport) ? $auditReport : [];
+        $app->setUserState('com_contentbuilder_ng.about.audit', []);
 
         // 3️⃣ Affichage du layout
         parent::display($tpl);

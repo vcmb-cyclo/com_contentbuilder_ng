@@ -320,6 +320,7 @@
 
     <field name="email_admin_template" type="editor"
            label="COM_CONTENTBUILDER_NG_FIELD_EMAIL_ADMIN_TEMPLATE"
+           hiddenLabel="true"
            filter="raw" 
            width="100%"
            height="550"

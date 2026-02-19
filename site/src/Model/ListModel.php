@@ -223,8 +223,9 @@ class ListModel extends BaseListModel
             $limit = (int) $app->get('list_limit');
         }
 
-        $start = isset($list['start']) ? (int) $list['start'] : 0;
-        if ($start <= 0) {
+        if (array_key_exists('start', $list)) {
+            $start = max(0, (int) $list['start']);
+        } else {
             $start = (int) $app->getUserState($startKey, 0);
         }
 

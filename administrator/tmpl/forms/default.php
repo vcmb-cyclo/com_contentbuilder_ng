@@ -69,6 +69,7 @@ $filterState = in_array($filterStateRaw, ['P', '1', 'PUBLISHED'], true)
     ? 'P'
     : (in_array($filterStateRaw, ['U', '0', 'UNPUBLISHED'], true) ? 'U' : '');
 $filterTag = (string) ($this->lists['filter_tag'] ?? '');
+$previewLinks = is_array($this->previewLinks ?? null) ? $this->previewLinks : [];
 
 $sortLink = function (string $label, string $field) use ($order, $orderDir, $limitValue, $filterSearch, $filterState, $filterTag): string {
     $isActive = ($order === $field);
@@ -90,6 +91,13 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
 };
 
 ?>
+<style>
+    .cb-forms-preview-link::before,
+    .cb-forms-preview-link::after {
+        content: none !important;
+        display: none !important;
+    }
+</style>
 <form action="index.php"
     method="post"
     name="adminForm"
@@ -169,6 +177,9 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                     <th width="20">
                         <?php echo HTMLHelper::_('grid.checkall'); ?>
                     </th>
+                    <th width="60" class="text-center">
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW'); ?>
+                    </th>
                     <th>
                         <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_VIEW_NAME'), 'a.name'); ?>
                     </th>
@@ -213,6 +224,21 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                         </td>
                         <td>
                             <?php echo $checked; ?>
+                        </td>
+                        <td class="text-center">
+                            <?php $previewUrl = (string) ($previewLinks[(int) $row->id] ?? ''); ?>
+                            <?php if ($previewUrl !== '') : ?>
+                                <a
+                                    class="btn btn-sm btn-link p-0 cb-forms-preview-link"
+                                    href="<?php echo htmlspecialchars($previewUrl, ENT_QUOTES, 'UTF-8'); ?>"
+                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW'); ?>"
+                                >
+                                    <span class="icon-eye" aria-hidden="true"></span>
+                                    <span class="visually-hidden"><?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW'); ?></span>
+                                </a>
+                            <?php else : ?>
+                                <span class="text-muted">-</span>
+                            <?php endif; ?>
                         </td>
                         <td>
                             <a href="<?php echo $link; ?>">
@@ -286,7 +312,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
             </tbody>
             <tfoot>
             <tr>
-                <td colspan="10">
+                <td colspan="11">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
 
                     <div class="d-flex flex-wrap align-items-center gap-2">

@@ -77,6 +77,48 @@ class FormModel extends AdminModel
         return $hex;
     }
 
+    private function ensureListDisplayColumns(): void
+    {
+        $db = $this->getDatabase();
+        $tableName = $db->getPrefix() . 'contentbuilder_ng_forms';
+
+        try {
+            $columns = $db->getTableColumns($tableName, true);
+        } catch (\Throwable $e) {
+            Logger::warning('Could not inspect form table columns', ['error' => $e->getMessage()]);
+            return;
+        }
+
+        $knownColumns = [];
+        foreach ((array) $columns as $columnName => $_type) {
+            $knownColumns[strtolower((string) $columnName)] = true;
+        }
+
+        $requiredColumns = [
+            'button_bar_sticky' => 'TINYINT(1) NOT NULL DEFAULT 0',
+            'show_preview_link' => 'TINYINT(1) NOT NULL DEFAULT 0',
+        ];
+
+        foreach ($requiredColumns as $columnName => $definition) {
+            if (isset($knownColumns[$columnName])) {
+                continue;
+            }
+
+            try {
+                $db->setQuery(
+                    'ALTER TABLE ' . $db->quoteName('#__contentbuilder_ng_forms')
+                    . ' ADD ' . $db->quoteName($columnName) . ' ' . $definition
+                );
+                $db->execute();
+            } catch (\Throwable $e) {
+                Logger::warning('Could not add missing form table column', [
+                    'column' => $columnName,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
+
     public function getForm($data = [], $loadData = true)
     {
         return $this->loadForm(
@@ -492,6 +534,10 @@ class FormModel extends AdminModel
 
             $data->show_records_per_page = 1;
 
+            $data->button_bar_sticky = 0;
+
+            $data->show_preview_link = 0;
+
             $data->initial_list_limit = 20;
 
             $data->save_button_title = '';
@@ -505,6 +551,14 @@ class FormModel extends AdminModel
 
         if (!isset($data->new_button)) {
             $data->new_button = 0;
+        }
+
+        if (!isset($data->button_bar_sticky)) {
+            $data->button_bar_sticky = 0;
+        }
+
+        if (!isset($data->show_preview_link)) {
+            $data->show_preview_link = 0;
         }
 
         $data->forms = array();
@@ -716,6 +770,8 @@ class FormModel extends AdminModel
             'email_admin_html',
             'show_filter',
             'show_records_per_page',
+            'button_bar_sticky',
+            'show_preview_link',
             'metadata',
             'export_xls',
             'print_button',
@@ -952,6 +1008,7 @@ class FormModel extends AdminModel
 
         // 8) Sauvegarde STANDARD Joomla (bind/check/store + prepareTable() + events)
         // IMPORTANT: parent::save() prend un array "jform-like"
+        $this->ensureListDisplayColumns();
         $ok = parent::save($jform);
         if (!$ok) {
             return false;

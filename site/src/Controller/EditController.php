@@ -139,20 +139,7 @@ class EditController extends BaseController
         }
 
         $app = Factory::getApplication();
-        $previewQuery = '';
-        if ($isAdminPreview) {
-            $previewUntil = (int) $app->input->getInt('cb_preview_until', 0);
-            $previewSig = (string) $app->input->getString('cb_preview_sig', '');
-            $previewActorId = (int) $app->input->getInt('cb_preview_actor_id', 0);
-            $previewActorName = (string) $app->input->getString('cb_preview_actor_name', '');
-            if ($previewUntil > 0 && $previewSig !== '') {
-                $previewQuery = '&cb_preview=1'
-                    . '&cb_preview_until=' . $previewUntil
-                    . '&cb_preview_actor_id=' . $previewActorId
-                    . '&cb_preview_actor_name=' . rawurlencode($previewActorName)
-                    . '&cb_preview_sig=' . rawurlencode($previewSig);
-            }
-        }
+        $previewQuery = $this->buildPreviewQuery();
         $listQuery = $this->buildListQuery();
 
         if (Factory::getApplication()->input->getString('cb_controller', '') == 'edit') {
@@ -351,8 +338,9 @@ class EditController extends BaseController
             $limit = (int) $app->get('list_limit');
         }
 
-        $start = isset($list['start']) ? $app->input->getInt('list[start]', 0) : 0;
-        if ($start <= 0) {
+        if (array_key_exists('start', $list)) {
+            $start = max(0, $app->input->getInt('list[start]', 0));
+        } else {
             $start = (int) $app->getUserState($startKey, 0);
         }
 
@@ -411,12 +399,14 @@ class EditController extends BaseController
 
         $actorId = (int) $this->input->getInt('cb_preview_actor_id', 0);
         $actorName = trim((string) $this->input->getString('cb_preview_actor_name', ''));
+        $adminReturn = trim((string) $this->input->getCmd('cb_admin_return', ''));
 
         return '&cb_preview=1'
             . '&cb_preview_until=' . $until
             . '&cb_preview_actor_id=' . $actorId
             . '&cb_preview_actor_name=' . rawurlencode($actorName)
-            . '&cb_preview_sig=' . rawurlencode($sig);
+            . '&cb_preview_sig=' . rawurlencode($sig)
+            . ($adminReturn !== '' ? '&cb_admin_return=' . rawurlencode($adminReturn) : '');
     }
 
     public function display($cachable = false, $urlparams = array())

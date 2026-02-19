@@ -62,7 +62,11 @@ $previewSig = $input->getString('cb_preview_sig', '');
 $previewActorId = $input->getInt('cb_preview_actor_id', 0);
 $previewActorName = (string) $input->getString('cb_preview_actor_name', '');
 $previewQuery = '';
+$adminReturnContext = trim((string) $input->getCmd('cb_admin_return', ''));
 $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&task=form.edit&id=' . (int) $id;
+if ($adminReturnContext === 'forms') {
+    $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&view=forms';
+}
 $previewFormName = trim((string) ($this->form_name ?? ''));
 if ($previewFormName === '') {
     $previewFormName = trim((string) ($this->page_title ?? ''));
@@ -76,13 +80,15 @@ if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
         . '&cb_preview_until=' . (int) $previewUntil
         . '&cb_preview_actor_id=' . (int) $previewActorId
         . '&cb_preview_actor_name=' . rawurlencode($previewActorName)
-        . '&cb_preview_sig=' . rawurlencode($previewSig);
+        . '&cb_preview_sig=' . rawurlencode($previewSig)
+        . ($adminReturnContext !== '' ? '&cb_admin_return=' . rawurlencode($adminReturnContext) : '');
     $previewHiddenFields =
         '<input type="hidden" name="cb_preview" value="1" />' . "\n"
         . '<input type="hidden" name="cb_preview_until" value="' . (int) $previewUntil . '" />' . "\n"
         . '<input type="hidden" name="cb_preview_actor_id" value="' . (int) $previewActorId . '" />' . "\n"
         . '<input type="hidden" name="cb_preview_actor_name" value="' . htmlentities($previewActorName, ENT_QUOTES, 'UTF-8') . '" />' . "\n"
-        . '<input type="hidden" name="cb_preview_sig" value="' . htmlentities($previewSig, ENT_QUOTES, 'UTF-8') . '" />';
+        . '<input type="hidden" name="cb_preview_sig" value="' . htmlentities($previewSig, ENT_QUOTES, 'UTF-8') . '" />'
+        . ($adminReturnContext !== '' ? "\n" . '<input type="hidden" name="cb_admin_return" value="' . htmlentities($adminReturnContext, ENT_QUOTES, 'UTF-8') . '" />' : '');
 }
 
 $detailsHref = Route::_(
@@ -111,6 +117,46 @@ $backHref = ($backToList || !$hasRecord) ? $listHref : $detailsHref;
 $showBack = $this->back_button && !$hasReturn;
 $showColumnHeader = $input->getInt('cb_show_column_header', 1) === 1;
 $columnHeaderHtml = '';
+$showAuditTrail = $input->getInt('cb_show_author', 1) === 1;
+
+$createdOnText = '';
+if (!empty($this->created)) {
+    $createdOnText = Text::_('COM_CONTENTBUILDER_NG_CREATED_ON') . ' ' . HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2'));
+}
+
+$createdByText = '';
+if (!empty($this->created_by)) {
+    $createdByText = Text::_('COM_CONTENTBUILDER_NG_BY') . ' ' . htmlentities((string) $this->created_by, ENT_QUOTES, 'UTF-8');
+}
+
+$modifiedOnText = '';
+if (!empty($this->modified)) {
+    $modifiedOnText = Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON') . ' ' . HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2'));
+}
+
+$modifiedByText = '';
+if (!empty($this->modified_by)) {
+    $modifiedByText = Text::_('COM_CONTENTBUILDER_NG_BY') . ' ' . htmlentities((string) $this->modified_by, ENT_QUOTES, 'UTF-8');
+}
+
+$createdTrailText = trim($createdOnText . (($createdOnText !== '' && $createdByText !== '') ? ' ' : '') . $createdByText);
+$modifiedTrailText = trim($modifiedOnText . (($modifiedOnText !== '' && $modifiedByText !== '') ? ' ' : '') . $modifiedByText);
+
+$auditTrailHtml = '';
+if ($showAuditTrail && ($createdTrailText !== '' || $modifiedTrailText !== '')) {
+    ob_start();
+    ?>
+    <div class="cbAuditTrail mt-2 mb-2">
+        <?php if ($createdTrailText !== '') : ?>
+            <span class="small created-by"><?php echo $createdTrailText; ?></span>
+        <?php endif; ?>
+        <?php if ($modifiedTrailText !== '') : ?>
+            <span class="small created-by"><?php echo $modifiedTrailText; ?></span>
+        <?php endif; ?>
+    </div>
+    <?php
+    $auditTrailHtml = ob_get_clean();
+}
 
 if ($showColumnHeader) {
     $columnHeaderHtml = '<div class="cbColumnHeader d-none d-md-grid" aria-hidden="true">'
@@ -284,6 +330,7 @@ if ($showColumnHeader) {
                 <?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CURRENT_FORM', $previewFormName) . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDER_NG_PREVIEW_TAB_EDITABLE_TEMPLATE')); ?>
             </span>
             <a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
+                <span class="icon-arrow-left me-1" aria-hidden="true"></span>
                 <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>
             </a>
         </div>
@@ -333,16 +380,16 @@ if ($showColumnHeader) {
         if ($showBack) {
             if ($jsBack) {
             ?>
-                <button class="btn btn-sm btn-outline-secondary cbButton cbBackButton" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_BACK'); ?>" onclick="history.back(-1);void(0);">
-                    <span class="icon-arrow-left me-1" aria-hidden="true"></span>
-                    <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK') ?>
+                <button class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbCloseButton" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>" onclick="history.back(-1);void(0);">
+                    <span class="icon-times me-1" aria-hidden="true"></span>
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE') ?>
                 </button>
             <?php
             } else {
             ?>
-                <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_BACK'); ?>" href="<?php echo $backHref; ?>">
-                    <span class="icon-arrow-left me-1" aria-hidden="true"></span>
-                    <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK') ?>
+                <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbCloseButton" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>" href="<?php echo $backHref; ?>">
+                    <span class="icon-times me-1" aria-hidden="true"></span>
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE') ?>
                 </a>
         <?php
             }
@@ -357,33 +404,6 @@ if ($showColumnHeader) {
     ?>
     <?php
         echo $buttons;
-    }
-
-    if (Factory::getApplication()->input->getInt('cb_show_author', 1)) {
-    ?>
-
-        <?php if ($this->created): ?>
-            <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_CREATED_ON'); ?> <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2')); ?></span>
-        <?php endif; ?>
-
-        <?php if ($this->created_by): ?>
-            <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_BY'); ?> <?php echo $this->created_by; ?></span><br />
-        <?php endif; ?>
-    <?php
-    }
-
-    if (Factory::getApplication()->input->getInt('cb_show_author', 1)) {
-    ?>
-
-        <?php if ($this->modified_by): ?>
-
-            <?php if ($this->modified): ?>
-                <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON'); ?> <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2')); ?></span>
-            <?php endif; ?>
-
-            <span class="small created-by"><?php echo Text::_('COM_CONTENTBUILDER_NG_BY'); ?> <?php echo $this->modified_by; ?></span>
-
-        <?php endif;
     }
 
     if ($this->create_articles && $fullarticle_allowed) {
@@ -565,6 +585,7 @@ if ($showColumnHeader) {
                 <?php echo $this->tpl ?>
             </div>
             <?php echo $this->event->afterDisplayContent; ?>
+            <?php echo $auditTrailHtml; ?>
             <br />
             <?php
             if (Factory::getApplication()->input->getInt('cb_show_bottom_bar', 1)) {
@@ -607,6 +628,7 @@ if ($showColumnHeader) {
                 <?php echo $this->tpl ?>
             </div>
             <?php echo $this->event->afterDisplayContent; ?>
+            <?php echo $auditTrailHtml; ?>
             <br />
             <?php
             if (Factory::getApplication()->input->getInt('cb_show_bottom_bar', 1)) {
@@ -627,6 +649,7 @@ if ($showColumnHeader) {
                     <?php echo $this->tpl ?>
                 </div>
                 <?php echo $this->event->afterDisplayContent; ?>
+                <?php echo $auditTrailHtml; ?>
                 <?php
                 if (Factory::getApplication()->input->get('tmpl', '', 'string') != '') {
                 ?>

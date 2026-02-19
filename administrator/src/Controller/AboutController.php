@@ -41,10 +41,20 @@ final class AboutController extends BaseController
             $unchanged = (int) ($summary['unchanged'] ?? 0);
             $errors = (int) ($summary['errors'] ?? 0);
 
-            if ($migrated === 0 && $errors === 0) {
+            $repair = is_array($summary['repair'] ?? null) ? $summary['repair'] : [];
+            $repairSupported = (bool) ($repair['supported'] ?? false);
+            $repairScanned = (int) ($repair['scanned'] ?? 0);
+            $repairConverted = (int) ($repair['converted'] ?? 0);
+            $repairUnchanged = (int) ($repair['unchanged'] ?? 0);
+            $repairErrors = (int) ($repair['errors'] ?? 0);
+            $repairTarget = (string) ($repair['target_collation'] ?? 'utf8mb4_0900_ai_ci');
+            $repairWarnings = is_array($repair['warnings'] ?? null) ? $repair['warnings'] : [];
+
+            if ($migrated === 0 && $errors === 0 && $repairSupported && $repairConverted === 0 && $repairErrors === 0) {
                 $message = Text::sprintf(
                     'COM_CONTENTBUILDER_NG_PACKED_MIGRATION_UP_TO_DATE',
-                    $scanned
+                    $scanned,
+                    $repairScanned
                 );
                 $this->setMessage($message, 'message');
                 $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&view=about', false));
@@ -58,7 +68,11 @@ final class AboutController extends BaseController
                 $candidates,
                 $migrated,
                 $unchanged,
-                $errors
+                $errors,
+                $repairScanned,
+                $repairConverted,
+                $repairUnchanged,
+                $repairErrors
             );
 
             $tableMessages = [];
@@ -83,11 +97,71 @@ final class AboutController extends BaseController
                 }
             }
 
+            $repairTables = $repair['tables'] ?? [];
+
+            if (is_array($repairTables)) {
+                foreach ($repairTables as $repairStat) {
+                    if (!is_array($repairStat)) {
+                        continue;
+                    }
+
+                    $status = (string) ($repairStat['status'] ?? '');
+                    $table = (string) ($repairStat['table'] ?? '');
+                    $from = (string) ($repairStat['from'] ?? '');
+                    $to = (string) ($repairStat['to'] ?? $repairTarget);
+                    $errorMessage = (string) ($repairStat['error'] ?? '');
+
+                    if ($from === '') {
+                        $from = Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE');
+                    }
+
+                    if ($status === 'converted') {
+                        $tableMessages[] = Text::sprintf(
+                            'COM_CONTENTBUILDER_NG_COLLATION_REPAIR_TABLE_CONVERTED',
+                            $table,
+                            $from,
+                            $to
+                        );
+                        continue;
+                    }
+
+                    if ($status === 'error') {
+                        $tableMessages[] = Text::sprintf(
+                            'COM_CONTENTBUILDER_NG_COLLATION_REPAIR_TABLE_ERROR',
+                            $table,
+                            $from,
+                            $to,
+                            $errorMessage
+                        );
+                    }
+                }
+            }
+
+            if (!$repairSupported) {
+                $tableMessages[] = Text::sprintf(
+                    'COM_CONTENTBUILDER_NG_COLLATION_REPAIR_UNSUPPORTED',
+                    $repairTarget
+                );
+            }
+
+            foreach ($repairWarnings as $repairWarning) {
+                $repairWarning = trim((string) $repairWarning);
+
+                if ($repairWarning === '') {
+                    continue;
+                }
+
+                $tableMessages[] = Text::sprintf(
+                    'COM_CONTENTBUILDER_NG_COLLATION_REPAIR_WARNING',
+                    $repairWarning
+                );
+            }
+
             if ($tableMessages !== []) {
                 $message .= '<br>' . implode('<br>', $tableMessages);
             }
 
-            $level = ($errors > 0) ? 'warning' : 'message';
+            $level = ($errors > 0 || $repairErrors > 0 || !$repairSupported) ? 'warning' : 'message';
             $this->setMessage($message, $level);
         } catch (\Throwable $e) {
             $this->setMessage(

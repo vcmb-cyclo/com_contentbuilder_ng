@@ -56,6 +56,7 @@ class HtmlView extends BaseHtmlView
         $formId = (int) ($this->item->id ?? $app->input->getInt('id', 0));
 
         $this->elements = [];
+        $this->all_elements = [];
         $this->pagination = null;
         $this->state = null;
 
@@ -74,6 +75,7 @@ class HtmlView extends BaseHtmlView
 
                 // Charge les items
                 $this->elements   = $elementsModel->getItems();
+                $this->all_elements = $elementsModel->getAllElements($formId) ?? [];
                 $this->pagination = $elementsModel->getPagination();
                 $this->state      = $elementsModel->getState();
             }
@@ -109,7 +111,7 @@ class HtmlView extends BaseHtmlView
         $statusDropdown->toggleSplit(false);
         $statusDropdown->icon('fa fa-ellipsis-h');
         $statusDropdown->buttonClass('btn btn-action');
-        $statusDropdown->listCheck(false);
+        $statusDropdown->listCheck(true);
 
         $statusChildToolbar = $statusDropdown->getChildToolbar();
         $statusChildToolbar->standardButton('list_include')
@@ -155,81 +157,140 @@ class HtmlView extends BaseHtmlView
         $statusChildToolbar->publish('form.publish')->icon('icon-publish text-success')->listCheck(true);
         $statusChildToolbar->unpublish('form.unpublish')->icon('icon-unpublish text-danger')->listCheck(true);
 
-        // Keep right-side toolbar alignment stable and visually disable Actions until at least one row is selected.
-        $wa->addInlineStyle(
-            '#toolbar-form-status-group.cb-disabled{opacity:.55;pointer-events:none;}'
-            . '#toolbar-form-status-group.cb-disabled button,'
-            . '#toolbar-form-status-group.cb-disabled a{pointer-events:none;}'
-        );
+        // Keep Preview aligned with the right-side help button.
+        $wa->addInlineStyle('.cb-toolbar-preview{margin-inline-start:auto!important;}');
         $wa->addInlineScript(
             "(function () {
-                function getActionsHost() {
-                    return document.getElementById('toolbar-form-status-group')
-                        || document.querySelector('joomla-toolbar-button[id*=\"form-status-group\"]')
-                        || document.querySelector('[id$=\"form-status-group\"]');
+                function getToolbarHost() {
+                    return document.getElementById('toolbar')
+                        || document.querySelector('joomla-toolbar')
+                        || document.querySelector('.toolbar');
                 }
 
-                function hasSelectedRows() {
-                    return document.querySelectorAll('input[name=\"cid[]\"]:checked').length > 0;
-                }
-
-                function getHelpHost() {
-                    return document.getElementById('toolbar-help')
-                        || document.querySelector('[id*=\"toolbar-help\"]');
-                }
-
-                function getPreviewHost() {
-                    var previewLink = document.querySelector('a[href*=\"cb_preview=1\"]');
-                    if (!previewLink) {
+                function resolveToolbarButtonHost(node) {
+                    if (!node) {
                         return null;
                     }
 
-                    return previewLink.closest('joomla-toolbar-button, .toolbar-button, .btn-wrapper')
-                        || previewLink.parentElement;
+                    var host = node.closest('joomla-toolbar-button, .toolbar-button, .btn-wrapper');
+                    if (host) {
+                        return host;
+                    }
+
+                    if (typeof node.getRootNode === 'function') {
+                        var root = node.getRootNode();
+                        if (root && root.host) {
+                            return root.host;
+                        }
+                    }
+
+                    return node.parentElement || null;
                 }
 
-                function alignRightButtons() {
-                    var previewHost = getPreviewHost();
-                    var helpHost = getHelpHost();
+                function findHostByHref(fragment) {
+                    var selector = 'a[href*=\"' + fragment + '\"],button[href*=\"' + fragment + '\"]';
+                    var direct = document.querySelector(selector);
+                    if (direct) {
+                        return resolveToolbarButtonHost(direct);
+                    }
 
-                    if (previewHost) {
-                        previewHost.style.marginInlineStart = 'auto';
+                    var toolbarButtons = document.querySelectorAll('joomla-toolbar-button');
+                    for (var i = 0; i < toolbarButtons.length; i++) {
+                        var host = toolbarButtons[i];
+                        var shadow = host.shadowRoot;
+                        if (shadow && shadow.querySelector(selector)) {
+                            return host;
+                        }
+                    }
 
-                        if (helpHost && helpHost.parentNode === previewHost.parentNode && previewHost.nextElementSibling !== helpHost) {
-                            previewHost.parentNode.insertBefore(helpHost, previewHost.nextSibling);
+                    return null;
+                }
+
+                function getHelpHost() {
+                    var helpById = document.getElementById('toolbar-help')
+                        || document.querySelector('[id*=\"toolbar-help\"]');
+                    if (helpById) {
+                        return resolveToolbarButtonHost(helpById);
+                    }
+
+                    var byHref = findHostByHref('layout=help');
+                    if (byHref) {
+                        return byHref;
+                    }
+
+                    var toolbarButtons = document.querySelectorAll('joomla-toolbar-button');
+                    for (var i = 0; i < toolbarButtons.length; i++) {
+                        var hostId = String(toolbarButtons[i].id || '').toLowerCase();
+                        if (hostId.indexOf('help') !== -1) {
+                            return toolbarButtons[i];
+                        }
+                    }
+
+                    return null;
+                }
+
+                function getPreviewHost() {
+                    var previewById = document.getElementById('toolbar-preview')
+                        || document.querySelector('[id*=\"toolbar-preview\"]');
+                    if (previewById) {
+                        return resolveToolbarButtonHost(previewById);
+                    }
+
+                    var byHref = findHostByHref('cb_preview=1') || findHostByHref('cb_preview_sig');
+                    if (byHref) {
+                        return byHref;
+                    }
+
+                    var toolbarButtons = document.querySelectorAll('joomla-toolbar-button');
+                    for (var i = 0; i < toolbarButtons.length; i++) {
+                        var host = toolbarButtons[i];
+                        var hostId = String(host.id || '').toLowerCase();
+                        if (hostId.indexOf('preview') !== -1) {
+                            return host;
                         }
 
-                        return;
+                        var shadow = host.shadowRoot;
+                        if (shadow && shadow.querySelector('.icon-eye, .fa-eye')) {
+                            return host;
+                        }
                     }
 
-                    if (helpHost) {
-                        helpHost.style.marginInlineStart = 'auto';
-                    }
+                    return null;
                 }
 
-                function syncActionsState() {
-                    var host = getActionsHost();
-                    if (!host) {
+                function alignPreviewNearHelp() {
+                    var previewHost = getPreviewHost();
+                    if (!previewHost) {
                         return;
                     }
 
-                    var disabled = !hasSelectedRows();
-                    host.classList.toggle('cb-disabled', disabled);
-                    host.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+                    previewHost.classList.add('cb-toolbar-preview');
+
+                    var helpHost = getHelpHost();
+                    if (!helpHost || !helpHost.parentNode || previewHost === helpHost) {
+                        return;
+                    }
+
+                    if (previewHost.parentNode !== helpHost.parentNode || previewHost.nextElementSibling !== helpHost) {
+                        helpHost.parentNode.insertBefore(previewHost, helpHost);
+                    }
                 }
 
                 function init() {
-                    document.addEventListener('change', function (event) {
-                        var target = event.target;
-                        if (!target) {
-                            return;
-                        }
-                        if (target.matches('input[name=\"cid[]\"]') || target.matches('#checkall-toggle')) {
-                            syncActionsState();
-                        }
-                    });
-                    alignRightButtons();
-                    syncActionsState();
+                    var toolbarHost = getToolbarHost();
+                    alignPreviewNearHelp();
+
+                    if (toolbarHost && typeof MutationObserver === 'function') {
+                        var observer = new MutationObserver(alignPreviewNearHelp);
+                        observer.observe(toolbarHost, { childList: true, subtree: true });
+                        window.setTimeout(function () {
+                            observer.disconnect();
+                        }, 6000);
+                    }
+
+                    window.setTimeout(alignPreviewNearHelp, 0);
+                    window.setTimeout(alignPreviewNearHelp, 120);
+                    window.setTimeout(alignPreviewNearHelp, 400);
                 }
 
                 if (document.readyState === 'loading') {

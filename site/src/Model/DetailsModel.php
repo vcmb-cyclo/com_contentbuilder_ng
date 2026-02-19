@@ -437,8 +437,9 @@ class DetailsModel extends ListModel
             $limit = (int) $app->get('list_limit');
         }
 
-        $start = isset($list['start']) ? $app->input->getInt('list[start]', 0) : 0;
-        if ($start <= 0) {
+        if (array_key_exists('start', $list)) {
+            $start = max(0, $app->input->getInt('list[start]', 0));
+        } else {
             $start = (int) $app->getUserState($startKey, 0);
         }
 

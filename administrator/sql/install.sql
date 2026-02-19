@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_articles`
     varchar
 (
     55
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `reference_id` int NOT NULL DEFAULT '0',
     `record_id` bigint NOT NULL DEFAULT '0',
     `form_id` int NOT NULL DEFAULT '0',
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_articles`
 (
     `type`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_elements`
 (
@@ -67,22 +67,22 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_elements`
     varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `change_type` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
-    `options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `custom_init_script` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `custom_action_script` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `custom_validation_script` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `validation_message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `default_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `hint` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
+    `options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `custom_init_script` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `custom_action_script` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `custom_validation_script` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `validation_message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `default_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `hint` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `label` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `list_include` tinyint
 (
     1
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_elements`
 (
     1
 ) NOT NULL DEFAULT '1',
-    `item_wrapper` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `item_wrapper` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `wordwrap` int NOT NULL DEFAULT '0',
     `linkable` tinyint
 (
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_elements`
 (
     1
 ) NOT NULL DEFAULT '0',
-    `validations` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `validations` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `published` tinyint
 (
     1
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_elements`
     `order_type` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `ordering` int NOT NULL DEFAULT '0',
     PRIMARY KEY
 (
@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_elements`
     `form_id`,
     `reference_id`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;
 
 
 CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
@@ -138,34 +138,34 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
     varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `reference_id` int NOT NULL DEFAULT '0',
     `name` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `tag` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `title` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
-    `details_template` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `details_prepare` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `editable_template` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `editable_prepare` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
+    `details_template` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `details_prepare` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `editable_template` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `editable_prepare` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `created` datetime NULL DEFAULT CURRENT_TIMESTAMP,
     `modified` datetime NULL DEFAULT NULL,
     `created_by` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `modified_by` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `metadata` tinyint
 (
     1
@@ -235,14 +235,14 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
     1
 ) NOT NULL DEFAULT '0',
     `ordering` int NOT NULL DEFAULT '0',
-    `intro_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `intro_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `default_section` int NOT NULL DEFAULT '0',
     `default_category` int NOT NULL DEFAULT '0',
     `default_lang_code` varchar
 (
     7
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '*',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '*',
     `default_lang_code_ignore` tinyint
 (
     1
@@ -258,19 +258,19 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
     `initial_sort_order` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '-1',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '-1',
     `initial_sort_order2` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '-1',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '-1',
     `initial_sort_order3` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '-1',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '-1',
     `initial_order_dir` varchar
 (
     4
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'desc',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'desc',
     `title_field` int NOT NULL DEFAULT '0',
     `delete_articles` tinyint
 (
@@ -296,7 +296,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
 (
     1
 ) NOT NULL DEFAULT '1',
-    `upload_directory` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `upload_directory` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `protect_upload_directory` tinyint
 (
     1
@@ -319,9 +319,9 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
     1
 ) NOT NULL DEFAULT '0',
     `verification_days_edit` float NOT NULL DEFAULT '0',
-    `verification_url_view` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `verification_url_new` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `verification_url_edit` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `verification_url_view` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `verification_url_new` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `verification_url_edit` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `show_all_languages_fe` tinyint
 (
     1
@@ -333,40 +333,40 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
 (
     1
 ) NOT NULL DEFAULT '0',
-    `email_admin_template` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `email_admin_template` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `email_admin_subject` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `email_admin_alternative_from` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `email_admin_alternative_fromname` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
-    `email_admin_recipients` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `email_admin_recipients_attach_uploads` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
+    `email_admin_recipients` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `email_admin_recipients_attach_uploads` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `email_admin_html` tinyint
 (
     1
 ) NOT NULL DEFAULT '0',
-    `email_template` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `email_template` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `email_subject` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `email_alternative_from` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `email_alternative_fromname` varchar
 (
     255
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-    `email_recipients` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `email_recipients_attach_uploads` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+    `email_recipients` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `email_recipients_attach_uploads` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `email_html` tinyint
 (
     1
@@ -378,27 +378,27 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
     `registration_username_field` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `registration_password_field` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `registration_password_repeat_field` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `registration_name_field` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `registration_email_field` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `registration_email_repeat_field` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `auto_publish` tinyint
 (
     1
@@ -407,24 +407,24 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
 (
     1
 ) NOT NULL DEFAULT '0',
-    `force_url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `force_url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `registration_bypass_plugin` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
-    `registration_bypass_plugin_params` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
+    `registration_bypass_plugin_params` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `registration_bypass_verification_name` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `registration_bypass_verify_view` varchar
 (
     32
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `theme_plugin` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `list_rating` tinyint
 (
     1
@@ -455,11 +455,19 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
 (
     1
 ) NOT NULL DEFAULT '1',
+    `button_bar_sticky` tinyint
+(
+    1
+) NOT NULL DEFAULT '0',
+    `show_preview_link` tinyint
+(
+    1
+) NOT NULL DEFAULT '0',
     `initial_list_limit` tinyint NOT NULL DEFAULT '20',
     `save_button_title` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `filter_exact_match` tinyint
 (
     1
@@ -467,7 +475,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
     `apply_button_title` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     PRIMARY KEY
 (
     `id`
@@ -484,7 +492,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_forms`
 (
     `tag`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;
 
 
 CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_list_records`
@@ -533,7 +541,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_list_records`
     `record_id`,
     `state_id`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_list_states`
 (
@@ -552,21 +560,21 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_list_states`
     varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `color` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `action` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `published` tinyint NOT NULL DEFAULT '0',
     PRIMARY KEY
 (
     `id`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_rating_cache`
 (
@@ -586,7 +594,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_rating_cache`
     varchar
 (
     50
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `date` datetime NULL DEFAULT NULL,
     KEY `record_id`
 (
@@ -598,7 +606,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_rating_cache`
 (
     `date`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_records`
 (
@@ -611,18 +619,18 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_records`
     varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `record_id` bigint NOT NULL DEFAULT '0',
     `reference_id` int NOT NULL DEFAULT '0',
     `edited` int NOT NULL DEFAULT '0',
     `sef` varchar
 (
     50
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `lang_code` varchar
 (
     7
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '*',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '*',
     `publish_up` datetime NULL DEFAULT NULL,
     `publish_down` datetime NULL DEFAULT NULL,
     `last_update` datetime NULL DEFAULT NULL,
@@ -635,34 +643,34 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_records`
     `lastip` varchar
 (
     50
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `session_id` varchar
 (
     32
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `published` tinyint
 (
     1
 ) NOT NULL DEFAULT '0',
     `rand_date` datetime NULL DEFAULT NULL,
-    `metakey` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-    `metadesc` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `metakey` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `metadesc` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `robots` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `author` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `rights` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `xreference` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     PRIMARY KEY
 (
     `id`
@@ -683,7 +691,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_records`
 (
     `rand_date`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;
 
 
 CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_registered_users`
@@ -722,20 +730,20 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_registered_users`
     `record_id`,
     `form_id`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_resource_access`
 (
     `type` varchar
 (
     100
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `form_id` int NOT NULL DEFAULT '0',
     `element_id` int NOT NULL DEFAULT '0',
     `resource_id` varchar
 (
     100
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `hits` int NOT NULL DEFAULT '0',
     UNIQUE KEY `type`
 (
@@ -743,7 +751,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_resource_access`
     `element_id`,
     `resource_id`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_storages`
 (
@@ -756,11 +764,11 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_storages`
     varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `title` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `bytable` tinyint
 (
     1
@@ -771,11 +779,11 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_storages`
     `created_by` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `modified_by` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `published` tinyint
 (
     1
@@ -788,7 +796,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_storages`
 (
     `name`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_storage_fields`
 (
@@ -807,16 +815,16 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_storage_fields`
     varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `title` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `is_group` tinyint
 (
     1
 ) NOT NULL DEFAULT '0',
-    `group_definition` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `group_definition` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `ordering` int NOT NULL DEFAULT '0',
     `published` tinyint
 (
@@ -831,7 +839,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_storage_fields`
     `storage_id`,
     `name`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_users`
 (
@@ -889,7 +897,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_users`
     `userid`,
     `form_id`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_verifications`
 (
@@ -902,10 +910,10 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_verifications`
     varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `start_date` datetime NULL DEFAULT NULL,
     `verification_date` datetime NULL DEFAULT NULL,
-    `verification_data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `verification_data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `create_invoice` tinyint
 (
     1
@@ -914,16 +922,16 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_verifications`
     `plugin` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `ip` varchar
 (
     255
-) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `is_test` tinyint
 (
     1
 ) NOT NULL DEFAULT '0',
-    `setup` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `setup` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `client` tinyint
 (
     1
@@ -940,4 +948,4 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilder_ng_verifications`
 (
     `user_id`
 )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_0900_ai_ci;

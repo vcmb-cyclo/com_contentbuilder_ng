@@ -27,11 +27,38 @@ $legacyTables = (array) ($auditReport['legacy_tables'] ?? []);
 $tableEncodingIssues = (array) ($auditReport['table_encoding_issues'] ?? []);
 $columnEncodingIssues = (array) ($auditReport['column_encoding_issues'] ?? []);
 $mixedTableCollations = (array) ($auditReport['mixed_table_collations'] ?? []);
+$cbTableStats = is_array($auditReport['cb_tables'] ?? null) ? $auditReport['cb_tables'] : [];
+$cbTableSummary = (array) ($cbTableStats['summary'] ?? []);
+$cbTableDetails = (array) ($cbTableStats['tables'] ?? []);
+$cbMissingNgTables = (array) ($cbTableStats['missing_ng_tables'] ?? []);
 $auditErrors = (array) ($auditReport['errors'] ?? []);
 $hasAuditReport = $auditReport !== [];
+$dbRepairConfirmMessage = str_replace('\n', "\n", Text::_('COM_CONTENTBUILDER_NG_DB_REPAIR_CONFIRMATION'));
+$dbRepairPromptMessage = str_replace('\n', "\n", Text::_('COM_CONTENTBUILDER_NG_DB_REPAIR_CONFIRMATION_PROMPT'));
+$dbRepairPromptFailedMessage = str_replace('\n', "\n", Text::_('COM_CONTENTBUILDER_NG_DB_REPAIR_CONFIRMATION_FAILED'));
 $columnEncodingIssueLimit = 200;
 $columnEncodingIssuesDisplayed = array_slice($columnEncodingIssues, 0, $columnEncodingIssueLimit);
 $columnEncodingIssueHiddenCount = max(0, count($columnEncodingIssues) - count($columnEncodingIssuesDisplayed));
+$formatBytes = static function (int $bytes): string {
+    if ($bytes <= 0) {
+        return '0 B';
+    }
+
+    $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    $value = (float) $bytes;
+    $unitIndex = 0;
+
+    while ($value >= 1024 && $unitIndex < count($units) - 1) {
+        $value /= 1024;
+        $unitIndex++;
+    }
+
+    if ($unitIndex === 0) {
+        return number_format((int) round($value), 0, '.', ' ') . ' ' . $units[$unitIndex];
+    }
+
+    return number_format($value, 2, '.', ' ') . ' ' . $units[$unitIndex];
+};
 
 ?>
 <style>
@@ -157,6 +184,29 @@ $columnEncodingIssueHiddenCount = max(0, count($columnEncodingIssues) - count($c
         line-height: 1.25;
         word-break: break-word;
     }
+    .cb-audit-ok-alert {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        background-color: #eaf7ef;
+        border-color: #b7e1c1;
+        color: #0f5132;
+    }
+    .cb-audit-ok-alert::before {
+        content: "\2713";
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.2rem;
+        height: 1.2rem;
+        border-radius: 50%;
+        background-color: #198754;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: .78rem;
+        line-height: 1;
+        flex: 0 0 auto;
+    }
 </style>
 <form
     action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&view=about'); ?>"
@@ -230,19 +280,47 @@ $columnEncodingIssueHiddenCount = max(0, count($columnEncodingIssues) - count($c
                         <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_MIXED_COLLATIONS'); ?></th>
                         <td><?php echo max(0, count($mixedTableCollations) - 1); ?></td>
                     </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_CB_TABLES_TOTAL'); ?></th>
+                        <td><?php echo (int) ($cbTableSummary['tables_total'] ?? 0); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_CB_NG_TABLES'); ?></th>
+                        <td><?php echo (int) ($cbTableSummary['tables_ng_total'] ?? 0); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_CB_NG_TABLES_EXPECTED'); ?></th>
+                        <td><?php echo (int) ($cbTableSummary['tables_ng_expected'] ?? 0); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_CB_NG_TABLES_MISSING'); ?></th>
+                        <td><?php echo (int) ($cbTableSummary['tables_ng_missing'] ?? 0); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_CB_STORAGE_TABLES'); ?></th>
+                        <td><?php echo (int) ($cbTableSummary['tables_storage_total'] ?? 0); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_CB_ESTIMATED_ROWS'); ?></th>
+                        <td><?php echo number_format((int) ($cbTableSummary['rows_total'] ?? 0), 0, '.', ' '); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_CB_ESTIMATED_SIZE'); ?></th>
+                        <td><?php echo $formatBytes((int) ($cbTableSummary['size_bytes_total'] ?? 0)); ?></td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
 
             <?php if ((int) ($auditSummary['issues_total'] ?? 0) === 0 && empty($auditErrors)) : ?>
-                <div class="alert alert-success mb-3">
+                <div class="alert cb-audit-ok-alert mb-3">
                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_ISSUES'); ?>
                 </div>
             <?php endif; ?>
 
             <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_DUPLICATE_GROUPS'); ?></h4>
             <?php if (empty($duplicateIndexes)) : ?>
-                <div class="alert alert-info">
+                <div class="alert cb-audit-ok-alert">
                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_DUPLICATE_INDEXES'); ?>
                 </div>
             <?php else : ?>
@@ -272,7 +350,7 @@ $columnEncodingIssueHiddenCount = max(0, count($columnEncodingIssues) - count($c
 
             <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_LEGACY_TABLES'); ?></h4>
             <?php if (empty($legacyTables)) : ?>
-                <div class="alert alert-info">
+                <div class="alert cb-audit-ok-alert">
                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_LEGACY_TABLES'); ?>
                 </div>
             <?php else : ?>
@@ -285,7 +363,7 @@ $columnEncodingIssueHiddenCount = max(0, count($columnEncodingIssues) - count($c
 
             <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_TABLE_ENCODING_ISSUES'); ?></h4>
             <?php if (empty($tableEncodingIssues)) : ?>
-                <div class="alert alert-info">
+                <div class="alert cb-audit-ok-alert">
                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_TABLE_ENCODING_ISSUES'); ?>
                 </div>
             <?php else : ?>
@@ -313,7 +391,7 @@ $columnEncodingIssueHiddenCount = max(0, count($columnEncodingIssues) - count($c
 
             <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_COLUMN_ENCODING_ISSUES'); ?></h4>
             <?php if (empty($columnEncodingIssuesDisplayed)) : ?>
-                <div class="alert alert-info">
+                <div class="alert cb-audit-ok-alert">
                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_COLUMN_ENCODING_ISSUES'); ?>
                 </div>
             <?php else : ?>
@@ -348,7 +426,7 @@ $columnEncodingIssueHiddenCount = max(0, count($columnEncodingIssues) - count($c
 
             <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_MIXED_COLLATIONS'); ?></h4>
             <?php if (count($mixedTableCollations) <= 1) : ?>
-                <div class="alert alert-info">
+                <div class="alert cb-audit-ok-alert">
                     <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_MIXED_COLLATIONS'); ?>
                 </div>
             <?php else : ?>
@@ -372,6 +450,47 @@ $columnEncodingIssueHiddenCount = max(0, count($columnEncodingIssues) - count($c
                         </tbody>
                     </table>
                 </div>
+            <?php endif; ?>
+
+            <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_CB_TABLE_STATS'); ?></h4>
+            <?php if (empty($cbTableDetails)) : ?>
+                <div class="alert cb-audit-ok-alert">
+                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_NO_CB_TABLE_STATS'); ?>
+                </div>
+            <?php else : ?>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead>
+                        <tr>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_TABLE'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_COUNT'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_SIZE'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_ENGINE'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_COLLATION'); ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($cbTableDetails as $cbTableDetail) : ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars((string) ($cbTableDetail['table'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo number_format((int) ($cbTableDetail['rows'] ?? 0), 0, '.', ' '); ?></td>
+                                <td><?php echo $formatBytes((int) ($cbTableDetail['size_bytes'] ?? 0)); ?></td>
+                                <td><?php echo htmlspecialchars((string) (($cbTableDetail['engine'] ?? '') !== '' ? $cbTableDetail['engine'] : Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars((string) (($cbTableDetail['collation'] ?? '') !== '' ? $cbTableDetail['collation'] : Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE')), ENT_QUOTES, 'UTF-8'); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($cbMissingNgTables)) : ?>
+                <h4 class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_CB_NG_TABLES_MISSING_LIST'); ?></h4>
+                <ul class="mb-0">
+                    <?php foreach ($cbMissingNgTables as $missingNgTable) : ?>
+                        <li><?php echo htmlspecialchars((string) $missingNgTable, ENT_QUOTES, 'UTF-8'); ?></li>
+                    <?php endforeach; ?>
+                </ul>
             <?php endif; ?>
 
             <?php if (!empty($auditErrors)) : ?>
@@ -420,40 +539,63 @@ $columnEncodingIssueHiddenCount = max(0, count($columnEncodingIssues) - count($c
 </div>
 
 <div class="card mt-3">
-    <div class="card-body">
-        <h3 class="h6 card-title mb-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_PHP_LIBRARIES'); ?></h3>
-
-        <?php if (empty($this->phpLibraries)) : ?>
-            <div class="alert alert-info mb-0">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_PHP_LIBRARIES_NOT_AVAILABLE'); ?>
+    <div class="card-body p-0">
+        <div class="accordion accordion-flush" id="cb-about-php-libraries-accordion">
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="cb-about-php-libraries-heading">
+                    <button
+                        class="accordion-button collapsed fw-semibold"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#cb-about-php-libraries-collapse"
+                        aria-expanded="false"
+                        aria-controls="cb-about-php-libraries-collapse"
+                    >
+                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PHP_LIBRARIES'); ?>
+                    </button>
+                </h3>
+                <div
+                    id="cb-about-php-libraries-collapse"
+                    class="accordion-collapse collapse"
+                    aria-labelledby="cb-about-php-libraries-heading"
+                    data-bs-parent="#cb-about-php-libraries-accordion"
+                >
+                    <div class="accordion-body">
+                        <?php if (empty($this->phpLibraries)) : ?>
+                            <div class="alert alert-info mb-0">
+                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PHP_LIBRARIES_NOT_AVAILABLE'); ?>
+                            </div>
+                        <?php else : ?>
+                            <p class="text-muted small">
+                                <?php echo Text::sprintf('COM_CONTENTBUILDER_NG_PHP_LIBRARIES_COUNT', count($this->phpLibraries)); ?>
+                            </p>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped align-middle mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_PHP_LIBRARY'); ?></th>
+                                        <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_PHP_LIBRARY_VERSION'); ?></th>
+                                        <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_PHP_LIBRARY_SCOPE'); ?></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach ($this->phpLibraries as $library) : ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars((string) $library['name'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                            <td><?php echo htmlspecialchars((string) ($library['version'] ?: Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                            <td>
+                                                <?php echo Text::_(!empty($library['is_dev']) ? 'COM_CONTENTBUILDER_NG_PHP_LIBRARY_SCOPE_DEV' : 'COM_CONTENTBUILDER_NG_PHP_LIBRARY_SCOPE_RUNTIME'); ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
-        <?php else : ?>
-            <p class="text-muted small">
-                <?php echo Text::sprintf('COM_CONTENTBUILDER_NG_PHP_LIBRARIES_COUNT', count($this->phpLibraries)); ?>
-            </p>
-            <div class="table-responsive">
-                <table class="table table-sm table-striped align-middle mb-0">
-                    <thead>
-                    <tr>
-                        <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_PHP_LIBRARY'); ?></th>
-                        <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_PHP_LIBRARY_VERSION'); ?></th>
-                        <th scope="col"><?php echo Text::_('COM_CONTENTBUILDER_NG_PHP_LIBRARY_SCOPE'); ?></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach ($this->phpLibraries as $library) : ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars((string) $library['name'], ENT_QUOTES, 'UTF-8'); ?></td>
-                            <td><?php echo htmlspecialchars((string) ($library['version'] ?: Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE')), ENT_QUOTES, 'UTF-8'); ?></td>
-                            <td>
-                                <?php echo Text::_(!empty($library['is_dev']) ? 'COM_CONTENTBUILDER_NG_PHP_LIBRARY_SCOPE_DEV' : 'COM_CONTENTBUILDER_NG_PHP_LIBRARY_SCOPE_RUNTIME'); ?>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php endif; ?>
+        </div>
     </div>
 </div>
 <div class="card mt-3">
@@ -493,6 +635,42 @@ $columnEncodingIssueHiddenCount = max(0, count($columnEncodingIssues) - count($c
         <?php endif; ?>
     </div>
 </div>
+<script>
+    (function () {
+        var originalSubmitbutton = Joomla.submitbutton;
+
+        Joomla.submitbutton = function (task) {
+            if (task === 'about.migratePackedData') {
+                var confirmed = window.confirm(
+                    <?php echo json_encode($dbRepairConfirmMessage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>
+                );
+
+                if (!confirmed) {
+                    return false;
+                }
+
+                var requiredToken = 'REPAIR';
+                var typedToken = window.prompt(
+                    <?php echo json_encode($dbRepairPromptMessage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>,
+                    ''
+                );
+
+                if (typedToken === null || typedToken.trim() !== requiredToken) {
+                    window.alert(
+                        <?php echo json_encode($dbRepairPromptFailedMessage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>
+                    );
+                    return false;
+                }
+            }
+
+            if (typeof originalSubmitbutton === 'function') {
+                return originalSubmitbutton(task);
+            }
+
+            return Joomla.submitform(task, document.getElementById('adminForm'));
+        };
+    })();
+</script>
     <input type="hidden" name="option" value="com_contentbuilder_ng">
     <input type="hidden" name="task" value="">
     <?php echo HTMLHelper::_('form.token'); ?>

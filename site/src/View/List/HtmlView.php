@@ -85,6 +85,8 @@ class HtmlView extends BaseHtmlView
 
         $this->show_filter = $subject->show_filter;
         $this->show_records_per_page = $subject->show_records_per_page;
+        $this->button_bar_sticky = (int) ($subject->button_bar_sticky ?? 0);
+        $this->show_preview_link = (int) ($subject->show_preview_link ?? 0);
 
         $this->page_class = $subject->page_class;
         $this->show_page_heading = $subject->show_page_heading;

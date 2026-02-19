@@ -152,6 +152,15 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
   }
 
+  private function formatInstallMessageForDisplay(string $message): string
+  {
+    return str_replace(
+      '[OK]',
+      '<span style="color:#198754;font-weight:700;" aria-hidden="true">&#10003;</span>',
+      $message
+    );
+  }
+
   private function log(string $message, int $priority = Log::INFO, bool $enqueue = true): void
   {
     $this->writeInstallLogEntry($message, $priority);
@@ -167,7 +176,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       default => 'message',
     };
 
-    $app->enqueueMessage($message, $type);
+    $app->enqueueMessage($this->formatInstallMessageForDisplay($message), $type);
   }
 
   private function getIndexedColumns(DatabaseInterface $db, string $tableQN): array

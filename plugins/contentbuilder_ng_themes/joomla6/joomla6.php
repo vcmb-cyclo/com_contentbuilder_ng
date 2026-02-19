@@ -316,11 +316,35 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
 }
 
 .cbEditableWrapper .form-select.form-select-sm,
+.cbEditableWrapper .form-select-sm,
 .cbEditableWrapper .form-control.form-control-sm {
     min-height: 1.78rem;
     font-size: 0.84rem;
     padding-top: 0.18rem;
     padding-bottom: 0.18rem;
+}
+
+/* Keep select label/arrow alignment stable in edit.display */
+.cbEditableWrapper select,
+.cbEditableWrapper .form-select,
+.cbEditableWrapper .form-select-sm {
+    line-height: 1.35;
+    vertical-align: middle;
+}
+
+.cbEditableWrapper select:not([multiple]):not([size]),
+.cbEditableWrapper .form-select:not([multiple]):not([size]),
+.cbEditableWrapper .form-select-sm:not([multiple]):not([size]) {
+    min-height: 2rem;
+    padding-top: 0.24rem;
+    padding-bottom: 0.24rem;
+    padding-right: 2rem;
+}
+
+.cbEditableWrapper .form-select:not([multiple]):not([size]),
+.cbEditableWrapper .form-select-sm:not([multiple]):not([size]) {
+    background-position: right 0.62rem center;
+    background-repeat: no-repeat;
 }
 
 .cbEditableWrapper .cbEditableBody > .mb-3 :is(
@@ -332,12 +356,21 @@ class plgContentbuilder_ng_themesJoomla6 extends CMSPlugin implements Subscriber
     input[type="time"],
     input[type="url"],
     input[type="password"],
-    textarea,
-    select
+    textarea
 ) {
     min-height: 1.64rem;
     font-size: 0.83rem;
     padding: 0.2rem 0.4rem;
+}
+
+.cbEditableWrapper .cbEditableBody > .mb-3 select:not([multiple]):not([size]),
+.cbEditableWrapper .cbEditableBody > .mb-3 .form-select:not([multiple]):not([size]),
+.cbEditableWrapper .cbEditableBody > .mb-3 .form-select-sm:not([multiple]):not([size]) {
+    min-height: 1.86rem;
+    font-size: 0.83rem;
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+    padding-right: 1.85rem;
 }
 
 .cbEditableWrapper .cbEditableBody > .mb-3 textarea {

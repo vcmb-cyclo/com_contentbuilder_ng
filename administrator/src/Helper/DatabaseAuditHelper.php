@@ -26,6 +26,31 @@ final class DatabaseAuditHelper
      *   table_encoding_issues:array<int,array{table:string,collation:string,expected:string}>,
      *   column_encoding_issues:array<int,array{table:string,column:string,charset:string,collation:string}>,
      *   mixed_table_collations:array<int,array{collation:string,count:int,tables:array<int,string>}>,
+     *   cb_tables:array{
+     *     summary:array{
+     *       tables_total:int,
+     *       tables_ng_total:int,
+     *       tables_ng_expected:int,
+     *       tables_ng_present:int,
+     *       tables_ng_missing:int,
+     *       tables_legacy_total:int,
+     *       tables_storage_total:int,
+     *       rows_total:int,
+     *       data_bytes_total:int,
+     *       index_bytes_total:int,
+     *       size_bytes_total:int
+     *     },
+     *     missing_ng_tables:array<int,string>,
+     *     tables:array<int,array{
+     *       table:string,
+     *       rows:int,
+     *       data_bytes:int,
+     *       index_bytes:int,
+     *       size_bytes:int,
+     *       engine:string,
+     *       collation:string
+     *     }>
+     *   },
      *   summary:array{
      *     duplicate_index_groups:int,
      *     duplicate_indexes_to_drop:int,
@@ -52,6 +77,8 @@ final class DatabaseAuditHelper
         $errors = array_merge($errors, $duplicateErrors);
 
         $legacyTables = self::findLegacyContentbuilderTables($tables, $prefix);
+        [$cbTableStats, $cbTableStatsErrors] = self::collectCbTableStats($db, $tables, $prefix, $legacyTables);
+        $errors = array_merge($errors, $cbTableStatsErrors);
 
         [$tableEncodingIssues, $columnEncodingIssues, $mixedTableCollations, $encodingErrors] =
             self::inspectEncodingAndCollation($db, $tables, $prefix);
@@ -83,6 +110,7 @@ final class DatabaseAuditHelper
             'table_encoding_issues' => $tableEncodingIssues,
             'column_encoding_issues' => $columnEncodingIssues,
             'mixed_table_collations' => $mixedTableCollations,
+            'cb_tables' => $cbTableStats,
             'summary' => [
                 'duplicate_index_groups' => count($duplicateIndexes),
                 'duplicate_indexes_to_drop' => $duplicateToDrop,
@@ -244,6 +272,186 @@ final class DatabaseAuditHelper
         sort($legacy, SORT_NATURAL | SORT_FLAG_CASE);
 
         return $legacy;
+    }
+
+    /**
+     * @param array<int,string> $tables
+     * @param array<int,string> $legacyTables
+     * @return array{
+     *   0:array{
+     *     summary:array{
+     *       tables_total:int,
+     *       tables_ng_total:int,
+     *       tables_ng_expected:int,
+     *       tables_ng_present:int,
+     *       tables_ng_missing:int,
+     *       tables_legacy_total:int,
+     *       tables_storage_total:int,
+     *       rows_total:int,
+     *       data_bytes_total:int,
+     *       index_bytes_total:int,
+     *       size_bytes_total:int
+     *     },
+     *     missing_ng_tables:array<int,string>,
+     *     tables:array<int,array{
+     *       table:string,
+     *       rows:int,
+     *       data_bytes:int,
+     *       index_bytes:int,
+     *       size_bytes:int,
+     *       engine:string,
+     *       collation:string
+     *     }>
+     *   },
+     *   1:array<int,string>
+     * }
+     */
+    private static function collectCbTableStats(
+        DatabaseInterface $db,
+        array $tables,
+        string $prefix,
+        array $legacyTables
+    ): array {
+        $errors = [];
+        $aliases = array_map(
+            static fn(string $tableName): string => self::toAlias($tableName, $prefix),
+            $tables
+        );
+        $aliasLookup = array_fill_keys($aliases, true);
+        $expectedNgTables = self::getExpectedNgCoreTableAliases();
+        $legacyLookup = array_fill_keys($legacyTables, true);
+
+        $ngTables = [];
+        $storageTables = [];
+
+        foreach ($aliases as $alias) {
+            $lowerAlias = strtolower($alias);
+
+            if (strpos($lowerAlias, '#__contentbuilder_ng_') === 0) {
+                $ngTables[] = $alias;
+                continue;
+            }
+
+            if (!isset($legacyLookup[$alias])) {
+                $storageTables[] = $alias;
+            }
+        }
+
+        sort($ngTables, SORT_NATURAL | SORT_FLAG_CASE);
+        sort($storageTables, SORT_NATURAL | SORT_FLAG_CASE);
+
+        $missingNgTables = array_values(
+            array_filter(
+                $expectedNgTables,
+                static fn(string $tableAlias): bool => !isset($aliasLookup[$tableAlias])
+            )
+        );
+        sort($missingNgTables, SORT_NATURAL | SORT_FLAG_CASE);
+
+        $tableStats = [];
+        $tableMeta = [];
+        $rowsTotal = 0;
+        $dataBytesTotal = 0;
+        $indexBytesTotal = 0;
+        $sizeBytesTotal = 0;
+
+        if ($tables !== []) {
+            $quotedTables = array_map(
+                static fn(string $tableName): string => $db->quote($tableName),
+                $tables
+            );
+            $inClause = implode(', ', $quotedTables);
+
+            try {
+                $db->setQuery(
+                    'SELECT TABLE_NAME, TABLE_ROWS, DATA_LENGTH, INDEX_LENGTH, ENGINE, TABLE_COLLATION'
+                    . ' FROM information_schema.TABLES'
+                    . ' WHERE TABLE_SCHEMA = DATABASE()'
+                    . ' AND TABLE_NAME IN (' . $inClause . ')'
+                );
+                $rows = $db->loadAssocList() ?: [];
+
+                foreach ($rows as $row) {
+                    $tableName = (string) ($row['TABLE_NAME'] ?? $row['table_name'] ?? '');
+
+                    if ($tableName === '') {
+                        continue;
+                    }
+
+                    $tableMeta[$tableName] = $row;
+                }
+            } catch (\Throwable $e) {
+                $errors[] = 'Could not inspect ContentBuilder table statistics: ' . $e->getMessage();
+            }
+        }
+
+        foreach ($tables as $tableName) {
+            $meta = (array) ($tableMeta[$tableName] ?? []);
+            $rows = (int) ($meta['TABLE_ROWS'] ?? $meta['table_rows'] ?? 0);
+            $dataBytes = (int) ($meta['DATA_LENGTH'] ?? $meta['data_length'] ?? 0);
+            $indexBytes = (int) ($meta['INDEX_LENGTH'] ?? $meta['index_length'] ?? 0);
+            $sizeBytes = $dataBytes + $indexBytes;
+
+            $rowsTotal += max(0, $rows);
+            $dataBytesTotal += max(0, $dataBytes);
+            $indexBytesTotal += max(0, $indexBytes);
+            $sizeBytesTotal += max(0, $sizeBytes);
+
+            $tableStats[] = [
+                'table' => self::toAlias($tableName, $prefix),
+                'rows' => max(0, $rows),
+                'data_bytes' => max(0, $dataBytes),
+                'index_bytes' => max(0, $indexBytes),
+                'size_bytes' => max(0, $sizeBytes),
+                'engine' => (string) ($meta['ENGINE'] ?? $meta['engine'] ?? ''),
+                'collation' => (string) ($meta['TABLE_COLLATION'] ?? $meta['table_collation'] ?? ''),
+            ];
+        }
+
+        usort(
+            $tableStats,
+            static fn(array $a, array $b): int => strcmp((string) ($a['table'] ?? ''), (string) ($b['table'] ?? ''))
+        );
+
+        return [[
+            'summary' => [
+                'tables_total' => count($aliases),
+                'tables_ng_total' => count($ngTables),
+                'tables_ng_expected' => count($expectedNgTables),
+                'tables_ng_present' => count($expectedNgTables) - count($missingNgTables),
+                'tables_ng_missing' => count($missingNgTables),
+                'tables_legacy_total' => count($legacyTables),
+                'tables_storage_total' => count($storageTables),
+                'rows_total' => $rowsTotal,
+                'data_bytes_total' => $dataBytesTotal,
+                'index_bytes_total' => $indexBytesTotal,
+                'size_bytes_total' => $sizeBytesTotal,
+            ],
+            'missing_ng_tables' => $missingNgTables,
+            'tables' => $tableStats,
+        ], $errors];
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    private static function getExpectedNgCoreTableAliases(): array
+    {
+        return [
+            '#__contentbuilder_ng_articles',
+            '#__contentbuilder_ng_elements',
+            '#__contentbuilder_ng_forms',
+            '#__contentbuilder_ng_list_records',
+            '#__contentbuilder_ng_list_states',
+            '#__contentbuilder_ng_rating_cache',
+            '#__contentbuilder_ng_records',
+            '#__contentbuilder_ng_registered_users',
+            '#__contentbuilder_ng_resource_access',
+            '#__contentbuilder_ng_storages',
+            '#__contentbuilder_ng_storage_fields',
+            '#__contentbuilder_ng_users',
+            '#__contentbuilder_ng_verifications',
+        ];
     }
 
     /**
