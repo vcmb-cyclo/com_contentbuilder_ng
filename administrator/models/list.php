@@ -80,7 +80,26 @@ class ContentbuilderModelList extends CBModel
 
         $menuFilterRaw = (string) CBRequest::getVar('cb_list_filterhidden', '');
         $menuOrderRaw = (string) CBRequest::getVar('cb_list_orderhidden', '');
-        $menuScopeHash = md5($menuFilterRaw . '|' . $menuOrderRaw);
+        $titleScope = (string) CBRequest::getVar('title', '');
+        $routeQuery = Uri::getInstance()->getQuery(true);
+        $volatileRouteKeys = array(
+            'limitstart',
+            'filter',
+            'filter_order',
+            'filter_order_Dir',
+            'list_state_filter',
+            'list_publish_filter',
+            'list_language_filter',
+            'task',
+        );
+        foreach ($volatileRouteKeys as $volatileRouteKey) {
+            if (isset($routeQuery[$volatileRouteKey])) {
+                unset($routeQuery[$volatileRouteKey]);
+            }
+        }
+        ksort($routeQuery);
+        $routeScope = http_build_query($routeQuery);
+        $menuScopeHash = md5($menuFilterRaw . '|' . $menuOrderRaw . '|' . $titleScope . '|' . $routeScope);
         $this->stateScope = intval($this->_id) . '_' . intval(CBRequest::getInt('Itemid', 0)) . '_' . $menuScopeHash;
 
         // Get pagination request variables
