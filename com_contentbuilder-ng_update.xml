@@ -11,7 +11,7 @@
     <infourl title="ContentBuilder">https://breezingforms-ng.vcmb.fr/</infourl>
 
     <downloads>
-      <downloadurl type="full" format="zip">https://breezingforms-ng.vcmb.fr/download/com_contentbuilder-ng-6.1.0-rc6.zip</downloadurl>
+      <downloadurl type="full" format="zip">https://breezingforms-ng.vcmb.fr/download/com_contentbuilder-ng-6.1.0-rc7.zip</downloadurl>
     </downloads>
 
     <tags>
@@ -21,7 +21,6 @@
     <maintainer>XDA+GIL</maintainer>
     <maintainerurl>https://breezingforms-ng.vcmb.fr</maintainerurl>
 
-    <targetplatform name="joomla" version="5\..*"/>
     <targetplatform name="joomla" version="6\..*"/>
   </update>
 </updates>
