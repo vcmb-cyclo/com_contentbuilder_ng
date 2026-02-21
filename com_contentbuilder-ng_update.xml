@@ -6,7 +6,7 @@
     <element>com_contentbuilder-ng</element>
     <type>component</type>
     <client>1</client>
-    <version>6.1.0</version>
+    <version>6.1.0-RC7</version>
 
     <infourl title="ContentBuilder">https://breezingforms-ng.vcmb.fr/</infourl>
 
