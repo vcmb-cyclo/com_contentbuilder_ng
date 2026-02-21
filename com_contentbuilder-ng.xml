@@ -1,10 +1,10 @@
 <extension type="component" method="upgrade" version="6.0">
 
     <!-- Basic information -->
-    <name>com_contentbuilder-ng</name>
+    <name>com_contentbuilder</name>
     <version>6.1.0-RC7</version>
     <creationDate>2026-02-18</creationDate>
-    <description>com_contentbuilder-ng XML description</description>
+    <description>com_contentbuilder XML description</description>
 
     <!-- Author information -->
     <author>XDA+GIL</author>
@@ -33,13 +33,13 @@
 
 <install>
     <sql>
-        <file charset="utf8" driver="mysql">sql/install.sql</file>
+        <file charset="utf8" driver="mysql">administrator/sql/install.sql</file>
     </sql>
 </install>
 
  <uninstall>
   <sql>
-    <file charset="utf8" driver="mysql">sql/uninstall.sql</file>
+    <file charset="utf8" driver="mysql">administrator/sql/uninstall.sql</file>
   </sql>
  </uninstall>
  
@@ -75,7 +75,6 @@
     <submenu>
         <menu controller="storages" img="components/com_contentbuilder/views/logo_icon_cb.png">COM_CONTENTBUILDER_STORAGES</menu>
         <menu controller="forms" img="components/com_contentbuilder/views/logo_icon_cb.png">COM_CONTENTBUILDER_LIST</menu>
-        <menu link="option=com_contentbuilder&amp;view=contentbuilder&amp;market=true">Try BreezingForms!</menu>
         <menu view="contentbuilder">COM_CONTENTBUILDER_ABOUT</menu>
     </submenu>
 

@@ -11,7 +11,6 @@ defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Installer\InstallerScript;
-use Joomla\CMS\Installer\InstallerAdapter;
 use Joomla\Filesystem\File;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\Folder;
@@ -143,7 +142,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
    *
    * @return bool
    */
-  public function install(InstallerAdapter $parent): bool
+  public function install($parent)
   {
     if (!version_compare(PHP_VERSION, '8.1', '>=')) {
       Factory::getApplication()->enqueueMessage('"WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 8.1, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!"', 'error');
@@ -159,7 +158,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
    *
    * @return bool
    */
-  public function update(InstallerAdapter $parent): bool
+  public function update($parent)
   {
     if (!version_compare(PHP_VERSION, '8.1', '>=')) {
       Factory::getApplication()->enqueueMessage('"WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 8.1, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!"', 'error');
@@ -173,7 +172,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
    *
    * @return bool
    */
-  public function uninstall(InstallerAdapter $parent): bool
+  public function uninstall($parent)
   {
     $this->log('Uninstall of ContentBuilder.');
 
@@ -212,7 +211,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
    *
    * @return bool
    */
-  public function preflight($type, $parent): bool
+  public function preflight($type, $parent)
   {
 
     if (!parent::preflight($type, $parent)) {

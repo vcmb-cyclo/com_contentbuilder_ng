@@ -39,20 +39,23 @@ if (!function_exists('cb_b64dec')) {
 	}
 }
 
-set_error_handler('myErrorHandler');
-register_shutdown_function('fatalErrorShutdownHandler');
-function myErrorHandler($code, $message, $file, $line)
-{
-	// nothing
-}
-function fatalErrorShutdownHandler()
-{
-	$last_error = error_get_last();
-	if ($last_error['type'] === E_ERROR) {
-		// fatal error
-		myErrorHandler(E_ERROR, $last_error['message'], $last_error['file'], $last_error['line']);
+if (!function_exists('contentbuilderImageScaleErrorHandler')) {
+	function contentbuilderImageScaleErrorHandler($code, $message, $file, $line)
+	{
+		// nothing
 	}
 }
+if (!function_exists('contentbuilderImageScaleShutdownHandler')) {
+	function contentbuilderImageScaleShutdownHandler()
+	{
+		$last_error = error_get_last();
+		if (is_array($last_error) && isset($last_error['type']) && $last_error['type'] === E_ERROR) {
+			contentbuilderImageScaleErrorHandler(E_ERROR, $last_error['message'], $last_error['file'], $last_error['line']);
+		}
+	}
+}
+set_error_handler('contentbuilderImageScaleErrorHandler');
+register_shutdown_function('contentbuilderImageScaleShutdownHandler');
 
 require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
 require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder_helpers.php');
