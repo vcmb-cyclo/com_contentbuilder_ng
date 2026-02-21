@@ -113,13 +113,29 @@ class ContentbuilderModelList extends CBModel
         $this->setState('limitstart', $limitstart);
 
         // Scope list state to the current view/menu/filter signature to avoid leakage across views.
+        // We intentionally avoid reusing legacy session values when a request key is absent.
+        // This prevents a filter from another view being injected on pagination.
         $statePrefix = $option . 'formsd_' . $this->stateScope . '_';
-        $filter_order     = $mainframe->getUserStateFromRequest($statePrefix . 'filter_order', 'filter_order', '', 'cmd');
-        $filter_order_Dir = $mainframe->getUserStateFromRequest($statePrefix . 'filter_order_Dir', 'filter_order_Dir', '', 'cmd');
-        $filter           = $mainframe->getUserStateFromRequest($statePrefix . 'filter', 'filter', '', 'string');
-        $filter_state     = $mainframe->getUserStateFromRequest($statePrefix . 'filter_state', 'list_state_filter', 0, 'int');
-        $filter_publish   = $mainframe->getUserStateFromRequest($statePrefix . 'filter_publish', 'list_publish_filter', -1, 'int');
-        $filter_language  = $mainframe->getUserStateFromRequest($statePrefix . 'filter_language', 'list_language_filter', '', 'cmd');
+        $filter_orderReq = CBRequest::getVar('filter_order', null);
+        $filter_order_DirReq = CBRequest::getVar('filter_order_Dir', null);
+        $filterReq = CBRequest::getVar('filter', null);
+        $filter_stateReq = CBRequest::getVar('list_state_filter', null);
+        $filter_publishReq = CBRequest::getVar('list_publish_filter', null);
+        $filter_languageReq = CBRequest::getVar('list_language_filter', null);
+
+        $filter_order = $filter_orderReq === null ? '' : CBRequest::getCmd('filter_order', '');
+        $filter_order_Dir = $filter_order_DirReq === null ? '' : CBRequest::getCmd('filter_order_Dir', '');
+        $filter = $filterReq === null ? '' : CBRequest::getVar('filter', '', '', 'string');
+        $filter_state = $filter_stateReq === null ? 0 : CBRequest::getInt('list_state_filter', 0);
+        $filter_publish = $filter_publishReq === null ? -1 : CBRequest::getInt('list_publish_filter', -1);
+        $filter_language = $filter_languageReq === null ? '' : CBRequest::getCmd('list_language_filter', '');
+
+        $mainframe->setUserState($statePrefix . 'filter_order', $filter_order);
+        $mainframe->setUserState($statePrefix . 'filter_order_Dir', $filter_order_Dir);
+        $mainframe->setUserState($statePrefix . 'filter', $filter);
+        $mainframe->setUserState($statePrefix . 'filter_state', $filter_state);
+        $mainframe->setUserState($statePrefix . 'filter_publish', $filter_publish);
+        $mainframe->setUserState($statePrefix . 'filter_language', $filter_language);
 
         $this->setState('formsd_filter_state', $filter_state);
         $this->setState('formsd_filter_publish', $filter_publish);
