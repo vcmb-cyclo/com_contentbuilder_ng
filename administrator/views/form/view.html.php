@@ -17,9 +17,9 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\MVC\View\HtmlView;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/pane/CBTabs.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/viewlegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/pane/CBTabs.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/viewlegacy.php');
 
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder_helpers.php');
@@ -31,15 +31,15 @@ class ContentbuilderViewForm extends HtmlView
         Factory::getApplication()->input->set('hidemainmenu', true);
 
         $document = Factory::getApplication()->getDocument();
-        $document->addScript(Uri::root(true) . '/administrator/components/com_contentbuilder/assets/js/jscolor/jscolor.js');
+        $document->addScript(Uri::root(true) . '/administrator/components/com_contentbuilder_ng/assets/js/jscolor/jscolor.js');
 
         echo '
         <style type="text/css">
-        .icon-48-logo_left { background-image: url(../administrator/components/com_contentbuilder/views/logo_left.png); }
+        .icon-48-logo_left { background-image: url(../administrator/components/com_contentbuilder_ng/views/logo_left.png); }
         </style>
         ';
 
-        echo '<link rel="stylesheet" href="' . Uri::root(true) . '/administrator/components/com_contentbuilder/views/bluestork.fix.css" type="text/css" />';
+        echo '<link rel="stylesheet" href="' . Uri::root(true) . '/administrator/components/com_contentbuilder_ng/views/bluestork.fix.css" type="text/css" />';
 
         $form = $this->get('Form');
         $elements = $this->get('Data');

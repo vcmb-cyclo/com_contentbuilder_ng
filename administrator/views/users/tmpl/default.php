@@ -113,7 +113,7 @@ use Joomla\CMS\HTML\HTMLHelper;
             for ($i = 0; $i < $n; $i++) {
                 $row = $this->items[$i];
                 $checked = HTMLHelper::_('grid.id', $i, $row->id);
-                $link = Route::_('index.php?option=com_contentbuilder&controller=users&tmpl=' . CBRequest::getCmd('tmpl', '') . '&task=edit&form_id=' . CBRequest::getInt('form_id', 0) . '&joomla_userid=' . $row->id);
+                $link = Route::_('index.php?option=com_contentbuilder_ng&controller=users&tmpl=' . CBRequest::getCmd('tmpl', '') . '&task=edit&form_id=' . CBRequest::getInt('form_id', 0) . '&joomla_userid=' . $row->id);
                 if ($row->published === null) {
                     $row->published = 1;
                 }

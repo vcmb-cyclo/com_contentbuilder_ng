@@ -26,10 +26,10 @@ use Joomla\CMS\Event\Content\ContentPrepareEvent;
 use Joomla\CMS\Access\Access;
 use Joomla\Application\ApplicationInterface;
 
-require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/contentbuilder_helpers.php');
-require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/plugin_helper.php');
-require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/plugin_helper4.php');
+require_once(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/classes/contentbuilder_helpers.php');
+require_once(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/classes/plugin_helper.php');
+require_once(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/classes/plugin_helper4.php');
 class contentbuilder
 {
 
@@ -175,7 +175,7 @@ class contentbuilder
 }
 
 .cbVotingDisplay {
-	background-image: url(' . Uri::root(true) . '/components/com_contentbuilder/assets/images/bg_votingStarOff.png);
+	background-image: url(' . Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/bg_votingStarOff.png);
 	background-repeat: repeat-x;
         height: auto;
 }
@@ -185,7 +185,7 @@ class contentbuilder
 	float: left;
 	height: 20px;
 	overflow: hidden;
-	background-image: url(' . Uri::root(true) . '/components/com_contentbuilder/assets/images/bg_votingStarOn.png);
+	background-image: url(' . Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/bg_votingStarOn.png);
 	background-repeat: repeat-x;
 }
 
@@ -210,14 +210,14 @@ class contentbuilder
 .cbRatingImage2{
     width: 30px;
     height: 30px;
-    background-image: url(' . Uri::root(true) . '/components/com_contentbuilder/assets/images/thumbs_down.png);
+    background-image: url(' . Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/thumbs_down.png);
     background-repeat: no-repeat;
 }
 
 .cbRatingImage{ 
     width: 30px;
     height: 30px;
-    background-image: url(' . Uri::root(true) . '/components/com_contentbuilder/assets/images/thumbs_up.png);
+    background-image: url(' . Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/thumbs_up.png);
     background-repeat: no-repeat;
 }');
 
@@ -242,9 +242,9 @@ class contentbuilder
         $rating_link = '';
         if ($rating_allowed) {
             if (Factory::getApplication()->isClient('site')) {
-                $rating_link = Uri::root(true) . (Factory::getApplication()->isClient('administrator') ? '/administrator' : (CBRequest::getCmd('lang', '') && CBCompat::getJoomlaConfig('config.sef') && CBCompat::getJoomlaConfig('config.sef_rewrite') ? '/' . CBRequest::getCmd('lang', '') : '')) . '/?option=com_contentbuilder&lang=' . $lang . '&controller=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
+                $rating_link = Uri::root(true) . (Factory::getApplication()->isClient('administrator') ? '/administrator' : (CBRequest::getCmd('lang', '') && CBCompat::getJoomlaConfig('config.sef') && CBCompat::getJoomlaConfig('config.sef_rewrite') ? '/' . CBRequest::getCmd('lang', '') : '')) . '/?option=com_contentbuilder_ng&lang=' . $lang . '&controller=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
             } else {
-                $rating_link = 'index.php?option=com_contentbuilder&lang=' . $lang . '&controller=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
+                $rating_link = 'index.php?option=com_contentbuilder_ng&lang=' . $lang . '&controller=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
             }
         }
         for ($x = 1; $x <= $rating_slots; $x++) {
@@ -587,7 +587,7 @@ class contentbuilder
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $parent_id = 0;
-        $db->setQuery("Select id From #__components Where `option`='' And admin_menu_link='option=com_contentbuilder&viewcontainer=true'");
+        $db->setQuery("Select id From #__components Where `option`='' And admin_menu_link='option=com_contentbuilder_ng&viewcontainer=true'");
         $res = $db->loadResult();
         if ($res) {
             $parent_id = $res;
@@ -605,10 +605,10 @@ class contentbuilder
                  Values
                  (
                     'ContentBuilder Views',
-                    'option=com_contentbuilder&viewcontainer=true',
+                    'option=com_contentbuilder_ng&viewcontainer=true',
                     'ContentBuilder',
                     '',
-                    'components/com_contentbuilder/views/logo_icon_cb.png',
+                    'components/com_contentbuilder_ng/views/logo_icon_cb.png',
                     1
                  )
            "
@@ -616,7 +616,7 @@ class contentbuilder
             $db->execute();
             $parent_id = $db->insertid();
         }
-        $db->setQuery("Select id From #__components Where admin_menu_link = 'option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'");
+        $db->setQuery("Select id From #__components Where admin_menu_link = 'option=com_contentbuilder_ng&controller=list&id=" . intval($contentbuilder_form_id) . "'");
         $menuitem = $db->loadResult();
         if (!$update)
             return;
@@ -637,10 +637,10 @@ class contentbuilder
                      Values
                      (
                         " . $db->Quote($name) . ",
-                        'option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "',
+                        'option=com_contentbuilder_ng&controller=list&id=" . intval($contentbuilder_form_id) . "',
                         " . $db->Quote($name) . ",
                         'com_contentbuilder',
-                        'components/com_contentbuilder/views/logo_icon_cb.png',
+                        'components/com_contentbuilder_ng/views/logo_icon_cb.png',
                         1,
                         '$parent_id'
                      )
@@ -666,10 +666,10 @@ class contentbuilder
         if (trim($name)) {
             $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-            $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder' And parent_id = 1");
+            $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder_ng' And parent_id = 1");
             $result = $db->loadResult();
 
-            $db->setQuery("Select id From #__menu Where `link`='index.php?option=com_contentbuilder&viewcontainer=true' And parent_id = 1");
+            $db->setQuery("Select id From #__menu Where `link`='index.php?option=com_contentbuilder_ng&viewcontainer=true' And parent_id = 1");
             $old_id = $db->loadResult();
             $parent_id = $old_id;
 
@@ -682,8 +682,8 @@ class contentbuilder
                     ") " .
                     "values (" .
                     "'ContentBuilder Views', 'ContentBuilder Views', 'main', 1, " .
-                    "'index.php?option=com_contentbuilder&viewcontainer=true'," .
-                    "'0', 1, " . intval($result) . ", 1, 'components/com_contentbuilder/views/logo_icon_cb.png',( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet )" .
+                    "'index.php?option=com_contentbuilder_ng&viewcontainer=true'," .
+                    "'0', 1, " . intval($result) . ", 1, 'components/com_contentbuilder_ng/views/logo_icon_cb.png',( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet )" .
                     ")"
                 );
                 $db->execute();
@@ -696,7 +696,7 @@ class contentbuilder
                 $db->execute();
             }
 
-            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder_ng&controller=list&id=" . intval($contentbuilder_form_id) . "'");
             $menuitem = $db->loadResult();
 
             if (!$update)
@@ -704,7 +704,7 @@ class contentbuilder
             if (!$result)
                 die("ContentBuilder main menu item not found!");
 
-            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder&controller=list&id=%' And link <> 'index.php?option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder_ng&controller=list&id=%' And link <> 'index.php?option=com_contentbuilder_ng&controller=list&id=" . intval($contentbuilder_form_id) . "'");
             $name_exists = $db->loadResult();
 
             if ($name_exists) {
@@ -721,8 +721,8 @@ class contentbuilder
                     ",lft,rgt) " .
                     "values (" .
                     "" . $db->Quote($name) . ", " . $db->Quote($name) . ", 'main', '$parent_id', " .
-                    "'index.php?option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'," .
-                    "'0', 1, " . intval($result) . ", 1, 'components/com_contentbuilder/views/logo_icon_cb.png'" .
+                    "'index.php?option=com_contentbuilder_ng&controller=list&id=" . intval($contentbuilder_form_id) . "'," .
+                    "'0', 1, " . intval($result) . ", 1, 'components/com_contentbuilder_ng/views/logo_icon_cb.png'" .
                     ",( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone), ( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet))"
                 );
                 $db->execute();
@@ -751,10 +751,10 @@ class contentbuilder
 
             $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-            $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder' And parent_id = 1");
+            $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder_ng' And parent_id = 1");
             $result = $db->loadResult();
 
-            $db->setQuery("Select id From #__menu Where `link`='index.php?option=com_contentbuilder&viewcontainer=true' And parent_id = 1");
+            $db->setQuery("Select id From #__menu Where `link`='index.php?option=com_contentbuilder_ng&viewcontainer=true' And parent_id = 1");
             $old_id = $db->loadResult();
             $parent_id = $old_id;
 
@@ -768,8 +768,8 @@ class contentbuilder
                     ") " .
                     "values (" .
                     "'ContentBuilder Views', 'ContentBuilder Views', 'main', 'component', 1, " .
-                    "'index.php?option=com_contentbuilder&viewcontainer=true'," .
-                    "1, " . intval($result) . ", 1, 'components/com_contentbuilder/views/logo_icon_cb.png',( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet )" .
+                    "'index.php?option=com_contentbuilder_ng&viewcontainer=true'," .
+                    "1, " . intval($result) . ", 1, 'components/com_contentbuilder_ng/views/logo_icon_cb.png',( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet )" .
                     ")"
                 );
                 $db->execute();
@@ -782,7 +782,7 @@ class contentbuilder
                 $db->execute();
             }
 
-            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder_ng&controller=list&id=" . intval($contentbuilder_form_id) . "'");
             $menuitem = $db->loadResult();
 
             if (!$update)
@@ -790,7 +790,7 @@ class contentbuilder
             if (!$result)
                 die("ContentBuilder main menu item not found!");
 
-            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder&controller=list&id=%' And link <> 'index.php?option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where alias = " . $db->Quote($name) . " And link Like 'index.php?option=com_contentbuilder_ng&controller=list&id=%' And link <> 'index.php?option=com_contentbuilder_ng&controller=list&id=" . intval($contentbuilder_form_id) . "'");
             $name_exists = $db->loadResult();
 
             if ($name_exists) {
@@ -807,8 +807,8 @@ class contentbuilder
                     ",lft,rgt) " .
                     "values (" .
                     "''," . "''," . $db->Quote($name) . ", " . $db->Quote($name) . ", 'main', 'component', '$parent_id', " .
-                    "'index.php?option=com_contentbuilder&controller=list&id=" . intval($contentbuilder_form_id) . "'," .
-                    "1, " . intval($result) . ", 1, 'components/com_contentbuilder/views/logo_icon_cb.png'" .
+                    "'index.php?option=com_contentbuilder_ng&controller=list&id=" . intval($contentbuilder_form_id) . "'," .
+                    "1, " . intval($result) . ", 1, 'components/com_contentbuilder_ng/views/logo_icon_cb.png'" .
                     ",( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone), ( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet))"
                 );
                 $db->execute();
@@ -973,8 +973,8 @@ class contentbuilder
 
     public static function getForms($type)
     {
-        if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/types/' . $type . '.php')) {
-            require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/types/' . $type . '.php');
+        if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/classes/types/' . $type . '.php')) {
+            require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/classes/types/' . $type . '.php');
             $class = 'contentbuilder_' . $type;
             if (class_exists($class)) {
                 return call_user_func(array($class, "getFormsList"));
@@ -995,8 +995,8 @@ class contentbuilder
 
         static $forms;
 
-        if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/types/' . $type . '.php')) {
-            require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/types/' . $type . '.php');
+        if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/classes/types/' . $type . '.php')) {
+            require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/classes/types/' . $type . '.php');
             if (isset($forms[$type][$reference_id])) {
                 return $forms[$type][$reference_id];
             }
@@ -1618,15 +1618,15 @@ class contentbuilder
                             $the_item = '<div class="cbFormField cbCaptchaField">';
 
                             if (Factory::getApplication()->isClient('site')) {
-                                $captcha_url = Uri::root(true) . '/components/com_contentbuilder/images/securimage/securimage_show.php';
+                                $captcha_url = Uri::root(true) . '/components/com_contentbuilder_ng/images/securimage/securimage_show.php';
                             } else {
-                                $captcha_url = Uri::root(true) . '/administrator/components/com_contentbuilder/assets/images/securimage_show.php';
+                                $captcha_url = Uri::root(true) . '/administrator/components/com_contentbuilder_ng/assets/images/securimage_show.php';
                             }
 
                             $the_item .= '<img width="250" height="80" id="cbCaptcha" alt="captcha" src="' . $captcha_url . '?rand=' . rand(0, getrandmax()) . '"/>';
                             $the_item .= '<div>';
                             $the_item .= '<input class="form-control form-control-sm mt-1" autocomplete="off" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" type="text" maxlength="12" />';
-                            $the_item .= '<img style="cursor: pointer; padding-left: 7px;" onclick="document.getElementById(\'cbCaptcha\').src = \'' . $captcha_url . '?\' + Math.random(); blur(); return false" border="0" alt="refresh" src="' . Uri::root(true) . '/components/com_contentbuilder/images/securimage/refresh-captcha.png"/>';
+                            $the_item .= '<img style="cursor: pointer; padding-left: 7px;" onclick="document.getElementById(\'cbCaptcha\').src = \'' . $captcha_url . '?\' + Math.random(); blur(); return false" border="0" alt="refresh" src="' . Uri::root(true) . '/components/com_contentbuilder_ng/images/securimage/refresh-captcha.png"/>';
                             $the_item .= '</div>';
                             $the_item .= '</div>';
                             break;
@@ -1686,7 +1686,7 @@ class contentbuilder
                     if ($the_item) {
                         $tip = 'hasTip';
                         $tip_prefix = htmlentities($item['label'], ENT_QUOTES, 'UTF-8') . '::';
-                        $template = str_replace('{' . $key . ':label}', '<label ' . ($element['hint'] ? 'class="editlinktip ' . $tip . '" title="' . $tip_prefix . $element['hint'] . '" ' : '') . 'for="cb_' . $item['id'] . '">' . $item['label'] . $asterisk . ($element['hint'] ? ' <img style="cursor: pointer;" src="' . Uri::root(true) . '/components/com_contentbuilder/images/icon_info.png" border="0"/>' : '') . '</label>', $template);
+                        $template = str_replace('{' . $key . ':label}', '<label ' . ($element['hint'] ? 'class="editlinktip ' . $tip . '" title="' . $tip_prefix . $element['hint'] . '" ' : '') . 'for="cb_' . $item['id'] . '">' . $item['label'] . $asterisk . ($element['hint'] ? ' <img style="cursor: pointer;" src="' . Uri::root(true) . '/components/com_contentbuilder_ng/images/icon_info.png" border="0"/>' : '') . '</label>', $template);
                         $template = str_replace('{' . $key . ':item}', $the_item, $template);
                     }
                 }
@@ -2306,8 +2306,8 @@ class contentbuilder
             $reference_id = $type['reference_id'];
             $type = $type['type'];
             $_type = $type;
-            if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/types/' . $type . '.php')) {
-                require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/types/' . $type . '.php');
+            if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/classes/types/' . $type . '.php')) {
+                require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/classes/types/' . $type . '.php');
                 $type = 'contentbuilder_' . $type;
                 if (class_exists($type)) {
                     $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, Factory::getApplication()->getIdentity()->get('id', 0));

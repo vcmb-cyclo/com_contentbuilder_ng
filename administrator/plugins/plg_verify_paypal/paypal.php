@@ -13,7 +13,7 @@ defined('_JEXEC') or die('Restricted access');
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
 
 class plgContentbuilder_verifyPaypal extends CMSPlugin
 {

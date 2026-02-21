@@ -27,7 +27,7 @@ $fullarticle_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe(
 function contentbuilder_delete(){
     var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDER_CONFIRM_DELETE_MESSAGE');?>');
     if(confirmed){
-        location.href = '<?php echo 'index.php?option=com_contentbuilder&controller=edit&task=delete'.(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&view=edit&id='.CBRequest::getInt('id', 0).'&cid[]='.CBRequest::getCmd('record_id', 0).'&Itemid='.CBRequest::getInt('Itemid',0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order'); ?>';
+        location.href = '<?php echo 'index.php?option=com_contentbuilder_ng&controller=edit&task=delete'.(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&view=edit&id='.CBRequest::getInt('id', 0).'&cid[]='.CBRequest::getCmd('record_id', 0).'&Itemid='.CBRequest::getInt('Itemid',0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order'); ?>';
     }
 }
 //-->
@@ -76,7 +76,7 @@ if(!CBRequest::getInt('backtolist',0) && !CBRequest::getVar('return','')){
     if(!CBRequest::getInt('jsback',0)){
         if($this->back_button){
 ?>
-<a class="btn btn-sm btn-primary cbButton cbBackButton" href="<?php echo Route::_( 'index.php?option=com_contentbuilder&controller=details'.(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&id='.CBRequest::getInt('id', 0).'&record_id='.CBRequest::getCmd('record_id', 0).(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>"><?php echo Text::_('COM_CONTENTBUILDER_BACK')?></a>
+<a class="btn btn-sm btn-primary cbButton cbBackButton" href="<?php echo Route::_( 'index.php?option=com_contentbuilder_ng&controller=details'.(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&id='.CBRequest::getInt('id', 0).'&record_id='.CBRequest::getCmd('record_id', 0).(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>"><?php echo Text::_('COM_CONTENTBUILDER_BACK')?></a>
 <?php
         }
     }else{
@@ -87,7 +87,7 @@ if(!CBRequest::getInt('backtolist',0) && !CBRequest::getVar('return','')){
 }else{
     if($this->back_button && !CBRequest::getVar('return','')){
 ?>
-<a class="btn btn-sm btn-primary cbButton cbBackButton" href="<?php echo Route::_( 'index.php?option=com_contentbuilder&controller=list'.(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&id='.CBRequest::getInt('id', 0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order').(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0) ); ?>"><?php echo Text::_('COM_CONTENTBUILDER_BACK')?></a>
+<a class="btn btn-sm btn-primary cbButton cbBackButton" href="<?php echo Route::_( 'index.php?option=com_contentbuilder_ng&controller=list'.(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&id='.CBRequest::getInt('id', 0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order').(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0) ); ?>"><?php echo Text::_('COM_CONTENTBUILDER_BACK')?></a>
 <?php
     }
 }
@@ -137,14 +137,14 @@ if($this->create_articles && $fullarticle_allowed){
 <?php
 if(!$this->edit_by_type){
 ?>
-<form class="form-horizontal mt-5 mb-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_( 'index.php?option=com_contentbuilder&controller=edit'.(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&id='.CBRequest::getInt('id', 0).'&record_id='.CBRequest::getCmd('record_id',  '').(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>" method="post" enctype="multipart/form-data">
+<form class="form-horizontal mt-5 mb-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_( 'index.php?option=com_contentbuilder_ng&controller=edit'.(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&id='.CBRequest::getInt('id', 0).'&record_id='.CBRequest::getCmd('record_id',  '').(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>" method="post" enctype="multipart/form-data">
 <?php
 }
 ?>
 <?php
 if($this->edit_by_type){
 ?>
-<form class="mt-5 mb-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_( 'index.php?option=com_contentbuilder&controller=edit'.(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&id='.CBRequest::getInt('id', 0).'&record_id='.CBRequest::getCmd('record_id',  '').(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>" method="post" enctype="multipart/form-data">
+<form class="mt-5 mb-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_( 'index.php?option=com_contentbuilder_ng&controller=edit'.(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&id='.CBRequest::getInt('id', 0).'&record_id='.CBRequest::getCmd('record_id',  '').(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>" method="post" enctype="multipart/form-data">
 <?php
 }
 ?>
@@ -327,7 +327,7 @@ if(!$this->edit_by_type){
 }else{
     if($this->edit_by_type){
 ?>
-    <form class="mt-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_( 'index.php?option=com_contentbuilder&controller=edit'.(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&id='.CBRequest::getInt('id', 0).'&record_id='.CBRequest::getCmd('record_id',  '').(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>" method="post" enctype="multipart/form-data">
+    <form class="mt-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_( 'index.php?option=com_contentbuilder_ng&controller=edit'.(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&id='.CBRequest::getInt('id', 0).'&record_id='.CBRequest::getCmd('record_id',  '').(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>" method="post" enctype="multipart/form-data">
     <?php
     if( CBRequest::getVar('tmpl', '') != '' ){
     ?>
@@ -358,7 +358,7 @@ if(!$this->edit_by_type){
 <?php
     } else {
 ?>
-    <form class="form-horizontal name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_( 'index.php?option=com_contentbuilder&controller=edit'.(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&id='.CBRequest::getInt('id', 0).'&record_id='.CBRequest::getCmd('record_id',  '').(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>" method="post" enctype="multipart/form-data">
+    <form class="form-horizontal name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_( 'index.php?option=com_contentbuilder_ng&controller=edit'.(CBRequest::getVar('layout', '') != '' ? '&layout='.CBRequest::getVar('layout', '') : '').'&id='.CBRequest::getInt('id', 0).'&record_id='.CBRequest::getCmd('record_id',  '').(CBRequest::getVar('tmpl', '') != '' ? '&tmpl='.CBRequest::getVar('tmpl', '') : '').'&Itemid='.CBRequest::getInt('Itemid',0).'&limitstart='.CBRequest::getInt('limitstart',0).'&filter_order='.CBRequest::getCmd('filter_order') ); ?>" method="post" enctype="multipart/form-data">
     <?php echo $this->event->beforeDisplayContent; ?>
     <?php echo $this->toc ?>
     <?php echo $this->tpl ?>

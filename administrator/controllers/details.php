@@ -14,8 +14,8 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/controllerlegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/controllerlegacy.php');
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
 
 class ContentbuilderControllerDetails extends CBController
@@ -79,7 +79,7 @@ class ContentbuilderControllerDetails extends CBController
                 $auth = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('new') : contentbuilder::authorize('new');
 
                 if ($auth) {
-                    Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder&controller=edit&latest=1&backtolist=' . CBRequest::getInt('backtolist', 0) . '&id=' . CBRequest::getInt('id', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&record_id=&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getVar('filter_order', ''), false));
+                    Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder_ng&controller=edit&latest=1&backtolist=' . CBRequest::getInt('backtolist', 0) . '&id=' . CBRequest::getInt('id', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&record_id=&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getVar('filter_order', ''), false));
                 } else {
                     Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
                     Factory::getApplication()->redirect('index.php');

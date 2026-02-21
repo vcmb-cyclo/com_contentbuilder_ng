@@ -54,7 +54,7 @@ Joomla.tableOrdering = function( order, dir, task ) {
     }
     //-->
 </script>
-<form action="index.php?option=com_contentbuilder&amp;controller=forms" method="post" name="adminForm" id="adminForm">
+<form action="index.php?option=com_contentbuilder_ng&amp;controller=forms" method="post" name="adminForm" id="adminForm">
 
     <div id="editcell">
         <label for="filter_tag">
@@ -115,7 +115,7 @@ Joomla.tableOrdering = function( order, dir, task ) {
             for ($i = 0; $i < $n; $i++) {
                 $row = $this->items[$i];
                 $checked = HTMLHelper::_('grid.id', $i, $row->id);
-                $link = Route::_('index.php?option=com_contentbuilder&controller=forms&task=edit&cid[]=' . $row->id);
+                $link = Route::_('index.php?option=com_contentbuilder_ng&controller=forms&task=edit&cid[]=' . $row->id);
                 $published = contentbuilder_helpers::listPublish($row, $i);
                 ?>
                 <tr class="<?php echo "row$k"; ?>">

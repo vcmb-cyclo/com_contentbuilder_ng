@@ -612,7 +612,7 @@ class contentbuilder_helpers
         $action = $published ? Text::_('PUBLISH') : Text::_('UNPUBLISH');
 
         $href = ($allowed ? '<a href="' . $url . '" title="' . $action . '">' : '') . '
-                     <img src="' . Uri::root(true) . '/components/com_contentbuilder/images/_' . $img . '" border="0" alt="' . $alt . '" />' .
+                     <img src="' . Uri::root(true) . '/components/com_contentbuilder_ng/images/_' . $img . '" border="0" alt="' . $alt . '" />' .
             ($allowed ? '</a>' : '');
 
         return $href;

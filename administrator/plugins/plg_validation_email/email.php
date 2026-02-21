@@ -14,7 +14,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder_helpers.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder_helpers.php');
 
 class plgContentbuilder_validationEmail extends CMSPlugin
 {

@@ -21,8 +21,8 @@ use Joomla\CMS\User\UserHelper;
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Mail\MailerFactoryInterface;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/modellegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/modellegacy.php');
 
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
 
@@ -132,7 +132,7 @@ class ContentbuilderModelVerify extends CBModel
             }
 
             if (intval($user_id) == 0) {
-                $this->mainframe->redirect('index.php?option=com_contentbuilder&lang=' . CBRequest::getCmd('lang', '') . '&return=' . cb_b64enc(Uri::getInstance()->toString()) . '&controller=edit&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
+                $this->mainframe->redirect('index.php?option=com_contentbuilder_ng&lang=' . CBRequest::getCmd('lang', '') . '&return=' . cb_b64enc(Uri::getInstance()->toString()) . '&controller=edit&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
             }
 
             $rec = $form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, $user_id, 0, -1, -1, -1, -1, array(), true, null);
@@ -143,7 +143,7 @@ class ContentbuilderModelVerify extends CBModel
             }
 
             if (!$form->getListRecordsTotal($ids)) {
-                $this->mainframe->redirect('index.php?option=com_contentbuilder&lang=' . CBRequest::getCmd('lang', '') . '&return=' . cb_b64enc(Uri::getInstance()->toString()) . '&controller=edit&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
+                $this->mainframe->redirect('index.php?option=com_contentbuilder_ng&lang=' . CBRequest::getCmd('lang', '') . '&return=' . cb_b64enc(Uri::getInstance()->toString()) . '&controller=edit&record_id=&id=' . $id . '&rand=' . rand(0, getrandmax()));
             }
         }
 
@@ -261,9 +261,9 @@ class ContentbuilderModelVerify extends CBModel
 
                             if ((!$out['client'] && (!isset($out['return-site']) || !$out['return-site'])) || ($out['client'] && (!isset($out['return-admin']) || !$out['return-admin']))) {
                                 if (intval($out['client']) && !$this->mainframe->isClient('administrator')) {
-                                    $redirect_view = Uri::getInstance()->base() . 'administrator/index.php?option=com_contentbuilder&controller=list&lang=' . CBRequest::getCmd('lang', '') . '&id=' . $out['verify_view'];
+                                    $redirect_view = Uri::getInstance()->base() . 'administrator/index.php?option=com_contentbuilder_ng&controller=list&lang=' . CBRequest::getCmd('lang', '') . '&id=' . $out['verify_view'];
                                 } else {
-                                    $redirect_view = 'index.php?option=com_contentbuilder&controller=list&lang=' . CBRequest::getCmd('lang', '') . '&id=' . $out['verify_view'];
+                                    $redirect_view = 'index.php?option=com_contentbuilder_ng&controller=list&lang=' . CBRequest::getCmd('lang', '') . '&id=' . $out['verify_view'];
                                 }
                             }
 
@@ -496,7 +496,7 @@ class ContentbuilderModelVerify extends CBModel
             $data['activation'] = ApplicationHelper::getHash(UserHelper::genRandomPassword());
             $user->set('activation', $data['activation']);
             $data['siteurl'] = Uri::root();
-            $data['activate'] = Uri::root() . 'index.php?option=com_contentbuilder&controller=verify&token=' . $data['activation'] . '&verify_by_admin=1&format=raw';
+            $data['activate'] = Uri::root() . 'index.php?option=com_contentbuilder_ng&controller=verify&token=' . $data['activation'] . '&verify_by_admin=1&format=raw';
 
             // Remove administrator/ from activate url in case this method is called from admin
             if ($this->mainframe->isClient('administrator')) {

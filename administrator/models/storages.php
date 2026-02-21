@@ -15,8 +15,8 @@ use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Pagination\Pagination;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/modellegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/modellegacy.php');
 
 class ContentbuilderModelStorages extends CBModel
 {

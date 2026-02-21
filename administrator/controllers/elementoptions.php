@@ -14,8 +14,8 @@ defined('_JEXEC') or die('Restricted access');
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 
-require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/controllerlegacy.php');
+require_once (JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once (JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/controllerlegacy.php');
 
 class ContentbuilderControllerElementoptions extends CBController
 {
@@ -52,7 +52,7 @@ class ContentbuilderControllerElementoptions extends CBController
         }
 
         // Check the table in so it can be edited.... we are done with it anyway
-        $link = Route::_('index.php?option=com_contentbuilder&controller=elementoptions&tabStartOffset=' . CBRequest::getInt('tabStartOffset', 0) . '&tmpl=component&element_id=' . CBRequest::getInt('element_id', 0) . '&id=' . CBRequest::getInt('id', 0) . $type_change_url, false);
+        $link = Route::_('index.php?option=com_contentbuilder_ng&controller=elementoptions&tabStartOffset=' . CBRequest::getInt('tabStartOffset', 0) . '&tmpl=component&element_id=' . CBRequest::getInt('element_id', 0) . '&id=' . CBRequest::getInt('id', 0) . $type_change_url, false);
         $this->setRedirect($link, $msg);
     }
 }

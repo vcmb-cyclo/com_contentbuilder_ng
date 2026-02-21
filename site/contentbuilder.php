@@ -81,7 +81,7 @@ if (CBRequest::getInt('Itemid', 0)) {
 		$session->set('com_contentbuilderformsd_filter_publish', -1);
 		$session->set('com_contentbuilderformsd_filter_language', '');
 		$session->set('com_contentbuilderformsd_id', 0);
-		// Keep compatibility with installs still using the _ng option key variant.
+		// Compatibility key variant if an install still uses _ng option namespace.
 		$session->set('com_contentbuilder_ngformsd_filter_order', '');
 		$session->set('com_contentbuilder_ngformsd_filter_order_Dir', '');
 		$session->set('com_contentbuilder_ngformsd_filter', '');
@@ -95,7 +95,7 @@ if (CBRequest::getInt('Itemid', 0)) {
 
 if (CBRequest::getInt('Itemid', 0)) {
 
-	$option = 'com_contentbuilder';
+	$option = 'com_contentbuilder_ng';
 
 	if (CBRequest::getVar('layout', null) !== null) {
 		Factory::getApplication()->getSession()->set('com_contentbuilder.layout.' . CBRequest::getInt('Itemid', 0) . CBRequest::getVar('layout', null), CBRequest::getVar('layout', null));

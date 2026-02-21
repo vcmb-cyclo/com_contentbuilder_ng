@@ -8,7 +8,7 @@
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 // shouldn't be required no longer in Joomla 3.0 Stable
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/pane/CBBehaviorTabs.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/pane/CBBehaviorTabs.php');
 
 class CBTabs
 {

@@ -16,9 +16,9 @@ use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\File;
 use Joomla\CMS\Router\Route;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/controllerlegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/controllerlegacy.php');
 
 class ContentbuilderControllerStorages extends CBController
 {
@@ -34,7 +34,7 @@ class ContentbuilderControllerStorages extends CBController
     {
         $model = $this->getModel('storage');
         $model->move(-1);
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=storages&limitstart=' . CBRequest::getInt('limitstart'), false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=storages&limitstart=' . CBRequest::getInt('limitstart'), false));
     }
 
     function listdelete()
@@ -68,7 +68,7 @@ class ContentbuilderControllerStorages extends CBController
     {
         $model = $this->getModel('storage');
         $model->move(1);
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=storages&limitstart=' . CBRequest::getInt('limitstart'), false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=storages&limitstart=' . CBRequest::getInt('limitstart'), false));
     }
 
     function listorderdown()
@@ -88,7 +88,7 @@ class ContentbuilderControllerStorages extends CBController
     {
         $model = $this->getModel('storages');
         $model->saveOrder();
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=storages&limitstart=' . CBRequest::getInt('limitstart'), false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=storages&limitstart=' . CBRequest::getInt('limitstart'), false));
     }
 
 
@@ -118,7 +118,7 @@ class ContentbuilderControllerStorages extends CBController
             $model->setPublished();
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=storages&limitstart=' . CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_PUBLISHED'));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=storages&limitstart=' . CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_PUBLISHED'));
     }
 
     function listpublish()
@@ -150,7 +150,7 @@ class ContentbuilderControllerStorages extends CBController
             $model->setUnpublished();
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=storages&limitstart=' . CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_UNPUBLISHED'));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=storages&limitstart=' . CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_UNPUBLISHED'));
     }
 
     function listunpublish()
@@ -220,7 +220,7 @@ class ContentbuilderControllerStorages extends CBController
         }
 
         // Check the table in so it can be edited.... we are done with it anyway
-        $link = Route::_('index.php?option=com_contentbuilder&controller=storages&limitstart=' . $limit . $additionalParams, false);
+        $link = Route::_('index.php?option=com_contentbuilder_ng&controller=storages&limitstart=' . $limit . $additionalParams, false);
         $this->setRedirect($link, $msg);
     }
 
@@ -235,7 +235,7 @@ class ContentbuilderControllerStorages extends CBController
         }
 
         // Check the table in so it can be edited.... we are done with it anyway
-        $link = Route::_('index.php?option=com_contentbuilder&controller=storages&task=edit&limitstart=' . CBRequest::getInt('limitstart'), false);
+        $link = Route::_('index.php?option=com_contentbuilder_ng&controller=storages&task=edit&limitstart=' . CBRequest::getInt('limitstart'), false);
         $this->setRedirect($link, $msg);
     }
 
@@ -248,7 +248,7 @@ class ContentbuilderControllerStorages extends CBController
             $msg = Text::_('COM_CONTENTBUILDER_DELETED');
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=storages&limitstart=' . CBRequest::getInt('limitstart'), false), $msg);
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=storages&limitstart=' . CBRequest::getInt('limitstart'), false), $msg);
     }
 
     function listremove()
@@ -273,7 +273,7 @@ class ContentbuilderControllerStorages extends CBController
     function cancel()
     {
         $msg = Text::_('COM_CONTENTBUILDER_CANCELLED');
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=storages&limitstart=0', false), $msg);
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=storages&limitstart=0', false), $msg);
     }
 
     function display($cachable = false, $urlparams = array())

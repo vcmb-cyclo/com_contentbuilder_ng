@@ -3,7 +3,7 @@
   <update>
     <name>ContentBuilder-ng</name>
     <description>ContentBuilder-ng Update</description>
-    <element>com_contentbuilder</element>
+    <element>com_contentbuilder_ng</element>
     <type>component</type>
     <client>1</client>
     <version>6.1.0-RC8</version>

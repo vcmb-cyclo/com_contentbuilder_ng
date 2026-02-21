@@ -53,7 +53,7 @@ class plgContentContentbuilder_permission_observer extends CMSPlugin
 
     function onContentPrepare($context, &$article, &$params, $limitstart = 0)
     {
-        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php')) {
+        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder.php')) {
             return true;
         }
 
@@ -68,7 +68,7 @@ class plgContentContentbuilder_permission_observer extends CMSPlugin
             $db->setQuery("Select form.`reference_id`,article.`record_id`,article.`form_id`,form.`type`,form.`published_only`,form.`own_only`,form.`own_only_fe` From #__contentbuilder_articles As article, #__contentbuilder_forms As form Where form.`published` = 1 And form.id = article.`form_id` And article.`article_id` = " . $db->quote($article->id));
             $data = $db->loadAssoc();
 
-            require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php');
+            require_once (JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder.php');
             $form = contentbuilder::getForm($data['type'], $data['reference_id']);
 
             if (!$form || !$form->exists) {

@@ -28,7 +28,7 @@ $state_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('state
 $publish_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('publish') : contentbuilder::authorize('publish');
 $rating_allowed = class_exists('cbFeMarker') ? contentbuilder::authorizeFe('rating') : contentbuilder::authorize('rating');
 
-Factory::getApplication()->getDocument()->addScript(Uri::root(true) . '/components/com_contentbuilder/assets/js/contentbuilder.js');
+Factory::getApplication()->getDocument()->addScript(Uri::root(true) . '/components/com_contentbuilder_ng/assets/js/contentbuilder.js');
 
 $___getpost = 'post';
 $___tableOrdering = "Joomla.tableOrdering = function";
@@ -110,7 +110,7 @@ if ($this->export_xls):
 	?>
 	<div class="mb-3" style="float: right; text-align: right;">
 		<a
-			href="<?php echo Route::_('index.php?option=com_contentbuilder&controller=export&id=' . CBRequest::getInt('id', 0) . '&type=xls&format=raw&tmpl=component'); ?>"><i
+			href="<?php echo Route::_('index.php?option=com_contentbuilder_ng&controller=export&id=' . CBRequest::getInt('id', 0) . '&type=xls&format=raw&tmpl=component'); ?>"><i
 				class="fa fa-solid fa-2x fa-file-excel"></i></a>
 	</div>
 	<div style="clear: both;"></div>
@@ -129,7 +129,7 @@ endif;
 	if ($new_allowed) {
 		?>
 		<button class="button btn btn-sm btn-primary cbButton cbNewButton"
-			onclick="location.href='<?php echo Route::_('index.php?option=com_contentbuilder&controller=edit&backtolist=1&id=' . CBRequest::getInt('id', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&record_id=0&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order')); ?>'"><?php echo Text::_('COM_CONTENTBUILDER_NEW'); ?></button>
+			onclick="location.href='<?php echo Route::_('index.php?option=com_contentbuilder_ng&controller=edit&backtolist=1&id=' . CBRequest::getInt('id', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&record_id=0&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order')); ?>'"><?php echo Text::_('COM_CONTENTBUILDER_NEW'); ?></button>
 		<?php
 	}
 	-- END of BEGIN - NEW BUTTON */
@@ -154,11 +154,11 @@ endif;
 <!-- 2023-12-19 XDA / GIL - BEGIN - Fix
 <form action="index.php" method=<php echo $___getpost;?>" name="adminForm" id
 # Bug CB Joomla 4 (march 2023) - fix error search, delete, pagination, 404 error 
-Replace line 144 of components/com_contentbuilder/views/list/tmpl/default.php
+Replace line 144 of components/com_contentbuilder_ng/views/list/tmpl/default.php
 # by this block -->
 <form action="
 <?php
-$szRoute = 'index.php?option=com_contentbuilder'
+$szRoute = 'index.php?option=com_contentbuilder_ng'
 	. '&Itemid=' . CBRequest::getInt('Itemid', 0)
 	. '&limitstart=' . CBRequest::getInt('limitstart', 0)
 	. '&filter_order=' . CBRequest::getCmd('filter_order')
@@ -442,10 +442,10 @@ echo Route::_($szRoute); ?>" method="<?php echo $___getpost; ?>" name="adminForm
 			$n = count($this->items);
 			for ($i = 0; $i < $n; $i++) {
 				$row = $this->items[$i];
-				$link = Route::_('index.php?option=com_contentbuilder&controller=details&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . CBRequest::getInt('Itemid', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order'));
-				$edit_link = Route::_('index.php?option=com_contentbuilder&controller=edit&backtolist=1&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . CBRequest::getInt('Itemid', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order'));
-				$publish_link = Route::_('index.php?option=com_contentbuilder&controller=edit&task=publish&backtolist=1&id=' . $this->form_id . '&list_publish=1&cid[]=' . $row->colRecord . '&Itemid=' . CBRequest::getInt('Itemid', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order'));
-				$unpublish_link = Route::_('index.php?option=com_contentbuilder&controller=edit&task=publish&backtolist=1&id=' . $this->form_id . '&list_publish=0&cid[]=' . $row->colRecord . '&Itemid=' . CBRequest::getInt('Itemid', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order'));
+				$link = Route::_('index.php?option=com_contentbuilder_ng&controller=details&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . CBRequest::getInt('Itemid', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order'));
+				$edit_link = Route::_('index.php?option=com_contentbuilder_ng&controller=edit&backtolist=1&id=' . $this->form_id . '&record_id=' . $row->colRecord . '&Itemid=' . CBRequest::getInt('Itemid', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order'));
+				$publish_link = Route::_('index.php?option=com_contentbuilder_ng&controller=edit&task=publish&backtolist=1&id=' . $this->form_id . '&list_publish=1&cid[]=' . $row->colRecord . '&Itemid=' . CBRequest::getInt('Itemid', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order'));
+				$unpublish_link = Route::_('index.php?option=com_contentbuilder_ng&controller=edit&task=publish&backtolist=1&id=' . $this->form_id . '&list_publish=0&cid[]=' . $row->colRecord . '&Itemid=' . CBRequest::getInt('Itemid', 0) . (CBRequest::getVar('tmpl', '') != '' ? '&tmpl=' . CBRequest::getVar('tmpl', '') : '') . (CBRequest::getVar('layout', '') != '' ? '&layout=' . CBRequest::getVar('layout', '') : '') . '&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getCmd('filter_order'));
 				$select = '<input class="form-check-input" type="checkbox" name="cid[]" value="' . $row->colRecord . '"/>';
 				?>
 				<tr class="<?php echo "row$k"; ?>">
@@ -484,7 +484,7 @@ echo Route::_($szRoute); ?>" method="<?php echo $___getpost; ?>" name="adminForm
 						?>
 						<td>
 							<a href="<?php echo $edit_link; ?>"><img
-									src="<?php Uri::root(true) ?>components/com_contentbuilder/images/edit.png" border="0"
+									src="<?php Uri::root(true) ?>components/com_contentbuilder_ng/images/edit.png" border="0"
 									width="18" height="18" /></a>
 						</td>
 						<?php

@@ -44,7 +44,7 @@ if (!(CBRequest::getCmd('controller', '') == 'elementoptions' || CBRequest::getC
     Factory::getApplication()->enqueueMessage(Text::_('JERROR_ALERTNOAUTHOR'), 'warning');
 }
 
-require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/contentbuilder.php');
+require_once(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/classes/contentbuilder.php');
 
 $db     = Factory::getContainer()->get(DatabaseInterface::class);
 $db->setQuery("Select `id`,`name` From #__contentbuilder_forms Where display_in In (1,2) And published = 1");

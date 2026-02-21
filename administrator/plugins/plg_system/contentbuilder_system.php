@@ -55,7 +55,7 @@ class plgSystemContentbuilder_system extends CMSPlugin
 
     function onAfterDispatch()
     {
-        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php')) {
+        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder.php')) {
             return;
         }
 
@@ -172,7 +172,7 @@ class plgSystemContentbuilder_system extends CMSPlugin
             $the_ids = implode(',', $ids);
 
             if ($the_ids) {
-                $this->app->getDocument()->addScript(Uri::root(true) . '/components/com_contentbuilder/assets/js/contentbuilder.js');
+                $this->app->getDocument()->addScript(Uri::root(true) . '/components/com_contentbuilder_ng/assets/js/contentbuilder.js');
                 $this->db->setQuery("Select Distinct forms.theme_plugin From #__contentbuilder_forms As forms, #__contentbuilder_articles As articles, #__content As content Where forms.id = articles.form_id And articles.article_id In (" . $the_ids . ") And content.id = articles.article_id And (content.state = 1 Or content.state = 0)");
                 $themes = $this->db->loadColumn();
                 foreach ($themes as $theme) {
@@ -217,7 +217,7 @@ class plgSystemContentbuilder_system extends CMSPlugin
                 $this->db->setQuery("Select article.record_id, article.form_id From #__contentbuilder_articles As article, #__content As content Where content.id = " . intval($id) . " And (content.state = 0 Or content.state = 1) And article.article_id = content.id");
                 $article = $this->db->loadAssoc();
                 if (is_array($article)) {
-                    $this->app->redirect('index.php?option=com_contentbuilder&controller=edit&id=' . $article['form_id'] . "&record_id=" . $article['record_id'] . "&jsback=1&Itemid=" . CBRequest::getInt('Itemid', 0));
+                    $this->app->redirect('index.php?option=com_contentbuilder_ng&controller=edit&id=' . $article['form_id'] . "&record_id=" . $article['record_id'] . "&jsback=1&Itemid=" . CBRequest::getInt('Itemid', 0));
                 }
             }
         }
@@ -225,13 +225,13 @@ class plgSystemContentbuilder_system extends CMSPlugin
 
     function onAfterRoute()
     {
-        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php')) {
+        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder.php')) {
             return;
         }
 
         // register non-existent records
         if (in_array(CBRequest::getVar('option', ''), array('com_contentbuilder', 'com_content'))) {
-            require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php');
+            require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder.php');
             $this->db->setQuery("Select `type`, `reference_id` From #__contentbuilder_forms Where published = 1");
             $views = $this->db->loadAssocList();
             $typeview = array();
@@ -362,7 +362,7 @@ class plgSystemContentbuilder_system extends CMSPlugin
 
     function onAfterInitialize()
     {
-        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php')) {
+        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder.php')) {
             return;
         }
 
@@ -443,7 +443,7 @@ class plgSystemContentbuilder_system extends CMSPlugin
 
             $pluginParams = CBCompat::getPluginParams($this, 'system', 'contentbuilder_system');
 
-            require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php');
+            require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder.php');
 
             $this->db->setQuery("
                 Select 

@@ -16,7 +16,7 @@ use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\MVC\View\HtmlView;
 
 require_once(JPATH_SITE.'/administrator/' .'components/' .'com_contentbuilder/' .'classes/' .'joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/viewlegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/viewlegacy.php');
 
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder_helpers.php');

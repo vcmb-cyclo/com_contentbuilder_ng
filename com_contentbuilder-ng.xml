@@ -1,10 +1,10 @@
 <extension type="component" method="upgrade" version="6.0">
 
     <!-- Basic information -->
-    <name>com_contentbuilder</name>
+    <name>com_contentbuilder_ng</name>
     <version>6.1.0-RC8</version>
     <creationDate>2026-02-20</creationDate>
-    <description>com_contentbuilder XML description</description>
+    <description>com_contentbuilder_ng XML description</description>
 
     <!-- Author information -->
     <author>XDA+GIL</author>
@@ -71,10 +71,10 @@
 <!-- ADMINISTRATION -->
 <!-- ===================== -->
 <administration>
-    <menu img="components/com_contentbuilder/views/logo_icon_cb.png">ContentBuilder</menu>
+    <menu img="components/com_contentbuilder_ng/views/logo_icon_cb.png">ContentBuilder</menu>
     <submenu>
-        <menu controller="storages" img="components/com_contentbuilder/views/logo_icon_cb.png">COM_CONTENTBUILDER_STORAGES</menu>
-        <menu controller="forms" img="components/com_contentbuilder/views/logo_icon_cb.png">COM_CONTENTBUILDER_LIST</menu>
+        <menu controller="storages" img="components/com_contentbuilder_ng/views/logo_icon_cb.png">COM_CONTENTBUILDER_STORAGES</menu>
+        <menu controller="forms" img="components/com_contentbuilder_ng/views/logo_icon_cb.png">COM_CONTENTBUILDER_LIST</menu>
         <menu view="contentbuilder">COM_CONTENTBUILDER_ABOUT</menu>
     </submenu>
 

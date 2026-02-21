@@ -98,7 +98,7 @@ class plgContentContentbuilder_verify extends CMSPlugin
     function onContentPrepare($context, &$article, &$params, $limitstart = 0)
     {
 
-        if (!$article || !isset ($article->text) || !file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php')) {
+        if (!$article || !isset ($article->text) || !file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder.php')) {
             return true;
         }
 
@@ -187,7 +187,7 @@ class plgContentContentbuilder_verify extends CMSPlugin
                     $this->app->getSession()->clear($plugin . $verification_name, 'com_contentbuilder.verify.' . $plugin . $verification_name);
                     $this->app->getSession()->set($plugin . $verification_name, $plugin_settings, 'com_contentbuilder.verify.' . $plugin . $verification_name);
 
-                    $link = Uri::root(true) . '/index.php?option=com_contentbuilder&controller=verify&plugin=' . urlencode($plugin) . '&verification_name=' . urlencode($verification_name) . '&format=raw';
+                    $link = Uri::root(true) . '/index.php?option=com_contentbuilder_ng&controller=verify&plugin=' . urlencode($plugin) . '&verification_name=' . urlencode($verification_name) . '&format=raw';
                     PluginHelper::importPlugin('contentbuilder_verify', $plugin);
                     $eventResult = $this->app->getDispatcher()->dispatch('onViewport', new Joomla\Event\Event('onVerify', array($link, $plugin_settings)));
                     $results = $eventResult->getArgument('result') ?: [];

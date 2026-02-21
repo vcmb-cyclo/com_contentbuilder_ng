@@ -50,6 +50,7 @@ if (!function_exists('contentbuilderImageScaleShutdownHandler')) {
 	{
 		$last_error = error_get_last();
 		if (is_array($last_error) && isset($last_error['type']) && $last_error['type'] === E_ERROR) {
+			// fatal error
 			contentbuilderImageScaleErrorHandler(E_ERROR, $last_error['message'], $last_error['file'], $last_error['line']);
 		}
 	}
@@ -57,8 +58,8 @@ if (!function_exists('contentbuilderImageScaleShutdownHandler')) {
 set_error_handler('contentbuilderImageScaleErrorHandler');
 register_shutdown_function('contentbuilderImageScaleShutdownHandler');
 
-require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder_helpers.php');
+require_once (JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once (JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder_helpers.php');
 
 // some hosting providers think it is a good idea not to compile in exif with php...
 if (!function_exists('exif_imagetype')) {
@@ -130,7 +131,7 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 		$max_filesize = (8 * 8 * 8 * 1024 * 2) * intval($pluginParams->def('max_filesize', 4)); // 4M default
 
 		
-		if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php')) {
+		if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder.php')) {
 			return true;
 		}
 
@@ -204,7 +205,7 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 					$this->db->setQuery("Select form.`title_field`,form.`protect_upload_directory`,form.`reference_id`,article.`record_id`,article.`form_id`,form.`type`,form.`published_only`,form.`own_only`,form.`own_only_fe` From #__contentbuilder_articles As article, #__contentbuilder_forms As form Where form.`published` = 1 And form.id = article.`form_id` And article.`article_id` = " . $this->db->quote($article->id));
 					$data = $this->db->loadAssoc();
 
-					require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php');
+					require_once (JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder.php');
 					$form = contentbuilder::getForm($data['type'], $data['reference_id']);
 					if (!$form || !$form->exists) {
 						return true;
@@ -384,7 +385,7 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 
 						if (!$use_form) {
 
-							require_once (JPATH_SITE .'/administrator/components/com_contentbuilder/classes/contentbuilder.php');
+							require_once (JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/contentbuilder.php');
 							$use_form = contentbuilder::getForm($ref_type, $ref_id);
 						}
 
@@ -756,7 +757,7 @@ class plgContentContentbuilder_image_scale extends CMSPlugin
 																$url = Uri::getInstance()->toString();
 																//fixing downloads on other pages than page 1
 																if (CBRequest::getVar('controller', '') == 'list') {
-																	$url = Uri::getInstance()->base() . 'index.php?option=com_contentbuilder&amp;controller=list&amp;id=' . intval($form_id) . '&amp;limitstart=' . CBRequest::getInt('limitstart', 0);
+																	$url = Uri::getInstance()->base() . 'index.php?option=com_contentbuilder_ng&amp;controller=list&amp;id=' . intval($form_id) . '&amp;limitstart=' . CBRequest::getInt('limitstart', 0);
 																}
 
 																if (trim($open) == 'true') {

@@ -17,8 +17,8 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\MVC\View\HtmlView;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/viewlegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/viewlegacy.php');
 
 class ContentbuilderViewForms extends HtmlView
 {
@@ -27,10 +27,10 @@ class ContentbuilderViewForms extends HtmlView
 
         echo '
         <style type="text/css">
-        .icon-48-logo_left { background-image: url(../administrator/components/com_contentbuilder/views/logo_left.png); }
+        .icon-48-logo_left { background-image: url(../administrator/components/com_contentbuilder_ng/views/logo_left.png); }
         </style>
         ';
-        echo '<link rel="stylesheet" href="' . Uri::root(true) . '/administrator/components/com_contentbuilder/views/bluestork.fix.css" type="text/css" />';
+        echo '<link rel="stylesheet" href="' . Uri::root(true) . '/administrator/components/com_contentbuilder_ng/views/bluestork.fix.css" type="text/css" />';
 
         ToolBarHelper::title('ContentBuilder :: ' . Text::_('COM_CONTENTBUILDER_FORMS') . '</span>', 'logo_left.png');
         ToolBarHelper::addNew();

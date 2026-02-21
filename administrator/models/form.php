@@ -23,8 +23,8 @@ use Joomla\CMS\Pagination\Pagination;
 
 HTMLHelper::_('behavior.keepalive');
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/modellegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/modellegacy.php');
 
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
 
@@ -413,7 +413,7 @@ class ContentbuilderModelForm extends CBModel
             $data->form = contentbuilder::getForm($data->type, $data->reference_id);
             if (!$data->form->exists) {
                 Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_FORM_NOT_FOUND'), 'error');
-                Factory::getApplication()->redirect('index.php?option=com_contentbuilder&controller=forms&limitstart=' . $this->getState('limitstart', 0));
+                Factory::getApplication()->redirect('index.php?option=com_contentbuilder_ng&controller=forms&limitstart=' . $this->getState('limitstart', 0));
             }
             if (isset($data->form->properties) && isset($data->form->properties->name)) {
                 $data->type_name = $data->form->properties->name;
@@ -1116,12 +1116,12 @@ class ContentbuilderModelForm extends CBModel
 
             $this->getTable('elements')->reorder('form_id = ' . $cid);
 
-            $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&controller=list&id=" . intval($cid) . "'");
+            $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder_ng&controller=list&id=" . intval($cid) . "'");
             $this->_db->execute();
-            $this->_db->setQuery("Select count(id) From #__menu Where `link` Like 'index.php?option=com_contentbuilder&controller=list&id=%'");
+            $this->_db->setQuery("Select count(id) From #__menu Where `link` Like 'index.php?option=com_contentbuilder_ng&controller=list&id=%'");
             $amount = $this->_db->loadResult();
             if (!$amount) {
-                $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder&viewcontainer=true'");
+                $this->_db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder_ng&viewcontainer=true'");
                 $this->_db->execute();
             }
 

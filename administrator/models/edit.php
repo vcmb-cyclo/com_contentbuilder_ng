@@ -32,8 +32,8 @@ use Joomla\CMS\User\UserHelper;
 use Joomla\Application\ApplicationInterface;
 use Joomla\CMS\Mail\MailerFactoryInterface;
 
-require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/modellegacy.php');
+require_once(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/classes/modellegacy.php');
 
 require_once(JPATH_COMPONENT_ADMINISTRATOR . '/classes/contentbuilder.php');
 require_once(JPATH_COMPONENT_ADMINISTRATOR . '/classes/contentbuilder_helpers.php');
@@ -269,7 +269,7 @@ class ContentbuilderModelEdit extends CBModel
                     $article = $this->_db->loadAssoc();
 
                     if ($data->create_articles) {
-                        Form::addFormPath(JPATH_SITE . '/administrator/components/com_contentbuilder/models/forms');
+                        Form::addFormPath(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/models/forms');
                         Form::addFieldPath(JPATH_SITE . '/administrator/components/com_content/models/fields');
                         $form = Form::getInstance('com_content.article', 'article', array('control' => 'Form', 'load_data' => true));
 
@@ -690,7 +690,7 @@ var contentbuilder = new function(){
                     if ($the_captcha_field !== null && !in_array($the_captcha_field['reference_id'], $noneditable_fields)) {
 
                         if (!class_exists('Securimage')) {
-                            require_once(JPATH_SITE . '/components/com_contentbuilder/images/securimage/securimage.php');
+                            require_once(JPATH_SITE . '/components/com_contentbuilder_ng/images/securimage/securimage.php');
                         }
 
                         $securimage = new Securimage();
@@ -1812,7 +1812,7 @@ var contentbuilder = new function(){
 
             $siteurl = $data['siteurl'] . 'index.php?option=com_users&task=registration.activate&token=' . $data['activation'];
             if ($bypass_plugin) {
-                $siteurl = $data['siteurl'] . 'index.php?option=com_contentbuilder&controller=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $data['activation'] . '&verification_id=' . $verification_id . '&format=raw';
+                $siteurl = $data['siteurl'] . 'index.php?option=com_contentbuilder_ng&controller=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $data['activation'] . '&verification_id=' . $verification_id . '&format=raw';
             }
 
             $emailBody = Text::_('COM_USERS_EMAIL_REGISTERED_WITH_ADMIN_ACTIVATION_BODY');
@@ -1834,7 +1834,7 @@ var contentbuilder = new function(){
 
             $siteurl = $data['siteurl'] . 'index.php?option=com_users&task=registration.activate&token=' . $data['activation'];
             if ($bypass_plugin) {
-                $siteurl = $data['siteurl'] . 'index.php?option=com_contentbuilder&controller=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $data['activation'] . '&verification_id=' . $verification_id . '&format=raw';
+                $siteurl = $data['siteurl'] . 'index.php?option=com_contentbuilder_ng&controller=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $data['activation'] . '&verification_id=' . $verification_id . '&format=raw';
             }
 
             $emailBody = Text::_('COM_USERS_EMAIL_REGISTERED_WITH_ACTIVATION_BODY');
@@ -1972,7 +1972,7 @@ var contentbuilder = new function(){
 
         $siteurl_ = $siteURL . "index.php?option=com_user&task=activate&activation=" . $user->get('activation');
         if ($bypass_plugin) {
-            $siteurl_ = $siteURL . 'index.php?option=com_contentbuilder&controller=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $user->get('activation') . '&verification_id=' . $verification_id . '&format=raw';
+            $siteurl_ = $siteURL . 'index.php?option=com_contentbuilder_ng&controller=verify&plugin=' . urlencode($bypass_plugin) . '&verification_name=' . urlencode($bypass_verification_name) . '&token=' . $user->get('activation') . '&verification_id=' . $verification_id . '&format=raw';
         }
 
         if ($useractivation == 1) {

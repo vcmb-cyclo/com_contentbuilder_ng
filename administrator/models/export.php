@@ -14,7 +14,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 
 require_once(JPATH_SITE.'/administrator/' .'components/' .'com_contentbuilder/' .'classes/' .'joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/modellegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/modellegacy.php');
 
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
 

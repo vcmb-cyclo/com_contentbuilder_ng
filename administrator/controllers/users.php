@@ -14,7 +14,7 @@ use Joomla\CMS\Router\Route;
 
 require_once(JPATH_SITE.'/administrator/' .'components/' .'com_contentbuilder/' .'classes/' .'joomla_compat.php');
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/controllerlegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/controllerlegacy.php');
 
 class ContentbuilderControllerUsers extends CBController
 {
@@ -151,7 +151,7 @@ class ContentbuilderControllerUsers extends CBController
             $model->setPublished();
         }
 
-        $this->setRedirect( Route::_('index.php?option=com_contentbuilder&controller=users&form_id='.CBRequest::getInt('form_id',0).'&tmpl='.CBRequest::getCmd('tmpl','').'&limitstart='.CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_PUBLISHED') );
+        $this->setRedirect( Route::_('index.php?option=com_contentbuilder_ng&controller=users&form_id='.CBRequest::getInt('form_id',0).'&tmpl='.CBRequest::getCmd('tmpl','').'&limitstart='.CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_PUBLISHED') );
     }
     
     function unpublish() {
@@ -168,7 +168,7 @@ class ContentbuilderControllerUsers extends CBController
             $model->setUnpublished();
         }
 
-        $this->setRedirect( Route::_('index.php?option=com_contentbuilder&controller=users&form_id='.CBRequest::getInt('form_id',0).'&tmpl='.CBRequest::getCmd('tmpl','').'&limitstart='.CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_UNPUBLISHED') );
+        $this->setRedirect( Route::_('index.php?option=com_contentbuilder_ng&controller=users&form_id='.CBRequest::getInt('form_id',0).'&tmpl='.CBRequest::getCmd('tmpl','').'&limitstart='.CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_UNPUBLISHED') );
     }
     
     function save($keep_task = false)
@@ -192,14 +192,14 @@ class ContentbuilderControllerUsers extends CBController
         }
 
         // Check the table in so it can be edited.... we are done with it anyway
-        $link = 'index.php?option=com_contentbuilder&controller=users&form_id='.CBRequest::getInt('form_id',0).'&tmpl='.CBRequest::getCmd('tmpl','').'&limitstart='.$limit.$additionalParams;
+        $link = 'index.php?option=com_contentbuilder_ng&controller=users&form_id='.CBRequest::getInt('form_id',0).'&tmpl='.CBRequest::getCmd('tmpl','').'&limitstart='.$limit.$additionalParams;
         $this->setRedirect(Route::_($link, false), $msg);
     }
 
     function cancel()
     {
         $msg = Text::_( 'COM_CONTENTBUILDER_CANCELLED' );
-        $this->setRedirect( Route::_('index.php?option=com_contentbuilder&controller=users&form_id='.CBRequest::getInt('form_id',0).'&tmpl='.CBRequest::getCmd('tmpl','').'&limitstart=0', false), $msg );
+        $this->setRedirect( Route::_('index.php?option=com_contentbuilder_ng&controller=users&form_id='.CBRequest::getInt('form_id',0).'&tmpl='.CBRequest::getCmd('tmpl','').'&limitstart=0', false), $msg );
     }
 
     function display($cachable = false, $urlparams = array())

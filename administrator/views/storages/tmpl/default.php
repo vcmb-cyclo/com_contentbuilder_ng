@@ -55,7 +55,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
     }
     //-->
 </script>
-<form action="index.php?option=com_contentbuilder&controller=storages" method="post" name="adminForm" id="adminForm">
+<form action="index.php?option=com_contentbuilder_ng&controller=storages" method="post" name="adminForm" id="adminForm">
 
     <div id="editcell">
         <table class="adminlist table table-striped">
@@ -88,7 +88,7 @@ $___tableOrdering = "Joomla.tableOrdering = function";
             for ($i = 0; $i < $n; $i++) {
                 $row = $this->items[$i];
                 $checked = HTMLHelper::_('grid.id', $i, $row->id);
-                $link = Route::_('index.php?option=com_contentbuilder&controller=storages&task=edit&cid[]=' . $row->id);
+                $link = Route::_('index.php?option=com_contentbuilder_ng&controller=storages&task=edit&cid[]=' . $row->id);
                 $published = contentbuilder_helpers::listPublish($row, $i);
                 ?>
                 <tr class="<?php echo "row$k"; ?>">

@@ -139,7 +139,7 @@ if ($this->page_heading) {
             $row = $this->items[$i];
             $link_ = htmlentities($row->name, ENT_QUOTES, 'UTF-8');
             if (($this->show_permissions && $this->perms[$row->id]['view']) || !$this->show_permissions) {
-                $link = Route::_('index.php?option=com_contentbuilder&title=' . contentbuilder::stringURLUnicodeSlug($row->name) . '&controller=list&id=' . $row->id);
+                $link = Route::_('index.php?option=com_contentbuilder_ng&title=' . contentbuilder::stringURLUnicodeSlug($row->name) . '&controller=list&id=' . $row->id);
                 $link_ = '<a href="' . $link . '">' . htmlentities($row->name, ENT_QUOTES, 'UTF-8') . '</a>';
             }
             ?>
@@ -198,7 +198,7 @@ if ($this->page_heading) {
 
                     <td valign="top">
                         <img width="16" height="16" alt=""
-                            src="<?php echo $this->perms[$row->id]['view'] ? Uri::root(true) . '/components/com_contentbuilder/assets/images/tick.png' : Uri::root(true) . '/components/com_contentbuilder/assets/images/untick.png'; ?>" />
+                            src="<?php echo $this->perms[$row->id]['view'] ? Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/tick.png' : Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/untick.png'; ?>" />
                     </td>
 
                     <?php
@@ -211,7 +211,7 @@ if ($this->page_heading) {
 
                     <td valign="top">
                         <img width="16" height="16" alt=""
-                            src="<?php echo $this->perms[$row->id]['new'] ? Uri::root(true) . '/components/com_contentbuilder/assets/images/tick.png' : Uri::root(true) . '/components/com_contentbuilder/assets/images/untick.png'; ?>" />
+                            src="<?php echo $this->perms[$row->id]['new'] ? Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/tick.png' : Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/untick.png'; ?>" />
                     </td>
 
                     <?php
@@ -224,7 +224,7 @@ if ($this->page_heading) {
 
                     <td valign="top">
                         <img width="16" height="16" alt=""
-                            src="<?php echo $this->perms[$row->id]['edit'] ? Uri::root(true) . '/components/com_contentbuilder/assets/images/tick.png' : Uri::root(true) . '/components/com_contentbuilder/assets/images/untick.png'; ?>" />
+                            src="<?php echo $this->perms[$row->id]['edit'] ? Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/tick.png' : Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/untick.png'; ?>" />
                     </td>
 
                     <?php

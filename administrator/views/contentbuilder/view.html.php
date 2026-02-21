@@ -15,8 +15,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\MVC\View\HtmlView;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/viewlegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/viewlegacy.php');
 
 class ContentbuilderViewContentbuilder extends HtmlView
 {
@@ -24,7 +24,7 @@ class ContentbuilderViewContentbuilder extends HtmlView
     {
         echo '
         <style type="text/css">
-        .icon-48-logo_left { background-image: url(../administrator/components/com_contentbuilder/views/logo_left.png); }
+        .icon-48-logo_left { background-image: url(../administrator/components/com_contentbuilder_ng/views/logo_left.png); }
         </style>
         ';
         ToolBarHelper::title(Text::_('COM_CONTENTBUILDER_ABOUT') . '</span>', 'logo_left.png');

@@ -807,7 +807,7 @@ $cbcompat = new CBCompat();
                                 <?php echo $editable; ?>
                                 <?php
                                 if ($row->editable && !$this->form->edit_by_type) {
-                                    echo '<br/><br/>[<a href="index.php?option=com_contentbuilder&amp;controller=elementoptions&amp;tmpl=component&amp;element_id=' . $row->id . '&amp;id=' . $this->form->id . '" title="" data-bs-toggle="modal" data-bs-target="#text-type-modal">' . $row->type . '</a>]';
+                                    echo '<br/><br/>[<a href="index.php?option=com_contentbuilder_ng&amp;controller=elementoptions&amp;tmpl=component&amp;element_id=' . $row->id . '&amp;id=' . $this->form->id . '" title="" data-bs-toggle="modal" data-bs-target="#text-type-modal">' . $row->type . '</a>]';
                                 }
                                 ?>
                             </td>
@@ -2038,7 +2038,7 @@ $cbcompat = new CBCompat();
                     </label>
                 </td>
                 <td>
-                    <?php echo '[<a href="index.php?option=com_contentbuilder&amp;controller=users&amp;tmpl=component&amp;form_id=' . $this->form->id . '" title="" data-bs-toggle="modal" data-bs-target="#edit-modal">' . Text::_('COM_CONTENTBUILDER_EDIT') . '</a>]'; ?>
+                    <?php echo '[<a href="index.php?option=com_contentbuilder_ng&amp;controller=users&amp;tmpl=component&amp;form_id=' . $this->form->id . '" title="" data-bs-toggle="modal" data-bs-target="#edit-modal">' . Text::_('COM_CONTENTBUILDER_EDIT') . '</a>]'; ?>
 
                 </td>
             </tr>

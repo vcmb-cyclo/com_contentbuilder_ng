@@ -21,8 +21,8 @@ use Joomla\CMS\Table\Table;
 use Joomla\CMS\Event\Content\ContentPrepareEvent;
 use Joomla\Application\ApplicationInterface;
 
-require_once(JPATH_SITE . '/administrator/' . 'components/' . 'com_contentbuilder/' . 'classes/' . 'joomla_compat.php');
-require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/modellegacy.php');
+require_once(JPATH_SITE . '/administrator/' . 'components/' . 'com_contentbuilder_ng/' . 'classes/' . 'joomla_compat.php');
+require_once(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/classes/modellegacy.php');
 
 require_once(JPATH_COMPONENT_ADMINISTRATOR . '/classes/contentbuilder.php');
 require_once(JPATH_COMPONENT_ADMINISTRATOR . '/classes/contentbuilder_helpers.php');
@@ -69,7 +69,7 @@ class ContentbuilderModelList extends CBModel
         $this->frontend = class_exists('cbFeMarker');
 
         if ($this->frontend) {
-            Factory::getApplication()->getDocument()->addStyleSheet(Uri::root(true) . '/components/com_contentbuilder/assets/css/system.css');
+            Factory::getApplication()->getDocument()->addStyleSheet(Uri::root(true) . '/components/com_contentbuilder_ng/assets/css/system.css');
         }
 
         if (CBRequest::getInt('Itemid', 0)) {

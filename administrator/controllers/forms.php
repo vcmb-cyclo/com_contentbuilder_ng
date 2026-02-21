@@ -17,8 +17,8 @@ use Joomla\CMS\Router\Route;
 
 // use Joomla\CMS\HTML\HTMLHelper;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/controllerlegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/controllerlegacy.php');
 
 class ContentbuilderControllerForms extends CBController
 {
@@ -53,14 +53,14 @@ class ContentbuilderControllerForms extends CBController
             $model->copy();
         }
 
-        $this->setRedirect('index.php?option=com_contentbuilder&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), Text::_('COM_CONTENTBUILDER_COPIED'));
+        $this->setRedirect('index.php?option=com_contentbuilder_ng&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), Text::_('COM_CONTENTBUILDER_COPIED'));
     }
 
     function orderup()
     {
         $model = $this->getModel('form');
         $model->move(-1);
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), false));
     }
 
     function listorderup()
@@ -80,7 +80,7 @@ class ContentbuilderControllerForms extends CBController
     {
         $model = $this->getModel('form');
         $model->move(1);
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), false));
     }
 
     function listorderdown()
@@ -100,7 +100,7 @@ class ContentbuilderControllerForms extends CBController
     {
         $model = $this->getModel('forms');
         $model->saveOrder();
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), false));
     }
 
 
@@ -130,7 +130,7 @@ class ContentbuilderControllerForms extends CBController
             $model->setPublished();
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_PUBLISHED'));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_PUBLISHED'));
     }
 
     function listpublish()
@@ -235,7 +235,7 @@ class ContentbuilderControllerForms extends CBController
             $model->setUnpublished();
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_UNPUBLISHED'));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_UNPUBLISHED'));
     }
 
     function listunpublish()
@@ -364,7 +364,7 @@ class ContentbuilderControllerForms extends CBController
         }
 
         // Check the table in so it can be edited.... we are done with it anyway
-        $link = Route::_('index.php?option=com_contentbuilder&controller=forms&limitstart=' . $limit . $additionalParams, false);
+        $link = Route::_('index.php?option=com_contentbuilder_ng&controller=forms&limitstart=' . $limit . $additionalParams, false);
         $this->setRedirect($link, $msg);
     }
 
@@ -379,7 +379,7 @@ class ContentbuilderControllerForms extends CBController
         }
 
         // Check the table in so it can be edited.... we are done with it anyway
-        $link = Route::_('index.php?option=com_contentbuilder&controller=forms&task=edit&limitstart=' . CBRequest::getInt('limitstart'), false);
+        $link = Route::_('index.php?option=com_contentbuilder_ng&controller=forms&task=edit&limitstart=' . CBRequest::getInt('limitstart'), false);
         $this->setRedirect($link, $msg);
     }
 
@@ -392,7 +392,7 @@ class ContentbuilderControllerForms extends CBController
             $msg = Text::_('COM_CONTENTBUILDER_DELETED');
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), false), $msg);
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=forms&limitstart=' . CBRequest::getInt('limitstart'), false), $msg);
     }
 
     function listremove()
@@ -417,7 +417,7 @@ class ContentbuilderControllerForms extends CBController
     function cancel()
     {
         $msg = Text::_('COM_CONTENTBUILDER_CANCELLED');
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder&controller=forms&limitstart=0', false), $msg);
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&controller=forms&limitstart=0', false), $msg);
     }
 
     function display($cachable = false, $urlparams = array())

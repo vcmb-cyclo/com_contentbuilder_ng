@@ -16,8 +16,8 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\Application\ApplicationInterface;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/modellegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/modellegacy.php');
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder_helpers.php');
 
@@ -203,7 +203,7 @@ class ContentbuilderModelDetails extends CBModel
                             $auth = $this->frontend ? contentbuilder::authorizeFe('new') : contentbuilder::authorize('new');
 
                             if ($auth) {
-                                Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder&controller=edit&latest=1&backtolist=' . CBRequest::getInt('backtolist', 0) . '&id=' . $this->_id . '&record_id=&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getVar('filter_order', ''), false));
+                                Factory::getApplication()->redirect(Route::_('index.php?option=com_contentbuilder_ng&controller=edit&latest=1&backtolist=' . CBRequest::getInt('backtolist', 0) . '&id=' . $this->_id . '&record_id=&limitstart=' . CBRequest::getInt('limitstart', 0) . '&filter_order=' . CBRequest::getVar('filter_order', ''), false));
                             } else {
                                 Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_ADD_ENTRY_FIRST'));
                                 Factory::getApplication()->redirect('index.php');

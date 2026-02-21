@@ -302,7 +302,7 @@ class CBPagination
 		if (file_exists(JPATH_SITE .'/media/contentbuilder/misc/pagination.php')) {
 			$chromePath = JPATH_SITE .'/media/contentbuilder/misc/pagination.php';
 		} else {
-			$chromePath = JPATH_SITE .'/administrator/components/com_contentbuilder/classes/pagination_chrome.php';
+			$chromePath = JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/pagination_chrome.php';
 		}
 
 		if (file_exists($chromePath)) {
@@ -395,7 +395,7 @@ class CBPagination
 		if (file_exists(JPATH_SITE .'/media/contentbuilder/misc/pagination.php')) {
 			$chromePath = JPATH_SITE .'/media/contentbuilder/misc/pagination.php';
 		} else {
-			$chromePath = JPATH_SITE .'/administrator/components/com_contentbuilder/classes/pagination_chrome.php';
+			$chromePath = JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/pagination_chrome.php';
 		}
 
 		if (file_exists($chromePath)) {

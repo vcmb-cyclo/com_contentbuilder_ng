@@ -20,8 +20,8 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\MVC\View\HtmlView;
 
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/joomla_compat.php');
-require_once(JPATH_SITE .'/administrator/components/com_contentbuilder/classes/viewlegacy.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
+require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/classes/viewlegacy.php');
 require_once(JPATH_COMPONENT_ADMINISTRATOR .'/classes/contentbuilder.php');
 
 class ContentbuilderViewDetails extends HtmlView
@@ -34,7 +34,7 @@ class ContentbuilderViewDetails extends HtmlView
 		if (!class_exists('cbFeMarker')) {
 			echo '
             <style type="text/css">
-            .icon-48-logo_left { background-image: url(../administrator/components/com_contentbuilder/views/logo_left.png); }
+            .icon-48-logo_left { background-image: url(../administrator/components/com_contentbuilder_ng/views/logo_left.png); }
             </style>
             ';
 			ToolBarHelper::title($subject->page_title . '</span>', 'logo_left.png');
@@ -111,7 +111,7 @@ class ContentbuilderViewDetails extends HtmlView
 						}
 					}
 				}
-				$subject->template = str_replace($match, Route::_('index.php?option=com_contentbuilder&controller=details&id=' . CBRequest::getInt('id') . '&record_id=' . CBRequest::getCmd('record_id', '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . $sub), $subject->template);
+				$subject->template = str_replace($match, Route::_('index.php?option=com_contentbuilder_ng&controller=details&id=' . CBRequest::getInt('id') . '&record_id=' . CBRequest::getCmd('record_id', '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . $sub), $subject->template);
 			}
 		}
 
@@ -133,7 +133,7 @@ class ContentbuilderViewDetails extends HtmlView
 						}
 					}
 				}
-				$table->toc = str_replace($match, Route::_('index.php?option=com_contentbuilder&controller=details&id=' . CBRequest::getInt('id') . '&record_id=' . CBRequest::getCmd('record_id', '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . $sub), $table->toc);
+				$table->toc = str_replace($match, Route::_('index.php?option=com_contentbuilder_ng&controller=details&id=' . CBRequest::getInt('id') . '&record_id=' . CBRequest::getCmd('record_id', '') . '&Itemid=' . CBRequest::getInt('Itemid', 0) . $sub), $table->toc);
 			}
 		}
 

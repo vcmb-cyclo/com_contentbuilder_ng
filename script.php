@@ -18,7 +18,7 @@ use Joomla\CMS\Installer\Installer;
 use Joomla\CMS\Log\Log;
 
 
-class com_contentbuilderInstallerScript extends InstallerScript
+class com_contentbuilder_ngInstallerScript extends InstallerScript
 {
   protected $minimumPhp = '8.1';
   protected $minimumJoomla = '5.0';
@@ -33,16 +33,16 @@ class com_contentbuilderInstallerScript extends InstallerScript
         'text_file_path'     => JPATH_ADMINISTRATOR . '/logs'
       ],
       Log::ALL,
-      ['com_contentbuilder.install']
+      ['com_contentbuilder_ng.install']
     );
 
 
     // Starting logs.
-    Log::add('---------------------------------------------------------', Log::INFO, 'com_contentbuilder.install');
-    Log::add('[OK] ContentBuilder installation/update started.', Log::INFO, 'com_contentbuilder.install');
-    Log::add('* PHP Version: ' . PHP_VERSION . '.', Log::INFO, 'com_contentbuilder.install');
-    Log::add('* Joomla Version : ' . JVERSION . '.', Log::INFO, 'com_contentbuilder.install');
-    Log::add('* User Agent: ' . ($_SERVER['HTTP_USER_AGENT'] ?? 'CLI') . '.', Log::INFO, 'com_contentbuilder.install');
+    Log::add('---------------------------------------------------------', Log::INFO, 'com_contentbuilder_ng.install');
+    Log::add('[OK] ContentBuilder installation/update started.', Log::INFO, 'com_contentbuilder_ng.install');
+    Log::add('* PHP Version: ' . PHP_VERSION . '.', Log::INFO, 'com_contentbuilder_ng.install');
+    Log::add('* Joomla Version : ' . JVERSION . '.', Log::INFO, 'com_contentbuilder_ng.install');
+    Log::add('* User Agent: ' . ($_SERVER['HTTP_USER_AGENT'] ?? 'CLI') . '.', Log::INFO, 'com_contentbuilder_ng.install');
   }
 
   function getPlugins()
@@ -79,7 +79,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
 
   private function log(string $message, int $priority = Log::INFO): void
   {
-    Log::add($message, $priority, 'com_contentbuilder.install');
+    Log::add($message, $priority, 'com_contentbuilder_ng.install');
   }
 
   private function getCurrentInstalledVersion(): string
@@ -88,7 +88,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
     $query = $db->getQuery(true)
       ->select($db->quoteName('manifest_cache'))
       ->from($db->quoteName('#__extensions'))
-      ->where($db->quoteName('element') . ' = ' . $db->quote('com_contentbuilder'));
+      ->where($db->quoteName('element') . ' = ' . $db->quote('com_contentbuilder_ng'));
 
     $db->setQuery($query);
     $manifest = $db->loadResult();
@@ -106,10 +106,10 @@ class com_contentbuilderInstallerScript extends InstallerScript
 
   function installAndUpdate(): bool
   {
-    require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/joomla_compat.php');
+    require_once(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
     $db = Factory::getContainer()->get(DatabaseInterface::class);
     $plugins = $this->getPlugins();
-    $base_path = JPATH_SITE . '/administrator/components/com_contentbuilder/plugins';
+    $base_path = JPATH_SITE . '/administrator/components/com_contentbuilder_ng/plugins';
     $folders = Folder::folders($base_path);
 
     foreach ($folders as $folder) {
@@ -121,6 +121,19 @@ class com_contentbuilderInstallerScript extends InstallerScript
       if (!$success) {
         Factory::getApplication()->enqueueMessage('Install failed for plugin <b>' . $folder . '</b>', 'error');
       }
+    }
+
+    // Prevent collision with old NG image-scale plugin if still present.
+    try {
+      $query = 'UPDATE #__extensions SET `enabled` = 0'
+        . ' WHERE `type` = "plugin"'
+        . ' AND `folder` = "content"'
+        . ' AND `element` = ' . $db->quote('contentbuilder_ng_image_scale');
+      $db->setQuery($query);
+      $db->execute();
+      $this->log('Plugin contentbuilder_ng_image_scale disabled to prevent duplicate handlers.');
+    } catch (Exception $e) {
+      $this->log('Could not disable contentbuilder_ng_image_scale: ' . $e->getMessage(), Log::WARNING);
     }
 
     // Publication des plugins.
@@ -148,7 +161,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
       Factory::getApplication()->enqueueMessage('"WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 8.1, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!"', 'error');
     }
 
-    require_once(JPATH_SITE . '/administrator/components/com_contentbuilder/classes/joomla_compat.php');
+    require_once(JPATH_SITE . '/administrator/components/com_contentbuilder_ng/classes/joomla_compat.php');
 
     return $this->installAndUpdate();
   }
@@ -178,7 +191,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
 
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-    $db->setQuery("DELETE FROM #__menu WHERE `link` LIKE 'index.php?option=com_contentbuilder%'");
+    $db->setQuery("DELETE FROM #__menu WHERE `link` LIKE 'index.php?option=com_contentbuilder_ng%'");
     $db->execute();
 
     $plugins = $this->getPlugins();
@@ -242,9 +255,9 @@ class com_contentbuilderInstallerScript extends InstallerScript
   private function removeOldLibraries(): void
   {
     $paths = [
-      JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/PHPExcel',
-      JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/PHPExcel.php',
-      JPATH_ADMINISTRATOR . '/components/com_contentbuilder/librairies/PhpSpreadsheet',
+      JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/classes/PHPExcel',
+      JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/classes/PHPExcel.php',
+      JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/librairies/PhpSpreadsheet',
     ];
 
     $app = Factory::getApplication();
@@ -370,7 +383,7 @@ class com_contentbuilderInstallerScript extends InstallerScript
 
     // try to restore the main menu items if they got lost
     /*
-    $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder' And parent_id = 1");
+    $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder_ng' And parent_id = 1");
     $result = $db->loadResult();
 
     if(!$result) {
@@ -379,20 +392,20 @@ class com_contentbuilderInstallerScript extends InstallerScript
         $comp_id = $db->loadResult();
         
         if($comp_id){
-            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER', 'contentbuilder', '', 'contentbuilder', 'index.php?option=com_contentbuilder', 'component', 0, 1, 1, ".$comp_id.", 0, NULL, 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER', 'contentbuilder', '', 'contentbuilder', 'index.php?option=com_contentbuilder_ng', 'component', 0, 1, 1, ".$comp_id.", 0, NULL, 0, 1, 'components/com_contentbuilder_ng/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
             $db->execute();
             $parent_id = $db->insertid();
 
-            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER_STORAGES', 'comcontentbuilderstorages', '', 'contentbuilder/comcontentbuilderstorages', 'index.php?option=com_contentbuilder&controller=storages', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER_STORAGES', 'comcontentbuilderstorages', '', 'contentbuilder/comcontentbuilderstorages', 'index.php?option=com_contentbuilder_ng&controller=storages', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'components/com_contentbuilder_ng/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
             $db->execute();
 
-            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_LIST', 'comcontentbuilderlist', '', 'contentbuilder/comcontentbuilderlist', 'index.php?option=com_contentbuilder&controller=forms', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'components/com_contentbuilder/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_LIST', 'comcontentbuilderlist', '', 'contentbuilder/comcontentbuilderlist', 'index.php?option=com_contentbuilder_ng&controller=forms', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'components/com_contentbuilder_ng/views/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
             $db->execute();
 
-            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'Try BreezingForms!', 'try-breezingforms', '', 'contentbuilder/try-breezingforms', 'index.php?option=com_contentbuilder&view=contentbuilder&market=true', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'Try BreezingForms!', 'try-breezingforms', '', 'contentbuilder/try-breezingforms', 'index.php?option=com_contentbuilder_ng&view=contentbuilder&market=true', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
             $db->execute();
 
-            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_ABOUT', 'comcontentbuilderabout', '', 'contentbuilder/comcontentbuilderabout', 'index.php?option=com_contentbuilder&view=contentbuilder', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_ABOUT', 'comcontentbuilderabout', '', 'contentbuilder/comcontentbuilderabout', 'index.php?option=com_contentbuilder_ng&view=contentbuilder', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
             $db->execute();
 
             $db->setQuery("Select max(mrgt.rgt)+1 From #__menu As mrgt");
