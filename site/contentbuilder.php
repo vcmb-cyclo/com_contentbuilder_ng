@@ -67,6 +67,32 @@ if (is_object($item)) {
 	CBRequest::setVar('Itemid', $item->id);
 }
 
+// Reset list filter state when switching frontend menu item to avoid cross-view leaks.
+if (CBRequest::getInt('Itemid', 0)) {
+	$app = Factory::getApplication();
+	$currentItemid = CBRequest::getInt('Itemid', 0);
+	$lastItemid = (int) $app->getSession()->get('com_contentbuilder.last_itemid', 0);
+	if ($lastItemid && $lastItemid !== $currentItemid) {
+		$session = $app->getSession();
+		$session->set('com_contentbuilderformsd_filter_order', '');
+		$session->set('com_contentbuilderformsd_filter_order_Dir', '');
+		$session->set('com_contentbuilderformsd_filter', '');
+		$session->set('com_contentbuilderformsd_filter_state', 0);
+		$session->set('com_contentbuilderformsd_filter_publish', -1);
+		$session->set('com_contentbuilderformsd_filter_language', '');
+		$session->set('com_contentbuilderformsd_id', 0);
+		// Keep compatibility with installs still using the _ng option key variant.
+		$session->set('com_contentbuilder_ngformsd_filter_order', '');
+		$session->set('com_contentbuilder_ngformsd_filter_order_Dir', '');
+		$session->set('com_contentbuilder_ngformsd_filter', '');
+		$session->set('com_contentbuilder_ngformsd_filter_state', 0);
+		$session->set('com_contentbuilder_ngformsd_filter_publish', -1);
+		$session->set('com_contentbuilder_ngformsd_filter_language', '');
+		$session->set('com_contentbuilder_ngformsd_id', 0);
+	}
+	$app->getSession()->set('com_contentbuilder.last_itemid', $currentItemid);
+}
+
 if (CBRequest::getInt('Itemid', 0)) {
 
 	$option = 'com_contentbuilder';
