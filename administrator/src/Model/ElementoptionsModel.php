@@ -275,81 +275,100 @@ class ElementoptionsModel extends BaseDatabaseModel
 
                 $tokens = '';
 
-                $upl_ex = explode('|', $setup['upload_directory']);
-                $setup['upload_directory'] = $upl_ex[0];
+                $upl_ex = explode('|', (string) ($setup['upload_directory'] ?? ''), 2);
+                $setupUploadDirectory = trim((string) ($upl_ex[0] ?? ''));
+                if ($setupUploadDirectory === '') {
+                    $setupUploadDirectory = 'media/com_contentbuilder_ng/upload';
+                }
+                $setupUploadDirectory = str_replace('\\', '/', $setupUploadDirectory);
+                $setupUploadDirectory = str_ireplace(
+                    ['{CBSite}/media/contentbuilder_ng', '{cbsite}/media/contentbuilder_ng'],
+                    ['{CBSite}/media/com_contentbuilder_ng', '{cbsite}/media/com_contentbuilder_ng'],
+                    $setupUploadDirectory
+                );
+                if (stripos($setupUploadDirectory, '/media/contentbuilder_ng') === 0) {
+                    $setupUploadDirectory = 'media/com_contentbuilder_ng' . substr($setupUploadDirectory, strlen('/media/contentbuilder_ng'));
+                } elseif (stripos($setupUploadDirectory, 'media/contentbuilder_ng') === 0) {
+                    $setupUploadDirectory = 'media/com_contentbuilder_ng' . substr($setupUploadDirectory, strlen('media/contentbuilder_ng'));
+                }
 
-                $upl_ex2 = explode('|', trim(Factory::getApplication()->input->get('upload_directory', '', 'string')));
+                $upl_ex2 = explode('|', trim((string) Factory::getApplication()->input->get('upload_directory', '', 'string')), 2);
+                $optionUploadDirectory = trim((string) ($upl_ex2[0] ?? ''));
+                $optionUploadDirectory = str_replace('\\', '/', $optionUploadDirectory);
+                $optionUploadDirectory = str_ireplace(
+                    ['{CBSite}/media/contentbuilder_ng', '{cbsite}/media/contentbuilder_ng'],
+                    ['{CBSite}/media/com_contentbuilder_ng', '{cbsite}/media/com_contentbuilder_ng'],
+                    $optionUploadDirectory
+                );
+                if (stripos($optionUploadDirectory, '/media/contentbuilder_ng') === 0) {
+                    $optionUploadDirectory = 'media/com_contentbuilder_ng' . substr($optionUploadDirectory, strlen('/media/contentbuilder_ng'));
+                } elseif (stripos($optionUploadDirectory, 'media/contentbuilder_ng') === 0) {
+                    $optionUploadDirectory = 'media/com_contentbuilder_ng' . substr($optionUploadDirectory, strlen('media/contentbuilder_ng'));
+                }
+                Factory::getApplication()->input->set('upload_directory', $optionUploadDirectory);
 
-                Factory::getApplication()->input->set('upload_directory', $upl_ex2[0]);
+                $siteRoot = rtrim(str_replace('\\', '/', JPATH_SITE), '/');
 
-                $is_relative = strpos(strtolower($setup['upload_directory']), '{cbsite}') === 0;
-                $tmp_upload_directory = $setup['upload_directory'];
-                $upload_directory = $is_relative ? str_replace(array('{CBSite}', '{cbsite}'), JPATH_SITE, $setup['upload_directory']) : $setup['upload_directory'];
+                $is_relative = strpos(strtolower($setupUploadDirectory), '{cbsite}') === 0;
+                $tmp_upload_directory = $setupUploadDirectory;
+                if ($is_relative) {
+                    $upload_directory = str_ireplace(array('{CBSite}', '{cbsite}'), JPATH_SITE, $setupUploadDirectory);
+                } else {
+                    $isWinAbs = (bool) preg_match('#^[A-Za-z]:/#', $setupUploadDirectory);
+                    if (!$isWinAbs && strpos($setupUploadDirectory, '/') === 0) {
+                        $setupUploadDirectory = ltrim($setupUploadDirectory, '/');
+                        $tmp_upload_directory = $setupUploadDirectory;
+                    }
+                    $upload_directory = ($isWinAbs || stripos($setupUploadDirectory, $siteRoot . '/') === 0 || strcasecmp($setupUploadDirectory, $siteRoot) === 0)
+                        ? $setupUploadDirectory
+                        : $siteRoot . '/' . ltrim($setupUploadDirectory, '/');
+                }
+                $upload_directory = ContentbuilderLegacyHelper::makeSafeFolder($upload_directory);
 
                 // rel check for element options
-                $is_opt_relative = strpos(strtolower(trim(Factory::getApplication()->input->get('upload_directory', '', 'string'))), '{cbsite}') === 0;
-                $tmp_opt_upload_directory = trim(Factory::getApplication()->input->get('upload_directory', '', 'string'));
-                Factory::getApplication()->input->set('upload_directory', $is_relative ? str_replace(array('{CBSite}', '{cbsite}'), JPATH_SITE, trim(Factory::getApplication()->input->get('upload_directory', '', 'string'))) : trim(Factory::getApplication()->input->get('upload_directory', '', 'string')));
+                $is_opt_relative = strpos(strtolower($optionUploadDirectory), '{cbsite}') === 0;
+                $tmp_opt_upload_directory = $optionUploadDirectory;
+                if ($is_opt_relative) {
+                    $opt_upload_directory = str_ireplace(array('{CBSite}', '{cbsite}'), JPATH_SITE, $optionUploadDirectory);
+                } else {
+                    $isOptWinAbs = (bool) preg_match('#^[A-Za-z]:/#', $optionUploadDirectory);
+                    if (!$isOptWinAbs && strpos($optionUploadDirectory, '/') === 0) {
+                        $optionUploadDirectory = ltrim($optionUploadDirectory, '/');
+                        $tmp_opt_upload_directory = $optionUploadDirectory;
+                    }
+                    $opt_upload_directory = ($isOptWinAbs || stripos($optionUploadDirectory, $siteRoot . '/') === 0 || strcasecmp($optionUploadDirectory, $siteRoot) === 0)
+                        ? $optionUploadDirectory
+                        : $siteRoot . '/' . ltrim($optionUploadDirectory, '/');
+                }
+                $opt_upload_directory = ContentbuilderLegacyHelper::makeSafeFolder($opt_upload_directory);
 
 
                 $protect = $setup['protect_upload_directory'];
 
-                if (!trim(Factory::getApplication()->input->get('upload_directory', '', 'string')) && !is_dir($upload_directory)) {
-
-                    if (!is_dir(JPATH_SITE .'/media/contentbuilder_ng')) {
-                        Folder::create(JPATH_SITE .'/media/contentbuilder_ng');
-                        File::write(JPATH_SITE .'/media/contentbuilder_ng/index.html', $def = '');
+                if ($optionUploadDirectory === '') {
+                    if ($upload_directory !== '' && !is_dir($upload_directory)) {
+                        Folder::create($upload_directory);
+                        File::write($upload_directory . '/index.html', '');
                     }
-
-                    if (!is_dir(JPATH_SITE .'/media/contentbuilder_ng/upload')) {
-                        Folder::create(JPATH_SITE .'/media/contentbuilder_ng/upload');
-                        File::write(JPATH_SITE .'/media/contentbuilder_ng/upload/index.html', $def = '');
-                    }
-
-                    $upload_directory = JPATH_SITE .'/media/contentbuilder_ng/upload';
-
-                    if ($is_opt_relative) {
-                        $is_relative = 1;
-                        $tmp_upload_directory = '{CBSite}/media/contentbuilder_ng/upload';
-                    }
-
                     if (isset($upl_ex[1])) {
                         $tokens = '|' . $upl_ex[1];
                     }
-
-                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FALLBACK_UPLOAD_CREATED') . ' (/media/contentbuilder_ng/upload' . ')', 'warning');
-
-                } else if (trim(Factory::getApplication()->input->get('upload_directory', '', 'string')) != '' && !is_dir(ContentbuilderLegacyHelper::makeSafeFolder(Factory::getApplication()->input->get('upload_directory', '', 'string')))) {
-
-                    $upload_directory = ContentbuilderLegacyHelper::makeSafeFolder(Factory::getApplication()->input->get('upload_directory', '', 'string'));
-
+                } else if ($opt_upload_directory !== '' && !is_dir($opt_upload_directory)) {
+                    $upload_directory = $opt_upload_directory;
                     Folder::create($upload_directory);
-                    File::write($upload_directory .'/index.html', $def = '');
-
-                    if ($is_opt_relative) {
-                        $is_relative = 1;
-                        $tmp_upload_directory = $tmp_opt_upload_directory;
-                    }
-
+                    File::write($upload_directory . '/index.html', '');
+                    $is_relative = $is_opt_relative ? 1 : 0;
+                    $tmp_upload_directory = $tmp_opt_upload_directory;
                     if (isset($upl_ex2[1])) {
                         $tokens = '|' . $upl_ex2[1];
                     }
-
-                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FALLBACK_UPLOAD_CREATED') . ' (' . $upload_directory . ')', 'warning');
-
-                } else if (trim(Factory::getApplication()->input->get('upload_directory', '', 'string')) != '' && is_dir(ContentbuilderLegacyHelper::makeSafeFolder(Factory::getApplication()->input->get('upload_directory', '', 'string')))) {
-
-                    $upload_directory = ContentbuilderLegacyHelper::makeSafeFolder(Factory::getApplication()->input->get('upload_directory', '', 'string'));
-
-                    if ($is_opt_relative) {
-                        $is_relative = 1;
-                        $tmp_upload_directory = $tmp_opt_upload_directory;
-                    }
-
+                } else if ($opt_upload_directory !== '') {
+                    $upload_directory = $opt_upload_directory;
+                    $is_relative = $is_opt_relative ? 1 : 0;
+                    $tmp_upload_directory = $tmp_opt_upload_directory;
                     if (isset($upl_ex2[1])) {
                         $tokens = '|' . $upl_ex2[1];
                     }
-
                 } else {
                     if (isset($upl_ex[1])) {
                         $tokens = '|' . $upl_ex[1];

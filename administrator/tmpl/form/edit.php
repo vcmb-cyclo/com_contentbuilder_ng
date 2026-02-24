@@ -30,7 +30,13 @@ $wa->addInlineStyle(
     . '.cb-order-head .saveorder{float:none!important;margin-left:6px}'
     . '.cb-item-label-cell{display:flex;flex-direction:column;gap:4px}'
     . '.cb-item-label-display{cursor:pointer;width:100%;display:block}'
-    . '.cb-item-order-type{max-width:125px}'
+    . '.cb-item-order-type{min-width:170px;max-width:190px}'
+    . '.cb-elements-table .cb-col-label{width:340px;min-width:340px}'
+    . '.cb-elements-table .cb-col-toggle{white-space:nowrap}'
+    . '.cb-elements-table .cb-col-editable{width:120px;min-width:120px}'
+    . '.cb-wordwrap-input{width:8ch!important;min-width:8ch!important;max-width:8ch!important;text-align:center}'
+    . '.cb-save-animate{background:#198754!important;border-color:#198754!important;color:#fff!important;filter:brightness(1.2)!important;box-shadow:0 0 0 .38rem rgba(25,135,84,.36)!important;transition:none!important}'
+    . '.cb-save-animate .icon-apply,.cb-save-animate .icon-save,.cb-save-animate .icon-save-new{color:#fff!important}'
     . '#view-pane .nav-tabs,#perm-pane .nav-tabs{display:flex;gap:.4rem;flex-wrap:wrap;padding:.42rem;margin-bottom:.9rem;border:1px solid #dbe1ea;border-bottom:1px solid #dbe1ea;border-radius:14px;background:linear-gradient(180deg,#f7f9fc,#eef3f9)}'
     . '#view-pane .nav-tabs .nav-link,#view-pane .nav-tabs [role="tab"],#perm-pane .nav-tabs .nav-link,#perm-pane .nav-tabs [role="tab"]{border:1px solid transparent;border-radius:10px;padding:.45rem .8rem;font-weight:600;color:#334155;background:transparent;transition:all .18s ease}'
     . '#view-pane .nav-tabs .nav-link:hover,#view-pane .nav-tabs [role="tab"]:hover,#perm-pane .nav-tabs .nav-link:hover,#perm-pane .nav-tabs [role="tab"]:hover{background:#fff;border-color:#cfd8e3;color:#0f172a;transform:translateY(-1px)}'
@@ -119,6 +125,261 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 ?>
 
 <script type="text/javascript">
+    const cbViewportStateKey = 'cbng.form.viewport.<?php echo (int) ($this->item->id ?? 0); ?>';
+    let cbLastRowId = '';
+    let cbAjaxBusy = false;
+    let cbSaveButtonTimer = null;
+
+    function cbRememberViewport(rowId) {
+        var payload = {
+            y: window.scrollY || document.documentElement.scrollTop || 0,
+            rowId: rowId ? String(rowId) : (cbLastRowId ? String(cbLastRowId) : ''),
+            ts: Date.now()
+        };
+
+        try {
+            window.sessionStorage.setItem(cbViewportStateKey, JSON.stringify(payload));
+        } catch (e) {
+            // ignore storage failures
+        }
+    }
+
+    function cbRestoreViewport() {
+        var payloadRaw = null;
+
+        try {
+            payloadRaw = window.sessionStorage.getItem(cbViewportStateKey);
+        } catch (e) {
+            payloadRaw = null;
+        }
+
+        if (!payloadRaw) {
+            return;
+        }
+
+        var payload = null;
+        try {
+            payload = JSON.parse(payloadRaw);
+        } catch (e) {
+            payload = null;
+        }
+
+        try {
+            window.sessionStorage.removeItem(cbViewportStateKey);
+        } catch (e) {
+            // ignore storage failures
+        }
+
+        if (!payload || typeof payload !== 'object') {
+            return;
+        }
+
+        var ageMs = Date.now() - Number(payload.ts || 0);
+        if (!Number.isFinite(ageMs) || ageMs > 120000) {
+            return;
+        }
+
+        var y = Number(payload.y || 0);
+        if (Number.isFinite(y) && y > 0) {
+            window.requestAnimationFrame(function() {
+                window.scrollTo(0, y);
+            });
+        }
+    }
+
+    function cbAnimateSaveButton() {
+        var selectors = [
+            'joomla-toolbar-button#save-group-children-apply button',
+            '#save-group-children-apply button',
+            '#toolbar .button-apply'
+        ];
+
+        var targets = [];
+        selectors.forEach(function(selector) {
+            document.querySelectorAll(selector).forEach(function(el) {
+                if (!el) {
+                    return;
+                }
+                if (el.classList && el.classList.contains('dropdown-toggle-split')) {
+                    return;
+                }
+                if (typeof el.closest === 'function' && el.closest('.dropdown-menu')) {
+                    return;
+                }
+                if (targets.indexOf(el) === -1) {
+                    targets.push(el);
+                }
+            });
+        });
+
+        if (!targets.length) {
+            return;
+        }
+
+        targets.forEach(function(el) {
+            el.classList.remove('cb-save-animate');
+            void el.offsetWidth;
+            el.classList.add('cb-save-animate');
+        });
+
+        if (cbSaveButtonTimer) {
+            clearTimeout(cbSaveButtonTimer);
+            cbSaveButtonTimer = null;
+        }
+
+        cbSaveButtonTimer = setTimeout(function() {
+            targets.forEach(function(el) {
+                el.classList.remove('cb-save-animate');
+            });
+        }, 1000);
+    }
+
+    function cbIsAjaxToggleTask(task) {
+        return [
+            'form.list_include',
+            'form.no_list_include',
+            'form.search_include',
+            'form.no_search_include',
+            'form.linkable',
+            'form.not_linkable',
+            'form.editable',
+            'form.not_editable',
+            'form.listpublish',
+            'form.listunpublish'
+        ].indexOf(task) !== -1;
+    }
+
+    function cbNormalizeRowTask(task) {
+        switch (task) {
+            case 'form.publish':
+                return 'form.listpublish';
+            case 'form.unpublish':
+                return 'form.listunpublish';
+            default:
+                return task;
+        }
+    }
+
+    function cbExtractListItemTask(actionElement) {
+        if (!actionElement) {
+            return null;
+        }
+
+        var onclick = String(actionElement.getAttribute('onclick') || '');
+        var match = onclick.match(/listItemTask\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/);
+        if (match) {
+            return {
+                checkboxId: String(match[1] || ''),
+                task: String(match[2] || '')
+            };
+        }
+
+        var dataTask = String(
+            actionElement.getAttribute('data-item-task')
+            || actionElement.getAttribute('data-submit-task')
+            || actionElement.getAttribute('data-task')
+            || ''
+        ).trim();
+
+        if (dataTask === '') {
+            return null;
+        }
+
+        return {
+            checkboxId: '',
+            task: dataTask.indexOf('.') === -1 ? ('form.' + dataTask) : dataTask
+        };
+    }
+
+    function cbResolveRowId(actionElement, checkboxId) {
+        if (actionElement && typeof actionElement.closest === 'function') {
+            var row = actionElement.closest('tr[data-cb-row-id]');
+            if (row) {
+                var rowId = String(row.getAttribute('data-cb-row-id') || '');
+                if (rowId !== '') {
+                    return rowId;
+                }
+            }
+        }
+
+        if (checkboxId !== '') {
+            var checkbox = document.getElementById(checkboxId);
+            if (checkbox && typeof checkbox.value !== 'undefined' && String(checkbox.value) !== '') {
+                return String(checkbox.value);
+            }
+        }
+
+        return '';
+    }
+
+    function cbSubmitTaskAjax(task, rowId, onSuccess, onError) {
+        var form = document.getElementById('adminForm') || document.adminForm;
+        if (!form) {
+            if (typeof onError === 'function') {
+                onError("Form not found.");
+            }
+            return;
+        }
+
+        if (cbAjaxBusy) {
+            return;
+        }
+
+        cbAjaxBusy = true;
+        cbRememberViewport(rowId || '');
+
+        var formData = new FormData(form);
+        formData.set('task', task);
+        formData.set('cb_ajax', '1');
+
+        if (rowId) {
+            formData.delete('cid[]');
+            formData.append('cid[]', String(rowId));
+            formData.set('boxchecked', '1');
+        }
+
+        fetch(form.getAttribute('action') || 'index.php', {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function(response) {
+                return response.text().then(function(text) {
+                    var payload = null;
+                    try {
+                        payload = JSON.parse(text);
+                    } catch (e) {
+                        payload = null;
+                    }
+
+                    if (!response.ok || !payload || payload.success === false) {
+                        throw new Error((payload && payload.message) ? payload.message : 'Save failed');
+                    }
+
+                    return payload;
+                });
+            })
+            .then(function(payload) {
+                cbAnimateSaveButton();
+                if (typeof onSuccess === 'function') {
+                    onSuccess(payload);
+                }
+            })
+            .catch(function(error) {
+                if (typeof onError === 'function') {
+                    onError(error && error.message ? error.message : 'Save failed');
+                    return;
+                }
+                alert(error && error.message ? error.message : 'Save failed');
+            })
+            .finally(function() {
+                cbAjaxBusy = false;
+            });
+    }
+
     function listItemTask(id, task) {
 
         var f = document.adminForm;
@@ -133,6 +394,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             } // for
             cb.checked = true;
             f.boxchecked.value = 1;
+            if (typeof cb.value !== 'undefined' && cb.value !== '') {
+                cbLastRowId = String(cb.value);
+                cbRememberViewport(cbLastRowId);
+            }
 
             switch (task) {
                 case 'form.publish':
@@ -147,6 +412,15 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 case 'form.orderup':
                     task = 'form.listorderup';
                     break;
+            }
+
+            if (cbIsAjaxToggleTask(task)) {
+                var rowId = (typeof cb.value !== 'undefined' && cb.value !== '') ? String(cb.value) : '';
+
+                cbSubmitTaskAjax(task, rowId, function() {
+                    window.location.reload();
+                });
+                return false;
             }
 
             submitbutton(task);
@@ -181,6 +455,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             case 'form.not_linkable':
             case 'form.editable':
             case 'form.not_editable':
+            case 'form.save_labels':
                 Joomla.submitform(task);
                 break;
             case 'form.save':
@@ -223,6 +498,47 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             task = 'form.saveorder';
         }
         submitbutton(task);
+    }
+
+    function cbHandleItemLabelBlur(input, elementId) {
+        if (!input) {
+            return;
+        }
+
+        var value = String(input.value || '').trim();
+        if (value === '') {
+            value = 'Unnamed';
+        }
+
+        input.value = value;
+        input.style.display = 'none';
+
+        var displayNode = document.getElementById('itemLabels_' + elementId);
+        if (displayNode) {
+            displayNode.style.display = 'block';
+            displayNode.innerHTML = '';
+            var strong = document.createElement('b');
+            strong.textContent = value;
+            displayNode.appendChild(strong);
+        }
+
+        var lastSaved = String(input.getAttribute('data-cb-last-saved') || '');
+        if (lastSaved === value) {
+            return;
+        }
+
+        cbLastRowId = String(elementId);
+        cbSubmitTaskAjax(
+            'form.save_labels',
+            cbLastRowId,
+            function() {
+                input.setAttribute('data-cb-last-saved', value);
+            },
+            function(message) {
+                input.setAttribute('data-cb-last-saved', lastSaved);
+                alert(message || 'Save failed');
+            }
+        );
     }
 
     function cbQueueDetailsSampleGeneration(button) {
@@ -315,6 +631,68 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             hint.classList.remove('d-none');
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        cbRestoreViewport();
+
+        var form = document.getElementById('adminForm') || document.adminForm;
+        if (!form) {
+            return;
+        }
+
+        form.addEventListener('click', function(event) {
+            var target = event.target;
+            if (!target || typeof target.closest !== 'function') {
+                return;
+            }
+
+            var actionElement = target.closest('[onclick*="listItemTask("], [data-item-task], [data-submit-task], [data-task]');
+            if (!actionElement) {
+                return;
+            }
+
+            var parsed = cbExtractListItemTask(actionElement);
+            if (!parsed) {
+                return;
+            }
+
+            var task = cbNormalizeRowTask(parsed.task);
+            if (!cbIsAjaxToggleTask(task)) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            if (typeof event.stopImmediatePropagation === 'function') {
+                event.stopImmediatePropagation();
+            }
+
+            var rowId = cbResolveRowId(actionElement, parsed.checkboxId);
+            if (rowId !== '') {
+                cbLastRowId = rowId;
+            }
+
+            cbSubmitTaskAjax(task, rowId, function() {
+                window.location.reload();
+            });
+        }, true);
+
+        form.addEventListener('click', function(event) {
+            var target = event.target;
+            if (!target || typeof target.closest !== 'function') {
+                return;
+            }
+
+            var row = target.closest('tr[data-cb-row-id]');
+            if (row) {
+                cbLastRowId = String(row.getAttribute('data-cb-row-id') || '');
+            }
+        });
+
+        form.addEventListener('submit', function() {
+            cbRememberViewport();
+        });
+    });
 
     if (typeof Joomla != 'undefined') {
         Joomla.submitbutton = submitbutton;
@@ -1154,7 +1532,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         </tr>
         <tr>
             <td valign="top">
-                <table class="table table-striped">
+                <table class="table table-striped cb-elements-table">
                     <thead>
                         <tr>
                             <th width="5">
@@ -1163,31 +1541,31 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <th width="20">
                                 <?php echo HTMLHelper::_('grid.checkall'); ?>
                             </th>
-                            <th>
+                            <th class="cb-col-label">
                                 <span class="editlinktip hasTip"
                                     title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LABEL_TIP'); ?>">
                                     <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_LABEL'), 'label'); ?>
                                 </span>
                             </th>
-                            <th>
+                            <th class="cb-col-toggle">
                                 <span class="editlinktip hasTip"
                                     title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE_TIP'); ?>">
                                     <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE'), 'list_include'); ?>
                                 </span>
                             </th>
-                            <th>
+                            <th class="cb-col-toggle">
                                 <span class="editlinktip hasTip"
                                     title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE_TIP'); ?>">
                                     <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE'), 'search_include'); ?>
                                 </span>
                             </th>
-                            <th>
+                            <th class="cb-col-toggle">
                                 <span class="editlinktip hasTip"
                                     title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LINKABLE_TIP'); ?>">
                                     <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_LINKABLE'), 'linkable'); ?>
                                 </span>
                             </th>
-                            <th>
+                            <th class="cb-col-editable">
                                 <span class="editlinktip hasTip"
                                     title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TIP'); ?>">
                                     <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_EDITABLE'), 'editable'); ?>
@@ -1205,7 +1583,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_ITEM_WRAPPER'); ?>
                                 </span>
                             </th>
-                            <th>
+                            <th class="cb-col-toggle">
                                 <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'published'); ?>
                             </th>
                             <th width="120" class="cb-order-head">
@@ -1232,14 +1610,14 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             $linkable = ContentbuilderHelper::listLinkable('form', $row, $i);
                             $editable = ContentbuilderHelper::listEditable('form', $row, $i);
                         ?>
-                            <tr class="<?php echo "row$k"; ?>">
+                            <tr id="cb-row-<?php echo (int) $row->id; ?>" class="<?php echo "row$k"; ?>" data-cb-row-id="<?php echo (int) $row->id; ?>">
                                 <td valign="top">
                                     <?php echo $row->id; ?>
                                 </td>
                                 <td valign="top">
                                     <?php echo $checked; ?>
                                 </td>
-                                <td width="150" valign="top">
+                                <td class="cb-col-label" valign="top">
                                     <div class="cb-item-label-cell">
                                     <div class="cb-item-label-display"
                                         id="itemLabels_<?php echo $row->id ?>"
@@ -1249,9 +1627,11 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                         </b>
                                     </div>
                                     <input class="form-control form-control-sm"
-                                        onblur="if(this.value=='') {this.value = 'Unnamed';} this.style.display='none';document.getElementById('itemLabels_<?php echo $row->id ?>').innerHTML='<b>'+this.value+'<b/>';document.getElementById('itemLabels_<?php echo $row->id ?>').style.display='block';"
+                                        onblur="cbHandleItemLabelBlur(this, <?php echo (int) $row->id; ?>);"
+                                        onkeydown="if (event.key === 'Enter') { event.preventDefault(); this.blur(); }"
                                         id="itemLabels<?php echo $row->id ?>" type="text" style="display:none; width: 100%;"
                                         name="jform[itemLabels][<?php echo $row->id ?>]"
+                                        data-cb-last-saved="<?php echo htmlentities($row->label ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                         value="<?php echo htmlentities($row->label ?? '', ENT_QUOTES, 'UTF-8') ?>" />
 
                                     <select class="form-select form-select-sm cb-item-order-type"
@@ -1281,16 +1661,16 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     </div>
 
                                 </td>
-                                <td valign="top">
+                                <td class="cb-col-toggle" valign="top">
                                     <?php echo $list_include; ?>
                                 </td>
-                                <td valign="top">
+                                <td class="cb-col-toggle" valign="top">
                                     <?php echo $search_include; ?>
                                 </td>
-                                <td valign="top">
+                                <td class="cb-col-toggle" valign="top">
                                     <?php echo $linkable; ?>
                                 </td>
-                                <td valign="top">
+                                <td class="cb-col-editable" valign="top">
                                     <?php echo $editable; ?>
                                     <?php
                                     if ($row->editable && !$this->item->edit_by_type) {
@@ -1299,7 +1679,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     ?>
                                 </td>
                                 <td valign="top">
-                                    <input class="form-control form-control-sm w-100" type="text" style="width: 20px;"
+                                    <input class="form-control form-control-sm cb-wordwrap-input" type="text" size="4" maxlength="4" inputmode="numeric" pattern="[0-9]{0,4}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);"
                                         name="jform[itemWordwrap][<?php echo $row->id ?>]"
                                         value="<?php echo htmlentities($row->wordwrap ?? '', ENT_QUOTES, 'UTF-8') ?>" />
                                 </td>
@@ -1308,7 +1688,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                         name="jform[itemWrapper][<?php echo $row->id ?>]"
                                         value="<?php echo htmlentities($row->item_wrapper ?? '', ENT_QUOTES, 'UTF-8') ?>" />
                                 </td>
-                                <td valign="top">
+                                <td class="cb-col-toggle" valign="top">
                                     <?php echo $published; ?>
                                 </td>
                                 <td class="order" width="150" valign="top">
@@ -1783,7 +2163,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             echo Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TEMPLATE_PROVIDED_BY_BREEZINGFORMS');
             echo '<input type="hidden" name="jform[editable_template]" value="{BreezingForms: ' . (isset($this->item->type_name) ? $this->item->type_name : '') . '}"/>';
             //echo '<input type="hidden" name="jform[protect_upload_directory]" value="'.(trim($this->item->protect_upload_directory) ? 1 : 0).'"/>'; 
-            echo '<input type="hidden" name="jform[upload_directory]" value="' . (trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/contentbuilder_ng/upload') . '"/>';
+            echo '<input type="hidden" name="jform[upload_directory]" value="' . (trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/com_contentbuilder_ng/upload') . '"/>';
         } else {
         ?>
 
@@ -1793,7 +2173,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 </span></label>
             <br />
             <input class="form-control form-control-sm" style="width: 50%;" type="text"
-                value="<?php echo trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/contentbuilder_ng/upload'; ?>"
+                value="<?php echo trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/com_contentbuilder_ng/upload'; ?>"
                 name="jform[upload_directory]" id="upload_directory" />
             <br />
             <br />

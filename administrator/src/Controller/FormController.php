@@ -21,6 +21,8 @@ namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\FormController as BaseFormController;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Response\JsonResponse;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 
@@ -248,16 +250,26 @@ class FormController extends BaseFormController
     // Elles doivent utiliser Elements
     public function listorderup(): void
     {
+        $formId = (int) $this->input->getInt('id');
+        if (!$this->persistInlineElementSettings($formId)) {
+            return;
+        }
+
         $model = $this->getModel('Elements', 'Administrator');
         $model->move(-1); // ou utilise reorder si tu préfères
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&view=' . $this->view_item . '&id=' . $this->input->getInt('id'), false));
+        $this->setRedirect($this->getEditRedirectUrl($formId));
     }
 
     public function listorderdown(): void
     {
+        $formId = (int) $this->input->getInt('id');
+        if (!$this->persistInlineElementSettings($formId)) {
+            return;
+        }
+
         $model = $this->getModel('Elements', 'Administrator');
         $model->move(1);
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&view=' . $this->view_item . '&id=' . $this->input->getInt('id'), false));
+        $this->setRedirect($this->getEditRedirectUrl($formId));
     }
 
     public function saveorder(): void
@@ -274,7 +286,11 @@ class FormController extends BaseFormController
 
         if (empty($orderMap)) {
             $this->setMessage(Text::_('JGLOBAL_NO_MATCHING_RESULTS'), 'warning');
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&view=' . $this->view_item . '&id=' . $formId, false));
+            $this->setRedirect($this->getEditRedirectUrl($formId));
+            return;
+        }
+
+        if (!$this->persistInlineElementSettings($formId)) {
             return;
         }
 
@@ -296,7 +312,7 @@ class FormController extends BaseFormController
             $this->setMessage(Text::_('JLIB_APPLICATION_SAVE_SUCCESS'));
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&view=' . $this->view_item . '&id=' . $formId, false));
+        $this->setRedirect($this->getEditRedirectUrl($formId));
     }
 
     // ==================================================================
@@ -367,6 +383,32 @@ class FormController extends BaseFormController
         $this->elementsUpdate('search_include', 0);
     }
 
+    public function save_labels(): bool
+    {
+        $this->checkToken();
+
+        $formId = (int) $this->input->getInt('id');
+
+        if (!$this->persistInlineElementSettings($formId)) {
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $this->getMessage() ?: Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED'));
+            }
+            return false;
+        }
+
+        if ($this->isAjaxCall()) {
+            $this->respondAjax(true, Text::_('JLIB_APPLICATION_SAVE_SUCCESS'));
+            return true;
+        }
+
+        $this->setRedirect(
+            $this->getEditRedirectUrl($formId),
+            Text::_('JLIB_APPLICATION_SAVE_SUCCESS')
+        );
+
+        return true;
+    }
+
     public function listpublish(): bool
     {
         return $this->elementsPublish(1, 'COM_CONTENTBUILDER_NG_PUBLISHED');
@@ -400,21 +442,50 @@ class FormController extends BaseFormController
 
             if (empty($cids)) {
                 $this->setMessage(Text::_('JERROR_NO_ITEMS_SELECTED'), 'error');
-                $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&task=form.display' . '&id=' . $formId, false));
+                if ($this->isAjaxCall()) {
+                    $this->respondAjax(false, Text::_('JERROR_NO_ITEMS_SELECTED'));
+                } else {
+                    $this->setRedirect($this->getEditRedirectUrl($formId));
+                }
+                return false;
+            }
+
+            if (!$this->persistInlineElementSettings($formId)) {
+                if ($this->isAjaxCall()) {
+                    $this->respondAjax(false, $this->getMessage() ?: Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED'));
+                }
                 return false;
             }
 
             $model = $this->getModel('Elementoptions', 'Administrator', ['ignore_request' => true]);
-            $model->fieldUpdate($cids, $field, $value);
+            if (!$model->fieldUpdate($cids, $field, $value)) {
+                $error = $model->getError() ?: Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED');
+                $this->setMessage($error, 'error');
+                if ($this->isAjaxCall()) {
+                    $this->respondAjax(false, $error);
+                } else {
+                    $this->setRedirect($this->getEditRedirectUrl($formId), $error, 'error');
+                }
+                return false;
+            }
+
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, Text::_('JLIB_APPLICATION_SAVE_SUCCESS'));
+                return true;
+            }
 
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&view=' . $this->view_item . '&id=' . $formId, false),
+                $this->getEditRedirectUrl($formId),
                 Text::_('JLIB_APPLICATION_SAVE_SUCCESS')
             );
             return true;
         } catch (\Throwable $e) {
             $this->setMessage($e->getMessage(), 'warning');
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&task=form.display' . '&id=' . $formId, false));
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $e->getMessage());
+            } else {
+                $this->setRedirect($this->getEditRedirectUrl((int) $formId));
+            }
             return false;
         }
     }
@@ -430,23 +501,93 @@ class FormController extends BaseFormController
 
             if (empty($cids)) {
                 $this->setMessage(Text::_('JERROR_NO_ITEMS_SELECTED'), 'error');
-                $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&task=form.display' . '&id=' . $formId, false));
+                if ($this->isAjaxCall()) {
+                    $this->respondAjax(false, Text::_('JERROR_NO_ITEMS_SELECTED'));
+                } else {
+                    $this->setRedirect($this->getEditRedirectUrl($formId));
+                }
+                return false;
+            }
+
+            if (!$this->persistInlineElementSettings($formId)) {
+                if ($this->isAjaxCall()) {
+                    $this->respondAjax(false, $this->getMessage() ?: Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED'));
+                }
                 return false;
             }
 
             $model = $this->getModel('Elementoptions', 'Administrator', ['ignore_request' => true]);
-            $model->publish($cids, $state);
+            if (!$model->publish($cids, $state)) {
+                $error = $model->getError() ?: Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED');
+                $this->setMessage($error, 'error');
+                if ($this->isAjaxCall()) {
+                    $this->respondAjax(false, $error);
+                } else {
+                    $this->setRedirect($this->getEditRedirectUrl($formId), $error, 'error');
+                }
+                return false;
+            }
+
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, Text::_($successMsgKey));
+                return true;
+            }
 
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . $formId, false),
+                $this->getEditRedirectUrl($formId),
                 Text::_($successMsgKey)
             );
 
             return true;
         } catch (\Throwable $e) {
             $this->setMessage($e->getMessage(), 'warning');
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&task=form.display', false));
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $e->getMessage());
+            } else {
+                $this->setRedirect($this->getEditRedirectUrl((int) ($formId ?? 0)));
+            }
             return false;
         }
+    }
+
+    private function getEditRedirectUrl(int $formId): string
+    {
+        return Route::_(
+            'index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . max(0, $formId),
+            false
+        );
+    }
+
+    private function isAjaxCall(): bool
+    {
+        return (bool) $this->input->getInt('cb_ajax', 0);
+    }
+
+    private function respondAjax(bool $success, string $message = ''): void
+    {
+        echo new JsonResponse(['ok' => $success], $message, !$success);
+        Factory::getApplication()->close();
+    }
+
+    private function persistInlineElementSettings(int $formId): bool
+    {
+        if ($formId <= 0) {
+            return true;
+        }
+
+        $formModel = $this->getModel('Form', 'Administrator', ['ignore_request' => true]);
+        if (!$formModel || !method_exists($formModel, 'saveElementListSettingsFromRequest')) {
+            return true;
+        }
+
+        if (!$formModel->saveElementListSettingsFromRequest($formId)) {
+            $this->setMessage($formModel->getError() ?: Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED'), 'error');
+            if (!$this->isAjaxCall()) {
+                $this->setRedirect($this->getEditRedirectUrl($formId));
+            }
+            return false;
+        }
+
+        return true;
     }
 }

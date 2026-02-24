@@ -891,7 +891,7 @@ final class ContentbuilderLegacyHelper
         $types = array();
 
         // built-in types
-        if (file_exists(JPATH_SITE . '/administrator/components/com_breezingforms/breezingforms.xml')) {
+        if (self::isBreezingFormsAvailable()) {
             $types[] = 'com_breezingforms';
         }
 
@@ -925,6 +925,49 @@ final class ContentbuilderLegacyHelper
             @closedir($handle);
         }
         return $types;
+    }
+
+    private static function isBreezingFormsAvailable(): bool
+    {
+        $manifestCandidates = array(
+            JPATH_ROOT . '/administrator/components/com_breezingforms/breezingforms.xml',
+            JPATH_ROOT . '/administrator/components/com_breezingforms/com_breezingforms.xml',
+            JPATH_ROOT . '/administrator/components/com_breezingforms_ng/com_breezingforms_ng.xml',
+            JPATH_ROOT . '/administrator/components/com_breezingforms_ng/com_breezingformsng.xml',
+        );
+
+        foreach ($manifestCandidates as $manifest) {
+            if (file_exists($manifest)) {
+                return true;
+            }
+        }
+
+        try {
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
+            $query = $db->getQuery(true)
+                ->select('COUNT(1)')
+                ->from($db->quoteName('#__extensions'))
+                ->where($db->quoteName('type') . ' = ' . $db->quote('component'))
+                ->where($db->quoteName('element') . ' IN (' . $db->quote('com_breezingforms') . ',' . $db->quote('com_breezingforms_ng') . ')');
+            $db->setQuery($query);
+            if ((int) $db->loadResult() > 0) {
+                return true;
+            }
+        } catch (\Throwable $e) {
+            // ignore and continue with table-based detection
+        }
+
+        try {
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
+            $tables = array_map('strtolower', (array) $db->getTableList());
+            $required = array(
+                strtolower($db->replacePrefix('#__facileforms_forms')),
+                strtolower($db->replacePrefix('#__facileforms_records')),
+            );
+            return !array_diff($required, $tables);
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     public static function getForms($type)

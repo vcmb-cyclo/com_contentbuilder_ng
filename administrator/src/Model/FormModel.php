@@ -119,6 +119,86 @@ class FormModel extends AdminModel
         }
     }
 
+    private function saveElementListSettings(
+        int $formId,
+        array $labels,
+        array $wordwrap,
+        array $orderTypes,
+        array $itemWrapper,
+        array $order
+    ): void {
+        if ($formId <= 0) {
+            return;
+        }
+
+        $elementIds = array_unique(array_merge(
+            array_keys($labels),
+            array_keys($wordwrap),
+            array_keys($orderTypes),
+            array_keys($itemWrapper),
+            array_keys($order)
+        ));
+
+        if (empty($elementIds)) {
+            return;
+        }
+
+        ArrayHelper::toInteger($wordwrap);
+        $db = $this->getDatabase();
+
+        foreach ($elementIds as $elementId) {
+            $elementId = (int) $elementId;
+            if ($elementId <= 0) {
+                continue;
+            }
+
+            $label   = $labels[$elementId] ?? '';
+            $wrap    = $wordwrap[$elementId] ?? 0;
+            $wrap    = max(0, min(9999, (int) $wrap));
+            $otype   = $orderTypes[$elementId] ?? '';
+            $wrapper = $itemWrapper[$elementId] ?? '';
+            $ord     = isset($order[$elementId]) ? (int) $order[$elementId] : 0;
+
+            $db->setQuery(
+                "UPDATE #__contentbuilder_ng_elements
+                 SET `order_type`   = " . $db->quote((string) $otype) . ",
+                     `label`        = " . $db->quote((string) $label) . ",
+                     `wordwrap`     = " . (int) $wrap . ",
+                     `item_wrapper` = " . $db->quote(trim((string) $wrapper)) . ",
+                     `ordering`     = " . (int) $ord . "
+                 WHERE form_id = " . (int) $formId . " AND id = " . (int) $elementId
+            );
+            $db->execute();
+        }
+    }
+
+    public function saveElementListSettingsFromRequest(int $formId): bool
+    {
+        if ($formId <= 0) {
+            return true;
+        }
+
+        try {
+            $input = Factory::getApplication()->input;
+            $jform = (array) $input->post->get('jform', [], 'array');
+            $jformRaw = (array) $input->post->get('jform', [], 'raw');
+
+            $this->saveElementListSettings(
+                $formId,
+                (array) ($jform['itemLabels'] ?? []),
+                (array) ($jform['itemWordwrap'] ?? []),
+                (array) ($jform['itemOrderTypes'] ?? []),
+                (array) ($jformRaw['itemWrapper'] ?? []),
+                (array) ($jform['order'] ?? [])
+            );
+        } catch (\Throwable $e) {
+            $this->setError($e->getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
     public function getForm($data = [], $loadData = true)
     {
         return $this->loadForm(
@@ -459,7 +539,7 @@ class FormModel extends AdminModel
             $data->email_update_notifications = 0;
             $data->limited_article_options = 1;
             $data->limited_article_options_fe = 1;
-            $data->upload_directory = JPATH_SITE . '/media/contentbuilder_ng/upload';
+            $data->upload_directory = JPATH_SITE . '/media/com_contentbuilder_ng/upload';
             $data->protect_upload_directory = 1;
             $data->limit_add = 0;
             $data->limit_edit = 0;
@@ -814,56 +894,62 @@ class FormModel extends AdminModel
         $list_states = (array) ($jform['list_states'] ?? []);
         unset($jform['list_states']);
 
-        // 5) Upload directory : on garde ta logique, mais en version compacte
-        //    (ton système {CBSite} + fallback /media/contentbuilder_ng/upload)
+        // 5) Upload directory: keep current folder, do not fallback to another path.
         if (!isset($jform['upload_directory']) || $jform['upload_directory'] === '') {
             $jform['upload_directory'] = 'media/com_contentbuilder_ng/upload';
         }
 
         $upl_ex = explode('|', (string) $jform['upload_directory']);
-        $basePath = $upl_ex[0];
+        $basePath = trim((string) $upl_ex[0]);
         $tokens   = isset($upl_ex[1]) ? '|' . $upl_ex[1] : '';
+
+        $basePath = str_replace('\\', '/', $basePath);
+        $basePath = str_ireplace(
+            ['{CBSite}/media/contentbuilder_ng', '{cbsite}/media/contentbuilder_ng'],
+            ['{CBSite}/media/com_contentbuilder_ng', '{cbsite}/media/com_contentbuilder_ng'],
+            $basePath
+        );
+        if (stripos($basePath, '/media/contentbuilder_ng') === 0) {
+            $basePath = 'media/com_contentbuilder_ng' . substr($basePath, strlen('/media/contentbuilder_ng'));
+        } elseif (stripos($basePath, 'media/contentbuilder_ng') === 0) {
+            $basePath = 'media/com_contentbuilder_ng' . substr($basePath, strlen('media/contentbuilder_ng'));
+        }
 
         $is_relative = (stripos($basePath, '{cbsite}') === 0);
         $tmp_upload_directory = $basePath;
 
-        $resolved = $is_relative
-            ? str_ireplace(['{CBSite}', '{cbsite}'], JPATH_SITE, $basePath)
-            : $basePath;
+        if ($is_relative) {
+            $resolved = str_ireplace(['{CBSite}', '{cbsite}'], JPATH_SITE, $basePath);
+        } else {
+            $siteRoot = rtrim(str_replace('\\', '/', JPATH_SITE), '/');
+            $isWindowsAbsolute = (bool) preg_match('#^[A-Za-z]:/#', $basePath);
+            $isUnixAbsolute = !$isWindowsAbsolute && strpos($basePath, '/') === 0;
+
+            if ($isUnixAbsolute) {
+                // Treat web-style absolute paths like "/media/..." as site-relative.
+                $basePath = ltrim($basePath, '/');
+                $tmp_upload_directory = $basePath;
+            }
+
+            $resolved = ($isWindowsAbsolute || stripos($basePath, $siteRoot . '/') === 0 || strcasecmp($basePath, $siteRoot) === 0)
+                ? $basePath
+                : $siteRoot . '/' . ltrim($basePath, '/');
+        }
+
+        $resolved = ContentbuilderLegacyHelper::makeSafeFolder($resolved);
 
         $protect = !empty($jform['protect_upload_directory']);
 
-        // Crée fallback si dossier inexistant
+        // Create the configured folder when missing (no fallback path switching).
         if (!is_dir($resolved)) {
-            // /media/contentbuilder
-            if (!is_dir(JPATH_SITE . '/media/contentbuilder_ng')) {
-                Folder::create(JPATH_SITE . '/media/contentbuilder_ng');
-                File::write(JPATH_SITE . '/media/contentbuilder_ng/index.html', '');
-            }
-
-            // /media/contentbuilder_ng/upload
-            if (!is_dir(JPATH_SITE . '/media/contentbuilder_ng/upload')) {
-                Folder::create(JPATH_SITE . '/media/contentbuilder_ng/upload');
-                File::write(JPATH_SITE . '/media/contentbuilder_ng/upload/index.html', '');
-
+            if (!Folder::create($resolved)) {
+                $app->enqueueMessage('Could not create upload folder: ' . $resolved, 'error');
+            } else {
+                File::write($resolved . '/index.html', '');
                 if ($protect) {
-                    File::write(JPATH_SITE . '/media/contentbuilder_ng/upload/.htaccess', 'deny from all');
+                    File::write($resolved . '/.htaccess', 'deny from all');
                 }
             }
-
-            // On force le chemin fallback
-            $resolved = JPATH_SITE . '/media/contentbuilder_ng/upload';
-            $jform['upload_directory'] = $resolved;
-
-            // Et on restaure la version "tokenisée" si c'était relatif
-            if ($is_relative) {
-                $tmp_upload_directory = '{CBSite}/media/contentbuilder_ng/upload';
-            }
-
-            $app->enqueueMessage(
-                Text::_('COM_CONTENTBUILDER_NG_FALLBACK_UPLOAD_CREATED') . ' (/media/contentbuilder_ng/upload)',
-                'warning'
-            );
         }
 
         // Applique protection (safe folder) si besoin
@@ -1074,46 +1160,15 @@ class FormModel extends AdminModel
             // non bloquant
         }
 
-        // 12) Update elements (ton bloc, inchangé mais avec $formId)
-        $item_wrapper = (array) ($jformRaw['itemWrapper'] ?? []);
-        $wordwrap     = (array) ($jform['itemWordwrap'] ?? []);
-        $labels       = (array) ($jform['itemLabels'] ?? []);
-        $order_types  = (array) ($jform['itemOrderTypes'] ?? []);
-        $order        = (array) ($jform['order'] ?? []);
-
-        $elementIds = array_unique(array_merge(
-            array_keys($labels),
-            array_keys($wordwrap),
-            array_keys($order_types),
-            array_keys($item_wrapper),
-            array_keys($order)
-        ));
-
-        ArrayHelper::toInteger($wordwrap);
-
-        foreach ($elementIds as $elementId) {
-            $elementId = (int) $elementId;
-            if ($elementId <= 0) {
-                continue;
-            }
-
-            $label   = $labels[$elementId] ?? '';
-            $wrap    = $wordwrap[$elementId] ?? 0;
-            $otype   = $order_types[$elementId] ?? '';
-            $wrapper = $item_wrapper[$elementId] ?? '';
-            $ord     = isset($order[$elementId]) ? (int) $order[$elementId] : 0;
-
-            $db->setQuery(
-                "UPDATE #__contentbuilder_ng_elements
-             SET `order_type`   = " . $db->quote((string) $otype) . ",
-                 `label`        = " . $db->quote((string) $label) . ",
-                 `wordwrap`     = " . (int) $wrap . ",
-                 `item_wrapper` = " . $db->quote(trim((string) $wrapper)) . ",
-                 `ordering`     = " . (int) $ord . "
-             WHERE form_id = " . (int) $formId . " AND id = " . (int) $elementId
-            );
-            $db->execute();
-        }
+        // 12) Update elements (labels/order/wrappers/wordwrap)
+        $this->saveElementListSettings(
+            $formId,
+            (array) ($jform['itemLabels'] ?? []),
+            (array) ($jform['itemWordwrap'] ?? []),
+            (array) ($jform['itemOrderTypes'] ?? []),
+            (array) ($jformRaw['itemWrapper'] ?? []),
+            (array) ($jform['order'] ?? [])
+        );
 
         // 13) Synchronisation éventuelle des éléments (si tu en as besoin)
         // IMPORTANT: Evite de le faire dans getItem() (effets de bord).

@@ -546,7 +546,30 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       }
     }*/
 
+    $this->ensureUploadDirectoryExists();
+
     return true;
+  }
+
+  private function ensureUploadDirectoryExists(): void
+  {
+    $uploadDir = JPATH_ROOT . '/media/com_contentbuilder_ng/upload';
+    $parentDir = dirname($uploadDir);
+
+    if (!Folder::exists($parentDir) && !Folder::create($parentDir)) {
+      $this->log('[WARNING] Could not create upload parent directory: ' . $parentDir, Log::WARNING);
+      return;
+    }
+
+    if (!Folder::exists($uploadDir) && !Folder::create($uploadDir)) {
+      $this->log('[WARNING] Could not create upload directory: ' . $uploadDir, Log::WARNING);
+      return;
+    }
+
+    $indexFile = $uploadDir . '/index.html';
+    if (!File::exists($indexFile)) {
+      File::write($indexFile, '');
+    }
   }
 
   /**
@@ -2659,6 +2682,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $this->removeOldLibraries();
     $this->removeObsoleteFiles();
     $this->ensureMediaListTemplateInstalled();
+    $this->ensureUploadDirectoryExists();
     $this->updateDateColumns();
     $this->ensureFormsNewButtonColumn();
     $this->ensureElementsLinkableDefault();
