@@ -1,22 +1,71 @@
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## About the Project
 
-ContentBuilder NG for Joomla 5.x, 6.x.
+This repository provides **community-maintained updates and fixes for ContentBuilder**, 
+a Joomla extension originally developed by **Crosstec**. The original Crosstec project 
+is no longer maintained or supported.
 
-## Getting Started
+This ContentBuilerng (new gen) has been highly refactored for Joomla 6 native support. 
+New Gen releases releases will be named: "com_contentBuilerng-6.1.xx.zip" and above.
 
-## Migration
-The Joomla aliases have been removed to prepare Joomla 6.
+This initiative aims to keep the extension usable on modern Joomla installations by:
+- fixing compatibility issues
+- removing deprecated APIs
+- adapting the codebase to 6.x
+- adding Preview mode
+- improving user interface behaviors, ...
 
-## Installation
-    Clone the repo
-    git clone https://github.com/vcmb-cyclo/breezingforms.git 
+⚠️ **This is NOT an official Crosstec project.**  
+All trademarks and original copyrights remain the property of their respective owners.
 
-## Download plugin
-    Click on tag label.
-    Download "Source code (zip)" file.
+---
 
-## License
-ContentBuilder NG is licensed under GNU/GPL v2 or later (`GPL-2.0-or-later`).
-https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-    
+## Compatibility
+
+- ✅ Joomla 5.4.x (not tested, shoudl be OK **without** the Backward Compatibility plugin)
+- ✅ Joomla 6.x. (tested **with and witout** the Backward Compatibility plugin)
+- ✅ PHP 8.3 
+
+⚠️ **This is NOT an official ContentBuilder repository.**  
+This project is maintained by volunteers and provided *as-is*.
+
+---
+
+## Project Status
+
+🚧 This project is developed on a **best-effort basis**.  
+Only **GitHub Releases** should be considered stable and suitable for production use.
+
+---
+
+## Migration Notes
+
+To prepare for Joomla 6 compatibility:
+- Joomla alias classes have been removed
+- Deprecated APIs are progressively being cleaned up
+
+These changes may impact older custom integrations.
+
+---
+
+## Download
+
+For stable versions:
+1. Go to the **Tags** or **Releases** section
+2. Select the latest version
+3. Download **Source code (zip)**
+4. Install via the Joomla Extension Manager
+
+---
+
+## Disclaimer
+
+This software is provided **"as is"**, without warranty of any kind, express or implied.
+
+The maintainers provide this code on a **best-effort basis** and make no guarantees
+regarding correctness, stability, security, or fitness for any particular purpose.
+
+In no event shall the maintainers be held liable for any damages, data loss, or other
+issues arising from the use of this software.
+
+Use this code **at your own risk**.
