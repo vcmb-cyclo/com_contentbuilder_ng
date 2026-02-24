@@ -739,7 +739,7 @@ CSS;
 .cb-list-actions .btn.btn-outline-primary:hover,
 .cb-list-actions .btn.btn-outline-primary:focus{background:#0d6efd;color:#fff}
 .cb-list-panel{border:1px solid var(--bs-border-color,#dee2e6);border-radius:.9rem;padding:.65rem .75rem;background:var(--bs-body-bg,#fff);box-shadow:0 .35rem .9rem rgba(0,0,0,.06)}
-.cb-list-sticky{z-index:1040}
+.cb-list-sticky{z-index:9}
 .cb-list-sticky .cb-list-sticky-panel{
     border-color:rgba(13,110,253,.24)!important;
     background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(248,251,255,.92) 100%)!important;

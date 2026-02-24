@@ -104,7 +104,7 @@ Factory::getApplication()->getDocument()->addStyleDeclaration(
 .cbDetailsWrapper .cbToolBar.cbToolBar--top{
     position:sticky;
     top:var(--cb-details-sticky-top, .5rem);
-    z-index:1090;
+    z-index:9;
     margin:.25rem 0 .9rem !important;
     padding:.42rem .5rem;
     border:1px solid rgba(36,61,86,.2);

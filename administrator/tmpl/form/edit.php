@@ -236,6 +236,24 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         }, cbSaveAnimationDurationMs);
     }
 
+    function cbDismissTransientTooltips() {
+        // Hide Bootstrap tooltips that may remain visible after intercepted AJAX clicks.
+        if (window.bootstrap && typeof window.bootstrap.Tooltip === 'function') {
+            document.querySelectorAll('[data-bs-toggle="tooltip"], .hasTip, .editlinktip, .js-grid-item-action').forEach(function(el) {
+                var instance = window.bootstrap.Tooltip.getInstance(el);
+                if (instance && typeof instance.hide === 'function') {
+                    instance.hide();
+                }
+            });
+        }
+
+        // Defensive cleanup for any visible tooltip containers left in the DOM.
+        document.querySelectorAll('.tooltip.show').forEach(function(el) {
+            el.classList.remove('show');
+            el.setAttribute('aria-hidden', 'true');
+        });
+    }
+
     function cbGetToggleTaskMeta(task) {
         var map = {
             'form.list_include': { nextTask: 'form.no_list_include', enabled: true },
@@ -373,7 +391,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         return '';
     }
 
-    function cbSubmitTaskAjax(task, rowId, onSuccess, onError) {
+    function cbSubmitTaskAjax(task, rowId, onSuccess, onError, triggerElement) {
         var form = document.getElementById('adminForm') || document.adminForm;
         if (!form) {
             if (typeof onError === 'function') {
@@ -388,6 +406,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
         cbAjaxBusy = true;
         cbRememberViewport(rowId || '');
+        cbDismissTransientTooltips();
 
         var formData = new FormData(form);
         formData.set('task', task);
@@ -437,6 +456,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 alert(error && error.message ? error.message : 'Save failed');
             })
             .finally(function() {
+                cbDismissTransientTooltips();
+                if (triggerElement && typeof triggerElement.blur === 'function') {
+                    triggerElement.blur();
+                }
                 cbAjaxBusy = false;
             });
     }
@@ -490,7 +513,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
                 cbSubmitTaskAjax(task, rowId, function() {
                     cbApplyAjaxToggleState(actionElement, task);
-                });
+                }, null, actionElement);
                 return false;
             }
 
@@ -801,7 +824,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
             cbSubmitTaskAjax(task, rowId, function() {
                 cbApplyAjaxToggleState(actionElement, task);
-            });
+            }, null, actionElement);
         }, true);
 
         form.addEventListener('click', function(event) {
