@@ -824,6 +824,7 @@ by this block. -->
 				$pagStart = (int) ($this->lists['liststart'] ?? Factory::getApplication()->input->getInt('list[start]', 0));
 				$pagPages = (int) ceil($pagTotal / $pagLimit);
 				$pagCurrent = $pagPages > 0 ? (int) floor($pagStart / $pagLimit) + 1 : 1;
+				$pagLastStart = $pagPages > 0 ? max(0, ($pagPages - 1) * $pagLimit) : 0;
 				$showSummary = $pagTotal > 0;
 				$showPagination = $pagPages > 1;
 				$rangeStart = $pagTotal > 0 ? $pagStart + 1 : 0;
@@ -858,8 +859,13 @@ by this block. -->
 									<?php if ($showPagination) : ?>
 										<ul class="pagination pagination-sm mb-0">
 											<li class="page-item<?php echo $pagCurrent <= 1 ? ' disabled' : ''; ?>">
+												<a class="page-link" href="<?php echo $buildPageLink(0); ?>" aria-label="First">
+													<span aria-hidden="true">&lt;&lt;</span>
+												</a>
+											</li>
+											<li class="page-item<?php echo $pagCurrent <= 1 ? ' disabled' : ''; ?>">
 												<a class="page-link" href="<?php echo $buildPageLink($pagStart - $pagLimit); ?>" aria-label="Previous">
-													<span aria-hidden="true">&laquo;</span>
+													<span aria-hidden="true">&lt;</span>
 												</a>
 											</li>
 											<?php for ($p = 1; $p <= $pagPages; $p++) :
@@ -873,7 +879,12 @@ by this block. -->
 											<?php endfor; ?>
 											<li class="page-item<?php echo $pagCurrent >= $pagPages ? ' disabled' : ''; ?>">
 												<a class="page-link" href="<?php echo $buildPageLink($pagStart + $pagLimit); ?>" aria-label="Next">
-													<span aria-hidden="true">&raquo;</span>
+													<span aria-hidden="true">&gt;</span>
+												</a>
+											</li>
+											<li class="page-item<?php echo $pagCurrent >= $pagPages ? ' disabled' : ''; ?>">
+												<a class="page-link" href="<?php echo $buildPageLink($pagLastStart); ?>" aria-label="Last">
+													<span aria-hidden="true">&gt;&gt;</span>
 												</a>
 											</li>
 										</ul>
