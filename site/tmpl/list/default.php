@@ -82,7 +82,7 @@ Factory::getApplication()->getDocument()->addStyleDeclaration(
 .cb-list-sticky{
 	position:sticky;
 	top:var(--cb-list-sticky-top,.5rem);
-	z-index:1080;
+	z-index:var(--cb-list-sticky-z-index,960);
 	margin:0 0 .75rem;
 }
 .cb-list-sticky .cb-list-panel{

@@ -126,6 +126,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
 <script type="text/javascript">
     const cbViewportStateKey = 'cbng.form.viewport.<?php echo (int) ($this->item->id ?? 0); ?>';
+    const cbSaveAnimationDurationMs = 500;
     let cbLastRowId = '';
     let cbAjaxBusy = false;
     let cbSaveButtonTimer = null;
@@ -231,7 +232,66 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             targets.forEach(function(el) {
                 el.classList.remove('cb-save-animate');
             });
-        }, 1000);
+        }, cbSaveAnimationDurationMs);
+    }
+
+    function cbGetToggleTaskMeta(task) {
+        var map = {
+            'form.list_include': { nextTask: 'form.no_list_include', enabled: true },
+            'form.no_list_include': { nextTask: 'form.list_include', enabled: false },
+            'form.search_include': { nextTask: 'form.no_search_include', enabled: true },
+            'form.no_search_include': { nextTask: 'form.search_include', enabled: false },
+            'form.linkable': { nextTask: 'form.not_linkable', enabled: true },
+            'form.not_linkable': { nextTask: 'form.linkable', enabled: false },
+            'form.editable': { nextTask: 'form.not_editable', enabled: true },
+            'form.not_editable': { nextTask: 'form.editable', enabled: false },
+            'form.listpublish': { nextTask: 'form.listunpublish', enabled: true },
+            'form.listunpublish': { nextTask: 'form.listpublish', enabled: false }
+        };
+
+        return map[String(task || '')] || null;
+    }
+
+    function cbApplyAjaxToggleState(actionElement, task) {
+        if (!actionElement) {
+            return;
+        }
+
+        var meta = cbGetToggleTaskMeta(task);
+        if (!meta) {
+            return;
+        }
+
+        if (actionElement.hasAttribute('data-item-task')) {
+            actionElement.setAttribute('data-item-task', meta.nextTask);
+        }
+        if (actionElement.hasAttribute('data-submit-task')) {
+            actionElement.setAttribute('data-submit-task', meta.nextTask);
+        }
+        if (actionElement.hasAttribute('data-task')) {
+            actionElement.setAttribute('data-task', meta.nextTask);
+        }
+
+        var onclick = String(actionElement.getAttribute('onclick') || '');
+        if (onclick.indexOf('listItemTask(') !== -1) {
+            actionElement.setAttribute(
+                'onclick',
+                onclick.replace(
+                    /(listItemTask\(\s*['"][^'"]+['"]\s*,\s*['"])([^'"]+)(['"]\s*\))/,
+                    '$1' + meta.nextTask + '$3'
+                )
+            );
+        }
+
+        if (actionElement.classList) {
+            actionElement.classList.toggle('active', !!meta.enabled);
+        }
+
+        var icon = actionElement.querySelector('span[class*="icon-"]');
+        if (icon && icon.classList) {
+            icon.classList.remove('icon-publish', 'icon-unpublish');
+            icon.classList.add(meta.enabled ? 'icon-publish' : 'icon-unpublish');
+        }
     }
 
     function cbIsAjaxToggleTask(task) {
@@ -416,9 +476,19 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
             if (cbIsAjaxToggleTask(task)) {
                 var rowId = (typeof cb.value !== 'undefined' && cb.value !== '') ? String(cb.value) : '';
+                var actionElement = null;
+
+                if (cb && typeof cb.closest === 'function') {
+                    var row = cb.closest('tr[data-cb-row-id]');
+                    if (row) {
+                        actionElement = row.querySelector(
+                            '[data-item-task="' + task + '"], [data-submit-task="' + task + '"], [data-task="' + task + '"], [onclick*="' + task + '"]'
+                        );
+                    }
+                }
 
                 cbSubmitTaskAjax(task, rowId, function() {
-                    window.location.reload();
+                    cbApplyAjaxToggleState(actionElement, task);
                 });
                 return false;
             }
@@ -673,7 +743,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             }
 
             cbSubmitTaskAjax(task, rowId, function() {
-                window.location.reload();
+                cbApplyAjaxToggleState(actionElement, task);
             });
         }, true);
 
