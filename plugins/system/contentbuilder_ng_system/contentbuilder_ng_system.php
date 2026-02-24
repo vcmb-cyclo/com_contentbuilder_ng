@@ -38,6 +38,37 @@ class plgSystemContentbuilder_ng_system extends CMSPlugin implements SubscriberI
 
     private $caching = 0;
 
+    /**
+     * Ensure ContentBuilder NG helper classes are available for this plugin lifecycle.
+     */
+    private function bootstrapContentbuilder(): bool
+    {
+        if (class_exists(ContentbuilderLegacyHelper::class)) {
+            return true;
+        }
+
+        $base = JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng';
+        if (!is_dir($base)) {
+            return false;
+        }
+
+        $files = [
+            $base . '/src/Helper/PackedDataHelper.php',
+            $base . '/src/Helper/Logger.php',
+            $base . '/src/Helper/ContentbuilderHelper.php',
+            $base . '/src/Helper/ContentbuilderLegacyHelper.php',
+        ];
+
+        foreach ($files as $file) {
+            if (!is_file($file)) {
+                return false;
+            }
+            require_once $file;
+        }
+
+        return class_exists(ContentbuilderLegacyHelper::class);
+    }
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -60,7 +91,7 @@ class plgSystemContentbuilder_ng_system extends CMSPlugin implements SubscriberI
 
     function onAfterDispatch()
     {
-        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/src/contentbuilder_ng.php')) {
+        if (!$this->bootstrapContentbuilder()) {
             return;
         }
 
@@ -237,13 +268,12 @@ class plgSystemContentbuilder_ng_system extends CMSPlugin implements SubscriberI
 
     function onAfterRoute()
     {
-        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/src/contentbuilder_ng.php')) {
+        if (!$this->bootstrapContentbuilder()) {
             return;
         }
 
         // register non-existent records
-        if (in_array(Factory::getApplication()->input->get('option', '', 'string'), array('com_contentbuilder_ng', 'com_content'))) {
-            require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/src/contentbuilder_ng.php');
+        if (in_array(Factory::getApplication()->input->get('option', '', 'string'), array('com_contentbuilder_ng', 'com_content', 'com_breezingforms'))) {
             $this->db->setQuery("Select `type`, `reference_id` From #__contentbuilder_ng_forms Where published = 1");
             $views = $this->db->loadAssocList();
             $typeview = array();
@@ -364,7 +394,7 @@ class plgSystemContentbuilder_ng_system extends CMSPlugin implements SubscriberI
 
     function onAfterInitialize()
     {
-        if (!file_exists(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/src/contentbuilder_ng.php')) {
+        if (!$this->bootstrapContentbuilder()) {
             return;
         }
 
@@ -444,8 +474,6 @@ class plgSystemContentbuilder_ng_system extends CMSPlugin implements SubscriberI
             $this->db->execute();
 
             $pluginParams = $this->params;
-
-            require_once(JPATH_SITE .'/administrator/components/com_contentbuilder_ng/src/contentbuilder_ng.php');
 
             $this->db->setQuery("
                 Select 
