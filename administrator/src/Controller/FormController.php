@@ -91,7 +91,7 @@ class FormController extends BaseFormController
                         'index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . (int) $this->input->getInt('id', 0),
                         false
                     ),
-                    $model->getError() ?: 'Store failed (no id returned)',
+                    Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED'),
                     'error'
                 );
                 return false;
@@ -133,7 +133,7 @@ class FormController extends BaseFormController
                         'index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . (int) $this->input->getInt('id', 0),
                         false
                     ),
-                    $model->getError() ?: 'Store failed (no id returned)',
+                    Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED'),
                     'error'
                 );
                 return false;
@@ -218,9 +218,7 @@ class FormController extends BaseFormController
             $id = $model->store(); // legacy
 
             if (!$id) {
-                $this->setMessage($model->getError() ?: 'Store failed (no id returned)', 'error');
-                $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=0', false));
-                return false;
+                throw new \RuntimeException('Store failed (no id returned)');
             }
 
             $this->setRedirect(
@@ -231,7 +229,7 @@ class FormController extends BaseFormController
 
             return true;
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($e->getMessage(), 'error');
             $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=0', false));
             return false;
         }
@@ -307,7 +305,7 @@ class FormController extends BaseFormController
         $model->setFormId($formId);
 
         if (!$model->saveorder($pks, $order)) {
-            $this->setMessage($model->getError() ?: 'Saveorder failed', 'warning');
+            $this->setMessage(Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED'), 'warning');
         } else {
             $this->setMessage(Text::_('JLIB_APPLICATION_SAVE_SUCCESS'));
         }
@@ -337,7 +335,7 @@ class FormController extends BaseFormController
         ArrayHelper::toInteger($order);
 
         if (!$model->saveorder($pks, $order)) {
-            $this->enqueueMessage($model->getError() ?: 'Saveorder failed', 'warning');
+            $this->enqueueMessage(Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED'), 'warning');
         }
     }
 
@@ -469,7 +467,7 @@ class FormController extends BaseFormController
 
             $model = $this->getModel('Elementoptions', 'Administrator', ['ignore_request' => true]);
             if (!$model->fieldUpdate($cids, $field, $value)) {
-                $error = $model->getError() ?: Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED');
+                $error = Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED');
                 $this->setMessage($error, 'error');
                 if ($this->isAjaxCall()) {
                     $this->respondAjax(false, $error);
@@ -528,7 +526,7 @@ class FormController extends BaseFormController
 
             $model = $this->getModel('Elementoptions', 'Administrator', ['ignore_request' => true]);
             if (!$model->publish($cids, $state)) {
-                $error = $model->getError() ?: Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED');
+                $error = Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED');
                 $this->setMessage($error, 'error');
                 if ($this->isAjaxCall()) {
                     $this->respondAjax(false, $error);
@@ -585,7 +583,7 @@ class FormController extends BaseFormController
             $model = $this->getModel('Form', 'Administrator', ['ignore_request' => true]);
             $pks = [$formId];
             if (!$model || !$model->publish($pks, (int) $state)) {
-                $error = ($model && $model->getError()) ? $model->getError() : Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED');
+                $error = Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED');
                 $this->setMessage($error, 'error');
                 if ($this->isAjaxCall()) {
                     $this->respondAjax(false, $error);
@@ -656,7 +654,7 @@ class FormController extends BaseFormController
         }
 
         if (!$formModel->saveElementListSettingsFromRequest($formId)) {
-            $this->setMessage($formModel->getError() ?: Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED'), 'error');
+            $this->setMessage(Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED'), 'error');
             if (!$this->isAjaxCall()) {
                 $this->setRedirect($this->getEditRedirectUrl($formId));
             }
