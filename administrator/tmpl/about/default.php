@@ -26,6 +26,15 @@ if ($licenseValue === '' || in_array(strtolower($licenseValue), $genericLicenseV
     $licenseValue = Text::_('COM_CONTENTBUILDERNG_LICENSE_FALLBACK');
 }
 $licenseUrl = 'https://www.gnu.org/licenses/gpl-2.0.html';
+$tooltipAudit = Text::_('COM_CONTENTBUILDERNG_ABOUT_TOOLTIP_AUDIT');
+$tooltipDbRepair = Text::_('COM_CONTENTBUILDERNG_ABOUT_TOOLTIP_DB_REPAIR');
+$tooltipShowLog = Text::_('COM_CONTENTBUILDERNG_ABOUT_TOOLTIP_SHOW_LOG');
+$tooltipLinkVcmb = Text::_('COM_CONTENTBUILDERNG_ABOUT_TOOLTIP_LINK_VCMB');
+$tooltipLinkGithub = Text::_('COM_CONTENTBUILDERNG_ABOUT_TOOLTIP_LINK_GITHUB');
+$tooltipLinkLicense = Text::_('COM_CONTENTBUILDERNG_ABOUT_TOOLTIP_LINK_LICENSE');
+$labelAuditButton = Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT');
+$labelDbRepairButton = Text::_('COM_CONTENTBUILDERNG_ABOUT_MIGRATE_PACKED_DATA');
+$labelShowLogButton = Text::_('COM_CONTENTBUILDERNG_ABOUT_SHOW_LOG');
 $auditReport = is_array($this->auditReport ?? null) ? $this->auditReport : [];
 $auditSummary = (array) ($auditReport['summary'] ?? []);
 $duplicateIndexes = (array) ($auditReport['duplicate_indexes'] ?? []);
@@ -419,18 +428,24 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
                 href="https://breezingforms-ng.vcmb.fr"
                 target="_blank"
                 rel="noopener noreferrer"
+                title="<?php echo htmlspecialchars($tooltipLinkVcmb, ENT_QUOTES, 'UTF-8'); ?>"
+                aria-label="<?php echo htmlspecialchars($tooltipLinkVcmb, ENT_QUOTES, 'UTF-8'); ?>"
             >VCMB migration</a>
             <a
                 class="cb-about-intro-link cb-about-intro-link--github"
                 href="https://github.com/vcmb-cyclo/com_contentbuilder-ng"
                 target="_blank"
                 rel="noopener noreferrer"
+                title="<?php echo htmlspecialchars($tooltipLinkGithub, ENT_QUOTES, 'UTF-8'); ?>"
+                aria-label="<?php echo htmlspecialchars($tooltipLinkGithub, ENT_QUOTES, 'UTF-8'); ?>"
             >GitHub repository</a>
             <a
                 class="cb-about-intro-link cb-about-intro-link--license"
                 href="<?php echo htmlspecialchars($licenseUrl, ENT_QUOTES, 'UTF-8'); ?>"
                 target="_blank"
                 rel="noopener noreferrer"
+                title="<?php echo htmlspecialchars($tooltipLinkLicense, ENT_QUOTES, 'UTF-8'); ?>"
+                aria-label="<?php echo htmlspecialchars($tooltipLinkLicense, ENT_QUOTES, 'UTF-8'); ?>"
             ><?php echo Text::_('COM_CONTENTBUILDERNG_LICENSE_LINK'); ?></a>
         </div>
     </div>
@@ -1117,6 +1132,204 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
 <script>
     (function () {
         var originalSubmitbutton = Joomla.submitbutton;
+        var toolbarTaskMeta = {
+            'about.runAudit': {
+                tooltip: <?php echo json_encode($tooltipAudit, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>,
+                label: <?php echo json_encode($labelAuditButton, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>,
+                fragments: ['about_audit', 'about-audit', 'runaudit', 'run-audit']
+            },
+            'about.migratePackedData': {
+                tooltip: <?php echo json_encode($tooltipDbRepair, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>,
+                label: <?php echo json_encode($labelDbRepairButton, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>,
+                fragments: ['about_migrate_packed_data', 'about-migrate-packed-data', 'migratepackeddata', 'migrate-packed-data']
+            },
+            'about.showLog': {
+                tooltip: <?php echo json_encode($tooltipShowLog, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>,
+                label: <?php echo json_encode($labelShowLogButton, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>,
+                fragments: ['about_show_log', 'about-show-log', 'showlog', 'show-log']
+            }
+        };
+
+        function getToolbarHost() {
+            return document.getElementById('toolbar')
+                || document.querySelector('joomla-toolbar')
+                || document.querySelector('.toolbar');
+        }
+
+        function uniqueNodes(nodes) {
+            var seen = [];
+            var unique = [];
+
+            Array.prototype.forEach.call(nodes || [], function (node) {
+                if (!node || seen.indexOf(node) !== -1) {
+                    return;
+                }
+
+                seen.push(node);
+                unique.push(node);
+            });
+
+            return unique;
+        }
+
+        function normalizeText(value) {
+            return String(value || '')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .toLowerCase();
+        }
+
+        function collectTaskNodes(task, meta) {
+            var selectors = [
+                '[data-task="' + task + '"]',
+                '[task="' + task + '"]',
+                '[data-submit-task="' + task + '"]',
+                '[onclick*="' + task + '"]'
+            ];
+            var nodes = [];
+
+            if (meta && Array.isArray(meta.fragments)) {
+                meta.fragments.forEach(function (fragment) {
+                    if (!fragment) {
+                        return;
+                    }
+
+                    selectors.push('[id*="' + fragment + '"]');
+                    selectors.push('[class*="' + fragment + '"]');
+                });
+            }
+
+            selectors.forEach(function (selector) {
+                try {
+                    Array.prototype.push.apply(nodes, document.querySelectorAll(selector));
+                } catch (error) {
+                    // Ignore invalid selector fragments.
+                }
+            });
+
+            if (nodes.length === 0 && meta && meta.label) {
+                var expected = normalizeText(meta.label);
+
+                Array.prototype.forEach.call(
+                    document.querySelectorAll('#toolbar button, #toolbar a, joomla-toolbar-button, .toolbar button, .toolbar a'),
+                    function (node) {
+                        var text = normalizeText(node.textContent || '');
+
+                        if (text === expected || (expected && text.indexOf(expected) !== -1)) {
+                            nodes.push(node);
+                        }
+                    }
+                );
+            }
+
+            return uniqueNodes(nodes);
+        }
+
+        function applyTooltipAttributes(node, tooltip) {
+            if (!node || !tooltip) {
+                return;
+            }
+
+            node.setAttribute('title', tooltip);
+            node.setAttribute('aria-label', tooltip);
+            node.setAttribute('data-bs-title', tooltip);
+            node.setAttribute('data-bs-toggle', 'tooltip');
+        }
+
+        function applyTooltipToTaskNodes(nodes, tooltip) {
+            nodes.forEach(function (node) {
+                applyTooltipAttributes(node, tooltip);
+
+                Array.prototype.forEach.call(
+                    node.querySelectorAll('button, a, [role="button"], .btn, .toolbar-button'),
+                    function (child) {
+                        applyTooltipAttributes(child, tooltip);
+                    }
+                );
+
+                if (node.shadowRoot) {
+                    Array.prototype.forEach.call(
+                        node.shadowRoot.querySelectorAll('button, a, [role="button"], .btn, .toolbar-button'),
+                        function (child) {
+                            applyTooltipAttributes(child, tooltip);
+                        }
+                    );
+                }
+
+                var host = node.closest('joomla-toolbar-button, .btn-wrapper, .toolbar-button');
+                if (host) {
+                    applyTooltipAttributes(host, tooltip);
+                    Array.prototype.forEach.call(
+                        host.querySelectorAll('button, a, [role="button"], .btn, .toolbar-button'),
+                        function (child) {
+                            applyTooltipAttributes(child, tooltip);
+                        }
+                    );
+                }
+            });
+        }
+
+        function initBootstrapTooltips() {
+            if (!window.bootstrap || !window.bootstrap.Tooltip) {
+                return;
+            }
+
+            Array.prototype.forEach.call(
+                document.querySelectorAll('#toolbar [data-bs-toggle="tooltip"], joomla-toolbar [data-bs-toggle="tooltip"]'),
+                function (node) {
+                    var instance = window.bootstrap.Tooltip.getInstance(node);
+                    if (!instance) {
+                        new window.bootstrap.Tooltip(node, { container: 'body', trigger: 'hover focus' });
+                    }
+                }
+            );
+        }
+
+        function applyToolbarTaskTooltips() {
+            Object.keys(toolbarTaskMeta).forEach(function (task) {
+                var meta = toolbarTaskMeta[task] || {};
+                var tooltip = String(meta.tooltip || '').trim();
+
+                if (!tooltip) {
+                    return;
+                }
+
+                applyTooltipToTaskNodes(collectTaskNodes(task, meta), tooltip);
+            });
+
+            initBootstrapTooltips();
+        }
+
+        function scheduleToolbarTaskTooltips() {
+            [0, 200, 600].forEach(function (delay) {
+                window.setTimeout(applyToolbarTaskTooltips, delay);
+            });
+        }
+
+        function observeToolbarUpdates() {
+            var toolbarHost = getToolbarHost();
+
+            if (!toolbarHost || typeof MutationObserver !== 'function') {
+                return;
+            }
+
+            var observer = new MutationObserver(applyToolbarTaskTooltips);
+            observer.observe(toolbarHost, { childList: true, subtree: true });
+
+            window.setTimeout(function () {
+                observer.disconnect();
+            }, 8000);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () {
+                scheduleToolbarTaskTooltips();
+                observeToolbarUpdates();
+            }, { once: true });
+        } else {
+            scheduleToolbarTaskTooltips();
+            observeToolbarUpdates();
+        }
 
         Joomla.submitbutton = function (task) {
             if (task === 'about.migratePackedData') {
