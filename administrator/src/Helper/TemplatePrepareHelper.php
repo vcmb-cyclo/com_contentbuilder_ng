@@ -11,7 +11,7 @@
  * @since       6.1.1
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Helper;
+namespace CB\Component\Contentbuilderng\Administrator\Helper;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -32,7 +32,7 @@ final class TemplatePrepareHelper
         } catch (\ParseError $e) {
             $fieldLabel = ucwords(str_replace('_', ' ', trim($fieldName)));
             $msg = 'Invalid ' . $fieldName . ' code; skipped. Check the ' . $fieldLabel . ' field for stray HTML (editor).';
-            Log::add($msg . ' Error: ' . $e->getMessage(), Log::WARNING, 'com_contentbuilder_ng');
+            Log::add($msg . ' Error: ' . $e->getMessage(), Log::WARNING, 'com_contentbuilderng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }
     }

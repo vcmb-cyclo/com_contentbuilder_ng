@@ -14,7 +14,7 @@
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Model;
+namespace CB\Component\Contentbuilderng\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -26,7 +26,7 @@ use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class FormsModel extends ListModel
 {
@@ -79,7 +79,7 @@ class FormsModel extends ListModel
 
         $input = $app->input;
         $user = $app->getIdentity();
-        $profileKey = 'com_contentbuilder_ng.filter_tag';
+        $profileKey = 'com_contentbuilderng.filter_tag';
 
         $filterTag = $app->getUserStateFromRequest($this->context . '.filter.tag', 'filter_tag', '', 'string');
         $hasRequestValue = $input->get('filter_tag', null) !== null;
@@ -160,7 +160,7 @@ class FormsModel extends ListModel
 
         // Base query
         $query->select('a.*')
-            ->from($db->quoteName('#__contentbuilder_ng_forms', 'a'));
+            ->from($db->quoteName('#__contentbuilderng_forms', 'a'));
 
         // Published filter (filter.state : 'P' or 'U')
         $filterState = strtoupper(trim((string) $this->getState('filter.state')));
@@ -265,7 +265,7 @@ class FormsModel extends ListModel
         }
 
         $factory = Factory::getApplication()
-            ->bootComponent('com_contentbuilder_ng')
+            ->bootComponent('com_contentbuilderng')
             ->getMVCFactory();
 
         $formModel = $factory->createModel('form', 'Administrator', ['ignore_request' => true]);
@@ -295,7 +295,7 @@ class FormsModel extends ListModel
 
         $query = $db->getQuery(true)
             ->select('DISTINCT ' . $db->quoteName('tag') . ' AS ' . $db->quoteName('tag'))
-            ->from($db->quoteName('#__contentbuilder_ng_forms'))
+            ->from($db->quoteName('#__contentbuilderng_forms'))
             ->where($db->quoteName('tag') . ' <> ' . $db->quote(''))
             ->order($db->quoteName('tag') . ' ASC');
 

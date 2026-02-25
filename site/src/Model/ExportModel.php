@@ -8,7 +8,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Site\Model;
+namespace CB\Component\Contentbuilderng\Site\Model;
 
 // No direct access
 defined('_JEXEC') or die('Restricted access');
@@ -17,8 +17,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class ExportModel extends BaseDatabaseModel
 {
@@ -40,7 +40,7 @@ class ExportModel extends BaseDatabaseModel
         $this->frontend = Factory::getApplication()->isClient('site');
 
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
 
         $id = Factory::getApplication()->input->getInt('id', 0);
 
@@ -59,7 +59,7 @@ class ExportModel extends BaseDatabaseModel
         $this->setId($id);
 
         if (!$this->_id) {
-            throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+            throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
         }
 
         if ($app->getSession()->get($option . 'formsd_id', 0) == 0 || $app->getSession()->get($option . 'formsd_id', 0) == $this->_id) {
@@ -144,7 +144,7 @@ class ExportModel extends BaseDatabaseModel
      */
     private function _buildQuery()
     {
-        return 'Select * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id) . ' And published = 1';
+        return 'Select * From #__contentbuilderng_forms Where id = ' . intval($this->_id) . ' And published = 1';
     }
 
     /**
@@ -161,15 +161,15 @@ class ExportModel extends BaseDatabaseModel
             $this->_data = $this->_getList($query, 0, 1);
 
             if (!count($this->_data)) {
-                throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
             }
 
             $labels = [];
             foreach ($this->_data as $data) {
                 if (!$this->frontend && $data->display_in == 0) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
                 } else if ($this->frontend && $data->display_in == 1) {
-                    throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+                    throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
                 }
 
                 if (is_array($data->export_xls) && !count($data->export_xls)) {
@@ -179,13 +179,13 @@ class ExportModel extends BaseDatabaseModel
                 if ($data->type && $data->reference_id) {
                     $data->form = ContentbuilderLegacyHelper::getForm($data->type, $data->reference_id);
                     if (!$data->form->exists) {
-                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+                        throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
                     }
                     $searchable_elements = ContentbuilderLegacyHelper::getListSearchableElements($this->_id);
                     $data->labels = $data->form->getElementLabels();
 
                     if (
-                        $app->getSession()->get('com_contentbuilder_ng.filter_signal.' . $this->_id, false)
+                        $app->getSession()->get('com_contentbuilderng.filter_signal.' . $this->_id, false)
 
                         && $data->allow_external_filter
                     ) {
@@ -196,12 +196,12 @@ class ExportModel extends BaseDatabaseModel
                         $filters_to = array();
                         $calendar_formats = array();
 
-                        $filters = $app->getSession()->get('com_contentbuilder_ng.filter.' . $this->_id, array());
-                        $filters_from = $app->getSession()->get('com_contentbuilder_ng.calendar_filter_from.' . $this->_id, array());
-                        $filters_to = $app->getSession()->get('com_contentbuilder_ng.calendar_filter_to.' . $this->_id, array());
-                        $calendar_formats = $app->getSession()->get('com_contentbuilder_ng.calendar_formats.' . $this->_id, array());
-                        $filter_keywords = $app->getSession()->get('com_contentbuilder_ng.filter_keywords.' . $this->_id, '');
-                        $filter_cats = $app->getSession()->get('com_contentbuilder_ng.filter_article_categories.' . $this->_id, -1);
+                        $filters = $app->getSession()->get('com_contentbuilderng.filter.' . $this->_id, array());
+                        $filters_from = $app->getSession()->get('com_contentbuilderng.calendar_filter_from.' . $this->_id, array());
+                        $filters_to = $app->getSession()->get('com_contentbuilderng.calendar_filter_to.' . $this->_id, array());
+                        $calendar_formats = $app->getSession()->get('com_contentbuilderng.calendar_formats.' . $this->_id, array());
+                        $filter_keywords = $app->getSession()->get('com_contentbuilderng.filter_keywords.' . $this->_id, '');
+                        $filter_cats = $app->getSession()->get('com_contentbuilderng.filter_article_categories.' . $this->_id, -1);
 
                         if ($filter_keywords != '') {
                             $this->setState('formsd_filter', $filter_keywords);
@@ -219,13 +219,13 @@ class ExportModel extends BaseDatabaseModel
                                     switch (count($to_exploded)) {
                                         case 2:
                                             if ($to_exploded[0] != '') {
-                                                $filters[$col] = '@range/date/' .  ContentbuilderHelper::convertDate(trim($to_exploded[0]), $calendar_format) . ' to ' . ContentbuilderHelper::convertDate(trim($to_exploded[1]), $calendar_format);
+                                                $filters[$col] = '@range/date/' .  ContentbuilderngHelper::convertDate(trim($to_exploded[0]), $calendar_format) . ' to ' . ContentbuilderngHelper::convertDate(trim($to_exploded[1]), $calendar_format);
                                             } else {
-                                                $filters[$col] = '@range/date/to ' . ContentbuilderHelper::convertDate(trim($to_exploded[1]), $calendar_format);
+                                                $filters[$col] = '@range/date/to ' . ContentbuilderngHelper::convertDate(trim($to_exploded[1]), $calendar_format);
                                             }
                                             break;
                                         case 1:
-                                            $filters[$col] = '@range/date/' .  ContentbuilderHelper::convertDate(trim($to_exploded[0]), $calendar_format);
+                                            $filters[$col] = '@range/date/' .  ContentbuilderngHelper::convertDate(trim($to_exploded[0]), $calendar_format);
                                             break;
                                     }
                                     if (isset($to_exploded[0]) && isset($to_exploded[1]) && trim($to_exploded[0]) == '' && trim($to_exploded[1]) == '') {
@@ -275,9 +275,9 @@ class ExportModel extends BaseDatabaseModel
                                         }
                                     }
                                     if (count($ex2) == 2) {
-                                        $out = (trim($ex2[0]) ? Text::_('COM_CONTENTBUILDER_NG_FROM') . ' ' . trim($val) : '') . ' ' . Text::_('COM_CONTENTBUILDER_NG_TO') . ' ' . trim($val2);
+                                        $out = (trim($ex2[0]) ? Text::_('COM_CONTENTBUILDERNG_FROM') . ' ' . trim($val) : '') . ' ' . Text::_('COM_CONTENTBUILDERNG_TO') . ' ' . trim($val2);
                                     } else if (count($ex2) > 0) {
-                                        $out = Text::_('COM_CONTENTBUILDER_NG_FROM2') . ' ' . trim($val);
+                                        $out = Text::_('COM_CONTENTBUILDERNG_FROM2') . ' ' . trim($val);
                                     }
                                     if ($out) {
                                         $this->_menu_filter[$order_key] = $ex;
@@ -293,7 +293,7 @@ class ExportModel extends BaseDatabaseModel
                                     $i = 0;
                                     foreach ($ex2 as $val) {
                                         if ($i + 1 < $size) {
-                                            $out .= trim($val) . ' ' . Text::_('COM_CONTENTBUILDER_NG_AND') . ' ';
+                                            $out .= trim($val) . ' ' . Text::_('COM_CONTENTBUILDERNG_AND') . ' ';
                                         } else {
                                             $out .= trim($val);
                                         }
@@ -315,7 +315,7 @@ class ExportModel extends BaseDatabaseModel
                         $ids[] = $this->getDatabase()->quote($reference_id);
                     }
                     if (count($ids)) {
-                        $this->getDatabase()->setQuery("Select Distinct `id`,`label`, reference_id, `order_type` From #__contentbuilder_ng_elements Where form_id = " . intval($this->_id) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
+                        $this->getDatabase()->setQuery("Select Distinct `id`,`label`, reference_id, `order_type` From #__contentbuilderng_elements Where form_id = " . intval($this->_id) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
                         $rows = $this->getDatabase()->loadAssocList();
                         $ids = array();
                         foreach ($rows as $row) {

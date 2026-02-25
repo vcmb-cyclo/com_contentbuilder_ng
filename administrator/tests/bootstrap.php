@@ -8,7 +8,7 @@ namespace {
     }
 }
 
-namespace CB\Component\Contentbuilder_ng\Tests\Stubs {
+namespace CB\Component\Contentbuilderng\Tests\Stubs {
     final class Identity
     {
         public function get(string $key, $default = null)
@@ -67,14 +67,14 @@ namespace Joomla\CMS {
     if (!\class_exists(Factory::class, false)) {
         class Factory
         {
-            public static function getApplication(): \CB\Component\Contentbuilder_ng\Tests\Stubs\Application
+            public static function getApplication(): \CB\Component\Contentbuilderng\Tests\Stubs\Application
             {
-                return new \CB\Component\Contentbuilder_ng\Tests\Stubs\Application();
+                return new \CB\Component\Contentbuilderng\Tests\Stubs\Application();
             }
 
-            public static function getDate(): \CB\Component\Contentbuilder_ng\Tests\Stubs\Date
+            public static function getDate(): \CB\Component\Contentbuilderng\Tests\Stubs\Date
             {
-                return new \CB\Component\Contentbuilder_ng\Tests\Stubs\Date();
+                return new \CB\Component\Contentbuilderng\Tests\Stubs\Date();
             }
         }
     }

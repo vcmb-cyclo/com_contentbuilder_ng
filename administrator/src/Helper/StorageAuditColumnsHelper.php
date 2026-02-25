@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Helper;
+namespace CB\Component\Contentbuilderng\Administrator\Helper;
 
 \defined('_JEXEC') or die('Restricted access');
 
@@ -265,13 +265,13 @@ final class StorageAuditColumnsHelper
         try {
             $query = $db->getQuery(true)
                 ->select($db->quoteName(['id', 'name', 'bytable']))
-                ->from($db->quoteName('#__contentbuilder_ng_storages'))
+                ->from($db->quoteName('#__contentbuilderng_storages'))
                 ->where($db->quoteName('name') . " <> ''");
 
             $db->setQuery($query);
             $storages = $db->loadAssocList() ?: [];
         } catch (\Throwable $e) {
-            $warnings[] = 'Could not inspect #__contentbuilder_ng_storages: ' . $e->getMessage();
+            $warnings[] = 'Could not inspect #__contentbuilderng_storages: ' . $e->getMessage();
             return [[], $warnings];
         }
 

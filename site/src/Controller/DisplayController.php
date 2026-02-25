@@ -7,7 +7,7 @@
  * 
  * Custom dispatcher to Controllers.
 */
-namespace CB\Component\Contentbuilder_ng\Site\Controller;
+namespace CB\Component\Contentbuilderng\Site\Controller;
 
 \defined('_JEXEC') or die;
 

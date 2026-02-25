@@ -1,5 +1,5 @@
 <extension type="component" method="upgrade" version="6.0">
-    <name>COM_CONTENTBUILDER_NG</name>
+    <name>COM_CONTENTBUILDERNG</name>
     <creationDate>2026-02-25</creationDate>
     <author>XDA+GIL</author>
     <authorEmail>bf@vcmb.fr</authorEmail>
@@ -7,12 +7,12 @@
     <copyright>Copyright 2011 - 2026 by XDA+GIL</copyright>
     <license>GNU/GPL v2 or later</license>
     <version>6.1.1</version>
-    <description>COM_CONTENTBUILDER_NG_XML_DESCRIPTION</description>
+    <description>COM_CONTENTBUILDERNG_XML_DESCRIPTION</description>
 
     <!-- ===================== -->
     <!-- PSR-4 NAMESPACE -->
     <!-- ===================== -->
-    <namespace path="src">CB\Component\Contentbuilder_ng</namespace>
+    <namespace path="src">CB\Component\Contentbuilderng</namespace>
 
     <!-- ===================== -->
     <!-- INSTALL / UNINSTALL -->
@@ -32,48 +32,48 @@
  </uninstall>
  
  <updateservers>
-    <server type="extension" name="ContentBuilder_ng" priority="1">https://breezingforms-ng.vcmb.fr/download/com_contentbuilderng_update.xml</server>
+    <server type="extension" name="ContentBuilderng" priority="1">https://breezingforms-ng.vcmb.fr/download/com_contentbuilderng_update.xml</server>
  </updateservers>
 
  <files folder="site">
     <filename>index.html</filename>
     <filename>controller.php</filename>
     <filename>router.php</filename>
-    <filename>contentbuilder_ng.php</filename>
+    <filename>contentbuilderng.php</filename>
     <folder>elements</folder>
     <folder>src</folder>
     <folder>tmpl</folder>
  </files>
 
  <languages folder="site">
-    <language tag="en-GB">languages/en-GB/site/en-GB.com_contentbuilder_ng.ini</language>
-    <language tag="de-DE">languages/de-DE/site/de-DE.com_contentbuilder_ng.ini</language>
-    <language tag="fr-FR">languages/fr-FR/site/fr-FR.com_contentbuilder_ng.ini</language>
+    <language tag="en-GB">languages/en-GB/site/en-GB.com_contentbuilderng.ini</language>
+    <language tag="de-DE">languages/de-DE/site/de-DE.com_contentbuilderng.ini</language>
+    <language tag="fr-FR">languages/fr-FR/site/fr-FR.com_contentbuilderng.ini</language>
  </languages>
 
 <!-- ===================== -->
 <!-- ADMINISTRATION -->
 <!-- ===================== -->
 <administration>
-    <menu>COM_CONTENTBUILDER_NG</menu>
+    <menu>COM_CONTENTBUILDERNG</menu>
     <submenu>
         <menu view="storages">
-            COM_CONTENTBUILDER_NG_STORAGES
+            COM_CONTENTBUILDERNG_STORAGES
             <params>
-                <menu-quicktask>index.php?option=com_contentbuilder_ng&amp;task=storage.add</menu-quicktask>
-                <menu-quicktask-title>COM_CONTENTBUILDER_NG_MENUS_NEW_STORAGE</menu-quicktask-title>
+                <menu-quicktask>index.php?option=com_contentbuilderng&amp;task=storage.add</menu-quicktask>
+                <menu-quicktask-title>COM_CONTENTBUILDERNG_MENUS_NEW_STORAGE</menu-quicktask-title>
                 <menu-quicktask-icon>plus</menu-quicktask-icon>
             </params>
         </menu>
         <menu view="forms">
-            COM_CONTENTBUILDER_NG_LIST
+            COM_CONTENTBUILDERNG_LIST
             <params>
-                <menu-quicktask>index.php?option=com_contentbuilder_ng&amp;task=form.add</menu-quicktask>
-                <menu-quicktask-title>COM_CONTENTBUILDER_NG_MENUS_NEW_VIEW</menu-quicktask-title>
+                <menu-quicktask>index.php?option=com_contentbuilderng&amp;task=form.add</menu-quicktask>
+                <menu-quicktask-title>COM_CONTENTBUILDERNG_MENUS_NEW_VIEW</menu-quicktask-title>
                 <menu-quicktask-icon>plus</menu-quicktask-icon>
             </params>
         </menu>
-        <menu view="about">COM_CONTENTBUILDER_NG_ABOUT</menu>
+        <menu view="about">COM_CONTENTBUILDERNG_ABOUT</menu>
     </submenu>
 
     <!-- Un seul bloc <files> avec folder="administrator" -->
@@ -81,7 +81,7 @@
         <filename>access.xml</filename>
         <filename>config.xml</filename>
         <filename>index.html</filename>
-        <filename>contentbuilder_ng.php</filename>
+        <filename>contentbuilderng.php</filename>
         
         <folder>forms</folder>
         <folder>languages</folder>
@@ -94,20 +94,20 @@
 
     <!-- Languages admin (à laisser séparément, c'est correct) -->
     <languages folder="administrator">
-        <language tag="en-GB">languages/en-GB/admin/en-GB.com_contentbuilder_ng.ini</language>
-        <language tag="en-GB">languages/en-GB/admin/en-GB.com_contentbuilder_ng.menu.ini</language>
-        <language tag="en-GB">languages/en-GB/admin/en-GB.com_contentbuilder_ng.sys.ini</language>
-        <language tag="de-DE">languages/de-DE/admin/de-DE.com_contentbuilder_ng.ini</language>
-        <language tag="de-DE">languages/de-DE/admin/de-DE.com_contentbuilder_ng.menu.ini</language>
-        <language tag="de-DE">languages/de-DE/admin/de-DE.com_contentbuilder_ng.sys.ini</language>
-        <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilder_ng.ini</language>
-        <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilder_ng.menu.ini</language>
-        <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilder_ng.sys.ini</language>
+        <language tag="en-GB">languages/en-GB/admin/en-GB.com_contentbuilderng.ini</language>
+        <language tag="en-GB">languages/en-GB/admin/en-GB.com_contentbuilderng.menu.ini</language>
+        <language tag="en-GB">languages/en-GB/admin/en-GB.com_contentbuilderng.sys.ini</language>
+        <language tag="de-DE">languages/de-DE/admin/de-DE.com_contentbuilderng.ini</language>
+        <language tag="de-DE">languages/de-DE/admin/de-DE.com_contentbuilderng.menu.ini</language>
+        <language tag="de-DE">languages/de-DE/admin/de-DE.com_contentbuilderng.sys.ini</language>
+        <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilderng.ini</language>
+        <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilderng.menu.ini</language>
+        <language tag="fr-FR">languages/fr-FR/admin/fr-FR.com_contentbuilderng.sys.ini</language>
     </languages>
 
 </administration>
 
-<media folder="media" destination="com_contentbuilder_ng">
+<media folder="media" destination="com_contentbuilderng">
     <folder>css</folder>
     <folder>js</folder>
     <folder>images</folder>
@@ -115,10 +115,10 @@
 </media>
 
 <plugins>
-    <plugin group="contentbuilder_ng_themes" plugin="blank">plugins/contentbuilder_ng_themes/blank</plugin>
-    <plugin group="contentbuilder_ng_themes" plugin="joomla6">plugins/contentbuilder_ng_themes/joomla6</plugin>
-    <plugin group="contentbuilder_ng_themes" plugin="dark">plugins/contentbuilder_ng_themes/dark</plugin>
-    <plugin group="contentbuilder_ng_themes" plugin="khepri">plugins/contentbuilder_ng_themes/khepri</plugin>
+    <plugin group="contentbuilderng_themes" plugin="blank">plugins/contentbuilderng_themes/blank</plugin>
+    <plugin group="contentbuilderng_themes" plugin="joomla6">plugins/contentbuilderng_themes/joomla6</plugin>
+    <plugin group="contentbuilderng_themes" plugin="dark">plugins/contentbuilderng_themes/dark</plugin>
+    <plugin group="contentbuilderng_themes" plugin="khepri">plugins/contentbuilderng_themes/khepri</plugin>
 </plugins>
 
 

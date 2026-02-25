@@ -6,12 +6,13 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Model;
+namespace CB\Component\Contentbuilderng\Administrator\Model;
 
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 
 class UserModel extends BaseDatabaseModel
@@ -42,7 +43,7 @@ class UserModel extends BaseDatabaseModel
     }
 
     private function _buildQuery(){
-        return 'Select users.*, contentbuilder_ng_users.limit_edit, contentbuilder_ng_users.limit_add, contentbuilder_ng_users.id As cb_id, contentbuilder_ng_users.form_id, contentbuilder_ng_users.verification_date_edit, contentbuilder_ng_users.verification_date_new, contentbuilder_ng_users.verification_date_view, contentbuilder_ng_users.verified_view, contentbuilder_ng_users.verified_new, contentbuilder_ng_users.verified_edit, contentbuilder_ng_users.records, contentbuilder_ng_users.published From #__users As users Left Join #__contentbuilder_ng_users As contentbuilder_ng_users On ( users.id = contentbuilder_ng_users.userid And contentbuilder_ng_users.form_id = '.Factory::getApplication()->input->getInt('form_id',0).' ) Where users.id = ' . $this->_id;
+        return 'Select users.*, contentbuilderng_users.limit_edit, contentbuilderng_users.limit_add, contentbuilderng_users.id As cb_id, contentbuilderng_users.form_id, contentbuilderng_users.verification_date_edit, contentbuilderng_users.verification_date_new, contentbuilderng_users.verification_date_view, contentbuilderng_users.verified_view, contentbuilderng_users.verified_new, contentbuilderng_users.verified_edit, contentbuilderng_users.records, contentbuilderng_users.published From #__users As users Left Join #__contentbuilderng_users As contentbuilderng_users On ( users.id = contentbuilderng_users.userid And contentbuilderng_users.form_id = '.Factory::getApplication()->input->getInt('form_id',0).' ) Where users.id = ' . $this->_id;
                 
     }
     
@@ -53,14 +54,14 @@ class UserModel extends BaseDatabaseModel
         if (count($items)) {
             $cids = $items;
             foreach($cids As $cid){
-                $this->getDatabase()->setQuery("Select id From #__contentbuilder_ng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . $cid);
+                $this->getDatabase()->setQuery("Select id From #__contentbuilderng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . $cid);
                 if(!$this->getDatabase()->loadResult() && Factory::getApplication()->input->getInt('form_id',0) && $cid){
-                    $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", $cid, 1)");
+                    $this->getDatabase()->setQuery("Insert Into #__contentbuilderng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", $cid, 1)");
                     $this->getDatabase()->execute();
                 }
             }
             
-            $this->getDatabase()->setQuery( ' Update #__contentbuilder_ng_users '.
+            $this->getDatabase()->setQuery( ' Update #__contentbuilderng_users '.
                         '  Set verified_view = 1 Where form_id = '.$this->_form_id.' And userid In ( '.implode(',', $items) . ')' );
             $this->getDatabase()->execute();
         }
@@ -74,14 +75,14 @@ class UserModel extends BaseDatabaseModel
             
             $cids = $items;
             foreach($cids As $cid){
-                $this->getDatabase()->setQuery("Select id From #__contentbuilder_ng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . $cid);
+                $this->getDatabase()->setQuery("Select id From #__contentbuilderng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . $cid);
                 if(!$this->getDatabase()->loadResult() && Factory::getApplication()->input->getInt('form_id',0) && $cid){
-                    $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", $cid, 1)");
+                    $this->getDatabase()->setQuery("Insert Into #__contentbuilderng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", $cid, 1)");
                     $this->getDatabase()->execute();
                 }
             }
             
-            $this->getDatabase()->setQuery( ' Update #__contentbuilder_ng_users '.
+            $this->getDatabase()->setQuery( ' Update #__contentbuilderng_users '.
                         '  Set verified_view = 0 Where form_id = '.$this->_form_id.' And userid In ( '.implode(',', $items) . ')' );
             $this->getDatabase()->execute();
         }
@@ -94,14 +95,14 @@ class UserModel extends BaseDatabaseModel
         if (count($items)) {
             $cids = $items;
             foreach($cids As $cid){
-                $this->getDatabase()->setQuery("Select id From #__contentbuilder_ng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . $cid);
+                $this->getDatabase()->setQuery("Select id From #__contentbuilderng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . $cid);
                 if(!$this->getDatabase()->loadResult() && Factory::getApplication()->input->getInt('form_id',0) && $cid){
-                    $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", $cid, 1)");
+                    $this->getDatabase()->setQuery("Insert Into #__contentbuilderng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", $cid, 1)");
                     $this->getDatabase()->execute();
                 }
             }
             
-            $this->getDatabase()->setQuery( ' Update #__contentbuilder_ng_users '.
+            $this->getDatabase()->setQuery( ' Update #__contentbuilderng_users '.
                         '  Set verified_new = 1 Where form_id = '.$this->_form_id.' And userid In ( '.implode(',', $items) . ')' );
             $this->getDatabase()->execute();
         }
@@ -115,14 +116,14 @@ class UserModel extends BaseDatabaseModel
             
             $cids = $items;
             foreach($cids As $cid){
-                $this->getDatabase()->setQuery("Select id From #__contentbuilder_ng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . $cid);
+                $this->getDatabase()->setQuery("Select id From #__contentbuilderng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . $cid);
                 if(!$this->getDatabase()->loadResult() && Factory::getApplication()->input->getInt('form_id',0) && $cid){
-                    $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", $cid, 1)");
+                    $this->getDatabase()->setQuery("Insert Into #__contentbuilderng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", $cid, 1)");
                     $this->getDatabase()->execute();
                 }
             }
             
-            $this->getDatabase()->setQuery( ' Update #__contentbuilder_ng_users '.
+            $this->getDatabase()->setQuery( ' Update #__contentbuilderng_users '.
                         '  Set verified_new = 0 Where form_id = '.$this->_form_id.' And userid In ( '.implode(',', $items) . ')' );
             $this->getDatabase()->execute();
         }
@@ -135,14 +136,14 @@ class UserModel extends BaseDatabaseModel
         if (count($items)) {
             $cids = $items;
             foreach($cids As $cid){
-                $this->getDatabase()->setQuery("Select id From #__contentbuilder_ng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . $cid);
+                $this->getDatabase()->setQuery("Select id From #__contentbuilderng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . $cid);
                 if(!$this->getDatabase()->loadResult() && Factory::getApplication()->input->getInt('form_id',0) && $cid){
-                    $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", $cid, 1)");
+                    $this->getDatabase()->setQuery("Insert Into #__contentbuilderng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", $cid, 1)");
                     $this->getDatabase()->execute();
                 }
             }
             
-            $this->getDatabase()->setQuery( ' Update #__contentbuilder_ng_users '.
+            $this->getDatabase()->setQuery( ' Update #__contentbuilderng_users '.
                         '  Set verified_edit = 1 Where form_id = '.$this->_form_id.' And userid In ( '.implode(',', $items) . ')' );
             $this->getDatabase()->execute();
         }
@@ -156,14 +157,14 @@ class UserModel extends BaseDatabaseModel
             
             $cids = $items;
             foreach($cids As $cid){
-                $this->getDatabase()->setQuery("Select id From #__contentbuilder_ng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . $cid);
+                $this->getDatabase()->setQuery("Select id From #__contentbuilderng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . $cid);
                 if(!$this->getDatabase()->loadResult() && Factory::getApplication()->input->getInt('form_id',0) && $cid){
-                    $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", $cid, 1)");
+                    $this->getDatabase()->setQuery("Insert Into #__contentbuilderng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", $cid, 1)");
                     $this->getDatabase()->execute();
                 }
             }
             
-            $this->getDatabase()->setQuery( ' Update #__contentbuilder_ng_users '.
+            $this->getDatabase()->setQuery( ' Update #__contentbuilderng_users '.
                         '  Set verified_edit = 0 Where form_id = '.$this->_form_id.' And userid In ( '.implode(',', $items) . ')' );
             $this->getDatabase()->execute();
         }
@@ -190,9 +191,9 @@ class UserModel extends BaseDatabaseModel
     function store()
     {
         $insert = 0;
-        $this->getDatabase()->setQuery("Select id From #__contentbuilder_ng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . Factory::getApplication()->input->getInt('joomla_userid',0));
+        $this->getDatabase()->setQuery("Select id From #__contentbuilderng_users Where form_id = ".Factory::getApplication()->input->getInt('form_id',0)." And userid = " . Factory::getApplication()->input->getInt('joomla_userid',0));
         if(!$this->getDatabase()->loadResult() && Factory::getApplication()->input->getInt('form_id',0) && Factory::getApplication()->input->getInt('joomla_userid',0)){
-            $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", ".Factory::getApplication()->input->getInt('joomla_userid',0).", 1)");
+            $this->getDatabase()->setQuery("Insert Into #__contentbuilderng_users (form_id, userid, published) Values (".Factory::getApplication()->input->getInt('form_id',0).", ".Factory::getApplication()->input->getInt('joomla_userid',0).", 1)");
             $this->getDatabase()->execute();
             $insert = $this->getDatabase()->insertid();
         }

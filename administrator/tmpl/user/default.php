@@ -29,10 +29,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 </style>
 
 <div style="float:right" class="mb-3">
-    <input type="button" class="btn btn-sm btn-primary w-25" value="<?php echo Text::_('COM_CONTENTBUILDER_NG_SAVE'); ?>"
+    <input type="button" class="btn btn-sm btn-primary w-25" value="<?php echo Text::_('COM_CONTENTBUILDERNG_SAVE'); ?>"
         onclick="document.adminForm.task.value='user.save';document.adminForm.submit();" />
     <input type="button" class="btn btn-sm btn-primary w-25"
-        value="<?php echo Text::_('COM_CONTENTBUILDER_NG_CANCEL'); ?>"
+        value="<?php echo Text::_('COM_CONTENTBUILDERNG_CANCEL'); ?>"
         onclick="document.adminForm.task.value='user.cancel';document.adminForm.submit();" />
 </div>
 
@@ -43,7 +43,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         <table class="table table-striped">
             <tr class="row0">
                 <td width="20%" align="right" class="key">
-                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ID'); ?>
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_ID'); ?>
                 </td>
                 <td>
                     <?php echo htmlentities($this->subject->id, ENT_QUOTES, 'UTF-8'); ?>
@@ -51,7 +51,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             </tr>
             <tr class="row0">
                 <td width="20%" align="right" class="key">
-                    <?php echo Text::_('COM_CONTENTBUILDER_NG_NAME'); ?>
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_NAME'); ?>
                 </td>
                 <td>
                     <?php echo htmlentities($this->subject->name, ENT_QUOTES, 'UTF-8'); ?>
@@ -59,7 +59,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             </tr>
             <tr class="row0">
                 <td width="20%" align="right" class="key">
-                    <?php echo Text::_('COM_CONTENTBUILDER_NG_USERNAME'); ?>
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_USERNAME'); ?>
                 </td>
                 <td>
                     <?php echo htmlentities($this->subject->username, ENT_QUOTES, 'UTF-8'); ?>
@@ -68,7 +68,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="limit_add">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMIT_ADD'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_LIMIT_ADD'); ?>:
                     </label>
                 </td>
                 <td>
@@ -79,7 +79,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="limit_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMIT_EDIT'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_LIMIT_EDIT'); ?>:
                     </label>
                 </td>
                 <td>
@@ -90,7 +90,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="verification_date_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_DATE_VIEW'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VERIFICATION_DATE_VIEW'); ?>:
                     </label>
                 </td>
                 <td>
@@ -111,7 +111,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
                     ?>
                     <?php echo $renderCheckbox('verified_view', 'verified_view', (bool) $this->subject->verified_view); ?> <label class="form-check-label" for="verified_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_VIEW'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_VERIFIED_VIEW'); ?>
                     </label>
 
                 </td>
@@ -119,7 +119,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="verification_date_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_DATE_NEW'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VERIFICATION_DATE_NEW'); ?>:
                     </label>
                 </td>
                 <td>
@@ -141,7 +141,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     ?>
 
                     <?php echo $renderCheckbox('verified_new', 'verified_new', (bool) $this->subject->verified_new); ?> <label class="form-check-label" for="verified_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_NEW'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_VERIFIED_NEW'); ?>
                     </label>
 
                 </td>
@@ -149,7 +149,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="verification_date_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_DATE_EDIT'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VERIFICATION_DATE_EDIT'); ?>:
                     </label>
                 </td>
                 <td>
@@ -171,7 +171,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     ?>
 
                     <?php echo $renderCheckbox('verified_edit', 'verified_edit', (bool) $this->subject->verified_edit); ?> <label class="form-check-label" for="verified_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_EDIT'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_VERIFIED_EDIT'); ?>
                     </label>
 
                 </td>
@@ -179,7 +179,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="published">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PUBLISHED'); ?>
                     </label>
                 </td>
                 <td>
@@ -191,7 +191,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
     </div>
 
 
-    <input type="hidden" name="option" value="com_contentbuilder_ng" />
+    <input type="hidden" name="option" value="com_contentbuilderng" />
     <input type="hidden" name="task" id="task" value="" />
     <input type="hidden" name="form_id" value="<?php echo Factory::getApplication()->input->getInt('form_id', 0); ?>" />
     <input type="hidden" name="joomla_userid" value="<?php echo $this->subject->id; ?>" />

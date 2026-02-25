@@ -17,7 +17,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Factory;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 
 HTMLHelper::_('behavior.multiselect');
 
@@ -38,7 +38,7 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
         : '';
     $tmplParam = $tmpl !== '' ? '&tmpl=' . $tmpl : '';
     $url = Route::_(
-        'index.php?option=com_contentbuilder_ng&view=users&form_id='
+        'index.php?option=com_contentbuilderng&view=users&form_id='
         . $formId . $tmplParam . '&list[start]=0&list[ordering]=' . $field
         . '&list[direction]=' . $nextDir
     );
@@ -55,49 +55,53 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
         value="<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>"
         onchange="document.adminForm.submit();" />
 
-    <input type="button" class="btn btn-sm btn-primary" value="<?php echo Text::_('COM_CONTENTBUILDER_NG_SEARCH'); ?>"
+    <input type="button" class="btn btn-sm btn-primary" value="<?php echo Text::_('COM_CONTENTBUILDERNG_SEARCH'); ?>"
         onclick="this.form.submit();" />
     <input type="button" class="btn btn-sm btn-primary"
-        value="<?php echo Text::_('COM_CONTENTBUILDER_NG_RESET'); ?>"
+        value="<?php echo Text::_('COM_CONTENTBUILDERNG_RESET'); ?>"
         onclick="document.getElementById('filter_search').value='';document.adminForm.submit();" />
 
 
 
     <div style="float:right">
-        <select class="form-select-sm"
+        <select id="cb-users-bulk-status"
+            class="form-select-sm"
+            disabled="disabled"
             onchange="if(this.selectedIndex == 1 || this.selectedIndex == 2){document.adminForm.task.value=this.options[this.selectedIndex].value;document.adminForm.submit();}">
             <option> -
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_UPDATE_STATUS'); ?> -
+                <?php echo Text::_('COM_CONTENTBUILDERNG_UPDATE_STATUS'); ?> -
             </option>
             <option value="users.publish">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_PUBLISH'); ?>
             </option>
             <option value="users.unpublish">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_UNPUBLISH'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_UNPUBLISH'); ?>
             </option>
         </select>
-        <select class="form-select-sm"
+        <select id="cb-users-bulk-verify"
+            class="form-select-sm"
+            disabled="disabled"
             onchange="if(this.selectedIndex != 0){document.adminForm.task.value=this.options[this.selectedIndex].value;document.adminForm.submit();}">
             <option> -
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_SET_VERIFICATION'); ?> -
+                <?php echo Text::_('COM_CONTENTBUILDERNG_SET_VERIFICATION'); ?> -
             </option>
             <option value="verified_view">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_VIEW'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_VERIFIED_VIEW'); ?>
             </option>
             <option value="not_verified_view">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_UNVERIFIED_VIEW'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_UNVERIFIED_VIEW'); ?>
             </option>
             <option value="verified_new">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_NEW'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_VERIFIED_NEW'); ?>
             </option>
             <option value="not_verified_new">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_UNVERIFIED_NEW'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_UNVERIFIED_NEW'); ?>
             </option>
             <option value="verified_edit">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_VERIFIED_EDIT'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_VERIFIED_EDIT'); ?>
             </option>
             <option value="not_verified_edit">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_UNVERIFIED_EDIT'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_UNVERIFIED_EDIT'); ?>
             </option>
         </select>
     </div>
@@ -121,16 +125,16 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
                         <?php echo $sortLink('Username', 'u.username'); ?>
                     </th>
                     <th>
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_VERIFIED_VIEW'), 'a.verified_view'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_VERIFIED_VIEW'), 'a.verified_view'); ?>
                     </th>
                     <th>
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_VERIFIED_NEW'), 'a.verified_new'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_VERIFIED_NEW'), 'a.verified_new'); ?>
                     </th>
                     <th>
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_VERIFIED_EDIT'), 'a.verified_edit'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_VERIFIED_EDIT'), 'a.verified_edit'); ?>
                     </th>
                     <th width="5">
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'a.published'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_PUBLISHED'), 'a.published'); ?>
                     </th>
                 </tr>
             </thead>
@@ -138,14 +142,14 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
             <tbody>
                 <?php foreach ($this->items as $i => $item):
                     $checked = HTMLHelper::_('grid.id', $i, $item->id);
-                    $link = Route::_('index.php?option=com_contentbuilder_ng&task=user.edit&form_id=' . (int) Factory::getApplication()->input->getInt('form_id', 0) . '&joomla_userid=' . (int) $item->id);
+                    $link = Route::_('index.php?option=com_contentbuilderng&task=user.edit&form_id=' . (int) Factory::getApplication()->input->getInt('form_id', 0) . '&joomla_userid=' . (int) $item->id);
                     if ($item->published === null) {
                         $item->published = 1;
                     }
-                    $published = ContentbuilderHelper::listPublish('users', $item, $i);
-                    $verified_view = ContentbuilderHelper::listVerifiedView('users', $item, $i);
-                    $verified_new = ContentbuilderHelper::listVerifiedNew('users', $item, $i);
-                    $verified_edit = ContentbuilderHelper::listVerifiedEdit('users', $item, $i);
+                    $published = ContentbuilderngHelper::listPublish('users', $item, $i);
+                    $verified_view = ContentbuilderngHelper::listVerifiedView('users', $item, $i);
+                    $verified_new = ContentbuilderngHelper::listVerifiedNew('users', $item, $i);
+                    $verified_edit = ContentbuilderngHelper::listVerifiedEdit('users', $item, $i);
                 ?>
                     <tr>
                         <td>
@@ -190,7 +194,7 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
         </table>
     </div>
 
-    <input type="hidden" name="option" value="com_contentbuilder_ng" />
+    <input type="hidden" name="option" value="com_contentbuilderng" />
     <input type="hidden" name="task" value="" />
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="view" value="users" />
@@ -200,3 +204,343 @@ $sortLink = function (string $label, string $field) use ($ordering, $direction, 
     <input type="hidden" name="list[direction]" value="<?php echo htmlspecialchars($direction, ENT_QUOTES, 'UTF-8'); ?>">
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
+
+<script>
+(function () {
+    'use strict';
+
+    var cbUsersAjaxBusy = false;
+    var cbUsersForm = document.getElementById('adminForm') || document.adminForm;
+    var cbUsersBulkStatus = document.getElementById('cb-users-bulk-status');
+    var cbUsersBulkVerify = document.getElementById('cb-users-bulk-verify');
+    var cbUsersTaskMeta = {
+        'users.publish': { nextTask: 'users.unpublish', enabled: true },
+        'users.unpublish': { nextTask: 'users.publish', enabled: false },
+        'users.verified_view': { nextTask: 'users.not_verified_view', enabled: true },
+        'users.not_verified_view': { nextTask: 'users.verified_view', enabled: false },
+        'users.verified_new': { nextTask: 'users.not_verified_new', enabled: true },
+        'users.not_verified_new': { nextTask: 'users.verified_new', enabled: false },
+        'users.verified_edit': { nextTask: 'users.not_verified_edit', enabled: true },
+        'users.not_verified_edit': { nextTask: 'users.verified_edit', enabled: false }
+    };
+
+    function cbUsersUpdateBulkSelectState() {
+        if (!cbUsersForm) {
+            return;
+        }
+
+        var rowCheckboxes = cbUsersForm.querySelectorAll('input[type="checkbox"][name="cid[]"]');
+        var hasSelection = false;
+
+        for (var i = 0; i < rowCheckboxes.length; i++) {
+            if (rowCheckboxes[i] && rowCheckboxes[i].checked) {
+                hasSelection = true;
+                break;
+            }
+        }
+
+        [cbUsersBulkStatus, cbUsersBulkVerify].forEach(function (select) {
+            if (!select) {
+                return;
+            }
+
+            select.disabled = !hasSelection;
+            if (!hasSelection) {
+                select.selectedIndex = 0;
+            }
+        });
+    }
+
+    function cbUsersIsAjaxToggleTask(task) {
+        return Object.prototype.hasOwnProperty.call(cbUsersTaskMeta, String(task || ''));
+    }
+
+    function cbUsersGetToggleTaskMeta(task) {
+        return cbUsersTaskMeta[String(task || '')] || null;
+    }
+
+    function cbUsersEscapeRegExp(value) {
+        return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function cbUsersEscapeId(id) {
+        var raw = String(id || '');
+        if (raw === '') {
+            return raw;
+        }
+
+        if (window.CSS && typeof window.CSS.escape === 'function') {
+            return window.CSS.escape(raw);
+        }
+
+        return raw.replace(/([ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, '\\$1');
+    }
+
+    function cbUsersUpdateToggleIconClasses(host, enabled) {
+        if (!host) {
+            return;
+        }
+
+        var icons = host.querySelectorAll('span, i');
+        if (!icons.length) {
+            return;
+        }
+
+        icons.forEach(function (icon) {
+            if (!icon || !icon.classList) {
+                return;
+            }
+
+            var className = String(icon.className || '');
+            var isFontAwesomeIcon = className.indexOf('fa-') !== -1;
+            var isLegacyJoomlaIcon = className.indexOf('icon-') !== -1;
+
+            icon.classList.remove(
+                'fa-check',
+                'fa-circle-xmark',
+                'fa-xmark',
+                'fa-times',
+                'icon-publish',
+                'icon-unpublish',
+                'icon-check',
+                'icon-times',
+                'icon-checkbox',
+                'icon-checkbox-partial'
+            );
+
+            if (isFontAwesomeIcon) {
+                icon.classList.add('fa-solid', enabled ? 'fa-check' : 'fa-circle-xmark');
+            }
+
+            if (isLegacyJoomlaIcon) {
+                icon.classList.add(enabled ? 'icon-publish' : 'icon-unpublish');
+            }
+        });
+    }
+
+    function cbUsersApplyAjaxToggleState(actionElement, task) {
+        if (!actionElement) {
+            return;
+        }
+
+        var meta = cbUsersGetToggleTaskMeta(task);
+        if (!meta) {
+            return;
+        }
+
+        var onclick = String(actionElement.getAttribute('onclick') || '');
+        if (onclick.indexOf('listItemTask(') !== -1) {
+            actionElement.setAttribute(
+                'onclick',
+                onclick.replace(
+                    /(listItemTask\(\s*['"][^'"]+['"]\s*,\s*['"])([^'"]+)(['"]\s*\))/,
+                    '$1' + meta.nextTask + '$3'
+                )
+            );
+        }
+
+        if (actionElement.classList) {
+            actionElement.classList.toggle('active', !!meta.enabled);
+        }
+
+        cbUsersUpdateToggleIconClasses(actionElement, !!meta.enabled);
+    }
+
+    function cbUsersFindActionElement(row, task) {
+        if (!row || typeof row.querySelector !== 'function') {
+            return null;
+        }
+
+        var candidates = row.querySelectorAll('[onclick*="listItemTask("], [data-item-task], [data-submit-task], [data-task]');
+        for (var i = 0; i < candidates.length; i++) {
+            var onclick = String(candidates[i].getAttribute('onclick') || '');
+            if (onclick.indexOf("'" + task + "'") !== -1 || onclick.indexOf('"' + task + '"') !== -1) {
+                return candidates[i];
+            }
+        }
+
+        return null;
+    }
+
+    function cbUsersFindActionElementByCheckboxAndTask(root, checkboxId, task) {
+        if (!root || typeof root.querySelectorAll !== 'function') {
+            return null;
+        }
+
+        var cbId = String(checkboxId || '').trim();
+        var taskName = String(task || '').trim();
+        if (cbId === '' || taskName === '') {
+            return null;
+        }
+
+        var candidates = root.querySelectorAll('[onclick*="listItemTask("]');
+        var pattern = new RegExp(
+            'listItemTask\\(\\s*[\'"]' + cbUsersEscapeRegExp(cbId) + '[\'"]\\s*,\\s*[\'"]' + cbUsersEscapeRegExp(taskName) + '[\'"]',
+            'i'
+        );
+
+        for (var i = 0; i < candidates.length; i++) {
+            var onclick = String(candidates[i].getAttribute('onclick') || '');
+            if (pattern.test(onclick)) {
+                return candidates[i];
+            }
+        }
+
+        return null;
+    }
+
+    function cbUsersSubmitTaskAjax(form, checkbox, task, actionElement) {
+        if (!form || cbUsersAjaxBusy) {
+            return false;
+        }
+
+        cbUsersAjaxBusy = true;
+
+        var checkboxId = checkbox && typeof checkbox.id !== 'undefined' ? String(checkbox.id || '') : '';
+        var rowId = checkbox && typeof checkbox.value !== 'undefined' ? String(checkbox.value || '') : '';
+        var formData = new FormData(form);
+        formData.set('task', task);
+        formData.set('cb_ajax', '1');
+        formData.set('option', 'com_contentbuilderng');
+
+        if (rowId !== '') {
+            formData.delete('cid[]');
+            formData.append('cid[]', rowId);
+            formData.set('boxchecked', '1');
+        }
+
+        var endpoint = form.getAttribute('action') || 'index.php';
+
+        fetch(endpoint, {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) {
+                return response.text().then(function (text) {
+                    var payload = null;
+                    try {
+                        payload = JSON.parse(text);
+                    } catch (e) {
+                        payload = null;
+                    }
+
+                    if (!response.ok || !payload || payload.success === false) {
+                        throw new Error((payload && payload.message) ? payload.message : 'Save failed');
+                    }
+
+                    return payload;
+                });
+            })
+            .then(function () {
+                var resolvedActionElement = actionElement;
+                if (!resolvedActionElement && checkbox && typeof checkbox.closest === 'function') {
+                    var row = checkbox.closest('tr');
+                    resolvedActionElement =
+                        cbUsersFindActionElementByCheckboxAndTask(row, checkboxId, task)
+                        || cbUsersFindActionElement(row, task);
+                }
+                if (!resolvedActionElement) {
+                    resolvedActionElement =
+                        cbUsersFindActionElementByCheckboxAndTask(form, checkboxId, task);
+                }
+
+                if (!resolvedActionElement) {
+                    window.location.reload();
+                    return;
+                }
+
+                cbUsersApplyAjaxToggleState(resolvedActionElement, task);
+            })
+            .catch(function (error) {
+                var message = error && error.message ? error.message : 'Save failed';
+                if (window.Joomla && typeof Joomla.renderMessages === 'function') {
+                    Joomla.renderMessages({ error: [message] });
+                } else {
+                    alert(message);
+                }
+            })
+            .finally(function () {
+                var boxchecked = form.querySelector('input[name="boxchecked"]');
+                if (checkbox) {
+                    checkbox.checked = false;
+                }
+                if (boxchecked) {
+                    boxchecked.value = '0';
+                }
+                cbUsersUpdateBulkSelectState();
+                cbUsersAjaxBusy = false;
+            });
+
+        return false;
+    }
+
+    var cbUsersOriginalListItemTask = (typeof Joomla !== 'undefined' && typeof Joomla.listItemTask === 'function')
+        ? Joomla.listItemTask
+        : null;
+
+    function cbUsersListItemTask(id, task, form) {
+        form = form || document.getElementById('adminForm') || document.adminForm;
+
+        if (!form) {
+            return false;
+        }
+
+        var checkboxes = form.querySelectorAll('input[type="checkbox"][id^="cb"]');
+        checkboxes.forEach(function (cb) {
+            cb.checked = false;
+        });
+
+        var target = form.querySelector('#' + cbUsersEscapeId(id)) || form.elements[id];
+        if (!target) {
+            if (typeof cbUsersOriginalListItemTask === 'function') {
+                return cbUsersOriginalListItemTask(id, task, form);
+            }
+            return false;
+        }
+
+        target.checked = true;
+
+        var boxchecked = form.querySelector('input[name="boxchecked"]');
+        if (boxchecked) {
+            boxchecked.value = 1;
+        }
+
+        if (!cbUsersIsAjaxToggleTask(task)) {
+            if (typeof cbUsersOriginalListItemTask === 'function') {
+                return cbUsersOriginalListItemTask(id, task, form);
+            }
+            if (typeof Joomla !== 'undefined' && typeof Joomla.submitform === 'function') {
+                Joomla.submitform(task, form);
+            } else {
+                form.submit();
+            }
+            return false;
+        }
+
+        var row = (typeof target.closest === 'function') ? target.closest('tr') : null;
+        var actionElement = cbUsersFindActionElement(row, task);
+
+        return cbUsersSubmitTaskAjax(form, target, task, actionElement);
+    }
+
+    if (typeof Joomla !== 'undefined') {
+        Joomla.listItemTask = cbUsersListItemTask;
+    }
+
+    if (cbUsersForm) {
+        cbUsersForm.addEventListener('change', function (event) {
+            var target = event && event.target ? event.target : null;
+            if (!target || target.type !== 'checkbox') {
+                return;
+            }
+            cbUsersUpdateBulkSelectState();
+        }, true);
+    }
+
+    cbUsersUpdateBulkSelectState();
+})();
+</script>

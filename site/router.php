@@ -9,7 +9,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
 
-function ContentbuilderBuildRoute(&$query) {
+function ContentbuilderngBuildRoute(&$query) {
 
     $segments = array();
 
@@ -101,7 +101,7 @@ function ContentbuilderBuildRoute(&$query) {
     return $segments;
 }
 
-function ContentbuilderParseRoute(&$segments) {
+function ContentbuilderngParseRoute(&$segments) {
 
 	$vars = array();
 

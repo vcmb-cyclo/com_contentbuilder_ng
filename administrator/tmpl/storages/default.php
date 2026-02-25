@@ -14,7 +14,7 @@
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 
 // Charge les scripts Joomla nécessaires (checkAll, submit, etc.)
 HTMLHelper::_('behavior.core');
@@ -89,7 +89,7 @@ setValue('task', task);
 };
 </script>
 
-<form action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=storages.display'); ?>"
+<form action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=storages.display'); ?>"
     method="post"
     name="adminForm"
     id="adminForm">
@@ -143,7 +143,7 @@ setValue('task', task);
             <thead>
                 <tr>
                     <th class="w-1 text-nowrap">
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_ID'), 'a.id', $listDirn, $listOrder); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDERNG_ID'), 'a.id', $listDirn, $listOrder); ?>
                     </th>
 
                     <th class="w-1 text-center">
@@ -151,15 +151,15 @@ setValue('task', task);
                     </th>
 
                     <th>
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_NAME'), 'a.name', $listDirn, $listOrder); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDERNG_NAME'), 'a.name', $listDirn, $listOrder); ?>
                     </th>
 
                     <th>
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_STORAGE_TITLE'), 'a.title', $listDirn, $listOrder); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDERNG_STORAGE_TITLE'), 'a.title', $listDirn, $listOrder); ?>
                     </th>
 
                     <th class="w-10 text-nowrap">
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_ORDERBY'), 'a.ordering', $listDirn, $listOrder); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDERNG_ORDERBY'), 'a.ordering', $listDirn, $listOrder); ?>
                     </th>
 
                     <th class="w-10 text-nowrap">
@@ -167,7 +167,7 @@ setValue('task', task);
                     </th>
 
                     <th class="w-1 text-center">
-                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'a.published', $listDirn, $listOrder); ?>
+                        <?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDERNG_PUBLISHED'), 'a.published', $listDirn, $listOrder); ?>
                     </th>
                 </tr>
             </thead>
@@ -191,10 +191,10 @@ setValue('task', task);
                             : '-';
 
                         // ⚠️ Vérifie ta convention : task=storage.edit (singulier) ou storages.edit (pluriel)
-                        $link = Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $id);
+                        $link = Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $id);
 
                         $checked   = HTMLHelper::_('grid.id', $i, $id);
-                        $published = ContentbuilderHelper::listPublish('storages', $row, $i);
+                        $published = ContentbuilderngHelper::listPublish('storages', $row, $i);
 
                     ?>
                     <tr>
@@ -234,9 +234,9 @@ setValue('task', task);
 
                             <div class="d-flex flex-wrap align-items-center gap-2">
                                 <?php echo $this->pagination->getPagesCounter(); ?>
-                                <span><?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_NUM'); ?></span>
+                                <span><?php echo Text::_('COM_CONTENTBUILDERNG_DISPLAY_NUM'); ?></span>
                                 <span class="d-inline-block"><?php echo $limitSelect; ?></span>
-                                <span><?php echo Text::_('COM_CONTENTBUILDER_NG_OF'); ?></span>
+                                <span><?php echo Text::_('COM_CONTENTBUILDERNG_OF'); ?></span>
                                 <span><?php echo (int) ($this->pagination->total ?? 0); ?></span>
                             </div>
 
@@ -251,7 +251,7 @@ setValue('task', task);
         </table>
     </div>
 
-    <input type="hidden" name="option" value="com_contentbuilder_ng">
+    <input type="hidden" name="option" value="com_contentbuilderng">
     <input type="hidden" name="task" value="storages.display">
     <input type="hidden" name="limitstart" value="<?php echo (int) $listStart; ?>">
     <input type="hidden" name="list[start]" value="<?php echo (int) $listStart; ?>">

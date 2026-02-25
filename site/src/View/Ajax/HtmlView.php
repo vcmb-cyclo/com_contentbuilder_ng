@@ -6,13 +6,13 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder_ng\Site\View\Ajax;
+namespace CB\Component\Contentbuilderng\Site\View\Ajax;
 
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
-use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
-use CB\Component\Contentbuilder_ng\Site\Model\AjaxModel;
+use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilderng\Site\Model\AjaxModel;
 
 class HtmlView extends BaseHtmlView
 {

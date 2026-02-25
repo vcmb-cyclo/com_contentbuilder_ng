@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
+namespace CB\Component\Contentbuilderng\Administrator\Controller;
 
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
@@ -15,11 +15,12 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Response\JsonResponse;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder_ng\Administrator\Model\UserModel;
-use CB\Component\Contentbuilder_ng\Administrator\Model\UsersModel;
+use CB\Component\Contentbuilderng\Administrator\Model\UserModel;
+use CB\Component\Contentbuilderng\Administrator\Model\UsersModel;
 
 class UsersController extends BaseController
 {
@@ -48,7 +49,7 @@ class UsersController extends BaseController
     private function getUserModelForSave(): UserModel
     {
         $model = $this->getModel('User', 'Administrator', ['ignore_request' => true])
-            ?: $this->getModel('User', 'Contentbuilder_ng', ['ignore_request' => true]);
+            ?: $this->getModel('User', 'Contentbuilderng', ['ignore_request' => true]);
 
         if (!$model instanceof UserModel) {
             throw new \RuntimeException('UserModel not found');
@@ -71,99 +72,123 @@ class UsersController extends BaseController
     }
     
     public function verified_view() {
-        $cid = Factory::getApplication()->input->get('cid', [], 'array');
+        try {
+            $model = $this->getUserModelForListActions();
+            $model->setListVerifiedView();
 
-        $model = $this->getUserModelForListActions();
-        $model->setListVerifiedView();
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_SAVED'));
+                return;
+            }
+        } catch (\Throwable $e) {
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $e->getMessage());
+                return;
+            }
+            $this->setMessage($e->getMessage(), 'warning');
+        }
 
-        Factory::getApplication()->input->set( 'view', 'users' );
-        Factory::getApplication()->input->set( 'layout', 'default'  );
-        Factory::getApplication()->input->set( 'hidemainmenu', 1 );
-        Factory::getApplication()->input->set( 'filter_order', 'ordering' );
-        Factory::getApplication()->input->set( 'filter_order_Dir', 'asc' );
-        Factory::getApplication()->input->set( 'limitstart', Factory::getApplication()->input->getInt('limitstart') );
-
-        parent::display();
+        $this->renderUsersList();
     }
     
     public function not_verified_view() {
-        $cid = Factory::getApplication()->input->get('cid', [], 'array');
+        try {
+            $model = $this->getUserModelForListActions();
+            $model->setListNotVerifiedView();
 
-        $model = $this->getUserModelForListActions();
-        $model->setListNotVerifiedView();
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_SAVED'));
+                return;
+            }
+        } catch (\Throwable $e) {
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $e->getMessage());
+                return;
+            }
+            $this->setMessage($e->getMessage(), 'warning');
+        }
 
-        Factory::getApplication()->input->set( 'view', 'users' );
-        Factory::getApplication()->input->set( 'layout', 'default'  );
-        Factory::getApplication()->input->set( 'hidemainmenu', 1 );
-        Factory::getApplication()->input->set( 'filter_order', 'ordering' );
-        Factory::getApplication()->input->set( 'filter_order_Dir', 'asc' );
-        Factory::getApplication()->input->set( 'limitstart', Factory::getApplication()->input->getInt('limitstart') );
-
-        parent::display();
+        $this->renderUsersList();
     }
     
     public function verified_new() {
-        $cid = Factory::getApplication()->input->get('cid', [], 'array');
+        try {
+            $model = $this->getUserModelForListActions();
+            $model->setListVerifiedNew();
 
-        $model = $this->getUserModelForListActions();
-        $model->setListVerifiedNew();
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_SAVED'));
+                return;
+            }
+        } catch (\Throwable $e) {
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $e->getMessage());
+                return;
+            }
+            $this->setMessage($e->getMessage(), 'warning');
+        }
 
-        Factory::getApplication()->input->set( 'view', 'users' );
-        Factory::getApplication()->input->set( 'layout', 'default'  );
-        Factory::getApplication()->input->set( 'hidemainmenu', 1 );
-        Factory::getApplication()->input->set( 'filter_order', 'ordering' );
-        Factory::getApplication()->input->set( 'filter_order_Dir', 'asc' );
-        Factory::getApplication()->input->set( 'limitstart', Factory::getApplication()->input->getInt('limitstart') );
-
-        parent::display();
+        $this->renderUsersList();
     }
     
     public function not_verified_new() {
-        $cid = Factory::getApplication()->input->get('cid', [], 'array');
+        try {
+            $model = $this->getUserModelForListActions();
+            $model->setListNotVerifiedNew();
 
-        $model = $this->getUserModelForListActions();
-        $model->setListNotVerifiedNew();
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_SAVED'));
+                return;
+            }
+        } catch (\Throwable $e) {
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $e->getMessage());
+                return;
+            }
+            $this->setMessage($e->getMessage(), 'warning');
+        }
 
-        Factory::getApplication()->input->set( 'view', 'users' );
-        Factory::getApplication()->input->set( 'layout', 'default'  );
-        Factory::getApplication()->input->set( 'hidemainmenu', 1 );
-        Factory::getApplication()->input->set( 'filter_order', 'ordering' );
-        Factory::getApplication()->input->set( 'filter_order_Dir', 'asc' );
-        Factory::getApplication()->input->set( 'limitstart', Factory::getApplication()->input->getInt('limitstart') );
-
-        parent::display();
+        $this->renderUsersList();
     }
     
     public function verified_edit() {
-        $cid = Factory::getApplication()->input->get('cid', [], 'array');
+        try {
+            $model = $this->getUserModelForListActions();
+            $model->setListVerifiedEdit();
 
-        $model = $this->getUserModelForListActions();
-        $model->setListVerifiedEdit();
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_SAVED'));
+                return;
+            }
+        } catch (\Throwable $e) {
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $e->getMessage());
+                return;
+            }
+            $this->setMessage($e->getMessage(), 'warning');
+        }
 
-        Factory::getApplication()->input->set( 'view', 'users' );
-        Factory::getApplication()->input->set( 'layout', 'default'  );
-        Factory::getApplication()->input->set( 'hidemainmenu', 1 );
-        Factory::getApplication()->input->set( 'filter_order', 'ordering' );
-        Factory::getApplication()->input->set( 'filter_order_Dir', 'asc' );
-        Factory::getApplication()->input->set( 'limitstart', Factory::getApplication()->input->getInt('limitstart') );
-
-        parent::display();
+        $this->renderUsersList();
     }
     
     public function not_verified_edit() {
-        $cid = Factory::getApplication()->input->get('cid', [], 'array');
+        try {
+            $model = $this->getUserModelForListActions();
+            $model->setListNotVerifiedEdit();
 
-        $model = $this->getUserModelForListActions();
-        $model->setListNotVerifiedEdit();
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_SAVED'));
+                return;
+            }
+        } catch (\Throwable $e) {
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $e->getMessage());
+                return;
+            }
+            $this->setMessage($e->getMessage(), 'warning');
+        }
 
-        Factory::getApplication()->input->set( 'view', 'users' );
-        Factory::getApplication()->input->set( 'layout', 'default'  );
-        Factory::getApplication()->input->set( 'hidemainmenu', 1 );
-        Factory::getApplication()->input->set( 'filter_order', 'ordering' );
-        Factory::getApplication()->input->set( 'filter_order_Dir', 'asc' );
-        Factory::getApplication()->input->set( 'limitstart', Factory::getApplication()->input->getInt('limitstart') );
-
-        parent::display();
+        $this->renderUsersList();
     }
     
     public function edit()
@@ -182,37 +207,43 @@ class UsersController extends BaseController
     }
 
     public function publish() {
-        $cid = Factory::getApplication()->input->get('cid', [], 'array');
-
-        if(count($cid) == 1)
-        {
+        try {
             $model = $this->getUsersModelForPublishActions();
             $model->setPublished();
-        }
-        else if(count($cid) > 1)
-        {
-            $model = $this->getUsersModelForPublishActions();
-            $model->setPublished();
+
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_PUBLISHED'));
+                return;
+            }
+        } catch (\Throwable $e) {
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $e->getMessage());
+                return;
+            }
+            $this->setMessage($e->getMessage(), 'warning');
         }
 
-        $this->setRedirect( Route::_('index.php?option=com_contentbuilder_ng&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.Factory::getApplication()->input->getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_NG_PUBLISHED') );
+        $this->setRedirect( Route::_('index.php?option=com_contentbuilderng&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.Factory::getApplication()->input->getInt('limitstart'), false), Text::_('COM_CONTENTBUILDERNG_PUBLISHED') );
     }
     
     public function unpublish() {
-        $cid = Factory::getApplication()->input->get('cid', [], 'array');
-
-        if(count($cid) == 1)
-        {
+        try {
             $model = $this->getUsersModelForPublishActions();
             $model->setUnpublished();
-        }
-        else if(count($cid) > 1)
-        {
-            $model = $this->getUsersModelForPublishActions();
-            $model->setUnpublished();
+
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_UNPUBLISHED'));
+                return;
+            }
+        } catch (\Throwable $e) {
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $e->getMessage());
+                return;
+            }
+            $this->setMessage($e->getMessage(), 'warning');
         }
 
-        $this->setRedirect( Route::_('index.php?option=com_contentbuilder_ng&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.Factory::getApplication()->input->getInt('limitstart'), false), Text::_('COM_CONTENTBUILDER_NG_UNPUBLISHED') );
+        $this->setRedirect( Route::_('index.php?option=com_contentbuilderng&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.Factory::getApplication()->input->getInt('limitstart'), false), Text::_('COM_CONTENTBUILDERNG_UNPUBLISHED') );
     }
     
     public function save($keep_task = false)
@@ -221,9 +252,9 @@ class UsersController extends BaseController
         $id = $model->store();
         
         if ($id) {
-            $msg = Text::_( 'COM_CONTENTBUILDER_NG_SAVED' );
+            $msg = Text::_( 'COM_CONTENTBUILDERNG_SAVED' );
         } else {
-            $msg = Text::_( 'COM_CONTENTBUILDER_NG_ERROR' );
+            $msg = Text::_( 'COM_CONTENTBUILDERNG_ERROR' );
         }
 
         $limit = 0;
@@ -236,22 +267,38 @@ class UsersController extends BaseController
         }
 
         // Check the table in so it can be edited.... we are done with it anyway
-        $link = 'index.php?option=com_contentbuilder_ng&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.$limit.$additionalParams;
+        $link = 'index.php?option=com_contentbuilderng&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart='.$limit.$additionalParams;
         $this->setRedirect(Route::_($link, false), $msg);
     }
 
     public function cancel()
     {
-        $msg = Text::_( 'COM_CONTENTBUILDER_NG_CANCELLED' );
-        $this->setRedirect( Route::_('index.php?option=com_contentbuilder_ng&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart=0', false), $msg );
+        $msg = Text::_( 'COM_CONTENTBUILDERNG_CANCELLED' );
+        $this->setRedirect( Route::_('index.php?option=com_contentbuilderng&view=users&form_id='.Factory::getApplication()->input->getInt('form_id',0).'&tmpl='.Factory::getApplication()->input->getCmd('tmpl','').'&limitstart=0', false), $msg );
     }
 
     public function display($cachable = false, $urlparams = array())
+    {
+        $this->renderUsersList();
+    }
+
+    private function renderUsersList(): void
     {
         Factory::getApplication()->input->set('tmpl', Factory::getApplication()->input->getWord('tmpl',null));
         Factory::getApplication()->input->set('layout', Factory::getApplication()->input->getWord('layout',null));
         Factory::getApplication()->input->set('view', 'users');
 
         parent::display();
+    }
+
+    private function isAjaxCall(): bool
+    {
+        return (bool) $this->input->getInt('cb_ajax', 0);
+    }
+
+    private function respondAjax(bool $success, string $message = ''): void
+    {
+        echo new JsonResponse(['ok' => $success], $message, !$success);
+        Factory::getApplication()->close();
     }
 }

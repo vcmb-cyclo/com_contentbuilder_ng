@@ -16,7 +16,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 $frontend = Factory::getApplication()->isClient('site');
 $edit_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('edit') : ContentbuilderLegacyHelper::authorize('edit');
@@ -47,16 +47,16 @@ $previewActorName = (string) $input->getString('cb_preview_actor_name', '');
 $isAdminPreview = $input->getBool('cb_preview_ok', false);
 $showTopBar = $input->getInt('cb_show_details_top_bar', 1) === 1;
 $adminReturnContext = trim((string) $input->getCmd('cb_admin_return', ''));
-$adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&task=form.edit&id=' . (int) $input->getInt('id', 0);
+$adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilderng&task=form.edit&id=' . (int) $input->getInt('id', 0);
 if ($adminReturnContext === 'forms') {
-    $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&view=forms';
+    $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilderng&view=forms';
 }
 $previewFormName = trim((string) ($this->form_name ?? ''));
 if ($previewFormName === '') {
     $previewFormName = trim((string) ($this->page_title ?? ''));
 }
 if ($previewFormName === '') {
-    $previewFormName = Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE');
+    $previewFormName = Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
 }
 $previewFormName = htmlspecialchars($previewFormName, ENT_QUOTES, 'UTF-8');
 if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
@@ -67,7 +67,7 @@ if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
         . '&cb_preview_sig=' . rawurlencode($previewSig)
         . ($adminReturnContext !== '' ? '&cb_admin_return=' . rawurlencode($adminReturnContext) : '');
 }
-$printLink = Route::_('index.php?option=com_contentbuilder_ng&title=' . $input->get('title', '', 'string')
+$printLink = Route::_('index.php?option=com_contentbuilderng&title=' . $input->get('title', '', 'string')
     . ($input->get('tmpl', '', 'string') != '' ? '&tmpl=' . $input->get('tmpl', '', 'string') : '')
     . ($input->get('layout', '', 'string') != '' ? '&layout=' . $input->get('layout', '', 'string') : '')
     . '&task=details.display&layout=print&tmpl=component&id=' . $input->getInt('id', 0)
@@ -77,10 +77,10 @@ $printLink = Route::_('index.php?option=com_contentbuilder_ng&title=' . $input->
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 
 // Charge le manifeste joomla.asset.json du composant
-$wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
+$wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
 
 $wa->useScript('jquery');
-$wa->useScript('com_contentbuilder_ng.contentbuilder_ng');
+$wa->useScript('com_contentbuilderng.contentbuilderng');
 ?>
 
 <?php if ($this->author)
@@ -131,10 +131,10 @@ CSS
 ?>
 <script type="text/javascript">
     <!--
-    function contentbuilder_ng_delete() {
-        var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDER_NG_CONFIRM_DELETE_MESSAGE'); ?>');
+    function contentbuilderng_delete() {
+        var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDERNG_CONFIRM_DELETE_MESSAGE'); ?>');
         if (confirmed) {
-            location.href = '<?php echo 'index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=detail.delete&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&cid[]=' . Factory::getApplication()->input->getCmd('record_id', 0) . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : ''); ?>';
+            location.href = '<?php echo 'index.php?option=com_contentbuilderng&title=' . Factory::getApplication()->input->get('title', '', 'string') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&task=detail.delete&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&cid[]=' . Factory::getApplication()->input->getCmd('record_id', 0) . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : ''); ?>';
         }
     }
     //
@@ -153,11 +153,11 @@ CSS
 <?php if ($isAdminPreview): ?>
     <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
         <span>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CURRENT_FORM', $previewFormName) . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDER_NG_PREVIEW_TAB_CONTENT_TEMPLATE')); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_CURRENT_FORM', $previewFormName) . ' - ' . Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDERNG_PREVIEW_TAB_CONTENT_TEMPLATE')); ?>
         </span>
         <a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
             <span class="fa-solid fa-arrow-left me-1" aria-hidden="true"></span>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_BACK_TO_ADMIN'); ?>
         </a>
     </div>
 <?php endif; ?>
@@ -168,7 +168,7 @@ $nextRecordId = property_exists($this, 'next_record_id') ? (int) $this->next_rec
 $currentRecordLabel = trim((string) $input->getCmd('record_id', ''));
 $showCurrentRecordLabel = !in_array($currentRecordLabel, ['', '0'], true);
 $showCurrentRecordLabel = $showCurrentRecordLabel && (int) ($this->show_id_column ?? 0) === 1;
-$detailsNavBaseLink = 'index.php?option=com_contentbuilder_ng&title=' . $input->get('title', '', 'string')
+$detailsNavBaseLink = 'index.php?option=com_contentbuilderng&title=' . $input->get('title', '', 'string')
     . '&task=details.display&id=' . $input->getInt('id', 0)
     . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '')
     . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '')
@@ -176,7 +176,7 @@ $detailsNavBaseLink = 'index.php?option=com_contentbuilder_ng&title=' . $input->
     . ($listQuery !== '' ? '&' . $listQuery : '')
     . $previewQuery;
 $showCloseButton = $this->show_back_button && Factory::getApplication()->input->getBool('cb_show_details_back_button', 1);
-$closeListLink = Route::_('index.php?option=com_contentbuilder_ng&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&view=list&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $previewQuery);
+$closeListLink = Route::_('index.php?option=com_contentbuilderng&title=' . Factory::getApplication()->input->get('title', '', 'string') . '&view=list&task=list.display&id=' . Factory::getApplication()->input->getInt('id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $previewQuery);
 $showActionToolbar = (
     (Factory::getApplication()->input->getInt('cb_show_details_back_button', 1) && $this->show_back_button)
     || $delete_allowed
@@ -187,22 +187,22 @@ $showAuditTrail = $input->getInt('cb_show_author', 1) === 1;
 
 $createdOnText = '';
 if (!empty($this->created)) {
-    $createdOnText = Text::_('COM_CONTENTBUILDER_NG_CREATED_ON') . ' ' . HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC5'));
+    $createdOnText = Text::_('COM_CONTENTBUILDERNG_CREATED_ON') . ' ' . HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC5'));
 }
 
 $createdByText = '';
 if (!empty($this->created_by)) {
-    $createdByText = Text::_('COM_CONTENTBUILDER_NG_BY') . ' ' . htmlentities((string) $this->created_by, ENT_QUOTES, 'UTF-8');
+    $createdByText = Text::_('COM_CONTENTBUILDERNG_BY') . ' ' . htmlentities((string) $this->created_by, ENT_QUOTES, 'UTF-8');
 }
 
 $modifiedOnText = '';
 if (!empty($this->modified)) {
-    $modifiedOnText = Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON') . ' ' . HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC5'));
+    $modifiedOnText = Text::_('COM_CONTENTBUILDERNG_LAST_UPDATED_ON') . ' ' . HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC5'));
 }
 
 $modifiedByText = '';
 if (!empty($this->modified_by)) {
-    $modifiedByText = Text::_('COM_CONTENTBUILDER_NG_BY') . ' ' . htmlentities((string) $this->modified_by, ENT_QUOTES, 'UTF-8');
+    $modifiedByText = Text::_('COM_CONTENTBUILDERNG_BY') . ' ' . htmlentities((string) $this->modified_by, ENT_QUOTES, 'UTF-8');
 }
 
 $createdTrailText = trim($createdOnText . (($createdOnText !== '' && $createdByText !== '') ? ' ' : '') . $createdByText);
@@ -240,9 +240,9 @@ if ($this->show_page_heading && $this->page_title) {
                     <a
                         class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbCloseButton"
                         href="<?php echo $closeListLink; ?>"
-                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>">
+                        title="<?php echo Text::_('COM_CONTENTBUILDERNG_CLOSE'); ?>">
                         <span class="fa-solid fa-xmark me-1" aria-hidden="true"></span>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_CLOSE'); ?>
                     </a>
                 <?php endif; ?>
             </span>
@@ -306,19 +306,19 @@ if ($showActionToolbar) {
 
     <?php if ($edit_allowed) { ?>
         <a class="btn btn-sm btn-primary cbButton cbEditButton"
-            href="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . $previewQuery); ?>"
-            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT'); ?>">
+            href="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', 0) . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . $previewQuery); ?>"
+            title="<?php echo Text::_('COM_CONTENTBUILDERNG_EDIT'); ?>">
             <span class="fa-solid fa-pen me-1" aria-hidden="true"></span>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT') ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_EDIT') ?>
         </a>
     <?php
     }
     ?>
     <?php if ($delete_allowed) { ?>
-        <button class="btn btn-sm btn-outline-danger cbButton cbDeleteButton d-inline-flex align-items-center gap-1 rounded-pill" onclick="contentbuilder_ng_delete();"
-            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE'); ?>">
+        <button class="btn btn-sm btn-outline-danger cbButton cbDeleteButton d-inline-flex align-items-center gap-1 rounded-pill" onclick="contentbuilderng_delete();"
+            title="<?php echo Text::_('COM_CONTENTBUILDERNG_DELETE'); ?>">
             <span class="fa-solid fa-trash" aria-hidden="true"></span>
-            <span><?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE') ?></span>
+            <span><?php echo Text::_('COM_CONTENTBUILDERNG_DELETE') ?></span>
         </button>
     <?php
     }
@@ -326,9 +326,9 @@ if ($showActionToolbar) {
     <?php if ($showCloseButton && ($showTopBar || (!$showTopBar && (!$this->show_page_heading || !$this->page_title)))): ?>
         <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbCloseButton"
             href="<?php echo $closeListLink; ?>"
-            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>">
+            title="<?php echo Text::_('COM_CONTENTBUILDERNG_CLOSE'); ?>">
             <span class="fa-solid fa-xmark me-1" aria-hidden="true"></span>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE') ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_CLOSE') ?>
         </a>
     <?php endif; ?>
 

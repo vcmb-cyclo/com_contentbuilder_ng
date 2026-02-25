@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
+namespace CB\Component\Contentbuilderng\Administrator\Controller;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -32,16 +32,16 @@ class ElementoptionsController extends AdminController
     function save()
     {
         $model = $this->getModel('Elementoptions', 'Administrator', ['ignore_request' => true])
-            ?: $this->getModel('Elementoptions', 'Contentbuilder_ng', ['ignore_request' => true]);
+            ?: $this->getModel('Elementoptions', 'Contentbuilderng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('ElementoptionsModel not found');
         }
         $id = $model->store();
 
         if ($id) {
-            $msg = Text::_('COM_CONTENTBUILDER_NG_SAVED');
+            $msg = Text::_('COM_CONTENTBUILDERNG_SAVED');
         } else {
-            $msg = Text::_('COM_CONTENTBUILDER_NG_ERROR');
+            $msg = Text::_('COM_CONTENTBUILDERNG_ERROR');
         }
 
 
@@ -52,7 +52,7 @@ class ElementoptionsController extends AdminController
         }
 
         // Check the table in so it can be edited.... we are done with it anyway
-        $link = Route::_('index.php?option=com_contentbuilder_ng&view=elementoptions&tabStartOffset=' . Factory::getApplication()->input->getInt('tabStartOffset', 0) . '&tmpl=component&element_id=' . Factory::getApplication()->input->getInt('element_id', 0) . '&id=' . Factory::getApplication()->input->getInt('id', 0) . $type_change_url, false);
+        $link = Route::_('index.php?option=com_contentbuilderng&view=elementoptions&tabStartOffset=' . Factory::getApplication()->input->getInt('tabStartOffset', 0) . '&tmpl=component&element_id=' . Factory::getApplication()->input->getInt('element_id', 0) . '&id=' . Factory::getApplication()->input->getInt('id', 0) . $type_change_url, false);
         $this->setRedirect($link, $msg);
     }
 }

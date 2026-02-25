@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<access component="com_contentbuilder_ng">
+<access component="com_contentbuilderng">
     <section name="component">
 
         <action
@@ -14,13 +14,13 @@
             description="JACTION_ADMIN_COMPONENT_DESC"
         />
 		<action
-			name="contentbuilder_ng.manage"
-			title="COM_CONTENTBUILDER_NG_ACTION_MANAGE"
-			description="COM_CONTENTBUILDER_NG_ACTION_MANAGE_DESC"
+			name="contentbuilderng.manage"
+			title="COM_CONTENTBUILDERNG_ACTION_MANAGE"
+			description="COM_CONTENTBUILDERNG_ACTION_MANAGE_DESC"
 		/>
 
 		<action
-			name="contentbuilder_ng.admin"
+			name="contentbuilderng.admin"
 			title="JACTION_ADMIN"
 			description="JACTION_ADMIN_COMPONENT_DESC"
 		/>

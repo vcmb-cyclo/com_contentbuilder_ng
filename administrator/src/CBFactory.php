@@ -7,7 +7,7 @@
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator;
+namespace CB\Component\Contentbuilderng\Administrator;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');

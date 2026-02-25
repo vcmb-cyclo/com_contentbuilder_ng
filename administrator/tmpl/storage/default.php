@@ -15,7 +15,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Application\AdministratorApplication;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 
 /** @var AdministratorApplication $app */
 $app = Factory::getApplication();
@@ -30,8 +30,8 @@ $fields = $this->fields ?? [];
 $fieldsCount = is_countable($fields) ? count($fields) : 0;
 $recordsCount = isset($this->storageRecordsCount) ? $this->storageRecordsCount : null;
 $storageModeKey = ((int) ($this->item->bytable ?? 0) === 1)
-    ? 'COM_CONTENTBUILDER_NG_STORAGE_MODE_EXTERNAL'
-    : 'COM_CONTENTBUILDER_NG_STORAGE_MODE_INTERNAL';
+    ? 'COM_CONTENTBUILDERNG_STORAGE_MODE_EXTERNAL'
+    : 'COM_CONTENTBUILDERNG_STORAGE_MODE_INTERNAL';
 $storageName = trim((string) ($this->item->name ?? ''));
 $storageTitle = trim((string) ($this->item->title ?? ''));
 $dataTableName = $storageName !== '' ? $storageName : '-';
@@ -69,7 +69,7 @@ foreach ($sortFields as $field) {
 
     $sortLinks[$field] = [
         'url' => \Joomla\CMS\Router\Route::_(
-            'index.php?option=com_contentbuilder_ng&task=storage.display&layout=edit&id='
+            'index.php?option=com_contentbuilderng&task=storage.display&layout=edit&id='
             . $storageId
             . '&limitstart=0'
             . '&list[ordering]=' . $field
@@ -188,6 +188,61 @@ function cbGetToggleTaskMeta(task) {
     return map[String(task || '')] || null;
 }
 
+function cbUpdateToggleIconClasses(container, enabled) {
+    if (!container || !container.classList) {
+        return;
+    }
+
+    var icons = [];
+
+    function collectIcon(el) {
+        if (!el || !el.classList) {
+            return;
+        }
+
+        var className = String(el.className || '');
+        if (className.indexOf('fa-') === -1 && className.indexOf('icon-') === -1) {
+            return;
+        }
+
+        if (icons.indexOf(el) === -1) {
+            icons.push(el);
+        }
+    }
+
+    collectIcon(container);
+    if (typeof container.querySelectorAll === 'function') {
+        container.querySelectorAll('span, i').forEach(collectIcon);
+    }
+
+    icons.forEach(function(icon) {
+        var className = String(icon.className || '');
+        var isFontAwesomeIcon = className.indexOf('fa-') !== -1;
+        var isLegacyJoomlaIcon = className.indexOf('icon-') !== -1;
+
+        icon.classList.remove(
+            'fa-check',
+            'fa-circle-xmark',
+            'fa-xmark',
+            'fa-times',
+            'icon-publish',
+            'icon-unpublish',
+            'icon-check',
+            'icon-times',
+            'icon-checkbox',
+            'icon-checkbox-partial'
+        );
+
+        if (isFontAwesomeIcon) {
+            icon.classList.add('fa-solid', enabled ? 'fa-check' : 'fa-circle-xmark');
+        }
+
+        if (isLegacyJoomlaIcon) {
+            icon.classList.add(enabled ? 'icon-publish' : 'icon-unpublish');
+        }
+    });
+}
+
 function cbApplyAjaxToggleState(actionElement, task) {
     if (!actionElement) {
         return;
@@ -223,17 +278,32 @@ function cbApplyAjaxToggleState(actionElement, task) {
         actionElement.classList.toggle('active', !!meta.enabled);
     }
 
-    var icon = actionElement.querySelector('span[class*="fa-"]');
-    if (icon && icon.classList) {
-        icon.classList.remove('fa-solid fa-check', 'fa-solid fa-circle-xmark');
-        icon.classList.add(meta.enabled ? 'fa-solid fa-check' : 'fa-solid fa-circle-xmark');
+    var visualHost = actionElement;
+    if (typeof actionElement.closest === 'function') {
+        var host = actionElement.closest('.tbody-icon, .js-grid-item-action, button, a');
+        if (host) {
+            visualHost = host;
+        }
+    }
+
+    if (visualHost !== actionElement && visualHost.classList) {
+        visualHost.classList.toggle('active', !!meta.enabled);
+    }
+
+    cbUpdateToggleIconClasses(visualHost, !!meta.enabled);
+    if (visualHost !== actionElement) {
+        cbUpdateToggleIconClasses(actionElement, !!meta.enabled);
     }
 
     var title = meta.enabled ? cbPublishedTitle : cbUnpublishedTitle;
-    actionElement.setAttribute('title', title);
-    actionElement.setAttribute('aria-label', title);
+    visualHost.setAttribute('title', title);
+    visualHost.setAttribute('aria-label', title);
+    if (visualHost !== actionElement) {
+        actionElement.setAttribute('title', title);
+        actionElement.setAttribute('aria-label', title);
+    }
 
-    var hiddenLabel = actionElement.querySelector('.visually-hidden, .sr-only');
+    var hiddenLabel = visualHost.querySelector('.visually-hidden, .sr-only');
     if (hiddenLabel) {
         hiddenLabel.textContent = title;
     }
@@ -314,6 +384,7 @@ function cbSubmitTaskAjax(task, rowId, onSuccess, onError, triggerElement) {
     var formData = new FormData(form);
     formData.set('task', task);
     formData.set('cb_ajax', '1');
+    formData.set('option', 'com_contentbuilderng');
 
     if (rowId) {
         formData.delete('cid[]');
@@ -321,7 +392,8 @@ function cbSubmitTaskAjax(task, rowId, onSuccess, onError, triggerElement) {
         formData.set('boxchecked', '1');
     }
 
-    fetch(form.getAttribute('action') || 'index.php', {
+    var endpoint = form.getAttribute('action') || 'index.php';
+    fetch(endpoint, {
         method: 'POST',
         body: formData,
         credentials: 'same-origin',
@@ -493,7 +565,7 @@ if (document.readyState === 'loading') {
 // Démarrer les onglets
 echo HTMLHelper::_('uitab.startTabSet', 'view-pane', ['active' => 'tab0']);
 // Premier onglet
-echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUILDER_NG_STORAGE'));
+echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUILDERNG_STORAGE'));
 ?>
 
 <table width="100%">
@@ -506,7 +578,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                             <td style="min-width: 150px;">
                                 <label for="name">
                                     <b>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NAME'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_NAME'); ?>
                                     </b>
                                 </label>
                             </td>
@@ -530,14 +602,14 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                 if (!$this->item->id) {
                                 ?>
                                     <b>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_CHOOSE_TABLE'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_CHOOSE_TABLE'); ?>
                                     </b>
                                     <br />
                                     <select class="form-select-sm"
-                                        onchange="if(this.selectedIndex != 0){ document.getElementById('name').disabled = true; document.getElementById('csvUploadHead').style.display = 'none'; document.getElementById('csvUpload').style.display = 'none'; alert('<?php echo addslashes(Text::_('COM_CONTENTBUILDER_NG_CUSTOM_STORAGE_MSG')); ?>'); }else{ document.getElementById('name').disabled = false; document.getElementById('csvUploadHead').style.display = ''; document.getElementById('csvUpload').style.display = ''; }"
+                                        onchange="if(this.selectedIndex != 0){ document.getElementById('name').disabled = true; document.getElementById('csvUploadHead').style.display = 'none'; document.getElementById('csvUpload').style.display = 'none'; alert('<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_CUSTOM_STORAGE_MSG')); ?>'); }else{ document.getElementById('name').disabled = false; document.getElementById('csvUploadHead').style.display = ''; document.getElementById('csvUpload').style.display = ''; }"
                                         name="jform[bytable]" id="bytable" style="max-width: 150px;">
                                         <option value=""> -
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_NONE'); ?> -
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_NONE'); ?> -
                                         </option>
                                         <?php
                                         foreach ($this->tables as $table) {
@@ -568,7 +640,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                             <td width="100">
                                 <label for="title">
                                     <b>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_TITLE'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_TITLE'); ?>
                                     </b>
                                 </label>
                             </td>
@@ -595,7 +667,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                     aria-expanded="false"
                                 >
                                     <i class="fa fa-file-excel me-1" aria-hidden="true"></i>
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_UPDATE_FROM_CSV'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV'); ?>
                                 </button>
                             </td>
                         </tr>
@@ -627,29 +699,29 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                 <br />
                                 <br />
                                 <label for="csv_drop_records">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_UPDATE_FROM_CSV_DROP_RECORDS'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV_DROP_RECORDS'); ?>
                                 </label> <?php echo $renderCheckbox('jform[csv_drop_records]', 'csv_drop_records', true); ?>
                                 <br />
                                 <label for="csv_published">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_AUTO_PUBLISH'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_AUTO_PUBLISH'); ?>
                                 </label> <?php echo $renderCheckbox('jform[csv_published]', 'csv_published', true); ?>
                                 <br />
                                 <label for="csv_delimiter">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_UPDATE_FROM_CSV_DELIMITER'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV_DELIMITER'); ?>
                                 </label> <input class="form-control form-control-sm" maxlength="3" type="text"
                                     size="1" id="csv_delimiter" name="jform[csv_delimiter]" value="," />
                                 <br />
                                 <br />
                                 <label class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_UPDATE_FROM_CSV_REPAIR_ENCODING_TIP'); ?>"
+                                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV_REPAIR_ENCODING_TIP'); ?>"
                                     for="csv_repair_encoding">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_UPDATE_FROM_CSV_REPAIR_ENCODING'); ?>*
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV_REPAIR_ENCODING'); ?>*
                                 </label>
                                 <br />
                                 <select class="form-select-sm" style="width: 150px;" name="jform[csv_repair_encoding]"
                                     id="csv_repair_encoding">
                                     <option value=""> -
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_UPDATE_FROM_CSV_NO_REPAIR_ENCODING'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV_NO_REPAIR_ENCODING'); ?>
                                         -
                                     </option>
                                     <option value="WINDOWS-1250">WINDOWS-1250</option>
@@ -729,7 +801,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                 <td>
                                     <label for="fieldname">
                                         <b>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_NAME'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_NAME'); ?>
                                         </b>
                                     </label>
                                 </td>
@@ -744,7 +816,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                 <td width="100">
                                     <label for="fieldtitle">
                                         <b>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_TITLE'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_TITLE'); ?>
                                         </b>
                                     </label>
                                 </td>
@@ -759,7 +831,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                 <td width="100">
                                     <label for="is_group">
                                         <b>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_GROUP'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'); ?>
                                         </b>
                                     </label>
                                 </td>
@@ -768,11 +840,11 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                 <td>
                                     <input class="form-check-input" type="radio" id="is_group" name="jform[is_group]"
                                         value="1" /> <label for="is_group">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_YES'); ?>
                                     </label>
                                     <input class="form-check-input" type="radio" id="is_group_no" name="jform[is_group]"
                                         value="0" checked="checked" /> <label for="is_group_no">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_NO'); ?>
                                     </label>
                                 </td>
                             </tr>
@@ -780,7 +852,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                 <td width="100">
                                     <label for="group_definition">
                                         <b>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_GROUP_DEFINITION'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP_DEFINITION'); ?>
                                         </b>
                                     </label>
                                 </td>
@@ -810,27 +882,27 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                             </th>
                             <th>
                                 <a href="<?php echo htmlspecialchars((string) $sortLinks['name']['url'], ENT_QUOTES, 'UTF-8'); ?>">
-                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_NAME'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['name']['indicator']; ?>
+                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_NAME'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['name']['indicator']; ?>
                                 </a>
                             </th>
                             <th>
                                 <a href="<?php echo htmlspecialchars((string) $sortLinks['title']['url'], ENT_QUOTES, 'UTF-8'); ?>">
-                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_STORAGE_TITLE'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['title']['indicator']; ?>
+                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_TITLE'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['title']['indicator']; ?>
                                 </a>
                             </th>
                             <th>
                                 <a href="<?php echo htmlspecialchars((string) $sortLinks['group_definition']['url'], ENT_QUOTES, 'UTF-8'); ?>">
-                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_STORAGE_GROUP'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['group_definition']['indicator']; ?>
+                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['group_definition']['indicator']; ?>
                                 </a>
                             </th>
                             <th class="cb-order-col">
                                 <a href="<?php echo htmlspecialchars((string) $sortLinks['ordering']['url'], ENT_QUOTES, 'UTF-8'); ?>">
-                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_ORDERBY'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['ordering']['indicator']; ?>
+                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ORDERBY'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['ordering']['indicator']; ?>
                                 </a>
                             </th>
                             <th>
                                 <a href="<?php echo htmlspecialchars((string) $sortLinks['published']['url'], ENT_QUOTES, 'UTF-8'); ?>">
-                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['published']['indicator']; ?>
+                                    <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_PUBLISHED'), ENT_QUOTES, 'UTF-8'); ?><?php echo $sortLinks['published']['indicator']; ?>
                                 </a>
                             </th>
                         </tr>
@@ -845,7 +917,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
 
                         $checked   = HTMLHelper::_('grid.id', $i, $id);
 
-                        $published = ContentbuilderHelper::listPublish('storage', $row, $i);
+                        $published = ContentbuilderngHelper::listPublish('storage', $row, $i);
 
                         // ordering: n’active les flèches que si ordering est vrai
                         $canOrder = !empty($this->ordering);
@@ -864,7 +936,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                     id="itemIsGroup_<?php echo $id; ?>"
                                     <?php echo $isGroup ? 'checked="checked"' : ''; ?> />
                                 <label for="itemIsGroup_<?php echo $id; ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_YES'); ?>
                                 </label>
 
                                 <input class="form-check-input" type="radio"
@@ -873,13 +945,13 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                     id="itemIsGroupNo_<?php echo $id; ?>"
                                     <?php echo !$isGroup ? 'checked="checked"' : ''; ?> />
                                 <label for="itemIsGroupNo_<?php echo $id; ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_NO'); ?>
                                 </label>
 
                                 <div id="itemGroupDefinitions_<?php echo $id; ?>">
                                     <button type="button" class="btn btn-link btn-sm p-0"
                                         onclick="document.getElementById('itemGroupDefinitions<?php echo $id; ?>').style.display='block'; this.parentNode.style.display='none'; document.getElementById('itemGroupDefinitions<?php echo $id; ?>').focus(); return false;">
-                                        [<?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT'); ?>]
+                                        [<?php echo Text::_('COM_CONTENTBUILDERNG_EDIT'); ?>]
                                     </button>
                                 </div>
                                 <textarea class="form-control form-control-sm mt-1"
@@ -915,7 +987,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
                                             echo $this->pagination->getPagesCounter();
                                         } ?>
                                         <?php
-                                        echo '<span>' . Text::_('COM_CONTENTBUILDER_NG_DISPLAY_NUM') . '&nbsp;</span>';
+                                        echo '<span>' . Text::_('COM_CONTENTBUILDERNG_DISPLAY_NUM') . '&nbsp;</span>';
                                         echo '<div class="d-inline-block">' . (empty($this->pagination) ? '' : $this->pagination->getLimitBox()) . '</div>';
                                         ?>
                                     </div>
@@ -935,12 +1007,12 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
 
     <?php
     echo HTMLHelper::_('uitab.endTab');
-    echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', Text::_('COM_CONTENTBUILDER_NG_STORAGE_INFORMATION'));
+    echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', Text::_('COM_CONTENTBUILDERNG_STORAGE_INFORMATION'));
     ?>
 
     <div class="mb-2">
         <span class="badge text-bg-light border">
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_ID'); ?> #<?php echo (int) ($this->item->id ?? 0); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_ID'); ?> #<?php echo (int) ($this->item->id ?? 0); ?>
         </span>
     </div>
 
@@ -949,36 +1021,36 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
             <table class="table table-striped mb-0">
                 <tbody>
                     <tr>
-                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_NAME'); ?></th>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDERNG_NAME'); ?></th>
                         <td colspan="3"><?php echo htmlspecialchars($storageName !== '' ? $storageName : '-', ENT_QUOTES, 'UTF-8'); ?></td>
                     </tr>
                     <tr>
-                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_TITLE'); ?></th>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_TITLE'); ?></th>
                         <td colspan="3"><?php echo htmlspecialchars($storageTitle !== '' ? $storageTitle : '-', ENT_QUOTES, 'UTF-8'); ?></td>
                     </tr>
                     <tr>
-                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'); ?></th>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDERNG_PUBLISHED'); ?></th>
                         <td colspan="3">
                             <span class="<?php echo $publishedIconClass; ?>" aria-hidden="true" title="<?php echo htmlspecialchars($publishedIconTitle, ENT_QUOTES, 'UTF-8'); ?>"></span>
                             <span class="visually-hidden"><?php echo htmlspecialchars($publishedIconTitle, ENT_QUOTES, 'UTF-8'); ?></span>
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_TABLE'); ?></th>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_TABLE'); ?></th>
                         <td><?php echo htmlspecialchars($dataTableName, ENT_QUOTES, 'UTF-8'); ?></td>
-                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_MODE'); ?></th>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_MODE'); ?></th>
                         <td><?php echo htmlspecialchars(Text::_($storageModeKey), ENT_QUOTES, 'UTF-8'); ?></td>
                     </tr>
                     <tr>
-                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_FIELDS_COUNT'); ?></th>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELDS_COUNT'); ?></th>
                         <td colspan="3"><?php echo (int) $fieldsCount; ?></td>
                     </tr>
                     <tr>
-                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDER_NG_STORAGE_RECORDS_COUNT'); ?></th>
+                        <th scope="row"><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_RECORDS_COUNT'); ?></th>
                         <td colspan="3"><?php echo $recordsCount === null ? '-' : (int) $recordsCount; ?></td>
                     </tr>
                     <tr class="text-secondary">
-                        <th scope="row" style="width: 240px;"><?php echo Text::_('COM_CONTENTBUILDER_NG_CREATED_ON'); ?></th>
+                        <th scope="row" style="width: 240px;"><?php echo Text::_('COM_CONTENTBUILDERNG_CREATED_ON'); ?></th>
                         <td><?php echo htmlspecialchars($formatDate($this->item->created ?? null), ENT_QUOTES, 'UTF-8'); ?></td>
                         <th scope="row" style="width: 240px;"><?php echo Text::_('JGLOBAL_FIELD_CREATED_BY_LABEL'); ?></th>
                         <td><?php echo htmlspecialchars($createdBy !== '' ? $createdBy : '-', ENT_QUOTES, 'UTF-8'); ?></td>
@@ -1002,7 +1074,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
     <div class="clr">
     </div>
 
-    <input type="hidden" name="option" value="com_contentbuilder_ng" />
+    <input type="hidden" name="option" value="com_contentbuilderng" />
     <input type="hidden" name="view" value="storage" />
     <input type="hidden" name="layout" value="edit" />
     <input type="hidden" name="id" value="<?php echo (int) $this->item->id; ?>">

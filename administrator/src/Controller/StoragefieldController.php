@@ -1,12 +1,12 @@
 <?php
-namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
+namespace CB\Component\Contentbuilderng\Administrator\Controller;
 
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Language\Text;
-use CB\Component\Contentbuilder_ng\Administrator\Service\StorageFieldService;
+use CB\Component\Contentbuilderng\Administrator\Service\StorageFieldService;
 
 class StoragefieldController extends BaseController
 {
@@ -17,7 +17,7 @@ class StoragefieldController extends BaseController
         $storageId = (int) $this->input->getInt('storage_id', 0);
         if (!$storageId) {
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&view=storages', false),
+                Route::_('index.php?option=com_contentbuilderng&view=storages', false),
                 'Missing storage_id',
                 'error'
             );
@@ -34,8 +34,8 @@ class StoragefieldController extends BaseController
 
         if ($fieldname === '') {
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
-                Text::_('COM_CONTENTBUILDER_NG_FIELDNAME_REQUIRED'),
+                Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),
+                Text::_('COM_CONTENTBUILDERNG_FIELDNAME_REQUIRED'),
                 'warning'
             );
             return false;
@@ -51,15 +51,15 @@ class StoragefieldController extends BaseController
             ]);
 
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
-                Text::_('COM_CONTENTBUILDER_NG_FIELD_ADDED'),
+                Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),
+                Text::_('COM_CONTENTBUILDERNG_FIELD_ADDED'),
                 'message'
             );
             return true;
 
         } catch (\Throwable $e) {
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
+                Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),
                 $e->getMessage(),
                 'error'
             );

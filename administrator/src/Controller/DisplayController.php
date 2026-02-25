@@ -10,7 +10,7 @@
 
 // administrator/src/Controller/DisplayController.php
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
+namespace CB\Component\Contentbuilderng\Administrator\Controller;
 
 \defined('_JEXEC') or die;
 
@@ -26,7 +26,7 @@ class DisplayController extends BaseController
     {
         $user = Factory::getApplication()->getIdentity();
 
-        if (!$user->authorise('core.manage', 'com_contentbuilder_ng')) {
+        if (!$user->authorise('core.manage', 'com_contentbuilderng')) {
             throw new \Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
         }
 

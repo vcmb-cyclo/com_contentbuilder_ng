@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace CB\Component\Contentbuilder_ng\Tests\Unit\Model;
+namespace CB\Component\Contentbuilderng\Tests\Unit\Model;
 
-use CB\Component\Contentbuilder_ng\Administrator\Model\VerifyModel;
+use CB\Component\Contentbuilderng\Administrator\Model\VerifyModel;
 use PHPUnit\Framework\TestCase;
 
 final class VerifyModelTest extends TestCase
@@ -33,23 +33,23 @@ final class VerifyModelTest extends TestCase
     {
         $internal = $this->invokePrivateMethod(
             'decodeInternalReturn',
-            \base64_encode('index.php?option=com_contentbuilder_ng')
+            \base64_encode('index.php?option=com_contentbuilderng')
         );
         $external = $this->invokePrivateMethod(
             'decodeInternalReturn',
             \base64_encode('https://evil.example/path')
         );
 
-        self::assertSame('index.php?option=com_contentbuilder_ng', $internal);
+        self::assertSame('index.php?option=com_contentbuilderng', $internal);
         self::assertSame('', $external);
     }
 
     public function testSafeRedirectTargetUsesFallbackForExternalUrl(): void
     {
-        $allowed = $this->invokePrivateMethod('safeRedirectTarget', 'index.php?option=com_contentbuilder_ng', 'index.php');
+        $allowed = $this->invokePrivateMethod('safeRedirectTarget', 'index.php?option=com_contentbuilderng', 'index.php');
         $blocked = $this->invokePrivateMethod('safeRedirectTarget', 'https://evil.example/path', 'index.php');
 
-        self::assertSame('index.php?option=com_contentbuilder_ng', $allowed);
+        self::assertSame('index.php?option=com_contentbuilderng', $allowed);
         self::assertSame('index.php', $blocked);
     }
 

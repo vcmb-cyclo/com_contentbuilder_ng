@@ -7,7 +7,7 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Table;
+namespace CB\Component\Contentbuilderng\Administrator\Table;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -36,7 +36,7 @@ class CbuserTable extends Table
      * @param object Database connector object
      */
     function __construct( DatabaseDriver $db ) {
-        parent::__construct('#__contentbuilder_ng_users', 'id', $db);
+        parent::__construct('#__contentbuilderng_users', 'id', $db);
 
         // Joomla attend un champ "state" pour publish/unpublish au lieu de "published"
         $this->setColumnAlias('state', 'published');       

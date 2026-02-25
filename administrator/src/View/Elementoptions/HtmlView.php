@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\View\Elementoptions;
+namespace CB\Component\Contentbuilderng\Administrator\View\Elementoptions;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -16,7 +16,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
 {

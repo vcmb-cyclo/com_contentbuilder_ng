@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Site\Model;
+namespace CB\Component\Contentbuilderng\Site\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -18,7 +18,7 @@ use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class PublicformsModel extends ListModel
 {
@@ -64,7 +64,7 @@ class PublicformsModel extends ListModel
         parent::__construct($config, $factory);
 
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
 
         // Get pagination request variables
         $limit = $app->getUserStateFromRequest('global.list.limit', 'limit', $app->get('list_limit'), 'int');
@@ -155,7 +155,7 @@ class PublicformsModel extends ListModel
     private function buildOrderBy()
     {
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
 
         $orderby = ' Order By ordering';
         $filter_order = $this->getState('forms_filter_order');
@@ -187,7 +187,7 @@ class PublicformsModel extends ListModel
             $in = ' id In (' . implode(',', $this->forms) . ') And ';
         }
 
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_forms Where ' . $in . ' published = 1 ' . $filter_state . $this->buildOrderBy();
+        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilderng_forms Where ' . $in . ' published = 1 ' . $filter_state . $this->buildOrderBy();
     }
 
     function getShowPageHeading()
@@ -243,7 +243,7 @@ class PublicformsModel extends ListModel
 
     function getTags()
     {
-        $this->getDatabase()->setQuery("Select Distinct `tag` As `tag` From #__contentbuilder_ng_forms Where published = 1 Order by `tag` Asc");
+        $this->getDatabase()->setQuery("Select Distinct `tag` As `tag` From #__contentbuilderng_forms Where published = 1 Order by `tag` Asc");
         return $this->getDatabase()->loadObjectList();
     }
 

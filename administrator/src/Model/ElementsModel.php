@@ -15,7 +15,7 @@
  */
 
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Model;
+namespace CB\Component\Contentbuilderng\Administrator\Model;
 
 \defined('_JEXEC') or die;
 
@@ -24,7 +24,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Database\DatabaseQuery;
 use Joomla\Utilities\ArrayHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Table\ElementoptionsTable;
+use CB\Component\Contentbuilderng\Administrator\Table\ElementoptionsTable;
 
 class ElementsModel extends ListModel
 {
@@ -59,7 +59,7 @@ class ElementsModel extends ListModel
     }
 
 
-    public function getTable($name = 'Elementoptions', $prefix = 'CB\\Component\\Contentbuilder_ng\\Administrator\\Table\\', $options = [])
+    public function getTable($name = 'Elementoptions', $prefix = 'CB\\Component\\Contentbuilderng\\Administrator\\Table\\', $options = [])
     {
         $db = $this->getDatabase();
 
@@ -109,14 +109,14 @@ class ElementsModel extends ListModel
         $this->formId = $formId;
 
 
-        $context = $this->context ?: 'com_contentbuilder_ng.elements';
+        $context = $this->context ?: 'com_contentbuilderng.elements';
 
         // Filtre sur published
-        $published = $app->getUserStateFromRequest('com_contentbuilder_ng.elements.filter.published', 'filter_published', '', 'string');
+        $published = $app->getUserStateFromRequest('com_contentbuilderng.elements.filter.published', 'filter_published', '', 'string');
         $this->setState('filter.published', $published);
 
         // Recherche (si tu veux ajouter un champ de recherche sur label ou type)
-        $search = $app->getUserStateFromRequest('com_contentbuilder_ng.elements.filter.search', 'filter_search', '', 'string');
+        $search = $app->getUserStateFromRequest('com_contentbuilderng.elements.filter.search', 'filter_search', '', 'string');
         $this->setState('filter.search', $search);
 
         // Pagination (scope local a la liste des elements)
@@ -191,7 +191,7 @@ class ElementsModel extends ListModel
         $db    = $this->getDatabase();
         $query = $db->getQuery(true);
 
-        // Sélectionner les colonnes pertinentes de #__contentbuilder_ng_elements
+        // Sélectionner les colonnes pertinentes de #__contentbuilderng_elements
         $query->select(
             $db->quoteName([
                 'id',
@@ -219,7 +219,7 @@ class ElementsModel extends ListModel
                 'ordering'
             ])
         )
-            ->from($db->quoteName('#__contentbuilder_ng_elements'))
+            ->from($db->quoteName('#__contentbuilderng_elements'))
             ->where($db->quoteName('form_id') . ' = ' . (int) $this->getState('form.id'));  // Filtre par form_id
 
         // Filtre publié (si défini)
@@ -371,7 +371,7 @@ class ElementsModel extends ListModel
     private function buildOrderBy()
     {
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
 
         $orderby = '';
         $filter_order = $this->getState('elements_filter_order');
@@ -400,7 +400,7 @@ class ElementsModel extends ListModel
             $filter_state .= ' And published = ' . $published;
         }
 
-        return "Select * From #__contentbuilder_ng_elements Where form_id = " . $this->formId . $filter_state . $this->buildOrderBy();
+        return "Select * From #__contentbuilderng_elements Where form_id = " . $this->formId . $filter_state . $this->buildOrderBy();
     }
 
     // Legacy

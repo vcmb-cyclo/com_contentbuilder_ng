@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\View\Users;
+namespace CB\Component\Contentbuilderng\Administrator\View\Users;
 
 \defined('_JEXEC') or die;
 
@@ -40,7 +40,7 @@ class HtmlView extends BaseHtmlView
 
         // Toolbar
         ToolbarHelper::title(
-            Text::_('COM_CONTENTBUILDER_NG') .' :: ' .Text::_('COM_CONTENTBUILDER_NG_USERS'),
+            Text::_('COM_CONTENTBUILDERNG') .' :: ' .Text::_('COM_CONTENTBUILDERNG_USERS'),
             'users'
         );
 

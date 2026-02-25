@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace CB\Component\Contentbuilder_ng\Tests\Unit\Helper;
+namespace CB\Component\Contentbuilderng\Tests\Unit\Helper;
 
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 use Joomla\CMS\Log\Log;
 use PHPUnit\Framework\TestCase;
 

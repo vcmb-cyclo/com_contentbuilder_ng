@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder_ng\Site\Controller;
+namespace CB\Component\Contentbuilderng\Site\Controller;
 
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );

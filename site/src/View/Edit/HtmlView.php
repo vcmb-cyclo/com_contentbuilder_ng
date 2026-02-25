@@ -15,7 +15,7 @@
  */
 
 
-namespace CB\Component\Contentbuilder_ng\Site\View\Edit;
+namespace CB\Component\Contentbuilderng\Site\View\Edit;
 
 \defined('_JEXEC') or die;
 
@@ -26,7 +26,7 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
-use CB\Component\Contentbuilder_ng\Site\Model\EditModel;
+use CB\Component\Contentbuilderng\Site\Model\EditModel;
 
 class HtmlView extends BaseHtmlView
 {
@@ -89,7 +89,7 @@ class HtmlView extends BaseHtmlView
         try {
             $prevQuery = $db->getQuery(true)
                 ->select($db->quoteName('record_id'))
-                ->from($db->quoteName('#__contentbuilder_ng_records'))
+                ->from($db->quoteName('#__contentbuilderng_records'))
                 ->where($baseWhere)
                 ->where($db->quoteName('record_id') . ' < ' . (int) $currentRecordId)
                 ->order($db->quoteName('record_id') . ' DESC');
@@ -99,7 +99,7 @@ class HtmlView extends BaseHtmlView
 
             $nextQuery = $db->getQuery(true)
                 ->select($db->quoteName('record_id'))
-                ->from($db->quoteName('#__contentbuilder_ng_records'))
+                ->from($db->quoteName('#__contentbuilderng_records'))
                 ->where($baseWhere)
                 ->where($db->quoteName('record_id') . ' > ' . (int) $currentRecordId)
                 ->order($db->quoteName('record_id') . ' ASC');
@@ -116,7 +116,7 @@ class HtmlView extends BaseHtmlView
     private function getListPaginationStateKeys(int $formId): array
     {
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
         $layout = (string) $app->input->getCmd('layout', 'default');
 
         if ($layout === '') {
@@ -155,7 +155,7 @@ class HtmlView extends BaseHtmlView
             $listForNavigation['limit'] = 1000000;
             $app->input->set('list', $listForNavigation);
 
-            $factory = $app->bootComponent('com_contentbuilder_ng')->getMVCFactory();
+            $factory = $app->bootComponent('com_contentbuilderng')->getMVCFactory();
             $listModel = $factory->createModel('List', 'Site', ['ignore_request' => false]);
 
             if (!$listModel || !method_exists($listModel, 'getData')) {
@@ -210,12 +210,12 @@ class HtmlView extends BaseHtmlView
 
     private function rewriteSlugLinks(string $markup): string
     {
-        if (strpos($markup, 'contentbuilder_ng_slug_used') === false) {
+        if (strpos($markup, 'contentbuilderng_slug_used') === false) {
             return $markup;
         }
 
         $matches = array(array(), array());
-        preg_match_all('/\"([^\"]*contentbuilder_ng_slug_used[^\"]*)\"/i', $markup, $matches);
+        preg_match_all('/\"([^\"]*contentbuilderng_slug_used[^\"]*)\"/i', $markup, $matches);
 
         foreach ($matches[1] as $match) {
             $sub = '';
@@ -242,7 +242,7 @@ class HtmlView extends BaseHtmlView
             }
 
             $replacement = Route::_(
-                'index.php?option=com_contentbuilder_ng&view=details&id='
+                'index.php?option=com_contentbuilderng&view=details&id='
                 . Factory::getApplication()->input->getInt('id')
                 . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', '')
                 . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0)
@@ -445,7 +445,7 @@ class HtmlView extends BaseHtmlView
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery(
             'Select articles.`article_id`'
-            . ' From #__contentbuilder_ng_articles As articles, #__content As content'
+            . ' From #__contentbuilderng_articles As articles, #__content As content'
             . ' Where content.id = articles.article_id'
             . ' And (content.state = 1 Or content.state = 0)'
             . ' And articles.form_id = ' . (int) $this->id
@@ -474,7 +474,7 @@ class HtmlView extends BaseHtmlView
         if (trim(str_replace('-', '', $alias)) === '') {
             $alias = Factory::getDate()->format('%Y-%m-%d-%H-%M-%S');
         }
-        $table->slug = ($articleId > 0 ? $articleId : 0) . ':' . $alias . ':contentbuilder_ng_slug_used';
+        $table->slug = ($articleId > 0 ? $articleId : 0) . ':' . $alias . ':contentbuilderng_slug_used';
 
         $registry = new Registry();
         $registry->loadString((string) ($table->attribs ?? ''));
@@ -632,9 +632,9 @@ CSS;
                 if ($this->theme_css === '' && $this->theme_js === '' && property_exists($this->item, 'theme_plugin')) {
                     $themePlugin = (string) ($this->item->theme_plugin ?? '');
                     $fallbackTheme = false;
-                    if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin)) {
+                    if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
                         $themePlugin = 'joomla6';
-                        PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin);
+                        PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin);
                         $fallbackTheme = true;
                     }
                     $dispatcher = Factory::getApplication()->getDispatcher();
@@ -663,7 +663,7 @@ CSS;
                 'afterDisplayContent' => '',
             ];
             Factory::getApplication()->enqueueMessage(
-                Text::_('COM_CONTENTBUILDER_NG') .' : Edit model not found for this request.',
+                Text::_('COM_CONTENTBUILDERNG') .' : Edit model not found for this request.',
                 'warning'
             );
         }

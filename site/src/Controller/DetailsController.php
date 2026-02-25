@@ -6,7 +6,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Site\Controller;
+namespace CB\Component\Contentbuilderng\Site\Controller;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -20,14 +20,14 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class DetailsController extends BaseController
 {
     protected $default_view = 'details';
 
     // ✅ IMPORTANT : force le prefix PSR-4 des vues
-    protected $viewPrefix = 'CB\\Component\\Contentbuilder_ng\\Site\\View';
+    protected $viewPrefix = 'CB\\Component\\Contentbuilderng\\Site\\View';
 
     private SiteApplication $siteApp;
     private bool $frontend;
@@ -65,7 +65,7 @@ class DetailsController extends BaseController
         if ($this->siteApp->input->getWord('view', '') == 'latest') {
             $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-            $db->setQuery('Select `type`, `reference_id` From #__contentbuilder_ng_forms Where id = ' . intval($this->siteApp->input->getInt('id', 0)) . ' And published = 1');
+            $db->setQuery('Select `type`, `reference_id` From #__contentbuilderng_forms Where id = ' . intval($this->siteApp->input->getInt('id', 0)) . ' And published = 1');
             $form = $db->loadAssoc();
             $form = ContentbuilderLegacyHelper::getForm($form['type'], $form['reference_id']);
 
@@ -76,7 +76,7 @@ class DetailsController extends BaseController
             }
 
             if (count($ids)) {
-                $db->setQuery("Select Distinct `label`, reference_id From #__contentbuilder_ng_elements Where form_id = " . intval($this->siteApp->input->getInt('id', 0)) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
+                $db->setQuery("Select Distinct `label`, reference_id From #__contentbuilderng_elements Where form_id = " . intval($this->siteApp->input->getInt('id', 0)) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 Order By ordering");
                 $rows = $db->loadAssocList();
                 $ids = array();
                 foreach ($rows as $row) {
@@ -108,9 +108,9 @@ class DetailsController extends BaseController
                         'direction' => $state['direction'],
                     ]]);
 
-                    $this->siteApp->redirect(Route::_('index.php?option=com_contentbuilder_ng&task=edit.display&latest=1&backtolist=' . $this->siteApp->input->getInt('backtolist', 0) . '&id=' . $this->siteApp->input->getInt('id', 0) . ($this->siteApp->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . $this->siteApp->input->get('tmpl', '', 'string') : '') . ($this->siteApp->input->get('layout', '', 'string') != '' ? '&layout=' . $this->siteApp->input->get('layout', '', 'string') : '') . '&record_id=' . ($listQuery !== '' ? '' : '') . ($listQuery !== '' ? '&' . $listQuery : ''), false));
+                    $this->siteApp->redirect(Route::_('index.php?option=com_contentbuilderng&task=edit.display&latest=1&backtolist=' . $this->siteApp->input->getInt('backtolist', 0) . '&id=' . $this->siteApp->input->getInt('id', 0) . ($this->siteApp->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . $this->siteApp->input->get('tmpl', '', 'string') : '') . ($this->siteApp->input->get('layout', '', 'string') != '' ? '&layout=' . $this->siteApp->input->get('layout', '', 'string') : '') . '&record_id=' . ($listQuery !== '' ? '' : '') . ($listQuery !== '' ? '&' . $listQuery : ''), false));
                 } else {
-                    $this->siteApp->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_ADD_ENTRY_FIRST'));
+                    $this->siteApp->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_ADD_ENTRY_FIRST'));
                     $this->siteApp->redirect(Route::_('index.php'));
                 }
             }
@@ -159,7 +159,7 @@ class DetailsController extends BaseController
         $this->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
         $this->siteApp->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
         if (!$isAdminPreview) {
-            ContentbuilderLegacyHelper::checkPermissions('view', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_VIEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+            ContentbuilderLegacyHelper::checkPermissions('view', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_VIEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
         }
 
         $this->siteApp->input->set('tmpl', $this->siteApp->input->getWord('tmpl', null));
@@ -174,7 +174,7 @@ class DetailsController extends BaseController
     private function resolveListState(): array
     {
         $app = $this->siteApp;
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
         $list = (array) $app->input->get('list', [], 'array');
         $stateKeyPrefix = $this->getPaginationStateKeyPrefix();
         $limitKey = $stateKeyPrefix . '.limit';
@@ -208,7 +208,7 @@ class DetailsController extends BaseController
     private function getPaginationStateKeyPrefix(): string
     {
         $app = $this->siteApp;
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
 
         $formId = (int) $app->input->getInt('id', 0);
         if ($formId < 1) {

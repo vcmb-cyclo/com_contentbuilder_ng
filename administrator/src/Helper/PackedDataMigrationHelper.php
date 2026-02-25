@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Helper;
+namespace CB\Component\Contentbuilderng\Administrator\Helper;
 
 \defined('_JEXEC') or die('Restricted access');
 
@@ -21,12 +21,12 @@ final class PackedDataMigrationHelper
 
     private const PACKED_MIGRATION_TARGETS = [
         [
-            'table' => '#__contentbuilder_ng_elements',
+            'table' => '#__contentbuilderng_elements',
             'primaryKey' => 'id',
             'column' => 'options',
         ],
         [
-            'table' => '#__contentbuilder_ng_forms',
+            'table' => '#__contentbuilderng_forms',
             'primaryKey' => 'id',
             'column' => 'config',
         ],
@@ -87,6 +87,23 @@ final class PackedDataMigrationHelper
      *       error:string
      *     }>,
      *     warnings:array<int,string>
+     *   },
+     *   plugin_duplicates:array{
+     *     scanned:int,
+     *     issues:int,
+     *     repaired:int,
+     *     unchanged:int,
+     *     errors:int,
+     *     rows_removed:int,
+     *     groups:array<int,array{
+     *       canonical_folder:string,
+     *       canonical_element:string,
+     *       keep_id:int,
+     *       removed_ids:array<int,int>,
+     *       status:string,
+     *       error:string
+     *     }>,
+     *     warnings:array<int,string>
      *   }
      * }
      */
@@ -96,6 +113,7 @@ final class PackedDataMigrationHelper
         $summary = self::migratePackedPayloads($db);
         $summary['repair'] = self::repairTableCollations($db);
         $summary['audit_columns'] = StorageAuditColumnsHelper::repair($db);
+        $summary['plugin_duplicates'] = PluginExtensionDedupHelper::repair($db);
 
         return $summary;
     }
@@ -382,7 +400,7 @@ final class PackedDataMigrationHelper
         try {
             $query = $db->getQuery(true)
                 ->select($db->quoteName(['name', 'bytable']))
-                ->from($db->quoteName('#__contentbuilder_ng_storages'))
+                ->from($db->quoteName('#__contentbuilderng_storages'))
                 ->where($db->quoteName('name') . " <> ''");
 
             $db->setQuery($query);
@@ -406,7 +424,7 @@ final class PackedDataMigrationHelper
                 }
             }
         } catch (\Throwable $e) {
-            $warnings[] = 'Could not inspect #__contentbuilder_ng_storages: ' . $e->getMessage();
+            $warnings[] = 'Could not inspect #__contentbuilderng_storages: ' . $e->getMessage();
         }
 
         $result = array_keys($tables);

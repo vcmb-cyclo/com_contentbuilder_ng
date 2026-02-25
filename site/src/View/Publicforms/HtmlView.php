@@ -7,14 +7,14 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Site\View\PublicForms;
+namespace CB\Component\Contentbuilderng\Site\View\PublicForms;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
-use CB\Component\Contentbuilder_ng\Site\Model\PublicformsModel;
+use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilderng\Site\Model\PublicformsModel;
 
 class HtmlView extends BaseHtmlView
 {

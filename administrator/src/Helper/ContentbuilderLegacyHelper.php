@@ -8,7 +8,7 @@
  */
 
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Helper;
+namespace CB\Component\Contentbuilderng\Administrator\Helper;
 
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -30,7 +30,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
 use Joomla\Registry\Registry;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 
 final class ContentbuilderLegacyHelper
 {
@@ -58,15 +58,15 @@ final class ContentbuilderLegacyHelper
 
     private static function helperClassName(): string
     {
-        return __NAMESPACE__ . '\\ContentbuilderHelper';
+        return __NAMESPACE__ . '\\ContentbuilderngHelper';
     }
 
-    private static function callContentbuilderHelper(string $method, ...$arguments)
+    private static function callContentbuilderngHelper(string $method, ...$arguments)
     {
         $helperClass = self::helperClassName();
 
         if (!class_exists($helperClass) || !method_exists($helperClass, $method)) {
-            throw new \RuntimeException('Missing ContentbuilderHelper::' . $method);
+            throw new \RuntimeException('Missing ContentbuilderngHelper::' . $method);
         }
 
         return $helperClass::$method(...$arguments);
@@ -130,7 +130,7 @@ final class ContentbuilderLegacyHelper
             Log::add(
                 'Blocked legacy PHP expression in hidden filter value.',
                 Log::WARNING,
-                'com_contentbuilder_ng'
+                'com_contentbuilderng'
             );
             return '';
         }
@@ -265,10 +265,10 @@ final class ContentbuilderLegacyHelper
             <div class="pagination">
                 <ul>
                     <li class="pagination-start">
-                        <?php echo $pages_current - 1 > 0 ? '<a title="' . Text::_('COM_CONTENTBUILDER_NG_START') . '" href="' . $open . '" class="pagenav">' . Text::_('COM_CONTENTBUILDER_NG_START') . '</a>' : '<span class="pagenav">' . Text::_('COM_CONTENTBUILDER_NG_START') . '</span>'; ?>
+                        <?php echo $pages_current - 1 > 0 ? '<a title="' . Text::_('COM_CONTENTBUILDERNG_START') . '" href="' . $open . '" class="pagenav">' . Text::_('COM_CONTENTBUILDERNG_START') . '</a>' : '<span class="pagenav">' . Text::_('COM_CONTENTBUILDERNG_START') . '</span>'; ?>
                     </li>
                     <li class="pagination-prev">
-                        <?php echo $pages_current - 1 > 0 ? '<a title="' . Text::_('COM_CONTENTBUILDER_NG_PREV') . '" href="' . $open . 'start=' . ($limitstart - $limit) . '" class="pagenav">' . Text::_('COM_CONTENTBUILDER_NG_PREV') . '</a>' : '<span class="pagenav">' . Text::_('COM_CONTENTBUILDER_NG_PREV') . '</span>'; ?>
+                        <?php echo $pages_current - 1 > 0 ? '<a title="' . Text::_('COM_CONTENTBUILDERNG_PREV') . '" href="' . $open . 'start=' . ($limitstart - $limit) . '" class="pagenav">' . Text::_('COM_CONTENTBUILDERNG_PREV') . '</a>' : '<span class="pagenav">' . Text::_('COM_CONTENTBUILDERNG_PREV') . '</span>'; ?>
                     </li>
                     <?php echo $begin; ?>
                     <?php
@@ -291,10 +291,10 @@ final class ContentbuilderLegacyHelper
                     ?>
                     <?php echo $end; ?>
                     <li class="pagination-next">
-                        <?php echo $pages_current < $pages_total ? '<a title="' . Text::_('COM_CONTENTBUILDER_NG_NEXT') . '" href="' . $open . 'start=' . ($pages_current * $limit) . '" class="pagenav">' . Text::_('COM_CONTENTBUILDER_NG_NEXT') . '</a>' : '<span class="pagenav">' . Text::_('COM_CONTENTBUILDER_NG_NEXT') . '</span>'; ?>
+                        <?php echo $pages_current < $pages_total ? '<a title="' . Text::_('COM_CONTENTBUILDERNG_NEXT') . '" href="' . $open . 'start=' . ($pages_current * $limit) . '" class="pagenav">' . Text::_('COM_CONTENTBUILDERNG_NEXT') . '</a>' : '<span class="pagenav">' . Text::_('COM_CONTENTBUILDERNG_NEXT') . '</span>'; ?>
                     </li>
                     <li class="pagination-end">
-                        <?php echo $pages_total > 1 && $pages_current < $pages_total ? '<a title="' . Text::_('COM_CONTENTBUILDER_NG_END') . '" href="' . $open . 'start=' . (($pages_total - 1) * $limit) . '" class="pagenav">' . Text::_('COM_CONTENTBUILDER_NG_END') . '</a>' : '<span class="pagenav">' . Text::_('COM_CONTENTBUILDER_NG_END') . '</span>'; ?>
+                        <?php echo $pages_total > 1 && $pages_current < $pages_total ? '<a title="' . Text::_('COM_CONTENTBUILDERNG_END') . '" href="' . $open . 'start=' . (($pages_total - 1) * $limit) . '" class="pagenav">' . Text::_('COM_CONTENTBUILDERNG_END') . '</a>' : '<span class="pagenav">' . Text::_('COM_CONTENTBUILDERNG_END') . '</span>'; ?>
                     </li>
                 </ul>
             </div>
@@ -383,10 +383,10 @@ final class ContentbuilderLegacyHelper
         return $value;
     }
 
-    public static function createBackendMenuItem($contentbuilder_ng_form_id, $name, $update)
+    public static function createBackendMenuItem($contentbuilderng_form_id, $name, $update)
     {
 
-        self::createBackendMenuItem3($contentbuilder_ng_form_id, $name, $update);
+        self::createBackendMenuItem3($contentbuilderng_form_id, $name, $update);
     }
 
     public static function getLanguageCodes()
@@ -404,7 +404,7 @@ final class ContentbuilderLegacyHelper
         return $langs;
     }
 
-    public static function applyItemWrappers($contentbuilder_ng_form_id, array $items, $form)
+    public static function applyItemWrappers($contentbuilderng_form_id, array $items, $form)
     {
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
@@ -416,7 +416,7 @@ final class ContentbuilderLegacyHelper
         $registry = new Registry;
         $registry->loadString('{}');
 
-        $db->setQuery("Select reference_id, item_wrapper, wordwrap, `label`, `options` From #__contentbuilder_ng_elements Where published = 1 And form_id = " . intval($contentbuilder_ng_form_id));
+        $db->setQuery("Select reference_id, item_wrapper, wordwrap, `label`, `options` From #__contentbuilderng_elements Where published = 1 And form_id = " . intval($contentbuilderng_form_id));
         $wrappers = $db->loadAssocList();
         foreach ($wrappers as $wrapper) {
             foreach ($items as $item) {
@@ -475,9 +475,9 @@ final class ContentbuilderLegacyHelper
                         }
 
                         if ($wrapper['wordwrap'] && !$allow_html) {
-                            $new_value = self::allhtmlentities(self::callContentbuilderHelper('contentbuilder_ng_wordwrap', self::callContentbuilderHelper('cbinternal', $value), $wrapper['wordwrap'], "\n", true));
+                            $new_value = self::allhtmlentities(self::callContentbuilderngHelper('contentbuilderng_wordwrap', self::callContentbuilderngHelper('cbinternal', $value), $wrapper['wordwrap'], "\n", true));
                         } else {
-                            $new_value = $allow_html ? self::cleanString(self::callContentbuilderHelper('cbinternal', $value)) : self::allhtmlentities(self::callContentbuilderHelper('cbinternal', $value));
+                            $new_value = $allow_html ? self::cleanString(self::callContentbuilderngHelper('cbinternal', $value)) : self::allhtmlentities(self::callContentbuilderngHelper('cbinternal', $value));
                         }
 
                         if (strpos(trim($wrapper['item_wrapper'] ?? ''), '<?php') === 0) {
@@ -541,11 +541,11 @@ final class ContentbuilderLegacyHelper
         return $items;
     }
 
-    public static function createBackendMenuItem15($contentbuilder_ng_form_id, $name, $update)
+    public static function createBackendMenuItem15($contentbuilderng_form_id, $name, $update)
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $parent_id = 0;
-        $db->setQuery("Select id From #__components Where `option`='' And admin_menu_link='option=com_contentbuilder_ng&viewcontainer=true'");
+        $db->setQuery("Select id From #__components Where `option`='' And admin_menu_link='option=com_contentbuilderng&viewcontainer=true'");
         $res = $db->loadResult();
         if ($res) {
             $parent_id = $res;
@@ -563,10 +563,10 @@ final class ContentbuilderLegacyHelper
                  Values
                  (
                     'ContentBuilder NG Views',
-                    'option=com_contentbuilder_ng&viewcontainer=true',
-                    'contentbuilder_ng',
+                    'option=com_contentbuilderng&viewcontainer=true',
+                    'contentbuilderng',
                     '',
-                    'media/com_contentbuilder_ng/images/logo_icon_cb.png',
+                    'media/com_contentbuilderng/images/logo_icon_cb.png',
                     1
                  )
            "
@@ -574,11 +574,11 @@ final class ContentbuilderLegacyHelper
             $db->execute();
             $parent_id = $db->insertid();
         }
-        $db->setQuery("Select id From #__components Where admin_menu_link = 'option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
+        $db->setQuery("Select id From #__components Where admin_menu_link = 'option=com_contentbuilderng&task=list.display&id=" . intval($contentbuilderng_form_id) . "'");
         $menuitem = $db->loadResult();
         if (!$update)
             return;
-        $db->setQuery("Select count(published) From #__contentbuilder_ng_elements Where form_id = " . intval($contentbuilder_ng_form_id));
+        $db->setQuery("Select count(published) From #__contentbuilderng_elements Where form_id = " . intval($contentbuilderng_form_id));
         if ($db->loadResult()) {
             if (!$menuitem) {
                 $db->setQuery(
@@ -595,10 +595,10 @@ final class ContentbuilderLegacyHelper
                      Values
                      (
                         " . $db->quote($name) . ",
-                        'option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "',
+                        'option=com_contentbuilderng&task=list.display&id=" . intval($contentbuilderng_form_id) . "',
                         " . $db->quote($name) . ",
-                        'com_contentbuilder_ng',
-                        'media/com_contentbuilder_ng/images/logo_icon_cb.png',
+                        'com_contentbuilderng',
+                        'media/com_contentbuilderng/images/logo_icon_cb.png',
                         1,
                         '$parent_id'
                      )
@@ -619,15 +619,15 @@ final class ContentbuilderLegacyHelper
         }
     }
 
-    public static function createBackendMenuItem16($contentbuilder_ng_form_id, $name, $update)
+    public static function createBackendMenuItem16($contentbuilderng_form_id, $name, $update)
     {
         if (trim($name)) {
             $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-            $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder_ng' And parent_id = 1");
+            $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilderng' And parent_id = 1");
             $result = $db->loadResult();
 
-            $db->setQuery("Select id From #__menu Where `link`='index.php?option=com_contentbuilder_ng&viewcontainer=true' And parent_id = 1");
+            $db->setQuery("Select id From #__menu Where `link`='index.php?option=com_contentbuilderng&viewcontainer=true' And parent_id = 1");
             $old_id = $db->loadResult();
             $parent_id = $old_id;
 
@@ -640,8 +640,8 @@ final class ContentbuilderLegacyHelper
                     ") " .
                     "values (" .
                     "'ContentBuilder NG Views', 'ContentBuilder NG Views', 'main', 1, " .
-                    "'index.php?option=com_contentbuilder_ng&viewcontainer=true'," .
-                    "'0', 1, " . intval($result) . ", 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png',( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet )" .
+                    "'index.php?option=com_contentbuilderng&viewcontainer=true'," .
+                    "'0', 1, " . intval($result) . ", 1, 'media/com_contentbuilderng/images/logo_icon_cb.png',( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet )" .
                     ")"
                 );
                 $db->execute();
@@ -654,7 +654,7 @@ final class ContentbuilderLegacyHelper
                 $db->execute();
             }
 
-            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilderng&task=list.display&id=" . intval($contentbuilderng_form_id) . "'");
             $menuitem = $db->loadResult();
 
             if (!$update)
@@ -662,7 +662,7 @@ final class ContentbuilderLegacyHelper
             if (!$result)
                 die("ContentBuilder main menu item not found!");
 
-            $db->setQuery("Select id From #__menu Where alias = " . $db->quote($name) . " And link Like 'index.php?option=com_contentbuilder_ng&task=list.display&id=%' And link <> 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where alias = " . $db->quote($name) . " And link Like 'index.php?option=com_contentbuilderng&task=list.display&id=%' And link <> 'index.php?option=com_contentbuilderng&task=list.display&id=" . intval($contentbuilderng_form_id) . "'");
             $name_exists = $db->loadResult();
 
             if ($name_exists) {
@@ -679,8 +679,8 @@ final class ContentbuilderLegacyHelper
                     ",lft,rgt) " .
                     "values (" .
                     "" . $db->quote($name) . ", " . $db->quote($name) . ", 'main', '$parent_id', " .
-                    "'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'," .
-                    "'0', 1, " . intval($result) . ", 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png'" .
+                    "'index.php?option=com_contentbuilderng&task=list.display&id=" . intval($contentbuilderng_form_id) . "'," .
+                    "'0', 1, " . intval($result) . ", 1, 'media/com_contentbuilderng/images/logo_icon_cb.png'" .
                     ",( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone), ( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet))"
                 );
                 $db->execute();
@@ -702,17 +702,17 @@ final class ContentbuilderLegacyHelper
         }
     }
 
-    public static function createBackendMenuItem3($contentbuilder_ng_form_id, $name, $update)
+    public static function createBackendMenuItem3($contentbuilderng_form_id, $name, $update)
     {
 
         if (trim($name)) {
 
             $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-            $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilder_ng' And parent_id = 1");
+            $db->setQuery("Select component_id From #__menu Where `link`='index.php?option=com_contentbuilderng' And parent_id = 1");
             $result = $db->loadResult();
 
-            $db->setQuery("Select id From #__menu Where `link`='index.php?option=com_contentbuilder_ng&viewcontainer=true' And parent_id = 1");
+            $db->setQuery("Select id From #__menu Where `link`='index.php?option=com_contentbuilderng&viewcontainer=true' And parent_id = 1");
             $old_id = $db->loadResult();
             $parent_id = $old_id;
 
@@ -726,8 +726,8 @@ final class ContentbuilderLegacyHelper
                     ") " .
                     "values (" .
                     "'ContentBuilder NG Views', 'ContentBuilder NG Views', 'main', 'component', 1, " .
-                    "'index.php?option=com_contentbuilder_ng&viewcontainer=true'," .
-                    "1, " . intval($result) . ", 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png',( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet )" .
+                    "'index.php?option=com_contentbuilderng&viewcontainer=true'," .
+                    "1, " . intval($result) . ", 1, 'media/com_contentbuilderng/images/logo_icon_cb.png',( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet )" .
                     ")"
                 );
                 $db->execute();
@@ -740,7 +740,7 @@ final class ContentbuilderLegacyHelper
                 $db->execute();
             }
 
-            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where link = 'index.php?option=com_contentbuilderng&task=list.display&id=" . intval($contentbuilderng_form_id) . "'");
             $menuitem = $db->loadResult();
 
             if (!$update)
@@ -748,7 +748,7 @@ final class ContentbuilderLegacyHelper
             if (!$result)
                 die("ContentBuilder NG main menu item not found!");
 
-            $db->setQuery("Select id From #__menu Where alias = " . $db->quote($name) . " And link Like 'index.php?option=com_contentbuilder_ng&task=list.display&id=%' And link <> 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'");
+            $db->setQuery("Select id From #__menu Where alias = " . $db->quote($name) . " And link Like 'index.php?option=com_contentbuilderng&task=list.display&id=%' And link <> 'index.php?option=com_contentbuilderng&task=list.display&id=" . intval($contentbuilderng_form_id) . "'");
             $name_exists = $db->loadResult();
 
             if ($name_exists) {
@@ -765,8 +765,8 @@ final class ContentbuilderLegacyHelper
                     ",lft,rgt) " .
                     "values (" .
                     "''," . "''," . $db->quote($name) . ", " . $db->quote($name) . ", 'main', 'component', '$parent_id', " .
-                    "'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($contentbuilder_ng_form_id) . "'," .
-                    "1, " . intval($result) . ", 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png'" .
+                    "'index.php?option=com_contentbuilderng&task=list.display&id=" . intval($contentbuilderng_form_id) . "'," .
+                    "1, " . intval($result) . ", 1, 'media/com_contentbuilderng/images/logo_icon_cb.png'" .
                     ",( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone), ( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet))"
                 );
                 $db->execute();
@@ -788,35 +788,35 @@ final class ContentbuilderLegacyHelper
         }
     }
 
-    public static function createDetailsSample($contentbuilder_ng_form_id, $form, $plugin)
+    public static function createDetailsSample($contentbuilderng_form_id, $form, $plugin)
     {
-        if (!$contentbuilder_ng_form_id || !is_object($form)) {
+        if (!$contentbuilderng_form_id || !is_object($form)) {
             return;
         }
 
-        if ($plugin && !PluginHelper::isEnabled('contentbuilder_ng_themes', $plugin)) {
-            $msg = "ContentBuilder NG theme plugin not enabled: contentbuilder_ng_themes/{$plugin}";
-            Log::add($msg, Log::WARNING, 'com_contentbuilder_ng');
+        if ($plugin && !PluginHelper::isEnabled('contentbuilderng_themes', $plugin)) {
+            $msg = "ContentBuilder NG theme plugin not enabled: contentbuilderng_themes/{$plugin}";
+            Log::add($msg, Log::WARNING, 'com_contentbuilderng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }
 
-        PluginHelper::importPlugin('contentbuilder_ng_themes', $plugin);
+        PluginHelper::importPlugin('contentbuilderng_themes', $plugin);
 
         $dispatcher = Factory::getApplication()->getDispatcher();
-        $eventResult = $dispatcher->dispatch('onContentTemplateSample', new \Joomla\Event\Event('onContentTemplateSample', [$contentbuilder_ng_form_id, $form, 'theme' => $plugin]));
+        $eventResult = $dispatcher->dispatch('onContentTemplateSample', new \Joomla\Event\Event('onContentTemplateSample', [$contentbuilderng_form_id, $form, 'theme' => $plugin]));
         $results = $eventResult->getArgument('result') ?: [];
         $out = implode('', $results);
         if ($plugin && $out === '') {
-            $msg = "ContentBuilder NG theme plugin returned empty sample: contentbuilder_ng_themes/{$plugin}";
-            Log::add($msg, Log::WARNING, 'com_contentbuilder_ng');
+            $msg = "ContentBuilder NG theme plugin returned empty sample: contentbuilderng_themes/{$plugin}";
+            Log::add($msg, Log::WARNING, 'com_contentbuilderng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }
         return $out;
     }
 
-    public static function createEmailSample($contentbuilder_ng_form_id, $form, $html = false)
+    public static function createEmailSample($contentbuilderng_form_id, $form, $html = false)
     {
-        if (!$contentbuilder_ng_form_id || !is_object($form)) {
+        if (!$contentbuilderng_form_id || !is_object($form)) {
             return;
         }
         $db = Factory::getContainer()->get(DatabaseInterface::class);
@@ -826,7 +826,7 @@ final class ContentbuilderLegacyHelper
         }
         $names = $form->getElementNames();
         foreach ($names as $reference_id => $name) {
-            $db->setQuery("Select id, `type` From #__contentbuilder_ng_elements Where published = 1 And form_id = " . intval($contentbuilder_ng_form_id) . " And reference_id = " . $db->quote($reference_id));
+            $db->setQuery("Select id, `type` From #__contentbuilderng_elements Where published = 1 And form_id = " . intval($contentbuilderng_form_id) . " And reference_id = " . $db->quote($reference_id));
             $result = $db->loadAssoc();
             if (is_array($result)) {
                 if ($result['type'] != 'hidden') {
@@ -846,34 +846,34 @@ final class ContentbuilderLegacyHelper
         return $out;
     }
 
-    public static function createEditableSample($contentbuilder_ng_form_id, $form, $plugin)
+    public static function createEditableSample($contentbuilderng_form_id, $form, $plugin)
     {
 
-        if (!$contentbuilder_ng_form_id || !is_object($form)) {
+        if (!$contentbuilderng_form_id || !is_object($form)) {
             return;
         }
 
-        if ($plugin && !PluginHelper::isEnabled('contentbuilder_ng_themes', $plugin)) {
-            $msg = "ContentBuilder NG theme plugin not enabled: contentbuilder_ng_themes/{$plugin}";
-            Log::add($msg, Log::WARNING, 'com_contentbuilder_ng');
+        if ($plugin && !PluginHelper::isEnabled('contentbuilderng_themes', $plugin)) {
+            $msg = "ContentBuilder NG theme plugin not enabled: contentbuilderng_themes/{$plugin}";
+            Log::add($msg, Log::WARNING, 'com_contentbuilderng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }
 
-        PluginHelper::importPlugin('contentbuilder_ng_themes', $plugin);
+        PluginHelper::importPlugin('contentbuilderng_themes', $plugin);
 
         $dispatcher = Factory::getApplication()->getDispatcher();
-        $eventResult = $dispatcher->dispatch('onEditableTemplateSample', new \Joomla\Event\Event('onEditableTemplateSample', [$contentbuilder_ng_form_id, $form, 'theme' => $plugin]));
+        $eventResult = $dispatcher->dispatch('onEditableTemplateSample', new \Joomla\Event\Event('onEditableTemplateSample', [$contentbuilderng_form_id, $form, 'theme' => $plugin]));
         $results = $eventResult->getArgument('result') ?: [];
         $out = implode('', $results);
         if ($plugin && $out === '') {
-            $msg = "ContentBuilder NG theme plugin returned empty editable sample: contentbuilder_ng_themes/{$plugin}";
-            Log::add($msg, Log::WARNING, 'com_contentbuilder_ng');
+            $msg = "ContentBuilder NG theme plugin returned empty editable sample: contentbuilderng_themes/{$plugin}";
+            Log::add($msg, Log::WARNING, 'com_contentbuilderng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }
         return $out;
     }
 
-    public static function synchElements($contentbuilder_ng_form_id, $form): array
+    public static function synchElements($contentbuilderng_form_id, $form): array
     {
         $report = array(
             'added' => array(),
@@ -882,7 +882,7 @@ final class ContentbuilderLegacyHelper
             'removed_count' => 0,
         );
 
-        if (!$contentbuilder_ng_form_id || !is_object($form)) {
+        if (!$contentbuilderng_form_id || !is_object($form)) {
             return $report;
         }
 
@@ -892,8 +892,8 @@ final class ContentbuilderLegacyHelper
 
         $db->setQuery(
             "Select reference_id, label"
-            . " From #__contentbuilder_ng_elements"
-            . " Where form_id = " . intval($contentbuilder_ng_form_id)
+            . " From #__contentbuilderng_elements"
+            . " Where form_id = " . intval($contentbuilderng_form_id)
         );
         $existingRows = (array) $db->loadAssocList();
         $existingByReference = array();
@@ -913,15 +913,15 @@ final class ContentbuilderLegacyHelper
             $options->readonly = 0;
             $options->seperator = ',';
             $ids[] = $db->quote($reference_id);
-            $db->setQuery("Select id, `type`, `options` From #__contentbuilder_ng_elements Where form_id = " . intval($contentbuilder_ng_form_id) . " And reference_id = " . $db->quote($reference_id));
+            $db->setQuery("Select id, `type`, `options` From #__contentbuilderng_elements Where form_id = " . intval($contentbuilderng_form_id) . " And reference_id = " . $db->quote($reference_id));
             $assoc = $db->loadAssoc();
 
             if (!is_array($assoc)) {
 
-                $db->setQuery("Select Max(ordering) + 1 From #__contentbuilder_ng_elements Where form_id = " . intval($contentbuilder_ng_form_id));
+                $db->setQuery("Select Max(ordering) + 1 From #__contentbuilderng_elements Where form_id = " . intval($contentbuilderng_form_id));
                 $ordering = $db->loadResult();
 
-                $db->setQuery("Insert Into #__contentbuilder_ng_elements (`label`,`form_id`,`reference_id`,`type`,`options`, `ordering`) Values (" . $db->quote($title) . "," . $db->quote($contentbuilder_ng_form_id) . "," . $db->quote($reference_id) . ",'text','" . self::encodePackedData($options) . "', " . ($ordering ? $ordering : 0) . ")");
+                $db->setQuery("Insert Into #__contentbuilderng_elements (`label`,`form_id`,`reference_id`,`type`,`options`, `ordering`) Values (" . $db->quote($title) . "," . $db->quote($contentbuilderng_form_id) . "," . $db->quote($reference_id) . ",'text','" . self::encodePackedData($options) . "', " . ($ordering ? $ordering : 0) . ")");
                 $db->execute();
                 $report['added'][] = trim((string) $title) !== '' ? trim((string) $title) : (string) $reference_id;
             }
@@ -930,7 +930,7 @@ final class ContentbuilderLegacyHelper
         }
         // delete missing elements
         if (count($ids)) {
-            $db->setQuery("Delete From #__contentbuilder_ng_elements Where form_id = " . intval($contentbuilder_ng_form_id) . " And reference_id Not In (" . implode(',', $ids) . ")");
+            $db->setQuery("Delete From #__contentbuilderng_elements Where form_id = " . intval($contentbuilderng_form_id) . " And reference_id Not In (" . implode(',', $ids) . ")");
             $db->execute();
         }
 
@@ -956,25 +956,25 @@ final class ContentbuilderLegacyHelper
             $types[] = 'com_breezingforms';
         }
 
-        $types[] = 'com_contentbuilder_ng';
+        $types[] = 'com_contentbuilderng';
 
         // Custom types
-        if (!is_dir(JPATH_SITE . '/media/contentbuilder_ng')) {
-            Folder::create(JPATH_SITE . '/media/contentbuilder_ng');
+        if (!is_dir(JPATH_SITE . '/media/contentbuilderng')) {
+            Folder::create(JPATH_SITE . '/media/contentbuilderng');
         }
 
         $def = '';
 
-        if (!file_exists(JPATH_SITE . '/media/contentbuilder_ng/index.html'))
-            File::write(JPATH_SITE . '/media/contentbuilder_ng/index.html', $def);
-        if (!is_dir(JPATH_SITE . '/media/contentbuilder_ng/types')) {
-            Folder::create(JPATH_SITE . '/media/contentbuilder_ng/types');
+        if (!file_exists(JPATH_SITE . '/media/contentbuilderng/index.html'))
+            File::write(JPATH_SITE . '/media/contentbuilderng/index.html', $def);
+        if (!is_dir(JPATH_SITE . '/media/contentbuilderng/types')) {
+            Folder::create(JPATH_SITE . '/media/contentbuilderng/types');
         }
 
-        if (!file_exists(JPATH_SITE . '/media/contentbuilder_ng/types/index.html'))
-            File::write(JPATH_SITE . '/media/contentbuilder_ng/types/index.html', $def);
+        if (!file_exists(JPATH_SITE . '/media/contentbuilderng/types/index.html'))
+            File::write(JPATH_SITE . '/media/contentbuilderng/types/index.html', $def);
 
-        $sourcePath = JPATH_SITE . '/media/contentbuilder_ng/types/';
+        $sourcePath = JPATH_SITE . '/media/contentbuilderng/types/';
         if (is_dir($sourcePath) && @is_readable($sourcePath) && @is_dir($sourcePath) && $handle = @opendir($sourcePath)) {
             while (false !== ($file = @readdir($handle))) {
                 if ($file != "." && $file != ".." && strtolower($file) != 'index.html' && strtolower($file) != '.cvs' && strtolower($file) != '.svn') {
@@ -1038,26 +1038,26 @@ final class ContentbuilderLegacyHelper
             return array();
         }
 
-        $namespace = 'CB\\Component\\Contentbuilder_ng\\Administrator\\types\\';
+        $namespace = 'CB\\Component\\Contentbuilderng\\Administrator\\types\\';
         $adminTypeCandidates = array($type);
-        if ($type === 'com_contentbuilder_ng') {
+        if ($type === 'com_contentbuilderng') {
             $adminTypeCandidates[] = 'com_contentbuilder';
         } else if ($type === 'com_contentbuilder') {
-            $adminTypeCandidates[] = 'com_contentbuilder_ng';
+            $adminTypeCandidates[] = 'com_contentbuilderng';
         }
 
         foreach ($adminTypeCandidates as $adminType) {
-            $candidate = JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/types/' . $adminType . '.php';
+            $candidate = JPATH_ADMINISTRATOR . '/components/com_contentbuilderng/src/types/' . $adminType . '.php';
             if (file_exists($candidate)) {
                 require_once($candidate);
             }
         }
 
-        $classCandidates = array($namespace . 'contentbuilder_ng_' . $type);
-        if ($type === 'com_contentbuilder_ng') {
-            $classCandidates[] = $namespace . 'contentbuilder_ng_com_contentbuilder';
+        $classCandidates = array($namespace . 'contentbuilderng_' . $type);
+        if ($type === 'com_contentbuilderng') {
+            $classCandidates[] = $namespace . 'contentbuilderng_com_contentbuilder';
         } else if ($type === 'com_contentbuilder') {
-            $classCandidates[] = $namespace . 'contentbuilder_ng_com_contentbuilder_ng';
+            $classCandidates[] = $namespace . 'contentbuilderng_COM_CONTENTBUILDERNG';
         }
 
         foreach ($classCandidates as $class) {
@@ -1066,9 +1066,9 @@ final class ContentbuilderLegacyHelper
             }
         }
 
-        if (file_exists(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php')) {
-            require_once(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php');
-            $class = 'contentbuilder_ng_' . $type;
+        if (file_exists(JPATH_SITE . '/media/contentbuilderng/types/' . $type . '.php')) {
+            require_once(JPATH_SITE . '/media/contentbuilderng/types/' . $type . '.php');
+            $class = 'contentbuilderng_' . $type;
             if (class_exists($class)) {
                 return call_user_func(array($class, "getFormsList"));
             }
@@ -1088,16 +1088,16 @@ final class ContentbuilderLegacyHelper
         
         
         $type = trim((string) $type);
-        $namespace = 'CB\\Component\\Contentbuilder_ng\\Administrator\\types\\';
+        $namespace = 'CB\\Component\\Contentbuilderng\\Administrator\\types\\';
         $adminTypeCandidates = array($type);
-        if ($type === 'com_contentbuilder_ng') {
+        if ($type === 'com_contentbuilderng') {
             $adminTypeCandidates[] = 'com_contentbuilder';
         } else if ($type === 'com_contentbuilder') {
-            $adminTypeCandidates[] = 'com_contentbuilder_ng';
+            $adminTypeCandidates[] = 'com_contentbuilderng';
         }
 
         foreach ($adminTypeCandidates as $adminType) {
-            $candidate = JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/types/' . $adminType . '.php';
+            $candidate = JPATH_ADMINISTRATOR . '/components/com_contentbuilderng/src/types/' . $adminType . '.php';
             if (file_exists($candidate)) {
                 require_once($candidate);
             }
@@ -1112,11 +1112,11 @@ final class ContentbuilderLegacyHelper
             return $forms[$type][$reference_id];
         }
 
-        $classCandidates = array($namespace . 'contentbuilder_ng_' . $type);
-        if ($type === 'com_contentbuilder_ng') {
-            $classCandidates[] = $namespace . 'contentbuilder_ng_com_contentbuilder';
+        $classCandidates = array($namespace . 'contentbuilderng_' . $type);
+        if ($type === 'com_contentbuilderng') {
+            $classCandidates[] = $namespace . 'contentbuilderng_com_contentbuilder';
         } else if ($type === 'com_contentbuilder') {
-            $classCandidates[] = $namespace . 'contentbuilder_ng_com_contentbuilder_ng';
+            $classCandidates[] = $namespace . 'contentbuilderng_COM_CONTENTBUILDERNG';
         }
 
         foreach ($classCandidates as $class) {
@@ -1154,13 +1154,13 @@ final class ContentbuilderLegacyHelper
             return $form;
         }
 
-        if (file_exists(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php')) {
-            require_once(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php');
+        if (file_exists(JPATH_SITE . '/media/contentbuilderng/types/' . $type . '.php')) {
+            require_once(JPATH_SITE . '/media/contentbuilderng/types/' . $type . '.php');
             if (isset($forms[$type][$reference_id])) {
                 return $forms[$type][$reference_id];
             }
             $namespace = '';
-            $class     = $namespace . 'contentbuilder_ng_' . $type;
+            $class     = $namespace . 'contentbuilderng_' . $type;
             if (class_exists($class)) {
                 try {
                     $form = new $class($reference_id);
@@ -1190,47 +1190,47 @@ final class ContentbuilderLegacyHelper
         return null;
     }
 
-    public static function getListSearchableElements($contentbuilder_ng_form_id)
+    public static function getListSearchableElements($contentbuilderng_form_id)
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select reference_id From #__contentbuilder_ng_elements Where search_include = 1 And published = 1 And form_id = " . intval($contentbuilder_ng_form_id));
+        $db->setQuery("Select reference_id From #__contentbuilderng_elements Where search_include = 1 And published = 1 And form_id = " . intval($contentbuilderng_form_id));
         return $db->loadColumn();
     }
 
-    public static function getListLinkableElements($contentbuilder_ng_form_id)
+    public static function getListLinkableElements($contentbuilderng_form_id)
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select reference_id From #__contentbuilder_ng_elements Where linkable = 1 And published = 1 And form_id = " . intval($contentbuilder_ng_form_id));
+        $db->setQuery("Select reference_id From #__contentbuilderng_elements Where linkable = 1 And published = 1 And form_id = " . intval($contentbuilderng_form_id));
         return $db->loadColumn();
     }
 
-    public static function getListEditableElements($contentbuilder_ng_form_id)
+    public static function getListEditableElements($contentbuilderng_form_id)
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select reference_id From #__contentbuilder_ng_elements Where editable = 1 And published = 1 And form_id = " . intval($contentbuilder_ng_form_id));
+        $db->setQuery("Select reference_id From #__contentbuilderng_elements Where editable = 1 And published = 1 And form_id = " . intval($contentbuilderng_form_id));
         return $db->loadColumn();
     }
 
-    public static function getListNonEditableElements($contentbuilder_ng_form_id)
+    public static function getListNonEditableElements($contentbuilderng_form_id)
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select reference_id From #__contentbuilder_ng_elements Where ( editable = 0 Or published = 0 ) And form_id = " . intval($contentbuilder_ng_form_id));
+        $db->setQuery("Select reference_id From #__contentbuilderng_elements Where ( editable = 0 Or published = 0 ) And form_id = " . intval($contentbuilderng_form_id));
         return $db->loadColumn();
     }
 
-    public static function getTemplate($contentbuilder_ng_form_id, $record_id, array $record, array $elements_allowed, $quiet_skip = false)
+    public static function getTemplate($contentbuilderng_form_id, $record_id, array $record, array $elements_allowed, $quiet_skip = false)
     {
 
         static $_template;
 
-        $hash = md5($contentbuilder_ng_form_id . $record_id . implode(',', $elements_allowed));
+        $hash = md5($contentbuilderng_form_id . $record_id . implode(',', $elements_allowed));
 
         if (is_array($_template) && isset($_template[$hash])) {
             return $_template[$hash];
         }
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select `type`,reference_id,details_template, details_prepare, edit_by_type, act_as_registration, registration_name_field, registration_username_field, registration_email_field, registration_email_repeat_field, registration_password_field, registration_password_repeat_field From #__contentbuilder_ng_forms Where id = " . intval($contentbuilder_ng_form_id));
+        $db->setQuery("Select `type`,reference_id,details_template, details_prepare, edit_by_type, act_as_registration, registration_name_field, registration_username_field, registration_email_field, registration_email_repeat_field, registration_password_field, registration_password_repeat_field From #__contentbuilderng_forms Where id = " . intval($contentbuilderng_form_id));
         $result = $db->loadAssoc();
         if (is_array($result) && $result['details_template']) {
 
@@ -1246,7 +1246,7 @@ final class ContentbuilderLegacyHelper
             $labels = array();
             $allow_html = array();
 
-            $db->setQuery("Select `label`,`reference_id`,`options` From #__contentbuilder_ng_elements Where form_id = " . intval($contentbuilder_ng_form_id));
+            $db->setQuery("Select `label`,`reference_id`,`options` From #__contentbuilderng_elements Where form_id = " . intval($contentbuilderng_form_id));
             $labels_ = $db->loadAssocList();
 
             foreach ($labels_ as $label_) {
@@ -1287,7 +1287,7 @@ final class ContentbuilderLegacyHelper
                                             }
                     }
 
-                    $items[$item->recName]['value'] = ($item->recValue != '' ? $item->recValue : Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE'));
+                    $items[$item->recName]['value'] = ($item->recValue != '' ? $item->recValue : Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
                     $items[$item->recName]['id'] = $item->recElementId;
                     $regex = "/([\{]hide-if-empty " . $item->recName . "[\}])(.*)([\{][\/]hide[\}])/isU";
 
@@ -1318,13 +1318,13 @@ final class ContentbuilderLegacyHelper
                 if (!isset($item['label']) || !isset($item['id']))
                     continue;
                 $items[$key]['label'] = htmlentities($item['label'], ENT_QUOTES, 'UTF-8');
-                $items[$key]['value'] = isset($allow_html[$item['id']]) ? self::cleanString($item['value']) : nl2br(self::allhtmlentities(self::callContentbuilderHelper('cbinternal', $item['value'])));
+                $items[$key]['value'] = isset($allow_html[$item['id']]) ? self::cleanString($item['value']) : nl2br(self::allhtmlentities(self::callContentbuilderngHelper('cbinternal', $item['value'])));
             }
             $detailsPrepare = $result['details_prepare'] ?? '';
             TemplatePrepareHelper::execute(
                 $detailsPrepare,
                 'details_prepare',
-                function (string $prepareCode) use (&$items, &$template, &$raw_items, &$item, $record, $result, $record_id, $elements_allowed, $contentbuilder_ng_form_id): void {
+                function (string $prepareCode) use (&$items, &$template, &$raw_items, &$item, $record, $result, $record_id, $elements_allowed, $contentbuilderng_form_id): void {
                     eval($prepareCode);
                 }
             );
@@ -1341,7 +1341,7 @@ final class ContentbuilderLegacyHelper
         } else {
             if ($quiet_skip)
                 return '';
-            throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_TEMPLATE_NOT_FOUND'), 404);
+            throw new \Exception(Text::_('COM_CONTENTBUILDERNG_TEMPLATE_NOT_FOUND'), 404);
         }
         return '';
     }
@@ -1360,7 +1360,7 @@ final class ContentbuilderLegacyHelper
     public static function getFormElementsPlugins()
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_ng_form_elements' And `enabled` = 1");
+        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilderng_form_elements' And `enabled` = 1");
         $res = $db->loadColumn();
         return $res;
     }
@@ -1380,19 +1380,19 @@ final class ContentbuilderLegacyHelper
         return preg_replace(array_keys($replacements), array_values($replacements), $template);
     }
 
-    public static function getEmailTemplate($contentbuilder_ng_form_id, $record_id, array $record, array $elements_allowed, $isAdmin)
+    public static function getEmailTemplate($contentbuilderng_form_id, $record_id, array $record, array $elements_allowed, $isAdmin)
     {
 
         static $_template;
 
-        $hash = md5(($isAdmin ? 'admin' : 'user') . $contentbuilder_ng_form_id . $record_id . implode(',', $elements_allowed));
+        $hash = md5(($isAdmin ? 'admin' : 'user') . $contentbuilderng_form_id . $record_id . implode(',', $elements_allowed));
 
         if (is_array($_template) && isset($_template[$hash])) {
             return $_template[$hash];
         }
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select `name`,`type`,reference_id,email_template, email_admin_template, email_html, email_admin_html, act_as_registration, registration_name_field, registration_username_field, registration_email_field  From #__contentbuilder_ng_forms Where id = " . intval($contentbuilder_ng_form_id));
+        $db->setQuery("Select `name`,`type`,reference_id,email_template, email_admin_template, email_html, email_admin_html, act_as_registration, registration_name_field, registration_username_field, registration_email_field  From #__contentbuilderng_forms Where id = " . intval($contentbuilderng_form_id));
         $result = $db->loadAssoc();
         if (is_array($result)) {
 
@@ -1408,7 +1408,7 @@ final class ContentbuilderLegacyHelper
             $labels = array();
             $allow_html = array();
 
-            $db->setQuery("Select `label`,`reference_id`,`options` From #__contentbuilder_ng_elements Where form_id = " . intval($contentbuilder_ng_form_id));
+            $db->setQuery("Select `label`,`reference_id`,`options` From #__contentbuilderng_elements Where form_id = " . intval($contentbuilderng_form_id));
             $labels_ = $db->loadAssocList();
 
             foreach ($labels_ as $label_) {
@@ -1443,12 +1443,12 @@ final class ContentbuilderLegacyHelper
                                     $item->recValue = $user->email;
                                 }
                     }
-                    $items[$item->recName]['value'] = ($item->recValue != '' ? $item->recValue : Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE'));
+                    $items[$item->recName]['value'] = ($item->recValue != '' ? $item->recValue : Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
                     $items[$item->recName]['id'] = $item->recElementId;
                     $regex = "/([\{]hide-if-empty " . $item->recName . "[\}])(.*)([\{][\/]hide[\}])/isU";
                     $regex2 = "/([\{]hide-if-empty " . $item->recName . " " . $item->recValue . "[\}])(.*)([\{][\/]hide[\}])/isU";
 
-                    $items[$item->recName]['value'] = ($item->recValue != '' ? $item->recValue : Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE'));
+                    $items[$item->recName]['value'] = ($item->recValue != '' ? $item->recValue : Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
                     $items[$item->recName]['id'] = $item->recElementId;
                     $regex = "/([\{]hide-if-empty " . $item->recName . "[\}])(.*)([\{][\/]hide[\}])/isU";
 
@@ -1481,12 +1481,12 @@ final class ContentbuilderLegacyHelper
             $template = str_replace(array('{USERNAME}', '{username}'), Factory::getApplication()->getIdentity()->username, $template);
             $template = str_replace(array('{USER_FULL_NAME}', '{user_full_name}'), Factory::getApplication()->getIdentity()->name, $template);
             $template = str_replace(array('{VIEW_NAME}', '{view_name}'), $result['name'], $template);
-            $template = str_replace(array('{VIEW_ID}', '{view_id}'), $contentbuilder_ng_form_id, $template);
+            $template = str_replace(array('{VIEW_ID}', '{view_id}'), $contentbuilderng_form_id, $template);
             $template = str_replace(array('{IP}', '{ip}'), $_SERVER['REMOTE_ADDR'], $template);
 
             foreach ($items as $key => $item) {
                 $template = str_replace('{' . $key . ':label}', $html ? htmlentities($item['label'], ENT_QUOTES, 'UTF-8') : $item['label'], $template);
-                $template = str_replace('{' . $key . ':value}', isset($allow_html[$item['id']]) && $html ? (self::callContentbuilderHelper('is_internal_path', $item['value']) ? basename($item['value']) : $item['value']) : nl2br(strip_tags((self::callContentbuilderHelper('is_internal_path', $item['value']) ? basename($item['value']) : $item['value']))), $template);
+                $template = str_replace('{' . $key . ':value}', isset($allow_html[$item['id']]) && $html ? (self::callContentbuilderngHelper('is_internal_path', $item['value']) ? basename($item['value']) : $item['value']) : nl2br(strip_tags((self::callContentbuilderngHelper('is_internal_path', $item['value']) ? basename($item['value']) : $item['value']))), $template);
                 $template = str_replace('{webpath ' . $key . '}', str_replace(array('{CBSite}', '{cbsite}', JPATH_SITE), Uri::getInstance()->getScheme() . '://' . Uri::getInstance()->getHost() . (Uri::getInstance()->getPort() == 80 ? '' : ':' . Uri::getInstance()->getPort()) . Uri::root(true), $item['value']), $template);
             }
 
@@ -1498,20 +1498,20 @@ final class ContentbuilderLegacyHelper
         return '';
     }
 
-    public static function getEditableTemplate($contentbuilder_ng_form_id, $record_id, array $record, array $elements_allowed, $execPrepare = true)
+    public static function getEditableTemplate($contentbuilderng_form_id, $record_id, array $record, array $elements_allowed, $execPrepare = true)
     {
         /** @var CMSApplication $app */
         $app = Factory::getApplication();
         $session = $app->getSession();
 
-        $failed_values = $session->get('cb_failed_values', null, 'com_contentbuilder_ng.' . $contentbuilder_ng_form_id);
+        $failed_values = $session->get('cb_failed_values', null, 'com_contentbuilderng.' . $contentbuilderng_form_id);
 
         if ($failed_values !== null) {
-            $session->clear('cb_failed_values', 'com_contentbuilder_ng.' . $contentbuilder_ng_form_id);
+            $session->clear('cb_failed_values', 'com_contentbuilderng.' . $contentbuilderng_form_id);
         }
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select `type`, reference_id, editable_template, editable_prepare, edit_by_type, act_as_registration, registration_name_field, registration_username_field, registration_email_field, registration_email_repeat_field, registration_password_field, registration_password_repeat_field From #__contentbuilder_ng_forms Where id = " . intval($contentbuilder_ng_form_id));
+        $db->setQuery("Select `type`, reference_id, editable_template, editable_prepare, edit_by_type, act_as_registration, registration_name_field, registration_username_field, registration_email_field, registration_email_repeat_field, registration_password_field, registration_password_repeat_field From #__contentbuilderng_forms Where id = " . intval($contentbuilderng_form_id));
         $result = $db->loadAssoc();
 
         if (is_array($result) && trim((string) ($result['editable_template'] ?? '')) !== '') {
@@ -1533,7 +1533,7 @@ final class ContentbuilderLegacyHelper
             $validations = array();
 
             if (!$result['edit_by_type']) {
-                $db->setQuery("Select `label`,`reference_id`,`validations` From #__contentbuilder_ng_elements Where form_id = " . intval($contentbuilder_ng_form_id));
+                $db->setQuery("Select `label`,`reference_id`,`validations` From #__contentbuilderng_elements Where form_id = " . intval($contentbuilderng_form_id));
                 $labels_ = $db->loadAssocList();
                 foreach ($labels_ as $label_) {
                     $labels[$label_['reference_id']] = $label_['label'];
@@ -1543,10 +1543,10 @@ final class ContentbuilderLegacyHelper
 
             $hasLabels = count($labels);
             $db->setQuery(
-                "Select Count(1) From #__contentbuilder_ng_elements"
+                "Select Count(1) From #__contentbuilderng_elements"
                 . " Where published = 1"
                 . " And editable = 1"
-                . " And form_id = " . intval($contentbuilder_ng_form_id)
+                . " And form_id = " . intval($contentbuilderng_form_id)
             );
             $hasEditableElements = ((int) $db->loadResult()) > 0;
 
@@ -1601,7 +1601,7 @@ final class ContentbuilderLegacyHelper
                 TemplatePrepareHelper::execute(
                     $editablePrepare,
                     'editable_prepare',
-                    function (string $prepareCode) use (&$items, &$template, &$item, $record, $result, $record_id, $elements_allowed, $contentbuilder_ng_form_id): void {
+                    function (string $prepareCode) use (&$items, &$template, &$item, $record, $result, $record_id, $elements_allowed, $contentbuilderng_form_id): void {
                         eval($prepareCode);
                     }
                 );
@@ -1611,11 +1611,11 @@ final class ContentbuilderLegacyHelper
 
             foreach ($items as $key => $item) {
                 $db->setQuery(
-                    "Select * From #__contentbuilder_ng_elements"
+                    "Select * From #__contentbuilderng_elements"
                     . " Where published = 1"
                     . ($hasEditableElements ? " And editable = 1" : "")
                     . " And reference_id = " . $db->quote($item['id'])
-                    . " And form_id = " . intval($contentbuilder_ng_form_id)
+                    . " And form_id = " . intval($contentbuilderng_form_id)
                     . " Order By ordering"
                 );
                 $element = $db->loadAssoc();
@@ -1705,7 +1705,7 @@ final class ContentbuilderLegacyHelper
                         case in_array($elementType, self::getFormElementsPlugins()):
 
 
-                            \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_ng_form_elements', $elementType);
+                            \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilderng_form_elements', $elementType);
 
                             $dispatcher = Factory::getApplication()->getDispatcher();
                             $eventResult = $dispatcher->dispatch('onRenderElement', new \Joomla\Event\Event('onRenderElement', array($item, $element, $options, $failed_values, $result, $hasRecords)));
@@ -1854,7 +1854,7 @@ final class ContentbuilderLegacyHelper
                             $the_item = '<div class="cbFormField cbUploadField">';
                             $the_item .= '<input type="file" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '"/>';
                             if (trim($item['value']) != '') {
-                                $the_item .= '<div>' . ($deletable ? '<label for="cb_delete_' . $item['id'] . '">' . Text::_('COM_CONTENTBUILDER_NG_DELETE') . '</label> <input type="checkbox" id="cb_delete_' . $item['id'] . '" name="cb_delete_' . $item['id'] . '" value="1"/> ' : '') . htmlentities(basename($item['value']), ENT_QUOTES, 'UTF-8') . '</div><div style="clear:both;"></div>';
+                                $the_item .= '<div>' . ($deletable ? '<label for="cb_delete_' . $item['id'] . '">' . Text::_('COM_CONTENTBUILDERNG_DELETE') . '</label> <input type="checkbox" id="cb_delete_' . $item['id'] . '" name="cb_delete_' . $item['id'] . '" value="1"/> ' : '') . htmlentities(basename($item['value']), ENT_QUOTES, 'UTF-8') . '</div><div style="clear:both;"></div>';
                             }
                             $the_item .= '</div>';
                             break;
@@ -1864,15 +1864,15 @@ final class ContentbuilderLegacyHelper
                             $the_item = '<div class="cbFormField cbCaptchaField">';
 
                             if (Factory::getApplication()->isClient('site')) {
-                                $captcha_url = Uri::root(true) . '/components/com_contentbuilder_ng/images/securimage/securimage_show.php';
+                                $captcha_url = Uri::root(true) . '/components/com_contentbuilderng/images/securimage/securimage_show.php';
                             } else {
-                                $captcha_url = Uri::root(true) . '/administrator/components/com_contentbuilder_ng/assets/images/securimage_show.php';
+                                $captcha_url = Uri::root(true) . '/administrator/components/com_contentbuilderng/assets/images/securimage_show.php';
                             }
 
                             $the_item .= '<img width="250" height="80" id="cbCaptcha" alt="captcha" src="' . $captcha_url . '?rand=' . rand(0, getrandmax()) . '"/>';
                             $the_item .= '<div>';
                             $the_item .= '<input class="form-control form-control-sm mt-1" autocomplete="off" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" type="text" maxlength="12" />';
-                            $the_item .= '<img style="cursor: pointer; padding-left: 7px;" onclick="document.getElementById(\'cbCaptcha\').src = \'' . $captcha_url . '?\' + Math.random(); blur(); return false" border="0" alt="refresh" src="' . Uri::root(true) . '/components/com_contentbuilder_ng/images/securimage/refresh-captcha.png"/>';
+                            $the_item .= '<img style="cursor: pointer; padding-left: 7px;" onclick="document.getElementById(\'cbCaptcha\').src = \'' . $captcha_url . '?\' + Math.random(); blur(); return false" border="0" alt="refresh" src="' . Uri::root(true) . '/components/com_contentbuilderng/images/securimage/refresh-captcha.png"/>';
                             $the_item .= '</div>';
                             $the_item .= '</div>';
                             break;
@@ -1899,7 +1899,7 @@ final class ContentbuilderLegacyHelper
                             }
 
                             $calval = htmlentities($failed_values !== null && isset($failed_values[$element['reference_id']]) ? $failed_values[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']), ENT_QUOTES, 'UTF-8');
-                            $calval = self::callContentbuilderHelper('convertDate', $calval, $options->transfer_format, $options->format);
+                            $calval = self::callContentbuilderngHelper('convertDate', $calval, $options->transfer_format, $options->format);
 
                             $calAttr = [
                                 'class' => 'cb_' . $item['id'],
@@ -1952,7 +1952,7 @@ final class ContentbuilderLegacyHelper
                     if ($the_item !== '' || $replaceTokens) {
                         $tip = 'hasTip';
                         $tip_prefix = htmlentities($item['label'], ENT_QUOTES, 'UTF-8') . '::';
-                        $template = str_replace('{' . $key . ':label}', '<label ' . ($elementHint ? 'class="editlinktip ' . $tip . '" title="' . $tip_prefix . $elementHint . '" ' : '') . 'for="cb_' . $item['id'] . '">' . $item['label'] . $asterisk . ($elementHint ? ' <img style="cursor: pointer;" src="' . Uri::root(true) . '/components/com_contentbuilder_ng/images/icon_info.png" border="0"/>' : '') . '</label>', $template);
+                        $template = str_replace('{' . $key . ':label}', '<label ' . ($elementHint ? 'class="editlinktip ' . $tip . '" title="' . $tip_prefix . $elementHint . '" ' : '') . 'for="cb_' . $item['id'] . '">' . $item['label'] . $asterisk . ($elementHint ? ' <img style="cursor: pointer;" src="' . Uri::root(true) . '/components/com_contentbuilderng/images/icon_info.png" border="0"/>' : '') . '</label>', $template);
                         $template = str_replace('{' . $key . ':item}', $the_item, $template);
                     }
                 }
@@ -1962,16 +1962,16 @@ final class ContentbuilderLegacyHelper
 
         } else {
             if (!is_array($result)) {
-                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 'error');
+                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'error');
             } else {
-                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TEMPLATE_NOT_SET'), 'error');
+                Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_EDITABLE_TEMPLATE_NOT_SET'), 'error');
             }
         }
 
         return '';
     }
 
-    public static function createArticle($contentbuilder_ng_form_id, $record_id, array $record, array $elements_allowed, $title_field = '', $metadata = null, $config = array(), $full = false, $limited_options = true, $menu_cat_id = null)
+    public static function createArticle($contentbuilderng_form_id, $record_id, array $record, array $elements_allowed, $title_field = '', $metadata = null, $config = array(), $full = false, $limited_options = true, $menu_cat_id = null)
     {
 
         $tz = new \DateTimeZone(Factory::getApplication()->get('offset'));
@@ -1998,11 +1998,11 @@ final class ContentbuilderLegacyHelper
             $config['publish_down'] = null;
         }
 
-        $tpl = self::getTemplate($contentbuilder_ng_form_id, $record_id, $record, $elements_allowed, true);
+        $tpl = self::getTemplate($contentbuilderng_form_id, $record_id, $record, $elements_allowed, true);
         if (!$tpl)
             return 0;
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select * From #__contentbuilder_ng_forms Where id = " . intval($contentbuilder_ng_form_id) . " And published = 1");
+        $db->setQuery("Select * From #__contentbuilderng_forms Where id = " . intval($contentbuilderng_form_id) . " And published = 1");
         $form = $db->loadAssoc();
 
         if (!$form) {
@@ -2046,7 +2046,7 @@ final class ContentbuilderLegacyHelper
                                 }
                 }
 
-                $label = self::callContentbuilderHelper('cbinternal', $rec->recValue);
+                $label = self::callContentbuilderngHelper('cbinternal', $rec->recValue);
                 break;
             }
         }
@@ -2055,7 +2055,7 @@ final class ContentbuilderLegacyHelper
         if (!$label && !count($record)) {
             $label = 'Unnamed';
         } else if (!$label && count($record)) {
-            $label = self::callContentbuilderHelper('cbinternal', $record[0]->recValue);
+            $label = self::callContentbuilderngHelper('cbinternal', $record[0]->recValue);
         }
 
         // Clean text for xhtml transitional compliance
@@ -2075,7 +2075,7 @@ final class ContentbuilderLegacyHelper
 
         // retrieve the publish state from the list view
         $state = 1;
-        $db->setQuery("Select published, is_future, publish_up, publish_down From #__contentbuilder_ng_records Where `type` = " . $db->quote($form['type']) . " And reference_id = " . $db->quote($form['reference_id']) . " And record_id = " . $db->quote($record_id));
+        $db->setQuery("Select published, is_future, publish_up, publish_down From #__contentbuilderng_records Where `type` = " . $db->quote($form['type']) . " And reference_id = " . $db->quote($form['reference_id']) . " And record_id = " . $db->quote($record_id));
         $state = $db->loadAssoc();
         $publish_up_record = $state['publish_up'];
         $publish_down_record = $state['publish_down'];
@@ -2084,7 +2084,7 @@ final class ContentbuilderLegacyHelper
         // save/update articles
         $alias = '';
 
-        $db->setQuery("Select articles.`article_id`, content.`alias` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($contentbuilder_ng_form_id) . " And articles.record_id = " . $db->quote($record_id));
+        $db->setQuery("Select articles.`article_id`, content.`alias` From #__contentbuilderng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($contentbuilderng_form_id) . " And articles.record_id = " . $db->quote($record_id));
         $article = $db->loadAssoc();
         if (is_array($article)) {
             $alias = $article['alias'];
@@ -2168,7 +2168,7 @@ final class ContentbuilderLegacyHelper
                     $sef = '';
                 }
 
-                $db->setQuery("Update #__contentbuilder_ng_records Set sef = " . $db->quote($sef) . ", lang_code = " . $db->quote($config['language']) . " Where `type` = " . $db->quote($form['type']) . " And reference_id = " . $db->quote($form['reference_id']) . " And record_id = " . $db->quote($record_id));
+                $db->setQuery("Update #__contentbuilderng_records Set sef = " . $db->quote($sef) . ", lang_code = " . $db->quote($config['language']) . " Where `type` = " . $db->quote($form['type']) . " And reference_id = " . $db->quote($form['reference_id']) . " And record_id = " . $db->quote($record_id));
                 $db->execute();
             }
 
@@ -2187,7 +2187,7 @@ final class ContentbuilderLegacyHelper
                 }
 
                 $db->setQuery(
-                    "UPDATE #__contentbuilder_ng_records 
+                    "UPDATE #__contentbuilderng_records 
                     SET " . $setPart . " publish_up = " . ($publishUp ? $db->quote($publishUp) : 'NULL') . " 
                     WHERE `type` = " . $db->quote($form['type']) . " 
                     AND reference_id = " . $db->quote($form['reference_id']) . " 
@@ -2210,7 +2210,7 @@ final class ContentbuilderLegacyHelper
                 }
 
                 $db->setQuery(
-                    "UPDATE #__contentbuilder_ng_records 
+                    "UPDATE #__contentbuilderng_records 
                     SET " . $setPart . " publish_down = " . ($publishDown ? $db->quote($publishDown) : 'NULL') . " 
                     WHERE `type` = " . $db->quote($form['type']) . " 
                     AND reference_id = " . $db->quote($form['reference_id']) . " 
@@ -2276,7 +2276,7 @@ final class ContentbuilderLegacyHelper
                 }
             }
 
-            $db->setQuery("Update #__contentbuilder_ng_records Set robots = " . $db->quote($robots) . ", author = " . $db->quote($author) . ", rights = " . $db->quote($rights) . ", xreference = " . $db->quote($xreference) . ", metakey = " . $db->quote($metakey) . ", metadesc = " . $db->quote($metadesc) . " Where `type` = " . $db->quote($form['type']) . " And reference_id = " . $db->quote($form['reference_id']) . " And record_id = " . $db->quote($record_id));
+            $db->setQuery("Update #__contentbuilderng_records Set robots = " . $db->quote($robots) . ", author = " . $db->quote($author) . ", rights = " . $db->quote($rights) . ", xreference = " . $db->quote($xreference) . ", metakey = " . $db->quote($metakey) . ", metadesc = " . $db->quote($metadesc) . " Where `type` = " . $db->quote($form['type']) . " And reference_id = " . $db->quote($form['reference_id']) . " And record_id = " . $db->quote($record_id));
             $db->execute();
 
             // Trigger the onContentBeforeSave event.
@@ -2392,7 +2392,7 @@ final class ContentbuilderLegacyHelper
             $datenow = Factory::getDate();
             $___datenow = $datenow->toSql();
 
-            $db->setQuery("Insert Into #__contentbuilder_ng_articles (`type`,`reference_id`,`last_update`,`article_id`,`record_id`,`form_id`) Values (" . $db->quote($form['type']) . "," . $db->quote($form['reference_id']) . "," . $db->quote($___datenow) . ",$article," . $db->quote($record_id) . "," . intval($contentbuilder_ng_form_id) . ")");
+            $db->setQuery("Insert Into #__contentbuilderng_articles (`type`,`reference_id`,`last_update`,`article_id`,`record_id`,`form_id`) Values (" . $db->quote($form['type']) . "," . $db->quote($form['reference_id']) . "," . $db->quote($___datenow) . ",$article," . $db->quote($record_id) . "," . intval($contentbuilderng_form_id) . ")");
             $db->execute();
             $db->setQuery("Update #__content Set introtext = concat('<div style=\'display:none;\'><!--(cbArticleId:$article)--></div>', introtext) Where id = $article");
             $db->execute();
@@ -2505,7 +2505,7 @@ final class ContentbuilderLegacyHelper
             $db->execute();
 
             $___datenow = Factory::getDate()->toSql();
-            $db->setQuery("Update #__contentbuilder_ng_articles Set `last_update` = " . $db->quote($___datenow) . " Where `type` = " . $db->quote($form['type']) . " And form_id = " . intval($contentbuilder_ng_form_id) . " And reference_id = " . $db->quote($form['reference_id']) . " And record_id = " . $db->quote($record_id));
+            $db->setQuery("Update #__contentbuilderng_articles Set `last_update` = " . $db->quote($___datenow) . " Where `type` = " . $db->quote($form['type']) . " And form_id = " . intval($contentbuilderng_form_id) . " And reference_id = " . $db->quote($form['reference_id']) . " And record_id = " . $db->quote($record_id));
             $db->execute();
         }
 
@@ -2526,7 +2526,7 @@ final class ContentbuilderLegacyHelper
             'cachebase' => $conf->get('cache_path', JPATH_SITE . '/cache')
         );
         self::cleanComponentCaches(
-            array('com_content', 'com_contentbuilder_ng'),
+            array('com_content', 'com_contentbuilderng'),
             array('cachebase' => $options['cachebase'])
         );
 
@@ -2555,10 +2555,10 @@ final class ContentbuilderLegacyHelper
         ]);
         $eventResult = $dispatcher->dispatch('onContentAfterSave', $event);
 
-        PluginHelper::importPlugin('contentbuilder_ng_listaction');
+        PluginHelper::importPlugin('contentbuilderng_listaction');
 
         $dispatcher = Factory::getApplication()->getDispatcher();
-        $eventResult = $dispatcher->dispatch('onAfterArticleCreation', new \Joomla\Event\Event('onAfterArticleCreation', array($contentbuilder_ng_form_id, $record_id, $article)));
+        $eventResult = $dispatcher->dispatch('onAfterArticleCreation', new \Joomla\Event\Event('onAfterArticleCreation', array($contentbuilderng_form_id, $record_id, $article)));
         $results = $eventResult->getArgument('result') ?: [];
 
         $msg = implode('', $results);
@@ -2575,7 +2575,7 @@ final class ContentbuilderLegacyHelper
         /** @var CMSApplication $app */
         $app     = Factory::getApplication();
         $session = $app->getSession();
-        $key     = 'com_contentbuilder_ng.permissions' . $suffix;
+        $key     = 'com_contentbuilderng.permissions' . $suffix;
         $isAdminPreview = self::isSignedAdminPreviewRequest((int) $form_id) || $app->input->getBool('cb_preview_ok', false);
         $formPublishedClause = $isAdminPreview ? '' : ' And published = 1';
 
@@ -2584,7 +2584,7 @@ final class ContentbuilderLegacyHelper
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-        $db->setQuery("Select `type`, `reference_id` From #__contentbuilder_ng_forms Where id = " . intval($form_id) . $formPublishedClause);
+        $db->setQuery("Select `type`, `reference_id` From #__contentbuilderng_forms Where id = " . intval($form_id) . $formPublishedClause);
         $type = $db->loadAssoc();
 
         $num_records_query = '';
@@ -2592,18 +2592,18 @@ final class ContentbuilderLegacyHelper
             $reference_id = $type['reference_id'];
             $type = $type['type'];
             $_type = $type;
-            if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/types/' . $type . '.php')) {
-                require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/types/' . $type . '.php');
-                $namespace = 'CB\\Component\\Contentbuilder_ng\\Administrator\\types\\';
-                $type     = $namespace . 'contentbuilder_ng_' . $type;
+            if (file_exists(JPATH_ADMINISTRATOR . '/components/com_contentbuilderng/src/types/' . $type . '.php')) {
+                require_once(JPATH_ADMINISTRATOR . '/components/com_contentbuilderng/src/types/' . $type . '.php');
+                $namespace = 'CB\\Component\\Contentbuilderng\\Administrator\\types\\';
+                $type     = $namespace . 'contentbuilderng_' . $type;
                 if (class_exists($type)) {
                     $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, (int) (Factory::getApplication()->getIdentity()->id ?? 0));
                     //$num_records_query = $type::getNumRecordsQuery($reference_id, (int) (Factory::getApplication()->getIdentity()->id ?? 0));
                 }
-            } else if (file_exists(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php')) {
-                require_once(JPATH_SITE . '/media/contentbuilder_ng/types/' . $type . '.php');
+            } else if (file_exists(JPATH_SITE . '/media/contentbuilderng/types/' . $type . '.php')) {
+                require_once(JPATH_SITE . '/media/contentbuilderng/types/' . $type . '.php');
                 $namespace = '';
-                $type     = $namespace . 'contentbuilder_ng_' . $type;
+                $type     = $namespace . 'contentbuilderng_' . $type;
                 if (class_exists($type)) {
                     $num_records_query = call_user_func(array($type, 'getNumRecordsQuery'), $reference_id, (int) (Factory::getApplication()->getIdentity()->id ?? 0));
                     //$num_records_query = $type::getNumRecordsQuery($reference_id, (int) (Factory::getApplication()->getIdentity()->id ?? 0));
@@ -2641,28 +2641,28 @@ final class ContentbuilderLegacyHelper
                 forms.verification_url_view,
                 forms.verification_url_new,
                 forms.verification_url_edit,
-                contentbuilder_ng_users.userid,
+                contentbuilderng_users.userid,
                 forms.limit_add,
                 forms.limit_edit,
                 " . ($num_records_query ? '(' . $num_records_query . ') ' : "'0'") . " As amount_records,
-                contentbuilder_ng_users.verified_view,
-                contentbuilder_ng_users.verified_new,
-                contentbuilder_ng_users.verified_edit,
-                contentbuilder_ng_users.verification_date_view,
-                contentbuilder_ng_users.verification_date_new,
-                contentbuilder_ng_users.verification_date_edit,
-                contentbuilder_ng_users.limit_add As user_limit_add,
-                contentbuilder_ng_users.limit_edit As user_limit_edit,
-                contentbuilder_ng_users.published
-                " . ($record_id && !is_array($record_id) ? ',contentbuilder_ng_records.edited' : ",'0' As edited") . "
+                contentbuilderng_users.verified_view,
+                contentbuilderng_users.verified_new,
+                contentbuilderng_users.verified_edit,
+                contentbuilderng_users.verification_date_view,
+                contentbuilderng_users.verification_date_new,
+                contentbuilderng_users.verification_date_edit,
+                contentbuilderng_users.limit_add As user_limit_add,
+                contentbuilderng_users.limit_edit As user_limit_edit,
+                contentbuilderng_users.published
+                " . ($record_id && !is_array($record_id) ? ',contentbuilderng_records.edited' : ",'0' As edited") . "
             From 
-                #__contentbuilder_ng_forms As forms
+                #__contentbuilderng_forms As forms
                 Left Join 
-                    #__contentbuilder_ng_users As contentbuilder_ng_users
-                On ( contentbuilder_ng_users.form_id = forms.id And contentbuilder_ng_users.userid = " . (int) (Factory::getApplication()->getIdentity()->id ?? 0) . " )
+                    #__contentbuilderng_users As contentbuilderng_users
+                On ( contentbuilderng_users.form_id = forms.id And contentbuilderng_users.userid = " . (int) (Factory::getApplication()->getIdentity()->id ?? 0) . " )
                 " . ($record_id && !is_array($record_id) ? "Left Join 
-                    #__contentbuilder_ng_records As contentbuilder_ng_records
-                On ( contentbuilder_ng_records.`type` = " . $db->quote(isset($_type) ? $_type : '') . " And contentbuilder_ng_records.reference_id = forms.reference_id And contentbuilder_ng_records.record_id = " . $db->quote($record_id) . " )
+                    #__contentbuilderng_records As contentbuilderng_records
+                On ( contentbuilderng_records.`type` = " . $db->quote(isset($_type) ? $_type : '') . " And contentbuilderng_records.reference_id = forms.reference_id And contentbuilderng_records.record_id = " . $db->quote($record_id) . " )
                 " : '') . "
             Where 
                 forms.id = " . intval($form_id) . "
@@ -2989,10 +2989,10 @@ final class ContentbuilderLegacyHelper
         $app = Factory::getApplication();
         $session = $app->getSession();
         $currentSessionId = $session->getId();
-        $key = 'com_contentbuilder_ng.permissions' . $suffix;
+        $key = 'com_contentbuilderng.permissions' . $suffix;
 
 
-        // AVANT (J<=5) : get('permissions' . $suffix, [], 'com_contentbuilder_ng')
+        // AVANT (J<=5) : get('permissions' . $suffix, [], 'com_contentbuilderng')
         // APRES (J6) :
         $permissions = $session->get($key, []);
         $published_return = $permissions['published'] ?? false;
@@ -3091,7 +3091,7 @@ final class ContentbuilderLegacyHelper
                     if (isset($typeref) && is_array($typeref) && isset($typeref[intval($user_return['form_id'])])) {
                         $typerefid = $typeref[intval($user_return['form_id'])];
                     } else {
-                        $db->setQuery("Select `type`, `reference_id` From #__contentbuilder_ng_forms Where id = " . intval($user_return['form_id']));
+                        $db->setQuery("Select `type`, `reference_id` From #__contentbuilderng_forms Where id = " . intval($user_return['form_id']));
                         $typerefid = $db->loadAssoc();
                         $typeref[intval($user_return['form_id'])] = $typerefid;
                     }
@@ -3102,7 +3102,7 @@ final class ContentbuilderLegacyHelper
                         } else {
                             if (is_array($user_return['record_id'])) {
                                 foreach ($user_return['record_id'] as $recid) {
-                                    $db->setQuery("Select session_id From #__contentbuilder_ng_records Where `record_id` = " . $db->quote($recid) . " And `type` = " . $db->quote($typerefid['type']) . " And `reference_id` = " . $db->quote($typerefid['reference_id']) . "");
+                                    $db->setQuery("Select session_id From #__contentbuilderng_records Where `record_id` = " . $db->quote($recid) . " And `type` = " . $db->quote($typerefid['type']) . " And `reference_id` = " . $db->quote($typerefid['reference_id']) . "");
                                     $session_id = $db->loadResult();
                                     if ($form && $session_id != $currentSessionId && !$form->isOwner((int) (Factory::getApplication()->getIdentity()->id ?? 0), $recid)) {
                                         $allowed = false;
@@ -3113,7 +3113,7 @@ final class ContentbuilderLegacyHelper
                                 }
                             } else {
 
-                                $db->setQuery("Select session_id From #__contentbuilder_ng_records Where `record_id` = " . $db->quote($user_return['record_id']) . " And `type` = " . $db->quote($typerefid['type']) . " And `reference_id` = " . $db->quote($typerefid['reference_id']) . "");
+                                $db->setQuery("Select session_id From #__contentbuilderng_records Where `record_id` = " . $db->quote($user_return['record_id']) . " And `type` = " . $db->quote($typerefid['type']) . " And `reference_id` = " . $db->quote($typerefid['reference_id']) . "");
                                 $session_id = $db->loadResult();
 
                                 if ($form && ($user_return['record_id'] == false || $session_id == $currentSessionId || ($form->isOwner((int) (Factory::getApplication()->getIdentity()->id ?? 0), $user_return['record_id'])))) {
@@ -3168,7 +3168,7 @@ final class ContentbuilderLegacyHelper
     public static function getListStates($id)
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select * From #__contentbuilder_ng_list_states where form_id = " . intval($id) . " And published = 1 Order By id");
+        $db->setQuery("Select * From #__contentbuilderng_list_states where form_id = " . intval($id) . " And published = 1 Order By id");
         $list_states = $db->loadAssocList();
         return $list_states;
     }
@@ -3185,7 +3185,7 @@ final class ContentbuilderLegacyHelper
             $i++;
         }
         if ($imp) {
-            $db->setQuery("Select states.color, records.record_id From #__contentbuilder_ng_list_states As states, #__contentbuilder_ng_list_records As records Where states.published = 1 And states.id = records.state_id And records.record_id In (" . $imp . ") And records.form_id = " . intval($id) . " And states.form_id = " . intval($id));
+            $db->setQuery("Select states.color, records.record_id From #__contentbuilderng_list_states As states, #__contentbuilderng_list_records As records Where states.published = 1 And states.id = records.state_id And records.record_id In (" . $imp . ") And records.form_id = " . intval($id) . " And states.form_id = " . intval($id));
             $colors = $db->loadAssocList();
             foreach ($colors as $color) {
                 $out[$color['record_id']] = $color['color'];
@@ -3206,7 +3206,7 @@ final class ContentbuilderLegacyHelper
             $i++;
         }
         if ($imp) {
-            $db->setQuery("Select states.title, records.record_id From #__contentbuilder_ng_list_states As states, #__contentbuilder_ng_list_records As records Where states.published = 1 And states.id = records.state_id And records.record_id In (" . $imp . ") And records.form_id = " . intval($id) . " And states.form_id = " . intval($id));
+            $db->setQuery("Select states.title, records.record_id From #__contentbuilderng_list_states As states, #__contentbuilderng_list_records As records Where states.published = 1 And states.id = records.state_id And records.record_id In (" . $imp . ") And records.form_id = " . intval($id) . " And states.form_id = " . intval($id));
             $colors = $db->loadAssocList();
             foreach ($colors as $color) {
                 $out[$color['record_id']] = $color['title'];
@@ -3231,7 +3231,7 @@ final class ContentbuilderLegacyHelper
             }
 
             if ($imp) {
-                $db->setQuery("Select records.published, records.record_id From #__contentbuilder_ng_records As records Where `type` = " . $db->quote($type) . " And reference_id = " . $db->quote($reference_id) . " And records.record_id In (" . $imp . ")");
+                $db->setQuery("Select records.published, records.record_id From #__contentbuilderng_records As records Where `type` = " . $db->quote($type) . " And reference_id = " . $db->quote($reference_id) . " And records.record_id In (" . $imp . ")");
                 $published = $db->loadAssocList();
                 foreach ($published as $publish) {
                     $out[$publish['record_id']] = $publish['published'];
@@ -3257,7 +3257,7 @@ final class ContentbuilderLegacyHelper
             }
 
             if ($imp) {
-                $db->setQuery("Select records.lang_code, records.record_id From #__contentbuilder_ng_records As records Where reference_id = " . $db->quote($reference_id) . " And records.record_id In (" . $imp . ")");
+                $db->setQuery("Select records.lang_code, records.record_id From #__contentbuilderng_records As records Where reference_id = " . $db->quote($reference_id) . " And records.record_id In (" . $imp . ")");
                 $codes = $db->loadAssocList();
                 foreach ($codes as $code) {
                     $out[$code['record_id']] = $code['lang_code'];

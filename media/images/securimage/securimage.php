@@ -7,8 +7,8 @@
 
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
-$composerAutoload = JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/vendor/autoload.php';
-$vendorSecurimage = JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/vendor/bgli100/securimage/securimage.php';
+$composerAutoload = JPATH_ADMINISTRATOR . '/components/com_contentbuilderng/vendor/autoload.php';
+$vendorSecurimage = JPATH_ADMINISTRATOR . '/components/com_contentbuilderng/vendor/bgli100/securimage/securimage.php';
 
 if (is_file($composerAutoload)) {
     require_once $composerAutoload;

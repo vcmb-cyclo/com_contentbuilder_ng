@@ -15,7 +15,7 @@
  */
 
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Model;
+namespace CB\Component\Contentbuilderng\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -29,9 +29,9 @@ use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\PackedDataHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 
 class FormModel extends AdminModel
 {
@@ -56,7 +56,7 @@ class FormModel extends AdminModel
     ) {
         // IMPORTANT : on transmet factory/app/input à ListModel
         parent::__construct($config, $factory);
-        $this->option = 'com_contentbuilder_ng';
+        $this->option = 'com_contentbuilderng';
     }
 
     private function normalizeListStateColor($value): string
@@ -79,7 +79,7 @@ class FormModel extends AdminModel
     private function ensureListDisplayColumns(): void
     {
         $db = $this->getDatabase();
-        $tableName = $db->getPrefix() . 'contentbuilder_ng_forms';
+        $tableName = $db->getPrefix() . 'contentbuilderng_forms';
 
         try {
             $columns = $db->getTableColumns($tableName, true);
@@ -105,7 +105,7 @@ class FormModel extends AdminModel
 
             try {
                 $db->setQuery(
-                    'ALTER TABLE ' . $db->quoteName('#__contentbuilder_ng_forms')
+                    'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_forms')
                     . ' ADD ' . $db->quoteName($columnName) . ' ' . $definition
                 );
                 $db->execute();
@@ -159,7 +159,7 @@ class FormModel extends AdminModel
             $ord     = isset($order[$elementId]) ? (int) $order[$elementId] : 0;
 
             $db->setQuery(
-                "UPDATE #__contentbuilder_ng_elements
+                "UPDATE #__contentbuilderng_elements
                  SET `order_type`   = " . $db->quote((string) $otype) . ",
                      `label`        = " . $db->quote((string) $label) . ",
                      `wordwrap`     = " . (int) $wrap . ",
@@ -209,21 +209,21 @@ class FormModel extends AdminModel
         }
 
         $msg = Text::sprintf(
-            'COM_CONTENTBUILDER_NG_SOURCE_FIELDS_SYNC_CHANGED',
+            'COM_CONTENTBUILDERNG_SOURCE_FIELDS_SYNC_CHANGED',
             $addedCount,
             $removedCount
         );
 
         if ($addedCount > 0) {
             $msg .= ' ' . Text::sprintf(
-                'COM_CONTENTBUILDER_NG_SOURCE_FIELDS_SYNC_ADDED',
+                'COM_CONTENTBUILDERNG_SOURCE_FIELDS_SYNC_ADDED',
                 $this->formatSyncFieldList($added, $addedCount)
             );
         }
 
         if ($removedCount > 0) {
             $msg .= ' ' . Text::sprintf(
-                'COM_CONTENTBUILDER_NG_SOURCE_FIELDS_SYNC_REMOVED',
+                'COM_CONTENTBUILDERNG_SOURCE_FIELDS_SYNC_REMOVED',
                 $this->formatSyncFieldList($removed, $removedCount)
             );
         }
@@ -261,7 +261,7 @@ class FormModel extends AdminModel
     public function getForm($data = [], $loadData = true)
     {
         return $this->loadForm(
-            'com_contentbuilder_ng.form',
+            'com_contentbuilderng.form',
             'form',
             ['control' => 'jform', 'load_data' => $loadData]
         );
@@ -291,7 +291,7 @@ class FormModel extends AdminModel
     protected function loadFormData()
     {
         $app = Factory::getApplication();
-        $data = $app->getUserState('com_contentbuilder_ng.edit.form.data', []);
+        $data = $app->getUserState('com_contentbuilderng.edit.form.data', []);
 
         return !empty($data) ? $data : (array) $this->getItem();
     }
@@ -310,7 +310,7 @@ class FormModel extends AdminModel
         $items = Factory::getApplication()->input->post->get('cid', [], 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
-            $db->setQuery(' Update #__contentbuilder_ng_elements ' .
+            $db->setQuery(' Update #__contentbuilderng_elements ' .
                 '  Set editable = 1 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
@@ -328,7 +328,7 @@ class FormModel extends AdminModel
         $items = Factory::getApplication()->input->post->get('cid', [], 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
-            $db->setQuery(' Update #__contentbuilder_ng_elements ' .
+            $db->setQuery(' Update #__contentbuilderng_elements ' .
                 '  Set list_include = 1 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
@@ -345,7 +345,7 @@ class FormModel extends AdminModel
         $items = Factory::getApplication()->input->post->get('cid', [], 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
-            $db->setQuery(' Update #__contentbuilder_ng_elements ' .
+            $db->setQuery(' Update #__contentbuilderng_elements ' .
                 '  Set search_include = 1 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
@@ -363,7 +363,7 @@ class FormModel extends AdminModel
         $items = Factory::getApplication()->input->post->get('cid', [], 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
-            $db->setQuery(' Update #__contentbuilder_ng_elements ' .
+            $db->setQuery(' Update #__contentbuilderng_elements ' .
                 '  Set linkable = 0 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
@@ -381,7 +381,7 @@ class FormModel extends AdminModel
         $items = Factory::getApplication()->input->post->get('cid', [], 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
-            $db->setQuery(' Update #__contentbuilder_ng_elements ' .
+            $db->setQuery(' Update #__contentbuilderng_elements ' .
                 '  Set editable = 0 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
@@ -399,7 +399,7 @@ class FormModel extends AdminModel
         $items = Factory::getApplication()->input->post->get('cid', [], 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
-            $db->setQuery(' Update #__contentbuilder_ng_elements ' .
+            $db->setQuery(' Update #__contentbuilderng_elements ' .
                 '  Set list_include = 0 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
@@ -417,7 +417,7 @@ class FormModel extends AdminModel
         $items = Factory::getApplication()->input->post->get('cid', [], 'array');
         ArrayHelper::toInteger($items);
         if (count($items)) {
-            $db->setQuery(' Update #__contentbuilder_ng_elements ' .
+            $db->setQuery(' Update #__contentbuilderng_elements ' .
                 '  Set search_include = 0 Where form_id = ' . $formId . ' And id In ( ' . implode(',', $items) . ')');
             $db->execute();
         }
@@ -426,7 +426,7 @@ class FormModel extends AdminModel
     function getListStatesActionPlugins()
     {
         $db = $this->getDatabase();
-        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_ng_listaction' And `enabled` = 1");
+        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilderng_listaction' And `enabled` = 1");
         $res = $db->loadColumn();
         return $res;
     }
@@ -437,8 +437,8 @@ class FormModel extends AdminModel
         $themes = [];
 
         $enabledQueries = [
-            "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_ng_themes' And `enabled` = 1",
-            "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_themes_ng' And `enabled` = 1",
+            "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilderng_themes' And `enabled` = 1",
+            "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilderng_themes' And `enabled` = 1",
         ];
 
         foreach ($enabledQueries as $query) {
@@ -460,8 +460,8 @@ class FormModel extends AdminModel
         // If no enabled plugin row could be found, keep a safe fallback list.
         if (empty($themes)) {
             $fallbackQueries = [
-                "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_ng_themes'",
-                "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilder_themes_ng'",
+                "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilderng_themes'",
+                "Select `element` From #__extensions Where `type` = 'plugin' And `folder` = 'contentbuilderng_themes'",
             ];
 
             foreach ($fallbackQueries as $query) {
@@ -482,7 +482,7 @@ class FormModel extends AdminModel
         }
 
         // Last-resort fallback: scan plugin directories if extension rows are missing.
-        foreach ([JPATH_ROOT . '/plugins/contentbuilder_ng_themes', JPATH_ROOT . '/plugins/contentbuilder_themes_ng'] as $path) {
+        foreach ([JPATH_ROOT . '/plugins/contentbuilderng_themes', JPATH_ROOT . '/plugins/contentbuilderng_themes'] as $path) {
             if (!Folder::exists($path)) {
                 continue;
             }
@@ -524,7 +524,7 @@ class FormModel extends AdminModel
     function getVerificationPlugins()
     {
         $db = $this->getDatabase();
-        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_ng_verify' And `enabled` = 1");
+        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilderng_verify' And `enabled` = 1");
         $res = $db->loadColumn();
         return $res;
     }
@@ -543,7 +543,7 @@ class FormModel extends AdminModel
         $db = $this->getDatabase();
         $query = $db->getQuery(true)
             ->select('*')
-            ->from($db->quoteName('#__contentbuilder_ng_forms'))
+            ->from($db->quoteName('#__contentbuilderng_forms'))
             ->where($db->quoteName('id') . ' = ' . (int)$formId);
 
         $db->setQuery($query);
@@ -598,7 +598,7 @@ class FormModel extends AdminModel
             $data->email_update_notifications = 0;
             $data->limited_article_options = 1;
             $data->limited_article_options_fe = 1;
-            $data->upload_directory = JPATH_SITE . '/media/com_contentbuilder_ng/upload';
+            $data->upload_directory = JPATH_SITE . '/media/com_contentbuilderng/upload';
             $data->protect_upload_directory = 1;
             $data->limit_add = 0;
             $data->limit_edit = 0;
@@ -713,11 +713,11 @@ class FormModel extends AdminModel
             if (!$data->form || !$data->form->exists) {
                 if ((string) $data->type === 'com_breezingforms') {
                     Factory::getApplication()->enqueueMessage(
-                        Text::sprintf('COM_CONTENTBUILDER_NG_BREEZINGFORMS_SOURCE_NOT_FOUND', (int) $data->reference_id),
+                        Text::sprintf('COM_CONTENTBUILDERNG_BREEZINGFORMS_SOURCE_NOT_FOUND', (int) $data->reference_id),
                         'warning'
                     );
                 } else {
-                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 'warning');
+                    Factory::getApplication()->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
                 }
 
                 // Keep the form editable and let admin choose a new source.
@@ -745,7 +745,7 @@ class FormModel extends AdminModel
         $db->setQuery(
             $db->getQuery(true)
                 ->select('*')
-                ->from($db->quoteName('#__contentbuilder_ng_list_states'))
+                ->from($db->quoteName('#__contentbuilderng_list_states'))
                 ->where($db->quoteName('form_id') . ' = ' . $formId)
                 ->order('id ASC')
         );
@@ -956,7 +956,7 @@ class FormModel extends AdminModel
 
         // 5) Upload directory: keep current folder, do not fallback to another path.
         if (!isset($jform['upload_directory']) || $jform['upload_directory'] === '') {
-            $jform['upload_directory'] = 'media/com_contentbuilder_ng/upload';
+            $jform['upload_directory'] = 'media/com_contentbuilderng/upload';
         }
 
         $upl_ex = explode('|', (string) $jform['upload_directory']);
@@ -965,14 +965,14 @@ class FormModel extends AdminModel
 
         $basePath = str_replace('\\', '/', $basePath);
         $basePath = str_ireplace(
-            ['{CBSite}/media/contentbuilder_ng', '{cbsite}/media/contentbuilder_ng'],
-            ['{CBSite}/media/com_contentbuilder_ng', '{cbsite}/media/com_contentbuilder_ng'],
+            ['{CBSite}/media/contentbuilderng', '{cbsite}/media/contentbuilderng'],
+            ['{CBSite}/media/com_contentbuilderng', '{cbsite}/media/com_contentbuilderng'],
             $basePath
         );
-        if (stripos($basePath, '/media/contentbuilder_ng') === 0) {
-            $basePath = 'media/com_contentbuilder_ng' . substr($basePath, strlen('/media/contentbuilder_ng'));
-        } elseif (stripos($basePath, 'media/contentbuilder_ng') === 0) {
-            $basePath = 'media/com_contentbuilder_ng' . substr($basePath, strlen('media/contentbuilder_ng'));
+        if (stripos($basePath, '/media/contentbuilderng') === 0) {
+            $basePath = 'media/com_contentbuilderng' . substr($basePath, strlen('/media/contentbuilderng'));
+        } elseif (stripos($basePath, 'media/contentbuilderng') === 0) {
+            $basePath = 'media/com_contentbuilderng' . substr($basePath, strlen('media/contentbuilderng'));
         }
 
         $is_relative = (stripos($basePath, '{cbsite}') === 0);
@@ -1100,7 +1100,7 @@ class FormModel extends AdminModel
         $createSample = !empty($jform['create_sample']);
         if ($createSample) {
             if (!$formObj) {
-                $app->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 'warning');
+                $app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
             }
             $sample = ContentbuilderLegacyHelper::createDetailsSample($id, $formObj, $jform['theme_plugin']);
             Logger::info('Details sample requested', [
@@ -1117,7 +1117,7 @@ class FormModel extends AdminModel
         $createEditableSample = !empty($jform['create_editable_sample']);
         if ($createEditableSample) {
             if (!$formObj) {
-                $app->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 'warning');
+                $app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
             }
             $jform['editable_template'] = ContentbuilderLegacyHelper::createEditableSample($id, $formObj, $jform['theme_plugin']);
         }
@@ -1126,7 +1126,7 @@ class FormModel extends AdminModel
         $emailAdminTemplate = !empty($jform['email_admin_create_sample']);
         if ($emailAdminTemplate) {
             if (!$formObj) {
-                $app->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 'warning');
+                $app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
             }
             $jform['email_admin_template'] = ContentbuilderLegacyHelper::createEmailSample($id, $formObj, $emailAdminHtml);
         }
@@ -1134,7 +1134,7 @@ class FormModel extends AdminModel
         $emailCreateSample = !empty($jform['email_create_sample']);
         if ($emailCreateSample) {
             if (!$formObj) {
-                $app->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 'warning');
+                $app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
             }
             $jform['email_template'] = ContentbuilderLegacyHelper::createEmailSample($id, $formObj, Factory::getApplication()->input->getBool('email_html', false));
         }
@@ -1201,7 +1201,7 @@ class FormModel extends AdminModel
                 $sid = (int) $state_id;
                 if ($sid > 0) {
                     $db->setQuery(
-                        "UPDATE #__contentbuilder_ng_list_states
+                        "UPDATE #__contentbuilderng_list_states
                      SET published = " . (isset($item['published']) && $item['published'] ? 1 : 0) . ",
                          `title`    = " . $db->quote(stripslashes(strip_tags((string) ($item['title'] ?? '')))) . ",
                          color      = " . $db->quote($this->normalizeListStateColor($item['color'] ?? 'FFFFFF')) . ",
@@ -1214,7 +1214,7 @@ class FormModel extends AdminModel
         }
 
         // Fallback: si pas assez d'états, on complète
-        $db->setQuery("SELECT COUNT(id) FROM #__contentbuilder_ng_list_states WHERE form_id = " . (int) $formId);
+        $db->setQuery("SELECT COUNT(id) FROM #__contentbuilderng_list_states WHERE form_id = " . (int) $formId);
         $existingCount = (int) $db->loadResult();
 
         $defaultCount = count($this->_default_list_states);
@@ -1222,7 +1222,7 @@ class FormModel extends AdminModel
             // rien du tout -> on insert tout
             for ($i = 0; $i < $defaultCount; $i++) {
                 $db->setQuery(
-                    "INSERT INTO #__contentbuilder_ng_list_states (form_id, `title`, color, action)
+                    "INSERT INTO #__contentbuilderng_list_states (form_id, `title`, color, action)
                  VALUES (" . (int) $formId . ", " . $db->quote('State') . ", " . $db->quote('FFFFFF') . ", " . $db->quote('') . ")"
                 );
                 $db->execute();
@@ -1232,7 +1232,7 @@ class FormModel extends AdminModel
             $add = $defaultCount - $existingCount;
             for ($i = 0; $i < $add; $i++) {
                 $db->setQuery(
-                    "INSERT INTO #__contentbuilder_ng_list_states (form_id, `title`, color, action)
+                    "INSERT INTO #__contentbuilderng_list_states (form_id, `title`, color, action)
                  VALUES (" . (int) $formId . ", " . $db->quote('State') . ", " . $db->quote('FFFFFF') . ", " . $db->quote('') . ")"
                 );
                 $db->execute();
@@ -1299,7 +1299,7 @@ class FormModel extends AdminModel
         $db = $this->getDatabase();
 
         foreach ($cids as $cid) {
-            $db->setQuery("Select article.article_id From #__contentbuilder_ng_articles As article, #__contentbuilder_ng_forms As form Where form.delete_articles > 0 And form.id = article.form_id And article.form_id = " . intval($cid));
+            $db->setQuery("Select article.article_id From #__contentbuilderng_articles As article, #__contentbuilderng_forms As form Where form.delete_articles > 0 And form.id = article.form_id And article.form_id = " . intval($cid));
             $articles = $db->loadColumn();
             if (count($articles)) {
                 $article_items = array();
@@ -1337,7 +1337,7 @@ class FormModel extends AdminModel
                 Delete
                     `elements`.*
                 From
-                    #__contentbuilder_ng_elements As `elements`
+                    #__contentbuilderng_elements As `elements`
                 Where
                     `elements`.form_id = " . $cid);
 
@@ -1347,7 +1347,7 @@ class FormModel extends AdminModel
                 Delete
                     `states`.*
                 From
-                    #__contentbuilder_ng_list_states As `states`
+                    #__contentbuilderng_list_states As `states`
                 Where
                     `states`.form_id = " . $cid);
 
@@ -1357,7 +1357,7 @@ class FormModel extends AdminModel
                 Delete
                     `records`.*
                 From
-                    #__contentbuilder_ng_list_records As `records`
+                    #__contentbuilderng_list_records As `records`
                 Where
                     `records`.form_id = " . $cid);
 
@@ -1367,7 +1367,7 @@ class FormModel extends AdminModel
                 Delete
                     `access`.*
                 From
-                    #__contentbuilder_ng_resource_access As `access`
+                    #__contentbuilderng_resource_access As `access`
                 Where
                     `access`.form_id = " . $cid);
 
@@ -1377,7 +1377,7 @@ class FormModel extends AdminModel
                 Delete
                     `users`.*
                 From
-                    #__contentbuilder_ng_users As `users`
+                    #__contentbuilderng_users As `users`
                 Where
                     `users`.form_id = " . $cid);
 
@@ -1387,7 +1387,7 @@ class FormModel extends AdminModel
                 Delete
                     `users`.*
                 From
-                    #__contentbuilder_ng_registered_users As `users`
+                    #__contentbuilderng_registered_users As `users`
                 Where
                     `users`.form_id = " . $cid);
 
@@ -1395,12 +1395,12 @@ class FormModel extends AdminModel
 
             $this->getTable('Elementoptions')->reorder('form_id = ' . $cid);
 
-            $db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder_ng&task=list.display&id=" . intval($cid) . "'");
+            $db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilderng&task=list.display&id=" . intval($cid) . "'");
             $db->execute();
-            $db->setQuery("Select count(id) From #__menu Where `link` Like 'index.php?option=com_contentbuilder_ng&task=list.display&id=%'");
+            $db->setQuery("Select count(id) From #__menu Where `link` Like 'index.php?option=com_contentbuilderng&task=list.display&id=%'");
             $amount = $db->loadResult();
             if (!$amount) {
-                $db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilder_ng&viewcontainer=true'");
+                $db->setQuery("Delete From #__menu Where `link` = 'index.php?option=com_contentbuilderng&viewcontainer=true'");
                 $db->execute();
             }
 
@@ -1412,7 +1412,7 @@ class FormModel extends AdminModel
         $row->reorder();
 
         // article deletion if required
-        $db->setQuery("Select `id` From #__contentbuilder_ng_forms");
+        $db->setQuery("Select `id` From #__contentbuilderng_forms");
         $references = $db->loadColumn();
 
         $cnt = count($references);
@@ -1421,10 +1421,10 @@ class FormModel extends AdminModel
             for ($i = 0; $i < $cnt; $i++) {
                 $new_items[] = $db->quote($references[$i]);
             }
-            $db->setQuery("Delete From #__contentbuilder_ng_articles Where `form_id` Not In (" . implode(',', $new_items) . ") ");
+            $db->setQuery("Delete From #__contentbuilderng_articles Where `form_id` Not In (" . implode(',', $new_items) . ") ");
             $db->execute();
         } else {
-            $db->setQuery("Delete From #__contentbuilder_ng_articles");
+            $db->setQuery("Delete From #__contentbuilderng_articles");
             $db->execute();
         }
 
@@ -1473,7 +1473,7 @@ class FormModel extends AdminModel
 
         $db = $this->getDatabase();
         $table = $this->getTable('Form', '');
-        $db->setQuery(' Select * From #__contentbuilder_ng_forms ' .
+        $db->setQuery(' Select * From #__contentbuilderng_forms ' .
             '  Where id In ( ' . implode(',', $cids) . ')');
         $result = $db->loadObjectList();
 
@@ -1489,27 +1489,27 @@ class FormModel extends AdminModel
             $obj->modified = Factory::getDate()->toSql();
             $obj->modified_by = Factory::getApplication()->getIdentity()->id;
             
-            $db->insertObject('#__contentbuilder_ng_forms', $obj);
+            $db->insertObject('#__contentbuilderng_forms', $obj);
             $insertId = $db->insertid();
 
             // Elements
-            $db->setQuery(' Select * From #__contentbuilder_ng_elements ' .
+            $db->setQuery(' Select * From #__contentbuilderng_elements ' .
                 '  Where form_id = ' . $origId);
             $elements = $db->loadObjectList();
             foreach ($elements as $element) {
                 unset($element->id);
                 $element->form_id = $insertId;
-                $db->insertObject('#__contentbuilder_ng_elements', $element);
+                $db->insertObject('#__contentbuilderng_elements', $element);
             }
 
             // list states
-            $db->setQuery(' Select * From #__contentbuilder_ng_list_states ' .
+            $db->setQuery(' Select * From #__contentbuilderng_list_states ' .
                 '  Where form_id = ' . $origId);
             $elements = $db->loadObjectList();
             foreach ($elements as $element) {
                 unset($element->id);
                 $element->form_id = $insertId;
-                $db->insertObject('#__contentbuilder_ng_list_states', $element);
+                $db->insertObject('#__contentbuilderng_list_states', $element);
             }
             // XDA-Gil fix 'Copy of Form' in Component Menu in Backen CB View
             // ContentbuilderLegacyHelper::createBackendMenuItem($insertId, $obj->name, true);

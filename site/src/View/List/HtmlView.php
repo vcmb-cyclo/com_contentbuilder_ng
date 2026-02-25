@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Site\View\List;
+namespace CB\Component\Contentbuilderng\Site\View\List;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -16,7 +16,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
 {
@@ -29,9 +29,9 @@ class HtmlView extends BaseHtmlView
         // Get data from the model
         $subject = $this->get('Data');
         $themePlugin = (string) ($subject->theme_plugin ?? '');
-        if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin)) {
+        if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
             $themePlugin = 'joomla6';
-            PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin);
+            PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin);
         }
 
         // 1️⃣ Récupération du WebAssetManager
@@ -42,7 +42,7 @@ class HtmlView extends BaseHtmlView
         if (!$this->frontend) {
             $wa->addInlineStyle(
                 '.icon-logo_left{
-                    background-image:url(' . Uri::root(true) . '/media/com_contentbuilder_ng/images/logo_left.png);
+                    background-image:url(' . Uri::root(true) . '/media/com_contentbuilderng/images/logo_left.png);
                     background-size:contain;
                     background-repeat:no-repeat;
                     background-position:center;

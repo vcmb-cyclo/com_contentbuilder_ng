@@ -6,7 +6,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\View\Storages;
+namespace CB\Component\Contentbuilderng\Administrator\View\Storages;
 
 \defined('_JEXEC') or die('Restricted access');
 
@@ -15,7 +15,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
 
 /**
  * Vue Storages pour ContentBuilder
@@ -77,7 +77,7 @@ class HtmlView extends BaseHtmlView
      */
     protected function addToolbar()
     {
-        ToolbarHelper::title(Text::_('COM_CONTENTBUILDER_NG') .' :: ' . Text::_('COM_CONTENTBUILDER_NG_STORAGES'), 'logo_left');
+        ToolbarHelper::title(Text::_('COM_CONTENTBUILDERNG') .' :: ' . Text::_('COM_CONTENTBUILDERNG_STORAGES'), 'logo_left');
 
         ToolbarHelper::addNew('storage.add');
         ToolbarHelper::editList('storage.edit');
@@ -95,11 +95,11 @@ class HtmlView extends BaseHtmlView
         $statusChildToolbar->publish('storages.publish')->icon('fa-solid fa-check text-success')->listCheck(true);
         $statusChildToolbar->unpublish('storages.unpublish')->icon('fa-solid fa-circle-xmark text-danger')->listCheck(true);
 
-        ToolbarHelper::preferences('com_contentbuilder_ng');
+        ToolbarHelper::preferences('com_contentbuilderng');
         ToolbarHelper::help(
-            'COM_CONTENTBUILDER_NG_HELP_STORAGES_TITLE',
+            'COM_CONTENTBUILDERNG_HELP_STORAGES_TITLE',
             false,
-            Uri::base() . 'index.php?option=com_contentbuilder_ng&view=storages&layout=help&tmpl=component'
+            Uri::base() . 'index.php?option=com_contentbuilderng&view=storages&layout=help&tmpl=component'
         );
     }
 
@@ -115,7 +115,7 @@ class HtmlView extends BaseHtmlView
          // Icon addition.
         $wa->addInlineStyle(
             '.icon-logo_left{
-                background-image:url(' . Uri::root(true) . '/media/com_contentbuilder_ng/images/logo_left.png);
+                background-image:url(' . Uri::root(true) . '/media/com_contentbuilderng/images/logo_left.png);
                 background-size:contain;
                 background-repeat:no-repeat;
                 background-position:center;
@@ -126,7 +126,7 @@ class HtmlView extends BaseHtmlView
             }'
         );
 
-        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
-        $wa->useStyle('com_contentbuilder_ng.admin-toolbar'); // A déclarer dans joomla.asset.json
+        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
+        $wa->useStyle('com_contentbuilderng.admin-toolbar'); // A déclarer dans joomla.asset.json
     }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace CB\Component\Contentbuilder_ng\Site\Dispatcher;
+namespace CB\Component\Contentbuilderng\Site\Dispatcher;
 
 \defined('_JEXEC') or die;
 

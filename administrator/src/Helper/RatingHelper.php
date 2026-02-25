@@ -7,7 +7,7 @@
  * @copyright   Copyright (C) 2026 by XDA+GIL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Helper;
+namespace CB\Component\Contentbuilderng\Administrator\Helper;
 
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -34,7 +34,7 @@ final class RatingHelper
 }
 
 .cbVotingDisplay {
-	background-image: url(' . Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/bg_votingStarOff.png);
+	background-image: url(' . Uri::root(true) . '/components/com_contentbuilderng/assets/images/bg_votingStarOff.png);
 	background-repeat: repeat-x;
         height: auto;
 }
@@ -44,7 +44,7 @@ final class RatingHelper
 	float: left;
 	height: 20px;
 	overflow: hidden;
-	background-image: url(' . Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/bg_votingStarOn.png);
+	background-image: url(' . Uri::root(true) . '/components/com_contentbuilderng/assets/images/bg_votingStarOn.png);
 	background-repeat: repeat-x;
 }
 
@@ -65,14 +65,14 @@ final class RatingHelper
 .cbRatingImage2{
     width: 30px;
     height: 30px;
-    background-image: url(' . Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/thumbs_down.png);
+    background-image: url(' . Uri::root(true) . '/components/com_contentbuilderng/assets/images/thumbs_down.png);
     background-repeat: no-repeat;
 }
 
 .cbRatingImage{ 
     width: 30px;
     height: 30px;
-    background-image: url(' . Uri::root(true) . '/components/com_contentbuilder_ng/assets/images/thumbs_up.png);
+    background-image: url(' . Uri::root(true) . '/components/com_contentbuilderng/assets/images/thumbs_up.png);
     background-repeat: no-repeat;
 }');
 
@@ -98,9 +98,9 @@ final class RatingHelper
         if ($rating_allowed) {
             if (Factory::getApplication()->isClient('site')) {
                 $rating_link = Uri::root(true) . (Factory::getApplication()->isClient('administrator') ? '/administrator' : (Factory::getApplication()->input->getCmd('lang', '') && 
-                Factory::getApplication()->getConfig()->get('sef') && Factory::getApplication()->getConfig()->get('sef_rewrite') ? '/' . Factory::getApplication()->input->getCmd('lang', '') : '')) . '/?option=com_contentbuilder_ng&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
+                Factory::getApplication()->getConfig()->get('sef') && Factory::getApplication()->getConfig()->get('sef_rewrite') ? '/' . Factory::getApplication()->input->getCmd('lang', '') : '')) . '/?option=com_contentbuilderng&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
             } else {
-                $rating_link = 'index.php?option=com_contentbuilder_ng&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
+                $rating_link = 'index.php?option=com_contentbuilderng&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
             }
         }
         for ($x = 1; $x <= $rating_slots; $x++) {
@@ -134,7 +134,7 @@ final class RatingHelper
                                     </div>
                                     <div style="clear: both;"></div>
                                     <div align="center" class="cbRatingVotes">
-                                    <?php echo $rating_count == 1 ? $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_NG_VOTES_SINGULAR') : $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_NG_VOTES_PLURAL'); ?>
+                                    <?php echo $rating_count == 1 ? $rating_count . ' ' . Text::_('COM_CONTENTBUILDERNG_VOTES_SINGULAR') : $rating_count . ' ' . Text::_('COM_CONTENTBUILDERNG_VOTES_PLURAL'); ?>
                                     </div>
                                 </div>
                                 <?php
@@ -149,7 +149,7 @@ final class RatingHelper
                                     <?php echo $rating_count; ?>
                                     </div>
                                     <div align="center" class="cbRatingVotes">
-                                    <?php echo $rating_count == 1 ? Text::_('COM_CONTENTBUILDER_NG_VOTES_SINGULAR') : Text::_('COM_CONTENTBUILDER_NG_VOTES_PLURAL'); ?>
+                                    <?php echo $rating_count == 1 ? Text::_('COM_CONTENTBUILDERNG_VOTES_SINGULAR') : Text::_('COM_CONTENTBUILDERNG_VOTES_PLURAL'); ?>
                                     </div>
                                 </div>
                             <?php
@@ -176,7 +176,7 @@ final class RatingHelper
                                     </div>
                                     <div style="clear: both;"></div>
                                     <div align="center" class="cbRatingVotes">
-                                    <?php echo $rating_count == 1 ? $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_NG_VOTES_SINGULAR') : $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_NG_VOTES_PLURAL'); ?>
+                                    <?php echo $rating_count == 1 ? $rating_count . ' ' . Text::_('COM_CONTENTBUILDERNG_VOTES_SINGULAR') : $rating_count . ' ' . Text::_('COM_CONTENTBUILDERNG_VOTES_PLURAL'); ?>
                                     </div>
                                 </div>
                                 <?php
@@ -189,7 +189,7 @@ final class RatingHelper
                                     <?php echo $rating_count; ?>
                                     </div>
                                     <div align="center" class="cbRatingVotes">
-                                    <?php echo $rating_count == 1 ? Text::_('COM_CONTENTBUILDER_NG_VOTES_SINGULAR') : Text::_('COM_CONTENTBUILDER_NG_VOTES_PLURAL'); ?>
+                                    <?php echo $rating_count == 1 ? Text::_('COM_CONTENTBUILDERNG_VOTES_SINGULAR') : Text::_('COM_CONTENTBUILDERNG_VOTES_PLURAL'); ?>
                                     </div>
                                 </div>
                             <?php
@@ -203,7 +203,7 @@ final class RatingHelper
                 </div>
                 <div style="clear: left;"></div>
                 <div align="center" class="cbRatingVotes">
-                    <?php echo $rating_count == 1 ? $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_NG_VOTES_SINGULAR') : $rating_count . ' ' . Text::_('COM_CONTENTBUILDER_NG_VOTES_PLURAL'); ?>
+                    <?php echo $rating_count == 1 ? $rating_count . ' ' . Text::_('COM_CONTENTBUILDERNG_VOTES_SINGULAR') : $rating_count . ' ' . Text::_('COM_CONTENTBUILDERNG_VOTES_PLURAL'); ?>
                 </div>
             </div>
             <?php

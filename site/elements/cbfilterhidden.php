@@ -4,6 +4,6 @@
 
 require_once __DIR__ . '/../src/Element/cbfilterhidden.php';
 
-if (!\class_exists('JFormFieldCbfilterhidden', false) && \class_exists(\CB\Component\Contentbuilder_ng\Site\Element\JFormFieldCbfilterhidden::class)) {
-    \class_alias(\CB\Component\Contentbuilder_ng\Site\Element\JFormFieldCbfilterhidden::class, 'JFormFieldCbfilterhidden');
+if (!\class_exists('JFormFieldCbfilterhidden', false) && \class_exists(\CB\Component\Contentbuilderng\Site\Element\JFormFieldCbfilterhidden::class)) {
+    \class_alias(\CB\Component\Contentbuilderng\Site\Element\JFormFieldCbfilterhidden::class, 'JFormFieldCbfilterhidden');
 }

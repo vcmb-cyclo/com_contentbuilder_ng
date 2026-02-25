@@ -14,7 +14,7 @@
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Model;
+namespace CB\Component\Contentbuilderng\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -83,7 +83,7 @@ class StoragesModel extends ListModel
 
         // Base query
         $query->select('a.*')
-            ->from($db->quoteName('#__contentbuilder_ng_storages', 'a'));
+            ->from($db->quoteName('#__contentbuilderng_storages', 'a'));
 
         // Published filter.
         $filterState = strtoupper(trim((string) $this->getState('filter.state')));
@@ -153,7 +153,7 @@ class StoragesModel extends ListModel
         }
 
         $factory = Factory::getApplication()
-            ->bootComponent('com_contentbuilder_ng')
+            ->bootComponent('com_contentbuilderng')
             ->getMVCFactory();
 
         $formModel = $factory->createModel('storage', 'Administrator', ['ignore_request' => true]);
@@ -174,7 +174,7 @@ class StoragesModel extends ListModel
     {
         $cids = Factory::getApplication()->input->get('cid', [], 'array');
         ArrayHelper::toInteger($cids);
-        $this->getDatabase()->setQuery(' Update #__contentbuilder_ng_storages ' .
+        $this->getDatabase()->setQuery(' Update #__contentbuilderng_storages ' .
             '  Set published = 1 Where id In ( ' . implode(',', $cids) . ')');
         $this->getDatabase()->execute();
 
@@ -184,7 +184,7 @@ class StoragesModel extends ListModel
     {
         $cids = Factory::getApplication()->input->get('cid', [], 'array');
         ArrayHelper::toInteger($cids);
-        $this->getDatabase()->setQuery(' Update #__contentbuilder_ng_storages ' .
+        $this->getDatabase()->setQuery(' Update #__contentbuilderng_storages ' .
             '  Set published = 0 Where id In ( ' . implode(',', $cids) . ')');
         $this->getDatabase()->execute();
     }*/
@@ -198,7 +198,7 @@ class StoragesModel extends ListModel
     private function buildOrderBy()
     {
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
 
         $orderby = '';
         $filter_order = $this->getState('storages_filter_order');
@@ -238,7 +238,7 @@ class StoragesModel extends ListModel
             $where = ' Where ';
         }
 
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilder_ng_storages ' . $where . $filter_state . $this->buildOrderBy();
+        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilderng_storages ' . $where . $filter_state . $this->buildOrderBy();
     }*/
 
 

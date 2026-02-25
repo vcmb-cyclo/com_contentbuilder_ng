@@ -7,7 +7,7 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder_ng\Administrator;
+namespace CB\Component\Contentbuilderng\Administrator;
 
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');

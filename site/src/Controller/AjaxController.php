@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder_ng\Site\Controller;
+namespace CB\Component\Contentbuilderng\Site\Controller;
 
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
@@ -15,7 +15,7 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class AjaxController extends BaseController
 {

@@ -6,12 +6,12 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder_ng\Site\Model;
+namespace CB\Component\Contentbuilderng\Site\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
-use CB\Component\Contentbuilder_ng\Administrator\Model\VerifyModel as AdministratorVerifyModel;
+use CB\Component\Contentbuilderng\Administrator\Model\VerifyModel as AdministratorVerifyModel;
 
 class VerifyModel extends AdministratorVerifyModel
 {

@@ -13,7 +13,7 @@
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
+namespace CB\Component\Contentbuilderng\Administrator\Controller;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -25,7 +25,7 @@ use Joomla\CMS\MVC\Controller\AdminController;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 
 final class FormsController extends AdminController
 {
@@ -49,19 +49,19 @@ final class FormsController extends AdminController
         $session = Factory::getApplication()->getSession();
 
         if ($this->input->getInt('email_users', -1) !== -1) {
-            $session->set('email_users', $this->input->get('email_users', 'none'), 'com_contentbuilder_ng');
+            $session->set('email_users', $this->input->get('email_users', 'none'), 'com_contentbuilderng');
         }
 
         if ($this->input->getInt('email_admins', -1) !== -1) {
-            $session->set('email_admins', $this->input->get('email_admins', ''), 'com_contentbuilder_ng');
+            $session->set('email_admins', $this->input->get('email_admins', ''), 'com_contentbuilderng');
         }
 
         if ($this->input->getInt('slideStartOffset', -1) !== -1) {
-            $session->set('slideStartOffset', $this->input->getInt('slideStartOffset', 1), 'com_contentbuilder_ng');
+            $session->set('slideStartOffset', $this->input->getInt('slideStartOffset', 1), 'com_contentbuilderng');
         }
 
         if ($this->input->getInt('tabStartOffset', -1) !== -1) {
-            $session->set('tabStartOffset', $this->input->getInt('tabStartOffset', 0), 'com_contentbuilder_ng');
+            $session->set('tabStartOffset', $this->input->getInt('tabStartOffset', 0), 'com_contentbuilderng');
         }
     }
 
@@ -126,7 +126,7 @@ final class FormsController extends AdminController
                 $this->resolvePluralMessage(
                     'JLIB_APPLICATION_N_ITEMS_DELETED',
                     $count,
-                    'COM_CONTENTBUILDER_NG_ENTRIES_DELETED'
+                    'COM_CONTENTBUILDERNG_ENTRIES_DELETED'
                 ),
                 'message'
             );
@@ -134,7 +134,7 @@ final class FormsController extends AdminController
             $this->setMessage($e->getMessage(), 'warning');
         }
 
-        $this->setRedirect('index.php?option=com_contentbuilder_ng&task=forms.display');
+        $this->setRedirect('index.php?option=com_contentbuilderng&task=forms.display');
     }
 
     /**
@@ -176,7 +176,7 @@ final class FormsController extends AdminController
         }
 
         $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilder_ng&task=forms.display&limitstart=' . $this->input->getInt('limitstart'),
+            Route::_('index.php?option=com_contentbuilderng&task=forms.display&limitstart=' . $this->input->getInt('limitstart'),
             false));
     }
 

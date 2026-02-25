@@ -13,7 +13,7 @@
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
+namespace CB\Component\Contentbuilderng\Administrator\Controller;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -50,7 +50,7 @@ class FormController extends BaseFormController
             return parent::edit($key, $urlVar);
         } catch (\Throwable $e) {
             $this->setMessage($e->getMessage(), 'warning');
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&task=forms.display', false));
+            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&task=forms.display', false));
             return false;
         }
     }
@@ -62,11 +62,11 @@ class FormController extends BaseFormController
     {
         try {
             // Tu peux aussi faire: return parent::add();
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=0', false));
+            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=0', false));
             return true;
         } catch (\Throwable $e) {
             $this->setMessage($e->getMessage(), 'warning');
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&task=forms.display', false));
+            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&task=forms.display', false));
             return false;
         }
     }
@@ -88,7 +88,7 @@ class FormController extends BaseFormController
             if (!$id) {
                 $this->setRedirect(
                     Route::_(
-                        'index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . (int) $this->input->getInt('id', 0),
+                        'index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=' . (int) $this->input->getInt('id', 0),
                         false
                     ),
                     Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED'),
@@ -98,7 +98,7 @@ class FormController extends BaseFormController
             }
 
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . (int) $id, false),
+                Route::_('index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=' . (int) $id, false),
                 Text::_('JLIB_APPLICATION_SAVE_SUCCESS'),
                 'message'
             );
@@ -108,7 +108,7 @@ class FormController extends BaseFormController
             $this->setMessage($e->getMessage(), 'warning');
             $this->setRedirect(
                 Route::_(
-                    'index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . (int) $this->input->getInt('id', 0),
+                    'index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=' . (int) $this->input->getInt('id', 0),
                     false
                 )
             );
@@ -130,7 +130,7 @@ class FormController extends BaseFormController
             if (!$id) {
                 $this->setRedirect(
                     Route::_(
-                        'index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . (int) $this->input->getInt('id', 0),
+                        'index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=' . (int) $this->input->getInt('id', 0),
                         false
                     ),
                     Text::_('JLIB_APPLICATION_ERROR_SAVE_FAILED'),
@@ -141,20 +141,20 @@ class FormController extends BaseFormController
 
             // ✅ Comportement actuel: rester sur l'édition
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . (int) $id, false),
+                Route::_('index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=' . (int) $id, false),
                 Text::_('JLIB_APPLICATION_SAVE_SUCCESS'),
                 'message'
             );
 
             // 👉 Si tu veux plutôt revenir à la liste après Save :
-            // $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&task=forms.display', false), Text::_('JLIB_APPLICATION_SAVE_SUCCESS'));
+            // $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&task=forms.display', false), Text::_('JLIB_APPLICATION_SAVE_SUCCESS'));
 
             return true;
         } catch (\Throwable $e) {
             $this->setMessage($e->getMessage(), 'warning');
             $this->setRedirect(
                 Route::_(
-                    'index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . (int) $this->input->getInt('id', 0),
+                    'index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=' . (int) $this->input->getInt('id', 0),
                     false
                 )
             );
@@ -222,7 +222,7 @@ class FormController extends BaseFormController
             }
 
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=0', false),
+                Route::_('index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=0', false),
                 Text::_('JLIB_APPLICATION_SAVE_SUCCESS'),
                 'message'
             );
@@ -230,7 +230,7 @@ class FormController extends BaseFormController
             return true;
         } catch (\Throwable $e) {
             $this->setMessage($e->getMessage(), 'error');
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=0', false));
+            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=0', false));
             return false;
         }
     }
@@ -409,32 +409,32 @@ class FormController extends BaseFormController
 
     public function listpublish(): bool
     {
-        return $this->elementsPublish(1, 'COM_CONTENTBUILDER_NG_PUBLISHED');
+        return $this->elementsPublish(1, 'COM_CONTENTBUILDERNG_PUBLISHED');
     }
 
     public function listunpublish(): bool
     {
-        return $this->elementsPublish(0, 'COM_CONTENTBUILDER_NG_UNPUBLISHED');
+        return $this->elementsPublish(0, 'COM_CONTENTBUILDERNG_UNPUBLISHED');
     }
 
     public function publish(): bool
     {
-        return $this->elementsPublish(1, 'COM_CONTENTBUILDER_NG_PUBLISHED');
+        return $this->elementsPublish(1, 'COM_CONTENTBUILDERNG_PUBLISHED');
     }
 
     public function unpublish(): bool
     {
-        return $this->elementsPublish(0, 'COM_CONTENTBUILDER_NG_UNPUBLISHED');
+        return $this->elementsPublish(0, 'COM_CONTENTBUILDERNG_UNPUBLISHED');
     }
 
     public function formpublish(): bool
     {
-        return $this->setFormPublishedState(1, 'COM_CONTENTBUILDER_NG_PUBLISHED');
+        return $this->setFormPublishedState(1, 'COM_CONTENTBUILDERNG_PUBLISHED');
     }
 
     public function formunpublish(): bool
     {
-        return $this->setFormPublishedState(0, 'COM_CONTENTBUILDER_NG_UNPUBLISHED');
+        return $this->setFormPublishedState(0, 'COM_CONTENTBUILDERNG_UNPUBLISHED');
     }
 
 
@@ -626,7 +626,7 @@ class FormController extends BaseFormController
     private function getEditRedirectUrl(int $formId): string
     {
         return Route::_(
-            'index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . max(0, $formId),
+            'index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=' . max(0, $formId),
             false
         );
     }

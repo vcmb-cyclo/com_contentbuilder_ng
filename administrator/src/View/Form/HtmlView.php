@@ -8,7 +8,7 @@
  * @license GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\View\Form;
+namespace CB\Component\Contentbuilderng\Administrator\View\Form;
 
 \defined('_JEXEC') or die;
 
@@ -18,8 +18,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\PackedDataHelper;
-use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
+use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
 {
@@ -35,14 +35,14 @@ class HtmlView extends BaseHtmlView
 
         // JS
         $wa = $app->getDocument()->getWebAssetManager();
-        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
-        $wa->useStyle('com_contentbuilder_ng.coloris.css');
-        $wa->useScript('com_contentbuilder_ng.coloris.js');
+        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
+        $wa->useStyle('com_contentbuilderng.coloris.css');
+        $wa->useScript('com_contentbuilderng.coloris.js');
 
         $wa->addInlineStyle(
             '.icon-48-logo_icon_cb{background-image:url('
             . Uri::root(true)
-            . '/media/com_contentbuilder_ng/images/logo_icon_cb.png);background-size:contain;background-repeat:no-repeat;}'
+            . '/media/com_contentbuilderng/images/logo_icon_cb.png);background-size:contain;background-repeat:no-repeat;}'
         );
 
 
@@ -63,7 +63,7 @@ class HtmlView extends BaseHtmlView
         try {
             $formId = (int) ($formId ?? 0);
             if ($formId > 0) {
-                $factory = $app->bootComponent('com_contentbuilder_ng')->getMVCFactory();
+                $factory = $app->bootComponent('com_contentbuilderng')->getMVCFactory();
                 $elementsModel = $factory->createModel('Elements', 'Administrator');
 
                 if (!$elementsModel) {
@@ -87,10 +87,10 @@ class HtmlView extends BaseHtmlView
         }
 
         $isNew = ($formId < 1);
-        $text  = $isNew ? Text::_('COM_CONTENTBUILDER_NG_NEW') : Text::_('COM_CONTENTBUILDER_NG_EDIT');
+        $text  = $isNew ? Text::_('COM_CONTENTBUILDERNG_NEW') : Text::_('COM_CONTENTBUILDERNG_EDIT');
 
         ToolbarHelper::title(
-            Text::_('COM_CONTENTBUILDER_NG') .' :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_NG_FORM') : ($this->item->name ?? '')) .
+            Text::_('COM_CONTENTBUILDERNG') .' :: ' . ($isNew ? Text::_('COM_CONTENTBUILDERNG_FORM') : ($this->item->name ?? '')) .
                 ' : <small><small>[ ' . $text . ' ]</small></small>',
             'logo_left'
         );
@@ -116,42 +116,42 @@ class HtmlView extends BaseHtmlView
         $statusChildToolbar = $statusDropdown->getChildToolbar();
         $statusChildToolbar->standardButton('list_include')
             ->task('form.list_include')
-            ->text('COM_CONTENTBUILDER_NG_LIST_INCLUDE')
+            ->text('COM_CONTENTBUILDERNG_LIST_INCLUDE')
             ->icon('fa fa-list text-success')
             ->listCheck(true);
         $statusChildToolbar->standardButton('no_list_include')
             ->task('form.no_list_include')
-            ->text('COM_CONTENTBUILDER_NG_NO_LIST_INCLUDE')
+            ->text('COM_CONTENTBUILDERNG_NO_LIST_INCLUDE')
             ->icon('fa fa-list text-danger')
             ->listCheck(true);
         $statusChildToolbar->standardButton('search_include')
             ->task('form.search_include')
-            ->text('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE')
+            ->text('COM_CONTENTBUILDERNG_SEARCH_INCLUDE')
             ->icon('fa fa-search text-success')
             ->listCheck(true);
         $statusChildToolbar->standardButton('no_search_include')
             ->task('form.no_search_include')
-            ->text('COM_CONTENTBUILDER_NG_NO_SEARCH_INCLUDE')
+            ->text('COM_CONTENTBUILDERNG_NO_SEARCH_INCLUDE')
             ->icon('fa fa-search text-danger')
             ->listCheck(true);
         $statusChildToolbar->standardButton('linkable')
             ->task('form.linkable')
-            ->text('COM_CONTENTBUILDER_NG_LINKABLE')
+            ->text('COM_CONTENTBUILDERNG_LINKABLE')
             ->icon('fa fa-link text-success')
             ->listCheck(true);
         $statusChildToolbar->standardButton('not_linkable')
             ->task('form.not_linkable')
-            ->text('COM_CONTENTBUILDER_NG_NOT_LINKABLE')
+            ->text('COM_CONTENTBUILDERNG_NOT_LINKABLE')
             ->icon('fa fa-link text-danger')
             ->listCheck(true);
         $statusChildToolbar->standardButton('editable')
             ->task('form.editable')
-            ->text('COM_CONTENTBUILDER_NG_EDITABLE')
+            ->text('COM_CONTENTBUILDERNG_EDITABLE')
             ->icon('fa fa-pen text-success')
             ->listCheck(true);
         $statusChildToolbar->standardButton('not_editable')
             ->task('form.not_editable')
-            ->text('COM_CONTENTBUILDER_NG_NOT_EDITABLE')
+            ->text('COM_CONTENTBUILDERNG_NOT_EDITABLE')
             ->icon('fa fa-pen text-danger')
             ->listCheck(true);
         $statusChildToolbar->publish('form.publish')->icon('fa-solid fa-check text-success')->listCheck(true);
@@ -316,7 +316,7 @@ class HtmlView extends BaseHtmlView
             $previewPayload = $formId . '|' . $previewUntil . '|' . $previewActorId . '|' . $previewActorName;
             $previewSig = hash_hmac('sha256', $previewPayload, (string) $app->get('secret'));
             $previewUrl = Uri::root()
-                . 'index.php?option=com_contentbuilder_ng&task=list.display&id='
+                . 'index.php?option=com_contentbuilderng&task=list.display&id='
                 . $formId
                 . '&cb_preview=1'
                 . '&cb_preview_until=' . $previewUntil
@@ -326,16 +326,16 @@ class HtmlView extends BaseHtmlView
             $toolbar->appendButton(
                 'Link',
                 'eye',
-                Text::_('COM_CONTENTBUILDER_NG_PREVIEW'),
+                Text::_('COM_CONTENTBUILDERNG_PREVIEW'),
                 $previewUrl,
                 '_blank'
             );
         }
 
         ToolbarHelper::help(
-            'COM_CONTENTBUILDER_NG_HELP_VIEWS_TITLE',
+            'COM_CONTENTBUILDERNG_HELP_VIEWS_TITLE',
             false,
-            Uri::base() . 'index.php?option=com_contentbuilder_ng&view=form&layout=help&tmpl=component'
+            Uri::base() . 'index.php?option=com_contentbuilderng&view=form&layout=help&tmpl=component'
         );
 
         // Compat template / listes

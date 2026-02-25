@@ -7,7 +7,7 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\View\Storage;
+namespace CB\Component\Contentbuilderng\Administrator\View\Storage;
 
 \defined('_JEXEC') or die;
 
@@ -16,7 +16,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
-use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
 {
@@ -42,7 +42,7 @@ class HtmlView extends BaseHtmlView
 
         // JS
         $wa = $app->getDocument()->getWebAssetManager();
-        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
+        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
 
 		if (!$this->frontend) {
             // 1️⃣ Récupération du WebAssetManager
@@ -50,7 +50,7 @@ class HtmlView extends BaseHtmlView
             $wa = $document->getWebAssetManager();
             $wa->addInlineStyle(
                 '.icon-logo_left{
-                    background-image:url(' . Uri::root(true) . '/media/com_contentbuilder_ng/images/logo_left.png);
+                    background-image:url(' . Uri::root(true) . '/media/com_contentbuilderng/images/logo_left.png);
                     background-size:contain;
                     background-repeat:no-repeat;
                     background-position:center;
@@ -81,7 +81,7 @@ class HtmlView extends BaseHtmlView
         try {
             $storageId  = (int) ($this->item->id ?? $app->input->getInt('id', 0));
             if ($storageId > 0) {
-                $factory = $app->bootComponent('com_contentbuilder_ng')->getMVCFactory();
+                $factory = $app->bootComponent('com_contentbuilderng')->getMVCFactory();
                 $fieldsModel = $factory->createModel('Storagefields', 'Administrator');
 
                 if (!$fieldsModel) {
@@ -105,10 +105,10 @@ class HtmlView extends BaseHtmlView
         }
 
         $isNew = ((int) ($this->item->id ?? 0) < 1);
-        $text  = $isNew ? Text::_('COM_CONTENTBUILDER_NG_NEW') : Text::_('COM_CONTENTBUILDER_NG_EDIT');
+        $text  = $isNew ? Text::_('COM_CONTENTBUILDERNG_NEW') : Text::_('COM_CONTENTBUILDERNG_EDIT');
 
         ToolbarHelper::title(
-            Text::_('COM_CONTENTBUILDER_NG') .' :: ' . ($isNew ? Text::_('COM_CONTENTBUILDER_NG_STORAGES') : ($this->item->title ?? ''))
+            Text::_('COM_CONTENTBUILDERNG') .' :: ' . ($isNew ? Text::_('COM_CONTENTBUILDERNG_STORAGES') : ($this->item->title ?? ''))
             . ' : <small><small>[ ' . $text . ' ]</small></small>',
             'logo_left'
         );
@@ -138,9 +138,9 @@ class HtmlView extends BaseHtmlView
         $isExternalTable = ((int) ($this->item->bytable ?? 0) === 1);
 
         if ($id > 0 && !$isExternalTable) {
-            ToolbarHelper::custom('datatable.sync', 'refresh', '', Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC'), false);
+            ToolbarHelper::custom('datatable.sync', 'refresh', '', Text::_('COM_CONTENTBUILDERNG_DATATABLE_SYNC'), false);
 
-            $syncTip = json_encode(Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNC_TIP'), JSON_UNESCAPED_UNICODE);
+            $syncTip = json_encode(Text::_('COM_CONTENTBUILDERNG_DATATABLE_SYNC_TIP'), JSON_UNESCAPED_UNICODE);
 
             $wa->addInlineScript(
                 "(function () {
@@ -178,16 +178,16 @@ class HtmlView extends BaseHtmlView
         }
         
         ToolbarHelper::deleteList(
-            Text::_('COM_CONTENTBUILDER_NG_DELETE_FIELDS_CONFIRM'),
+            Text::_('COM_CONTENTBUILDERNG_DELETE_FIELDS_CONFIRM'),
             'storage.listDelete',
-            Text::_('COM_CONTENTBUILDER_NG_DELETE_FIELDS')
+            Text::_('COM_CONTENTBUILDERNG_DELETE_FIELDS')
         );
 
         ToolbarHelper::cancel('storage.cancel', $isNew ? 'JTOOLBAR_CANCEL' : 'JTOOLBAR_CLOSE');
         ToolbarHelper::help(
-            'COM_CONTENTBUILDER_NG_HELP_STORAGES_TITLE',
+            'COM_CONTENTBUILDERNG_HELP_STORAGES_TITLE',
             false,
-            Uri::base() . 'index.php?option=com_contentbuilder_ng&view=storage&layout=help&tmpl=component'
+            Uri::base() . 'index.php?option=com_contentbuilderng&view=storage&layout=help&tmpl=component'
         );
 
         parent::display($tpl);

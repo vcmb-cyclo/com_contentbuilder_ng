@@ -9,7 +9,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
+namespace CB\Component\Contentbuilderng\Administrator\Controller;
 
 \defined('_JEXEC') or die;
 
@@ -17,7 +17,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Language\Text;
-use CB\Component\Contentbuilder_ng\Administrator\Service\DatatableService;
+use CB\Component\Contentbuilderng\Administrator\Service\DatatableService;
 
 class DatatableController extends BaseController
 {
@@ -33,25 +33,25 @@ class DatatableController extends BaseController
         }
 
         if (!$storageId) {
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&view=storage', false), 'Missing storage_id', 'error');
+            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=storage', false), 'Missing storage_id', 'error');
             return false;
         }
 
         try {
-            $container = Factory::getApplication()->bootComponent('com_contentbuilder_ng')->getContainer();
+            $container = Factory::getApplication()->bootComponent('com_contentbuilderng')->getContainer();
             $service   = $container->get(DatatableService::class);
 
             $breturn = $service->createForStorage($storageId);
             if ($breturn) {
                 $this->setRedirect(
-                    Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
-                    Text::_('COM_CONTENTBUILDER_NG_TABLE_CREATED'),
+                    Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),
+                    Text::_('COM_CONTENTBUILDERNG_TABLE_CREATED'),
                     'message'
                 );
             } else {
                 $this->setRedirect(
-                    Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
-                    Text::_('COM_CONTENTBUILDER_NG_TABLE_ALREADY_EXISTS'),
+                    Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),
+                    Text::_('COM_CONTENTBUILDERNG_TABLE_ALREADY_EXISTS'),
                     'warning'
                 );
             }
@@ -59,7 +59,7 @@ class DatatableController extends BaseController
 
         } catch (\Throwable $e) {
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
+                Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),
                 $e->getMessage(),
                 'error'
             );
@@ -80,7 +80,7 @@ class DatatableController extends BaseController
 
         if (!$storageId) {
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&view=storage', false),
+                Route::_('index.php?option=com_contentbuilderng&view=storage', false),
                 'Missing storage_id',
                 'error'
             );
@@ -91,14 +91,14 @@ class DatatableController extends BaseController
             (new DatatableService())->syncColumnsFromFields($storageId);
 
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
-                Text::_('COM_CONTENTBUILDER_NG_DATATABLE_SYNCED'),
+                Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),
+                Text::_('COM_CONTENTBUILDERNG_DATATABLE_SYNCED'),
                 'message'
             );
             return true;
         } catch (\Throwable $e) {
             $this->setRedirect(
-                Route::_('index.php?option=com_contentbuilder_ng&task=storage.edit&id=' . $storageId, false),
+                Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),
                 $e->getMessage(),
                 'error'
             );

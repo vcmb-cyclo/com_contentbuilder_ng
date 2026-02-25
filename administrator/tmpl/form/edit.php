@@ -16,14 +16,14 @@ use Joomla\CMS\Application\AdministratorApplication;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 ?>
 <?php
 /** @var AdministratorApplication $app */
 $app = Factory::getApplication();
 $session = $app->getSession();
-$helperClass = 'CB\\Component\\Contentbuilder_ng\\Administrator\\Helper\\ContentbuilderHelper';
-$hasContentbuilderHelper = class_exists($helperClass);
+$helperClass = 'CB\\Component\\Contentbuilderng\\Administrator\\Helper\\ContentbuilderngHelper';
+$hasContentbuilderngHelper = class_exists($helperClass);
 $wa = $app->getDocument()->getWebAssetManager();
 $wa->addInlineStyle(
     '.saveorder.btn{background-color:#fff;border-color:#ced4da;color:#1b1b1b}'
@@ -60,11 +60,11 @@ $isBreezingFormsType = in_array(
     ['com_breezingforms', 'com_breezingforms_ng'],
     true
 );
-$canEditByType = (string) ($this->item->type ?? '') !== 'com_contentbuilder_ng';
+$canEditByType = (string) ($this->item->type ?? '') !== 'com_contentbuilderng';
 $breezingFormsEditableToken = '{BreezingForms: ' . (isset($this->item->type_name) ? (string) $this->item->type_name : '') . '}';
 $breezingFormsProvidedMessage = '<div class="alert alert-success d-inline-flex align-items-center py-2 px-3 mb-2" role="status">'
     . '<span class="badge bg-success me-2">&#10003;</span>'
-    . '<span>' . htmlspecialchars(Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TEMPLATE_PROVIDED_BY_BREEZINGFORMS'), ENT_QUOTES, 'UTF-8') . '</span>'
+    . '<span>' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_EDITABLE_TEMPLATE_PROVIDED_BY_BREEZINGFORMS'), ENT_QUOTES, 'UTF-8') . '</span>'
     . '</div>';
 
 $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, $formId): string {
@@ -76,7 +76,7 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
             : ' <span class="ms-1 fa-solid fa-sort fa-solid fa-sort-down" aria-hidden="true"></span>')
         : '';
     $url = Route::_(
-        'index.php?option=com_contentbuilder_ng&task=form.display&layout=edit&id=' . $formId
+        'index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=' . $formId
             . '&list[ordering]=' . $field . '&list[direction]=' . $nextDir
     );
 
@@ -93,16 +93,16 @@ $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
 };
 
 $permissionColumns = [
-    ['key' => 'listaccess', 'label' => 'COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_LIST_ACCESS_TIP'],
-    ['key' => 'view', 'label' => 'COM_CONTENTBUILDER_NG_PERM_VIEW', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_VIEW_TIP'],
-    ['key' => 'new', 'label' => 'COM_CONTENTBUILDER_NG_PERM_NEW', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_NEW_TIP'],
-    ['key' => 'edit', 'label' => 'COM_CONTENTBUILDER_NG_PERM_EDIT', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_EDIT_TIP'],
-    ['key' => 'delete', 'label' => 'COM_CONTENTBUILDER_NG_PERM_DELETE', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_DELETE_TIP'],
-    ['key' => 'state', 'label' => 'COM_CONTENTBUILDER_NG_PERM_STATE', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_STATE_TIP'],
-    ['key' => 'publish', 'label' => 'COM_CONTENTBUILDER_NG_PUBLISH', 'tip' => 'COM_CONTENTBUILDER_NG_PUBLISH_TIP'],
-    ['key' => 'fullarticle', 'label' => 'COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_FULL_ARTICLE_TIP'],
-    ['key' => 'language', 'label' => 'COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_CHANGE_LANGUAGE_TIP'],
-    ['key' => 'rating', 'label' => 'COM_CONTENTBUILDER_NG_PERM_RATING', 'tip' => 'COM_CONTENTBUILDER_NG_PERM_RATING_TIP'],
+    ['key' => 'listaccess', 'label' => 'COM_CONTENTBUILDERNG_PERM_LIST_ACCESS', 'tip' => 'COM_CONTENTBUILDERNG_PERM_LIST_ACCESS_TIP'],
+    ['key' => 'view', 'label' => 'COM_CONTENTBUILDERNG_PERM_VIEW', 'tip' => 'COM_CONTENTBUILDERNG_PERM_VIEW_TIP'],
+    ['key' => 'new', 'label' => 'COM_CONTENTBUILDERNG_PERM_NEW', 'tip' => 'COM_CONTENTBUILDERNG_PERM_NEW_TIP'],
+    ['key' => 'edit', 'label' => 'COM_CONTENTBUILDERNG_PERM_EDIT', 'tip' => 'COM_CONTENTBUILDERNG_PERM_EDIT_TIP'],
+    ['key' => 'delete', 'label' => 'COM_CONTENTBUILDERNG_PERM_DELETE', 'tip' => 'COM_CONTENTBUILDERNG_PERM_DELETE_TIP'],
+    ['key' => 'state', 'label' => 'COM_CONTENTBUILDERNG_PERM_STATE', 'tip' => 'COM_CONTENTBUILDERNG_PERM_STATE_TIP'],
+    ['key' => 'publish', 'label' => 'COM_CONTENTBUILDERNG_PUBLISH', 'tip' => 'COM_CONTENTBUILDERNG_PUBLISH_TIP'],
+    ['key' => 'fullarticle', 'label' => 'COM_CONTENTBUILDERNG_PERM_FULL_ARTICLE', 'tip' => 'COM_CONTENTBUILDERNG_PERM_FULL_ARTICLE_TIP'],
+    ['key' => 'language', 'label' => 'COM_CONTENTBUILDERNG_PERM_CHANGE_LANGUAGE', 'tip' => 'COM_CONTENTBUILDERNG_PERM_CHANGE_LANGUAGE_TIP'],
+    ['key' => 'rating', 'label' => 'COM_CONTENTBUILDERNG_PERM_RATING', 'tip' => 'COM_CONTENTBUILDERNG_PERM_RATING_TIP'],
 ];
 
 $defaultCheckedForNewPermissions = ['listaccess' => true, 'view' => true, 'new' => true];
@@ -146,7 +146,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
     const cbSaveAnimationDurationMs = 500;
     const cbIsBreezingFormsType = <?php echo $isBreezingFormsType ? 'true' : 'false'; ?>;
     const cbBreezingFormsEditableToken = <?php echo json_encode($breezingFormsEditableToken, JSON_UNESCAPED_UNICODE); ?>;
-    const cbEditByTypeEnableConfirm = <?php echo json_encode(Text::_('COM_CONTENTBUILDER_NG_TYPE_EDIT_ENABLE_BF_CONFIRM'), JSON_UNESCAPED_UNICODE); ?>;
+    const cbEditByTypeEnableConfirm = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_TYPE_EDIT_ENABLE_BF_CONFIRM'), JSON_UNESCAPED_UNICODE); ?>;
     let cbLastRowId = '';
     let cbAjaxBusy = false;
     let cbSaveButtonTimer = null;
@@ -290,6 +290,61 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         return map[String(task || '')] || null;
     }
 
+    function cbUpdateToggleIconClasses(container, enabled) {
+        if (!container || !container.classList) {
+            return;
+        }
+
+        var icons = [];
+
+        function collectIcon(el) {
+            if (!el || !el.classList) {
+                return;
+            }
+
+            var className = String(el.className || '');
+            if (className.indexOf('fa-') === -1 && className.indexOf('icon-') === -1) {
+                return;
+            }
+
+            if (icons.indexOf(el) === -1) {
+                icons.push(el);
+            }
+        }
+
+        collectIcon(container);
+        if (typeof container.querySelectorAll === 'function') {
+            container.querySelectorAll('span, i').forEach(collectIcon);
+        }
+
+        icons.forEach(function(icon) {
+            var className = String(icon.className || '');
+            var isFontAwesomeIcon = className.indexOf('fa-') !== -1;
+            var isLegacyJoomlaIcon = className.indexOf('icon-') !== -1;
+
+            icon.classList.remove(
+                'fa-check',
+                'fa-circle-xmark',
+                'fa-xmark',
+                'fa-times',
+                'icon-publish',
+                'icon-unpublish',
+                'icon-check',
+                'icon-times',
+                'icon-checkbox',
+                'icon-checkbox-partial'
+            );
+
+            if (isFontAwesomeIcon) {
+                icon.classList.add('fa-solid', enabled ? 'fa-check' : 'fa-circle-xmark');
+            }
+
+            if (isLegacyJoomlaIcon) {
+                icon.classList.add(enabled ? 'icon-publish' : 'icon-unpublish');
+            }
+        });
+    }
+
     function cbApplyAjaxToggleState(actionElement, task) {
         if (!actionElement) {
             return;
@@ -325,10 +380,21 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             actionElement.classList.toggle('active', !!meta.enabled);
         }
 
-        var icon = actionElement.querySelector('span[class*="fa-"]');
-        if (icon && icon.classList) {
-            icon.classList.remove('fa-solid fa-check', 'fa-solid fa-circle-xmark');
-            icon.classList.add(meta.enabled ? 'fa-solid fa-check' : 'fa-solid fa-circle-xmark');
+        var visualHost = actionElement;
+        if (typeof actionElement.closest === 'function') {
+            var host = actionElement.closest('.tbody-icon, .js-grid-item-action, button, a');
+            if (host) {
+                visualHost = host;
+            }
+        }
+
+        if (visualHost !== actionElement && visualHost.classList) {
+            visualHost.classList.toggle('active', !!meta.enabled);
+        }
+
+        cbUpdateToggleIconClasses(visualHost, !!meta.enabled);
+        if (visualHost !== actionElement) {
+            cbUpdateToggleIconClasses(actionElement, !!meta.enabled);
         }
     }
 
@@ -430,6 +496,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         var formData = new FormData(form);
         formData.set('task', task);
         formData.set('cb_ajax', '1');
+        formData.set('option', 'com_contentbuilderng');
 
         if (rowId) {
             formData.delete('cid[]');
@@ -437,7 +504,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             formData.set('boxchecked', '1');
         }
 
-        fetch(form.getAttribute('action') || 'index.php', {
+        var endpoint = form.getAttribute('action') || 'index.php';
+        fetch(endpoint, {
             method: 'POST',
             body: formData,
             credentials: 'same-origin',
@@ -587,19 +655,19 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
                 if (document.getElementById('name').value == '') {
                     error = true;
-                    alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_NG_ERROR_ENTER_FORMNAME')); ?>");
+                    alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_ERROR_ENTER_FORMNAME')); ?>");
                 } else if (nodes) {
                     if (typeof nodes.value != 'undefined') {
                         if (nodes.checked && document.adminForm['elementLabels[' + nodes.value + ']'].value == '') {
                             error = true;
-                            alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_NG_ERROR_ENTER_FORMNAME_ALL')); ?>");
+                            alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_ERROR_ENTER_FORMNAME_ALL')); ?>");
                             break;
                         }
                     } else {
                         for (var i = 0; i < nodes.length; i++) {
                             if (nodes[i].checked && document.adminForm['elementLabels[' + nodes[i].value + ']'].value == '') {
                                 error = true;
-                                alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_NG_ERROR_ENTER_FORMNAME_ALL')); ?>");
+                                alert("<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_ERROR_ENTER_FORMNAME_ALL')); ?>");
                                 break;
                             }
                         }
@@ -794,7 +862,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
         var currentTemplate = cbGetEditorFieldValue('editable_template');
         if (cbTemplateHasContent(currentTemplate)) {
-            var shouldContinue = confirm("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_NG_INITIALISE_OVERWRITE_CONFIRM')); ?>");
+            var shouldContinue = confirm("<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_INITIALISE_OVERWRITE_CONFIRM')); ?>");
             if (!shouldContinue) {
                 return;
             }
@@ -821,7 +889,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
         var currentTemplate = cbGetEditorFieldValue('email_admin_template');
         if (cbTemplateHasContent(currentTemplate)) {
-            var shouldContinue = confirm("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_NG_INITIALISE_OVERWRITE_CONFIRM')); ?>");
+            var shouldContinue = confirm("<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_INITIALISE_OVERWRITE_CONFIRM')); ?>");
             if (!shouldContinue) {
                 return;
             }
@@ -848,7 +916,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
         var currentTemplate = cbGetEditorFieldValue('email_template');
         if (cbTemplateHasContent(currentTemplate)) {
-            var shouldContinue = confirm("<?php echo addslashes(Text::_('COM_CONTENTBUILDER_NG_INITIALISE_OVERWRITE_CONFIRM')); ?>");
+            var shouldContinue = confirm("<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_INITIALISE_OVERWRITE_CONFIRM')); ?>");
             if (!shouldContinue) {
                 return;
             }
@@ -942,7 +1010,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         Joomla.listItemTask = listItemTask;
     }
 
-    function contentbuilder_ng_selectAll(checker, type) {
+    function contentbuilderng_selectAll(checker, type) {
         var type = type == 'fe' ? 'jform[perms_fe][' : 'jform[perms][';
         for (var i = 0; i < document.adminForm.elements.length; i++) {
             if (typeof document.adminForm.elements[i].name != 'undefined' && document.adminForm.elements[i].name.startsWith(type) && document.adminForm.elements[i].name.endsWith(checker.value + "]")) {
@@ -1175,7 +1243,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         }
         echo HTMLHelper::_('uitab.startTabSet', 'view-pane', ['active' => $activeViewTab]);
         // Premier onglet
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUILDER_NG_VIEW'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUILDERNG_VIEW'));
         ?>
 
         <table width="100%">
@@ -1188,8 +1256,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <div class="col-12 col-lg-3">
                                 <label for="name">
                                     <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_VIEW_NAME_TIP'); ?>"><b>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_NAME'); ?>:
+                                        title="<?php echo Text::_('COM_CONTENTBUILDERNG_VIEW_NAME_TIP'); ?>"><b>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_NAME'); ?>:
                                         </b></span>
                                 </label>
                                 <input class="form-control form-control-sm" type="text" name="jform[name]" id="name" size="32"
@@ -1199,8 +1267,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <div class="col-12 col-lg-3">
                                 <label for="tag">
                                     <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_VIEW_TAG_TIP'); ?>"><b>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_TAG'); ?>:
+                                        title="<?php echo Text::_('COM_CONTENTBUILDERNG_VIEW_TAG_TIP'); ?>"><b>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_TAG'); ?>:
                                         </b></span>
                                 </label>
                                 <input class="form-control form-control-sm" type="text" name="jform[tag]" id="tag" size="32"
@@ -1211,8 +1279,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                 <div class="d-flex align-items-center gap-2 flex-nowrap">
                                     <label for="theme_plugin" class="mb-0">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_THEME_PLUGIN_TIP'); ?>"><b>
-                                                <?php echo Text::_('COM_CONTENTBUILDER_NG_THEME_PLUGIN'); ?>:
+                                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_THEME_PLUGIN_TIP'); ?>"><b>
+                                                <?php echo Text::_('COM_CONTENTBUILDERNG_THEME_PLUGIN'); ?>:
                                             </b></span>
                                     </label>
                                     <select class="form-select-sm w-auto" name="jform[theme_plugin]" id="theme_plugin">
@@ -1233,8 +1301,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                 <?php if ((int) ($this->item->id ?? 0) > 0) : ?>
                                     <div class="d-inline-flex align-items-center gap-2 ms-sm-4 ps-sm-2">
                                         <span class="fw-semibold editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH_TIP'); ?>">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'); ?>:
+                                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_PUBLISH_TIP'); ?>">
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_PUBLISHED'); ?>:
                                         </span>
                                         <?php
                                         $publishedToggleHtml = HTMLHelper::_(
@@ -1294,8 +1362,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         ?>
                             <label for="types">
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_TIP'); ?>"><b>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE'); ?>:
+                                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_TIP'); ?>"><b>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE'); ?>:
                                     </b></span>
                             </label>
                             <select class="form-select-sm" name="jform[type]">
@@ -1320,7 +1388,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <div class="alert">
                                 <label for="name">
                                     <b>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_FORM_SOURCE'); ?>:
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_FORM_SOURCE'); ?>:
                                     </b>
                                 </label>
                                 <?php
@@ -1350,8 +1418,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
                                 <label for="types">
                                     <span class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_TIP'); ?>"><b>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE'); ?>:
+                                        title="<?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_TIP'); ?>"><b>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE'); ?>:
                                         </b></span>
                                 </label>
                                 <?php echo $this->item->type ?>
@@ -1372,8 +1440,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <fieldset>
                                 <legend>
                                     <h3 class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY'); ?>
+                                        title="<?php echo Text::_('COM_CONTENTBUILDERNG_DISPLAY_TIP'); ?>">
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_DISPLAY'); ?>
                                     </h3>
                                 </legend>
 
@@ -1381,13 +1449,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                 <div class="cb-display-in-row">
                                     <select class="form-select-sm" name="jform[display_in]">
                                         <option value="0" <?php echo $this->item->display_in == 0 ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_FRONTEND') ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_DISPLAY_FRONTEND') ?>
                                         </option>
                                         <option value="1" <?php echo $this->item->display_in == 1 ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_BACKEND') ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_DISPLAY_BACKEND') ?>
                                         </option>
                                         <option value="2" <?php echo $this->item->display_in == 2 ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_BOTH') ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_DISPLAY_BOTH') ?>
                                         </option>
                                     </select>
                                 </div>
@@ -1399,8 +1467,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <fieldset>
                                 <legend>
                                     <h3 class="editlinktip hasTip"
-                                        title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_COLUMNS_TIP'); ?>">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW'); ?>
+                                        title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_COLUMNS_TIP'); ?>">
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW'); ?>
                                     </h3>
                                 </legend>
 
@@ -1409,15 +1477,15 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <div class="col-12 col-xl-4">
                                         <div class="border rounded bg-white p-3 h-100">
                                             <h4 class="h6 text-secondary mb-2">
-                                                <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_DATA_OPTIONS'); ?>
+                                                <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_DATA_OPTIONS'); ?>
                                             </h4>
                                             <div class="d-flex flex-wrap align-items-center gap-3">
                                                 <div>
                                                     <input type="hidden" name="jform[show_id_column]" value="0" />
                                                     <?php echo $renderCheckbox('jform[show_id_column]', 'show_id_column', (bool) $this->item->show_id_column); ?>
                                                     <label class="form-check-label" for="show_id_column">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_ID_COLUMN_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ID_COLUMN'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_ID_COLUMN_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_ID_COLUMN'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1425,8 +1493,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[select_column]" value="0" />
                                                     <?php echo $renderCheckbox('jform[select_column]', 'select_column', (bool) $this->item->select_column); ?>
                                                     <label class="form-check-label" for="select_column">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_SELECT_COLUMN_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_SELECT_COLUMN'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_SELECT_COLUMN_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_SELECT_COLUMN'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1434,8 +1502,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[list_state]" value="0" />
                                                     <?php echo $renderCheckbox('jform[list_state]', 'list_state', (bool) $this->item->list_state); ?>
                                                     <label class="form-check-label" for="list_state">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_STATE_COLUMN_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_STATE'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_STATE_COLUMN_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_EDIT_STATE'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1443,8 +1511,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[list_publish]" value="0" />
                                                     <?php echo $renderCheckbox('jform[list_publish]', 'list_publish', (bool) $this->item->list_publish); ?>
                                                     <label class="form-check-label" for="list_publish">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PUBLISH_COLUMN_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISH'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_PUBLISH_COLUMN_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_PUBLISH'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1452,8 +1520,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[list_language]" value="0" />
                                                     <?php echo $renderCheckbox('jform[list_language]', 'list_language', (bool) $this->item->list_language); ?>
                                                     <label class="form-check-label" for="list_language">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_LANGUAGE_COLUMN_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_LANGUAGE'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_LANGUAGE_COLUMN_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_LANGUAGE'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1461,8 +1529,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[list_article]" value="0" />
                                                     <?php echo $renderCheckbox('jform[list_article]', 'list_article', (bool) $this->item->list_article); ?>
                                                     <label class="form-check-label" for="list_article">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_ARTICLE_COLUMN_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_ARTICLE_COLUMN_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_ARTICLE'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1470,8 +1538,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[list_author]" value="0" />
                                                     <?php echo $renderCheckbox('jform[list_author]', 'list_author', (bool) $this->item->list_author); ?>
                                                     <label class="form-check-label" for="list_author">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_AUTHOR_COLUMN_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_AUTHOR'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_AUTHOR_COLUMN_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_AUTHOR'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1479,8 +1547,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[metadata]" value="0" />
                                                     <?php echo $renderCheckbox('jform[metadata]', 'metadata', (bool) $this->item->metadata); ?>
                                                     <label class="form-check-label" for="metadata">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_METADATA_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_METADATA'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_METADATA_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_METADATA'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1491,15 +1559,15 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <div class="col-12 col-xl-4">
                                         <div class="border rounded bg-white p-3 h-100">
                                             <h4 class="h6 text-secondary mb-2">
-                                                <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_BUTTON_OPTIONS'); ?>
+                                                <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_BUTTON_OPTIONS'); ?>
                                             </h4>
                                             <div class="d-flex flex-wrap align-items-center gap-3">
                                                 <div>
                                                     <input type="hidden" name="jform[edit_button]" value="0" />
                                                     <?php echo $renderCheckbox('jform[edit_button]', 'edit_button', (bool) $this->item->edit_button); ?>
                                                     <label class="form-check-label" for="edit_button">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_EDIT_BUTTON_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_EDIT_BUTTON'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_EDIT_BUTTON_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_EDIT_BUTTON'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1507,8 +1575,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[new_button]" value="0" />
                                                     <?php echo $renderCheckbox('jform[new_button]', 'new_button', (bool) ($this->item->new_button ?? 0)); ?>
                                                     <label class="form-check-label" for="new_button">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_NEW_BUTTON_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_NEW'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_NEW_BUTTON_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_NEW'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1516,8 +1584,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[export_xls]" value="0" />
                                                     <?php echo $renderCheckbox('jform[export_xls]', 'export_xls', (bool) $this->item->export_xls); ?>
                                                     <label class="form-check-label" for="export_xls">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_XLSEXPORT_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_XLSEXPORT'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_XLSEXPORT_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_XLSEXPORT'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1525,8 +1593,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[print_button]" value="0" />
                                                     <?php echo $renderCheckbox('jform[print_button]', 'print_button', (bool) $this->item->print_button); ?>
                                                     <label class="form-check-label" for="print_button">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PRINTBUTTON_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PRINTBUTTON'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_PRINTBUTTON_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_PRINTBUTTON'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1535,8 +1603,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[button_bar_sticky]" value="0" />
                                                     <?php echo $renderCheckbox('jform[button_bar_sticky]', 'button_bar_sticky', (bool) ($this->item->button_bar_sticky ?? 0)); ?>
                                                     <label class="form-check-label" for="button_bar_sticky">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_BUTTON_BAR_STICKY_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_BUTTON_BAR_STICKY'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_BUTTON_BAR_STICKY_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_BUTTON_BAR_STICKY'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1547,15 +1615,15 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <div class="col-12 col-xl-4">
                                         <div class="border rounded bg-white p-3 h-100">
                                             <h4 class="h6 text-secondary mb-2">
-                                                <?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_OPTIONS'); ?>
+                                                <?php echo Text::_('COM_CONTENTBUILDERNG_DISPLAY_OPTIONS'); ?>
                                             </h4>
                                             <div class="d-flex flex-wrap align-items-center gap-3">
                                                 <div>
                                                     <input type="hidden" name="jform[show_filter]" value="0" />
                                                     <?php echo $renderCheckbox('jform[show_filter]', 'show_filter', (bool) $this->item->show_filter); ?>
                                                     <label class="form-check-label" for="show_filter">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_FILTER_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_FILTER_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_FILTER'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1563,8 +1631,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[show_records_per_page]" value="0" />
                                                     <?php echo $renderCheckbox('jform[show_records_per_page]', 'show_records_per_page', (bool) $this->item->show_records_per_page); ?>
                                                     <label class="form-check-label" for="show_records_per_page">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_RECORDS_PER_PAGE_TIP'); ?>">
-                                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_LIMIT_LABEL'); ?>
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_RECORDS_PER_PAGE_TIP'); ?>">
+                                                            <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_LIMIT_LABEL'); ?>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -1572,7 +1640,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                                     <input type="hidden" name="jform[show_preview_link]" value="0" />
                                                     <?php echo $renderCheckbox('jform[show_preview_link]', 'show_preview_link', (bool) ($this->item->show_preview_link ?? 0)); ?>
                                                     <label class="form-check-label" for="show_preview_link">
-                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_PREVIEW_LINK_TIP'); ?>">
+                                                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_PREVIEW_LINK_TIP'); ?>">
                                                             <span class="fa-solid fa-eye" aria-hidden="true"></span>
                                                         </span>
                                                     </label>
@@ -1589,14 +1657,14 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <fieldset>
                                 <legend>
                                     <h3>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_RATING'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_RATING'); ?>
                                     </h3>
                                 </legend>
                                 <div class="alert">
                                     <input type="hidden" name="jform[list_rating]" value="0" />
                                     <?php echo $renderCheckbox('jform[list_rating]', 'list_rating', (bool) $this->item->list_rating); ?>
                                     <label class="form-check-label" for="list_rating">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_RATING'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_RATING'); ?>
                                     </label>
 
                                     <select class="form-select-sm" name="jform[rating_slots]" id="rating_slots">
@@ -1607,7 +1675,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                         <option value="5" <?php echo $this->item->rating_slots == 5 ? ' selected="selected"' : ''; ?>>5</option>
                                     </select>
                                     <label for="rating_slots">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_RATING_SLOTS'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_RATING_SLOTS'); ?>
                                     </label>
                                 </div>
                             </fieldset>
@@ -1617,30 +1685,30 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <fieldset>
                                 <legend>
                                     <h3>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_SORTING'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_SORTING'); ?>
                                     </h3>
                                 </legend>
                                 <div class="alert">
                                     <label for="initial_sort_order">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_INITIAL_SORT_ORDER_TIP'); ?>"><b>
-                                                <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIAL_SORT_ORDER'); ?>:
+                                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_TIP'); ?>"><b>
+                                                <?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER'); ?>:
                                             </b></span>
                                     </label>
                                     <select class="form-select-sm"
                                         onchange="if(this.selectedIndex == 3) { document.getElementById('randUpdate').style.display='block'; } else { document.getElementById('randUpdate').style.display='none'; } "
                                         name="jform[initial_sort_order]" id="initial_sort_order" style="max-width: 200px;">
                                         <option value="-1">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIAL_SORT_ORDER_BY_ID'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_BY_ID'); ?>
                                         </option>
                                         <option value="Rating" <?php echo $this->item->initial_sort_order == 'Rating' ? ' selected="selected"' : ''; ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_RATING'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_RATING'); ?>
                                         </option>
                                         <option value="RatingCount" <?php echo $this->item->initial_sort_order == 'RatingCount' ? ' selected="selected"' : ''; ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_RATING_COUNT'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_RATING_COUNT'); ?>
                                         </option>
                                         <option value="Rand" <?php echo $this->item->initial_sort_order == 'Rand' ? ' selected="selected"' : ''; ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIAL_SORT_ORDER_RAND'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_RAND'); ?>
                                         </option>
                                         <?php
                                         foreach ($this->elements as $sortable) {
@@ -1655,7 +1723,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <span id="randUpdate"
                                         style="display: <?php echo $this->item->initial_sort_order == 'Rand' ? 'block' : 'none' ?>;">
                                         <b>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_RAND_UPDATE'); ?>:
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_RAND_UPDATE'); ?>:
                                         </b>
                                         <input class="form-control form-control-sm" type="text" name="jform[rand_update]"
                                             value="<?php echo $this->item->rand_update; ?>" />
@@ -1663,7 +1731,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <select class="form-select-sm" name="jform[initial_sort_order2]" id="initial_sort_order2"
                                         style="max-width: 200px;">
                                         <option value="-1">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_NONE'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_NONE'); ?>
                                         </option>
                                         <?php
                                         foreach ($this->elements as $sortable) {
@@ -1678,7 +1746,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <select class="form-select-sm" name="jform[initial_sort_order3]" id="initial_sort_order3"
                                         style="max-width: 200px;">
                                         <option value="-1">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_NONE'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_NONE'); ?>
                                         </option>
                                         <?php
                                         foreach ($this->elements as $sortable) {
@@ -1694,12 +1762,12 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <input class="form-check-input" type="radio" name="jform[initial_order_dir]"
                                         id="initial_order_dir" value="asc" <?php echo $this->item->initial_order_dir == 'asc' ? ' checked="checked"' : ''; ?> /> <label
                                         for="initial_order_dir">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIAL_SORT_ORDER_ASC'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_ASC'); ?>
                                     </label>
                                     <input class="form-check-input" type="radio" name="jform[initial_order_dir]"
                                         id="initial_order_dir_desc" value="desc" <?php echo $this->item->initial_order_dir == 'desc' ? ' checked="checked"' : ''; ?> /> <label
                                         for="initial_order_dir_desc">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIAL_SORT_ORDER_DESC'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_DESC'); ?>
                                     </label>
                                 </div>
                             </fieldset>
@@ -1709,14 +1777,14 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <fieldset>
                                 <legend>
                                     <h3>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_BUTTONS'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_BUTTONS'); ?>
                                     </h3>
                                 </legend>
                                 <div class="alert">
                                     <label for="save_button_title">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SAVE_BUTTON_TITLE_TIP'); ?>"><b>
-                                                <?php echo Text::_('COM_CONTENTBUILDER_NG_SAVE_BUTTON_TITLE'); ?>:
+                                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_SAVE_BUTTON_TITLE_TIP'); ?>"><b>
+                                                <?php echo Text::_('COM_CONTENTBUILDERNG_SAVE_BUTTON_TITLE'); ?>:
                                             </b></span>
                                     </label>
                                     <input class="form-control form-control-sm" type="text" id="save_button_title"
@@ -1725,8 +1793,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
                                     <label for="apply_button_title">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_APPLY_BUTTON_TITLE_TIP'); ?>"><b>
-                                                <?php echo Text::_('COM_CONTENTBUILDER_NG_APPLY_BUTTON_TITLE'); ?>:
+                                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_APPLY_BUTTON_TITLE_TIP'); ?>"><b>
+                                                <?php echo Text::_('COM_CONTENTBUILDERNG_APPLY_BUTTON_TITLE'); ?>:
                                             </b></span>
                                     </label>
                                     <input class="form-control form-control-sm" type="text" id="apply_button_title"
@@ -1740,7 +1808,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <fieldset>
                                 <legend>
                                     <h3>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_MISC'); ?>
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_MISC'); ?>
                                     </h3>
                                 </legend>
                                 <div class="alert">
@@ -1748,8 +1816,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <?php echo $renderCheckbox('jform[filter_exact_match]', 'filter_exact_match', (bool) $this->item->filter_exact_match); ?>
                                     <label class="form-check-label" for="filter_exact_match">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_EXACT_MATCH_TIP'); ?>">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_EXACT_MATCH'); ?>
+                                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_FILTER_EXACT_MATCH_TIP'); ?>">
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_FILTER_EXACT_MATCH'); ?>
                                         </span>
                                     </label>
 
@@ -1757,8 +1825,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <?php echo $renderCheckbox('jform[use_view_name_as_title]', 'use_view_name_as_title', (bool) $this->item->use_view_name_as_title); ?>
                                     <label class="form-check-label" for="use_view_name_as_title">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_USE_VIEW_NAME_AS_TITLE_TIP'); ?>">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_USE_VIEW_NAME_AS_TITLE'); ?>
+                                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_USE_VIEW_NAME_AS_TITLE_TIP'); ?>">
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_USE_VIEW_NAME_AS_TITLE'); ?>
                                         </span>
                                     </label>
 
@@ -1766,8 +1834,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <?php echo $renderCheckbox('jform[published_only]', 'published_only', (bool) $this->item->published_only); ?>
                                     <label class="form-check-label" for="published_only">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_ONLY_TIP'); ?>">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PUBLISHED_ONLY'); ?>
+                                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_PUBLISHED_ONLY_TIP'); ?>">
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_PUBLISHED_ONLY'); ?>
                                         </span>
                                     </label>
 
@@ -1775,8 +1843,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <?php echo $renderCheckbox('jform[allow_external_filter]', 'allow_external_filter', (bool) $this->item->allow_external_filter); ?>
                                     <label class="form-check-label" for="allow_external_filter">
                                         <span class="editlinktip hasTip"
-                                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_ALLOW_EXTERNAL_FILTER_TIP'); ?>">
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ALLOW_EXTERNAL_FILTER'); ?>
+                                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_ALLOW_EXTERNAL_FILTER_TIP'); ?>">
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_ALLOW_EXTERNAL_FILTER'); ?>
                                         </span>
                                     </label>
                                 </div>
@@ -1799,59 +1867,59 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     <thead>
                         <tr>
                             <th width="5">
-                                <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_ID'), 'id'); ?>
+                                <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_ID'), 'id'); ?>
                             </th>
                             <th width="20">
                                 <?php echo HTMLHelper::_('grid.checkall'); ?>
                             </th>
                             <th class="cb-col-label">
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LABEL_TIP'); ?>">
-                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_LABEL'), 'label'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_LABEL_TIP'); ?>">
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_LABEL'), 'label'); ?>
                                 </span>
                             </th>
                             <th class="cb-col-toggle">
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE_TIP'); ?>">
-                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_LIST_INCLUDE'), 'list_include'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_LIST_INCLUDE_TIP'); ?>">
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_LIST_INCLUDE'), 'list_include'); ?>
                                 </span>
                             </th>
                             <th class="cb-col-toggle">
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE_TIP'); ?>">
-                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_SEARCH_INCLUDE'), 'search_include'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_SEARCH_INCLUDE_TIP'); ?>">
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_SEARCH_INCLUDE'), 'search_include'); ?>
                                 </span>
                             </th>
                             <th class="cb-col-toggle">
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LINKABLE_TIP'); ?>">
-                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_LINKABLE'), 'linkable'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_LINKABLE_TIP'); ?>">
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_LINKABLE'), 'linkable'); ?>
                                 </span>
                             </th>
                             <th class="cb-col-editable">
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TIP'); ?>">
-                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_EDITABLE'), 'editable'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_EDITABLE_TIP'); ?>">
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_EDITABLE'), 'editable'); ?>
                                 </span>
                             </th>
                             <th>
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_WORDWRAP_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_WORDWRAP'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_LIST_WORDWRAP_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_WORDWRAP'); ?>
                                 </span>
                             </th>
                             <th width="150">
                                 <span class="editlinktip hasTip"
-                                    title="<?php echo ContentbuilderLegacyHelper::allhtmlentities(Text::_('COM_CONTENTBUILDER_NG_LIST_ITEM_WRAPPER_TIP')); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_ITEM_WRAPPER'); ?>
+                                    title="<?php echo ContentbuilderLegacyHelper::allhtmlentities(Text::_('COM_CONTENTBUILDERNG_LIST_ITEM_WRAPPER_TIP')); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_ITEM_WRAPPER'); ?>
                                 </span>
                             </th>
                             <th class="cb-col-toggle">
-                                <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'published'); ?>
+                                <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_PUBLISHED'), 'published'); ?>
                             </th>
                             <th width="120" class="cb-order-head">
                                 <?php if (!empty($this->elements) && is_array($this->elements)) : ?>
-                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_ORDERBY'), 'ordering'); ?>
+                                    <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_ORDERBY'), 'ordering'); ?>
                                     <?php //TODO: dragndrop if ($this->ordering) echo HTMLHelper::_('grid.order',  $this->elements );   
                                     ?>
                                     <?php echo HTMLHelper::_('grid.order', $this->elements); ?>
@@ -1867,11 +1935,11 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         for ($i = 0; $i < $n; $i++) {
                             $row = $this->elements[$i];
                             $checked = HTMLHelper::_('grid.id', $i, $row->id);
-                            $published = $hasContentbuilderHelper ? $helperClass::listPublish('form', $row, $i) : '';
-                            $list_include = $hasContentbuilderHelper ? $helperClass::listIncludeInList('form', $row, $i) : '';
-                            $search_include = $hasContentbuilderHelper ? $helperClass::listIncludeInSearch('form', $row, $i) : '';
-                            $linkable = $hasContentbuilderHelper ? $helperClass::listLinkable('form', $row, $i) : '';
-                            $editable = $hasContentbuilderHelper ? $helperClass::listEditable('form', $row, $i) : '';
+                            $published = $hasContentbuilderngHelper ? $helperClass::listPublish('form', $row, $i) : '';
+                            $list_include = $hasContentbuilderngHelper ? $helperClass::listIncludeInList('form', $row, $i) : '';
+                            $search_include = $hasContentbuilderngHelper ? $helperClass::listIncludeInSearch('form', $row, $i) : '';
+                            $linkable = $hasContentbuilderngHelper ? $helperClass::listLinkable('form', $row, $i) : '';
+                            $editable = $hasContentbuilderngHelper ? $helperClass::listEditable('form', $row, $i) : '';
                         ?>
                             <tr id="cb-row-<?php echo (int) $row->id; ?>" class="<?php echo "row$k"; ?>" data-cb-row-id="<?php echo (int) $row->id; ?>">
                                 <td valign="top">
@@ -1900,25 +1968,25 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <select class="form-select form-select-sm cb-item-order-type"
                                         id="itemOrderTypes<?php echo $row->id ?>" name="jform[itemOrderTypes][<?php echo $row->id ?>]">
                                         <option value=""> -
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES'); ?> -
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_ORDER_TYPES'); ?> -
                                         </option>
                                         <option value="CHAR" <?php echo $row->order_type == 'CHAR' ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_TEXT'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_ORDER_TYPES_TEXT'); ?>
                                         </option>
                                         <option value="DATETIME" <?php echo $row->order_type == 'DATETIME' ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_DATETIME'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_ORDER_TYPES_DATETIME'); ?>
                                         </option>
                                         <option value="DATE" <?php echo $row->order_type == 'DATE' ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_DATE'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_ORDER_TYPES_DATE'); ?>
                                         </option>
                                         <option value="TIME" <?php echo $row->order_type == 'TIME' ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_TIME'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_ORDER_TYPES_TIME'); ?>
                                         </option>
                                         <option value="UNSIGNED" <?php echo $row->order_type == 'UNSIGNED' ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_INTEGER'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_ORDER_TYPES_INTEGER'); ?>
                                         </option>
                                         <option value="DECIMAL" <?php echo $row->order_type == 'DECIMAL' ? ' selected="selected"' : '' ?>>
-                                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ORDER_TYPES_DECIMAL'); ?>
+                                            <?php echo Text::_('COM_CONTENTBUILDERNG_ORDER_TYPES_DECIMAL'); ?>
                                         </option>
                                     </select>
                                     </div>
@@ -1937,7 +2005,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <?php echo $editable; ?>
                                     <?php
                                     if ($row->editable && !$this->item->edit_by_type) {
-                                        echo '<div class="mt-1">[<a href="index.php?option=com_contentbuilder_ng&amp;view=elementoptions&amp;tmpl=component&amp;element_id=' . $row->id . '&amp;id=' . $this->item->id . '" title="" data-bs-toggle="modal" data-bs-target="#text-type-modal">' . $row->type . '</a>]</div>';
+                                        echo '<div class="mt-1">[<a href="index.php?option=com_contentbuilderng&amp;view=elementoptions&amp;tmpl=component&amp;element_id=' . $row->id . '&amp;id=' . $this->item->id . '" title="" data-bs-toggle="modal" data-bs-target="#text-type-modal">' . $row->type . '</a>]</div>';
                                     }
                                     ?>
                                 </td>
@@ -1992,7 +2060,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
                                     <div class="d-flex flex-wrap align-items-center gap-2">
                                         <?php echo $this->pagination ? $this->pagination->getPagesCounter() : ''; ?>
-                                        <span><?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_NUM'); ?>&nbsp;</span>
+                                        <span><?php echo Text::_('COM_CONTENTBUILDERNG_DISPLAY_NUM'); ?>&nbsp;</span>
                                         <span class="d-inline-block">
                                             <?php echo $this->pagination ? $this->pagination->getLimitBox() : ''; ?>
                                         </span>
@@ -2015,13 +2083,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
         <?php
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab9', Text::_('COM_CONTENTBUILDER_NG_ADVANCED_OPTIONS'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab9', Text::_('COM_CONTENTBUILDERNG_ADVANCED_OPTIONS'));
         echo $advancedOptionsContent;
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', Text::_('COM_CONTENTBUILDER_NG_LIST_INTRO_TEXT'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', Text::_('COM_CONTENTBUILDERNG_LIST_INTRO_TEXT'));
         ?>
         <h3 class="mb-3">
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_INTRO_MODE_TITLE'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_INTRO_MODE_TITLE'); ?>
         </h3>
         <?php
         echo $this->form->renderField('intro_text');
@@ -2029,22 +2097,22 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
         <?php
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', Text::_('COM_CONTENTBUILDER_NG_LIST_STATES'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', Text::_('COM_CONTENTBUILDERNG_LIST_STATES'));
         ?>
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_STATES_PUBLISHED') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_STATES_TITLE') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_STATES_COLOR') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_COLOR') ?>
                     </th>
                     <th>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_STATES_ACTION') ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_ACTION') ?>
                     </th>
                 </tr>
             </thead>
@@ -2097,15 +2165,15 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                 data-cb-color-picker="1"
                                 data-cb-color-target="<?php echo $stateColorInputId; ?>"
                                 value="<?php echo $stateNativePickerValue; ?>"
-                                title="<?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_STATES_COLOR'); ?>"
-                                aria-label="<?php echo Text::_('COM_CONTENTBUILDER_NG_LIST_STATES_COLOR'); ?>"
+                                title="<?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_COLOR'); ?>"
+                                aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_COLOR'); ?>"
                                 style="width: 3rem; min-width: 3rem; padding: 0.2rem;" />
                         </div>
                     </td>
                     <td>
                         <select class="form-select-sm" name="jform[list_states][<?php echo $state['id']; ?>][action]">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_NONE'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_NONE'); ?> -
                             </option>
                             <?php
                             foreach ($this->list_states_action_plugins as $list_state_action_plugin) {
@@ -2130,61 +2198,61 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
         ?>
         <h3 class="mb-3">
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_DETAILS_TEMPLATE_MODE_TITLE'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_DETAILS_TEMPLATE_MODE_TITLE'); ?>
         </h3>
         <table width="100%" class="table table-striped">
             <tr>
                 <td width="20%">
                     <label for="create_sample"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE'); ?><span></label>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE'); ?><span></label>
                 </td>
                 <td>
                     <input type="hidden" name="jform[create_sample]" id="cb_create_sample_flag" value="0" />
                     <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                         <button type="button" class="btn btn-sm btn-outline-secondary" id="create_sample"
                             onclick="cbQueueDetailsSampleGeneration(this);">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIALISE'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_INITIALISE'); ?>
                         </button>
                         <small id="cb_create_sample_hint" class="text-success d-none">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
                         </small>
                     </div>
                     <input type="hidden" name="jform[create_articles]" value="0" />
                     <?php echo $renderCheckbox('jform[create_articles]', 'create_articles', (int) $this->item->create_articles === 1); ?><label class="form-check-label"
                         for="create_articles">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_ARTICLES'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_ARTICLES'); ?>
                     </label>
                 </td>
                 <td width="20%">
                     <label for="delete_articles"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE_ARTICLES_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE_ARTICLES'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_DELETE_ARTICLES_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_DELETE_ARTICLES'); ?>
                         </span></label>
                 </td>
                 <td>
                     <input class="form-check-input" type="radio" value="1" name="jform[delete_articles]" id="delete_articles"
                         <?php echo $this->item->delete_articles ? ' checked="checked"' : '' ?> /> <label
                         for="delete_articles">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_YES'); ?>
                     </label>
                     <input class="form-check-input" type="radio" value="0" name="jform[delete_articles]"
                         id="delete_articles_no" <?php echo !$this->item->delete_articles ? ' checked="checked"' : '' ?> /> <label for="delete_articles_no">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_NO'); ?>
                     </label>
                 </td>
             </tr>
             <tr>
                 <td width="20%">
                     <label for="title_field"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_TITLE_FIELD_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_TITLE_FIELD'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_TITLE_FIELD_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_TITLE_FIELD'); ?>
                         </span></label>
                 </td>
                 <td>
                     <select class="form-select-sm" name="jform[title_field]" id="title_field">
                         <option value="0">
-                            - <?php echo Text::_('COM_CONTENTBUILDER_NG_NONE'); ?> -
+                            - <?php echo Text::_('COM_CONTENTBUILDERNG_NONE'); ?> -
                         </option>
                         <?php
                         foreach ($this->all_elements as $sortable) {
@@ -2199,8 +2267,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 </td>
                 <td width="20%">
                     <label for="default_category"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_CATEGORY_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_CATEGORY'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_CATEGORY_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_CATEGORY'); ?>
                         </span></label>
                 </td>
                 <td>
@@ -2224,14 +2292,14 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <tr>
                 <td width="20%" valign="top">
                     <label for="default_lang_code"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_LANG_CODE_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_LANG_CODE'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_LANG_CODE_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_LANG_CODE'); ?>
                         </span></label>
                 </td>
                 <td valign="top">
                     <select class="form-select-sm" name="jform[default_lang_code]" id="default_lang_code">
                         <option value="*">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ANY'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_ANY'); ?>
                         </option>
                         <?php
                         foreach ($this->item->language_codes as $lang_code) {
@@ -2245,45 +2313,45 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     </select>
                     <br /><br />
                     <label for="article_record_impact_language"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE_RECORD_IMPACT_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE_RECORD_IMPACT'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_ARTICLE_RECORD_IMPACT_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_ARTICLE_RECORD_IMPACT'); ?>
                         </span></label>
                     <input class="form-check-input" <?php echo $this->item->article_record_impact_language ? 'checked="checked" ' : '' ?>type="radio" name="jform[article_record_impact_language]"
                         id="article_record_impact_language" value="1" />
                     <label for="article_record_impact_language_yes">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_YES'); ?>
                     </label>
                     <input class="form-check-input" <?php echo !$this->item->article_record_impact_language ? 'checked="checked" ' : '' ?>type="radio" name="jform[article_record_impact_language]"
                         id="article_record_impact_language_no" value="0" />
                     <label for="article_record_impact_language_no">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_NO'); ?>
                     </label>
                 </td>
                 <td width="20%" valign="top">
                     <label for="default_lang_code_ignore_yes"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_LANG_CODE_IGNORE_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_LANG_CODE_IGNORE'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_LANG_CODE_IGNORE_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_LANG_CODE_IGNORE'); ?>
                         </span></label>
                 </td>
                 <td valign="top">
                     <input class="form-check-input" <?php echo $this->item->default_lang_code_ignore ? 'checked="checked" ' : '' ?>type="radio" name="jform[default_lang_code_ignore]"
                         id="default_lang_code_ignore_yes" value="1" />
                     <label for="default_lang_code_ignore_yes">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_YES'); ?>
                     </label>
 
                     <input class="form-check-input" <?php echo !$this->item->default_lang_code_ignore ? 'checked="checked" ' : '' ?>type="radio" name="jform[default_lang_code_ignore]"
                         id="default_lang_code_ignore_no" value="0" />
                     <label for="default_lang_code_ignore_no">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_NO'); ?>
                     </label>
                 </td>
             </tr>
             <tr>
                 <td width="20%" valign="top">
                     <label for="default_publish_up_days"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_PUBLISH_UP_DAYS_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_PUBLISH_UP_DAYS'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_PUBLISH_UP_DAYS_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_PUBLISH_UP_DAYS'); ?>
                         </span></label>
                 </td>
                 <td valign="top">
@@ -2291,25 +2359,25 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         id="default_publish_up_days" value="<?php echo $this->item->default_publish_up_days; ?>" />
                     <br /><br />
                     <label for="article_record_impact_publish"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE_RECORD_PUBLISH_IMPACT_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_ARTICLE_RECORD_PUBLISH_IMPACT'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_ARTICLE_RECORD_PUBLISH_IMPACT_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_ARTICLE_RECORD_PUBLISH_IMPACT'); ?>
                         </span></label>
                     <input class="form-check-input" <?php echo $this->item->article_record_impact_publish ? 'checked="checked" ' : '' ?>type="radio" name="jform[article_record_impact_publish]"
                         id="article_record_impact_publish" value="1" />
                     <label for="article_record_impact_publish_yes">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_YES'); ?>
                     </label>
                     <input class="form-check-input" <?php echo !$this->item->article_record_impact_publish ? 'checked="checked" ' : '' ?>type="radio" name="jform[article_record_impact_publish]"
                         id="article_record_impact_publish_no" value="0" />
                     <label for="article_record_impact_publish_no">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_NO'); ?>
                     </label>
 
                 </td>
                 <td width="20%" valign="top">
                     <label for="default_publish_down_days"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_PUBLISH_DOWN_DAYS_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_PUBLISH_DOWN_DAYS'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_PUBLISH_DOWN_DAYS_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_PUBLISH_DOWN_DAYS'); ?>
                         </span></label>
                 </td>
                 <td valign="top">
@@ -2321,8 +2389,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <tr>
                 <td width="20%">
                     <label for="default_access"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_ACCESS_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_ACCESS'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_ACCESS_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_ACCESS'); ?>
                         </span></label>
                 </td>
                 <td>
@@ -2334,21 +2402,21 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 </td>
                 <td width="20%">
                     <label for="default_featured"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_FEATURED_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_DEFAULT_FEATURED'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_FEATURED_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_FEATURED'); ?>
                         </span></label>
                 </td>
                 <td>
                     <input class="form-check-input" class="form-check-input" <?php echo $this->item->default_featured ? 'checked="checked" ' : '' ?>type="radio" name="jform[default_featured]" id="default_featured"
                         value="1" />
                     <label for="default_featured">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_YES'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_YES'); ?>
                     </label>
 
                     <input class="form-check-input" class="form-check-input" <?php echo !$this->item->default_featured ? 'checked="checked" ' : '' ?>type="radio" name="jform[default_featured]" id="default_featured_no"
                         value="0" />
                     <label for="default_featured_no">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_NO'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_NO'); ?>
                     </label>
 
                 </td>
@@ -2356,8 +2424,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <tr>
                 <td width="20%">
                     <label for="auto_publish"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_AUTO_PUBLISH_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_AUTO_PUBLISH'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_AUTO_PUBLISH_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_AUTO_PUBLISH'); ?>
                         </span></label>
                 </td>
                 <td>
@@ -2369,8 +2437,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     if ($this->item->edit_by_type && $isBreezingFormsType) {
                     ?>
                         <label for="protect_upload_directory"><span class="editlinktip hasTip"
-                                title="<?php echo Text::_('COM_CONTENTBUILDER_NG_UPLOAD_DIRECTORY_TYPE_TIP'); ?>">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PROTECT_UPLOAD_DIRECTORY'); ?>
+                                title="<?php echo Text::_('COM_CONTENTBUILDERNG_UPLOAD_DIRECTORY_TYPE_TIP'); ?>">
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_PROTECT_UPLOAD_DIRECTORY'); ?>
                             </span></label>
                     <?php
                     }
@@ -2396,7 +2464,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         ?>
         <hr />
         <h3 class="mb-3">
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_DETAILS_PREPARE_MODE_TITLE'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_DETAILS_PREPARE_MODE_TITLE'); ?>
         </h3>
         <?php
         if (trim($this->item->details_prepare ?? '') == '') {
@@ -2413,18 +2481,18 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         ?>
         <?php
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab5', Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TEMPLATE'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab5', Text::_('COM_CONTENTBUILDERNG_EDITABLE_TEMPLATE'));
         ?>
         <h3 class="mb-3">
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_EDITABLE_TEMPLATE_MODE_TITLE'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_EDITABLE_TEMPLATE_MODE_TITLE'); ?>
         </h3>
         <input type="hidden" name="jform[edit_by_type]" value="0" />
         <?php if ($canEditByType) : ?>
             <div class="form-check mb-3">
                 <?php echo $renderCheckbox('jform[edit_by_type]', 'edit_by_type', (bool) $this->item->edit_by_type); ?>
                 <label class="form-check-label" for="edit_by_type">
-                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_EDIT_TIP'); ?>">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_EDIT'); ?>
+                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EDIT_TIP'); ?>">
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EDIT'); ?>
                     </span>
                 </label>
             </div>
@@ -2435,23 +2503,23 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             echo $breezingFormsProvidedMessage;
             echo '<input type="hidden" name="jform[editable_template]" value="' . htmlspecialchars($breezingFormsEditableToken, ENT_QUOTES, 'UTF-8') . '"/>';
             //echo '<input type="hidden" name="jform[protect_upload_directory]" value="'.(trim($this->item->protect_upload_directory) ? 1 : 0).'"/>'; 
-            echo '<input type="hidden" name="jform[upload_directory]" value="' . (trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/com_contentbuilder_ng/upload') . '"/>';
+            echo '<input type="hidden" name="jform[upload_directory]" value="' . (trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/com_contentbuilderng/upload') . '"/>';
         } else {
         ?>
 
             <label for="upload_directory"><span class="editlinktip hasTip"
-                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_UPLOAD_DIRECTORY_TIP'); ?>">
-                    <?php echo Text::_('COM_CONTENTBUILDER_NG_UPLOAD_DIRECTORY'); ?>
+                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_UPLOAD_DIRECTORY_TIP'); ?>">
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_UPLOAD_DIRECTORY'); ?>
                 </span></label>
             <br />
             <input class="form-control form-control-sm" style="width: 50%;" type="text"
-                value="<?php echo trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/com_contentbuilder_ng/upload'; ?>"
+                value="<?php echo trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/com_contentbuilderng/upload'; ?>"
                 name="jform[upload_directory]" id="upload_directory" />
             <br />
             <br />
             <input type="hidden" name="jform[protect_upload_directory]" value="0" />
             <?php echo $renderCheckbox('jform[protect_upload_directory]', 'protect_upload_directory', trim((string) $this->item->protect_upload_directory) !== ''); ?> <label class="form-check-label" for="protect_upload_directory">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_PROTECT_UPLOAD_DIRECTORY'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_PROTECT_UPLOAD_DIRECTORY'); ?>
             </label>
             <br />
             <br />
@@ -2459,10 +2527,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                 <button type="button" class="btn btn-sm btn-outline-secondary" id="create_editable_sample"
                     onclick="cbQueueEditableSampleGeneration(this);">
-                    <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIALISE'); ?>
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_INITIALISE'); ?>
                 </button>
                 <small id="cb_create_editable_sample_hint" class="text-success d-none">
-                    <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
                 </small>
             </div>
             <br />
@@ -2475,7 +2543,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         ?>
         <hr />
         <h3 class="mb-3">
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_DETAILS_PREPARE_MODE_TITLE'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_DETAILS_PREPARE_MODE_TITLE'); ?>
         </h3>
         <?php
 
@@ -2495,18 +2563,18 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         }
 
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab7', Text::_('COM_CONTENTBUILDER_NG_EMAIL_TEMPLATES'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab7', Text::_('COM_CONTENTBUILDERNG_EMAIL_TEMPLATES'));
         ?>
         <div class="mb-3">
             <input type="hidden" name="jform[email_notifications]" value="0" />
             <?php echo $renderCheckbox('jform[email_notifications]', 'email_notifications', (bool) $this->item->email_notifications); ?>
             <label class="form-check-label me-4" for="email_notifications">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_EMAIL_NOTIFICATIONS'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EMAIL_NOTIFICATIONS'); ?>
             </label>
             <input type="hidden" name="jform[email_update_notifications]" value="0" />
             <?php echo $renderCheckbox('jform[email_update_notifications]', 'email_update_notifications', (bool) $this->item->email_update_notifications); ?>
             <label class="form-check-label" for="email_update_notifications">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_TYPE_EMAIL_UPDATE_NOTIFICATIONS'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EMAIL_UPDATE_NOTIFICATIONS'); ?>
             </label>
         </div>
         <?php
@@ -2530,7 +2598,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             echo '<input type="hidden" name="jform[email_html]" value="' . htmlentities($this->item->email_html ?? '', ENT_QUOTES, 'UTF-8') . '"/>';
         } else {
 
-            $title = Text::_('COM_CONTENTBUILDER_NG_EMAIL_ADMINS');
+            $title = Text::_('COM_CONTENTBUILDERNG_EMAIL_ADMINS');
 
         ?>
             <div id="email_admins" style="cursor:pointer; width: 100%; background-color: #ffffff;"
@@ -2540,13 +2608,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 </h3>
             </div>
             <div id="email_admins_div"
-                style="display:<?php echo $session->get('email_admins', '', 'com_contentbuilder_ng'); ?>">
+                style="display:<?php echo $session->get('email_admins', '', 'com_contentbuilderng'); ?>">
                 <table width="100%" class="table table-striped">
                     <tr>
                         <td width="20%">
                             <label for="email_admin_subject"><span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_SUBJECT_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_SUBJECT'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_SUBJECT_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_SUBJECT'); ?>
                                 </span></label>
                         </td>
                         <td>
@@ -2556,7 +2624,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         </td>
                         <td width="20%">
                             <label for="email_admin_alternative_from">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ALTERNATIVE_FROM'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_ALTERNATIVE_FROM'); ?>
                             </label>
                         </td>
                         <td>
@@ -2568,7 +2636,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     <tr>
                         <td width="20%">
                             <label for="email_admin_alternative_fromname">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ALTERNATIVE_FROMNAME'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_ALTERNATIVE_FROMNAME'); ?>
                             </label>
                         </td>
                         <td>
@@ -2578,8 +2646,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         </td>
                         <td width="20%">
                             <label for="email_admin_recipients"><span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_RECIPIENTS_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_RECIPIENTS'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_RECIPIENTS_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_RECIPIENTS'); ?>
                                 </span></label>
                         </td>
                         <td>
@@ -2591,8 +2659,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     <tr>
                         <td width="20%">
                             <label for="email_admin_recipients_attach_uploads"><span class="editlinktip hasTip"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ATTACH_UPLOADS_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ATTACH_UPLOADS'); ?>
+                                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_ATTACH_UPLOADS_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_ATTACH_UPLOADS'); ?>
                                 </span></label>
                         </td>
                         <td>
@@ -2602,7 +2670,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         </td>
                         <td width="20%">
                             <label for="email_admin_html">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_HTML'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_HTML'); ?>
                             </label>
                         </td>
                         <td>
@@ -2613,7 +2681,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     <tr>
                         <td width="20%">
                             <label for="email_admin_create_sample_button">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_EMAIL_TEMPLATE'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_EMAIL_TEMPLATE'); ?>
                             </label>
                         </td>
                         <td>
@@ -2621,10 +2689,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <div class="d-flex flex-wrap align-items-center gap-2">
                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="email_admin_create_sample_button"
                                     onclick="cbQueueEmailAdminSampleGeneration(this);">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_EMAIL_TEMPLATE'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_EMAIL_TEMPLATE'); ?>
                                 </button>
                                 <small id="cb_email_admin_create_sample_hint" class="text-success d-none">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
                                 </small>
                             </div>
                         </td>
@@ -2642,7 +2710,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             </div>
             <?php
 
-            $title = Text::_('COM_CONTENTBUILDER_NG_EMAIL_USERS');
+            $title = Text::_('COM_CONTENTBUILDERNG_EMAIL_USERS');
 
             ?>
             <div id="email_users" style="cursor:pointer; width: 100%; background-color: #ffffff;">
@@ -2655,7 +2723,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     <tr>
                         <td width="20%">
                             <label for="email_subject">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_SUBJECT'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_SUBJECT'); ?>
                             </label>
                         </td>
                         <td>
@@ -2665,7 +2733,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         </td>
                         <td width="20%">
                             <label for="email_alternative_from">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ALTERNATIVE_FROM'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_ALTERNATIVE_FROM'); ?>
                             </label>
                         </td>
                         <td>
@@ -2677,7 +2745,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     <tr>
                         <td width="20%">
                             <label for="email_alternative_fromname">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ALTERNATIVE_FROMNAME'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_ALTERNATIVE_FROMNAME'); ?>
                             </label>
                         </td>
                         <td>
@@ -2687,7 +2755,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         </td>
                         <td width="20%">
                             <label for="email_recipients">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_RECIPIENTS'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_RECIPIENTS'); ?>
                             </label>
                         </td>
                         <td>
@@ -2699,7 +2767,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     <tr>
                         <td width="20%">
                             <label for="email_recipients_attach_uploads">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_ATTACH_UPLOADS'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_ATTACH_UPLOADS'); ?>
                             </label>
                         </td>
                         <td>
@@ -2709,7 +2777,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         </td>
                         <td width="20%">
                             <label for="email_html">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_EMAIL_HTML'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_HTML'); ?>
                             </label>
                         </td>
                         <td>
@@ -2720,7 +2788,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     <tr>
                         <td width="20%">
                             <label for="email_create_sample_button">
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_EMAIL_TEMPLATE'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_EMAIL_TEMPLATE'); ?>
                             </label>
                         </td>
                         <td>
@@ -2728,10 +2796,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <div class="d-flex flex-wrap align-items-center gap-2">
                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="email_create_sample_button"
                                     onclick="cbQueueEmailUserSampleGeneration(this);">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATE_EMAIL_TEMPLATE'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_EMAIL_TEMPLATE'); ?>
                                 </button>
                                 <small id="cb_email_create_sample_hint" class="text-success d-none">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
                                 </small>
                             </div>
                         </td>
@@ -2751,23 +2819,23 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         }
 
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab8', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab8', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS'));
 
         // Démarrer les onglets
-        $activePermTab = $session->get('slideStartOffset', 'permtab1', 'com_contentbuilder_ng');
+        $activePermTab = $session->get('slideStartOffset', 'permtab1', 'com_contentbuilderng');
         echo HTMLHelper::_('uitab.startTabSet', 'perm-pane', ['active' => $activePermTab]);
 
 
         // Premier onglet
-        echo HTMLHelper::_('uitab.addTab', 'perm-pane', 'permtab1', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_FRONTEND'));
+        echo HTMLHelper::_('uitab.addTab', 'perm-pane', 'permtab1', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_FRONTEND'));
         ?>
         <table class="table table-striped">
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="own_only_fe">
                         <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN_OWNLY_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN_OWNLY'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_PERM_OWN_OWNLY_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_OWN_OWNLY'); ?>
                         </span>:
                     </label>
                 </td>
@@ -2780,8 +2848,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 <td width="20%" align="right" class="key">
                     <label for="limited_article_options_fe">
                         <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMITED_ARTICLE_OPTIONS_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMITED_ARTICLE_OPTIONS'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_PERM_LIMITED_ARTICLE_OPTIONS_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_LIMITED_ARTICLE_OPTIONS'); ?>
                         </span>:
                     </label>
                 </td>
@@ -2794,8 +2862,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 <td width="20%" align="right" class="key">
                     <label for="own_fe_view">
                         <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_OWN'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_PERM_OWN_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_OWN'); ?>
                         </span>:
                     </label>
                 </td>
@@ -2818,8 +2886,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 <td width="20%" align="right" class="key">
                     <label for="show_all_languages_fe">
                         <span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_SHOW_ALL_LANGUAGES_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_SHOW_ALL_LANGUAGES'); ?>
+                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_PERM_SHOW_ALL_LANGUAGES_TIP'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_SHOW_ALL_LANGUAGES'); ?>
                         </span>:
                     </label>
                 </td>
@@ -2834,7 +2902,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 <tr class="row0">
                     <td width="20%" align="right" class="key">
                         <label for="force_login">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FORCE_LOGIN'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_FORCE_LOGIN'); ?>
                         </label>
                     </td>
                     <td>
@@ -2845,7 +2913,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 <tr class="row0">
                     <td width="20%" align="right" class="key">
                         <label for="force_url">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FORCE_URL'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_FORCE_URL'); ?>
                         </label>
                     </td>
                     <td>
@@ -2861,7 +2929,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <thead>
                 <tr>
                     <th>
-                        <?php echo $permHeaderLabel('COM_CONTENTBUILDER_NG_PERM_GROUP', 'COM_CONTENTBUILDER_NG_PERM_GROUP_TIP'); ?>
+                        <?php echo $permHeaderLabel('COM_CONTENTBUILDERNG_PERM_GROUP', 'COM_CONTENTBUILDERNG_PERM_GROUP_TIP'); ?>
                     </th>
                     <?php foreach ($permissionColumns as $permissionColumn) : ?>
                         <th>
@@ -2878,7 +2946,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     $permId = 'perms_fe_select_' . $permKey;
                     ?>
                     <td class="bg-light">
-                        <?php echo $renderCheckbox('', $permId, false, $permKey, ['onclick' => "contentbuilder_ng_selectAll(this,'fe')"]); ?>
+                        <?php echo $renderCheckbox('', $permId, false, $permKey, ['onclick' => "contentbuilderng_selectAll(this,'fe')"]); ?>
                     </td>
                 <?php endforeach; ?>
             </tr>
@@ -2917,14 +2985,14 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         // Legacy backend permissions block removed in favor of Joomla 6 frontend permissions UI.
 
 
-        echo HTMLHelper::_('uitab.addTab', 'perm-pane', 'permtab2', Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_USERS'));
+        echo HTMLHelper::_('uitab.addTab', 'perm-pane', 'permtab2', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_USERS'));
         ?>
 
         <table class="table table-striped">
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="limit_add">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMIT_ADD'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_LIMIT_ADD'); ?>:
                     </label>
                 </td>
                 <td>
@@ -2935,7 +3003,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="limit_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_LIMIT_EDIT'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_LIMIT_EDIT'); ?>:
                     </label>
                 </td>
                 <td>
@@ -2946,85 +3014,85 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="verification_required_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VIEW'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VIEW'); ?>:
                     </label>
                 </td>
                 <td>
                     <input type="hidden" name="jform[verification_required_view]" value="0" />
                     <?php echo $renderCheckbox('jform[verification_required_view]', 'verification_required_view', (bool) $this->item->verification_required_view); ?><label class="form-check-label" for="verification_required_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_REQUIRED'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VERIFICATION_REQUIRED'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 50px;" id="verification_days_view"
                         name="jform[verification_days_view]" type="text"
                         value="<?php echo $this->item->verification_days_view; ?>" /> <label
                         for="verification_days_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_DAYS'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VERIFICATION_DAYS'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 300px;" id="verification_url_view"
                         name="jform[verification_url_view]" type="text"
                         value="<?php echo htmlentities($this->item->verification_url_view ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                     <label for="verification_url_view">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_URL'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VERIFICATION_URL'); ?>
                     </label>
                 </td>
             </tr>
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="verification_required_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_NEW'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_NEW'); ?>:
                     </label>
                 </td>
                 <td>
                     <input type="hidden" name="jform[verification_required_new]" value="0" />
                     <?php echo $renderCheckbox('jform[verification_required_new]', 'verification_required_new', (bool) $this->item->verification_required_new); ?><label class="form-check-label" for="verification_required_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_REQUIRED'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VERIFICATION_REQUIRED'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 50px;" id="verification_days_new"
                         name="jform[verification_days_new]" type="text"
                         value="<?php echo $this->item->verification_days_new; ?>" /> <label for="verification_days_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_DAYS'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VERIFICATION_DAYS'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 300px;" id="verification_url_new"
                         name="jform[verification_url_new]" type="text"
                         value="<?php echo htmlentities($this->item->verification_url_new ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                     <label for="verification_url_new">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_URL'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VERIFICATION_URL'); ?>
                     </label>
                 </td>
             </tr>
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label for="verification_required_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_EDIT'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_EDIT'); ?>:
                     </label>
                 </td>
                 <td>
                     <input type="hidden" name="jform[verification_required_edit]" value="0" />
                     <?php echo $renderCheckbox('jform[verification_required_edit]', 'verification_required_edit', (bool) $this->item->verification_required_edit); ?><label class="form-check-label" for="verification_required_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_REQUIRED'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VERIFICATION_REQUIRED'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 50px;" id="verification_days_edit"
                         name="jform[verification_days_edit]" type="text"
                         value="<?php echo $this->item->verification_days_edit; ?>" /> <label
                         for="verification_days_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_DAYS'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VERIFICATION_DAYS'); ?>
                     </label>
                     <input class="form-control form-control-sm" style="width: 300px;" id="verification_url_new"
                         name="jform[verification_url_edit]" type="text"
                         value="<?php echo htmlentities($this->item->verification_url_edit ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                     <label for="verification_url_edit">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_VERIFICATION_URL'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_VERIFICATION_URL'); ?>
                     </label>
                 </td>
             </tr>
             <tr class="row0">
                 <td width="20%" align="right" class="key">
                     <label>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_USERS'); ?>:
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_USERS'); ?>:
                     </label>
                 </td>
                 <td>
-                    <?php echo '[<a href="index.php?option=com_contentbuilder_ng&amp;view=users&amp;tmpl=component&amp;form_id=' . $this->item->id . '" title="" data-bs-toggle="modal" data-bs-target="#edit-modal">' . Text::_('COM_CONTENTBUILDER_NG_EDIT') . '</a>]'; ?>
+                    <?php echo '[<a href="index.php?option=com_contentbuilderng&amp;view=users&amp;tmpl=component&amp;form_id=' . $this->item->id . '" title="" data-bs-toggle="modal" data-bs-target="#edit-modal">' . Text::_('COM_CONTENTBUILDERNG_EDIT') . '</a>]'; ?>
 
                 </td>
             </tr>
@@ -3034,7 +3102,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 <tr class="row0">
                     <td width="20%" align="right" class="key" valign="top">
                         <label for="act_as_registration">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION'); ?>:
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_ACT_AS_REGISTRATION'); ?>:
                         </label>
                     </td>
                     <td>
@@ -3045,7 +3113,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <select class="form-select-sm" name="jform[registration_name_field]" id="registration_name_field"
                             style="max-width: 200px;">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION_NAME_FIELD'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_ACT_AS_REGISTRATION_NAME_FIELD'); ?> -
                             </option>
                             <?php
                             foreach ($this->elements as $the_element) {
@@ -3062,7 +3130,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <select class="form-select-sm" name="jform[registration_username_field]" id="registration_username_field"
                             style="max-width: 200px;">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION_USERNAME_FIELD'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_ACT_AS_REGISTRATION_USERNAME_FIELD'); ?> -
                             </option>
                             <?php
                             foreach ($this->elements as $the_element) {
@@ -3079,7 +3147,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <select class="form-select-sm" name="jform[registration_email_field]" id="registration_email_field"
                             style="max-width: 200px;">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION_EMAIL_FIELD'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_ACT_AS_REGISTRATION_EMAIL_FIELD'); ?> -
                             </option>
                             <?php
                             foreach ($this->elements as $the_element) {
@@ -3096,7 +3164,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <select class="form-select-sm" name="jform[registration_email_repeat_field]"
                             id="registration_email_repeat_field" style="max-width: 200px;">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION_EMAIL_REPEAT_FIELD'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_ACT_AS_REGISTRATION_EMAIL_REPEAT_FIELD'); ?> -
                             </option>
                             <?php
                             foreach ($this->elements as $the_element) {
@@ -3113,7 +3181,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <select class="form-select-sm" name="jform[registration_password_field]" id="registration_password_field"
                             style="max-width: 200px;">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION_PASSWORD_FIELD'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_ACT_AS_REGISTRATION_PASSWORD_FIELD'); ?> -
                             </option>
                             <?php
                             foreach ($this->elements as $the_element) {
@@ -3130,7 +3198,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <select class="form-select-sm" name="jform[registration_password_repeat_field]"
                             id="registration_password_repeat_field" style="max-width: 200px;">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_ACT_AS_REGISTRATION_PASSWORD_REPEAT_FIELD'); ?>
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_ACT_AS_REGISTRATION_PASSWORD_REPEAT_FIELD'); ?>
                                 -
                             </option>
                             <?php
@@ -3146,7 +3214,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <br />
                         <br />
                         <label for="force_login">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FORCE_LOGIN'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_FORCE_LOGIN'); ?>
                         </label>
                         <br />
                         <input type="hidden" name="jform[force_login]" value="0" />
@@ -3154,7 +3222,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <br />
                         <br />
                         <label for="force_url">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_FORCE_URL'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_FORCE_URL'); ?>
                         </label>
                         <br />
                         <input class="form-control form-control-sm" id="force_url" name="jform[force_url]" type="text"
@@ -3162,12 +3230,12 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <br />
                         <br />
                         <label for="registration_bypass_plugin">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_REGISTRATION_BYPASS_PLUGIN'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_REGISTRATION_BYPASS_PLUGIN'); ?>
                         </label>
                         <br />
                         <select class="form-select-sm" name="jform[registration_bypass_plugin]" id="registration_bypass_plugin">
                             <option value=""> -
-                                <?php echo Text::_('COM_CONTENTBUILDER_NG_NONE'); ?> -
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_NONE'); ?> -
                             </option>
                             <?php
                             foreach ($this->verification_plugins as $registration_bypass_plugin) {
@@ -3182,7 +3250,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <br />
                         <br />
                         <label for="registration_bypass_verification_name">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_REGISTRATION_BYPASS_VERIFICATION_NAME'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_REGISTRATION_BYPASS_VERIFICATION_NAME'); ?>
                         </label>
                         <br />
                         <input class="form-control form-control-sm" type="text" name="jform[registration_bypass_verification_name]"
@@ -3191,7 +3259,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <br />
                         <br />
                         <label for="registration_bypass_verify_view">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_REGISTRATION_BYPASS_VERIFICATION_VIEW'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_REGISTRATION_BYPASS_VERIFICATION_VIEW'); ?>
                         </label>
                         <br />
                         <input class="form-control form-control-sm" type="text" name="jform[registration_bypass_verify_view]"
@@ -3201,7 +3269,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <br />
                         <br />
                         <label for="registration_bypass_plugin_params">
-                            <?php echo Text::_('COM_CONTENTBUILDER_NG_PERM_REGISTRATION_BYPASS_PLUGIN_PARAMS'); ?>
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_PERM_REGISTRATION_BYPASS_PLUGIN_PARAMS'); ?>
                         </label>
                         <br />
                         <textarea class="form-control form-control-sm" style="width: 100%;height: 80px;"
@@ -3251,7 +3319,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
     <div class="clr"></div>
 
-    <input type="hidden" name="option" value="com_contentbuilder_ng" />
+    <input type="hidden" name="option" value="com_contentbuilderng" />
     <input type="hidden" name="view" value="form" />
     <input type="hidden" name="layout" value="edit" />
     <input type="hidden" name="id" value="<?php echo (int) $this->item->id; ?>" />
@@ -3268,16 +3336,16 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
     <input type="hidden" name="slideStartOffset"
         value="<?php echo $session->get('slideStartOffset', 1); ?>" />
     <input type="hidden" name="jform[email_users]"
-        value="<?php echo $session->get('email_users', 'none', 'com_contentbuilder_ng'); ?>" />
+        value="<?php echo $session->get('email_users', 'none', 'com_contentbuilderng'); ?>" />
     <input type="hidden" name="jform[email_admins]"
-        value="<?php echo $session->get('email_admins', '', 'com_contentbuilder_ng'); ?>" />
+        value="<?php echo $session->get('email_admins', '', 'com_contentbuilderng'); ?>" />
 
     <?php echo HTMLHelper::_('form.token'); ?>
 
 </form>
 <?php
 $textTypeModalParams = [
-    'title' => Text::_('COM_CONTENTBUILDER_NG_EDIT'),
+    'title' => Text::_('COM_CONTENTBUILDERNG_EDIT'),
     'url' => '#',
     'height' => '100%',
     'width' => '100%',
@@ -3287,7 +3355,7 @@ $textTypeModalParams = [
 echo HTMLHelper::_('bootstrap.renderModal', 'text-type-modal', $textTypeModalParams);
 
 $editModalParams = [
-    'title' => Text::_('COM_CONTENTBUILDER_NG_EDIT'),
+    'title' => Text::_('COM_CONTENTBUILDERNG_EDIT'),
     'url' => '#',
     'height' => '400',
     'width' => '800',
@@ -3301,19 +3369,19 @@ $wa->useScript('jquery');
 //$wa->useScript('bootstrap.tab');
 
 $viewTabTooltips = [
-    'tab0' => Text::_('COM_CONTENTBUILDER_NG_TAB_TIP_VIEW'),
-    'tab9' => Text::_('COM_CONTENTBUILDER_NG_TAB_TIP_ADVANCED_OPTIONS'),
-    'tab2' => Text::_('COM_CONTENTBUILDER_NG_TAB_TIP_LIST_INTRO_TEXT'),
-    'tab1' => Text::_('COM_CONTENTBUILDER_NG_TAB_TIP_LIST_STATES'),
-    'tab3' => Text::_('COM_CONTENTBUILDER_NG_TAB_TIP_DETAILS_TEMPLATE') . ' + ' . Text::_('COM_CONTENTBUILDER_NG_TAB_TIP_DETAILS_PREPARE'),
-    'tab5' => Text::_('COM_CONTENTBUILDER_NG_TAB_TIP_EDITABLE_TEMPLATE'),
-    'tab7' => Text::_('COM_CONTENTBUILDER_NG_TAB_TIP_EMAIL_TEMPLATES'),
-    'tab8' => Text::_('COM_CONTENTBUILDER_NG_TAB_TIP_PERMISSIONS'),
+    'tab0' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_VIEW'),
+    'tab9' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_ADVANCED_OPTIONS'),
+    'tab2' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_LIST_INTRO_TEXT'),
+    'tab1' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES'),
+    'tab3' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_DETAILS_TEMPLATE') . ' + ' . Text::_('COM_CONTENTBUILDERNG_TAB_TIP_DETAILS_PREPARE'),
+    'tab5' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_EDITABLE_TEMPLATE'),
+    'tab7' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_EMAIL_TEMPLATES'),
+    'tab8' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_PERMISSIONS'),
 ];
 
 $permTabTooltips = [
-    'permtab1' => Text::_('COM_CONTENTBUILDER_NG_TAB_TIP_PERMISSIONS_FRONTEND'),
-    'permtab2' => Text::_('COM_CONTENTBUILDER_NG_TAB_TIP_PERMISSIONS_USERS'),
+    'permtab1' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_PERMISSIONS_FRONTEND'),
+    'permtab2' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_PERMISSIONS_USERS'),
 ];
 
 $jsonFlags = JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;

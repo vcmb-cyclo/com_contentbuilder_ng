@@ -19,23 +19,38 @@ use Joomla\CMS\Installer\Installer;
 use Joomla\CMS\Log\Log;
 use Joomla\Registry\Registry;
 
-class com_contentbuilder_ngInstallerScript extends InstallerScript
+class com_contentbuilderngInstallerScript extends InstallerScript
 {
   private const LEGACY_TABLE_RENAMES = [
-    'contentbuilder_articles' => 'contentbuilder_ng_articles',
-    'contentbuilder_elements' => 'contentbuilder_ng_elements',
-    'contentbuilder_forms' => 'contentbuilder_ng_forms',
-    'contentbuilder_list_records' => 'contentbuilder_ng_list_records',
-    'contentbuilder_list_states' => 'contentbuilder_ng_list_states',
-    'contentbuilder_rating_cache' => 'contentbuilder_ng_rating_cache',
-    'contentbuilder_records' => 'contentbuilder_ng_records',
-    'contentbuilder_registered_users' => 'contentbuilder_ng_registered_users',
-    'contentbuilder_resource_access' => 'contentbuilder_ng_resource_access',
-    'contentbuilder_storage_fields' => 'contentbuilder_ng_storage_fields',
-    'contentbuilder_storages' => 'contentbuilder_ng_storages',
-    'contentbuilder_users' => 'contentbuilder_ng_users',
-    'contentbuilder_verifications' => 'contentbuilder_ng_verifications',
+    'contentbuilder_articles' => 'contentbuilderng_articles',
+    'contentbuilder_ng_articles' => 'contentbuilderng_articles',
+    'contentbuilder_elements' => 'contentbuilderng_elements',
+    'contentbuilder_ng_elements' => 'contentbuilderng_elements',
+    'contentbuilder_forms' => 'contentbuilderng_forms',
+    'contentbuilder_ng_forms' => 'contentbuilderng_forms',
+    'contentbuilder_list_records' => 'contentbuilderng_list_records',
+    'contentbuilder_ng_list_records' => 'contentbuilderng_list_records',
+    'contentbuilder_list_states' => 'contentbuilderng_list_states',
+    'contentbuilder_ng_list_states' => 'contentbuilderng_list_states',
+    'contentbuilder_rating_cache' => 'contentbuilderng_rating_cache',
+    'contentbuilder_ng_rating_cache' => 'contentbuilderng_rating_cache',
+    'contentbuilder_records' => 'contentbuilderng_records',
+    'contentbuilder_ng_records' => 'contentbuilderng_records',
+    'contentbuilder_registered_users' => 'contentbuilderng_registered_users',
+    'contentbuilder_ng_registered_users' => 'contentbuilderng_registered_users',
+    'contentbuilder_resource_access' => 'contentbuilderng_resource_access',
+    'contentbuilder_ng_resource_access' => 'contentbuilderng_resource_access',
+    'contentbuilder_storage_fields' => 'contentbuilderng_storage_fields',
+    'contentbuilder_ng_storage_fields' => 'contentbuilderng_storage_fields',
+    'contentbuilder_storages' => 'contentbuilderng_storages',
+    'contentbuilder_ng_storages' => 'contentbuilderng_storages',
+    'contentbuilder_users' => 'contentbuilderng_users',
+    'contentbuilder_ng_users' => 'contentbuilderng_users',
+    'contentbuilder_verifications' => 'contentbuilderng_verifications',
+    'contentbuilder_ng_verifications' => 'contentbuilderng_verifications',
   ];
+  private bool $criticalFailureDetected = false;
+  private array $criticalFailureMessages = [];
   protected $minimumPhp = '8.1';
   protected $minimumJoomla = '5.0';
 
@@ -56,12 +71,12 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
     Log::addLogger(
       [
-        'text_file' => 'contentbuilder_ng_install.log',
+        'text_file' => 'contentbuilderng_install.log',
         'text_entry_format' => '{DATETIME} {PRIORITY} {MESSAGE}',
         'text_file_path'     => $logPath,
       ],
       Log::ALL,
-      ['com_contentbuilder_ng.install']
+      ['com_contentbuilderng.install']
     );
 
 
@@ -76,33 +91,33 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   function getPlugins()
   {
     $plugins = array();
-    $plugins['contentbuilder_ng_verify'] = array();
-    $plugins['contentbuilder_ng_verify'][] = 'paypal';
-    $plugins['contentbuilder_ng_verify'][] = 'passthrough';
-    $plugins['contentbuilder_ng_validation'] = array();
-    $plugins['contentbuilder_ng_validation'][] = 'notempty';
-    $plugins['contentbuilder_ng_validation'][] = 'equal';
-    $plugins['contentbuilder_ng_validation'][] = 'email';
-    $plugins['contentbuilder_ng_validation'][] = 'date_not_before';
-    $plugins['contentbuilder_ng_validation'][] = 'date_is_valid';
-    $plugins['contentbuilder_ng_themes'] = array();
-    $plugins['contentbuilder_ng_themes'][] = 'khepri';
-    $plugins['contentbuilder_ng_themes'][] = 'blank';
-    $plugins['contentbuilder_ng_themes'][] = 'joomla6';
-    $plugins['contentbuilder_ng_themes'][] = 'dark';
+    $plugins['contentbuilderng_verify'] = array();
+    $plugins['contentbuilderng_verify'][] = 'paypal';
+    $plugins['contentbuilderng_verify'][] = 'passthrough';
+    $plugins['contentbuilderng_validation'] = array();
+    $plugins['contentbuilderng_validation'][] = 'notempty';
+    $plugins['contentbuilderng_validation'][] = 'equal';
+    $plugins['contentbuilderng_validation'][] = 'email';
+    $plugins['contentbuilderng_validation'][] = 'date_not_before';
+    $plugins['contentbuilderng_validation'][] = 'date_is_valid';
+    $plugins['contentbuilderng_themes'] = array();
+    $plugins['contentbuilderng_themes'][] = 'khepri';
+    $plugins['contentbuilderng_themes'][] = 'blank';
+    $plugins['contentbuilderng_themes'][] = 'joomla6';
+    $plugins['contentbuilderng_themes'][] = 'dark';
     $plugins['system'] = array();
-    $plugins['system'][] = 'contentbuilder_ng_system';
-    $plugins['contentbuilder_ng_submit'] = array();
-    $plugins['contentbuilder_ng_submit'][] = 'submit_sample';
-    $plugins['contentbuilder_ng_listaction'] = array();
-    $plugins['contentbuilder_ng_listaction'][] = 'trash';
-    $plugins['contentbuilder_ng_listaction'][] = 'untrash';
+    $plugins['system'][] = 'contentbuilderng_system';
+    $plugins['contentbuilderng_submit'] = array();
+    $plugins['contentbuilderng_submit'][] = 'submit_sample';
+    $plugins['contentbuilderng_listaction'] = array();
+    $plugins['contentbuilderng_listaction'][] = 'trash';
+    $plugins['contentbuilderng_listaction'][] = 'untrash';
     $plugins['content'] = array();
-    $plugins['content'][] = 'contentbuilder_ng_verify';
-    $plugins['content'][] = 'contentbuilder_ng_permission_observer';
-    $plugins['content'][] = 'contentbuilder_ng_image_scale';
-    $plugins['content'][] = 'contentbuilder_ng_download';
-    $plugins['content'][] = 'contentbuilder_ng_rating';
+    $plugins['content'][] = 'contentbuilderng_verify';
+    $plugins['content'][] = 'contentbuilderng_permission_observer';
+    $plugins['content'][] = 'contentbuilderng_image_scale';
+    $plugins['content'][] = 'contentbuilderng_download';
+    $plugins['content'][] = 'contentbuilderng_rating';
     return $plugins;
   }
 
@@ -154,7 +169,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
 
     try {
-      Log::add($message, $priority, 'com_contentbuilder_ng.install');
+      Log::add($message, $priority, 'com_contentbuilderng.install');
     } finally {
       if ($switchedTimezone) {
         @date_default_timezone_set($previousTimezone);
@@ -173,6 +188,14 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
   private function log(string $message, int $priority = Log::INFO, bool $enqueue = true): void
   {
+    if ($priority === Log::ERROR) {
+      $this->criticalFailureDetected = true;
+      $normalizedMessage = trim(strip_tags($message));
+      if ($normalizedMessage !== '' && !in_array($normalizedMessage, $this->criticalFailureMessages, true)) {
+        $this->criticalFailureMessages[] = $normalizedMessage;
+      }
+    }
+
     $this->writeInstallLogEntry($message, $priority);
 
     if (!$enqueue) {
@@ -187,6 +210,34 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     };
 
     $app->enqueueMessage($this->formatInstallMessageForDisplay($message), $type);
+  }
+
+  private function resetCriticalFailures(): void
+  {
+    $this->criticalFailureDetected = false;
+    $this->criticalFailureMessages = [];
+  }
+
+  private function hasCriticalFailure(): bool
+  {
+    return $this->criticalFailureDetected;
+  }
+
+  private function getCriticalFailureSummary(int $max = 3): string
+  {
+    if (empty($this->criticalFailureMessages)) {
+      return 'unknown critical error';
+    }
+
+    $messages = array_slice($this->criticalFailureMessages, 0, max(1, $max));
+    $summary = implode(' | ', $messages);
+    $remaining = count($this->criticalFailureMessages) - count($messages);
+
+    if ($remaining > 0) {
+      $summary .= " | +{$remaining} more";
+    }
+
+    return $summary;
   }
 
   private function getIndexedColumns(DatabaseInterface $db, string $tableQN): array
@@ -360,7 +411,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $query = $db->getQuery(true)
       ->select($db->quoteName('manifest_cache'))
       ->from($db->quoteName('#__extensions'))
-      ->where($db->quoteName('element') . ' = ' . $db->quote('com_contentbuilder_ng'));
+      ->where($db->quoteName('element') . ' = ' . $db->quote('com_contentbuilderng'));
 
     $db->setQuery($query);
     $manifest = $db->loadResult();
@@ -528,42 +579,47 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
   function installAndUpdate(): bool
   {
-    /*    $db = Factory::getContainer()->get(DatabaseInterface::class);
-    $plugins = $this->getPlugins();
-    $base_path = JPATH_SITE . '/administrator/components/com_contentbuilder_ng/plugins';
-    $folders = Folder::folders($base_path);
+    try {
+      /*    $db = Factory::getContainer()->get(DatabaseInterface::class);
+      $plugins = $this->getPlugins();
+      $base_path = JPATH_SITE . '/administrator/components/com_contentbuilderng/plugins';
+      $folders = Folder::folders($base_path);
 
-    foreach ($folders as $folder) {
-      $installer = new Installer();
-      $installer->setDatabase(\Joomla\CMS\Factory::getContainer()->get('DatabaseDriver'));
+      foreach ($folders as $folder) {
+        $installer = new Installer();
+        $installer->setDatabase(\Joomla\CMS\Factory::getContainer()->get('DatabaseDriver'));
 
-      Factory::getApplication()->enqueueMessage('Installing plugin <b>' . $folder . '</b>', 'message');
-      $success = $installer->install($base_path . '/' . $folder);
-      if (!$success) {
-        Factory::getApplication()->enqueueMessage('Install failed for plugin <b>' . $folder . '</b>', 'error');
-      }
-    }*/
+        Factory::getApplication()->enqueueMessage('Installing plugin <b>' . $folder . '</b>', 'message');
+        $success = $installer->install($base_path . '/' . $folder);
+        if (!$success) {
+          Factory::getApplication()->enqueueMessage('Install failed for plugin <b>' . $folder . '</b>', 'error');
+        }
+      }*/
 
-    // Publication des plugins.
-    /*
-    foreach ($plugins as $folder => $subplugs) {
-      foreach ($subplugs as $plugin) {
-        $query = 'UPDATE #__extensions SET `enabled` = 1 WHERE `type` = "plugin" AND `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder);
-        $db->setQuery($query);
-        $db->execute();
-        $this->log("Plugin {$plugin} in folder {$folder} enabled.");
-        Factory::getApplication()->enqueueMessage('Published plugin <b>' . $plugin . '</b>', 'message');
-      }
-    }*/
+      // Publication des plugins.
+      /*
+      foreach ($plugins as $folder => $subplugs) {
+        foreach ($subplugs as $plugin) {
+          $query = 'UPDATE #__extensions SET `enabled` = 1 WHERE `type` = "plugin" AND `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder);
+          $db->setQuery($query);
+          $db->execute();
+          $this->log("Plugin {$plugin} in folder {$folder} enabled.");
+          Factory::getApplication()->enqueueMessage('Published plugin <b>' . $plugin . '</b>', 'message');
+        }
+      }*/
 
-    $this->ensureUploadDirectoryExists();
+      $this->ensureUploadDirectoryExists();
+    } catch (\Throwable $e) {
+      $this->log('[ERROR] installAndUpdate aborted: ' . $e->getMessage(), Log::ERROR);
+      return false;
+    }
 
-    return true;
+    return !$this->hasCriticalFailure();
   }
 
   private function ensureUploadDirectoryExists(): void
   {
-    $uploadDir = JPATH_ROOT . '/media/com_contentbuilder_ng/upload';
+    $uploadDir = JPATH_ROOT . '/media/com_contentbuilderng/upload';
     $parentDir = dirname($uploadDir);
 
     if (!Folder::exists($parentDir) && !Folder::create($parentDir)) {
@@ -589,12 +645,20 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
    */
   public function install(InstallerAdapter $parent): bool
   {
+    $this->resetCriticalFailures();
+
     if (!version_compare(PHP_VERSION, '8.1', '>=')) {
       Factory::getApplication()->enqueueMessage('"WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder NG WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 8.1, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!"', 'error');
     }
 
 
-    return $this->installAndUpdate();
+    try {
+      $result = $this->installAndUpdate();
+      return $result && !$this->hasCriticalFailure();
+    } catch (\Throwable $e) {
+      $this->log('[ERROR] Install aborted: ' . $e->getMessage(), Log::ERROR);
+      return false;
+    }
   }
 
   /**
@@ -604,11 +668,19 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
    */
   public function update(InstallerAdapter $parent): bool
   {
+    $this->resetCriticalFailures();
+
     if (!version_compare(PHP_VERSION, '8.1', '>=')) {
       Factory::getApplication()->enqueueMessage('"WARNING: YOU ARE RUNNING PHP VERSION "' . PHP_VERSION . '". ContentBuilder NG WON\'T WORK WITH THIS VERSION. PLEASE UPGRADE TO AT LEAST PHP 8.1, SORRY BUT YOU BETTER UNINSTALL THIS COMPONENT NOW!"', 'error');
     }
 
-    return $this->installAndUpdate();
+    try {
+      $result = $this->installAndUpdate();
+      return $result && !$this->hasCriticalFailure();
+    } catch (\Throwable $e) {
+      $this->log('[ERROR] Update aborted: ' . $e->getMessage(), Log::ERROR);
+      return false;
+    }
   }
 
   /**
@@ -618,48 +690,54 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
    */
   public function uninstall(InstallerAdapter $parent): bool
   {
-    $this->log('Uninstall of ContentBuilder_ng.');
-
-    $db = Factory::getContainer()->get(DatabaseInterface::class);
+    $this->resetCriticalFailures();
+    $this->log('Uninstall of ContentBuilder NG.');
 
     try {
-      $conditions = array_merge(
-        $this->buildMenuLinkOptionWhereClauses($db, 'com_contentbuilder_ng'),
-        $this->buildMenuLinkOptionWhereClauses($db, 'com_contentbuilder')
-      );
+      $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-      $db->setQuery(
-        $db->getQuery(true)
-          ->delete($db->quoteName('#__menu'))
-          ->where('(' . implode(' OR ', $conditions) . ')')
-      )->execute();
-    } catch (\Throwable $e) {
-      $this->log('[WARNING] Failed to remove component menu entries on uninstall: ' . $e->getMessage(), Log::WARNING);
-    }
+      try {
+        $conditions = array_merge(
+          $this->buildMenuLinkOptionWhereClauses($db, 'com_contentbuilderng'),
+          $this->buildMenuLinkOptionWhereClauses($db, 'com_contentbuilder')
+        );
 
-    $plugins = $this->getPlugins();
-    $installer = new Installer();
-    $installer->setDatabase(\Joomla\CMS\Factory::getContainer()->get('DatabaseDriver'));
+        $db->setQuery(
+          $db->getQuery(true)
+            ->delete($db->quoteName('#__menu'))
+            ->where('(' . implode(' OR ', $conditions) . ')')
+        )->execute();
+      } catch (\Throwable $e) {
+        $this->log('[WARNING] Failed to remove component menu entries on uninstall: ' . $e->getMessage(), Log::WARNING);
+      }
 
-    foreach ($plugins as $folder => $subplugs) {
-      foreach ($subplugs as $plugin) {
-        $query = 'SELECT `extension_id` FROM #__extensions WHERE `type` = "plugin" AND `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder);
-        $db->setQuery($query);
-        $id = $db->loadResult();
+      $plugins = $this->getPlugins();
+      $installer = new Installer();
+      $installer->setDatabase(\Joomla\CMS\Factory::getContainer()->get('DatabaseDriver'));
 
-        if ($id) {
-          $installer->uninstall('plugin', $id, 1);
+      foreach ($plugins as $folder => $subplugs) {
+        foreach ($subplugs as $plugin) {
+          $query = 'SELECT `extension_id` FROM #__extensions WHERE `type` = "plugin" AND `element` = ' . $db->quote($plugin) . ' AND `folder` = ' . $db->quote($folder);
+          $db->setQuery($query);
+          $id = $db->loadResult();
+
+          if ($id) {
+            $installer->uninstall('plugin', $id, 1);
+          }
         }
       }
+
+      $db->setQuery("SELECT id FROM `#__menu` WHERE `alias` = 'root'");
+      if (!$db->loadResult()) {
+        $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, NULL, 0, 0, '', 0, '', 0, (SELECT MAX(mlft.rgt)+1 FROM #__menu AS mlft), 0, '*', 0)");
+        $db->execute();
+      }
+    } catch (\Throwable $e) {
+      $this->log('[ERROR] Uninstall aborted: ' . $e->getMessage(), Log::ERROR);
+      return false;
     }
 
-    $db->setQuery("SELECT id FROM `#__menu` WHERE `alias` = 'root'");
-    if (!$db->loadResult()) {
-      $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, NULL, 0, 0, '', 0, '', 0, (SELECT MAX(mlft.rgt)+1 FROM #__menu AS mlft), 0, '*', 0)");
-      $db->execute();
-    }
-
-    return true;
+    return !$this->hasCriticalFailure();
   }
 
   /**
@@ -669,79 +747,85 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
    */
   public function preflight($type, $parent): bool
   {
+    $this->resetCriticalFailures();
 
-    if (!parent::preflight($type, $parent)) {
+    try {
+      if (!parent::preflight($type, $parent)) {
+        return false;
+      }
+
+      $db = Factory::getContainer()->get(DatabaseInterface::class);
+      $incomingVersion = $this->getIncomingPackageVersion($parent);
+      $installerInfo = $this->getInstallerPackageInfo($parent);
+      $timezoneName = (string) Factory::getApplication()->get('offset', 'UTC');
+      if ($timezoneName === '') {
+        $timezoneName = 'UTC';
+      }
+
+      try {
+        $timezone = new \DateTimeZone($timezoneName !== '' ? $timezoneName : 'UTC');
+      } catch (\Throwable) {
+        $timezone = new \DateTimeZone('UTC');
+      }
+
+      $startedAt = (new \DateTimeImmutable('now', $timezone))->format('Y-m-d H:i:s T');
+
+      // === LOG POUR DÉBOGAGE ===
+      $this->log(
+        '[OK] Préflight : '
+        . $startedAt
+        . ' | Installateur : '
+        . $installerInfo['name']
+        . ' | Taille : '
+        . $this->formatBytesForLog($installerInfo['size_bytes'] ?? null)
+        . '.'
+      );
+      $incomingVersionHtml = htmlspecialchars($incomingVersion, ENT_QUOTES, 'UTF-8');
+      $this->log('[OK] ContentBuilder NG Version <strong>' . $incomingVersionHtml . '</strong>.');
+  //    $this->log('Preflight installation method call, parameter : ' . $type . '.');
+      $this->log('[OK] Detected current version in manifest_cache : ' . $this->getCurrentInstalledVersion() . '.');
+
+      $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
+      if (!$db->loadResult()) {
+        $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, NULL, 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
+        $db->execute();
+      }
+
+      if ($type === 'update') {
+        $this->disableLegacyContentbuilderPlugins('preflight');
+      }
+
+      if ($type !== 'uninstall') {
+        $this->renameLegacyTables();
+        $this->migrateLegacyContentbuilderName('com_contentbuilder');
+        $this->migrateLegacyContentbuilderName('com_contentbuilder_ng');
+      }
+    } catch (\Throwable $e) {
+      $this->log('[ERROR] Preflight aborted: ' . $e->getMessage(), Log::ERROR);
       return false;
     }
 
-    $db = Factory::getContainer()->get(DatabaseInterface::class);
-    $incomingVersion = $this->getIncomingPackageVersion($parent);
-    $installerInfo = $this->getInstallerPackageInfo($parent);
-    $timezoneName = (string) Factory::getApplication()->get('offset', 'UTC');
-    if ($timezoneName === '') {
-      $timezoneName = 'UTC';
-    }
-
-    try {
-      $timezone = new \DateTimeZone($timezoneName !== '' ? $timezoneName : 'UTC');
-    } catch (\Throwable) {
-      $timezone = new \DateTimeZone('UTC');
-    }
-
-    $startedAt = (new \DateTimeImmutable('now', $timezone))->format('Y-m-d H:i:s T');
-
-    // === LOG POUR DÉBOGAGE ===
-    $this->log(
-      '[OK] Préflight : '
-      . $startedAt
-      . ' | Installateur : '
-      . $installerInfo['name']
-      . ' | Taille : '
-      . $this->formatBytesForLog($installerInfo['size_bytes'] ?? null)
-      . '.'
-    );
-    $incomingVersionHtml = htmlspecialchars($incomingVersion, ENT_QUOTES, 'UTF-8');
-    $this->log('[OK] ContentBuilder NG Version <strong>' . $incomingVersionHtml . '</strong>.');
-//    $this->log('Preflight installation method call, parameter : ' . $type . '.');
-    $this->log('[OK] Detected current version in manifest_cache : ' . $this->getCurrentInstalledVersion() . '.');
-
-    $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
-    if (!$db->loadResult()) {
-      $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, NULL, 0, 0, '', 0, '', 0, ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ), 0, '*', 0)");
-      $db->execute();
-    }
-
-    if ($type === 'update') {
-      $this->disableLegacyContentbuilderPlugins('preflight');
-    }
-
-    if ($type !== 'uninstall') {
-      $this->renameLegacyTables();
-      $this->migrateLegacyContentbuilderName();
-    }
-
-    return true;
+    return !$this->hasCriticalFailure();
   }
 
 
   /**
-   * method to remove old librairies and files.
+   * method to remove old folders.
    *
    * @return void
    */
-  private function removeOldLibraries(): void
+  private function removeOldDirectories(): void
   {
     $paths = [
       JPATH_ADMINISTRATOR . '/components/com_contentbuilder/',
+      JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/',
       JPATH_SITE . '/components/com_contentbuilder/',
+      JPATH_SITE . '/components/com_contentbuilder_ng/',
       JPATH_ROOT . '/media/contentbuilder/',
+      JPATH_ROOT . '/media/contentbuilder_ng/',
       JPATH_SITE . '/media/com_contentbuilder/',
-      JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/classes/PHPExcel',
-      JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/classes/PHPExcel.php',
-      JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/librairies/PhpSpreadsheet',
+      JPATH_SITE . '/media/com_contentbuilder_ng/'
     ];
-
-    $app = Factory::getApplication();
 
     foreach ($paths as $path) {
       if (Folder::exists($path)) {
@@ -751,20 +835,23 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
           $this->log("[ERROR] Failed to delete {$path} folder.", Log::ERROR);
         }
       } elseif (File::exists($path)) {
-        if (File::delete($path)) {
-          $this->log("[OK] Old {$path} file successfully deleted.");
-        } else {
-          $this->log("[ERROR] Failed to delete {$path} file.", Log::ERROR);
-        }
+          $this->log("[ERROR] Not a {$path} folder, but a file.", Log::ERROR);
       } else {
-        $this->log("[OK] No previous {$path} found.", Log::INFO, false);
+        $this->log("[OK] No previous {$path} directory found.", Log::INFO, false);
       }
     }
   }
 
+    /**
+   * method to remove old files.
+   *
+   * @return void
+   */
   private function removeObsoleteFiles(): void
   {
     $paths = [
+      JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/PHPExcel',
+      JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/PHPExcel.php',
       JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/Model/EditModel.php',
     ];
 
@@ -785,8 +872,8 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
   private function ensureMediaListTemplateInstalled(): void
   {
-    $source = JPATH_SITE . '/components/com_contentbuilder_ng/tmpl/list/default.php';
-    $target = JPATH_ROOT . '/media/com_contentbuilder_ng/images/list/tmpl/default.php';
+    $source = JPATH_SITE . '/components/com_contentbuilderng/tmpl/list/default.php';
+    $target = JPATH_ROOT . '/media/com_contentbuilderng/images/list/tmpl/default.php';
     $targetDir = \dirname($target);
 
     if (File::exists($target)) {
@@ -821,49 +908,49 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
     $alterQueries = [
-      // Table #__contentbuilder_ng_forms
-      "ALTER TABLE `#__contentbuilder_ng_forms` MODIFY `created` DATETIME NULL DEFAULT CURRENT_TIMESTAMP",
-      "UPDATE `#__contentbuilder_ng_forms` SET `created` = NULL WHERE `created` = '0000-00-00'",
+      // Table #__contentbuilderng_forms
+      "ALTER TABLE `#__contentbuilderng_forms` MODIFY `created` DATETIME NULL DEFAULT CURRENT_TIMESTAMP",
+      "UPDATE `#__contentbuilderng_forms` SET `created` = NULL WHERE `created` = '0000-00-00'",
 
-      "ALTER TABLE `#__contentbuilder_ng_forms` MODIFY `modified` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_forms` SET `modified` = NULL WHERE `modified` = '0000-00-00'",
+      "ALTER TABLE `#__contentbuilderng_forms` MODIFY `modified` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_forms` SET `modified` = NULL WHERE `modified` = '0000-00-00'",
 
-      "ALTER TABLE `#__contentbuilder_ng_forms` MODIFY `last_update` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_forms` SET `last_update` = NULL WHERE `last_update` = '0000-00-00'",
+      "ALTER TABLE `#__contentbuilderng_forms` MODIFY `last_update` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_forms` SET `last_update` = NULL WHERE `last_update` = '0000-00-00'",
 
-      "ALTER TABLE `#__contentbuilder_ng_forms` MODIFY `rand_date_update` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_forms` SET `rand_date_update` = NULL WHERE `rand_date_update` = '0000-00-00'",
+      "ALTER TABLE `#__contentbuilderng_forms` MODIFY `rand_date_update` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_forms` SET `rand_date_update` = NULL WHERE `rand_date_update` = '0000-00-00'",
 
-      // Table #__contentbuilder_ng_records
-      "ALTER TABLE `#__contentbuilder_ng_records` MODIFY `publish_up` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_records` SET `publish_up` = NULL WHERE `publish_up` = '0000-00-00'",
-      "ALTER TABLE `#__contentbuilder_ng_records` MODIFY `publish_down` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_records` SET `publish_down` = NULL WHERE `publish_down` = '0000-00-00'",
-      "ALTER TABLE `#__contentbuilder_ng_records` MODIFY `last_update` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_records` SET `last_update` = NULL WHERE `last_update` = '0000-00-00'",
-      "ALTER TABLE `#__contentbuilder_ng_records` MODIFY `rand_date` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_records` SET `rand_date` = NULL WHERE `rand_date` = '0000-00-00'",
+      // Table #__contentbuilderng_records
+      "ALTER TABLE `#__contentbuilderng_records` MODIFY `publish_up` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_records` SET `publish_up` = NULL WHERE `publish_up` = '0000-00-00'",
+      "ALTER TABLE `#__contentbuilderng_records` MODIFY `publish_down` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_records` SET `publish_down` = NULL WHERE `publish_down` = '0000-00-00'",
+      "ALTER TABLE `#__contentbuilderng_records` MODIFY `last_update` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_records` SET `last_update` = NULL WHERE `last_update` = '0000-00-00'",
+      "ALTER TABLE `#__contentbuilderng_records` MODIFY `rand_date` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_records` SET `rand_date` = NULL WHERE `rand_date` = '0000-00-00'",
 
-      // Table #__contentbuilder_ng_articles (si présent)
-      "ALTER TABLE `#__contentbuilder_ng_articles` MODIFY `last_update` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_articles` SET `last_update` = NULL WHERE `last_update` = '0000-00-00'",
+      // Table #__contentbuilderng_articles (si présent)
+      "ALTER TABLE `#__contentbuilderng_articles` MODIFY `last_update` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_articles` SET `last_update` = NULL WHERE `last_update` = '0000-00-00'",
 
-      // Table #__contentbuilder_ng_users (dates de vérification)
-      "ALTER TABLE `#__contentbuilder_ng_users` MODIFY `verification_date_view` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_users` SET `verification_date_view` = NULL WHERE `verification_date_view` = '0000-00-00'",
-      "ALTER TABLE `#__contentbuilder_ng_users` MODIFY `verification_date_new` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_users` SET `verification_date_new` = NULL WHERE `verification_date_new` = '0000-00-00'",
-      "ALTER TABLE `#__contentbuilder_ng_users` MODIFY `verification_date_edit` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_users` SET `verification_date_edit` = NULL WHERE `verification_date_edit` = '0000-00-00'",
+      // Table #__contentbuilderng_users (dates de vérification)
+      "ALTER TABLE `#__contentbuilderng_users` MODIFY `verification_date_view` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_users` SET `verification_date_view` = NULL WHERE `verification_date_view` = '0000-00-00'",
+      "ALTER TABLE `#__contentbuilderng_users` MODIFY `verification_date_new` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_users` SET `verification_date_new` = NULL WHERE `verification_date_new` = '0000-00-00'",
+      "ALTER TABLE `#__contentbuilderng_users` MODIFY `verification_date_edit` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_users` SET `verification_date_edit` = NULL WHERE `verification_date_edit` = '0000-00-00'",
 
-      "ALTER TABLE `#__contentbuilder_ng_rating_cache` MODIFY COLUMN `date` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_rating_cache` SET `date` = NULL WHERE `date` = '0000-00-00'",
+      "ALTER TABLE `#__contentbuilderng_rating_cache` MODIFY COLUMN `date` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_rating_cache` SET `date` = NULL WHERE `date` = '0000-00-00'",
 
-      // Table #__contentbuilder_ng_verifications
-      "ALTER TABLE `#__contentbuilder_ng_verifications` MODIFY `start_date` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_verifications` SET `start_date` = NULL WHERE `start_date` = '0000-00-00'",
-      "ALTER TABLE `#__contentbuilder_ng_verifications` MODIFY `verification_date` DATETIME NULL DEFAULT NULL",
-      "UPDATE `#__contentbuilder_ng_verifications` SET `verification_date` = NULL WHERE `verification_date` = '0000-00-00'"
+      // Table #__contentbuilderng_verifications
+      "ALTER TABLE `#__contentbuilderng_verifications` MODIFY `start_date` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_verifications` SET `start_date` = NULL WHERE `start_date` = '0000-00-00'",
+      "ALTER TABLE `#__contentbuilderng_verifications` MODIFY `verification_date` DATETIME NULL DEFAULT NULL",
+      "UPDATE `#__contentbuilderng_verifications` SET `verification_date` = NULL WHERE `verification_date` = '0000-00-00'"
     ];
 
     foreach ($alterQueries as $query) {
@@ -898,10 +985,10 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
     try {
-      $columns = $db->getTableColumns('#__contentbuilder_ng_storages', false);
+      $columns = $db->getTableColumns('#__contentbuilderng_storages', false);
       return array_change_key_case($columns ?: [], CASE_LOWER);
     } catch (\Throwable $e) {
-      $this->log('[WARNING] Could not inspect #__contentbuilder_ng_storages columns: ' . $e->getMessage(), Log::WARNING);
+      $this->log('[WARNING] Could not inspect #__contentbuilderng_storages columns: ' . $e->getMessage(), Log::WARNING);
       return [];
     }
   }
@@ -932,7 +1019,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       if (!array_key_exists($target, $columns)) {
         try {
           $db->setQuery(
-            'ALTER TABLE ' . $db->quoteName('#__contentbuilder_ng_storages') .
+            'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_storages') .
             ' CHANGE ' . $db->quoteName($legacy) . ' ' . $db->quoteName($target) . ' ' . $targetDefinition
           )->execute();
           $this->log("[OK] Renamed storage audit column {$legacy} to {$target}.");
@@ -946,7 +1033,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       try {
         if ($target === 'modified' || $target === 'created') {
           $db->setQuery(
-            'UPDATE ' . $db->quoteName('#__contentbuilder_ng_storages') .
+            'UPDATE ' . $db->quoteName('#__contentbuilderng_storages') .
             ' SET ' . $db->quoteName($target) . ' = ' . $db->quoteName($legacy) .
             ' WHERE (' . $db->quoteName($target) . ' IS NULL OR ' . $db->quoteName($target) . " IN ('0000-00-00', '0000-00-00 00:00:00'))" .
             ' AND ' . $db->quoteName($legacy) . ' IS NOT NULL' .
@@ -954,7 +1041,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
           )->execute();
         } else {
           $db->setQuery(
-            'UPDATE ' . $db->quoteName('#__contentbuilder_ng_storages') .
+            'UPDATE ' . $db->quoteName('#__contentbuilderng_storages') .
             ' SET ' . $db->quoteName($target) . ' = ' . $db->quoteName($legacy) .
             ' WHERE (' . $db->quoteName($target) . " = '' OR " . $db->quoteName($target) . ' IS NULL)' .
             ' AND ' . $db->quoteName($legacy) . ' IS NOT NULL' .
@@ -968,7 +1055,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       if ($legacy !== $target) {
         try {
           $db->setQuery(
-            'ALTER TABLE ' . $db->quoteName('#__contentbuilder_ng_storages') .
+            'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_storages') .
             ' DROP COLUMN ' . $db->quoteName($legacy)
           )->execute();
           $this->log("[OK] Removed legacy storage audit column {$legacy}.");
@@ -986,7 +1073,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       }
       try {
         $db->setQuery(
-          'ALTER TABLE ' . $db->quoteName('#__contentbuilder_ng_storages') .
+          'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_storages') .
           ' ADD COLUMN ' . $db->quoteName($column) . ' ' . $this->storageAuditColumnDefinition($column)
         )->execute();
         $this->log("[OK] Added storage audit column {$column}.");
@@ -996,14 +1083,14 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
 
     $normalizationQueries = [
-      "ALTER TABLE `#__contentbuilder_ng_storages` MODIFY `created` DATETIME NULL DEFAULT CURRENT_TIMESTAMP",
-      "ALTER TABLE `#__contentbuilder_ng_storages` MODIFY `modified` DATETIME NULL DEFAULT NULL",
-      "ALTER TABLE `#__contentbuilder_ng_storages` MODIFY `created_by` VARCHAR(255) NOT NULL DEFAULT ''",
-      "ALTER TABLE `#__contentbuilder_ng_storages` MODIFY `modified_by` VARCHAR(255) NOT NULL DEFAULT ''",
-      "UPDATE `#__contentbuilder_ng_storages` SET `created` = NULL WHERE `created` IN ('0000-00-00', '0000-00-00 00:00:00')",
-      "UPDATE `#__contentbuilder_ng_storages` SET `modified` = NULL WHERE `modified` IN ('0000-00-00', '0000-00-00 00:00:00')",
-      "UPDATE `#__contentbuilder_ng_storages` SET `created_by` = '' WHERE `created_by` IS NULL",
-      "UPDATE `#__contentbuilder_ng_storages` SET `modified_by` = '' WHERE `modified_by` IS NULL",
+      "ALTER TABLE `#__contentbuilderng_storages` MODIFY `created` DATETIME NULL DEFAULT CURRENT_TIMESTAMP",
+      "ALTER TABLE `#__contentbuilderng_storages` MODIFY `modified` DATETIME NULL DEFAULT NULL",
+      "ALTER TABLE `#__contentbuilderng_storages` MODIFY `created_by` VARCHAR(255) NOT NULL DEFAULT ''",
+      "ALTER TABLE `#__contentbuilderng_storages` MODIFY `modified_by` VARCHAR(255) NOT NULL DEFAULT ''",
+      "UPDATE `#__contentbuilderng_storages` SET `created` = NULL WHERE `created` IN ('0000-00-00', '0000-00-00 00:00:00')",
+      "UPDATE `#__contentbuilderng_storages` SET `modified` = NULL WHERE `modified` IN ('0000-00-00', '0000-00-00 00:00:00')",
+      "UPDATE `#__contentbuilderng_storages` SET `created_by` = '' WHERE `created_by` IS NULL",
+      "UPDATE `#__contentbuilderng_storages` SET `modified_by` = '' WHERE `modified_by` IS NULL",
     ];
 
     foreach ($normalizationQueries as $query) {
@@ -1023,7 +1110,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     try {
       $query = $db->getQuery(true)
         ->select($db->quoteName(['id', 'name']))
-        ->from($db->quoteName('#__contentbuilder_ng_storages'))
+        ->from($db->quoteName('#__contentbuilderng_storages'))
         ->where('(' . $db->quoteName('bytable') . ' = 0 OR ' . $db->quoteName('bytable') . ' IS NULL)')
         ->where($db->quoteName('name') . " <> ''");
 
@@ -1209,12 +1296,11 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   }
 
 
-  /* Rename com_contentbuilder ->  com_contentbuilder_ng */
-  private function migrateLegacyContentbuilderName(): void
+  /* Rename com_contentbuilder ->  com_contentbuilderng */
+  private function migrateLegacyContentbuilderName(string $legacyElement): void
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
-    $legacyElement = 'com_contentbuilder';
-    $targetElement = 'com_contentbuilder_ng';
+    $targetElement = 'com_contentbuilderng';
 
     $legacyQuery = $db->getQuery(true)
       ->select($db->quoteName('extension_id'))
@@ -1239,33 +1325,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
     $db->setQuery($targetQuery);
     if ((int) $db->loadResult() > 0) {
-      $message = "[WARNING] Legacy extension {$legacyElement} detected but {$targetElement} already exists. It will be removed after update.";
-      $this->log($message, Log::WARNING);
-      $columns = [];
-      try {
-        $columns = array_keys($db->getTableColumns('#__extensions'));
-      } catch (\Throwable $e) {
-        $columns = ['extension_id', 'element', 'name', 'enabled', 'client_id'];
-      }
-
-      $listQuery = $db->getQuery(true)
-        ->select($db->quoteName($columns))
-        ->from($db->quoteName('#__extensions'))
-        ->where($db->quoteName('type') . ' = ' . $db->quote('component'))
-        ->where($db->quoteName('element') . ' IN (' . $db->quote($legacyElement) . ', ' . $db->quote($targetElement) . ')');
-
-      $db->setQuery($listQuery);
-      $rows = $db->loadAssocList() ?: [];
-      if ($rows) {
-        foreach ($rows as $row) {
-          ksort($row);
-          $payload = json_encode($row, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-          $payload = $payload !== false ? $payload : '[unserializable row]';
-          $this->log('[WARNING] Component row: ' . $payload, Log::WARNING);
-        }
-      } else {
-        $this->log('[INFO] Component list empty for legacy/target elements.');
-      }
+      $this->log("[INFO] Legacy extension {$legacyElement} detected while {$targetElement} already exists; cleanup will run during postflight update.");
       return;
     }
 
@@ -1305,13 +1365,13 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       $db->setQuery(
         $db->getQuery(true)
           ->update($db->quoteName('#__menu'))
-          ->set($db->quoteName('alias') . ' = ' . $db->quote('contentbuilder_ng'))
-          ->set($db->quoteName('path') . ' = ' . $db->quote('contentbuilder_ng'))
-          ->set($db->quoteName('title') . ' = ' . $db->quote('COM_CONTENTBUILDER_NG'))
+          ->set($db->quoteName('alias') . ' = ' . $db->quote('contentbuilderng'))
+          ->set($db->quoteName('path') . ' = ' . $db->quote('contentbuilderng'))
+          ->set($db->quoteName('title') . ' = ' . $db->quote('COM_CONTENTBUILDERNG'))
           ->where($db->quoteName('alias') . ' = ' . $db->quote('contentbuilder'))
-          ->where($db->quoteName('link') . ' LIKE ' . $db->quote('%option=com_contentbuilder_ng%'))
+          ->where($db->quoteName('link') . ' LIKE ' . $db->quote('%option=com_contentbuilder%'))
       )->execute();
-      $this->log("[OK] Renamed legacy menu entry to contentbuilder_ng.");
+      $this->log("[OK] Renamed legacy menu entry to contentbuilderng.");
     } catch (\Throwable $e) {
       $message = "[WARNING] Could not rename legacy menu entry: " . $e->getMessage();
       $this->log($message, Log::WARNING);
@@ -1368,7 +1428,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
             ->update($db->quoteName('#__menu'))
             ->set(
               $db->quoteName('link') . ' = REPLACE(' . $db->quoteName('link') . ', ' .
-              $db->quote('option=com_contentbuilder_ng_ng') . ', ' . $db->quote('option=com_contentbuilder_ng') . ')'
+              $db->quote('option=com_contentbuilder_ng_ng') . ', ' . $db->quote('option=com_contentbuilderng') . ')'
             )
             ->where($db->quoteName('link') . ' LIKE ' . $db->quote('%option=com_contentbuilder_ng_ng%'))
         )->execute();
@@ -1386,14 +1446,213 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
 
     if ($total > 0) {
-      $this->log("[OK] Normalized {$total} broken com_contentbuilder_ng menu link(s).");
+      $this->log("[OK] Normalized {$total} broken com_contentbuilderng menu link(s).");
+    }
+  }
+
+  private function canonicalizePluginFolder(string $folder): string
+  {
+    $folder = strtolower(trim($folder));
+    if ($folder === '') {
+      return $folder;
+    }
+
+    if ($folder === 'contentbuilder_themes_ng' || $folder === 'contentbuilder_themes') {
+      return 'contentbuilderng_themes';
+    }
+
+    if (str_starts_with($folder, 'contentbuilder_ng_')) {
+      return 'contentbuilderng_' . substr($folder, strlen('contentbuilder_ng_'));
+    }
+
+    if (str_starts_with($folder, 'contentbuilder_')) {
+      return 'contentbuilderng_' . substr($folder, strlen('contentbuilder_'));
+    }
+
+    return $folder;
+  }
+
+  private function canonicalizePluginElement(string $element): string
+  {
+    $element = strtolower(trim($element));
+    if ($element === '') {
+      return $element;
+    }
+
+    if (str_starts_with($element, 'contentbuilder_ng_')) {
+      return 'contentbuilderng_' . substr($element, strlen('contentbuilder_ng_'));
+    }
+
+    if (str_starts_with($element, 'contentbuilder_')) {
+      return 'contentbuilderng_' . substr($element, strlen('contentbuilder_'));
+    }
+
+    return $element;
+  }
+
+  private function deduplicateTargetPluginExtensions(): void
+  {
+    $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+    try {
+      $rows = $db->setQuery(
+        $db->getQuery(true)
+          ->select($db->quoteName(['extension_id', 'folder', 'element', 'enabled', 'manifest_cache']))
+          ->from($db->quoteName('#__extensions'))
+          ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
+          ->where(
+            '('
+            . $db->quoteName('folder') . ' LIKE ' . $db->quote('contentbuilder%')
+            . ' OR '
+            . $db->quoteName('element') . ' LIKE ' . $db->quote('contentbuilder%')
+            . ')'
+      )
+          ->order($db->quoteName('extension_id') . ' DESC')
+      )->loadAssocList() ?: [];
+    } catch (\Throwable $e) {
+      $this->log('[WARNING] Failed reading plugin duplicates: ' . $e->getMessage(), Log::WARNING);
+      return;
+    }
+
+    $groups = [];
+    foreach ($rows as $row) {
+      if (!is_array($row)) {
+        continue;
+      }
+
+      $id = (int) ($row['extension_id'] ?? 0);
+      $folder = strtolower(trim((string) ($row['folder'] ?? '')));
+      $element = strtolower(trim((string) ($row['element'] ?? '')));
+      if ($id <= 0 || $folder === '' || $element === '') {
+        continue;
+      }
+
+      $canonicalFolder = $this->canonicalizePluginFolder($folder);
+      $canonicalElement = $this->canonicalizePluginElement($element);
+      $key = $canonicalFolder . '/' . $canonicalElement;
+
+      $row['extension_id'] = $id;
+      $row['folder'] = $folder;
+      $row['element'] = $element;
+      $row['canonical_folder'] = $canonicalFolder;
+      $row['canonical_element'] = $canonicalElement;
+      $groups[$key][] = $row;
+    }
+
+    if (empty($groups)) {
+      return;
+    }
+
+    $removedTotal = 0;
+    $groupCount = 0;
+    foreach ($groups as $key => $groupRows) {
+      if (!is_array($groupRows) || count($groupRows) < 2) {
+        continue;
+      }
+
+      [$canonicalFolder, $canonicalElement] = explode('/', $key, 2);
+      $keepId = 0;
+      $bestCanonical = -1;
+      $bestEnabled = -1;
+      $bestManifest = -1;
+      $bestId = -1;
+
+      foreach ($groupRows as $row) {
+        $id = (int) ($row['extension_id'] ?? 0);
+        if ($id <= 0) {
+          continue;
+        }
+
+        $isCanonical = ((string) ($row['folder'] ?? '') === $canonicalFolder && (string) ($row['element'] ?? '') === $canonicalElement) ? 1 : 0;
+        $enabled = (int) ($row['enabled'] ?? 0);
+        $hasManifest = trim((string) ($row['manifest_cache'] ?? '')) !== '' ? 1 : 0;
+
+        $isBetter = false;
+        if ($keepId === 0) {
+          $isBetter = true;
+        } elseif ($isCanonical > $bestCanonical) {
+          $isBetter = true;
+        } elseif ($isCanonical === $bestCanonical && $enabled > $bestEnabled) {
+          $isBetter = true;
+        } elseif ($isCanonical === $bestCanonical && $enabled === $bestEnabled && $hasManifest > $bestManifest) {
+          $isBetter = true;
+        } elseif ($isCanonical === $bestCanonical && $enabled === $bestEnabled && $hasManifest === $bestManifest && $id > $bestId) {
+          $isBetter = true;
+        }
+
+        if ($isBetter) {
+          $keepId = $id;
+          $bestCanonical = $isCanonical;
+          $bestEnabled = $enabled;
+          $bestManifest = $hasManifest;
+          $bestId = $id;
+        }
+      }
+
+      if ($keepId <= 0) {
+        continue;
+      }
+
+      $removeIds = [];
+      foreach ($groupRows as $row) {
+        $id = (int) ($row['extension_id'] ?? 0);
+        if ($id > 0 && $id !== $keepId) {
+          $removeIds[] = $id;
+        }
+      }
+      $removeIds = array_values(array_unique($removeIds));
+
+      if (empty($removeIds)) {
+        continue;
+      }
+
+      try {
+        $db->setQuery(
+          $db->getQuery(true)
+            ->update($db->quoteName('#__extensions'))
+            ->set($db->quoteName('folder') . ' = ' . $db->quote($canonicalFolder))
+            ->set($db->quoteName('element') . ' = ' . $db->quote($canonicalElement))
+            ->where($db->quoteName('extension_id') . ' = ' . $keepId)
+        )->execute();
+
+        foreach (['#__schemas', '#__update_sites_extensions'] as $table) {
+          $db->setQuery(
+            $db->getQuery(true)
+              ->delete($db->quoteName($table))
+              ->where($db->quoteName('extension_id') . ' IN (' . implode(',', $removeIds) . ')')
+          )->execute();
+        }
+
+        $db->setQuery(
+          $db->getQuery(true)
+            ->delete($db->quoteName('#__extensions'))
+            ->where($db->quoteName('extension_id') . ' IN (' . implode(',', $removeIds) . ')')
+        )->execute();
+
+        $removed = (int) $db->getAffectedRows();
+        $removedTotal += $removed;
+        $groupCount++;
+
+        $this->log(
+          "[OK] Deduplicated plugin {$canonicalFolder}/{$canonicalElement}: kept extension_id {$keepId}, removed " . implode(',', $removeIds) . '.'
+        );
+      } catch (\Throwable $e) {
+        $this->log(
+          "[WARNING] Failed deduplicating plugin {$canonicalFolder}/{$canonicalElement}: " . $e->getMessage(),
+          Log::WARNING
+        );
+      }
+    }
+
+    if ($groupCount > 0) {
+      $this->log("[OK] Plugin deduplication completed: {$groupCount} group(s), {$removedTotal} duplicate row(s) removed.");
     }
   }
 
   private function deduplicateTargetComponentExtensions(): void
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
-    $targetElement = 'com_contentbuilder_ng';
+    $targetElement = 'com_contentbuilderng';
 
     try {
       $rows = $db->setQuery(
@@ -1566,7 +1825,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   private function ensureAdministrationMainMenuEntry(): void
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
-    $targetElement = 'com_contentbuilder_ng';
+    $targetElement = 'com_contentbuilderng';
 
     try {
       $componentId = (int) $db->setQuery(
@@ -1583,7 +1842,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
 
     if ($componentId === 0) {
-      $this->log('[WARNING] Cannot ensure admin menu entry: com_contentbuilder_ng extension id is missing.', Log::WARNING);
+      $this->log('[WARNING] Cannot ensure admin menu entry: com_contentbuilderng extension id is missing.', Log::WARNING);
       return;
     }
 
@@ -1599,7 +1858,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
           ->where(
             '(' .
             $db->quoteName('component_id') . ' = ' . $componentId .
-            ' OR ' . $db->quoteName('link') . ' LIKE ' . $db->quote('index.php?option=com_contentbuilder_ng%') .
+            ' OR ' . $db->quoteName('link') . ' LIKE ' . $db->quote('index.php?option=com_contentbuilderng%') .
             ')'
           )
           ->order($db->quoteName('id') . ' ASC')
@@ -1615,7 +1874,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       $path = trim((string) ($mainRows[0]['path'] ?? ''));
 
       if ($alias === '') {
-        $alias = $this->resolveMenuAlias(1, 'contentbuilder_ng');
+        $alias = $this->resolveMenuAlias(1, 'contentbuilderng');
       }
       if ($path === '') {
         $path = $alias;
@@ -1625,10 +1884,10 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
         $db->setQuery(
           $db->getQuery(true)
             ->update($db->quoteName('#__menu'))
-            ->set($db->quoteName('title') . ' = ' . $db->quote('COM_CONTENTBUILDER_NG'))
+            ->set($db->quoteName('title') . ' = ' . $db->quote('COM_CONTENTBUILDERNG'))
             ->set($db->quoteName('alias') . ' = ' . $db->quote($alias))
             ->set($db->quoteName('path') . ' = ' . $db->quote($path))
-            ->set($db->quoteName('link') . ' = ' . $db->quote('index.php?option=com_contentbuilder_ng'))
+            ->set($db->quoteName('link') . ' = ' . $db->quote('index.php?option=com_contentbuilderng'))
             ->set($db->quoteName('type') . ' = ' . $db->quote('component'))
             ->set($db->quoteName('published') . ' = 1')
             ->set($db->quoteName('component_id') . ' = ' . $componentId)
@@ -1683,7 +1942,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       return;
     }
 
-    $alias = $this->resolveMenuAlias($rootId, 'contentbuilder_ng');
+    $alias = $this->resolveMenuAlias($rootId, 'contentbuilderng');
 
     try {
       $db->setQuery(
@@ -1728,7 +1987,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
       $values = [
         $db->quote('main'),
-        $db->quote('COM_CONTENTBUILDER_NG'),
+        $db->quote('COM_CONTENTBUILDERNG'),
         $db->quote($alias),
         $db->quote(''),
         $db->quote($alias),
@@ -1795,7 +2054,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
           'index.php?option=com_contentbuilder_ng&task=storages.display',
         ],
         'quicktask' => 'index.php?option=com_contentbuilder_ng&task=storage.add',
-        'quicktask_title' => 'COM_CONTENTBUILDER_NG_MENUS_NEW_STORAGE',
+        'quicktask_title' => 'COM_CONTENTBUILDERNG_MENUS_NEW_STORAGE',
       ],
       [
         'label' => 'Views',
@@ -1804,7 +2063,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
           'index.php?option=com_contentbuilder_ng&task=forms.display',
         ],
         'quicktask' => 'index.php?option=com_contentbuilder_ng&task=form.add',
-        'quicktask_title' => 'COM_CONTENTBUILDER_NG_MENUS_NEW_VIEW',
+        'quicktask_title' => 'COM_CONTENTBUILDERNG_MENUS_NEW_VIEW',
       ],
     ];
 
@@ -2097,12 +2356,13 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
   private function getLegacyPluginSourcePath(string $source, string $folder, string $element): ?string
   {
-    if ($folder === 'system' && $element === 'contentbuilder_ng_system') {
+    if ($folder === 'system' && $element === 'contentbuilderng_system') {
       return $source . '/plugins/plg_system';
     }
 
-    if ($folder === 'contentbuilder_ng_themes') {
+    if ($folder === 'contentbuilderng_themes') {
       $candidates = [
+        $source . '/plugins/contentbuilderng_themes/' . $element,
         $source . '/plugins/contentbuilder_themes_ng/' . $element,
         $source . '/plugins/contentbuilder_themes/' . $element,
       ];
@@ -2116,13 +2376,13 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       return $candidates[0];
     }
 
-    if ($folder === 'content' && str_starts_with($element, 'contentbuilder_ng_')) {
-      $suffix = substr($element, strlen('contentbuilder_ng_'));
+    if ($folder === 'content' && str_starts_with($element, 'contentbuilderng_')) {
+      $suffix = substr($element, strlen('contentbuilderng_'));
       return $source . '/plugins/plg_content_' . $suffix;
     }
 
-    if (str_starts_with($folder, 'contentbuilder_ng_')) {
-      $short = substr($folder, strlen('contentbuilder_ng_'));
+    if (str_starts_with($folder, 'contentbuilderng_')) {
+      $short = substr($folder, strlen('contentbuilderng_'));
       return $source . '/plugins/plg_' . $short . '_' . $element;
     }
 
@@ -2184,12 +2444,11 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     return null;
   }
 
-  private function removeLegacyComponent(): void
+  private function removeLegacyComponent(string $legacyElement): void
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
-    $legacyElement = 'com_contentbuilder';
-    $targetElement = 'com_contentbuilder_ng';
+    $targetElement = 'com_contentbuilderng';
 
     $legacyQuery = $db->getQuery(true)
       ->select($db->quoteName('extension_id'))
@@ -2219,7 +2478,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       return;
     }
 
-    $this->log("[INFO] Legacy component {$legacyElement} detected (id {$legacyId}). Disabling it (safe mode, no uninstall).");
+    $this->log("[INFO] Legacy component {$legacyElement} detected (id {$legacyId}). Cleaning up stale extension row (safe mode, no uninstall hooks).");
 
     // Keep admin links pointing to NG even when legacy component stays installed but disabled.
     $this->updateMenuLinks($legacyElement, $targetElement);
@@ -2227,13 +2486,13 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       $db->setQuery(
         $db->getQuery(true)
           ->update($db->quoteName('#__menu'))
-          ->set($db->quoteName('alias') . ' = ' . $db->quote('contentbuilder_ng'))
-          ->set($db->quoteName('path') . ' = ' . $db->quote('contentbuilder_ng'))
-          ->set($db->quoteName('title') . ' = ' . $db->quote('COM_CONTENTBUILDER_NG'))
+          ->set($db->quoteName('alias') . ' = ' . $db->quote('contentbuilderng'))
+          ->set($db->quoteName('path') . ' = ' . $db->quote('contentbuilderng'))
+          ->set($db->quoteName('title') . ' = ' . $db->quote('COM_CONTENTBUILDERNG'))
           ->where($db->quoteName('alias') . ' = ' . $db->quote('contentbuilder'))
           ->where($db->quoteName('link') . ' LIKE ' . $db->quote('%option=com_contentbuilder_ng%'))
       )->execute();
-      $this->log('[OK] Renamed legacy menu entry to contentbuilder_ng.');
+      $this->log('[OK] Renamed legacy menu entry to contentbuilderng.');
     } catch (\Throwable $e) {
       $message = "[WARNING] Could not rename legacy menu entry: " . $e->getMessage();
       $this->log($message, Log::WARNING);
@@ -2251,6 +2510,42 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       $this->log("[WARNING] Failed to disable legacy component {$legacyElement}: " . $e->getMessage(), Log::WARNING);
     }
 
+    try {
+      $db->setQuery(
+        $db->getQuery(true)
+          ->update($db->quoteName('#__menu'))
+          ->set($db->quoteName('component_id') . ' = ' . (int) $targetId)
+          ->where($db->quoteName('component_id') . ' = ' . (int) $legacyId)
+      )->execute();
+    } catch (\Throwable $e) {
+      $this->log("[WARNING] Failed to remap legacy component_id {$legacyId} to {$targetId}: " . $e->getMessage(), Log::WARNING);
+    }
+
+    try {
+      foreach (['#__schemas', '#__update_sites_extensions'] as $table) {
+        $db->setQuery(
+          $db->getQuery(true)
+            ->delete($db->quoteName($table))
+            ->where($db->quoteName('extension_id') . ' = ' . (int) $legacyId)
+        )->execute();
+      }
+
+      $db->setQuery(
+        $db->getQuery(true)
+          ->delete($db->quoteName('#__extensions'))
+          ->where($db->quoteName('extension_id') . ' = ' . (int) $legacyId)
+      )->execute();
+      $removed = (int) $db->getAffectedRows();
+
+      if ($removed > 0) {
+        $this->log("[OK] Legacy component extension row removed: {$legacyElement} (id {$legacyId}).");
+      } else {
+        $this->log("[INFO] Legacy component extension row already absent: {$legacyElement} (id {$legacyId}).");
+      }
+    } catch (\Throwable $e) {
+      $this->log("[WARNING] Failed to remove legacy component extension row {$legacyElement} (id {$legacyId}): " . $e->getMessage(), Log::WARNING);
+    }
+
     $this->log("[INFO] Legacy component uninstall intentionally skipped to avoid destructive uninstall SQL/hooks.");
   }
 
@@ -2258,7 +2553,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
     $likeLegacy = $db->quote('contentbuilder%');
-    $likeNg = $db->quote('contentbuilder_ng%');
+    $likeNg = $db->quote('contentbuilderng%');
     $folderCond = $db->quoteName('folder') . ' LIKE ' . $likeLegacy . ' AND ' . $db->quoteName('folder') . ' NOT LIKE ' . $likeNg;
     $elementCond = $db->quoteName('element') . ' LIKE ' . $likeLegacy . ' AND ' . $db->quoteName('element') . ' NOT LIKE ' . $likeNg;
 
@@ -2351,13 +2646,13 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       }
     }
 
-    // 2) Catch-all legacy folders (group or element names starting with contentbuilder but not contentbuilder_ng).
+    // 2) Catch-all legacy folders (group or element names starting with contentbuilder but not contentbuilderng).
     $groupFolders = Folder::folders($pluginRoot, '.', false, true) ?: [];
     foreach ($groupFolders as $groupPath) {
       $groupName = basename($groupPath);
       $groupLower = strtolower($groupName);
 
-      if (str_starts_with($groupLower, 'contentbuilder') && !str_starts_with($groupLower, 'contentbuilder_ng')) {
+      if (str_starts_with($groupLower, 'contentbuilder') && !str_starts_with($groupLower, 'contentbuilderng')) {
         $paths[] = $groupPath;
         continue;
       }
@@ -2369,7 +2664,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       $elements = Folder::folders($groupPath, '.', false, true) ?: [];
       foreach ($elements as $elementPath) {
         $elementLower = strtolower(basename($elementPath));
-        if (str_starts_with($elementLower, 'contentbuilder') && !str_starts_with($elementLower, 'contentbuilder_ng')) {
+        if (str_starts_with($elementLower, 'contentbuilder') && !str_starts_with($elementLower, 'contentbuilderng')) {
           $paths[] = $elementPath;
         }
       }
@@ -2399,17 +2694,17 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
   private function mapToLegacyPlugin(string $folder, string $element): array
   {
-    if ($folder === 'system' && $element === 'contentbuilder_ng_system') {
+    if ($folder === 'system' && $element === 'contentbuilderng_system') {
       return ['system', 'contentbuilder_system'];
     }
 
-    if ($folder === 'content' && str_starts_with($element, 'contentbuilder_ng_')) {
-      $suffix = substr($element, strlen('contentbuilder_ng_'));
+    if ($folder === 'content' && str_starts_with($element, 'contentbuilderng_')) {
+      $suffix = substr($element, strlen('contentbuilderng_'));
       return ['content', 'contentbuilder_' . $suffix];
     }
 
-    if (str_starts_with($folder, 'contentbuilder_ng_')) {
-      $legacyFolder = 'contentbuilder_' . substr($folder, strlen('contentbuilder_ng_'));
+    if (str_starts_with($folder, 'contentbuilderng_')) {
+      $legacyFolder = 'contentbuilder_' . substr($folder, strlen('contentbuilderng_'));
       return [$legacyFolder, $element];
     }
 
@@ -2461,7 +2756,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       ])
       ->from($db->quoteName('#__extensions'))
       ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
-      ->where($db->quoteName('folder') . ' = ' . $db->quote('contentbuilder_ng_themes'));
+      ->where($db->quoteName('folder') . ' = ' . $db->quote('contentbuilderng_themes'));
     $db->setQuery($query);
     $installedThemes = $db->loadAssocList();
 
@@ -2473,8 +2768,8 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
         continue;
       }
 
-      $this->log("[INFO] Removing unsupported theme plugin contentbuilder_ng_themes/{$element} (id {$id}).");
-      $this->uninstallPluginById($installer, $id, 'contentbuilder_ng_themes', $element);
+      $this->log("[INFO] Removing unsupported theme plugin contentbuilderng_themes/{$element} (id {$id}).");
+      $this->uninstallPluginById($installer, $id, 'contentbuilderng_themes', $element);
     }
   }
 
@@ -2483,17 +2778,17 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
     try {
-      $columns = $db->getTableColumns('#__contentbuilder_ng_forms', false);
+      $columns = $db->getTableColumns('#__contentbuilderng_forms', false);
       if (!is_array($columns) || !array_key_exists('theme_plugin', $columns)) {
-        $this->log('[INFO] Theme normalization skipped: #__contentbuilder_ng_forms.theme_plugin column not found.');
+        $this->log('[INFO] Theme normalization skipped: #__contentbuilderng_forms.theme_plugin column not found.');
         return;
       }
     } catch (\Throwable $e) {
-      $this->log('[WARNING] Could not inspect #__contentbuilder_ng_forms columns: ' . $e->getMessage(), Log::WARNING);
+      $this->log('[WARNING] Could not inspect #__contentbuilderng_forms columns: ' . $e->getMessage(), Log::WARNING);
       return;
     }
 
-    $supportedThemes = $this->getPlugins()['contentbuilder_ng_themes'] ?? ['joomla6'];
+    $supportedThemes = $this->getPlugins()['contentbuilderng_themes'] ?? ['joomla6'];
     if (!in_array('joomla6', $supportedThemes, true)) {
       $supportedThemes[] = 'joomla6';
     }
@@ -2503,7 +2798,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
     try {
       $query = $db->getQuery(true)
-        ->update($db->quoteName('#__contentbuilder_ng_forms'))
+        ->update($db->quoteName('#__contentbuilderng_forms'))
         ->set($db->quoteName('theme_plugin') . ' = ' . $db->quote('joomla6'))
         ->where($db->quoteName('theme_plugin') . ' = ' . $db->quote('joomla3'));
       $db->setQuery($query)->execute();
@@ -2515,7 +2810,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     try {
       $query = $db->getQuery(true)
         ->select('DISTINCT ' . $db->quoteName('theme_plugin'))
-        ->from($db->quoteName('#__contentbuilder_ng_forms'))
+        ->from($db->quoteName('#__contentbuilderng_forms'))
         ->where($db->quoteName('theme_plugin') . ' IS NOT NULL')
         ->where($db->quoteName('theme_plugin') . " <> ''");
       $db->setQuery($query);
@@ -2526,7 +2821,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
         $quotedThemes = array_map(static fn($theme) => $db->quote((string) $theme), $unsupportedThemes);
 
         $query = $db->getQuery(true)
-          ->update($db->quoteName('#__contentbuilder_ng_forms'))
+          ->update($db->quoteName('#__contentbuilderng_forms'))
           ->set($db->quoteName('theme_plugin') . ' = ' . $db->quote('joomla6'))
           ->where($db->quoteName('theme_plugin') . ' IN (' . implode(',', $quotedThemes) . ')');
         $db->setQuery($query)->execute();
@@ -2546,18 +2841,24 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   private function normalizeLegacyComponentTypes(): void
   {
     $db = Factory::getContainer()->get(DatabaseInterface::class);
-    $targetType = 'com_contentbuilder_ng';
+    $targetType = 'com_contentbuilderng';
     $legacyTypes = [
+      'contentbuilder',
+      'contentbuilderng',
       'com_contentbuilder',
+      'com_contentbuilder_ng',
       'com_contentbuilderng',
+      'COM_CONTENTBUILDER',
+      'COM_CONTENTBUILDER_NG',
+      'COM_CONTENTBUILDERNG',
     ];
     $quotedLegacyTypes = array_map(static fn($legacyType) => $db->quote($legacyType), $legacyTypes);
 
     $tables = [
-      '#__contentbuilder_ng_forms',
-      '#__contentbuilder_ng_records',
-      '#__contentbuilder_ng_articles',
-      '#__contentbuilder_ng_resource_access',
+      '#__contentbuilderng_forms',
+      '#__contentbuilderng_records',
+      '#__contentbuilderng_articles',
+      '#__contentbuilderng_resource_access',
     ];
 
     $totalUpdated = 0;
@@ -2601,7 +2902,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     }
 
     if ($totalUpdated === 0) {
-      $this->log('[INFO] No legacy com_contentbuilder type value needed normalization.');
+      $this->log('[INFO] No legacy ContentBuilder type value needed normalization.');
       return;
     }
 
@@ -2613,7 +2914,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
     try {
-      $columns = $db->getTableColumns('#__contentbuilder_ng_forms', false);
+      $columns = $db->getTableColumns('#__contentbuilderng_forms', false);
       if (!is_array($columns)) {
         return;
       }
@@ -2621,19 +2922,19 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
         return;
       }
     } catch (\Throwable $e) {
-      $this->log('[WARNING] Could not inspect #__contentbuilder_ng_forms columns for new_button: ' . $e->getMessage(), Log::WARNING);
+      $this->log('[WARNING] Could not inspect #__contentbuilderng_forms columns for new_button: ' . $e->getMessage(), Log::WARNING);
       return;
     }
 
     try {
       $db->setQuery(
-        'ALTER TABLE ' . $db->quoteName('#__contentbuilder_ng_forms')
+        'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_forms')
         . ' ADD COLUMN ' . $db->quoteName('new_button')
         . " TINYINT(1) NOT NULL DEFAULT '0'"
       )->execute();
-      $this->log('[OK] Added #__contentbuilder_ng_forms.new_button column.');
+      $this->log('[OK] Added #__contentbuilderng_forms.new_button column.');
     } catch (\Throwable $e) {
-      $this->log('[WARNING] Failed adding #__contentbuilder_ng_forms.new_button column: ' . $e->getMessage(), Log::WARNING);
+      $this->log('[WARNING] Failed adding #__contentbuilderng_forms.new_button column: ' . $e->getMessage(), Log::WARNING);
     }
   }
 
@@ -2642,24 +2943,24 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
     try {
-      $columns = $db->getTableColumns('#__contentbuilder_ng_elements', false);
+      $columns = $db->getTableColumns('#__contentbuilderng_elements', false);
       if (!is_array($columns) || !array_key_exists('linkable', $columns)) {
         return;
       }
     } catch (\Throwable $e) {
-      $this->log('[WARNING] Could not inspect #__contentbuilder_ng_elements.linkable column: ' . $e->getMessage(), Log::WARNING);
+      $this->log('[WARNING] Could not inspect #__contentbuilderng_elements.linkable column: ' . $e->getMessage(), Log::WARNING);
       return;
     }
 
     try {
       $db->setQuery(
-        'ALTER TABLE ' . $db->quoteName('#__contentbuilder_ng_elements')
+        'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_elements')
         . ' MODIFY ' . $db->quoteName('linkable')
         . " TINYINT(1) NOT NULL DEFAULT '0'"
       )->execute();
-      $this->log('[OK] Ensured #__contentbuilder_ng_elements.linkable default is 0.');
+      $this->log('[OK] Ensured #__contentbuilderng_elements.linkable default is 0.');
     } catch (\Throwable $e) {
-      $this->log('[WARNING] Failed to set #__contentbuilder_ng_elements.linkable default to 0: ' . $e->getMessage(), Log::WARNING);
+      $this->log('[WARNING] Failed to set #__contentbuilderng_elements.linkable default to 0: ' . $e->getMessage(), Log::WARNING);
     }
   }
 
@@ -2670,6 +2971,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
    */
   function postflight($type, $parent)
   {
+    $this->resetCriticalFailures();
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
     // === LOG POUR DÉBOGAGE ===
@@ -2683,13 +2985,13 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
              }*/
 
     try {
-      $db->setQuery("Update #__menu Set `title` = 'COM_CONTENTBUILDER_NG' Where `alias`='contentbuilder_ng'");
+      $db->setQuery("Update #__menu Set `title` = 'COM_CONTENTBUILDERNG' Where `alias`='contentbuilderng'");
       $db->execute();
     } catch (\Throwable $e) {
       $this->log('[WARNING] Failed to normalize admin menu title: ' . $e->getMessage(), Log::WARNING);
     }
 
-    $this->removeOldLibraries();
+    $this->removeOldDirectories();
     $this->removeObsoleteFiles();
     $this->ensureMediaListTemplateInstalled();
     $this->ensureUploadDirectoryExists();
@@ -2711,8 +3013,11 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
       $this->removeDeprecatedThemePlugins();
       $this->normalizeFormThemePlugins();
       $this->normalizeLegacyComponentTypes();
-      $this->removeLegacyComponent();
+      $this->removeLegacyComponent('com_contentbuilder');
+      $this->removeLegacyComponent('com_contentbuilder_ng');
       $this->removeLegacyPlugins();
+      $this->removeLegacyPluginFolders();
+      $this->deduplicateTargetPluginExtensions();
     }
 
     $this->deduplicateTargetComponentExtensions();
@@ -2721,49 +3026,43 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $this->ensureSubmenuQuickTasks();
 
     // On ne fait ça que sur update (et éventuellement discover_install si tu veux)
-    if ($type !== 'update') {
-      return;
-    }
+    if ($type === 'update') {
+      $table = $db->quoteName('#__contentbuilderng_storages');
 
-    $table = $db->quoteName('#__contentbuilder_ng_storages');
+      // Vérifie l’existence de la table
+      try {
+        $tables = $db->getTableList();
+        $expected = $db->getPrefix() . 'contentbuilderng_storages';
 
-    // Vérifie l’existence de la table
-    try {
-      $tables = $db->getTableList();
-      $expected = $db->getPrefix() . 'contentbuilder_ng_storages';
+        if (in_array($expected, $tables, true)) {
+          // Y a-t-il des ordering à 0 ?
+          $db->setQuery("SELECT COUNT(*) FROM $table WHERE ordering = 0");
+          $needFix = (int) $db->loadResult();
 
-      if (!in_array($expected, $tables, true)) {
-        return; // table pas présente => rien à faire
+          if ($needFix > 0) {
+            // Max ordering existant (si tout est à 0, max = 0)
+            $db->setQuery("SELECT COALESCE(MAX(ordering), 0) FROM $table");
+            $max = (int) $db->loadResult();
+
+            // IDs à réparer (ordering = 0)
+            $db->setQuery("SELECT id FROM $table WHERE ordering = 0 ORDER BY id");
+            $ids = $db->loadColumn() ?: [];
+
+            // Mise à jour séquentielle
+            $order = $max;
+            foreach ($ids as $id) {
+              $order++;
+
+              $db->setQuery(
+                "UPDATE $table SET ordering = " . (int) $order . " WHERE id = " . (int) $id
+              );
+              $db->execute();
+            }
+          }
+        }
+      } catch (\Throwable $e) {
+        $this->log('[ERROR] Failed to normalize storages ordering in postflight: ' . $e->getMessage(), Log::ERROR);
       }
-    } catch (\Throwable $e) {
-      // Si getTableList foire sur un driver, on tente quand même.
-    }
-
-    // Y a-t-il des ordering à 0 ?
-    $db->setQuery("SELECT COUNT(*) FROM $table WHERE ordering = 0");
-    $needFix = (int) $db->loadResult();
-
-    if ($needFix === 0) {
-      return;
-    }
-
-    // Max ordering existant (si tout est à 0, max = 0)
-    $db->setQuery("SELECT COALESCE(MAX(ordering), 0) FROM $table");
-    $max = (int) $db->loadResult();
-
-    // IDs à réparer (ordering = 0)
-    $db->setQuery("SELECT id FROM $table WHERE ordering = 0 ORDER BY id");
-    $ids = $db->loadColumn() ?: [];
-
-    // Mise à jour séquentielle
-    $order = $max;
-    foreach ($ids as $id) {
-      $order++;
-
-      $db->setQuery(
-        "UPDATE $table SET ordering = " . (int) $order . " WHERE id = " . (int) $id
-      );
-      $db->execute();
     }
     // try to restore the main menu items if they got lost
     /*
@@ -2776,20 +3075,20 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
         $comp_id = $db->loadResult();
         
         if($comp_id){
-            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'com_contentbuilder_ng', 'contentbuilder_ng', '', 'contentbuilder_ng', 'index.php?option=com_contentbuilder_ng', 'component', 0, 1, 1, ".$comp_id.", 0, NULL, 0, 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'com_contentbuilder_ng', 'contentbuilderng', '', 'contentbuilderng', 'index.php?option=com_contentbuilder_ng', 'component', 0, 1, 1, ".$comp_id.", 0, NULL, 0, 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
             $db->execute();
             $parent_id = $db->insertid();
 
-            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDER_NG_STORAGES', 'comcontentbuilderstorages', '', 'contentbuilder_ng/comcontentbuilderstorages', 'index.php?option=com_contentbuilder&task=storages.display', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES ('main', 'COM_CONTENTBUILDERNG_STORAGES', 'comcontentbuilderstorages', '', 'contentbuilderng/comcontentbuilderstorages', 'index.php?option=com_contentbuilder&task=storages.display', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
             $db->execute();
 
-            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_NG_LIST', 'comcontentbuilderlist', '', 'contentbuilder_ng/comcontentbuilderlist', 'index.php?option=com_contentbuilder&task=forms.display', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDERNG_LIST', 'comcontentbuilderlist', '', 'contentbuilderng/comcontentbuilderlist', 'index.php?option=com_contentbuilder&task=forms.display', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'media/com_contentbuilder_ng/images/logo_icon_cb.png', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
             $db->execute();
 
-            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'Try BreezingForms!', 'try-breezingforms', '', 'contentbuilder_ng/try-breezingforms', 'index.php?option=com_contentbuilder&view=contentbuilder&market=true', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'Try BreezingForms!', 'try-breezingforms', '', 'contentbuilderng/try-breezingforms', 'index.php?option=com_contentbuilder&view=contentbuilder&market=true', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
             $db->execute();
 
-            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDER_NG_ABOUT', 'comcontentbuilderabout', '', 'contentbuilder_ng/comcontentbuilderabout', 'index.php?option=com_contentbuilder&view=contentbuilder_ng', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
+            $db->setQuery("INSERT INTO `#__menu` (`menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES('main', 'COM_CONTENTBUILDERNG_ABOUT', 'comcontentbuilderabout', '', 'contentbuilderng/comcontentbuilderabout', 'index.php?option=com_contentbuilder&view=contentbuilderng', 'component', 0, ".$parent_id.", 2, ".$comp_id.", 0, NULL, 0, 1, 'class:component', 0, '', ( Select mlftrgt From (Select max(mlft.rgt)+1 As mlftrgt From #__menu As mlft) As tbone ),( Select mrgtrgt From (Select max(mrgt.rgt)+2 As mrgtrgt From #__menu As mrgt) As filet ), 0, '', 1)");
             $db->execute();
 
             $db->setQuery("Select max(mrgt.rgt)+1 From #__menu As mrgt");
@@ -2800,6 +3099,12 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
         }
     }*/
 
-    $this->log('[OK] Contentbuilder installation finished.');
+    if ($this->hasCriticalFailure()) {
+      $summary = $this->getCriticalFailureSummary();
+      $this->log('[ERROR] Postflight completed with critical failures: ' . $summary, Log::ERROR);
+      throw new \RuntimeException('ContentBuilder NG postflight failed: ' . $summary);
+    }
+
+    $this->log('[OK] ContentBuilder NG installation finished.');
   }
 }

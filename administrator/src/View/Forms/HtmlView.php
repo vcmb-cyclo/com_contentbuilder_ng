@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\View\Forms;
+namespace CB\Component\Contentbuilderng\Administrator\View\Forms;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -17,7 +17,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
 {
@@ -31,7 +31,7 @@ class HtmlView extends BaseHtmlView
         $wa = $this->document->getWebAssetManager();
         $wa->addInlineStyle(
             '.icon-logo_left{
-                background-image:url(' . Uri::root(true) . '/media/com_contentbuilder_ng/images/logo_left.png);
+                background-image:url(' . Uri::root(true) . '/media/com_contentbuilderng/images/logo_left.png);
                 background-size:contain;
                 background-repeat:no-repeat;
                 background-position:center;
@@ -43,9 +43,9 @@ class HtmlView extends BaseHtmlView
         );
 
         // Et pour le title, garde un identifiant cohérent :
-        ToolbarHelper::title(Text::_('COM_CONTENTBUILDER_NG') .' :: ' . Text::_('COM_CONTENTBUILDER_NG_FORMS'), 'logo_left');
+        ToolbarHelper::title(Text::_('COM_CONTENTBUILDERNG') .' :: ' . Text::_('COM_CONTENTBUILDERNG_FORMS'), 'logo_left');
         ToolbarHelper::addNew('form.add');
-        ToolbarHelper::custom('forms.copy', 'copy', '', Text::_('COM_CONTENTBUILDER_NG_COPY'));
+        ToolbarHelper::custom('forms.copy', 'copy', '', Text::_('COM_CONTENTBUILDERNG_COPY'));
         ToolbarHelper::editList('form.edit');
 
         $toolbar = Factory::getApplication()->getDocument()->getToolbar('toolbar');
@@ -61,11 +61,11 @@ class HtmlView extends BaseHtmlView
         $statusChildToolbar->publish('forms.publish')->icon('fa-solid fa-check text-success')->listCheck(true);
         $statusChildToolbar->unpublish('forms.unpublish')->icon('fa-solid fa-circle-xmark text-danger')->listCheck(true);
         ToolbarHelper::deleteList('JGLOBAL_CONFIRM_DELETE', 'forms.delete');
-        ToolbarHelper::preferences('com_contentbuilder_ng');
+        ToolbarHelper::preferences('com_contentbuilderng');
         ToolbarHelper::help(
-            'COM_CONTENTBUILDER_NG_HELP_VIEWS_TITLE',
+            'COM_CONTENTBUILDERNG_HELP_VIEWS_TITLE',
             false,
-            Uri::base() . 'index.php?option=com_contentbuilder_ng&view=forms&layout=help&tmpl=component'
+            Uri::base() . 'index.php?option=com_contentbuilderng&view=forms&layout=help&tmpl=component'
         );
 
         $items      = $this->getModel()->getItems();
@@ -131,7 +131,7 @@ class HtmlView extends BaseHtmlView
             $previewSig = hash_hmac('sha256', $previewPayload, $secret);
 
             $links[$formId] = Uri::root()
-                . 'index.php?option=com_contentbuilder_ng&task=list.display&id='
+                . 'index.php?option=com_contentbuilderng&task=list.display&id='
                 . $formId
                 . '&cb_preview=1'
                 . '&cb_preview_until=' . $previewUntil

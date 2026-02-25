@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="contentbuilderng_validation" version="6.0" method="upgrade">
+	<name>ContentBuilder NG - Validation - Equal</name>
+	<creationDate>2026-02-25</creationDate>
+	<author>XDA+GIL</author>
+        <license>GNU/GPL v2 or later https://www.gnu.org/licenses/old-licenses/gpl-2.0.html</license>
+	<copyright>This Joomla! component is released under the GNU/GPL license</copyright>
+	<authorEmail>noreply@vcmb.fr</authorEmail>
+	<authorUrl>breezingforms-ng.vcmb.fr</authorUrl>
+	<version>6.1.1</version>
+	<administration></administration>
+	<description>
+	<![CDATA[
+        Checks if the given value equals with another field.
+        The field to be check against needs to have the same name, with suffix "_repeat".
+        So if the name would be "firstname", the 2nd field's name has to be "firstname_repeat".
+        ]]>
+    </description>
+    <files>
+        <filename plugin="equal">equal.php</filename>
+    </files>
+    <languages>
+        <language tag="en-GB">en-GB.plg_contentbuilderng_validation_equal.ini</language>
+        <language tag="de-DE">de-DE.plg_contentbuilderng_validation_equal.ini</language>
+    </languages>
+
+    <config>
+    </config>
+</extension>

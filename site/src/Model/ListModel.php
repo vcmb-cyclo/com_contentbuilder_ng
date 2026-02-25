@@ -8,7 +8,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Site\Model;
+namespace CB\Component\Contentbuilderng\Site\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -21,8 +21,8 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Event\Content\ContentPrepareEvent;
 use Joomla\CMS\MVC\Model\ListModel as BaseListModel;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 class ListModel extends BaseListModel
 {
@@ -62,16 +62,16 @@ class ListModel extends BaseListModel
         $this->app = $app;
 
         $this->frontend = $app->isClient('site');
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
 
         if ($this->frontend) {
             $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 
             // Charge le manifeste joomla.asset.json du composant
-            $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilder_ng');
+            $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
 
             // Utilise la feuille de style déclarée
-            $wa->useStyle('com_contentbuilder_ng.system');
+            $wa->useStyle('com_contentbuilderng.system');
         }
 
         if (Factory::getApplication()->input->getInt('Itemid', 0)) {
@@ -92,7 +92,7 @@ class ListModel extends BaseListModel
         $this->setId($id);
 
         if (!$this->_id) {
-            throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+            throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
         }
 
         $list = (array) $app->input->get('list', [], 'array');
@@ -276,7 +276,7 @@ class ListModel extends BaseListModel
     private function getPaginationStateKeyPrefix(): string
     {
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
 
         $formId = (int) $this->_id;
         if ($formId < 1) {
@@ -309,7 +309,7 @@ class ListModel extends BaseListModel
     {
         $app = Factory::getApplication();
         $session = $app->getSession();
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
 
         // Reset legacy list state keys.
         $app->setUserState($option . 'formsd_filter', '');
@@ -320,13 +320,13 @@ class ListModel extends BaseListModel
         $app->setUserState($option . 'formsd_filter_order_Dir', '');
 
         // Reset current form external filter state.
-        $session->clear('com_contentbuilder_ng.filter_signal.' . $this->_id);
-        $session->clear('com_contentbuilder_ng.filter.' . $this->_id);
-        $session->clear('com_contentbuilder_ng.calendar_filter_from.' . $this->_id);
-        $session->clear('com_contentbuilder_ng.calendar_filter_to.' . $this->_id);
-        $session->clear('com_contentbuilder_ng.calendar_formats.' . $this->_id);
-        $session->clear('com_contentbuilder_ng.filter_keywords.' . $this->_id);
-        $session->clear('com_contentbuilder_ng.filter_article_categories.' . $this->_id);
+        $session->clear('com_contentbuilderng.filter_signal.' . $this->_id);
+        $session->clear('com_contentbuilderng.filter.' . $this->_id);
+        $session->clear('com_contentbuilderng.calendar_filter_from.' . $this->_id);
+        $session->clear('com_contentbuilderng.calendar_filter_to.' . $this->_id);
+        $session->clear('com_contentbuilderng.calendar_formats.' . $this->_id);
+        $session->clear('com_contentbuilderng.filter_keywords.' . $this->_id);
+        $session->clear('com_contentbuilderng.filter_article_categories.' . $this->_id);
     }
 
 
@@ -358,7 +358,7 @@ class ListModel extends BaseListModel
     private function _buildQuery()
     {
         $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
-        $query = 'Select * From #__contentbuilder_ng_forms Where id = ' . intval($this->_id);
+        $query = 'Select * From #__contentbuilderng_forms Where id = ' . intval($this->_id);
 
         if (!$isAdminPreview) {
             $query .= ' And published = 1';
@@ -374,7 +374,7 @@ class ListModel extends BaseListModel
     function getData()
     {
         $app = $this->app;
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
 
         // Lets load the data if it doesn't already exist
         if (empty($this->_data)) {
@@ -382,7 +382,7 @@ class ListModel extends BaseListModel
             $this->_data = $this->_getList($query, 0, 1);
 
             if (!count($this->_data)) {
-                throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+                throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
             }
 
             foreach ($this->_data as $data) {
@@ -390,9 +390,9 @@ class ListModel extends BaseListModel
 
                 if (!$isAdminPreview) {
                     if (!$this->frontend && $data->display_in == 0) {
-                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+                        throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
                     } else if ($this->frontend && $data->display_in == 1) {
-                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+                        throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
                     }
                 }
 
@@ -411,7 +411,7 @@ class ListModel extends BaseListModel
                 if ($data->type && $data->reference_id) {
                     $data->form = ContentbuilderLegacyHelper::getForm($data->type, $data->reference_id);
                     if (!$data->form->exists) {
-                        throw new \Exception(Text::_('COM_CONTENTBUILDER_NG_FORM_NOT_FOUND'), 404);
+                        throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
                     }
                     $isAdminPreview = Factory::getApplication()->input->getBool('cb_preview_ok', false);
                     $data->preview_no_list_fields = false;
@@ -439,9 +439,9 @@ class ListModel extends BaseListModel
                         $data->initial_sort_order == 'Rand' &&
                         (empty($data->rand_date_update) || $now->toUnix() - strtotime($data->rand_date_update) >= $data->rand_update)
                     ) {
-                        $this->getDatabase()->setQuery("UPDATE #__contentbuilder_ng_records SET rand_date = '" . $___now . "' + interval rand()*10000 day Where `type` = " . $this->getDatabase()->quote($data->type) . " And reference_id = " . $this->getDatabase()->quote($data->reference_id));
+                        $this->getDatabase()->setQuery("UPDATE #__contentbuilderng_records SET rand_date = '" . $___now . "' + interval rand()*10000 day Where `type` = " . $this->getDatabase()->quote($data->type) . " And reference_id = " . $this->getDatabase()->quote($data->reference_id));
                         $this->getDatabase()->execute();
-                        $this->getDatabase()->setQuery("Update #__contentbuilder_ng_forms Set rand_date_update = '" . $___now . "'");
+                        $this->getDatabase()->setQuery("Update #__contentbuilderng_forms Set rand_date_update = '" . $___now . "'");
                         $this->getDatabase()->execute();
                     }
 
@@ -449,18 +449,18 @@ class ListModel extends BaseListModel
 
                     if (Factory::getApplication()->input->getBool('filter_reset', false)) {
 
-                        $app->getSession()->clear('com_contentbuilder_ng.filter_signal.' . $this->_id);
-                        $app->getSession()->clear('com_contentbuilder_ng.filter.' . $this->_id);
-                        $app->getSession()->clear('com_contentbuilder_ng.calendar_filter_from.' . $this->_id);
-                        $app->getSession()->clear('com_contentbuilder_ng.calendar_filter_to.' . $this->_id);
-                        $app->getSession()->clear('com_contentbuilder_ng.calendar_formats.' . $this->_id);
-                        $app->getSession()->clear('com_contentbuilder_ng.filter_keywords.' . $this->_id);
-                        $app->getSession()->clear('com_contentbuilder_ng.filter_article_categories.' . $this->_id);
+                        $app->getSession()->clear('com_contentbuilderng.filter_signal.' . $this->_id);
+                        $app->getSession()->clear('com_contentbuilderng.filter.' . $this->_id);
+                        $app->getSession()->clear('com_contentbuilderng.calendar_filter_from.' . $this->_id);
+                        $app->getSession()->clear('com_contentbuilderng.calendar_filter_to.' . $this->_id);
+                        $app->getSession()->clear('com_contentbuilderng.calendar_formats.' . $this->_id);
+                        $app->getSession()->clear('com_contentbuilderng.filter_keywords.' . $this->_id);
+                        $app->getSession()->clear('com_contentbuilderng.filter_article_categories.' . $this->_id);
                     } else if (
                         (
-                            $app->getSession()->get('com_contentbuilder_ng.filter_signal.' . $this->_id, false)
+                            $app->getSession()->get('com_contentbuilderng.filter_signal.' . $this->_id, false)
                             ||
-                            Factory::getApplication()->input->getBool('contentbuilder_ng_filter_signal', false)
+                            Factory::getApplication()->input->getBool('contentbuilderng_filter_signal', false)
                         )
                         && $data->allow_external_filter
                     ) {
@@ -472,7 +472,7 @@ class ListModel extends BaseListModel
                         $calendar_formats = array();
 
                         // renew on request
-                        if (Factory::getApplication()->input->getBool('contentbuilder_ng_filter_signal', false)) {
+                        if (Factory::getApplication()->input->getBool('contentbuilderng_filter_signal', false)) {
 
                             if (Factory::getApplication()->input->get('cbListFilterKeywords', '', 'string')) {
                                 $this->setState('formsd_filter', Factory::getApplication()->input->get('cbListFilterKeywords', '', 'string'));
@@ -487,23 +487,23 @@ class ListModel extends BaseListModel
                             $filters_to = Factory::getApplication()->input->post->get('cbListFilterCalendarTo', [], 'array');
                             $calendar_formats = Factory::getApplication()->input->post->get('cb_filter_calendar_format', [], 'array');
 
-                            $app->getSession()->set('com_contentbuilder_ng.filter_signal.' . $this->_id, true);
-                            $app->getSession()->set('com_contentbuilder_ng.filter.' . $this->_id, $filters);
-                            $app->getSession()->set('com_contentbuilder_ng.filter_keywords.' . $this->_id, Factory::getApplication()->input->get('cbListFilterKeywords', '', 'string'));
-                            $app->getSession()->set('com_contentbuilder_ng.filter_article_categories.' . $this->_id, Factory::getApplication()->input->getInt('cbListFilterArticleCategories', -1));
-                            $app->getSession()->set('com_contentbuilder_ng.calendar_filter_from.' . $this->_id, $filters_from);
-                            $app->getSession()->set('com_contentbuilder_ng.calendar_filter_to.' . $this->_id, $filters_to);
-                            $app->getSession()->set('com_contentbuilder_ng.calendar_formats.' . $this->_id, $calendar_formats);
+                            $app->getSession()->set('com_contentbuilderng.filter_signal.' . $this->_id, true);
+                            $app->getSession()->set('com_contentbuilderng.filter.' . $this->_id, $filters);
+                            $app->getSession()->set('com_contentbuilderng.filter_keywords.' . $this->_id, Factory::getApplication()->input->get('cbListFilterKeywords', '', 'string'));
+                            $app->getSession()->set('com_contentbuilderng.filter_article_categories.' . $this->_id, Factory::getApplication()->input->getInt('cbListFilterArticleCategories', -1));
+                            $app->getSession()->set('com_contentbuilderng.calendar_filter_from.' . $this->_id, $filters_from);
+                            $app->getSession()->set('com_contentbuilderng.calendar_filter_to.' . $this->_id, $filters_to);
+                            $app->getSession()->set('com_contentbuilderng.calendar_formats.' . $this->_id, $calendar_formats);
 
                             // else pick from session
-                        } else if ($app->getSession()->get('com_contentbuilder_ng.filter_signal.' . $this->_id, false)) {
+                        } else if ($app->getSession()->get('com_contentbuilderng.filter_signal.' . $this->_id, false)) {
 
-                            $filters = $app->getSession()->get('com_contentbuilder_ng.filter.' . $this->_id, array());
-                            $filters_from = $app->getSession()->get('com_contentbuilder_ng.calendar_filter_from.' . $this->_id, array());
-                            $filters_to = $app->getSession()->get('com_contentbuilder_ng.calendar_filter_to.' . $this->_id, array());
-                            $calendar_formats = $app->getSession()->get('com_contentbuilder_ng.calendar_formats.' . $this->_id, array());
-                            $filter_keywords = $app->getSession()->get('com_contentbuilder_ng.filter_keywords.' . $this->_id, '');
-                            $filter_cats = $app->getSession()->get('com_contentbuilder_ng.filter_article_categories.' . $this->_id, -1);
+                            $filters = $app->getSession()->get('com_contentbuilderng.filter.' . $this->_id, array());
+                            $filters_from = $app->getSession()->get('com_contentbuilderng.calendar_filter_from.' . $this->_id, array());
+                            $filters_to = $app->getSession()->get('com_contentbuilderng.calendar_filter_to.' . $this->_id, array());
+                            $calendar_formats = $app->getSession()->get('com_contentbuilderng.calendar_formats.' . $this->_id, array());
+                            $filter_keywords = $app->getSession()->get('com_contentbuilderng.filter_keywords.' . $this->_id, '');
+                            $filter_cats = $app->getSession()->get('com_contentbuilderng.filter_article_categories.' . $this->_id, -1);
 
                             if ($filter_keywords != '') {
                                 $this->setState('formsd_filter', $filter_keywords);
@@ -522,13 +522,13 @@ class ListModel extends BaseListModel
                                     switch (count($to_exploded)) {
                                         case 2:
                                             if ($to_exploded[0] != '') {
-                                                $filters[$col] = '@range/date/' .  ContentbuilderHelper::convertDate(trim($to_exploded[0]), $calendar_format) . ' to ' . ContentbuilderHelper::convertDate(trim($to_exploded[1]), $calendar_format);
+                                                $filters[$col] = '@range/date/' .  ContentbuilderngHelper::convertDate(trim($to_exploded[0]), $calendar_format) . ' to ' . ContentbuilderngHelper::convertDate(trim($to_exploded[1]), $calendar_format);
                                             } else {
-                                                $filters[$col] = '@range/date/to ' . ContentbuilderHelper::convertDate(trim($to_exploded[1]), $calendar_format);
+                                                $filters[$col] = '@range/date/to ' . ContentbuilderngHelper::convertDate(trim($to_exploded[1]), $calendar_format);
                                             }
                                             break;
                                         case 1:
-                                            $filters[$col] = '@range/date/' .  ContentbuilderHelper::convertDate(trim($to_exploded[0]), $calendar_format);
+                                            $filters[$col] = '@range/date/' .  ContentbuilderngHelper::convertDate(trim($to_exploded[0]), $calendar_format);
                                             break;
                                     }
                                     if (isset($to_exploded[0]) && isset($to_exploded[1]) && trim($to_exploded[0]) == '' && trim($to_exploded[1]) == '') {
@@ -578,9 +578,9 @@ class ListModel extends BaseListModel
                                         }
                                     }
                                     if (count($ex2) == 2) {
-                                        $out = (trim($ex2[0]) ? Text::_('COM_CONTENTBUILDER_NG_FROM') . ' ' . trim($val) : '') . ' ' . Text::_('COM_CONTENTBUILDER_NG_TO') . ' ' . trim($val2);
+                                        $out = (trim($ex2[0]) ? Text::_('COM_CONTENTBUILDERNG_FROM') . ' ' . trim($val) : '') . ' ' . Text::_('COM_CONTENTBUILDERNG_TO') . ' ' . trim($val2);
                                     } else if (count($ex2) > 0) {
-                                        $out = Text::_('COM_CONTENTBUILDER_NG_FROM2') . ' ' . trim($val);
+                                        $out = Text::_('COM_CONTENTBUILDERNG_FROM2') . ' ' . trim($val);
                                     }
                                     if ($out) {
                                         $this->_menu_filter[$order_key] = $ex;
@@ -596,7 +596,7 @@ class ListModel extends BaseListModel
                                     $i = 0;
                                     foreach ($ex2 as $val) {
                                         if ($i + 1 < $size) {
-                                            $out .= trim($val) . ' ' . Text::_('COM_CONTENTBUILDER_NG_AND') . ' ';
+                                            $out .= trim($val) . ' ' . Text::_('COM_CONTENTBUILDERNG_AND') . ' ';
                                         } else {
                                             $out .= trim($val);
                                         }
@@ -647,7 +647,7 @@ class ListModel extends BaseListModel
                     $data->labels = array();
                     $order_types = array();
                     if (count($ids)) {
-                        $this->getDatabase()->setQuery("Select Distinct `id`,`label`, reference_id, `order_type` From #__contentbuilder_ng_elements Where form_id = " . intval($this->_id) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 And list_include = 1 Order By ordering");
+                        $this->getDatabase()->setQuery("Select Distinct `id`,`label`, reference_id, `order_type` From #__contentbuilderng_elements Where form_id = " . intval($this->_id) . " And reference_id In (" . implode(',', $ids) . ") And published = 1 And list_include = 1 Order By ordering");
                         $rows = $this->getDatabase()->loadAssocList();
                         $ids = array();
                         foreach ($rows as $row) {

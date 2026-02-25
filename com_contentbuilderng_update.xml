@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <updates>
 	<update>
-		<name>COM_CONTENTBUILDER_NG</name>
+		<name>COM_CONTENTBUILDERNG</name>
 		<description>ContentBuilder NG Update 6.1.1</description>
-		<element>com_contentbuilder_ng</element>
+		<element>Com_contentbuilderng</element>
 		<type>component</type>
 		<client>1</client>
 		<version>6.1.1</version>

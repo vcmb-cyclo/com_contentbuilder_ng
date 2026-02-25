@@ -14,11 +14,11 @@ use Joomla\CMS\Router\Route;
 
 $input = Factory::getApplication()->input;
 $storageId = (int) $input->getInt('id', 0);
-$backToEdit = Route::_('index.php?option=com_contentbuilder_ng&view=storage&layout=edit&id=' . $storageId);
-$backToList = Route::_('index.php?option=com_contentbuilder_ng&view=storages');
+$backToEdit = Route::_('index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $storageId);
+$backToList = Route::_('index.php?option=com_contentbuilderng&view=storages');
 ?>
 <div class="container-fluid p-3">
-    <h1 class="h3 mb-3"><?php echo Text::_('COM_CONTENTBUILDER_NG_HELP_STORAGES_TITLE'); ?></h1>
+    <h1 class="h3 mb-3"><?php echo Text::_('COM_CONTENTBUILDERNG_HELP_STORAGES_TITLE'); ?></h1>
     <p class="text-muted mb-4">
         Cet écran permet de configurer une source de données (storage), ses champs et la synchronisation avec la table SQL.
         Utilisez cette aide comme check-list rapide pour éviter les erreurs de structure.
@@ -102,7 +102,7 @@ $backToList = Route::_('index.php?option=com_contentbuilder_ng&view=storages');
             </a>
         <?php endif; ?>
         <a class="btn btn-primary btn-sm" href="<?php echo $backToList; ?>">
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_HELP_BACK_TO_STORAGES'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_HELP_BACK_TO_STORAGES'); ?>
         </a>
     </div>
 </div>

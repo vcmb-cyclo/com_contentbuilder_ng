@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Model;
+namespace CB\Component\Contentbuilderng\Administrator\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -20,9 +20,9 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\PackedDataHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 
 class ElementoptionsModel extends BaseDatabaseModel
 {
@@ -70,7 +70,7 @@ class ElementoptionsModel extends BaseDatabaseModel
 
     private function _buildQuery()
     {
-        return 'Select * From #__contentbuilder_ng_elements Where id = ' . intval($this->_element_id);
+        return 'Select * From #__contentbuilderng_elements Where id = ' . intval($this->_element_id);
     }
 
     function getData()
@@ -81,7 +81,7 @@ class ElementoptionsModel extends BaseDatabaseModel
             if ((int) $this->_element_id < 1 && (int) $this->_id > 0) {
                 // Fallback: no explicit element selected, use the first field of the current form.
                 $this->getDatabase()->setQuery(
-                    "SELECT id FROM #__contentbuilder_ng_elements WHERE form_id = "
+                    "SELECT id FROM #__contentbuilderng_elements WHERE form_id = "
                     . (int) $this->_id
                     . " ORDER BY ordering, id LIMIT 1"
                 );
@@ -121,7 +121,7 @@ class ElementoptionsModel extends BaseDatabaseModel
     function getValidationPlugins()
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilder_ng_validation' And `enabled` = 1");
+        $db->setQuery("Select `element` From #__extensions Where `folder` = 'contentbuilderng_validation' And `enabled` = 1");
 
         $res = $db->loadColumn();
         return $res;
@@ -137,7 +137,7 @@ class ElementoptionsModel extends BaseDatabaseModel
             return array();
         }
 
-        $this->getDatabase()->setQuery("Select `type`, `reference_id` From #__contentbuilder_ng_forms Where id = " . intval($this->_id));
+        $this->getDatabase()->setQuery("Select `type`, `reference_id` From #__contentbuilderng_forms Where id = " . intval($this->_id));
         $formRow = $this->getDatabase()->loadAssoc();
 
         if (!is_array($formRow) || empty($formRow['type']) || empty($formRow['reference_id'])) {
@@ -156,7 +156,7 @@ class ElementoptionsModel extends BaseDatabaseModel
     function store()
     {
         if (Factory::getApplication()->input->getInt('type_change', 0)) {
-            $this->getDatabase()->setQuery("Update #__contentbuilder_ng_elements Set `type`=" . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('type_selection', '')) . " Where id = " . $this->_element_id);
+            $this->getDatabase()->setQuery("Update #__contentbuilderng_elements Set `type`=" . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('type_selection', '')) . " Where id = " . $this->_element_id);
             $this->getDatabase()->execute();
             return 1;
         }
@@ -168,7 +168,7 @@ class ElementoptionsModel extends BaseDatabaseModel
 
                 $hint = Factory::getApplication()->input->post->get('hint', '', 'html');
 
-                \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_ng_form_elements', Factory::getApplication()->input->getCmd('field_type', ''));
+                \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilderng_form_elements', Factory::getApplication()->input->getCmd('field_type', ''));
 
                 $dispatcher = Factory::getApplication()->getDispatcher();
                 $eventResult = $dispatcher->dispatch('onSettingsStore', new \Joomla\Event\Event('onSettingsStore', array()));
@@ -268,7 +268,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                 break;
 
             case 'upload':
-                $this->getDatabase()->setQuery("Select upload_directory, protect_upload_directory From #__contentbuilder_ng_forms Where id = " . $this->_id);
+                $this->getDatabase()->setQuery("Select upload_directory, protect_upload_directory From #__contentbuilderng_forms Where id = " . $this->_id);
                 $setup = $this->getDatabase()->loadAssoc();
 
                 // rel check for setup
@@ -278,32 +278,32 @@ class ElementoptionsModel extends BaseDatabaseModel
                 $upl_ex = explode('|', (string) ($setup['upload_directory'] ?? ''), 2);
                 $setupUploadDirectory = trim((string) ($upl_ex[0] ?? ''));
                 if ($setupUploadDirectory === '') {
-                    $setupUploadDirectory = 'media/com_contentbuilder_ng/upload';
+                    $setupUploadDirectory = 'media/com_contentbuilderng/upload';
                 }
                 $setupUploadDirectory = str_replace('\\', '/', $setupUploadDirectory);
                 $setupUploadDirectory = str_ireplace(
-                    ['{CBSite}/media/contentbuilder_ng', '{cbsite}/media/contentbuilder_ng'],
-                    ['{CBSite}/media/com_contentbuilder_ng', '{cbsite}/media/com_contentbuilder_ng'],
+                    ['{CBSite}/media/contentbuilderng', '{cbsite}/media/contentbuilderng'],
+                    ['{CBSite}/media/com_contentbuilderng', '{cbsite}/media/com_contentbuilderng'],
                     $setupUploadDirectory
                 );
-                if (stripos($setupUploadDirectory, '/media/contentbuilder_ng') === 0) {
-                    $setupUploadDirectory = 'media/com_contentbuilder_ng' . substr($setupUploadDirectory, strlen('/media/contentbuilder_ng'));
-                } elseif (stripos($setupUploadDirectory, 'media/contentbuilder_ng') === 0) {
-                    $setupUploadDirectory = 'media/com_contentbuilder_ng' . substr($setupUploadDirectory, strlen('media/contentbuilder_ng'));
+                if (stripos($setupUploadDirectory, '/media/contentbuilderng') === 0) {
+                    $setupUploadDirectory = 'media/com_contentbuilderng' . substr($setupUploadDirectory, strlen('/media/contentbuilderng'));
+                } elseif (stripos($setupUploadDirectory, 'media/contentbuilderng') === 0) {
+                    $setupUploadDirectory = 'media/com_contentbuilderng' . substr($setupUploadDirectory, strlen('media/contentbuilderng'));
                 }
 
                 $upl_ex2 = explode('|', trim((string) Factory::getApplication()->input->get('upload_directory', '', 'string')), 2);
                 $optionUploadDirectory = trim((string) ($upl_ex2[0] ?? ''));
                 $optionUploadDirectory = str_replace('\\', '/', $optionUploadDirectory);
                 $optionUploadDirectory = str_ireplace(
-                    ['{CBSite}/media/contentbuilder_ng', '{cbsite}/media/contentbuilder_ng'],
-                    ['{CBSite}/media/com_contentbuilder_ng', '{cbsite}/media/com_contentbuilder_ng'],
+                    ['{CBSite}/media/contentbuilderng', '{cbsite}/media/contentbuilderng'],
+                    ['{CBSite}/media/com_contentbuilderng', '{cbsite}/media/com_contentbuilderng'],
                     $optionUploadDirectory
                 );
-                if (stripos($optionUploadDirectory, '/media/contentbuilder_ng') === 0) {
-                    $optionUploadDirectory = 'media/com_contentbuilder_ng' . substr($optionUploadDirectory, strlen('/media/contentbuilder_ng'));
-                } elseif (stripos($optionUploadDirectory, 'media/contentbuilder_ng') === 0) {
-                    $optionUploadDirectory = 'media/com_contentbuilder_ng' . substr($optionUploadDirectory, strlen('media/contentbuilder_ng'));
+                if (stripos($optionUploadDirectory, '/media/contentbuilderng') === 0) {
+                    $optionUploadDirectory = 'media/com_contentbuilderng' . substr($optionUploadDirectory, strlen('/media/contentbuilderng'));
+                } elseif (stripos($optionUploadDirectory, 'media/contentbuilderng') === 0) {
+                    $optionUploadDirectory = 'media/com_contentbuilderng' . substr($optionUploadDirectory, strlen('media/contentbuilderng'));
                 }
                 Factory::getApplication()->input->set('upload_directory', $optionUploadDirectory);
 
@@ -451,7 +451,7 @@ class ElementoptionsModel extends BaseDatabaseModel
             $other .= " `custom_validation_script`=" . $this->getDatabase()->quote($custom_validation_script) . ", ";
             $other .= " `validation_message`=" . $this->getDatabase()->quote($validation_message) . ", ";
 
-            $this->getDatabase()->setQuery("Update #__contentbuilder_ng_elements Set $other $query Where id = " . $this->_element_id);
+            $this->getDatabase()->setQuery("Update #__contentbuilderng_elements Set $other $query Where id = " . $this->_element_id);
             $this->getDatabase()->execute();
             return true;
         }
@@ -482,7 +482,7 @@ class ElementoptionsModel extends BaseDatabaseModel
         $value = (int) $value;
         $db = $this->getDatabase();
         $query = $db->getQuery(true)
-            ->update($db->quoteName('#__contentbuilder_ng_elements'))
+            ->update($db->quoteName('#__contentbuilderng_elements'))
             ->set($db->quoteName('published') . ' = ' . $value)
             ->where($db->quoteName('id') . ' IN (' . implode(',', $pks) . ')');
 
@@ -521,7 +521,7 @@ class ElementoptionsModel extends BaseDatabaseModel
         $db = $this->getDatabase();
 
         $query = $db->getQuery(true)
-            ->update($db->quoteName('#__contentbuilder_ng_elements'))
+            ->update($db->quoteName('#__contentbuilderng_elements'))
             ->set($db->quoteName($field) . ' = ' . (int) $value)
             ->where($db->quoteName('id') . ' IN (' . implode(',', $pks) . ')');
 

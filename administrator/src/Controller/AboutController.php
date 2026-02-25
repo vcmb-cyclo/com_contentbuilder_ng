@@ -7,12 +7,13 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Controller;
+namespace CB\Component\Contentbuilderng\Administrator\Controller;
 
 \defined('_JEXEC') or die('Restricted access');
 
-use CB\Component\Contentbuilder_ng\Administrator\Helper\DatabaseAuditHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\PackedDataMigrationHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\DatabaseAuditHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataMigrationHelper;
+use Joomla\CMS\Application\AdministratorApplication;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
@@ -21,6 +22,12 @@ use Joomla\CMS\Router\Route;
 final class AboutController extends BaseController
 {
     protected $default_view = 'about';
+    private const ABOUT_LOG_FILES = [
+        'contentbuilderng_install.log',
+        'com_contentbuilderng.admin.log',
+        'com_contentbuilderng.site.log',
+    ];
+    private const ABOUT_LOG_TAIL_BYTES = 262144;
 
     public function migratePackedData(): void
     {
@@ -29,7 +36,7 @@ final class AboutController extends BaseController
         $app = Factory::getApplication();
         $user = $app->getIdentity();
 
-        if (!$user->authorise('core.manage', 'com_contentbuilder_ng')) {
+        if (!$user->authorise('core.manage', 'com_contentbuilderng')) {
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
         }
 
@@ -56,6 +63,16 @@ final class AboutController extends BaseController
             $auditUnchanged = (int) ($auditColumns['unchanged'] ?? 0);
             $auditErrors = (int) ($auditColumns['errors'] ?? 0);
             $auditWarnings = is_array($auditColumns['warnings'] ?? null) ? $auditColumns['warnings'] : [];
+            $pluginDuplicates = is_array($summary['plugin_duplicates'] ?? null) ? $summary['plugin_duplicates'] : [];
+            $pluginDuplicateScanned = (int) ($pluginDuplicates['scanned'] ?? 0);
+            $pluginDuplicateIssues = (int) ($pluginDuplicates['issues'] ?? 0);
+            $pluginDuplicateRepaired = (int) ($pluginDuplicates['repaired'] ?? 0);
+            $pluginDuplicateUnchanged = (int) ($pluginDuplicates['unchanged'] ?? 0);
+            $pluginDuplicateErrors = (int) ($pluginDuplicates['errors'] ?? 0);
+            $pluginDuplicateRowsRemoved = (int) ($pluginDuplicates['rows_removed'] ?? 0);
+            $pluginDuplicateWarnings = is_array($pluginDuplicates['warnings'] ?? null)
+                ? $pluginDuplicates['warnings']
+                : [];
 
             if (
                 $migrated === 0
@@ -65,24 +82,30 @@ final class AboutController extends BaseController
                 && $repairErrors === 0
                 && $auditIssues === 0
                 && $auditErrors === 0
+                && $pluginDuplicateIssues === 0
+                && $pluginDuplicateErrors === 0
             ) {
                 $message = Text::sprintf(
-                    'COM_CONTENTBUILDER_NG_PACKED_MIGRATION_UP_TO_DATE',
+                    'COM_CONTENTBUILDERNG_PACKED_MIGRATION_UP_TO_DATE',
                     $scanned,
                     $repairScanned
                 );
                 $message .= ' ' . Text::sprintf(
-                    'COM_CONTENTBUILDER_NG_AUDIT_COLUMNS_REPAIR_UP_TO_DATE',
+                    'COM_CONTENTBUILDERNG_AUDIT_COLUMNS_REPAIR_UP_TO_DATE',
                     $auditScanned
                 );
+                $message .= ' ' . Text::sprintf(
+                    'COM_CONTENTBUILDERNG_PLUGIN_DUPLICATES_REPAIR_UP_TO_DATE',
+                    $pluginDuplicateScanned
+                );
                 $this->setMessage($message, 'message');
-                $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&view=about', false));
+                $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
 
                 return;
             }
 
             $message = Text::sprintf(
-                'COM_CONTENTBUILDER_NG_PACKED_MIGRATION_SUMMARY',
+                'COM_CONTENTBUILDERNG_PACKED_MIGRATION_SUMMARY',
                 $scanned,
                 $candidates,
                 $migrated,
@@ -94,12 +117,21 @@ final class AboutController extends BaseController
                 $repairErrors
             );
             $message .= ' ' . Text::sprintf(
-                'COM_CONTENTBUILDER_NG_AUDIT_COLUMNS_REPAIR_SUMMARY',
+                'COM_CONTENTBUILDERNG_AUDIT_COLUMNS_REPAIR_SUMMARY',
                 $auditScanned,
                 $auditIssues,
                 $auditRepaired,
                 $auditUnchanged,
                 $auditErrors
+            );
+            $message .= ' ' . Text::sprintf(
+                'COM_CONTENTBUILDERNG_PLUGIN_DUPLICATES_REPAIR_SUMMARY',
+                $pluginDuplicateScanned,
+                $pluginDuplicateIssues,
+                $pluginDuplicateRepaired,
+                $pluginDuplicateUnchanged,
+                $pluginDuplicateRowsRemoved,
+                $pluginDuplicateErrors
             );
 
             $tableMessages = [];
@@ -112,7 +144,7 @@ final class AboutController extends BaseController
                     }
 
                     $tableMessages[] = Text::sprintf(
-                        'COM_CONTENTBUILDER_NG_PACKED_MIGRATION_TABLE_SUMMARY',
+                        'COM_CONTENTBUILDERNG_PACKED_MIGRATION_TABLE_SUMMARY',
                         (string) ($tableStat['table'] ?? ''),
                         (string) ($tableStat['column'] ?? ''),
                         (int) ($tableStat['scanned'] ?? 0),
@@ -139,12 +171,12 @@ final class AboutController extends BaseController
                     $errorMessage = (string) ($repairStat['error'] ?? '');
 
                     if ($from === '') {
-                        $from = Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE');
+                        $from = Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
                     }
 
                     if ($status === 'converted') {
                         $tableMessages[] = Text::sprintf(
-                            'COM_CONTENTBUILDER_NG_COLLATION_REPAIR_TABLE_CONVERTED',
+                            'COM_CONTENTBUILDERNG_COLLATION_REPAIR_TABLE_CONVERTED',
                             $table,
                             $from,
                             $to
@@ -154,7 +186,7 @@ final class AboutController extends BaseController
 
                     if ($status === 'error') {
                         $tableMessages[] = Text::sprintf(
-                            'COM_CONTENTBUILDER_NG_COLLATION_REPAIR_TABLE_ERROR',
+                            'COM_CONTENTBUILDERNG_COLLATION_REPAIR_TABLE_ERROR',
                             $table,
                             $from,
                             $to,
@@ -182,12 +214,12 @@ final class AboutController extends BaseController
                         continue;
                     }
 
-                    $missingLabel = $missing !== [] ? implode(', ', $missing) : Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE');
-                    $addedLabel = $added !== [] ? implode(', ', $added) : Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE');
+                    $missingLabel = $missing !== [] ? implode(', ', $missing) : Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
+                    $addedLabel = $added !== [] ? implode(', ', $added) : Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
 
                     if ($status === 'repaired') {
                         $tableMessages[] = Text::sprintf(
-                            'COM_CONTENTBUILDER_NG_AUDIT_COLUMNS_REPAIR_TABLE_REPAIRED',
+                            'COM_CONTENTBUILDERNG_AUDIT_COLUMNS_REPAIR_TABLE_REPAIRED',
                             $table,
                             $missingLabel,
                             $addedLabel
@@ -197,7 +229,7 @@ final class AboutController extends BaseController
 
                     if ($status === 'partial') {
                         $tableMessages[] = Text::sprintf(
-                            'COM_CONTENTBUILDER_NG_AUDIT_COLUMNS_REPAIR_TABLE_PARTIAL',
+                            'COM_CONTENTBUILDERNG_AUDIT_COLUMNS_REPAIR_TABLE_PARTIAL',
                             $table,
                             $missingLabel,
                             $addedLabel,
@@ -207,7 +239,7 @@ final class AboutController extends BaseController
                     }
 
                     $tableMessages[] = Text::sprintf(
-                        'COM_CONTENTBUILDER_NG_AUDIT_COLUMNS_REPAIR_TABLE_ERROR',
+                        'COM_CONTENTBUILDERNG_AUDIT_COLUMNS_REPAIR_TABLE_ERROR',
                         $table,
                         $missingLabel,
                         $errorMessage
@@ -215,9 +247,54 @@ final class AboutController extends BaseController
                 }
             }
 
+            $pluginDuplicateGroups = $pluginDuplicates['groups'] ?? [];
+            if (is_array($pluginDuplicateGroups)) {
+                foreach ($pluginDuplicateGroups as $pluginDuplicateGroup) {
+                    if (!is_array($pluginDuplicateGroup)) {
+                        continue;
+                    }
+
+                    $status = (string) ($pluginDuplicateGroup['status'] ?? '');
+                    $canonicalFolder = trim((string) ($pluginDuplicateGroup['canonical_folder'] ?? ''));
+                    $canonicalElement = trim((string) ($pluginDuplicateGroup['canonical_element'] ?? ''));
+                    $canonicalLabel = $canonicalFolder !== '' || $canonicalElement !== ''
+                        ? $canonicalFolder . '/' . $canonicalElement
+                        : Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
+                    $keepId = (int) ($pluginDuplicateGroup['keep_id'] ?? 0);
+                    $removedIds = array_values(array_map(
+                        static fn($id): int => (int) $id,
+                        (array) ($pluginDuplicateGroup['removed_ids'] ?? [])
+                    ));
+                    $removedLabel = $removedIds !== []
+                        ? implode(', ', $removedIds)
+                        : Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
+                    $errorMessage = trim((string) ($pluginDuplicateGroup['error'] ?? ''));
+
+                    if ($status === 'repaired') {
+                        $tableMessages[] = Text::sprintf(
+                            'COM_CONTENTBUILDERNG_PLUGIN_DUPLICATES_REPAIR_GROUP_REPAIRED',
+                            $canonicalLabel,
+                            $keepId,
+                            $removedLabel
+                        );
+                        continue;
+                    }
+
+                    if ($status === 'error') {
+                        $tableMessages[] = Text::sprintf(
+                            'COM_CONTENTBUILDERNG_PLUGIN_DUPLICATES_REPAIR_GROUP_ERROR',
+                            $canonicalLabel,
+                            $keepId,
+                            $removedLabel,
+                            $errorMessage
+                        );
+                    }
+                }
+            }
+
             if (!$repairSupported) {
                 $tableMessages[] = Text::sprintf(
-                    'COM_CONTENTBUILDER_NG_COLLATION_REPAIR_UNSUPPORTED',
+                    'COM_CONTENTBUILDERNG_COLLATION_REPAIR_UNSUPPORTED',
                     $repairTarget
                 );
             }
@@ -230,7 +307,7 @@ final class AboutController extends BaseController
                 }
 
                 $tableMessages[] = Text::sprintf(
-                    'COM_CONTENTBUILDER_NG_COLLATION_REPAIR_WARNING',
+                    'COM_CONTENTBUILDERNG_COLLATION_REPAIR_WARNING',
                     $repairWarning
                 );
             }
@@ -243,8 +320,21 @@ final class AboutController extends BaseController
                 }
 
                 $tableMessages[] = Text::sprintf(
-                    'COM_CONTENTBUILDER_NG_AUDIT_COLUMNS_REPAIR_WARNING',
+                    'COM_CONTENTBUILDERNG_AUDIT_COLUMNS_REPAIR_WARNING',
                     $auditWarning
+                );
+            }
+
+            foreach ($pluginDuplicateWarnings as $pluginDuplicateWarning) {
+                $pluginDuplicateWarning = trim((string) $pluginDuplicateWarning);
+
+                if ($pluginDuplicateWarning === '') {
+                    continue;
+                }
+
+                $tableMessages[] = Text::sprintf(
+                    'COM_CONTENTBUILDERNG_PLUGIN_DUPLICATES_REPAIR_WARNING',
+                    $pluginDuplicateWarning
                 );
             }
 
@@ -252,34 +342,35 @@ final class AboutController extends BaseController
                 $message .= '<br>' . implode('<br>', $tableMessages);
             }
 
-            $level = ($errors > 0 || $repairErrors > 0 || !$repairSupported || $auditErrors > 0)
+            $level = ($errors > 0 || $repairErrors > 0 || !$repairSupported || $auditErrors > 0 || $pluginDuplicateErrors > 0)
                 ? 'warning'
                 : 'message';
             $this->setMessage($message, $level);
         } catch (\Throwable $e) {
             $this->setMessage(
-                Text::sprintf('COM_CONTENTBUILDER_NG_PACKED_MIGRATION_FAILED', $e->getMessage()),
+                Text::sprintf('COM_CONTENTBUILDERNG_PACKED_MIGRATION_FAILED', $e->getMessage()),
                 'error'
             );
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&view=about', false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
     }
 
     public function runAudit(): void
     {
         $this->checkToken();
 
+        /** @var AdministratorApplication $app */
         $app = Factory::getApplication();
         $user = $app->getIdentity();
 
-        if (!$user->authorise('core.manage', 'com_contentbuilder_ng')) {
+        if (!$user->authorise('core.manage', 'com_contentbuilderng')) {
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
         }
 
         try {
             $report = DatabaseAuditHelper::run();
-            $app->setUserState('com_contentbuilder_ng.about.audit', $report);
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
 
             $issuesTotal = (int) ($report['summary']['issues_total'] ?? 0);
             $scannedTables = (int) ($report['scanned_tables'] ?? 0);
@@ -287,29 +378,152 @@ final class AboutController extends BaseController
 
             if ($issuesTotal === 0 && $errorsCount === 0) {
                 $this->setMessage(
-                    Text::sprintf('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_SUMMARY_CLEAN', $scannedTables),
+                    Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_SUMMARY_CLEAN', $scannedTables),
                     'message'
                 );
             } else {
                 $message = Text::sprintf(
-                    'COM_CONTENTBUILDER_NG_ABOUT_AUDIT_SUMMARY_ISSUES',
+                    'COM_CONTENTBUILDERNG_ABOUT_AUDIT_SUMMARY_ISSUES',
                     $issuesTotal,
                     $scannedTables
                 );
 
                 if ($errorsCount > 0) {
-                    $message .= ' ' . Text::sprintf('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_SUMMARY_PARTIAL', $errorsCount);
+                    $message .= ' ' . Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_SUMMARY_PARTIAL', $errorsCount);
                 }
 
                 $this->setMessage($message, 'warning');
             }
         } catch (\Throwable $e) {
             $this->setMessage(
-                Text::sprintf('COM_CONTENTBUILDER_NG_ABOUT_AUDIT_FAILED', $e->getMessage()),
+                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FAILED', $e->getMessage()),
                 'error'
             );
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilder_ng&view=about', false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function showLog(): void
+    {
+        $this->checkToken();
+
+        /** @var AdministratorApplication $app */
+        $app = Factory::getApplication();
+        $user = $app->getIdentity();
+
+        if (!$user->authorise('core.manage', 'com_contentbuilderng')) {
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+
+        try {
+            $logReport = $this->readAboutLogReport();
+            $app->setUserState('com_contentbuilderng.about.log', $logReport);
+
+            $this->setMessage(
+                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_LOG_LOADED', (string) ($logReport['file'] ?? '')),
+                'message'
+            );
+        } catch (\Throwable $e) {
+            $app->setUserState('com_contentbuilderng.about.log', []);
+
+            $this->setMessage(
+                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_LOG_LOAD_FAILED', $e->getMessage()),
+                'error'
+            );
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    private function readAboutLogReport(): array
+    {
+        $logDirectory = $this->resolveLogDirectory();
+        $logFile = $this->resolveLogFile($logDirectory);
+
+        if ($logFile === null) {
+            throw new \RuntimeException(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_LOG_NOT_FOUND', $logDirectory));
+        }
+
+        $size = is_file($logFile) ? (int) @filesize($logFile) : 0;
+        $tailBytes = self::ABOUT_LOG_TAIL_BYTES;
+        $truncated = false;
+        $content = $this->readLogTail($logFile, $tailBytes, $truncated);
+
+        return [
+            'file' => basename($logFile),
+            'path' => $logFile,
+            'size' => max(0, $size),
+            'content' => $content,
+            'loaded_at' => Factory::getDate()->format('Y-m-d H:i:s'),
+            'truncated' => $truncated ? 1 : 0,
+            'tail_bytes' => $tailBytes,
+        ];
+    }
+
+    private function resolveLogDirectory(): string
+    {
+        $app = Factory::getApplication();
+        $configuredPath = '';
+
+        if (is_object($app) && method_exists($app, 'get')) {
+            $configuredPath = trim((string) $app->get('log_path', ''));
+        }
+
+        if ($configuredPath === '') {
+            $configuredPath = JPATH_ROOT . '/logs';
+        }
+
+        return rtrim($configuredPath, '/\\');
+    }
+
+    private function resolveLogFile(string $logDirectory): ?string
+    {
+        foreach (self::ABOUT_LOG_FILES as $fileName) {
+            $path = $logDirectory . '/' . $fileName;
+
+            if (is_file($path) && is_readable($path)) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+    private function readLogTail(string $logFile, int $tailBytes, bool &$truncated): string
+    {
+        $truncated = false;
+        $size = (int) @filesize($logFile);
+        $tailBytes = max(1, $tailBytes);
+        $handle = @fopen($logFile, 'rb');
+
+        if (!is_resource($handle)) {
+            throw new \RuntimeException('Unable to open log file for reading.');
+        }
+
+        try {
+            if ($size > $tailBytes) {
+                $truncated = true;
+                fseek($handle, -$tailBytes, SEEK_END);
+            }
+
+            $data = stream_get_contents($handle);
+        } finally {
+            fclose($handle);
+        }
+
+        if (!is_string($data)) {
+            throw new \RuntimeException('Unable to read log file content.');
+        }
+
+        if ($truncated) {
+            $lineBreakPosition = strpos($data, "\n");
+
+            if ($lineBreakPosition !== false) {
+                $data = substr($data, $lineBreakPosition + 1);
+            }
+        }
+
+        return trim($data);
     }
 }

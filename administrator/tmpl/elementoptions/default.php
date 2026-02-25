@@ -18,14 +18,14 @@ use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 
 $element = $this->element ?? null;
 if (!is_object($element) || empty($element->id)) {
 ?>
     <div class="alert alert-danger">
-        <?php echo Text::_('COM_CONTENTBUILDER_NG_ERROR'); ?>: Invalid or missing `element_id`.
+        <?php echo Text::_('COM_CONTENTBUILDERNG_ERROR'); ?>: Invalid or missing `element_id`.
     </div>
 <?php
     return;
@@ -35,7 +35,7 @@ $plugins = ContentbuilderLegacyHelper::getFormElementsPlugins();
 
 $elementType = is_string($this->element->type) ? $this->element->type : '';
 if ($elementType !== '') {
-    \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilder_ng_form_elements', $elementType);
+    \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilderng_form_elements', $elementType);
 }
 
 $dispatcher = Factory::getApplication()->getDispatcher();
@@ -65,35 +65,35 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
 <form action="index.php" method="post" name="adminForm" id="adminForm">
 
-    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE'); ?>
+    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE'); ?>
     <select class="form-select-sm" name="type_selection"
         onchange="document.getElementById('type_change').value='1';">
         <option value="text" <?php echo $this->element->type == 'text' || $this->element->type == '' ? ' selected="selected"' : ''; ?>>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_TEXT'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_TEXT'); ?>
         </option>
         <option value="textarea" <?php echo $this->element->type == 'textarea' ? ' selected="selected"' : ''; ?>>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_TEXTAREA'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_TEXTAREA'); ?>
         </option>
         <option value="checkboxgroup" <?php echo $this->element->type == 'checkboxgroup' ? ' selected="selected"' : ''; ?>>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_CHECKBOXGROUP'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_CHECKBOXGROUP'); ?>
         </option>
         <option value="radiogroup" <?php echo $this->element->type == 'radiogroup' ? ' selected="selected"' : ''; ?>>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_RADIO'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_RADIO'); ?>
         </option>
         <option value="select" <?php echo $this->element->type == 'select' ? ' selected="selected"' : ''; ?>>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_SELECT'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_SELECT'); ?>
         </option>
         <option value="upload" <?php echo $this->element->type == 'upload' ? ' selected="selected"' : ''; ?>>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_UPLOAD'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_UPLOAD'); ?>
         </option>
         <option value="calendar" <?php echo $this->element->type == 'calendar' ? ' selected="selected"' : ''; ?>>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_CALENDAR'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_CALENDAR'); ?>
         </option>
         <option value="hidden" <?php echo $this->element->type == 'hidden' ? ' selected="selected"' : ''; ?>>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_HIDDEN'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_HIDDEN'); ?>
         </option>
         <option value="captcha" <?php echo $this->element->type == 'captcha' ? ' selected="selected"' : ''; ?>>
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_CAPTCHA'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_CAPTCHA'); ?>
         </option>
         <?php
         foreach ($plugins as $plugin) {
@@ -106,7 +106,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         ?>
     </select>
     <button type="submit" class="btn btn-sm btn-primary" onclick="document.getElementById('task').value='elementoptions.save';">
-        <?php echo Text::_('COM_CONTENTBUILDER_NG_SAVE'); ?>
+        <?php echo Text::_('COM_CONTENTBUILDERNG_SAVE'); ?>
     </button>
 
     <hr />
@@ -117,7 +117,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         // Démarrer les onglets
         echo HTMLHelper::_('uitab.startTabSet', 'view-pane', ['active' => 'tab0']);
         // Premier onglet
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS'));
         ?>
         <h3>
             <?php echo htmlentities($this->element->label, ENT_QUOTES, 'UTF-8'); ?>
@@ -138,7 +138,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <tr>
                                 <td width="100" align="left" class="key">
                                     <label for="hint">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_HINT'); ?>:
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_HINT'); ?>:
                                     </label>
                                 </td>
                                 <td align="left">
@@ -161,13 +161,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_CAPTCHA'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_CAPTCHA'); ?>
                     </legend>
                     <table class="admintable" width="95%">
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="hint">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_HINT'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_HINT'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -184,13 +184,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_UPLOAD'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_UPLOAD'); ?>
                     </legend>
                     <table class="admintable" width="95%">
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="hint">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_HINT'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_HINT'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -201,7 +201,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="allowed_file_extensions">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_ALLOWED_FILE_EXTENSIONS'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_ALLOWED_FILE_EXTENSIONS'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -213,7 +213,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="max_filesize">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_MAX_FILESIZE'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_MAX_FILESIZE'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -225,7 +225,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="upload_directory">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_UPLOAD_DIRECTORY'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_UPLOAD_DIRECTORY'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -245,13 +245,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
-                        <?php echo $this->element->type == 'checkboxgroup' ? Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_CHECKBOXGROUP') : ($this->element->type == 'select' ? Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_SELECT') : Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_RADIO')); ?>
+                        <?php echo $this->element->type == 'checkboxgroup' ? Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_CHECKBOXGROUP') : ($this->element->type == 'select' ? Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_SELECT') : Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_RADIO')); ?>
                     </legend>
                     <table class="admintable" width="95%">
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="hint">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_HINT'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_HINT'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -282,7 +282,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <tr>
                                 <td width="100" align="left" class="key">
                                     <label>
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_DEFAULT_VALUE'); ?>:
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_DEFAULT_VALUE'); ?>:
                                     </label>
                                 </td>
                                 <td align="left">
@@ -311,7 +311,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <tr>
                                 <td width="100" align="left" class="key">
                                     <label for="multiple">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_MULTIPLE'); ?>:
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_MULTIPLE'); ?>:
                                     </label>
                                 </td>
                                 <td align="left">
@@ -321,7 +321,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <tr>
                                 <td width="100" align="left" class="key">
                                     <label for="length">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_LENGTH'); ?>:
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_LENGTH'); ?>:
                                     </label>
                                 </td>
                                 <td align="left">
@@ -337,7 +337,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <tr>
                                 <td width="100" align="left" class="key">
                                     <label for="horizontal">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_HORIZONTAL'); ?>:
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_HORIZONTAL'); ?>:
                                     </label>
                                 </td>
                                 <td align="left">
@@ -347,7 +347,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <tr>
                                 <td width="100" align="left" class="key">
                                     <label for="horizontal_length">
-                                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_HORIZONTAL_LENGTH'); ?>:
+                                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_HORIZONTAL_LENGTH'); ?>:
                                     </label>
                                 </td>
                                 <td align="left">
@@ -362,7 +362,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="class">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_CLASS'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_CLASS'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -374,7 +374,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="seperator">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_SEPERATOR'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_SEPERATOR'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -386,24 +386,24 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="allow_encoding">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_ALLOW_ENCODING'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_ALLOW_ENCODING'); ?>:
                                 </label>
                             </td>
                             <td align="left">
                                 <input class="form-check-input" type="radio" name="allow_encoding" id="allow_encoding" value="0"
                                     <?php echo (!isset($this->element->options->allow_html) || !$this->element->options->allow_html) && (!isset($this->element->options->allow_raw) || !$this->element->options->allow_raw) ? ' checked="checked"' : ''; ?> /> <label
                                     for="allow_encoding">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_ALL'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_FILTER_ALL'); ?>
                                 </label>
                                 <input class="form-check-input" type="radio" name="allow_encoding" id="allow_encoding1"
                                     value="1" <?php echo isset($this->element->options->allow_html) && $this->element->options->allow_html ? ' checked="checked"' : ''; ?> /> <label
                                     for="allow_encoding1">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_HTML'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_HTML'); ?>
                                 </label>
                                 <input class="form-check-input" type="radio" name="allow_encoding" id="allow_encoding2"
                                     value="2" <?php echo isset($this->element->options->allow_raw) && $this->element->options->allow_raw ? ' checked="checked"' : ''; ?> /> <label
                                     for="allow_encoding2">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_RAW'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_RAW'); ?>
                                 </label>
                             </td>
                         </tr>
@@ -416,13 +416,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_TEXTAREA'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_TEXTAREA'); ?>
                     </legend>
                     <table class="admintable" width="95%">
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="default_value">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_DEFAULT_VALUE'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_DEFAULT_VALUE'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -433,7 +433,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="hint">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_HINT'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_HINT'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -444,7 +444,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="width">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_WIDTH'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_WIDTH'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -456,7 +456,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="height">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_HEIGHT'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_HEIGHT'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -468,7 +468,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="maxlength">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_MAXLENGTH'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_MAXLENGTH'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -480,7 +480,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="class">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_CLASS'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_CLASS'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -492,7 +492,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="readonly">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_READONLY'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_READONLY'); ?>:
                                 </label>
                                 </td>
                                 <td align="left">
@@ -502,24 +502,24 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="allow_encoding">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_ALLOW_ENCODING'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_ALLOW_ENCODING'); ?>:
                                 </label>
                             </td>
                             <td align="left">
                                 <input class="form-check-input" type="radio" name="allow_encoding" id="allow_encoding" value="0"
                                     <?php echo (!isset($this->element->options->allow_html) || !$this->element->options->allow_html) && (!isset($this->element->options->allow_raw) || !$this->element->options->allow_raw) ? ' checked="checked"' : ''; ?> /> <label
                                     for="allow_encoding">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_ALL'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_FILTER_ALL'); ?>
                                 </label>
                                 <input class="form-check-input" type="radio" name="allow_encoding" id="allow_encoding1"
                                     value="1" <?php echo isset($this->element->options->allow_html) && $this->element->options->allow_html ? ' checked="checked"' : ''; ?> /> <label
                                     for="allow_encoding1">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_HTML'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_HTML'); ?>
                                 </label>
                                 <input class="form-check-input" type="radio" name="allow_encoding" id="allow_encoding2"
                                     value="2" <?php echo isset($this->element->options->allow_raw) && $this->element->options->allow_raw ? ' checked="checked"' : ''; ?> /> <label
                                     for="allow_encoding2">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_RAW'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_RAW'); ?>
                                 </label>
                             </td>
                         </tr>
@@ -533,13 +533,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_CALENDAR'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_CALENDAR'); ?>
                     </legend>
                     <table class="admintable" width="95%">
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="default_value">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_DEFAULT_VALUE'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_DEFAULT_VALUE'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -551,7 +551,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="hint">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_HINT'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_HINT'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -562,7 +562,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="length">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_LENGTH'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_LENGTH'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -574,7 +574,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="maxlength">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_MAXLENGTH'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_MAXLENGTH'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -586,7 +586,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="format">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_FORMAT'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_FORMAT'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -598,7 +598,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="transfer_format">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_TRANSFER_FORMAT'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_TRANSFER_FORMAT'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -610,7 +610,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="readonly">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_READONLY'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_READONLY'); ?>:
                                 </label>
                                 </td>
                                 <td align="left">
@@ -628,13 +628,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_TEXT'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_TEXT'); ?>
                     </legend>
                     <table class="admintable" width="95%">
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="default_value">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_DEFAULT_VALUE'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_DEFAULT_VALUE'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -646,7 +646,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="hint">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_HINT'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_HINT'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -657,7 +657,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="length">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_LENGTH'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_LENGTH'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -669,7 +669,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="maxlength">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_MAXLENGTH'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_MAXLENGTH'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -681,7 +681,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="class">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_CLASS'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_CLASS'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -693,7 +693,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="password">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_PASSWORD'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_PASSWORD'); ?>:
                                 </label>
                                 </td>
                                 <td align="left">
@@ -703,7 +703,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="readonly">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_READONLY'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_READONLY'); ?>:
                                 </label>
                                 </td>
                                 <td align="left">
@@ -713,24 +713,24 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="allow_encoding">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_ALLOW_ENCODING'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_ALLOW_ENCODING'); ?>:
                                 </label>
                             </td>
                             <td align="left">
                                 <input class="form-check-input" type="radio" name="allow_encoding" id="allow_encoding" value="0"
                                     <?php echo (!isset($this->element->options->allow_html) || !$this->element->options->allow_html) && (!isset($this->element->options->allow_raw) || !$this->element->options->allow_raw) ? ' checked="checked"' : ''; ?> /> <label
                                     for="allow_encoding">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_ALL'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_FILTER_ALL'); ?>
                                 </label>
                                 <input class="form-check-input" type="radio" name="allow_encoding" id="allow_encoding1"
                                     value="1" <?php echo isset($this->element->options->allow_html) && $this->element->options->allow_html ? ' checked="checked"' : ''; ?> /> <label
                                     for="allow_encoding1">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_HTML'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_HTML'); ?>
                                 </label>
                                 <input class="form-check-input" type="radio" name="allow_encoding" id="allow_encoding2"
                                     value="2" <?php echo isset($this->element->options->allow_raw) && $this->element->options->allow_raw ? ' checked="checked"' : ''; ?> /> <label
                                     for="allow_encoding2">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_RAW'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_RAW'); ?>
                                 </label>
                             </td>
                         </tr>
@@ -744,13 +744,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_TYPE_HIDDEN'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_HIDDEN'); ?>
                     </legend>
                     <table class="admintable" width="95%">
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="default_value">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_DEFAULT_VALUE'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_DEFAULT_VALUE'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -762,24 +762,24 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="allow_encoding">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_ALLOW_ENCODING'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_ALLOW_ENCODING'); ?>:
                                 </label>
                             </td>
                             <td align="left">
                                 <input class="form-check-input" type="radio" name="allow_encoding" id="allow_encoding" value="0"
                                     <?php echo (!isset($this->element->options->allow_html) || !$this->element->options->allow_html) && (!isset($this->element->options->allow_raw) || !$this->element->options->allow_raw) ? ' checked="checked"' : ''; ?> /> <label
                                     for="allow_encoding">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_ALL'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_FILTER_ALL'); ?>
                                 </label>
                                 <input class="form-check-input" type="radio" name="allow_encoding" id="allow_encoding1"
                                     value="1" <?php echo isset($this->element->options->allow_html) && $this->element->options->allow_html ? ' checked="checked"' : ''; ?> /> <label
                                     for="allow_encoding1">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_HTML'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_HTML'); ?>
                                 </label>
                                 <input class="form-check-input" type="radio" name="allow_encoding" id="allow_encoding2"
                                     value="2" <?php echo isset($this->element->options->allow_raw) && $this->element->options->allow_raw ? ' checked="checked"' : ''; ?> /> <label
                                     for="allow_encoding2">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_RAW'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_RAW'); ?>
                                 </label>
                             </td>
                         </tr>
@@ -792,7 +792,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
         echo HTMLHelper::_('uitab.endTab');
         if ($this->element->type != 'captcha') {
-            echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', Text::_('COM_CONTENTBUILDER_NG_ELEMENT_OPTIONS_SCRIPTS'));
+            echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_SCRIPTS'));
             ?>
             <h3>
                 <?php echo htmlentities($this->element->label, ENT_QUOTES, 'UTF-8'); ?>
@@ -802,13 +802,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_VALIDATION'); ?> (PHP)
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_VALIDATION'); ?> (PHP)
                     </legend>
                     <table class="admintable" width="95%">
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="validation_message">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_VALIDATION_MESSAGE'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_VALIDATION_MESSAGE'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -820,7 +820,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="validations">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_SELECT_VALIDATIONS'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_SELECT_VALIDATIONS'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -842,7 +842,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="custom_validation_script">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_VALIDATION_CODE'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_VALIDATION_CODE'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -862,13 +862,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_INIT'); ?> (JS)
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_INIT'); ?> (JS)
                     </legend>
                     <table class="admintable" width="95%">
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="custom_init_script">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_INIT_CODE'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_INIT_CODE'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -887,13 +887,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_ACTION'); ?> (PHP)
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_ACTION'); ?> (PHP)
                     </legend>
                     <table class="admintable" width="95%">
                         <tr>
                             <td width="100" align="left" class="key">
                                 <label for="custom_action_script">
-                                    <?php echo Text::_('COM_CONTENTBUILDER_NG_ELEMENT_ACTION_CODE'); ?>:
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_ACTION_CODE'); ?>:
                                 </label>
                             </td>
                             <td align="left">
@@ -917,7 +917,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
     </div>
 
 
-    <input type="hidden" name="option" value="com_contentbuilder_ng" />
+    <input type="hidden" name="option" value="com_contentbuilderng" />
     <input type="hidden" name="view" value="elementoptions" />
     <input type="hidden" name="task" id="task" value="" />
     <input type="hidden" name="type_change" id="type_change" value="0" />

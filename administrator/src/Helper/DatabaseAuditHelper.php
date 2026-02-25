@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\Helper;
+namespace CB\Component\Contentbuilderng\Administrator\Helper;
 
 \defined('_JEXEC') or die('Restricted access');
 
@@ -33,6 +33,19 @@ final class DatabaseAuditHelper
      *     storage_name:string,
      *     bytable:int,
      *     missing:array<int,string>
+     *   }>,
+     *   plugin_extension_duplicates:array<int,array{
+     *     canonical_folder:string,
+     *     canonical_element:string,
+     *     keep_id:int,
+     *     duplicate_ids:array<int,int>,
+     *     rows:array<int,array{
+     *       extension_id:int,
+     *       folder:string,
+     *       element:string,
+     *       enabled:int,
+     *       is_canonical:int
+     *     }>
      *   }>,
      *   bf_view_field_sync_issues:array<int,array{
      *     form_id:int,
@@ -82,6 +95,8 @@ final class DatabaseAuditHelper
      *     mixed_table_collations:int,
      *     missing_audit_column_tables:int,
      *     missing_audit_columns_total:int,
+     *     plugin_duplicate_groups:int,
+     *     plugin_duplicate_rows_to_remove:int,
      *     bf_view_field_sync_views:int,
      *     bf_view_field_sync_missing_in_cb:int,
      *     bf_view_field_sync_orphan_in_cb:int,
@@ -114,7 +129,11 @@ final class DatabaseAuditHelper
         $auditColumnsSummary = StorageAuditColumnsHelper::audit($db);
         $missingAuditColumns = (array) ($auditColumnsSummary['issues'] ?? []);
         $errors = array_merge($errors, (array) ($auditColumnsSummary['warnings'] ?? []));
+        $pluginDuplicatesSummary = PluginExtensionDedupHelper::audit($db);
+        $pluginExtensionDuplicates = (array) ($pluginDuplicatesSummary['groups'] ?? []);
+        $errors = array_merge($errors, (array) ($pluginDuplicatesSummary['warnings'] ?? []));
         $missingAuditColumnsTotal = 0;
+        $pluginDuplicateRowsToRemove = (int) ($pluginDuplicatesSummary['rows_to_remove'] ?? 0);
         $bfFieldSyncIssues = [];
         $bfMissingInCbTotal = 0;
         $bfOrphanInCbTotal = 0;
@@ -149,6 +168,7 @@ final class DatabaseAuditHelper
             + count($tableEncodingIssues)
             + count($columnEncodingIssues)
             + count($missingAuditColumns)
+            + count($pluginExtensionDuplicates)
             + count($bfFieldSyncIssues);
 
         if (count($mixedTableCollations) > 1) {
@@ -169,6 +189,7 @@ final class DatabaseAuditHelper
             'mixed_table_collations' => $mixedTableCollations,
             'missing_audit_columns_scanned' => (int) ($auditColumnsSummary['scanned'] ?? 0),
             'missing_audit_columns' => $missingAuditColumns,
+            'plugin_extension_duplicates' => $pluginExtensionDuplicates,
             'bf_view_field_sync_issues' => $bfFieldSyncIssues,
             'cb_tables' => $cbTableStats,
             'summary' => [
@@ -180,6 +201,8 @@ final class DatabaseAuditHelper
                 'mixed_table_collations' => count($mixedTableCollations),
                 'missing_audit_column_tables' => count($missingAuditColumns),
                 'missing_audit_columns_total' => $missingAuditColumnsTotal,
+                'plugin_duplicate_groups' => count($pluginExtensionDuplicates),
+                'plugin_duplicate_rows_to_remove' => $pluginDuplicateRowsToRemove,
                 'bf_view_field_sync_views' => count($bfFieldSyncIssues),
                 'bf_view_field_sync_missing_in_cb' => $bfMissingInCbTotal,
                 'bf_view_field_sync_orphan_in_cb' => $bfOrphanInCbTotal,
@@ -225,7 +248,7 @@ final class DatabaseAuditHelper
         try {
             $query = $db->getQuery(true)
                 ->select($db->quoteName(['name', 'bytable']))
-                ->from($db->quoteName('#__contentbuilder_ng_storages'))
+                ->from($db->quoteName('#__contentbuilderng_storages'))
                 ->where($db->quoteName('name') . " <> ''");
 
             $db->setQuery($query);
@@ -249,7 +272,7 @@ final class DatabaseAuditHelper
                 }
             }
         } catch (\Throwable $e) {
-            $errors[] = 'Could not inspect #__contentbuilder_ng_storages: ' . $e->getMessage();
+            $errors[] = 'Could not inspect #__contentbuilderng_storages: ' . $e->getMessage();
         }
 
         return array_keys($tables);
@@ -329,7 +352,7 @@ final class DatabaseAuditHelper
                 continue;
             }
 
-            if (strpos($withoutPrefix, 'contentbuilder_') === 0 && strpos($withoutPrefix, 'contentbuilder_ng_') !== 0) {
+            if (strpos($withoutPrefix, 'contentbuilder_') === 0 && strpos($withoutPrefix, 'contentbuilderng_') !== 0) {
                 $legacy[] = self::toAlias($tableName, $prefix);
             }
         }
@@ -392,7 +415,7 @@ final class DatabaseAuditHelper
         foreach ($aliases as $alias) {
             $lowerAlias = strtolower($alias);
 
-            if (strpos($lowerAlias, '#__contentbuilder_ng_') === 0) {
+            if (strpos($lowerAlias, '#__contentbuilderng_') === 0) {
                 $ngTables[] = $alias;
                 continue;
             }
@@ -503,19 +526,19 @@ final class DatabaseAuditHelper
     private static function getExpectedNgCoreTableAliases(): array
     {
         return [
-            '#__contentbuilder_ng_articles',
-            '#__contentbuilder_ng_elements',
-            '#__contentbuilder_ng_forms',
-            '#__contentbuilder_ng_list_records',
-            '#__contentbuilder_ng_list_states',
-            '#__contentbuilder_ng_rating_cache',
-            '#__contentbuilder_ng_records',
-            '#__contentbuilder_ng_registered_users',
-            '#__contentbuilder_ng_resource_access',
-            '#__contentbuilder_ng_storages',
-            '#__contentbuilder_ng_storage_fields',
-            '#__contentbuilder_ng_users',
-            '#__contentbuilder_ng_verifications',
+            '#__contentbuilderng_articles',
+            '#__contentbuilderng_elements',
+            '#__contentbuilderng_forms',
+            '#__contentbuilderng_list_records',
+            '#__contentbuilderng_list_states',
+            '#__contentbuilderng_rating_cache',
+            '#__contentbuilderng_records',
+            '#__contentbuilderng_registered_users',
+            '#__contentbuilderng_resource_access',
+            '#__contentbuilderng_storages',
+            '#__contentbuilderng_storage_fields',
+            '#__contentbuilderng_users',
+            '#__contentbuilderng_verifications',
         ];
     }
 
@@ -670,7 +693,7 @@ final class DatabaseAuditHelper
         try {
             $query = $db->getQuery(true)
                 ->select($db->quoteName(['id', 'name', 'type', 'reference_id']))
-                ->from($db->quoteName('#__contentbuilder_ng_forms'))
+                ->from($db->quoteName('#__contentbuilderng_forms'))
                 ->where(
                     $db->quoteName('type') . ' IN ('
                     . $db->quote('com_breezingforms') . ','
@@ -700,7 +723,7 @@ final class DatabaseAuditHelper
             try {
                 $query = $db->getQuery(true)
                     ->select($db->quoteName(['reference_id', 'label']))
-                    ->from($db->quoteName('#__contentbuilder_ng_elements'))
+                    ->from($db->quoteName('#__contentbuilderng_elements'))
                     ->where($db->quoteName('form_id') . ' = ' . $formId);
 
                 $db->setQuery($query);

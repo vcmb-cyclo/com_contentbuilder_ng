@@ -15,7 +15,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 
 // Charge les scripts Joomla nécessaires (checkAll, submit, etc.)
 HTMLHelper::_('behavior.core');
@@ -80,7 +80,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
             : ' <span class="ms-1 fa-solid fa-sort fa-solid fa-sort-down" aria-hidden="true"></span>')
         : '';
     $url = Route::_(
-        'index.php?option=com_contentbuilder_ng&view=forms&list[start]=0&list[ordering]='
+        'index.php?option=com_contentbuilderng&view=forms&list[start]=0&list[ordering]='
         . $field . '&list[direction]=' . $nextDir . '&list[limit]=' . $limitValue
         . '&filter_search=' . rawurlencode($filterSearch)
         . '&filter_state=' . rawurlencode($filterState)
@@ -145,14 +145,14 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                         </div>
 
                         <div class="btn-group">
-                            <label for="filter_tag" class="visually-hidden"><?php echo Text::_('COM_CONTENTBUILDER_NG_FILTER_TAG'); ?></label>
+                            <label for="filter_tag" class="visually-hidden"><?php echo Text::_('COM_CONTENTBUILDERNG_FILTER_TAG'); ?></label>
                             <select
                                 class="form-select form-select-sm js-select-submit-on-change"
                                 id="filter_tag"
                                 name="filter_tag"
                                 onchange="var form=document.adminForm;if(form){var start=form.elements['list[start]'];if(start){start.value=0;}var legacy=form.elements['limitstart'];if(legacy){legacy.value=0;}form.submit();}">
                                 <option value="">
-                                    <?php echo htmlentities(Text::_('COM_CONTENTBUILDER_NG_FILTER_TAG_ALL'), ENT_QUOTES, 'UTF-8'); ?>
+                                    <?php echo htmlentities(Text::_('COM_CONTENTBUILDERNG_FILTER_TAG_ALL'), ENT_QUOTES, 'UTF-8'); ?>
                                 </option>
                                 <?php foreach ($this->tags as $tag) : ?>
                                     <option
@@ -172,39 +172,39 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
             <thead>
                 <tr>
                     <th width="5">
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_ID'), 'a.id'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_ID'), 'a.id'); ?>
                     </th>
                     <th width="20">
                         <?php echo HTMLHelper::_('grid.checkall'); ?>
                     </th>
                     <th width="60" class="text-center">
-                        <?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW'); ?>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW'); ?>
                     </th>
                     <th>
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_VIEW_NAME'), 'a.name'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_VIEW_NAME'), 'a.name'); ?>
                     </th>
                     <th>
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_TAG'), 'a.tag'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_TAG'), 'a.tag'); ?>
                     </th>
                     <th>
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_FORM_SOURCE'), 'a.title'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_FORM_SOURCE'), 'a.title'); ?>
                     </th>
                     <th width="90" class="text-center">
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_TYPE'), 'a.type'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_TYPE'), 'a.type'); ?>
                     </th>
                     <th>
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_DISPLAY'), 'a.display_in'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_DISPLAY'), 'a.display_in'); ?>
                     </th>
 
 
                     <th class="w-10 text-nowrap">
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_ORDERBY'), 'a.ordering'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_ORDERBY'), 'a.ordering'); ?>
                     </th>
                     <th class="text-nowrap">
                         <?php echo $sortLink(Text::_('JGLOBAL_MODIFIED'), 'a.modified'); ?>
                     </th>
                     <th class="w-1 text-center">
-                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDER_NG_PUBLISHED'), 'a.published'); ?>
+                        <?php echo $sortLink(Text::_('COM_CONTENTBUILDERNG_PUBLISHED'), 'a.published'); ?>
                     </th>
                 </tr>
             </thead>
@@ -215,8 +215,8 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                 for ($i = 0; $i < $n; $i++) {
                     $row = $this->items[$i];
                     $checked = HTMLHelper::_('grid.id', $i, $row->id);
-                    $link = Route::_('index.php?option=com_contentbuilder_ng&task=form.edit&id=' . $row->id);
-                    $published = ContentbuilderHelper::listPublish('forms', $row, $i);
+                    $link = Route::_('index.php?option=com_contentbuilderng&task=form.edit&id=' . $row->id);
+                    $published = ContentbuilderngHelper::listPublish('forms', $row, $i);
                 ?>
                     <tr class="<?php echo "row$k"; ?>">
                         <td>
@@ -231,10 +231,10 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                                 <a
                                     class="btn btn-sm btn-link p-0 cb-forms-preview-link"
                                     href="<?php echo htmlspecialchars($previewUrl, ENT_QUOTES, 'UTF-8'); ?>"
-                                    title="<?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW'); ?>"
+                                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW'); ?>"
                                 >
                                     <span class="fa-solid fa-eye" aria-hidden="true"></span>
-                                    <span class="visually-hidden"><?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW'); ?></span>
+                                    <span class="visually-hidden"><?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW'); ?></span>
                                 </a>
                             <?php else : ?>
                                 <span class="text-muted">-</span>
@@ -264,7 +264,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                                 $typeCode = (string) ($row->type ?? '');
                                 $typeShortMap = [
                                     'com_breezingforms'  => 'BF',
-                                    'com_contentbuilder_ng' => 'CB',
+                                    'com_contentbuilderng' => 'CB',
                                     'com_contentbuilderng'  => 'CB',
                                 ];
                                 $typeShort = $typeShortMap[$typeCode] ?? $typeCode;
@@ -274,7 +274,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
                         </td>
                         <td>
                             <a href="<?php echo $link; ?>">
-                                <?php echo $row->display_in == 0 ? Text::_('COM_CONTENTBUILDER_NG_DISPLAY_FRONTEND') : ($row->display_in == 1 ? Text::_('COM_CONTENTBUILDER_NG_DISPLAY_BACKEND') : Text::_('COM_CONTENTBUILDER_NG_DISPLAY_BOTH')); ?>
+                                <?php echo $row->display_in == 0 ? Text::_('COM_CONTENTBUILDERNG_DISPLAY_FRONTEND') : ($row->display_in == 1 ? Text::_('COM_CONTENTBUILDERNG_DISPLAY_BACKEND') : Text::_('COM_CONTENTBUILDERNG_DISPLAY_BOTH')); ?>
                             </a>
                         </td>
                         <td class="order,text-nowrap">
@@ -317,9 +317,9 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
 
                     <div class="d-flex flex-wrap align-items-center gap-2">
                     <?php echo $this->pagination->getPagesCounter(); ?>
-                    <span><?php echo Text::_('COM_CONTENTBUILDER_NG_DISPLAY_NUM'); ?></span>
+                    <span><?php echo Text::_('COM_CONTENTBUILDERNG_DISPLAY_NUM'); ?></span>
                     <span class="d-inline-block"><?php echo $limitSelect; ?></span>
-                    <span><?php echo Text::_('COM_CONTENTBUILDER_NG_OF'); ?></span>
+                    <span><?php echo Text::_('COM_CONTENTBUILDERNG_OF'); ?></span>
                     <span><?php echo (int) ($this->pagination->total ?? 0); ?></span>
                     </div>
 
@@ -334,7 +334,7 @@ $sortLink = function (string $label, string $field) use ($order, $orderDir, $lim
         </table>
     </div>
 
-    <input type="hidden" name="option" value="com_contentbuilder_ng" />
+    <input type="hidden" name="option" value="com_contentbuilderng" />
     <input type="hidden" name="task" value="" />
     <input type="hidden" name="view" value="forms" />
     <input type="hidden" name="limitstart" value="<?php echo (int) $listStart; ?>" />

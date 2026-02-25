@@ -6,7 +6,7 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder_ng\Site\Controller;
+namespace CB\Component\Contentbuilderng\Site\Controller;
 
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
@@ -18,8 +18,8 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\Database\DatabaseInterface;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
-use CB\Component\Contentbuilder_ng\Site\Model\EditModel;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Site\Model\EditModel;
 
 class ListController extends BaseController
 {
@@ -31,7 +31,7 @@ class ListController extends BaseController
 
         ContentbuilderLegacyHelper::checkPermissions(
             'delete',
-            Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_DELETE_NOT_ALLOWED'),
+            Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_DELETE_NOT_ALLOWED'),
             '_fe'
         );
 
@@ -46,7 +46,7 @@ class ListController extends BaseController
             $state = $this->resolveListState();
             $previewQuery = $this->buildPreviewQuery();
             $link = Route::_(
-                'index.php?option=com_contentbuilder_ng&task=list.display&id='
+                'index.php?option=com_contentbuilderng&task=list.display&id='
                 . $this->input->getInt('id', 0)
                 . '&list[limit]=' . $state['limit']
                 . '&list[start]=' . $state['start']
@@ -63,7 +63,7 @@ class ListController extends BaseController
 
         /** @var EditModel|null $model */
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
-            ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
+            ?: $this->getModel('Edit', 'Contentbuilderng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('EditModel not found');
         }
@@ -92,13 +92,13 @@ class ListController extends BaseController
                     $msg === 'JLIB_APPLICATION_N_ITEMS_DELETED'
                     || str_starts_with($msg, 'JLIB_APPLICATION_N_ITEMS_DELETED_')
                 ) {
-                    $msg = Text::_('COM_CONTENTBUILDER_NG_ENTRIES_DELETED') . ' (' . $deletedCount . ')';
+                    $msg = Text::_('COM_CONTENTBUILDERNG_ENTRIES_DELETED') . ' (' . $deletedCount . ')';
                 }
             } else {
-                $msg = Text::_('COM_CONTENTBUILDER_NG_ENTRIES_DELETED');
+                $msg = Text::_('COM_CONTENTBUILDERNG_ENTRIES_DELETED');
             }
         } else {
-            $msg = Text::_('COM_CONTENTBUILDER_NG_ERROR');
+            $msg = Text::_('COM_CONTENTBUILDERNG_ERROR');
         }
         $type = $ok ? 'message' : 'warning';
 
@@ -109,7 +109,7 @@ class ListController extends BaseController
         $state = $this->resolveListState();
         $previewQuery = $this->buildPreviewQuery();
         $link = Route::_(
-            'index.php?option=com_contentbuilder_ng&task=list.display&id='
+            'index.php?option=com_contentbuilderng&task=list.display&id='
             . $this->input->getInt('id', 0)
             . '&list[limit]=' . $state['limit']
             . '&list[start]=' . $state['start']
@@ -131,13 +131,13 @@ class ListController extends BaseController
 
         ContentbuilderLegacyHelper::checkPermissions(
             'state',
-            Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'),
+            Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'),
             '_fe'
         );
 
         /** @var EditModel|null $model */
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
-            ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
+            ?: $this->getModel('Edit', 'Contentbuilderng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('EditModel not found');
         }
@@ -162,7 +162,7 @@ class ListController extends BaseController
             $state = $this->resolveListState();
             $previewQuery = $this->buildPreviewQuery();
             $link = Route::_(
-                'index.php?option=com_contentbuilder_ng&task=list.display&id='
+                'index.php?option=com_contentbuilderng&task=list.display&id='
                 . $this->input->getInt('id', 0)
                 . '&list[limit]=' . $state['limit']
                 . '&list[start]=' . $state['start']
@@ -181,12 +181,12 @@ class ListController extends BaseController
         Factory::getApplication()->input->set('cid', $selectedItems);
 
         $changedCount = (int) $model->change_list_states();
-        $message = Text::_('COM_CONTENTBUILDER_NG_STATES_CHANGED') . ' (' . $changedCount . ')';
+        $message = Text::_('COM_CONTENTBUILDERNG_STATES_CHANGED') . ' (' . $changedCount . ')';
 
         $state = $this->resolveListState();
         $previewQuery = $this->buildPreviewQuery();
         $link = Route::_(
-            'index.php?option=com_contentbuilder_ng&task=list.display&id='
+            'index.php?option=com_contentbuilderng&task=list.display&id='
             . $this->input->getInt('id', 0)
             . '&list[limit]=' . $state['limit']
             . '&list[start]=' . $state['start']
@@ -207,13 +207,13 @@ class ListController extends BaseController
 
         ContentbuilderLegacyHelper::checkPermissions(
             'publish',
-            Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'),
+            Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'),
             '_fe'
         );
 
         /** @var EditModel|null $model */
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
-            ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
+            ?: $this->getModel('Edit', 'Contentbuilderng', ['ignore_request' => true]);
         if (!$model) {
             throw new \RuntimeException('EditModel not found');
         }
@@ -238,7 +238,7 @@ class ListController extends BaseController
             $state = $this->resolveListState();
             $previewQuery = $this->buildPreviewQuery();
             $link = Route::_(
-                'index.php?option=com_contentbuilder_ng&task=list.display&id='
+                'index.php?option=com_contentbuilderng&task=list.display&id='
                 . $this->input->getInt('id', 0)
                 . '&list[limit]=' . $state['limit']
                 . '&list[start]=' . $state['start']
@@ -259,14 +259,14 @@ class ListController extends BaseController
         $changedCount = (int) $model->change_list_publish();
 
         $msg = $this->input->getInt('list_publish', 0)
-            ? Text::_('COM_CONTENTBUILDER_NG_PUBLISHED')
-            : Text::_('COM_CONTENTBUILDER_NG_UNPUBLISHED');
+            ? Text::_('COM_CONTENTBUILDERNG_PUBLISHED')
+            : Text::_('COM_CONTENTBUILDERNG_UNPUBLISHED');
         $msg .= ' (' . $changedCount . ')';
 
         $state = $this->resolveListState();
         $previewQuery = $this->buildPreviewQuery();
         $link = Route::_(
-            'index.php?option=com_contentbuilder_ng&task=list.display&id='
+            'index.php?option=com_contentbuilderng&task=list.display&id='
             . $this->input->getInt('id', 0)
             . '&list[limit]=' . $state['limit']
             . '&list[start]=' . $state['start']
@@ -323,7 +323,7 @@ class ListController extends BaseController
         if (!$isAdminPreview) {
             ContentbuilderLegacyHelper::checkPermissions(
                 'listaccess',
-                Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_LISTACCESS_NOT_ALLOWED'),
+                Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_LISTACCESS_NOT_ALLOWED'),
                 $suffix
             );
         }
@@ -339,7 +339,7 @@ class ListController extends BaseController
     {
         /** @var SiteApplication $app */
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
         $list = (array) $this->input->get('list', [], 'array');
         $stateKeyPrefix = $this->getPaginationStateKeyPrefix();
         $limitKey = $stateKeyPrefix . '.limit';
@@ -381,7 +381,7 @@ class ListController extends BaseController
     {
         /** @var SiteApplication $app */
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
 
         $formId = (int) $this->input->getInt('id', 0);
         if ($formId < 1) {
@@ -459,7 +459,7 @@ class ListController extends BaseController
 
         $until = (int) $this->input->getInt('cb_preview_until', 0);
         $sig = (string) $this->input->getString('cb_preview_sig', '');
-        $noticeKey = 'com_contentbuilder_ng.preview_notice.' . hash('sha256', $formId . '|' . $until . '|' . $sig);
+        $noticeKey = 'com_contentbuilderng.preview_notice.' . hash('sha256', $formId . '|' . $until . '|' . $sig);
         /** @var SiteApplication $app */
         $app = Factory::getApplication();
         $session = $app->getSession();
@@ -468,7 +468,7 @@ class ListController extends BaseController
             return;
         }
 
-        $this->app->enqueueMessage(Text::_('COM_CONTENTBUILDER_NG_PREVIEW_UNPUBLISHED_NOTICE'), 'warning');
+        $this->app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_PREVIEW_UNPUBLISHED_NOTICE'), 'warning');
         $session->set($noticeKey, true);
     }
 
@@ -478,7 +478,7 @@ class ListController extends BaseController
             $db = Factory::getContainer()->get(DatabaseInterface::class);
             $query = $db->getQuery(true)
                 ->select($db->quoteName('published'))
-                ->from($db->quoteName('#__contentbuilder_ng_forms'))
+                ->from($db->quoteName('#__contentbuilderng_forms'))
                 ->where($db->quoteName('id') . ' = ' . (int) $formId);
             $db->setQuery($query);
             $published = $db->loadResult();

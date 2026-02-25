@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Site\Model;
+namespace CB\Component\Contentbuilderng\Site\Model;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -16,7 +16,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Session\Session;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
@@ -37,7 +37,7 @@ class AjaxModel extends BaseDatabaseModel
         $this->frontend = Factory::getApplication()->isClient('site');
 
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
 
         $this->_id = Factory::getApplication()->input->getInt('id', 0);
         $this->_subject = Factory::getApplication()->input->getCmd('subject', '');
@@ -50,21 +50,21 @@ class AjaxModel extends BaseDatabaseModel
             case 'get_unique_values':
                 if ($this->frontend) {
                     if (!ContentbuilderLegacyHelper::authorizeFe('listaccess')) {
-                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_VIEW_NOT_ALLOWED')));
+                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_VIEW_NOT_ALLOWED')));
                     }
                 } else {
                     if (!ContentbuilderLegacyHelper::authorize('listaccess')) {
-                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDER_NG_PERMISSIONS_VIEW_NOT_ALLOWED')));
+                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_VIEW_NOT_ALLOWED')));
                     }
                 }
 
-                $this->getDatabase()->setQuery("Select `type`, `reference_id`, `rating_slots` From #__contentbuilder_ng_forms Where id = " . $this->_id);
+                $this->getDatabase()->setQuery("Select `type`, `reference_id`, `rating_slots` From #__contentbuilderng_forms Where id = " . $this->_id);
                 $result = $this->getDatabase()->loadAssoc();
 
                 $form = ContentbuilderLegacyHelper::getForm($result['type'], $result['reference_id']);
 
                 if (!$form || !$form->exists) {
-                    return json_encode(array('code' => 2, 'msg' => Text::_('COM_CONTENTBUILDER_NG_FORM_ERROR')));
+                    return json_encode(array('code' => 2, 'msg' => Text::_('COM_CONTENTBUILDERNG_FORM_ERROR')));
                 }
 
                 $values = $form->getUniqueValues(Factory::getApplication()->input->getCmd('field_reference_id', ''), Factory::getApplication()->input->getCmd('where_field', ''), Factory::getApplication()->input->get('where', '', 'string'));
@@ -78,11 +78,11 @@ class AjaxModel extends BaseDatabaseModel
 
                 if ($this->frontend) {
                     if (!ContentbuilderLegacyHelper::authorizeFe('rating')) {
-                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDER_NG_RATING_NOT_ALLOWED')));
+                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDERNG_RATING_NOT_ALLOWED')));
                     }
                 } else {
                     if (!ContentbuilderLegacyHelper::authorize('rating')) {
-                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDER_NG_RATING_NOT_ALLOWED')));
+                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDERNG_RATING_NOT_ALLOWED')));
                     }
                 }
 
@@ -93,13 +93,13 @@ class AjaxModel extends BaseDatabaseModel
                     return json_encode(array('code' => 1, 'msg' => Text::_('JINVALID_TOKEN')));
                 }
 
-                $this->getDatabase()->setQuery("Select `type`, `reference_id`, `rating_slots` From #__contentbuilder_ng_forms Where id = " . $this->_id);
+                $this->getDatabase()->setQuery("Select `type`, `reference_id`, `rating_slots` From #__contentbuilderng_forms Where id = " . $this->_id);
                 $result = $this->getDatabase()->loadAssoc();
 
                 $form = ContentbuilderLegacyHelper::getForm($result['type'], $result['reference_id']);
 
                 if (!$form || !$form->exists) {
-                    return json_encode(array('code' => 2, 'msg' => Text::_('COM_CONTENTBUILDER_NG_FORM_ERROR')));
+                    return json_encode(array('code' => 2, 'msg' => Text::_('COM_CONTENTBUILDERNG_FORM_ERROR')));
                 }
 
                 $rating = 0;
@@ -154,31 +154,31 @@ class AjaxModel extends BaseDatabaseModel
                     // clear rating cache
                     $___now = $_now->toSql();
 
-                    $this->getDatabase()->setQuery("Delete From #__contentbuilder_ng_rating_cache Where Datediff('" . $___now . "', `date`) >= 1");
+                    $this->getDatabase()->setQuery("Delete From #__contentbuilderng_rating_cache Where Datediff('" . $___now . "', `date`) >= 1");
                     $this->getDatabase()->execute();
 
                     // test if already voted
-                    $this->getDatabase()->setQuery("Select `form_id` From #__contentbuilder_ng_rating_cache Where `record_id` = " . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')) . " And `form_id` = " . $this->_id . " And `ip` = " . $this->getDatabase()->quote($_SERVER['REMOTE_ADDR']));
+                    $this->getDatabase()->setQuery("Select `form_id` From #__contentbuilderng_rating_cache Where `record_id` = " . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')) . " And `form_id` = " . $this->_id . " And `ip` = " . $this->getDatabase()->quote($_SERVER['REMOTE_ADDR']));
                     $cached = $this->getDatabase()->loadResult();
-                    $rated = Factory::getApplication()->getSession()->get('rated' . $this->_id . Factory::getApplication()->input->getCmd('record_id', ''), false, 'com_contentbuilder_ng.rating');
+                    $rated = Factory::getApplication()->getSession()->get('rated' . $this->_id . Factory::getApplication()->input->getCmd('record_id', ''), false, 'com_contentbuilderng.rating');
 
                     if ($rated || $cached) {
-                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDER_NG_RATED_ALREADY')));
+                        return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDERNG_RATED_ALREADY')));
                     } else {
-                        Factory::getApplication()->getSession()->set('rated' . $this->_id . Factory::getApplication()->input->getCmd('record_id', ''), true, 'com_contentbuilder_ng.rating');
+                        Factory::getApplication()->getSession()->set('rated' . $this->_id . Factory::getApplication()->input->getCmd('record_id', ''), true, 'com_contentbuilderng.rating');
                     }
 
                     // adding vote
-                    $this->getDatabase()->setQuery("Update #__contentbuilder_ng_records Set rating_count = rating_count + 1, rating_sum = rating_sum + " . $rating . ", lastip = " . $this->getDatabase()->quote($_SERVER['REMOTE_ADDR']) . " Where `type` = " . $this->getDatabase()->quote($result['type']) . " And `reference_id` = " . $this->getDatabase()->quote($result['reference_id']) . " And `record_id` = " . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')));
+                    $this->getDatabase()->setQuery("Update #__contentbuilderng_records Set rating_count = rating_count + 1, rating_sum = rating_sum + " . $rating . ", lastip = " . $this->getDatabase()->quote($_SERVER['REMOTE_ADDR']) . " Where `type` = " . $this->getDatabase()->quote($result['type']) . " And `reference_id` = " . $this->getDatabase()->quote($result['reference_id']) . " And `record_id` = " . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')));
                     $this->getDatabase()->execute();
 
                     // adding vote to cache
                     $___now = $_now->toSql();
-                    $this->getDatabase()->setQuery("Insert Into #__contentbuilder_ng_rating_cache (`record_id`,`form_id`,`ip`,`date`) Values (" . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')) . ", " . $this->_id . "," . $this->getDatabase()->quote($_SERVER['REMOTE_ADDR']) . ",'" . $___now . "')");
+                    $this->getDatabase()->setQuery("Insert Into #__contentbuilderng_rating_cache (`record_id`,`form_id`,`ip`,`date`) Values (" . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')) . ", " . $this->_id . "," . $this->getDatabase()->quote($_SERVER['REMOTE_ADDR']) . ",'" . $___now . "')");
                     $this->getDatabase()->execute();
 
                     // updating article's votes if there is an article bound to the record & view
-                    $this->getDatabase()->setQuery("Select a.article_id From #__contentbuilder_ng_articles As a, #__content As c Where c.id = a.article_id And (c.state = 1 Or c.state = 0) And a.form_id = " . $this->_id . " And a.record_id = " . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')));
+                    $this->getDatabase()->setQuery("Select a.article_id From #__contentbuilderng_articles As a, #__content As c Where c.id = a.article_id And (c.state = 1 Or c.state = 0) And a.form_id = " . $this->_id . " And a.record_id = " . $this->getDatabase()->quote(Factory::getApplication()->input->getCmd('record_id', '')));
                     $article_id = $this->getDatabase()->loadResult();
 
                     if ($article_id) {
@@ -190,8 +190,8 @@ class AjaxModel extends BaseDatabaseModel
                             $this->getDatabase()->setQuery("
                                 Update 
                                     #__content_rating As cr, 
-                                    #__contentbuilder_ng_records As cbr, 
-                                    #__contentbuilder_ng_articles As cba
+                                    #__contentbuilderng_records As cbr, 
+                                    #__contentbuilderng_articles As cba
                                 Set
                                     cr.rating_count = cbr.rating_count,
                                     cr.rating_sum = cbr.rating_sum,
@@ -232,7 +232,7 @@ class AjaxModel extends BaseDatabaseModel
                     }
                 }
 
-                return json_encode(array('code' => 0, 'msg' => Text::_('COM_CONTENTBUILDER_NG_THANK_YOU_FOR_RATING')));
+                return json_encode(array('code' => 0, 'msg' => Text::_('COM_CONTENTBUILDERNG_THANK_YOU_FOR_RATING')));
                 break;
         }
         return null;

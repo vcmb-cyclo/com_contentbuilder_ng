@@ -6,13 +6,15 @@
  * @license     GNU/GPL
 */
 
-namespace CB\Component\Contentbuilder_ng\Administrator\View\About;
+namespace CB\Component\Contentbuilderng\Administrator\View\About;
 
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
+use Joomla\CMS\Toolbar\Toolbar;
+use Joomla\CMS\Document\HtmlDocument;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Application\AdministratorApplication;
@@ -26,6 +28,7 @@ class HtmlView extends BaseHtmlView
     protected array $phpLibraries = [];
     protected array $javascriptLibraries = [];
     protected array $auditReport = [];
+    protected array $logReport = [];
 
     public function display($tpl = null)
     {
@@ -38,13 +41,14 @@ class HtmlView extends BaseHtmlView
         }
 
         // 1️⃣ Récupération du WebAssetManager
+        /** @var HtmlDocument $document */
         $document = $this->getDocument();
         $wa = $document->getWebAssetManager();
 
         // 2️⃣ Enregistrement + chargement du CSS
         $wa->registerAndUseStyle(
-            'com_contentbuilder_ng.admin',
-            'com_contentbuilder_ng/admin.css',
+            'com_contentbuilderng.admin',
+            'COM_CONTENTBUILDERNG/admin.css',
             [],
             ['media' => 'all']
         );
@@ -52,7 +56,7 @@ class HtmlView extends BaseHtmlView
         // Icon addition.
         $wa->addInlineStyle(
             '.icon-logo_left{
-                background-image:url(' . Uri::root(true) . '/media/com_contentbuilder_ng/images/logo_left.png);
+                background-image:url(' . Uri::root(true) . '/media/com_contentbuilderng/images/logo_left.png);
                 background-size:contain;
                 background-repeat:no-repeat;
                 background-position:center;
@@ -64,25 +68,36 @@ class HtmlView extends BaseHtmlView
         );
 
         ToolbarHelper::title(
-            Text::_('COM_CONTENTBUILDER_NG') .' :: ' . Text::_('COM_CONTENTBUILDER_NG_ABOUT'),
+            Text::_('COM_CONTENTBUILDERNG') .' :: ' . Text::_('COM_CONTENTBUILDERNG_ABOUT'),
             'logo_left'
         );
-        $toolbar = $app->getDocument()->getToolbar('toolbar');
+
+        /** @var Toolbar $toolbar */
+        $toolbar = $document->getToolbar('toolbar');
         $toolbar->standardButton('about_audit')
             ->task('about.runAudit')
-            ->text('COM_CONTENTBUILDER_NG_ABOUT_AUDIT')
+            ->text('COM_CONTENTBUILDERNG_ABOUT_AUDIT')
             ->icon('fa fa-search')
             ->listCheck(false);
+
         $toolbar->standardButton('about_migrate_packed_data')
             ->task('about.migratePackedData')
-            ->text('COM_CONTENTBUILDER_NG_ABOUT_MIGRATE_PACKED_DATA')
+            ->text('COM_CONTENTBUILDERNG_ABOUT_MIGRATE_PACKED_DATA')
             ->icon('fa fa-refresh')
             ->listCheck(false);
-        ToolbarHelper::preferences('com_contentbuilder_ng');
+
+        $toolbar->standardButton('about_show_log')
+            ->task('about.showLog')
+            ->text('COM_CONTENTBUILDERNG_ABOUT_SHOW_LOG')
+            ->icon('fa fa-file-text-o')
+            ->listCheck(false);
+
+        ToolbarHelper::preferences('com_contentbuilderng');
+        
         ToolbarHelper::help(
-            'COM_CONTENTBUILDER_NG_HELP_ABOUT_TITLE',
+            'COM_CONTENTBUILDERNG_HELP_ABOUT_TITLE',
             false,
-            Uri::base() . 'index.php?option=com_contentbuilder_ng&view=about&layout=help&tmpl=component'
+            Uri::base() . 'index.php?option=com_contentbuilderng&view=about&layout=help&tmpl=component'
         );
 
         $versionInformation = $this->getVersionInformation();
@@ -91,9 +106,12 @@ class HtmlView extends BaseHtmlView
         $this->componentAuthor = (string) ($versionInformation['author'] ?? '');
         $this->phpLibraries = $this->getInstalledPhpLibraries();
         $this->javascriptLibraries = $this->getInstalledJavascriptLibraries();
-        $auditReport = $app->getUserState('com_contentbuilder_ng.about.audit', []);
+        $auditReport = $app->getUserState('com_contentbuilderng.about.audit', []);
         $this->auditReport = is_array($auditReport) ? $auditReport : [];
-        $app->setUserState('com_contentbuilder_ng.about.audit', []);
+        $app->setUserState('com_contentbuilderng.about.audit', []);
+        $logReport = $app->getUserState('com_contentbuilderng.about.log', []);
+        $this->logReport = is_array($logReport) ? $logReport : [];
+        $app->setUserState('com_contentbuilderng.about.log', []);
 
         // 3️⃣ Affichage du layout
         parent::display($tpl);
@@ -113,7 +131,7 @@ class HtmlView extends BaseHtmlView
                 ->select($db->quoteName('manifest_cache'))
                 ->from($db->quoteName('#__extensions'))
                 ->where($db->quoteName('type') . ' = ' . $db->quote('component'))
-                ->where($db->quoteName('element') . ' = ' . $db->quote('com_contentbuilder_ng'));
+                ->where($db->quoteName('element') . ' = ' . $db->quote('com_contentbuilderng'));
 
             $db->setQuery($query);
             $manifestCache = (string) $db->loadResult();
@@ -135,7 +153,7 @@ class HtmlView extends BaseHtmlView
             return $versionInformation;
         }
 
-        $manifestPath = JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/com_contentbuilder_ng.xml';
+        $manifestPath = JPATH_ADMINISTRATOR . '/components/com_contentbuilderng/com_contentbuilderng.xml';
 
         if (!is_file($manifestPath)) {
             return $versionInformation;
@@ -154,7 +172,7 @@ class HtmlView extends BaseHtmlView
 
     private function getInstalledPhpLibraries(): array
     {
-        $componentRoot = JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng';
+        $componentRoot = JPATH_ADMINISTRATOR . '/components/com_contentbuilderng';
         $libraries = $this->readInstalledLibrariesFromVendor($componentRoot);
 
         if ($libraries === []) {
@@ -380,7 +398,7 @@ class HtmlView extends BaseHtmlView
 
     private function getInstalledJavascriptLibraries(): array
     {
-        $assetFile = JPATH_ROOT . '/media/com_contentbuilder_ng/joomla.asset.json';
+        $assetFile = JPATH_ROOT . '/media/com_contentbuilderng/joomla.asset.json';
 
         if (!is_file($assetFile)) {
             return [];
@@ -454,10 +472,10 @@ class HtmlView extends BaseHtmlView
             sort($library['assets']);
             $library['assets'] = implode(' + ', $library['assets']);
             if (($library['version'] ?? '') === '') {
-                $library['version'] = Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE');
+                $library['version'] = Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
             }
             if (($library['source'] ?? '') === '') {
-                $library['source'] = Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE');
+                $library['source'] = Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
             }
         }
         unset($library);

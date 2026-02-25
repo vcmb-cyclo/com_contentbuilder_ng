@@ -21,10 +21,10 @@ Factory::getApplication()->getDocument()->addScriptDeclaration($this->theme_js);
 
 <div class="text-center mb-3">
     <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
-        <?php echo Text::_('COM_CONTENTBUILDER_NG_PRINT') ?>
+        <?php echo Text::_('COM_CONTENTBUILDERNG_PRINT') ?>
     </button>
     <button class="btn btn-sm btn-outline-secondary" onclick="self.close()">
-        <?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE') ?>
+        <?php echo Text::_('COM_CONTENTBUILDERNG_CLOSE') ?>
     </button>
 </div>
 <h1 class="display-6 mb-4">
@@ -37,14 +37,14 @@ if (Factory::getApplication()->input->getInt('cb_show_author', 1)) {
 
     <?php if ($this->created): ?>
         <span class="small created-by">
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_CREATED_ON'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_CREATED_ON'); ?>
             <?php echo HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC5')); ?>
         </span>
     <?php endif; ?>
 
     <?php if ($this->created_by): ?>
         <span class="small created-by">
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_BY'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_BY'); ?>
             <?php echo $this->created_by; ?>
         </span><br />
     <?php endif; ?>
@@ -71,13 +71,13 @@ if (Factory::getApplication()->input->getInt('cb_show_author', 1)) {
 
         <?php if ($this->modified): ?>
             <span class="small created-by">
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_LAST_UPDATED_ON'); ?>
                 <?php echo HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC5')); ?>
             </span>
         <?php endif; ?>
 
         <span class="small created-by">
-            <?php echo Text::_('COM_CONTENTBUILDER_NG_BY'); ?>
+            <?php echo Text::_('COM_CONTENTBUILDERNG_BY'); ?>
             <?php echo $this->modified_by; ?>
         </span>
 

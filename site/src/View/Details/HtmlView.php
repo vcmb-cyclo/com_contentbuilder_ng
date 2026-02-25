@@ -7,7 +7,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Site\View\Details;
+namespace CB\Component\Contentbuilderng\Site\View\Details;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -24,7 +24,7 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
-use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
 {
@@ -60,7 +60,7 @@ class HtmlView extends BaseHtmlView
         try {
             $prevQuery = $db->getQuery(true)
                 ->select($db->quoteName('record_id'))
-                ->from($db->quoteName('#__contentbuilder_ng_records'))
+                ->from($db->quoteName('#__contentbuilderng_records'))
                 ->where($baseWhere)
                 ->where($db->quoteName('record_id') . ' < ' . (int) $currentRecordId)
                 ->order($db->quoteName('record_id') . ' DESC');
@@ -70,7 +70,7 @@ class HtmlView extends BaseHtmlView
 
             $nextQuery = $db->getQuery(true)
                 ->select($db->quoteName('record_id'))
-                ->from($db->quoteName('#__contentbuilder_ng_records'))
+                ->from($db->quoteName('#__contentbuilderng_records'))
                 ->where($baseWhere)
                 ->where($db->quoteName('record_id') . ' > ' . (int) $currentRecordId)
                 ->order($db->quoteName('record_id') . ' ASC');
@@ -87,7 +87,7 @@ class HtmlView extends BaseHtmlView
     private function getListPaginationStateKeys(int $formId): array
     {
         $app = Factory::getApplication();
-        $option = 'com_contentbuilder_ng';
+        $option = 'com_contentbuilderng';
         $layout = (string) $app->input->getCmd('layout', 'default');
 
         if ($layout === '') {
@@ -126,7 +126,7 @@ class HtmlView extends BaseHtmlView
             $listForNavigation['limit'] = 1000000;
             $app->input->set('list', $listForNavigation);
 
-            $factory = $app->bootComponent('com_contentbuilder_ng')->getMVCFactory();
+            $factory = $app->bootComponent('com_contentbuilderng')->getMVCFactory();
             $listModel = $factory->createModel('List', 'Site', ['ignore_request' => false]);
 
             if (!$listModel || !method_exists($listModel, 'getData')) {
@@ -224,7 +224,7 @@ CSS;
             $wa = $document->getWebAssetManager();
             $wa->addInlineStyle(
                 '.icon-logo_left{
-                    background-image:url(' . Uri::root(true) . '/media/com_contentbuilder_ng/images/logo_left.png);
+                    background-image:url(' . Uri::root(true) . '/media/com_contentbuilderng/images/logo_left.png);
                     background-size:contain;
                     background-repeat:no-repeat;
                     background-position:center;
@@ -241,7 +241,7 @@ CSS;
 		$event = new \stdClass();
 
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
-		$db->setQuery("Select articles.`article_id` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($subject->form_id) . " And articles.record_id = " . $db->quote($subject->record_id));
+		$db->setQuery("Select articles.`article_id` From #__contentbuilderng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($subject->form_id) . " And articles.record_id = " . $db->quote($subject->record_id));
 		$article = $db->loadResult();
 
 		$table = new \Joomla\CMS\Table\Content($db);
@@ -265,7 +265,7 @@ CSS;
 		}
 
 		// we pass the slug with a flag in the end, and see in the end if the slug has been used in the output
-		$table->slug = ($article > 0 ? $article : 0) . ':' . $alias . ':contentbuilder_ng_slug_used';
+		$table->slug = ($article > 0 ? $article : 0) . ':' . $alias . ':contentbuilderng_slug_used';
 
 		$registry = new Registry;
 		$registry->loadString($table->attribs ?? '{}', 'json');
@@ -327,11 +327,11 @@ CSS;
 		$results = $eventObj->getArgument('result') ?: [];
 		$event->afterDisplayContent = trim(implode("\n", $results));
 
-		// if the slug has been used, we would like to stay in com_contentbuilder_ng, so we re-arrange the resulting url a little
-		if (strstr($subject->template, 'contentbuilder_ng_slug_used') !== false) {
+		// if the slug has been used, we would like to stay in COM_CONTENTBUILDERNG, so we re-arrange the resulting url a little
+		if (strstr($subject->template, 'contentbuilderng_slug_used') !== false) {
 
 			$matches = array(array(), array());
-			preg_match_all("/\\\"([^\"]*contentbuilder_ng_slug_used[^\"]*)\\\"/i", $subject->template, $matches);
+			preg_match_all("/\\\"([^\"]*contentbuilderng_slug_used[^\"]*)\\\"/i", $subject->template, $matches);
 
 			foreach ($matches[1] as $match) {
 				$sub = '';
@@ -346,14 +346,14 @@ CSS;
 						}
 					}
 				}
-				$subject->template = str_replace($match, Route::_('index.php?option=com_contentbuilder_ng&task=details.display&id=' . Factory::getApplication()->input->getInt('id') . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $sub), $subject->template);
+				$subject->template = str_replace($match, Route::_('index.php?option=com_contentbuilderng&task=details.display&id=' . Factory::getApplication()->input->getInt('id') . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $sub), $subject->template);
 			}
 		}
 
 		// the same for the case a toc has been created
-		if (isset($table->toc) && strstr($table->toc, 'contentbuilder_ng_slug_used') !== false) {
+		if (isset($table->toc) && strstr($table->toc, 'contentbuilderng_slug_used') !== false) {
 
-			preg_match_all("/\\\"([^\"]*contentbuilder_ng_slug_used[^\"]*)\\\"/i", $table->toc, $matches);
+			preg_match_all("/\\\"([^\"]*contentbuilderng_slug_used[^\"]*)\\\"/i", $table->toc, $matches);
 
 			foreach ($matches[1] as $match) {
 				$sub = '';
@@ -368,7 +368,7 @@ CSS;
 						}
 					}
 				}
-				$table->toc = str_replace($match, Route::_('index.php?option=com_contentbuilder_ng&task=details.display&id=' . Factory::getApplication()->input->getInt('id') . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $sub), $table->toc);
+				$table->toc = str_replace($match, Route::_('index.php?option=com_contentbuilderng&task=details.display&id=' . Factory::getApplication()->input->getInt('id') . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . $sub), $table->toc);
 			}
 		}
 
@@ -381,9 +381,9 @@ CSS;
 
 			$themePlugin = (string) ($subject->theme_plugin ?? '');
 			$fallbackTheme = false;
-			if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin)) {
+			if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
 				$themePlugin = 'joomla6';
-				PluginHelper::importPlugin('contentbuilder_ng_themes', $themePlugin);
+				PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin);
 				$fallbackTheme = true;
 			}
 

@@ -17,7 +17,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 
 /** @var SiteApplication $app */
 $app = Factory::getApplication();
@@ -66,16 +66,16 @@ $previewActorId = $input->getInt('cb_preview_actor_id', 0);
 $previewActorName = (string) $input->getString('cb_preview_actor_name', '');
 $previewQuery = '';
 $adminReturnContext = trim((string) $input->getCmd('cb_admin_return', ''));
-$adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&task=form.edit&id=' . (int) $id;
+$adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilderng&task=form.edit&id=' . (int) $id;
 if ($adminReturnContext === 'forms') {
-    $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilder_ng&view=forms';
+    $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilderng&view=forms';
 }
 $previewFormName = trim((string) ($this->form_name ?? ''));
 if ($previewFormName === '') {
     $previewFormName = trim((string) ($this->page_title ?? ''));
 }
 if ($previewFormName === '') {
-    $previewFormName = Text::_('COM_CONTENTBUILDER_NG_NOT_AVAILABLE');
+    $previewFormName = Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
 }
 $previewFormName = htmlspecialchars($previewFormName, ENT_QUOTES, 'UTF-8');
 if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
@@ -95,7 +95,7 @@ if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
 }
 
 $detailsHref = Route::_(
-    'index.php?option=com_contentbuilder_ng&task=details.display'
+    'index.php?option=com_contentbuilderng&task=details.display'
         . ($layout !== '' ? '&layout=' . $layout : '')
         . '&id=' . $id
         . '&record_id=' . $recordId
@@ -106,7 +106,7 @@ $detailsHref = Route::_(
 );
 
 $listHref = Route::_(
-    'index.php?option=com_contentbuilder_ng&task=list.display'
+    'index.php?option=com_contentbuilderng&task=list.display'
         . ($layout !== '' ? '&layout=' . $layout : '')
         . '&id=' . $id
         . ($listQuery !== '' ? '&' . $listQuery : '')
@@ -124,7 +124,7 @@ $showBack = $this->back_button && !$hasReturn;
 $prevRecordId = property_exists($this, 'prev_record_id') ? (int) $this->prev_record_id : 0;
 $nextRecordId = property_exists($this, 'next_record_id') ? (int) $this->next_record_id : 0;
 $navReturn = $hasReturn ? '&return=' . rawurlencode($input->getString('return', '')) : '';
-$editNavBaseLink = 'index.php?option=com_contentbuilder_ng&task=edit.display'
+$editNavBaseLink = 'index.php?option=com_contentbuilderng&task=edit.display'
     . ($layout !== '' ? '&layout=' . $layout : '')
     . '&id=' . $id
     . ($tmpl !== '' ? '&tmpl=' . $tmpl : '')
@@ -140,22 +140,22 @@ $showAuditTrail = $input->getInt('cb_show_author', 1) === 1;
 
 $createdOnText = '';
 if (!empty($this->created)) {
-    $createdOnText = Text::_('COM_CONTENTBUILDER_NG_CREATED_ON') . ' ' . HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2'));
+    $createdOnText = Text::_('COM_CONTENTBUILDERNG_CREATED_ON') . ' ' . HTMLHelper::_('date', $this->created, Text::_('DATE_FORMAT_LC2'));
 }
 
 $createdByText = '';
 if (!empty($this->created_by)) {
-    $createdByText = Text::_('COM_CONTENTBUILDER_NG_BY') . ' ' . htmlentities((string) $this->created_by, ENT_QUOTES, 'UTF-8');
+    $createdByText = Text::_('COM_CONTENTBUILDERNG_BY') . ' ' . htmlentities((string) $this->created_by, ENT_QUOTES, 'UTF-8');
 }
 
 $modifiedOnText = '';
 if (!empty($this->modified)) {
-    $modifiedOnText = Text::_('COM_CONTENTBUILDER_NG_LAST_UPDATED_ON') . ' ' . HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2'));
+    $modifiedOnText = Text::_('COM_CONTENTBUILDERNG_LAST_UPDATED_ON') . ' ' . HTMLHelper::_('date', $this->modified, Text::_('DATE_FORMAT_LC2'));
 }
 
 $modifiedByText = '';
 if (!empty($this->modified_by)) {
-    $modifiedByText = Text::_('COM_CONTENTBUILDER_NG_BY') . ' ' . htmlentities((string) $this->modified_by, ENT_QUOTES, 'UTF-8');
+    $modifiedByText = Text::_('COM_CONTENTBUILDERNG_BY') . ' ' . htmlentities((string) $this->modified_by, ENT_QUOTES, 'UTF-8');
 }
 
 $createdTrailText = trim($createdOnText . (($createdOnText !== '' && $createdByText !== '') ? ' ' : '') . $createdByText);
@@ -179,8 +179,8 @@ if ($showAuditTrail && ($createdTrailText !== '' || $modifiedTrailText !== '')) 
 
 if ($showColumnHeader) {
     $columnHeaderHtml = '<div class="cbColumnHeader d-none d-md-grid" aria-hidden="true">'
-        . '<div class="cbColumnHeaderLabel">' . Text::_('COM_CONTENTBUILDER_NG_COLUMN_HEADER_FIELD') . '</div>'
-        . '<div class="cbColumnHeaderValue">' . Text::_('COM_CONTENTBUILDER_NG_COLUMN_HEADER_VALUE') . '</div>'
+        . '<div class="cbColumnHeaderLabel">' . Text::_('COM_CONTENTBUILDERNG_COLUMN_HEADER_FIELD') . '</div>'
+        . '<div class="cbColumnHeaderValue">' . Text::_('COM_CONTENTBUILDERNG_COLUMN_HEADER_VALUE') . '</div>'
         . '</div>';
 }
 
@@ -196,10 +196,10 @@ if (!empty($this->theme_css) || !empty($this->theme_js)) {
 ?>
 <a name="article_up"></a>
 <script type="text/javascript">
-    function contentbuilder_ng_delete() {
-        var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDER_NG_CONFIRM_DELETE_MESSAGE'); ?>');
+    function contentbuilderng_delete() {
+        var confirmed = confirm('<?php echo Text::_('COM_CONTENTBUILDERNG_CONFIRM_DELETE_MESSAGE'); ?>');
         if (confirmed) {
-            location.href = '<?php echo 'index.php?option=com_contentbuilder_ng&task=edit.delete' . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&cid[]=' . Factory::getApplication()->input->getCmd('record_id', 0) . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : ''); ?>';
+            location.href = '<?php echo 'index.php?option=com_contentbuilderng&task=edit.delete' . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&cid[]=' . Factory::getApplication()->input->getCmd('record_id', 0) . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : ''); ?>';
         }
     }
 
@@ -347,7 +347,7 @@ if (!empty($this->theme_css) || !empty($this->theme_js)) {
     }
 
     var cbInitialEditFormState = "";
-    var cbUnsavedChangesWarning = <?php echo json_encode(Text::_('COM_CONTENTBUILDER_NG_UNSAVED_CHANGES_WARNING')); ?>;
+    var cbUnsavedChangesWarning = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_UNSAVED_CHANGES_WARNING')); ?>;
 
     function cbShouldTrackFieldForDirtyState(field) {
         if (!field || field.disabled) {
@@ -447,11 +447,11 @@ if (!empty($this->theme_css) || !empty($this->theme_js)) {
     <?php if ($isAdminPreview): ?>
         <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
             <span>
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CURRENT_FORM', $previewFormName) . ' - ' . Text::sprintf('COM_CONTENTBUILDER_NG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDER_NG_PREVIEW_TAB_EDITABLE_TEMPLATE')); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_CURRENT_FORM', $previewFormName) . ' - ' . Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDERNG_PREVIEW_TAB_EDITABLE_TEMPLATE')); ?>
             </span>
             <a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
                 <span class="fa-solid fa-arrow-left me-1" aria-hidden="true"></span>
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_BACK_TO_ADMIN'); ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_BACK_TO_ADMIN'); ?>
             </a>
         </div>
     <?php endif; ?>
@@ -497,46 +497,46 @@ if (!empty($this->theme_css) || !empty($this->theme_js)) {
         }
         if ($this->record_id && $edit_allowed && $this->create_articles && $fullarticle_allowed) {
         ?>
-            <button class="btn btn-sm btn-primary cbButton cbArticleSettingsButton" onclick="if(document.getElementById('cbArticleOptions').style.display == 'none'){document.getElementById('cbArticleOptions').style.display='block'}else{document.getElementById('cbArticleOptions').style.display='none'};"><?php echo Text::_('COM_CONTENTBUILDER_NG_SHOW_ARTICLE_SETTINGS') ?></button>
+            <button class="btn btn-sm btn-primary cbButton cbArticleSettingsButton" onclick="if(document.getElementById('cbArticleOptions').style.display == 'none'){document.getElementById('cbArticleOptions').style.display='block'}else{document.getElementById('cbArticleOptions').style.display='none'};"><?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_ARTICLE_SETTINGS') ?></button>
         <?php
         }
         if (($edit_allowed || $new_allowed) && !$this->edit_by_type) {
         ?>
-            <button class="btn btn-sm btn-primary cbButton cbSaveButton" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_SAVE'); ?>" onclick="<?php echo $this->latest ? "document.getElementById('contentbuilder_ng_task').value='edit.apply';" : '' ?>contentbuilder_ng.onSubmit();">
+            <button class="btn btn-sm btn-primary cbButton cbSaveButton" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SAVE'); ?>" onclick="<?php echo $this->latest ? "document.getElementById('contentbuilderng_task').value='edit.apply';" : '' ?>contentbuilderng.onSubmit();">
                 <span class="fa-solid fa-xmark me-1" aria-hidden="true"></span>
-                <?php echo trim($this->save_button_title) != '' ? htmlentities($this->save_button_title, ENT_QUOTES, 'UTF-8') : Text::_('COM_CONTENTBUILDER_NG_SAVE') ?>
+                <?php echo trim($this->save_button_title) != '' ? htmlentities($this->save_button_title, ENT_QUOTES, 'UTF-8') : Text::_('COM_CONTENTBUILDERNG_SAVE') ?>
             </button>
         <?php
         }
         if ($this->record_id && $edit_allowed && $this->create_articles && $this->edit_by_type && $fullarticle_allowed) {
         ?>
-            <button class="btn btn-sm btn-primary cbButton cbArticleSettingsButton" onclick="document.getElementById('contentbuilder_ng_task').value='edit.apply';contentbuilder_ng.onSubmit();">
+            <button class="btn btn-sm btn-primary cbButton cbArticleSettingsButton" onclick="document.getElementById('contentbuilderng_task').value='edit.apply';contentbuilderng.onSubmit();">
                 <span class="fa-solid fa-check me-1" aria-hidden="true"></span>
-                <?php echo Text::_('COM_CONTENTBUILDER_NG_APPLY_ARTICLE_SETTINGS') ?>
+                <?php echo Text::_('COM_CONTENTBUILDERNG_APPLY_ARTICLE_SETTINGS') ?>
             </button>
         <?php }
         if ($this->record_id && $delete_allowed) { ?>
             <button class="btn btn-sm btn-outline-danger cbButton cbDeleteButton d-inline-flex align-items-center gap-1 rounded-pill"
-                onclick="contentbuilder_ng_delete();"
-                title="<?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE'); ?>">
+                onclick="contentbuilderng_delete();"
+                title="<?php echo Text::_('COM_CONTENTBUILDERNG_DELETE'); ?>">
                 <span class="fa-solid fa-trash" aria-hidden="true"></span>
-                <span><?php echo Text::_('COM_CONTENTBUILDER_NG_DELETE') ?></span>
+                <span><?php echo Text::_('COM_CONTENTBUILDERNG_DELETE') ?></span>
             </button>
             <?php
         }
         if ($showBack) {
             if ($jsBack) {
             ?>
-                <button class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbCloseButton" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>" onclick="history.back(-1);void(0);">
+                <button class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbCloseButton" title="<?php echo Text::_('COM_CONTENTBUILDERNG_CLOSE'); ?>" onclick="history.back(-1);void(0);">
                     <span class="fa-solid fa-xmark me-1" aria-hidden="true"></span>
-                    <?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE') ?>
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_CLOSE') ?>
                 </button>
             <?php
             } else {
             ?>
-                <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbCloseButton" title="<?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE'); ?>" href="<?php echo $backHref; ?>">
+                <a class="btn btn-sm btn-outline-secondary cbButton cbBackButton cbCloseButton" title="<?php echo Text::_('COM_CONTENTBUILDERNG_CLOSE'); ?>" href="<?php echo $backHref; ?>">
                     <span class="fa-solid fa-xmark me-1" aria-hidden="true"></span>
-                    <?php echo Text::_('COM_CONTENTBUILDER_NG_CLOSE') ?>
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_CLOSE') ?>
                 </a>
         <?php
             }
@@ -559,14 +559,14 @@ if (!empty($this->theme_css) || !empty($this->theme_js)) {
         <?php
         if (!$this->edit_by_type) {
         ?>
-            <form class="form-horizontal mt-5 mb-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id',  '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
+            <form class="form-horizontal mt-5 mb-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id',  '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
             <?php
         }
             ?>
             <?php
             if ($this->edit_by_type) {
             ?>
-                <form class="mt-5 mb-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id',  '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
+                <form class="mt-5 mb-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id',  '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
                 <?php
             }
                 ?>
@@ -713,7 +713,7 @@ if (!empty($this->theme_css) || !empty($this->theme_js)) {
                 }
                 ?>
                 <input type="hidden" name="Itemid" value="<?php echo Factory::getApplication()->input->getInt('Itemid', 0); ?>" />
-                <input type="hidden" name="task" id="contentbuilder_ng_task" value="edit.save" />
+                <input type="hidden" name="task" id="contentbuilderng_task" value="edit.save" />
                 <input type="hidden" name="backtolist" value="<?php echo Factory::getApplication()->input->getInt('backtolist', 0); ?>" />
                 <input type="hidden" name="return" value="<?php echo Factory::getApplication()->input->get('return', '', 'string'); ?>" />
                 <?php echo $previewHiddenFields; ?>
@@ -753,7 +753,7 @@ if (!empty($this->theme_css) || !empty($this->theme_js)) {
     } else {
         if ($this->edit_by_type) {
         ?>
-            <form class="mt-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id',  '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
+            <form class="mt-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id',  '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
                 <?php
                 if (Factory::getApplication()->input->get('tmpl', '', 'string') != '') {
                 ?>
@@ -762,7 +762,7 @@ if (!empty($this->theme_css) || !empty($this->theme_js)) {
                 }
                 ?>
                 <input type="hidden" name="Itemid" value="<?php echo Factory::getApplication()->input->getInt('Itemid', 0); ?>" />
-                <input type="hidden" name="task" id="contentbuilder_ng_task" value="edit.save" />
+                <input type="hidden" name="task" id="contentbuilderng_task" value="edit.save" />
                 <input type="hidden" name="backtolist" value="<?php echo Factory::getApplication()->input->getInt('backtolist', 0); ?>" />
                 <input type="hidden" name="return" value="<?php echo Factory::getApplication()->input->get('return', '', 'string'); ?>" />
                 <?php echo $previewHiddenFields; ?>
@@ -788,7 +788,7 @@ if (!empty($this->theme_css) || !empty($this->theme_js)) {
         <?php
         } else {
         ?>
-            <form class="form-horizontal" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilder_ng&task=edit.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id',  '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
+            <form class="form-horizontal" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . (Factory::getApplication()->input->get('layout', '', 'string') != '' ? '&layout=' . Factory::getApplication()->input->get('layout', '', 'string') : '') . '&id=' . Factory::getApplication()->input->getInt('id', 0) . '&record_id=' . Factory::getApplication()->input->getCmd('record_id',  '') . (Factory::getApplication()->input->get('tmpl', '', 'string') != '' ? '&tmpl=' . Factory::getApplication()->input->get('tmpl', '', 'string') : '') . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
                 <?php echo $this->event->beforeDisplayContent; ?>
                 <?php echo $this->toc ?>
                 <div class="cbEditableBody">
@@ -805,7 +805,7 @@ if (!empty($this->theme_css) || !empty($this->theme_js)) {
                 }
                 ?>
                 <input type="hidden" name="Itemid" value="<?php echo Factory::getApplication()->input->getInt('Itemid', 0); ?>" />
-                <input type="hidden" name="task" id="contentbuilder_ng_task" value="edit.save" />
+                <input type="hidden" name="task" id="contentbuilderng_task" value="edit.save" />
                 <input type="hidden" name="backtolist" value="<?php echo Factory::getApplication()->input->getInt('backtolist', 0); ?>" />
                 <input type="hidden" name="return" value="<?php echo Factory::getApplication()->input->get('return', '', 'string'); ?>" />
                 <?php echo $previewHiddenFields; ?>

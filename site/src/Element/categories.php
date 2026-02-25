@@ -8,7 +8,7 @@
  * @license     GNU/GPL
  */
 
-namespace CB\Component\Contentbuilder_ng\Site\Element;
+namespace CB\Component\Contentbuilderng\Site\Element;
 
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -87,7 +87,7 @@ class JFormFieldCategories extends FormField
         $fieldClass = (string) ($this->element['class'] ?: '');
         $out = '<select style="max-width: 200px;" name="' . $this->name . '" id="' . $this->id . '" class="' . $fieldClass . '">' . "\n";
 
-        $out .= '<option value="-2">' . Text::_('COM_CONTENTBUILDER_NG_INHERIT') . '</option>' . "\n";
+        $out .= '<option value="-2">' . Text::_('COM_CONTENTBUILDERNG_INHERIT') . '</option>' . "\n";
 
         foreach ($options as $category) {
             $out .= '<option ' . ($this->value == $category->value ? ' selected="selected"' : '') . 'value="' . $category->value . '">' . htmlentities($category->text, ENT_QUOTES, 'UTF-8') . '</option>' . "\n";

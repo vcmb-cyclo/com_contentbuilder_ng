@@ -1,23 +1,23 @@
 {
     "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
-    "name": "com_contentbuilder_ng",
-    "version": "6.1.1-RC9",
-    "description": "Assets pour le composant ContentBuilder_ng",
+    "name": "com_contentbuilderng",
+    "version": "6.1.1",
+    "description": "Assets pour le composant ContentBuilderng",
     "assets": [
         {
-            "name": "com_contentbuilder_ng.admin-toolbar",
+            "name": "com_contentbuilderng.admin-toolbar",
             "type": "style",
-            "uri": "com_contentbuilder_ng/css/admin-toolbar.css"
+            "uri": "com_contentbuilderng/css/admin-toolbar.css"
         },
         {
-            "name": "com_contentbuilder_ng.system",
+            "name": "com_contentbuilderng.system",
             "type": "style",
-            "uri": "com_contentbuilder_ng/css/system.css"
+            "uri": "com_contentbuilderng/css/system.css"
         },
         {
-            "name": "com_contentbuilder_ng.contentbuilder_ng",
+            "name": "com_contentbuilderng.contentbuilderng",
             "type": "script",
-            "uri": "com_contentbuilder_ng/js/contentbuilder_ng.js",
+            "uri": "com_contentbuilderng/js/contentbuilderng.js",
             "dependencies": [
                 "core"
             ],
@@ -26,9 +26,9 @@
             }
         },
         {
-            "name": "com_contentbuilder_ng.contentbuilder",
+            "name": "com_contentbuilderng.contentbuilderng",
             "type": "script",
-            "uri": "com_contentbuilder_ng/js/contentbuilder_ng.js",
+            "uri": "com_contentbuilderng/js/contentbuilderng.js",
             "dependencies": [
                 "core"
             ],
@@ -37,20 +37,20 @@
             }
         },
         {
-            "name": "com_contentbuilder_ng.jscolor",
+            "name": "com_contentbuilderng.jscolor",
             "type": "script",
-            "uri": "com_contentbuilder_ng/js/jscolor/jscolor.js",
+            "uri": "com_contentbuilderng/js/jscolor/jscolor.js",
             "dependencies": [
                 "core"
             ]
         },
         {
-            "name": "com_contentbuilder_ng.coloris.css",
+            "name": "com_contentbuilderng.coloris.css",
             "type": "style",
             "uri": "https://cdn.jsdelivr.net/npm/@melloware/coloris@0.25.0/dist/coloris.min.css"
         },
         {
-            "name": "com_contentbuilder_ng.coloris.js",
+            "name": "com_contentbuilderng.coloris.js",
             "type": "script",
             "uri": "https://cdn.jsdelivr.net/npm/@melloware/coloris@0.25.0/dist/umd/coloris.min.js",
             "dependencies": [
