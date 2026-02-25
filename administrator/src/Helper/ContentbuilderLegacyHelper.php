@@ -291,7 +291,7 @@ final class ContentbuilderLegacyHelper
     }
 
     /**
-     * @deprecated 6.1.0 Use RatingHelper::getRating() instead.
+     * @deprecated 6.1.1 Use RatingHelper::getRating() instead.
      */
     public static function getRating($form_id, $record_id, $colRating, $rating_slots, $lang, $rating_allowed, $rating_count, $rating_sum)
     {

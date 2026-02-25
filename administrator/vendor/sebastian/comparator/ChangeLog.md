@@ -44,7 +44,7 @@ All notable changes are documented in this file using the [Keep a CHANGELOG](htt
 
 * Reverted [#113](https://github.com/sebastianbergmann/comparator/pull/113) as it broke backward compatibility
 
-## [6.1.0] - 2024-09-11
+## [6.1.1] - 2024-09-11
 
 ### Added
 
@@ -234,8 +234,8 @@ All notable changes are documented in this file using the [Keep a CHANGELOG](htt
 [6.3.0]: https://github.com/sebastianbergmann/comparator/compare/6.2.1...6.3.0
 [6.2.1]: https://github.com/sebastianbergmann/comparator/compare/6.2.0...6.2.1
 [6.2.0]: https://github.com/sebastianbergmann/comparator/compare/6.1.1...6.2.0
-[6.1.1]: https://github.com/sebastianbergmann/comparator/compare/6.1.0...6.1.1
-[6.1.0]: https://github.com/sebastianbergmann/comparator/compare/6.0.2...6.1.0
+[6.1.1]: https://github.com/sebastianbergmann/comparator/compare/6.1.1...6.1.1
+[6.1.1]: https://github.com/sebastianbergmann/comparator/compare/6.0.2...6.1.1
 [6.0.2]: https://github.com/sebastianbergmann/comparator/compare/6.0.1...6.0.2
 [6.0.1]: https://github.com/sebastianbergmann/comparator/compare/6.0.0...6.0.1
 [6.0.0]: https://github.com/sebastianbergmann/comparator/compare/5.0...6.0.0

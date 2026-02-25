@@ -8,7 +8,7 @@
  * @copyright   Copyright (C) 2011–2026 by XDA+GIL
  * @license     GNU/GPL v2 or later
  * @link        https://breezingforms-ng.vcmb.fr
- * @since       6.1.0
+ * @since       6.1.1
  */
 
 namespace CB\Component\Contentbuilder_ng\Administrator\Helper;

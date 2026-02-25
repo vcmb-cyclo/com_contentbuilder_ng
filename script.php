@@ -702,7 +702,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     );
     $incomingVersionHtml = htmlspecialchars($incomingVersion, ENT_QUOTES, 'UTF-8');
     $this->log('[OK] ContentBuilder NG Version <strong>' . $incomingVersionHtml . '</strong>.');
-    $this->log('Preflight installation method call, parameter : ' . $type . '.');
+//    $this->log('Preflight installation method call, parameter : ' . $type . '.');
     $this->log('[OK] Detected current version in manifest_cache : ' . $this->getCurrentInstalledVersion() . '.');
 
     $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");
@@ -2673,7 +2673,7 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $db = Factory::getContainer()->get(DatabaseInterface::class);
 
     // === LOG POUR DÉBOGAGE ===
-    $this->log('Postflight installation method call, parameter : ' . $type . '.');
+    // $this->log('Postflight installation method call, parameter : ' . $type . '.');
 
     /*
              $db->setQuery("Select id From `#__menu` Where `alias` = 'root'");

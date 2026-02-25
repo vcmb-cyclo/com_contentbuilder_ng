@@ -109,6 +109,7 @@ class ListModel extends BaseListModel
 
         $previousFormId = (int) $app->getSession()->get($option . 'formsd_id', 0);
         $formSwitched = $previousFormId > 0 && $previousFormId !== $this->_id;
+        $filterLanguageStateKey = $this->getScopedListStateKey('filter_language');
 
         // Hard reset when moving from one CB view/form to another.
         // This avoids bringing back any prior filter/sort/pagination state.
@@ -132,6 +133,12 @@ class ListModel extends BaseListModel
             $filter_language  = $app->input->getCmd('list_language_filter', '');
         }
 
+        // Keep language filter state per FE screen (form/layout/menu item).
+        // This avoids leaking language selection between different list screens.
+        if ($app->input->get('list_language_filter', null) === null) {
+            $filter_language = (string) $app->getUserState($filterLanguageStateKey, (string) $filter_language);
+        }
+
         // Joomla 6 native list state takes precedence when present.
         if ($listOrdering !== '') {
             $filter_order = $listOrdering;
@@ -148,6 +155,7 @@ class ListModel extends BaseListModel
         $app->setUserState($option . 'formsd_filter_state', (int) $filter_state);
         $app->setUserState($option . 'formsd_filter_publish', (int) $filter_publish);
         $app->setUserState($option . 'formsd_filter_language', (string) $filter_language);
+        $app->setUserState($filterLanguageStateKey, (string) $filter_language);
         $app->setUserState($option . 'formsd_filter_order', (string) $filter_order);
         $app->setUserState($option . 'formsd_filter_order_Dir', (string) $filter_order_Dir);
 
@@ -292,6 +300,11 @@ class ListModel extends BaseListModel
         return $option . '.liststate.' . $formId . '.' . $layout . '.' . $itemId;
     }
 
+    private function getScopedListStateKey(string $suffix): string
+    {
+        return $this->getPaginationStateKeyPrefix() . '.' . $suffix;
+    }
+
     private function resetStateOnFormSwitch(): void
     {
         $app = Factory::getApplication();
@@ -305,11 +318,6 @@ class ListModel extends BaseListModel
         $app->setUserState($option . 'formsd_filter_language', '');
         $app->setUserState($option . 'formsd_filter_order', '');
         $app->setUserState($option . 'formsd_filter_order_Dir', '');
-
-        // Reset current view pagination state.
-        $paginationStateKey = $this->getPaginationStateKeyPrefix();
-        $app->setUserState($paginationStateKey . '.limit', 0);
-        $app->setUserState($paginationStateKey . '.start', 0);
 
         // Reset current form external filter state.
         $session->clear('com_contentbuilder_ng.filter_signal.' . $this->_id);
