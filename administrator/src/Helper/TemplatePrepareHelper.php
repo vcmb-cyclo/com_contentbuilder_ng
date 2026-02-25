@@ -1,0 +1,39 @@
+<?php
+/**
+ * ContentBuilder NG template prepare helper.
+ *
+ * @package     ContentBuilder NG
+ * @subpackage  Administrator.Helper
+ * @author      XDA+GIL
+ * @copyright   Copyright (C) 2011–2026 by XDA+GIL
+ * @license     GNU/GPL v2 or later
+ * @link        https://breezingforms.vcmb.fr
+ * @since       6.1.0
+ */
+
+namespace CB\Component\Contentbuilder_ng\Administrator\Helper;
+
+// No direct access
+\defined('_JEXEC') or die('Restricted access');
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Log\Log;
+
+final class TemplatePrepareHelper
+{
+    public static function execute(string $prepareCode, string $fieldName, callable $executor): void
+    {
+        if ($prepareCode === '') {
+            return;
+        }
+
+        try {
+            $executor($prepareCode);
+        } catch (\ParseError $e) {
+            $fieldLabel = ucwords(str_replace('_', ' ', trim($fieldName)));
+            $msg = 'Invalid ' . $fieldName . ' code; skipped. Check the ' . $fieldLabel . ' field for stray HTML (editor).';
+            Log::add($msg . ' Error: ' . $e->getMessage(), Log::WARNING, 'com_contentbuilder_ng');
+            Factory::getApplication()->enqueueMessage($msg, 'warning');
+        }
+    }
+}

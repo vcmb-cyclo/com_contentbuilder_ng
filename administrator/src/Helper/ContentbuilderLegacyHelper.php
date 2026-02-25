@@ -1260,15 +1260,13 @@ final class ContentbuilderLegacyHelper
                 $items[$key]['value'] = isset($allow_html[$item['id']]) ? self::cleanString($item['value']) : nl2br(self::allhtmlentities(ContentbuilderHelper::cbinternal($item['value'])));
             }
             $detailsPrepare = $result['details_prepare'] ?? '';
-            if ($detailsPrepare !== '') {
-                try {
-                    eval($detailsPrepare);
-                } catch (\ParseError $e) {
-                    $msg = 'Invalid details_prepare code; skipped. Check the Details Prepare field for stray HTML (editor).';
-                    Log::add($msg . ' Error: ' . $e->getMessage(), Log::WARNING, 'com_contentbuilder_ng');
-                    Factory::getApplication()->enqueueMessage($msg, 'warning');
+            TemplatePrepareHelper::execute(
+                $detailsPrepare,
+                'details_prepare',
+                function (string $prepareCode) use (&$items, &$template, &$raw_items, &$item, $record, $result, $record_id, $elements_allowed, $contentbuilder_ng_form_id): void {
+                    eval($prepareCode);
                 }
-            }
+            );
             foreach ($items as $key => $item) {
                 if (!isset($item['label']) || !isset($item['id']))
                     continue;
@@ -1536,15 +1534,13 @@ final class ContentbuilderLegacyHelper
             $item = null;
             if ($execPrepare) {
                 $editablePrepare = $result['editable_prepare'] ?? '';
-                if ($editablePrepare !== '') {
-                    try {
-                        eval($editablePrepare);
-                    } catch (\ParseError $e) {
-                        $msg = 'Invalid editable_prepare code; skipped. Check the Editable Prepare field for stray HTML (editor).';
-                        Log::add($msg . ' Error: ' . $e->getMessage(), Log::WARNING, 'com_contentbuilder_ng');
-                        Factory::getApplication()->enqueueMessage($msg, 'warning');
+                TemplatePrepareHelper::execute(
+                    $editablePrepare,
+                    'editable_prepare',
+                    function (string $prepareCode) use (&$items, &$template, &$item, $record, $result, $record_id, $elements_allowed, $contentbuilder_ng_form_id): void {
+                        eval($prepareCode);
                     }
-                }
+                );
             }
 
             $the_init_scripts = "\n" . '<script type="text/javascript">' . "\n" . '<!--' . "\n";
