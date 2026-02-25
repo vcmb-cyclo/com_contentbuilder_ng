@@ -41,10 +41,16 @@ class HtmlView extends BaseHtmlView
             return;
         }
 
-        // Récupération des données du modèle
-        $this->items      = (array) ($this->getModel()->getItems() ?? []);
-        $this->pagination = $this->getModel()->getPagination();
-        $this->state      = $this->getModel()->getState();
+        $model = $this->getModel();
+
+        try {
+            // Récupération des données du modèle
+            $this->items      = (array) ($model->getItems() ?? []);
+            $this->pagination = $model->getPagination();
+            $this->state      = $model->getState();
+        } catch (\Throwable $e) {
+            throw new \RuntimeException($e->getMessage(), (int) $e->getCode(), $e);
+        }
 
         // Préparation des filtres et tris (Joomla standard)
         $this->lists['order_Dir'] = (string) $this->state->get('list.direction', 'ASC');
@@ -55,12 +61,6 @@ class HtmlView extends BaseHtmlView
 
         // Ton flag ordering (ton template compare à "ordering" mais toi tu utilises souvent "a.ordering")
         $this->ordering = ($this->lists['order'] === 'a.ordering' || $this->lists['order'] === 'ordering');
-
-        // Vérification des erreurs
-        if (count($errors = $this->get('Errors')))
-        {
-            throw new \Exception(implode('<br>', $errors), 500);
-        }
 
         // Ajout du CSS personnalisé (méthode propre)
         $this->addToolbarIcon();
