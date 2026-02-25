@@ -2386,11 +2386,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             <br />
             <br />
         <?php
+            echo $this->form->renderField('editable_template');
+            //      $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
+            //      echo $editor->display('editable_template', $this->item->editable_template, '100%', '550', '75', '20', true, 'editable_template');
         }
-
-        echo $this->form->renderField('editable_template');
-        //      $editor = Editor::getInstance(Factory::getApplication()->get('editor'));
-        //      echo $editor->display('editable_template', $this->item->editable_template, '100%', '550', '75', '20', true, 'editable_template');
         ?>
         <hr />
         <h3 class="mb-3">

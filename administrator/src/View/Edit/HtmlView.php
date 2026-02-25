@@ -18,7 +18,6 @@ use Joomla\CMS\Router\Route;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Plugin\PluginHelper;
-use Joomla\CMS\Table\Table;
 use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
@@ -62,10 +61,11 @@ class HtmlView extends BaseHtmlView
 
 		if ($subject->edit_by_type) {
 
-			Factory::getContainer()->get(DatabaseInterface::class)->setQuery("Select articles.`article_id` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($subject->form_id) . " And articles.record_id = " . Factory::getContainer()->get(DatabaseInterface::class)->quote($subject->record_id));
-			$article = Factory::getContainer()->get(DatabaseInterface::class)->loadResult();
+				$db = Factory::getContainer()->get(DatabaseInterface::class);
+				$db->setQuery("Select articles.`article_id` From #__contentbuilder_ng_articles As articles, #__content As content Where content.id = articles.article_id And (content.state = 1 Or content.state = 0) And articles.form_id = " . intval($subject->form_id) . " And articles.record_id = " . $db->quote($subject->record_id));
+				$article = $db->loadResult();
 
-			$table = Table::getInstance('content');
+				$table = new \Joomla\CMS\Table\Content($db);
 
 			// required for pagebreak plugin
 			Factory::getApplication()->input->set('view', 'article');

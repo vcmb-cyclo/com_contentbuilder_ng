@@ -19,7 +19,6 @@ use Joomla\Registry\Registry;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Plugin\PluginHelper;
-use Joomla\CMS\Table\Table;
 use Joomla\CMS\Event\Content\ContentPrepareEvent;
 use Joomla\CMS\MVC\Model\ListModel as BaseListModel;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderHelper;
@@ -785,7 +784,7 @@ class ListModel extends BaseListModel
                     // Plugin call
                     $limitstart = (int) $this->getState('list.start');
                     $start      = Factory::getApplication()->input->getInt('start', 0);
-                    $table = Table::getInstance('content');
+                    $table = new \Joomla\CMS\Table\Content($this->getDatabase());
                     $registry = new Registry;
                     $registry->loadString($table->attribs ?? '');
                     PluginHelper::importPlugin('content');

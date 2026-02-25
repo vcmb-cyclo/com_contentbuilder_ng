@@ -14,6 +14,7 @@ namespace CB\Component\Contentbuilder_ng\Site\Model;
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Application\ApplicationHelper;
+use Joomla\CMS\Cache\CacheControllerFactoryInterface;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Utilities\ArrayHelper;
@@ -29,7 +30,6 @@ use Joomla\CMS\Mail\MailerFactoryInterface;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Router\Route;
-use Joomla\CMS\Table\Table;
 use Joomla\CMS\User\User;
 use Joomla\CMS\User\UserHelper;
 use Joomla\CMS\Event\Model\PrepareFormEvent;
@@ -60,6 +60,22 @@ class EditModel extends BaseDatabaseModel
     private $_page_title = '';
 
     private $_page_heading = '';
+
+    private function cleanComponentCaches(): void
+    {
+        $cacheFactory = Factory::getContainer()->get(CacheControllerFactoryInterface::class);
+        $cacheBase = Factory::getApplication()->getConfig()->get('cache_path', JPATH_SITE . '/cache');
+
+        foreach (array('com_content', 'com_contentbuilder_ng') as $group) {
+            $cacheFactory->createCacheController(
+                'callback',
+                array(
+                    'defaultgroup' => $group,
+                    'cachebase' => $cacheBase,
+                )
+            )->clean();
+        }
+    }
 
     public function getItem($pk = null)
     {
@@ -325,7 +341,7 @@ class EditModel extends BaseDatabaseModel
 
                         if (is_array($article)) {
 
-                            $table = Table::getInstance('content');
+                            $table = new \Joomla\CMS\Table\Content($this->getDatabase());
                             $loaded = $table->load($article['id']);
                             if ($loaded) {
                                 // Convert to stdClass before adding other data.
@@ -1558,8 +1574,8 @@ var contentbuilder_ng = new function(){
                     }
 
                     if ((!Factory::getApplication()->input->getCmd('record_id', 0) && $data->email_notifications) || (Factory::getApplication()->input->getCmd('record_id', 0) && $data->email_update_notifications)) {
-                        $from = $MailFrom = Factory::getConfig()->get('mailfrom');
-                        $fromname = Factory::getConfig()->get('fromname');
+                        $from = $MailFrom = Factory::getApplication()->getConfig()->get('mailfrom');
+                        $fromname = Factory::getApplication()->getConfig()->get('fromname');
 
 
                         $mailer = Factory::getContainer()->get(MailerFactoryInterface::class)->createMailer();
@@ -1795,10 +1811,7 @@ var contentbuilder_ng = new function(){
             }
         }
 
-        $cache = Factory::getCache('com_content');
-        $cache->clean();
-        $cache = Factory::getCache('com_contentbuilder_ng');
-        $cache->clean();
+        $this->cleanComponentCaches();
 
         return false;
     }
@@ -1827,7 +1840,7 @@ var contentbuilder_ng = new function(){
         // else execute the registration
         Factory::getApplication()->getLanguage()->load('com_users', JPATH_SITE);
 
-        $config = Factory::getConfig();
+        $config = Factory::getApplication()->getConfig();
         $params = ComponentHelper::getParams('com_users');
 
         // Initialise the table with User.
@@ -2144,7 +2157,7 @@ var contentbuilder_ng = new function(){
                                 foreach ($articles as $article) {
                                     $article_items[] = $this->getDatabase()->quote('com_content.article.' . $article);
                                     $article_ids[] = $article;
-                                    $table = Table::getInstance('content');
+                                    $table = new \Joomla\CMS\Table\Content($this->getDatabase());
                                     // Trigger the onContentBeforeDelete event.
                                     if ($table->load($article)) {
                                         $dispatcher = Factory::getApplication()->getDispatcher();
@@ -2181,10 +2194,7 @@ var contentbuilder_ng = new function(){
             }
         }
 
-        $cache = Factory::getCache('com_content');
-        $cache->clean();
-        $cache = Factory::getCache('com_contentbuilder_ng');
-        $cache->clean();
+        $this->cleanComponentCaches();
     }
 
     function change_list_states()
@@ -2270,10 +2280,7 @@ var contentbuilder_ng = new function(){
             $this->getDatabase()->execute();
         }
 
-        $cache = Factory::getCache('com_content');
-        $cache->clean();
-        $cache = Factory::getCache('com_contentbuilder_ng');
-        $cache->clean();
+        $this->cleanComponentCaches();
     }
 
     function change_list_publish()
@@ -2345,10 +2352,7 @@ var contentbuilder_ng = new function(){
         if ($select_ids) {
             $affected_articles = explode(',', $this->getDatabase()->loadResult());
         }
-        $cache = Factory::getCache('com_content');
-        $cache->clean();
-        $cache = Factory::getCache('com_contentbuilder_ng');
-        $cache->clean();
+        $this->cleanComponentCaches();
 
         // Trigger the onContentChangeState event.
         $dispatcher = Factory::getApplication()->getDispatcher();

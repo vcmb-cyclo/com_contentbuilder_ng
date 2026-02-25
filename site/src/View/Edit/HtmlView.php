@@ -21,8 +21,11 @@ namespace CB\Component\Contentbuilder_ng\Site\View\Edit;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Router\Route;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
+use Joomla\Database\DatabaseInterface;
+use Joomla\Registry\Registry;
 
 class HtmlView extends BaseHtmlView
 {
@@ -53,6 +56,173 @@ class HtmlView extends BaseHtmlView
     protected $state;
     protected $item;
     protected $form;
+
+    private function toUnicodeSlug(string $string): string
+    {
+        $str = preg_replace('/\xE3\x80\x80/', ' ', $string) ?? $string;
+        $str = str_replace('-', ' ', $str);
+        $str = preg_replace('#[:\#\*"@+=;!&\.%()\]\/\'\\\\|\[]#', ' ', $str) ?? $str;
+        $str = str_replace('?', '', $str);
+        $str = trim(strtolower($str));
+        $str = preg_replace('#\x20+#', '-', $str) ?? $str;
+
+        return $str;
+    }
+
+    private function rewriteSlugLinks(string $markup): string
+    {
+        if (strpos($markup, 'contentbuilder_ng_slug_used') === false) {
+            return $markup;
+        }
+
+        $matches = array(array(), array());
+        preg_match_all('/\"([^\"]*contentbuilder_ng_slug_used[^\"]*)\"/i', $markup, $matches);
+
+        foreach ($matches[1] as $match) {
+            $sub = '';
+            $parameters = explode('?', $match, 2);
+            if (count($parameters) === 2) {
+                $parameters[1] = str_replace('&amp;', '&', $parameters[1]);
+                foreach (explode('&', $parameters[1]) as $par) {
+                    $keyval = explode('=', $par, 2);
+                    $key = $keyval[0] ?? '';
+                    $value = $keyval[1] ?? '';
+                    if (
+                        $key !== ''
+                        && $key !== 'option'
+                        && $key !== 'id'
+                        && $key !== 'record_id'
+                        && $key !== 'view'
+                        && $key !== 'catid'
+                        && $key !== 'Itemid'
+                        && $key !== 'lang'
+                    ) {
+                        $sub .= '&' . $key . '=' . $value;
+                    }
+                }
+            }
+
+            $replacement = Route::_(
+                'index.php?option=com_contentbuilder_ng&view=details&id='
+                . Factory::getApplication()->input->getInt('id')
+                . '&record_id=' . Factory::getApplication()->input->getCmd('record_id', '')
+                . '&Itemid=' . Factory::getApplication()->input->getInt('Itemid', 0)
+                . $sub
+            );
+            $markup = str_replace($match, $replacement, $markup);
+        }
+
+        return $markup;
+    }
+
+    private function applyEditByTypeRendering(): void
+    {
+        if (!is_object($this->item) || !$this->edit_by_type) {
+            return;
+        }
+
+        $template = (string) ($this->item->template ?? $this->tpl ?? '');
+        if ($template === '') {
+            return;
+        }
+
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $db->setQuery(
+            'Select articles.`article_id`'
+            . ' From #__contentbuilder_ng_articles As articles, #__content As content'
+            . ' Where content.id = articles.article_id'
+            . ' And (content.state = 1 Or content.state = 0)'
+            . ' And articles.form_id = ' . (int) $this->id
+            . ' And articles.record_id = ' . $db->quote((string) $this->record_id)
+        );
+        $articleId = (int) $db->loadResult();
+
+        $table = new \Joomla\CMS\Table\Content($db);
+        if ($articleId > 0) {
+            $table->load($articleId);
+        }
+
+        // Required for content plugins that expect article context/page state.
+        Factory::getApplication()->input->set('view', 'article');
+
+        $table->cbrecord = $this->item;
+        $table->text = $template;
+
+        $alias = $table->alias
+            ? $this->toUnicodeSlug((string) $table->alias)
+            : $this->toUnicodeSlug((string) ($this->item->page_title ?? $this->page_title));
+        if (trim(str_replace('-', '', $alias)) === '') {
+            $alias = Factory::getDate()->format('%Y-%m-%d-%H-%M-%S');
+        }
+        $table->slug = ($articleId > 0 ? $articleId : 0) . ':' . $alias . ':contentbuilder_ng_slug_used';
+
+        $registry = new Registry();
+        $registry->loadString((string) ($table->attribs ?? ''));
+
+        PluginHelper::importPlugin('content', 'breezingforms');
+
+        $limitstart = Factory::getApplication()->input->getInt('limitstart', 0);
+        $start = Factory::getApplication()->input->getInt('start', 0);
+        $page = $limitstart ? $limitstart : $start;
+        $dispatcher = Factory::getApplication()->getDispatcher();
+
+        $dispatcher->dispatch(
+            'onContentPrepare',
+            new \Joomla\CMS\Event\Content\ContentPrepareEvent('onContentPrepare', [
+                'context' => 'com_content.article',
+                'subject' => $table,
+                'params' => $registry,
+                'page' => $page,
+            ])
+        );
+
+        $eventResult = $dispatcher->dispatch(
+            'onContentAfterTitle',
+            new \Joomla\CMS\Event\Content\AfterTitleEvent('onContentAfterTitle', [
+                'context' => 'com_content.article',
+                'subject' => $table,
+                'params' => $registry,
+                'page' => $page,
+            ])
+        );
+        $results = $eventResult->getArgument('result') ?: [];
+        $this->event->afterDisplayTitle = trim(implode("\n", $results));
+
+        $eventResult = $dispatcher->dispatch(
+            'onContentBeforeDisplay',
+            new \Joomla\CMS\Event\Content\BeforeDisplayEvent('onContentBeforeDisplay', [
+                'context' => 'com_content.article',
+                'subject' => $table,
+                'params' => $registry,
+                'page' => $page,
+            ])
+        );
+        $results = $eventResult->getArgument('result') ?: [];
+        $this->event->beforeDisplayContent = trim(implode("\n", $results));
+
+        $eventResult = $dispatcher->dispatch(
+            'onContentAfterDisplay',
+            new \Joomla\CMS\Event\Content\AfterDisplayEvent('onContentAfterDisplay', [
+                'context' => 'com_content.article',
+                'subject' => $table,
+                'params' => $registry,
+                'page' => $page,
+            ])
+        );
+        $results = $eventResult->getArgument('result') ?: [];
+        $this->event->afterDisplayContent = trim(implode("\n", $results));
+
+        $processedTemplate = (string) ($table->text ?? '');
+        $processedTemplate = $this->rewriteSlugLinks($processedTemplate);
+        $processedTemplate = preg_replace('#<hr\s+id=("|\')system-readmore("|\')\s*\/*>#i', '', $processedTemplate) ?? $processedTemplate;
+
+        $this->item->template = $processedTemplate;
+        $this->tpl = $processedTemplate;
+
+        if (isset($table->toc)) {
+            $this->toc = $this->rewriteSlugLinks((string) $table->toc);
+        }
+    }
 
     private function getFallbackEditThemeCss(): string
     {
@@ -129,6 +299,8 @@ CSS;
                 if ($this->record_id === 0 && property_exists($this->item, 'record_id')) {
                     $this->record_id = (int) $this->item->record_id;
                 }
+
+                $this->applyEditByTypeRendering();
 
                 if ($this->theme_css === '' && $this->theme_js === '' && property_exists($this->item, 'theme_plugin')) {
                     $themePlugin = (string) ($this->item->theme_plugin ?? '');

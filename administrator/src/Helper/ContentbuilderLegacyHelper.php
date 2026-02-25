@@ -23,7 +23,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Log\Log;
-use Joomla\CMS\Table\Table;
+use Joomla\CMS\Cache\CacheControllerFactoryInterface;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
@@ -34,6 +34,16 @@ use CB\Component\Contentbuilder_ng\Administrator\Helper\Logger;
 
 final class ContentbuilderLegacyHelper
 {
+    private static function cleanComponentCaches(array $groups, array $options = []): void
+    {
+        $cacheFactory = Factory::getContainer()->get(CacheControllerFactoryInterface::class);
+        foreach ($groups as $group) {
+            $cacheOptions = $options;
+            $cacheOptions['defaultgroup'] = $group;
+            $cacheFactory->createCacheController('callback', $cacheOptions)->clean();
+        }
+    }
+
     private static function startsWithIgnoreCase(string $value, string $prefix): bool
     {
         return strncasecmp($value, $prefix, strlen($prefix)) === 0;
@@ -112,9 +122,9 @@ final class ContentbuilderLegacyHelper
         $identity = Factory::getApplication()->getIdentity();
         $now = Factory::getDate();
         $replacements = [
-            '{userid}' => (string) $identity->get('id', 0),
-            '{username}' => (string) $identity->get('username', 'anonymous'),
-            '{name}' => (string) $identity->get('name', 'Anonymous'),
+            '{userid}' => (string) ((int) ($identity->id ?? 0)),
+            '{username}' => (string) ($identity->username ?? 'anonymous'),
+            '{name}' => (string) ($identity->name ?? 'Anonymous'),
             '{date}' => (string) $now->toSql(),
             '{time}' => (string) $now->format('H:i:s'),
             '{datetime}' => (string) $now->format('Y-m-d H:i:s'),
@@ -381,7 +391,8 @@ final class ContentbuilderLegacyHelper
     public static function applyItemWrappers($contentbuilder_ng_form_id, array $items, $form)
     {
 
-        $article = Table::getInstance('content');
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $article = new \Joomla\CMS\Table\Content($db);
         $registry = null;
         $onContentPrepare = '';
 
@@ -389,7 +400,6 @@ final class ContentbuilderLegacyHelper
         $registry = new Registry;
         $registry->loadString('{}');
 
-        $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select reference_id, item_wrapper, wordwrap, `label`, `options` From #__contentbuilder_ng_elements Where published = 1 And form_id = " . intval($contentbuilder_ng_form_id));
         $wrappers = $db->loadAssocList();
         foreach ($wrappers as $wrapper) {
@@ -2217,7 +2227,7 @@ final class ContentbuilderLegacyHelper
 
             // Trigger the onContentBeforeSave event.
             $isNew = true;
-            $table = Table::getInstance('content');
+            $table = new \Joomla\CMS\Table\Content($db);
 
             if ($article > 0) {
                 $table->load($article);
@@ -2446,7 +2456,7 @@ final class ContentbuilderLegacyHelper
         }
 
         if ($article) {
-            $row = Table::getInstance('content');
+            $row = new \Joomla\CMS\Table\Content($db);
             if ($row->load($article)) {
                 $row->reorder('catid = ' . (int) $form['default_category'] . ' AND state >= 0');
             }
@@ -2454,15 +2464,15 @@ final class ContentbuilderLegacyHelper
 
         // cleaning cache
         // Trigger the onContentCleanCache event.
-        $conf = Factory::getConfig();
+        $conf = Factory::getApplication()->getConfig();
         $options = array(
             'defaultgroup' => 'com_content',
             'cachebase' => $conf->get('cache_path', JPATH_SITE . '/cache')
         );
-        $cache = Factory::getCache('com_content');
-        $cache->clean();
-        $cache = Factory::getCache('com_contentbuilder_ng');
-        $cache->clean();
+        self::cleanComponentCaches(
+            array('com_content', 'com_contentbuilder_ng'),
+            array('cachebase' => $options['cachebase'])
+        );
 
         $dispatcher = Factory::getApplication()->getDispatcher();
         $dispatcher->dispatch('onContentCleanCache', new \Joomla\CMS\Event\Model\AfterCleanCacheEvent('onContentCleanCache', [
@@ -2473,7 +2483,7 @@ final class ContentbuilderLegacyHelper
 
         //// trigger onContentAfterSave event
         $isNew = true;
-        $table = Table::getInstance('content');
+        $table = new \Joomla\CMS\Table\Content($db);
 
         if ($article > 0) {
             $table->load($article);

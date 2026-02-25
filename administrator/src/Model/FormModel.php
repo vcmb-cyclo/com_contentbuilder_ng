@@ -25,7 +25,6 @@ use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
-use Joomla\CMS\Table\Table;
 use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
@@ -1218,7 +1217,7 @@ class FormModel extends AdminModel
                 $article_items = array();
                 foreach ($articles as $article) {
                     $article_items[] = $db->quote('com_content.article.' . $article);
-                    $table = Table::getInstance('content');
+                    $table = new \Joomla\CMS\Table\Content($db);
 
                     // Trigger the onContentBeforeDelete event.
                     if ($table->load($article)) {

@@ -773,9 +773,9 @@ class contentbuilder_ng_com_contentbuilder_ng
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $insert_id = 0;
         $identity = Factory::getApplication()->getIdentity();
-        $user_id = (int) $identity->get('id', 0);
-        $username = trim((string) $identity->get('username', ''));
-        $user_full_name = trim((string) $identity->get('name', ''));
+        $user_id = (int) ($identity->id ?? 0);
+        $username = trim((string) ($identity->username ?? ''));
+        $user_full_name = trim((string) ($identity->name ?? ''));
         $names = array();
 
         foreach ($this->elements as $element) {
