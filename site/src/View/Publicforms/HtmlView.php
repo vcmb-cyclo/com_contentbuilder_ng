@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder NG
  * @author      Markus Bopp / XDA+GIL
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL 
  * @license     GNU/GPL
  */
@@ -14,31 +14,35 @@ namespace CB\Component\Contentbuilder_ng\Site\View\PublicForms;
 
 use Joomla\CMS\HTML\HTMLHelper;
 use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilder_ng\Site\Model\PublicformsModel;
 
 class HtmlView extends BaseHtmlView
 {
     function display($tpl = null)
     {
+        /** @var PublicformsModel $model */
+        $model = $this->getModel();
+
         // Get data from the model
-        $items = $this->get('Data');
-        $perms = $this->get('Permissions');
-        $page_heading = $this->get('ShowPageHeading');
-        $introtext = $this->get('ShowIntrotext');
-        $show_tags = $this->get('ShowTags');
-        $show_id = $this->get('ShowId');
-        $show_permissions = $this->get('ShowPermissions');
-        $show_permissions_new = $this->get('ShowPermissionsNew');
-        $show_permissions_edit = $this->get('ShowPermissionsEdit');
-        $pagination = $this->get('Pagination');
-        $tags = $this->get('Tags');
+        $items = $model->getData();
+        $perms = $model->getPermissions();
+        $page_heading = $model->getShowPageHeading();
+        $introtext = $model->getShowIntrotext();
+        $show_tags = $model->getShowTags();
+        $show_id = $model->getShowId();
+        $show_permissions = $model->getShowPermissions();
+        $show_permissions_new = $model->getShowPermissionsNew();
+        $show_permissions_edit = $model->getShowPermissionsEdit();
+        $pagination = $model->getPagination();
+        $tags = $model->getTags();
 
-        $state = $this->get('state');
+        $state = $model->getState();
 
-        $lists['order_Dir'] = $state->get('forms_filter_order_Dir');
-        $lists['order'] = $state->get('forms_filter_order');
-        $lists['state'] = HTMLHelper::_('grid.state', $state->get('forms_filter_state'));
-        $lists['limitstart'] = $state->get('limitstart');
-        $lists['filter_tag'] = $state->get('forms_filter_tag');
+        $lists['order_Dir'] = $state?->get('forms_filter_order_Dir') ?? 'desc';
+        $lists['order'] = $state?->get('forms_filter_order') ?? '`name`';
+        $lists['state'] = HTMLHelper::_('grid.state', $state?->get('forms_filter_state') ?? '');
+        $lists['limitstart'] = $state?->get('limitstart') ?? 0;
+        $lists['filter_tag'] = $state?->get('forms_filter_tag') ?? '';
 
         $ordering = ($lists['order'] == 'ordering');
 

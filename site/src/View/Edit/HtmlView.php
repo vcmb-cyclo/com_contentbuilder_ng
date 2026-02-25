@@ -10,7 +10,7 @@
  * @author      Xavier DANO
  * @copyright   Copyright (C) 2011–2026 by XDA+GIL
  * @license     GNU/GPL v2 or later
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 
@@ -26,6 +26,7 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
+use CB\Component\Contentbuilder_ng\Site\Model\EditModel;
 
 class HtmlView extends BaseHtmlView
 {
@@ -441,6 +442,7 @@ CSS;
 
     public function display($tpl = null): void
     {
+        /** @var EditModel|null $model */
         $model = $this->getModel();
         if ($model) {
             $this->state = method_exists($model, 'getState') ? $model->getState() : null;

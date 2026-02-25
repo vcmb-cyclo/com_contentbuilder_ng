@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder NG
  * @author      Markus Bopp / XDA+GIL
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @license     GNU/GPL
 */
 
@@ -240,7 +240,7 @@ $formatBytes = static function (int $bytes): string {
     <div class="cb-about-intro-content">
         <p class="mb-0">
             <?php echo Text::_('COM_CONTENTBUILDER_NG_ABOUT_DESC'); ?>
-            <a href="https://breezingforms.vcmb.fr" target="_blank" rel="noopener noreferrer">VCMB migration</a>
+            <a href="https://breezingforms-ng.vcmb.fr" target="_blank" rel="noopener noreferrer">VCMB migration</a>
         </p>
     </div>
 </div>

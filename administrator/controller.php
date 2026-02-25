@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder NG
  * @author      Markus Bopp / XDA+GIL
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @copyright   (C) 2026 by XDA+GIL
  * @license     GNU/GPL
 */
@@ -27,7 +27,7 @@ class ContentbuilderController extends BaseController
         parent::display();
 
 	    if(Factory::getApplication()->input->get('market', '', 'string') == 'true'){
-            Factory::getApplication()->redirect('https://breezingforms.vcmb.fr');
+            Factory::getApplication()->redirect('https://breezingforms-ng.vcmb.fr');
         }
     }
 

@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder NG
  * @author      XDA+GIL
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @license     GNU/GPL
  */
 

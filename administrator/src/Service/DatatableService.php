@@ -4,7 +4,7 @@
  * Service servant à créer la table décrite par Storage.
  * @package     ContentBuilder NG
  * @author      Xavier DANO
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @copyright   (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */

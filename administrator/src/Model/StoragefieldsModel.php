@@ -29,7 +29,7 @@ class StoragefieldsModel extends ListModel
      */
     private int $storageId = 0;
 
-    public function __construct($config = [], MVCFactoryInterface $factory = null)
+    public function __construct($config = [], ?MVCFactoryInterface $factory = null)
     {
         $this->filter_fields = [
             'id',
@@ -199,7 +199,7 @@ class StoragefieldsModel extends ListModel
         return (bool) $table->move($direction, 'storage_id = ' . $storageId);
     }
 
-    public function saveorder(array $pks = null, array $order = null): bool
+    public function saveorder(?array $pks = null, ?array $order = null): bool
     {
         $storageId = (int) $this->getState('storage.id', 0);
         if (!$storageId) {

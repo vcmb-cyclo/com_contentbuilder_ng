@@ -3,7 +3,7 @@
  * Default page.
  * @package     ContentBuilder NG
  * @author      Xavier DANO
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @license     GNU/GPL
 */
 

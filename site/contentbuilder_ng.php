@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder NG
  * @author      Markus Bopp / XDA+GIL
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
@@ -12,7 +12,9 @@
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Application\SiteApplication;
 
+/** @var SiteApplication $app */
 $app = Factory::getApplication();
 $input = $app->input;
 $session = $app->getSession();
@@ -155,4 +157,4 @@ if ($task === '') {
 }
 
 $component = $app->bootComponent('com_contentbuilder_ng');
-$component->getDispatcher($input)->dispatch();
+$component->getDispatcher($app)->dispatch();

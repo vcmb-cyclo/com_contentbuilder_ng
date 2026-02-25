@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder NG
  * @author      Markus Bopp / XDA+GIL
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @license     GNU/GPL
 */
 
@@ -12,13 +12,17 @@ namespace CB\Component\Contentbuilder_ng\Site\View\Ajax;
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use CB\Component\Contentbuilder_ng\Administrator\View\Contentbuilder_ng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilder_ng\Site\Model\AjaxModel;
 
 class HtmlView extends BaseHtmlView
 {
     function display($tpl = null)
     {
+        /** @var AjaxModel $model */
+        $model = $this->getModel();
+
         // Get data from the model
-        $data = $this->get('Data');
+        $data = $model->getData();
         $this->data = $data;
         parent::display($tpl);
     }

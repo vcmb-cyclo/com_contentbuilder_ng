@@ -2,7 +2,7 @@
 /**
  * @package     ContentBuilder NG
  * @author      Markus Bopp / XDA+GIL
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @license     GNU/GPL
 */
 
@@ -12,12 +12,14 @@ namespace CB\Component\Contentbuilder_ng\Site\Controller;
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Application\SiteApplication;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\Database\DatabaseInterface;
 use CB\Component\Contentbuilder_ng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilder_ng\Site\Model\EditModel;
 
 class ListController extends BaseController
 {
@@ -59,6 +61,7 @@ class ListController extends BaseController
             return;
         }
 
+        /** @var EditModel|null $model */
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
             ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
@@ -132,6 +135,7 @@ class ListController extends BaseController
             '_fe'
         );
 
+        /** @var EditModel|null $model */
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
             ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
@@ -207,6 +211,7 @@ class ListController extends BaseController
             '_fe'
         );
 
+        /** @var EditModel|null $model */
         $model = $this->getModel('Edit', 'Site', ['ignore_request' => true])
             ?: $this->getModel('Edit', 'Contentbuilder_ng', ['ignore_request' => true]);
         if (!$model) {
@@ -276,6 +281,7 @@ class ListController extends BaseController
 
     public function display($cachable = false, $urlparams = [])
     {
+        /** @var SiteApplication $app */
         $app   = Factory::getApplication();
 
         // Si tu gardes le suffixe pour compat legacy :
@@ -331,6 +337,7 @@ class ListController extends BaseController
 
     private function resolveListState(): array
     {
+        /** @var SiteApplication $app */
         $app = Factory::getApplication();
         $option = 'com_contentbuilder_ng';
         $list = (array) $this->input->get('list', [], 'array');
@@ -372,6 +379,7 @@ class ListController extends BaseController
 
     private function getPaginationStateKeyPrefix(): string
     {
+        /** @var SiteApplication $app */
         $app = Factory::getApplication();
         $option = 'com_contentbuilder_ng';
 
@@ -452,7 +460,9 @@ class ListController extends BaseController
         $until = (int) $this->input->getInt('cb_preview_until', 0);
         $sig = (string) $this->input->getString('cb_preview_sig', '');
         $noticeKey = 'com_contentbuilder_ng.preview_notice.' . hash('sha256', $formId . '|' . $until . '|' . $sig);
-        $session = $this->app->getSession();
+        /** @var SiteApplication $app */
+        $app = Factory::getApplication();
+        $session = $app->getSession();
 
         if ($session->get($noticeKey, false)) {
             return;

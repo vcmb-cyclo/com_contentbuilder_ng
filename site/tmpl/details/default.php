@@ -3,7 +3,7 @@
 /**
  * @package     ContentBuilder NG
  * @author      Markus Bopp
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @copyright   Copyright (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */

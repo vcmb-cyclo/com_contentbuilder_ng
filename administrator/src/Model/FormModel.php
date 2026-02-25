@@ -10,7 +10,7 @@
  * @author      Markus Bopp / XDA+GIL
  * @copyright   Copyright (C) 2011–2026 by XDA+GIL
  * @license     GNU/GPL v2 or later
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @since       6.0.0  Joomla 6 compatibility rewrite.
  */
 

@@ -3,7 +3,7 @@
 /**
  * @package     ContentBuilder NG
  * @author      XDA+GIL
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @copyright   (C) 2026 by XDA+GIL
  * @license     GNU/GPL
  */
@@ -42,7 +42,14 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
   public function __construct()
   {
     // Logger personnalisé
-    $logPath = Factory::getApplication()->getConfig()->get('log_path') ?: JPATH_ROOT . '/logs';
+    $app = Factory::getApplication();
+    $logPath = '';
+    if (is_object($app) && method_exists($app, 'get')) {
+      $logPath = (string) $app->get('log_path', '');
+    }
+    if ($logPath === '') {
+      $logPath = JPATH_ROOT . '/logs';
+    }
     if (!Folder::exists($logPath)) {
       Folder::create($logPath);
     }
@@ -114,7 +121,10 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
 
     if ($timezoneName === '') {
       try {
-        $timezoneName = trim((string) Factory::getApplication()->getConfig()->get('offset', ''));
+        $app = Factory::getApplication();
+        if (is_object($app) && method_exists($app, 'get')) {
+          $timezoneName = trim((string) $app->get('offset', ''));
+        }
       } catch (\Throwable) {
         $timezoneName = '';
       }
@@ -667,9 +677,9 @@ class com_contentbuilder_ngInstallerScript extends InstallerScript
     $db = Factory::getContainer()->get(DatabaseInterface::class);
     $incomingVersion = $this->getIncomingPackageVersion($parent);
     $installerInfo = $this->getInstallerPackageInfo($parent);
-    $timezoneName = (string) Factory::getApplication()->get('offset', '');
+    $timezoneName = (string) Factory::getApplication()->get('offset', 'UTC');
     if ($timezoneName === '') {
-      $timezoneName = (string) Factory::getApplication()->getConfig()->get('offset', 'UTC');
+      $timezoneName = 'UTC';
     }
 
     try {

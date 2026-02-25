@@ -4,7 +4,7 @@
  * @version     6.0
  * @package     ContentBuilder NG
  * @author      Xavier DANO / XDA+GIL
- * @link        https://breezingforms.vcmb.fr
+ * @link        https://breezingforms-ng.vcmb.fr
  * @license     GNU/GPL
  */
 
