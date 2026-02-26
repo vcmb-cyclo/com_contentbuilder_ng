@@ -199,6 +199,19 @@ class HtmlView extends BaseHtmlView
 CSS;
     }
 
+    private function getBlinkCss(): string
+    {
+        return <<<'CSS'
+.cb-prepare-blink{
+    animation:cb-blink 0.8s steps(1,start) infinite;
+}
+
+@keyframes cb-blink{
+    50%{opacity:0}
+}
+CSS;
+    }
+
     private function toUnicodeSlug(string $string): string
     {
         // Keep legacy slug behavior while decoupling from ContentbuilderLegacyHelper.
@@ -391,9 +404,11 @@ CSS;
 		$dispatcher->dispatch('onContentTemplateCss', $eventObj);
 		$results = $eventObj->getArgument('result') ?: [];
 		$this->theme_css = trim(implode('', $results));
-		if ($this->theme_css === '' && ($fallbackTheme || $themePlugin === 'joomla6')) {
-			$this->theme_css = $this->getFallbackDetailsThemeCss();
-		}
+        if ($this->theme_css === '' && ($fallbackTheme || $themePlugin === 'joomla6')) {
+            $this->theme_css = $this->getFallbackDetailsThemeCss();
+        }
+
+        $this->theme_css .= $this->getBlinkCss();
 
 		$eventObj = new \Joomla\Event\Event('onContentTemplateJavascript', ['theme' => $themePlugin]);
 		$dispatcher->dispatch('onContentTemplateJavascript', $eventObj);

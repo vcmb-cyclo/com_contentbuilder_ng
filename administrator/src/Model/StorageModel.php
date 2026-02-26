@@ -889,6 +889,96 @@ class StorageModel extends AdminModel
         return $retval ?: false;
     }
 
+    /**
+     * Legacy compatibility helper used by csv_file_to_table().
+     * Creates a storage field definition if missing and ensures the data table column exists.
+     *
+     * @param array<string,mixed> $data
+     */
+    private function store(array $data): string
+    {
+        $storageId = (int) ($data['id'] ?? $this->storageId);
+        if ($storageId <= 0) {
+            throw new \RuntimeException('Missing storage id for CSV import field creation');
+        }
+
+        $fieldname = trim((string) ($data['fieldname'] ?? ''));
+        if ($fieldname === '') {
+            throw new \RuntimeException('Missing field name for CSV import');
+        }
+
+        $fieldtitle = trim((string) ($data['fieldtitle'] ?? $fieldname));
+        $isGroup = (int) (!empty($data['is_group']));
+        $groupDef = (string) ($data['group_definition'] ?? '');
+
+        $newfieldname = preg_replace("/[^a-zA-Z0-9_\s]/isU", "_", $fieldname);
+        $newfieldname = str_replace([' ', "\n", "\r", "\t"], ['_'], (string) $newfieldname);
+        $newfieldname = preg_replace("/^([0-9\s])/isU", "field$1$2", (string) $newfieldname);
+        $newfieldname = (string) ($newfieldname === '' ? ('field' . mt_rand(0, mt_getrandmax())) : $newfieldname);
+
+        $newfieldtitle = $fieldtitle !== '' ? $fieldtitle : $newfieldname;
+
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+        $db->setQuery(
+            "SELECT id FROM #__contentbuilderng_storage_fields"
+            . " WHERE storage_id = " . (int) $storageId
+            . " AND `name` = " . $db->quote($newfieldname)
+        );
+        $fieldId = (int) $db->loadResult();
+
+        if ($fieldId <= 0) {
+            $db->setQuery(
+                "SELECT COALESCE(MAX(ordering), 0) + 1"
+                . " FROM #__contentbuilderng_storage_fields"
+                . " WHERE storage_id = " . (int) $storageId
+            );
+            $ordering = (int) $db->loadResult();
+
+            $db->setQuery(
+                "INSERT INTO #__contentbuilderng_storage_fields"
+                . " (ordering, storage_id, `name`, `title`, `is_group`, `group_definition`)"
+                . " VALUES ("
+                . (int) $ordering . ", "
+                . (int) $storageId . ", "
+                . $db->quote($newfieldname) . ", "
+                . $db->quote($newfieldtitle) . ", "
+                . (int) $isGroup . ", "
+                . $db->quote($groupDef)
+                . ")"
+            );
+            $db->execute();
+        }
+
+        if ($this->target_table !== '') {
+            $tableColumns = [];
+            $prefixedTableName = $db->replacePrefix('#__' . $this->target_table);
+
+            try {
+                $tableColumns = $db->getTableColumns($prefixedTableName, true);
+            } catch (\Throwable $e) {
+                Logger::exception($e);
+            }
+
+            $columnExists = false;
+            if (is_array($tableColumns) && !empty($tableColumns)) {
+                foreach (array_keys($tableColumns) as $columnName) {
+                    if (strtolower((string) $columnName) === strtolower($newfieldname)) {
+                        $columnExists = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$columnExists) {
+                $db->setQuery("ALTER TABLE `#__" . $this->target_table . "` ADD `" . $newfieldname . "` TEXT NULL");
+                $db->execute();
+            }
+        }
+
+        return $db->quoteName($newfieldname);
+    }
+
     private function convertSpreadsheetFileToCsv(string $sourceFile, string $delimiter = ','): ?string
     {
         try {

@@ -20,6 +20,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 $versionValue = (string) ($this->componentVersion ?: Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
 $creationDateValue = (string) ($this->componentCreationDate ?: Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
 $authorValue = (string) ($this->componentAuthor ?: Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
+$copyrightValue = (string) ($this->componentCopyright ?: Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
 $licenseValue = trim((string) $this->componentLicense);
 $genericLicenseValues = ['gpl', 'gnu/gpl', 'gnu/gpl v2 or later'];
 if ($licenseValue === '' || in_array(strtolower($licenseValue), $genericLicenseValues, true)) {
@@ -1069,14 +1070,16 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
                     <p class="cb-about-version-value"><?php echo htmlspecialchars($creationDateValue, ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
             </div>
-            <div class="col-12 col-md-6 col-lg-2">
+            <div class="col-12 col-md-6 col-lg-4">
                 <div class="cb-about-version-tile cb-about-version-tile--author">
                     <span class="cb-about-version-icon" aria-hidden="true">DEV</span>
                     <p class="cb-about-version-label"><?php echo Text::_('COM_CONTENTBUILDERNG_AUTHOR_LABEL'); ?></p>
                     <p class="cb-about-version-value"><?php echo htmlspecialchars($authorValue, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <p class="cb-about-version-label mt-2"><?php echo Text::_('COM_CONTENTBUILDERNG_COPYRIGHT_LABEL'); ?></p>
+                    <p class="cb-about-version-value"><?php echo htmlspecialchars($copyrightValue, ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
             </div>
-            <div class="col-12 col-md-12 col-lg-6">
+            <div class="col-12 col-md-12 col-lg-4">
                 <div class="cb-about-version-tile cb-about-version-tile--license">
                     <span class="cb-about-version-icon" aria-hidden="true">GPL</span>
                     <p class="cb-about-version-label"><?php echo Text::_('COM_CONTENTBUILDERNG_LICENSE_LABEL'); ?></p>

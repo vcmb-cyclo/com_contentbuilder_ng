@@ -25,6 +25,7 @@ class HtmlView extends BaseHtmlView
     protected string $componentVersion = '';
     protected string $componentCreationDate = '';
     protected string $componentAuthor = '';
+    protected string $componentCopyright = '';
     protected string $componentLicense = '';
     protected array $phpLibraries = [];
     protected array $javascriptLibraries = [];
@@ -105,6 +106,7 @@ class HtmlView extends BaseHtmlView
         $this->componentVersion = (string) ($versionInformation['version'] ?? '');
         $this->componentCreationDate = (string) ($versionInformation['creationDate'] ?? '');
         $this->componentAuthor = (string) ($versionInformation['author'] ?? '');
+        $this->componentCopyright = (string) ($versionInformation['copyright'] ?? '');
         $this->componentLicense = (string) ($versionInformation['license'] ?? '');
         $this->phpLibraries = $this->getInstalledPhpLibraries();
         $this->javascriptLibraries = $this->getInstalledJavascriptLibraries();
@@ -125,6 +127,7 @@ class HtmlView extends BaseHtmlView
             'version' => '',
             'creationDate' => '',
             'author' => '',
+            'copyright' => '',
             'license' => '',
         ];
 
@@ -146,6 +149,7 @@ class HtmlView extends BaseHtmlView
                     $versionInformation['version'] = (string) ($manifestData['version'] ?? '');
                     $versionInformation['creationDate'] = (string) ($manifestData['creationDate'] ?? '');
                     $versionInformation['author'] = (string) ($manifestData['author'] ?? '');
+                    $versionInformation['copyright'] = (string) ($manifestData['copyright'] ?? '');
                     $versionInformation['license'] = (string) ($manifestData['license'] ?? '');
                 }
             }
@@ -155,7 +159,7 @@ class HtmlView extends BaseHtmlView
 
         $needsManifestFallback = false;
 
-        foreach (['version', 'creationDate', 'author', 'license'] as $key) {
+        foreach (['version', 'creationDate', 'author', 'copyright', 'license'] as $key) {
             if (trim((string) ($versionInformation[$key] ?? '')) === '') {
                 $needsManifestFallback = true;
                 break;
@@ -179,6 +183,7 @@ class HtmlView extends BaseHtmlView
                 'version' => (string) ($manifest->version ?? ''),
                 'creationDate' => (string) ($manifest->creationDate ?? ''),
                 'author' => (string) ($manifest->author ?? ''),
+                'copyright' => (string) ($manifest->copyright ?? ''),
                 'license' => (string) ($manifest->license ?? ''),
             ];
 

@@ -50,6 +50,7 @@ $wa->addInlineStyle(
     . '#view-pane .nav-tabs .nav-link:focus-visible,#view-pane .nav-tabs [role="tab"]:focus-visible,#perm-pane .nav-tabs .nav-link:focus-visible,#perm-pane .nav-tabs [role="tab"]:focus-visible{outline:2px solid #1d4ed8;outline-offset:1px}'
     . '#view-pane .nav-tabs .nav-link.active,#view-pane .nav-tabs [role="tab"][aria-selected="true"],#perm-pane .nav-tabs .nav-link.active,#perm-pane .nav-tabs [role="tab"][aria-selected="true"]{color:#fff;background:linear-gradient(135deg,#0f4db8,#0ea5e9);border-color:#0f4db8;box-shadow:0 4px 12px rgba(15,77,184,.28)}'
     . '@media (max-width:991.98px){#view-pane .nav-tabs,#perm-pane .nav-tabs{flex-wrap:nowrap;overflow:auto;-webkit-overflow-scrolling:touch}#view-pane .nav-tabs .nav-link,#view-pane .nav-tabs [role="tab"],#perm-pane .nav-tabs .nav-link,#perm-pane .nav-tabs [role="tab"]{white-space:nowrap}}'
+    . '@keyframes cb-blink{50%{opacity:0}}'
 );
 
 $listOrder = (string) ($this->listOrder ?? 'ordering');
@@ -203,7 +204,29 @@ $prepareEffectOptions = [
     ['value' => 'upper', 'text' => Text::_('COM_CONTENTBUILDERNG_PREPARE_EFFECT_UPPER')],
     ['value' => 'lower', 'text' => Text::_('COM_CONTENTBUILDERNG_PREPARE_EFFECT_LOWER')],
     ['value' => 'truncate10', 'text' => Text::_('COM_CONTENTBUILDERNG_PREPARE_EFFECT_TRUNCATE_10')],
+    ['value' => 'blink', 'text' => Text::_('COM_CONTENTBUILDERNG_PREPARE_EFFECT_BLINK')],
 ];
+
+$typeDisplayAliases = [
+    'com_breezingforms' => 'BF',
+    'com_breezingforms_ng' => 'BF',
+    'com_contentbuilderng' => 'CB',
+];
+
+$formatTypeDisplay = static function (string $type) use ($typeDisplayAliases): array {
+    $normalizedType = trim($type);
+
+    if ($normalizedType === '') {
+        return ['short' => '', 'full' => ''];
+    }
+
+    $short = $typeDisplayAliases[$normalizedType] ?? $normalizedType;
+
+    return [
+        'short' => $short,
+        'full' => $normalizedType,
+    ];
+};
 
 $renderCheckbox = static function (string $name, string $id, bool $checked = false, string $value = '1', array $attributes = []): string {
     $html = '<span class="form-check d-inline-block mb-0">';
@@ -1162,6 +1185,9 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             case 'lower':
                 expression = 'strtolower((string) ' + sourcePath + ')';
                 break;
+            case 'blink':
+                expression = '"<span class=\\"cb-prepare-blink\\">".' + sourcePath + '."</span>"';
+                break;
             case 'truncate10':
                 expression = '(mb_strlen((string) ' + sourcePath + ') > 10) ? mb_substr((string) ' + sourcePath + ', 0, 10) . "..." : (string) ' + sourcePath;
                 break;
@@ -1660,19 +1686,39 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                         <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE'); ?>:
                                     </b></span>
                             </label>
-                            <select class="form-select-sm" name="jform[type]">
+                            <select class="form-select-sm" name="jform[type]" id="cb_form_type_select">
                                 <?php
                                 foreach ($this->item->types as $type) {
                                     if (trim($type)) {
+                                        $typeValue = (string) $type;
+                                        $typeDisplay = $formatTypeDisplay($typeValue);
                                 ?>
-                                        <option value="<?php echo $type ?>">
-                                            <?php echo $type ?>
+                                        <option value="<?php echo htmlspecialchars($typeValue, ENT_QUOTES, 'UTF-8'); ?>"
+                                            data-full="<?php echo htmlspecialchars((string) ($typeDisplay['full'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                                            title="<?php echo htmlspecialchars((string) ($typeDisplay['full'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <?php echo htmlspecialchars((string) ($typeDisplay['short'] ?? $typeValue), ENT_QUOTES, 'UTF-8'); ?>
                                         </option>
                                 <?php
                                     }
                                 }
                                 ?>
                             </select>
+                            <script>
+                                (function() {
+                                    var typeSelect = document.getElementById('cb_form_type_select');
+                                    if (!typeSelect) {
+                                        return;
+                                    }
+
+                                    var updateTypeTitle = function() {
+                                        var option = typeSelect.options[typeSelect.selectedIndex];
+                                        typeSelect.title = option ? (option.getAttribute('data-full') || option.value || '') : '';
+                                    };
+
+                                    typeSelect.addEventListener('change', updateTypeTitle);
+                                    updateTypeTitle();
+                                })();
+                            </script>
 
                         <?php
                         } else {
@@ -1716,7 +1762,11 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                             <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE'); ?>:
                                         </b></span>
                                 </label>
-                                <?php echo $this->item->type ?>
+                                <?php $typeDisplay = $formatTypeDisplay((string) ($this->item->type ?? '')); ?>
+                                <span class="editlinktip hasTip"
+                                    title="<?php echo htmlspecialchars((string) ($typeDisplay['full'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php echo htmlspecialchars((string) ($typeDisplay['short'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                                </span>
                                 <input type="hidden" name="jform[type]" value="<?php echo $this->item->type ?>" />
                                 <input type="hidden" name="jform[type_name]"
                                     value="<?php echo isset($this->item->type_name) ? $this->item->type_name : ''; ?>" />
@@ -2512,19 +2562,34 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             <?php echo Text::_('COM_CONTENTBUILDERNG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
                         </small>
                     </div>
-                    <input type="hidden" name="jform[create_articles]" value="0" />
-                    <?php echo $renderCheckbox('jform[create_articles]', 'create_articles', (int) $this->item->create_articles === 1); ?><label class="form-check-label"
-                        for="create_articles">
-                        <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_ARTICLES'); ?>
-                    </label>
                 </td>
                 <td width="20%">
-                    <label for="delete_articles"><span class="editlinktip hasTip"
-                            title="<?php echo Text::_('COM_CONTENTBUILDERNG_DELETE_ARTICLES_TIP'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDERNG_DELETE_ARTICLES'); ?>
-                        </span></label>
+                    <div class="mb-2">
+                        <label for="create_articles_yes"><span class="editlinktip hasTip"
+                                title="<?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TIP'); ?>">
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_ARTICLES_LABEL'); ?>
+                            </span></label>
+                    </div>
+                    <div class="mb-1">
+                        <label for="delete_articles"><span class="editlinktip hasTip"
+                                title="<?php echo Text::_('COM_CONTENTBUILDERNG_DELETE_ARTICLES_TIP'); ?>">
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_DELETE_ARTICLES'); ?>
+                            </span></label>
+                    </div>
                 </td>
                 <td>
+                    <div class="mb-2">
+                        <input class="form-check-input" type="radio" value="1" name="jform[create_articles]" id="create_articles_yes"
+                            <?php echo (int) $this->item->create_articles === 1 ? ' checked="checked"' : ''; ?> />
+                        <label for="create_articles_yes">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_YES'); ?>
+                        </label>
+                        <input class="form-check-input" type="radio" value="0" name="jform[create_articles]" id="create_articles_no"
+                            <?php echo (int) $this->item->create_articles !== 1 ? ' checked="checked"' : ''; ?> />
+                        <label for="create_articles_no">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_NO'); ?>
+                        </label>
+                    </div>
                     <input class="form-check-input" type="radio" value="1" name="jform[delete_articles]" id="delete_articles"
                         <?php echo $this->item->delete_articles ? ' checked="checked"' : '' ?> /> <label
                         for="delete_articles">
