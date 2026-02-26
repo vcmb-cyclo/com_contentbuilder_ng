@@ -13,6 +13,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Model;
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Application\CMSApplication;
 use Joomla\Database\QueryInterface;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\MVC\Model\ListModel;
@@ -49,6 +50,7 @@ class UsersModel extends ListModel
 
     protected function populateState($ordering = 'u.id', $direction = 'ASC')
     {
+        /** @var CMSApplication $app */
         $app = Factory::getApplication();
 
         parent::populateState($ordering, $direction);

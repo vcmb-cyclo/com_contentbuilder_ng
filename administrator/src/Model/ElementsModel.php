@@ -19,6 +19,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Model;
 
 \defined('_JEXEC') or die;
 
+use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
@@ -86,6 +87,7 @@ class ElementsModel extends ListModel
      */
     protected function populateState($ordering = 'ordering', $direction = 'asc')
     {
+        /** @var CMSApplication $app */
         $app = Factory::getApplication();
 
         // Récupération du form_id depuis l'input (obligatoire pour cette vue)

@@ -18,7 +18,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 
-class contentbuilderng_COM_CONTENTBUILDERNG
+class contentbuilderng_com_contentbuilderng
 {
     public $properties = null;
     public $elements = null;

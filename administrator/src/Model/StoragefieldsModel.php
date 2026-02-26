@@ -13,6 +13,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Model;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\ListModel;
@@ -53,6 +54,7 @@ class StoragefieldsModel extends ListModel
      */
     protected function populateState($ordering = 'ordering', $direction = 'asc'): void
     {
+        /** @var CMSApplication $app */
         $app = Factory::getApplication();
         $context = $this->context ?: 'com_contentbuilderng.storagefields';
         $storageId = (int) $this->storageId;

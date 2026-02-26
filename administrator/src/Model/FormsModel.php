@@ -23,10 +23,12 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\Database\QueryInterface;
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 
 class FormsModel extends ListModel
 {
@@ -53,6 +55,7 @@ class FormsModel extends ListModel
 
     protected function populateState($ordering = 'a.ordering', $direction = 'ASC')
     {
+        /** @var CMSApplication $app */
         $app = Factory::getApplication();
 
         // ✅ appels standard ListModel
@@ -264,9 +267,11 @@ class FormsModel extends ListModel
             return false;
         }
 
-        $factory = Factory::getApplication()
-            ->bootComponent('com_contentbuilderng')
-            ->getMVCFactory();
+        $component = Factory::getApplication()->bootComponent('com_contentbuilderng');
+        if (!$component instanceof ContentbuilderngComponent) {
+            return false;
+        }
+        $factory = $component->getMVCFactory();
 
         $formModel = $factory->createModel('form', 'Administrator', ['ignore_request' => true]);
 

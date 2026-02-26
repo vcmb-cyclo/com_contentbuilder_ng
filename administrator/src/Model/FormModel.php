@@ -26,6 +26,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
 use Joomla\CMS\MVC\Model\AdminModel;
+use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
@@ -273,6 +274,7 @@ class FormModel extends AdminModel
         parent::populateState();
 
         // 2) ID depuis l'URL (standard Joomla en admin)
+        /** @var CMSApplication $app */
         $app   = Factory::getApplication();
         $input = $app->input;
         $formId = $input->getInt('id', 0);
@@ -290,6 +292,7 @@ class FormModel extends AdminModel
 
     protected function loadFormData()
     {
+        /** @var CMSApplication $app */
         $app = Factory::getApplication();
         $data = $app->getUserState('com_contentbuilderng.edit.form.data', []);
 

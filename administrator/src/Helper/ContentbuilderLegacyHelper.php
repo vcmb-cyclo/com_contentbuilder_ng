@@ -1057,7 +1057,7 @@ final class ContentbuilderLegacyHelper
         if ($type === 'com_contentbuilderng') {
             $classCandidates[] = $namespace . 'contentbuilderng_com_contentbuilder';
         } else if ($type === 'com_contentbuilder') {
-            $classCandidates[] = $namespace . 'contentbuilderng_COM_CONTENTBUILDERNG';
+            $classCandidates[] = $namespace . 'contentbuilderng_com_contentbuilderng';
         }
 
         foreach ($classCandidates as $class) {
@@ -1116,7 +1116,7 @@ final class ContentbuilderLegacyHelper
         if ($type === 'com_contentbuilderng') {
             $classCandidates[] = $namespace . 'contentbuilderng_com_contentbuilder';
         } else if ($type === 'com_contentbuilder') {
-            $classCandidates[] = $namespace . 'contentbuilderng_COM_CONTENTBUILDERNG';
+            $classCandidates[] = $namespace . 'contentbuilderng_com_contentbuilderng';
         }
 
         foreach ($classCandidates as $class) {

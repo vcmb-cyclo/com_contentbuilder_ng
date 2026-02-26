@@ -21,9 +21,11 @@ final class RatingHelper
     public static function getRating($form_id, $record_id, $colRating, $rating_slots, $lang, $rating_allowed, $rating_count, $rating_sum)
     {
         static $cssLoaded;
+        /** @var \Joomla\CMS\Application\CMSWebApplicationInterface $app */
+        $app = Factory::getApplication();
 
         if (!$cssLoaded) {
-            Factory::getApplication()->getDocument()->addStyleDeclaration('.cbVotingDisplay, .cbVotingStarButtonWrapper {
+            $app->getDocument()->getWebAssetManager()->addInlineStyle('.cbVotingDisplay, .cbVotingStarButtonWrapper {
 	height: 20px;
 	width: 100px;
 }
@@ -96,9 +98,9 @@ final class RatingHelper
         }
         $rating_link = '';
         if ($rating_allowed) {
-            if (Factory::getApplication()->isClient('site')) {
-                $rating_link = Uri::root(true) . (Factory::getApplication()->isClient('administrator') ? '/administrator' : (Factory::getApplication()->input->getCmd('lang', '') && 
-                Factory::getApplication()->getConfig()->get('sef') && Factory::getApplication()->getConfig()->get('sef_rewrite') ? '/' . Factory::getApplication()->input->getCmd('lang', '') : '')) . '/?option=com_contentbuilderng&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
+            if ($app->isClient('site')) {
+                $rating_link = Uri::root(true) . ($app->isClient('administrator') ? '/administrator' : ($app->input->getCmd('lang', '') &&
+                (bool) $app->get('sef') && (bool) $app->get('sef_rewrite') ? '/' . $app->input->getCmd('lang', '') : '')) . '/?option=com_contentbuilderng&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
             } else {
                 $rating_link = 'index.php?option=com_contentbuilderng&lang=' . $lang . '&view=ajax&format=raw&subject=rating&id=' . $form_id . '&record_id=' . $record_id;
             }

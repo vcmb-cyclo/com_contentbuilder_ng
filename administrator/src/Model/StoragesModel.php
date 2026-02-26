@@ -20,10 +20,12 @@ namespace CB\Component\Contentbuilderng\Administrator\Model;
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\Database\QueryInterface;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 class StoragesModel extends ListModel
 {
     // Optionnel mais recommandé : définir le nom de la table (sans postfix)
@@ -50,6 +52,7 @@ class StoragesModel extends ListModel
 
     protected function populateState($ordering = 'a.ordering', $direction = 'ASC')
     {
+        /** @var CMSApplication $app */
         $app = Factory::getApplication();
 
         // ✅ appels standard StorageModel
@@ -152,9 +155,11 @@ class StoragesModel extends ListModel
             return false;
         }
 
-        $factory = Factory::getApplication()
-            ->bootComponent('com_contentbuilderng')
-            ->getMVCFactory();
+        $component = Factory::getApplication()->bootComponent('com_contentbuilderng');
+        if (!$component instanceof ContentbuilderngComponent) {
+            return false;
+        }
+        $factory = $component->getMVCFactory();
 
         $formModel = $factory->createModel('storage', 'Administrator', ['ignore_request' => true]);
 
@@ -266,7 +271,7 @@ class StoragesModel extends ListModel
         } // for
 
 
-        $row->reorder();
+        $row->reorder('');
     }
 
     /**

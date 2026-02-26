@@ -21,6 +21,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Model;
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\Database\DatabaseInterface;
@@ -87,6 +88,7 @@ class StorageModel extends AdminModel
     protected function loadFormData()
     {
         $data = $this->getItem();
+        /** @var CMSApplication $app */
         $app  = Factory::getApplication();
         return $app->getUserState($this->option . '.edit.storage.data', $data);
     }
