@@ -157,10 +157,19 @@ final class StorageAuditColumnsHelper
             $summary['errors'] += count($warnings);
         }
 
-        $summary['scanned'] = count($storageTables);
+        // Repair is limited to internal storage tables only.
+        // External tables (bytable=1), e.g. third-party tables, are intentionally skipped.
+        $repairableTables = array_values(
+            array_filter(
+                $storageTables,
+                static fn(array $storageTable): bool => (int) ($storageTable['bytable'] ?? 0) !== 1
+            )
+        );
+
+        $summary['scanned'] = count($repairableTables);
         $now = Factory::getDate()->toSql();
 
-        foreach ($storageTables as $storageTable) {
+        foreach ($repairableTables as $storageTable) {
             $physicalTable = (string) ($storageTable['table_name'] ?? '');
             $tableAlias = (string) ($storageTable['table_alias'] ?? $physicalTable);
             $storageId = (int) ($storageTable['storage_id'] ?? 0);
