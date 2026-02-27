@@ -21,9 +21,12 @@ namespace CB\Component\Contentbuilderng\Administrator\Helper;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Log\Log;
+use Joomla\Filesystem\Folder;
 
 final class Logger
 {
+    private const LOG_FILE = 'com_contentbuilderng.log';
+    private const MAX_ROTATED_FILES = 10;
     private static bool $registered = false;
 
     private static function register(): void
@@ -32,25 +35,92 @@ final class Logger
             return;
         }
 
+        self::rotateIfNeeded();
+
         Log::addLogger(
             [
-                'text_file'         => 'com_contentbuilderng.admin.log',
+                'text_file'         => self::LOG_FILE,
+                'text_file_path'    => self::resolveLogDirectory(),
                 'text_entry_format' => "{DATE} {TIME} {PRIORITY}\t{CATEGORY}\t{MESSAGE}", // pas d'IP.
             ],
             Log::ALL,
-            ['cb.admin']
-        );
-
-        Log::addLogger(
-            [
-                'text_file'         => 'com_contentbuilderng.site.log',
-                'text_entry_format' => "{DATE} {TIME} {PRIORITY}\t{CATEGORY}\t{MESSAGE}",
-            ],
-            Log::ALL,
-            ['cb.site']
+            ['cb.admin', 'cb.site']
         );
 
         self::$registered = true;
+    }
+
+    private static function resolveLogDirectory(): string
+    {
+        $app = Factory::getApplication();
+        $logPath = '';
+
+        if (is_object($app) && method_exists($app, 'get')) {
+            $logPath = trim((string) $app->get('log_path', ''));
+        }
+
+        if ($logPath === '') {
+            $logPath = JPATH_ROOT . '/logs';
+        }
+
+        if (!Folder::exists($logPath)) {
+            Folder::create($logPath);
+        }
+
+        return rtrim($logPath, '/\\');
+    }
+
+    private static function rotateIfNeeded(): void
+    {
+        $directory = self::resolveLogDirectory();
+        $activeLog = $directory . '/' . self::LOG_FILE;
+
+        if (!is_file($activeLog)) {
+            return;
+        }
+
+        $fileTimestamp = @filemtime($activeLog);
+        if ($fileTimestamp === false) {
+            return;
+        }
+
+        $timezone = new \DateTimeZone((string) date_default_timezone_get());
+        $today = (new \DateTimeImmutable('now', $timezone))->format('Y-m-d');
+        $fileDate = (new \DateTimeImmutable('@' . $fileTimestamp))->setTimezone($timezone)->format('Y-m-d');
+
+        if ($fileDate === $today) {
+            return;
+        }
+
+        $archiveBaseName = 'com_contentbuilderng-' . $fileDate . '.log';
+        $archivePath = $directory . '/' . $archiveBaseName;
+        $archiveIndex = 1;
+
+        while (is_file($archivePath)) {
+            $archivePath = $directory . '/com_contentbuilderng-' . $fileDate . '-' . $archiveIndex . '.log';
+            $archiveIndex++;
+        }
+
+        @rename($activeLog, $archivePath);
+        self::cleanupRotatedLogs($directory);
+    }
+
+    private static function cleanupRotatedLogs(string $directory): void
+    {
+        $rotatedFiles = glob($directory . '/com_contentbuilderng-*.log') ?: [];
+
+        if (count($rotatedFiles) <= self::MAX_ROTATED_FILES) {
+            return;
+        }
+
+        usort(
+            $rotatedFiles,
+            static fn(string $left, string $right): int => (@filemtime($right) ?: 0) <=> (@filemtime($left) ?: 0)
+        );
+
+        foreach (array_slice($rotatedFiles, self::MAX_ROTATED_FILES) as $staleFile) {
+            @unlink($staleFile);
+        }
     }
 
     private static function category(): string

@@ -21,6 +21,8 @@ use Joomla\Registry\Registry;
 
 class com_contentbuilderngInstallerScript extends InstallerScript
 {
+  private const SHARED_LOG_FILE = 'com_contentbuilderng.log';
+  private const SHARED_LOG_KEEP_FILES = 10;
   private const LEGACY_TABLE_RENAMES = [
     'contentbuilder_articles' => 'contentbuilderng_articles',
     'contentbuilder_ng_articles' => 'contentbuilderng_articles',
@@ -72,9 +74,11 @@ class com_contentbuilderngInstallerScript extends InstallerScript
       Folder::create($logPath);
     }
 
+    $this->rotateSharedLogIfNeeded($logPath);
+
     Log::addLogger(
       [
-        'text_file' => 'contentbuilderng_install.log',
+        'text_file' => self::SHARED_LOG_FILE,
         'text_entry_format' => '{DATETIME} {PRIORITY} {MESSAGE}',
         'text_file_path'     => $logPath,
       ],
@@ -104,6 +108,58 @@ class com_contentbuilderngInstallerScript extends InstallerScript
     $this->log('[INFO] User agent: ' . ($_SERVER['HTTP_USER_AGENT'] ?? 'CLI') . '.', Log::INFO, false);
     $this->log('[INFO] ===================================================================', Log::INFO, false);
     $this->writeInstallLogEntry('---------------------------------------------------------', Log::INFO);
+  }
+
+  private function rotateSharedLogIfNeeded(string $logPath): void
+  {
+    $directory = rtrim($logPath, '/\\');
+    $activeLog = $directory . '/' . self::SHARED_LOG_FILE;
+
+    if (!is_file($activeLog)) {
+      return;
+    }
+
+    $fileTimestamp = @filemtime($activeLog);
+    if ($fileTimestamp === false) {
+      return;
+    }
+
+    $timezone = new \DateTimeZone($this->resolveJoomlaTimezoneName());
+    $today = (new \DateTimeImmutable('now', $timezone))->format('Y-m-d');
+    $fileDate = (new \DateTimeImmutable('@' . $fileTimestamp))->setTimezone($timezone)->format('Y-m-d');
+
+    if ($fileDate === $today) {
+      return;
+    }
+
+    $archivePath = $directory . '/com_contentbuilderng-' . $fileDate . '.log';
+    $archiveIndex = 1;
+
+    while (is_file($archivePath)) {
+      $archivePath = $directory . '/com_contentbuilderng-' . $fileDate . '-' . $archiveIndex . '.log';
+      $archiveIndex++;
+    }
+
+    @rename($activeLog, $archivePath);
+    $this->cleanupRotatedSharedLogs($directory);
+  }
+
+  private function cleanupRotatedSharedLogs(string $directory): void
+  {
+    $rotatedFiles = glob($directory . '/com_contentbuilderng-*.log') ?: [];
+
+    if (count($rotatedFiles) <= self::SHARED_LOG_KEEP_FILES) {
+      return;
+    }
+
+    usort(
+      $rotatedFiles,
+      static fn(string $left, string $right): int => (@filemtime($right) ?: 0) <=> (@filemtime($left) ?: 0)
+    );
+
+    foreach (array_slice($rotatedFiles, self::SHARED_LOG_KEEP_FILES) as $staleFile) {
+      @unlink($staleFile);
+    }
   }
 
   private function logDatabaseRuntimeInfo(bool $enqueue = true): void

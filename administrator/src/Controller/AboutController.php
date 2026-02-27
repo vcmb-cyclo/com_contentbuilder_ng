@@ -18,16 +18,24 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
+use Joomla\Database\DatabaseInterface;
 
 final class AboutController extends BaseController
 {
     protected $default_view = 'about';
     private const ABOUT_LOG_FILES = [
-        'contentbuilderng_install.log',
-        'com_contentbuilderng.admin.log',
-        'com_contentbuilderng.site.log',
+        'com_contentbuilderng.log',
     ];
     private const ABOUT_LOG_TAIL_BYTES = 262144;
+    private const CONFIG_EXPORT_SECTIONS = [
+        'component_params' => ['type' => 'component_params'],
+        'forms' => ['type' => 'table', 'table' => '#__contentbuilderng_forms'],
+        'elements' => ['type' => 'table', 'table' => '#__contentbuilderng_elements'],
+        'list_states' => ['type' => 'table', 'table' => '#__contentbuilderng_list_states'],
+        'storages' => ['type' => 'table', 'table' => '#__contentbuilderng_storages'],
+        'storage_fields' => ['type' => 'table', 'table' => '#__contentbuilderng_storage_fields'],
+        'resource_access' => ['type' => 'table', 'table' => '#__contentbuilderng_resource_access'],
+    ];
 
     public function migratePackedData(): void
     {
@@ -512,6 +520,373 @@ final class AboutController extends BaseController
         }
 
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function exportConfiguration(): void
+    {
+        $this->checkToken();
+
+        /** @var AdministratorApplication $app */
+        $app = Factory::getApplication();
+        $user = $app->getIdentity();
+
+        if (!$user->authorise('core.manage', 'com_contentbuilderng')) {
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+
+        try {
+            $selectedSections = $this->getSelectedConfigSections();
+            if ($selectedSections === []) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIGURATION_SELECT_SECTION'));
+            }
+
+            $payload = $this->buildConfigurationExportPayload($selectedSections);
+            $json = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+            if (!is_string($json) || $json === '') {
+                throw new \RuntimeException('Failed to encode configuration export payload.');
+            }
+
+            $fileName = 'contentbuilderng-config-' . Factory::getDate()->format('Ymd-His') . '.json';
+
+            $app->setHeader('Content-Type', 'application/json; charset=utf-8', true);
+            $app->setHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"', true);
+            $app->setHeader('Pragma', 'no-cache', true);
+            $app->setHeader('Expires', '0', true);
+            $app->sendHeaders();
+            echo $json;
+            $app->close();
+        } catch (\Throwable $e) {
+            $this->setMessage(
+                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_EXPORT_CONFIGURATION_FAILED', $e->getMessage()),
+                'error'
+            );
+            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+        }
+    }
+
+    public function importConfiguration(): void
+    {
+        $this->checkToken();
+
+        /** @var AdministratorApplication $app */
+        $app = Factory::getApplication();
+        $user = $app->getIdentity();
+
+        if (!$user->authorise('core.manage', 'com_contentbuilderng')) {
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+
+        try {
+            $selectedSections = $this->getSelectedConfigSections();
+            if ($selectedSections === []) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIGURATION_SELECT_SECTION'));
+            }
+
+            $upload = (array) $app->input->files->get('cb_config_import_file', [], 'array');
+            $tmpName = (string) ($upload['tmp_name'] ?? '');
+            $errorCode = (int) ($upload['error'] ?? UPLOAD_ERR_NO_FILE);
+
+            if ($errorCode !== UPLOAD_ERR_OK || $tmpName === '' || !is_uploaded_file($tmpName)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_SELECT_FILE'));
+            }
+
+            $raw = file_get_contents($tmpName);
+            if (!is_string($raw) || trim($raw) === '') {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_INVALID'));
+            }
+
+            $payload = json_decode($raw, true);
+            if (!is_array($payload)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_INVALID'));
+            }
+
+            $format = (string) ($payload['meta']['format'] ?? '');
+            if ($format !== '' && $format !== 'cbng-config-export-v1') {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_INVALID'));
+            }
+
+            $summary = $this->applyConfigurationImportPayload($payload, $selectedSections);
+            $app->setUserState('com_contentbuilderng.about.import', [
+                'generated_at' => Factory::getDate()->format('Y-m-d H:i:s'),
+                'summary' => $summary,
+            ]);
+
+            $this->setMessage(
+                Text::sprintf(
+                    'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_SUCCESS',
+                    (int) ($summary['tables'] ?? 0),
+                    (int) ($summary['rows'] ?? 0)
+                ),
+                'message'
+            );
+        } catch (\Throwable $e) {
+            $app->setUserState('com_contentbuilderng.about.import', [
+                'generated_at' => Factory::getDate()->format('Y-m-d H:i:s'),
+                'summary' => [
+                    'status' => 'error',
+                    'details' => [(string) $e->getMessage()],
+                ],
+            ]);
+            $this->setMessage(
+                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_FAILED', $e->getMessage()),
+                'error'
+            );
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    private function getSelectedConfigSections(): array
+    {
+        $selectedRaw = (array) Factory::getApplication()->input->get('cb_config_sections', [], 'array');
+        $selected = [];
+
+        foreach ($selectedRaw as $sectionKey) {
+            $key = strtolower((string) $sectionKey);
+            $key = preg_replace('/[^a-z0-9_]/', '', $key) ?? '';
+
+            if ($key !== '') {
+                $selected[] = $key;
+            }
+        }
+
+        $selected = array_values(array_unique($selected));
+        $allowed = array_keys(self::CONFIG_EXPORT_SECTIONS);
+
+        return array_values(array_intersect($selected, $allowed));
+    }
+
+    private function buildConfigurationExportPayload(array $selectedSections): array
+    {
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $existingTables = array_map('strtolower', (array) $db->getTableList());
+        $exportSections = [];
+
+        foreach ($selectedSections as $sectionKey) {
+            $sectionConfig = self::CONFIG_EXPORT_SECTIONS[$sectionKey] ?? null;
+            if (!is_array($sectionConfig)) {
+                continue;
+            }
+
+            if (($sectionConfig['type'] ?? '') === 'component_params') {
+                $exportSections[$sectionKey] = [
+                    'type' => 'component_params',
+                    'params' => $this->loadComponentParams($db),
+                ];
+                continue;
+            }
+
+            $tableAlias = (string) ($sectionConfig['table'] ?? '');
+            if ($tableAlias === '') {
+                continue;
+            }
+            $tableName = $db->replacePrefix($tableAlias);
+
+            if (!in_array(strtolower($tableName), $existingTables, true)) {
+                continue;
+            }
+
+            $columns = array_keys((array) $db->getTableColumns($tableAlias, false));
+            $query = $db->getQuery(true)
+                ->select('*')
+                ->from($db->quoteName($tableAlias));
+
+            if (in_array('id', $columns, true)) {
+                $query->order($db->quoteName('id') . ' ASC');
+            }
+
+            $db->setQuery($query);
+            $rows = (array) $db->loadAssocList();
+
+            $exportSections[$sectionKey] = [
+                'type' => 'table',
+                'table' => $tableAlias,
+                'row_count' => count($rows),
+                'rows' => $rows,
+            ];
+        }
+
+        return [
+            'meta' => [
+                'generated_at' => Factory::getDate()->toSql(),
+                'generated_by' => (int) (Factory::getApplication()->getIdentity()->id ?? 0),
+                'component' => 'com_contentbuilderng',
+                'format' => 'cbng-config-export-v1',
+            ],
+            'sections' => $selectedSections,
+            'data' => $exportSections,
+        ];
+    }
+
+    private function loadComponentParams(DatabaseInterface $db): array
+    {
+        $query = $db->getQuery(true)
+            ->select($db->quoteName('params'))
+            ->from($db->quoteName('#__extensions'))
+            ->where($db->quoteName('type') . ' = ' . $db->quote('component'))
+            ->where($db->quoteName('element') . ' = ' . $db->quote('com_contentbuilderng'));
+        $db->setQuery($query);
+        $rawParams = (string) $db->loadResult();
+
+        if ($rawParams === '') {
+            return [];
+        }
+
+        $decoded = json_decode($rawParams, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    private function applyConfigurationImportPayload(array $payload, array $selectedSections): array
+    {
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $tableRowsImported = 0;
+        $tablesImported = 0;
+        $details = [];
+
+        $dataSections = is_array($payload['data'] ?? null) ? $payload['data'] : [];
+        // Backward compatibility with older export format.
+        if ($dataSections === []) {
+            if (isset($payload['component_params']) && is_array($payload['component_params'])) {
+                $dataSections['component_params'] = [
+                    'type' => 'component_params',
+                    'params' => $payload['component_params'],
+                ];
+            }
+
+            $legacyTables = is_array($payload['tables'] ?? null) ? $payload['tables'] : [];
+            foreach ($legacyTables as $tableEntry) {
+                if (!is_array($tableEntry)) {
+                    continue;
+                }
+
+                $legacyTableAlias = (string) ($tableEntry['table'] ?? '');
+                $legacyRows = is_array($tableEntry['rows'] ?? null) ? $tableEntry['rows'] : [];
+                foreach (self::CONFIG_EXPORT_SECTIONS as $sectionKey => $sectionConfig) {
+                    if (($sectionConfig['type'] ?? '') !== 'table') {
+                        continue;
+                    }
+                    if ((string) ($sectionConfig['table'] ?? '') === $legacyTableAlias) {
+                        $dataSections[$sectionKey] = [
+                            'type' => 'table',
+                            'table' => $legacyTableAlias,
+                            'rows' => $legacyRows,
+                        ];
+                    }
+                }
+            }
+        }
+
+        $db->transactionStart();
+
+        try {
+            foreach ($selectedSections as $sectionKey) {
+                $sectionConfig = self::CONFIG_EXPORT_SECTIONS[$sectionKey] ?? null;
+                if (!is_array($sectionConfig)) {
+                    continue;
+                }
+
+                $sectionPayload = $dataSections[$sectionKey] ?? null;
+                if (!is_array($sectionPayload)) {
+                    $details[] = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_SECTION_MISSING', $sectionKey);
+                    continue;
+                }
+
+                if (($sectionConfig['type'] ?? '') === 'component_params') {
+                    $params = is_array($sectionPayload['params'] ?? null) ? $sectionPayload['params'] : [];
+                    $query = $db->getQuery(true)
+                        ->update($db->quoteName('#__extensions'))
+                        ->set($db->quoteName('params') . ' = ' . $db->quote(json_encode($params)))
+                        ->where($db->quoteName('type') . ' = ' . $db->quote('component'))
+                        ->where($db->quoteName('element') . ' = ' . $db->quote('com_contentbuilderng'));
+                    $db->setQuery($query)->execute();
+                    $details[] = Text::_('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_PARAMS_UPDATED');
+                    continue;
+                }
+
+                $tableAlias = (string) ($sectionConfig['table'] ?? '');
+                $rows = is_array($sectionPayload['rows'] ?? null) ? $sectionPayload['rows'] : [];
+                $importedRows = $this->replaceConfigTableRows($db, $tableAlias, $rows);
+                $tableRowsImported += $importedRows;
+                $tablesImported++;
+                $details[] = Text::sprintf(
+                    'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_TABLE_IMPORTED',
+                    $tableAlias,
+                    $importedRows
+                );
+            }
+
+            $db->transactionCommit();
+        } catch (\Throwable $e) {
+            $db->transactionRollback();
+            throw $e;
+        }
+
+        return [
+            'status' => 'ok',
+            'tables' => $tablesImported,
+            'rows' => $tableRowsImported,
+            'details' => $details,
+        ];
+    }
+
+    private function replaceConfigTableRows(DatabaseInterface $db, string $tableAlias, array $rows): int
+    {
+        $columns = array_keys((array) $db->getTableColumns($tableAlias, false));
+
+        if ($columns === []) {
+            return 0;
+        }
+
+        $query = $db->getQuery(true)
+            ->delete($db->quoteName($tableAlias));
+        $db->setQuery($query)->execute();
+
+        $imported = 0;
+
+        foreach ($rows as $rowIndex => $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $filtered = [];
+            foreach ($columns as $columnName) {
+                if (!array_key_exists($columnName, $row)) {
+                    continue;
+                }
+                $filtered[$columnName] = $row[$columnName];
+            }
+
+            if ($filtered === []) {
+                continue;
+            }
+
+            try {
+                $insertQuery = $db->getQuery(true)
+                    ->insert($db->quoteName($tableAlias))
+                    ->columns(array_map([$db, 'quoteName'], array_keys($filtered)));
+
+                $values = [];
+                foreach ($filtered as $value) {
+                    $values[] = $value === null ? 'NULL' : $db->quote((string) $value);
+                }
+
+                $insertQuery->values(implode(',', $values));
+                $db->setQuery($insertQuery)->execute();
+                $imported++;
+            } catch (\Throwable $e) {
+                throw new \RuntimeException(
+                    Text::sprintf(
+                        'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_ROW_ERROR',
+                        $tableAlias,
+                        ((int) $rowIndex) + 1,
+                        $e->getMessage()
+                    )
+                );
+            }
+        }
+
+        return $imported;
     }
 
     private function readAboutLogReport(): array

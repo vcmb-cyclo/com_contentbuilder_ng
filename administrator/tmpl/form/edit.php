@@ -42,6 +42,7 @@ $wa->addInlineStyle(
         . '.cb-prepare-tools .btn{text-wrap:nowrap}'
         . '.cb-prepare-tools .cb-snippet-select{display:inline-block;width:auto;min-width:12ch;max-width:42ch;flex:0 0 auto}'
         . '.cb-prepare-tools .cb-effect-select{min-width:170px;max-width:240px}'
+        . '.cb-upload-box{margin:0 0 1rem;padding:.85rem .95rem;border:1px solid #dbe1ea;border-radius:12px;background:linear-gradient(180deg,#f8fafc,#f1f5f9)}'
         . '.cb-save-animate{background-color:var(--alert-heading-bg,var(--bs-success,#198754))!important;background-image:none!important;border-color:var(--bs-success,#198754)!important;color:#fff!important;filter:brightness(1.2)!important;box-shadow:0 0 0 .38rem rgba(25,135,84,.36)!important;transition:none!important}'
         . '.cb-save-animate .fa-check,.cb-save-animate .fa-xmark,.cb-save-animate .fa-xmark-new{color:#fff!important}'
         . '#view-pane .nav-tabs,#perm-pane .nav-tabs{display:flex;gap:.4rem;flex-wrap:wrap;padding:.42rem;margin-bottom:.9rem;border:1px solid #dbe1ea;border-bottom:1px solid #dbe1ea;border-radius:14px;background:linear-gradient(180deg,#f7f9fc,#eef3f9)}'
@@ -3143,20 +3144,26 @@ TXT;
         } else {
         ?>
 
-            <label for="upload_directory"><span class="editlinktip hasTip"
-                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_UPLOAD_DIRECTORY_TIP'); ?>">
-                    <?php echo Text::_('COM_CONTENTBUILDERNG_UPLOAD_DIRECTORY'); ?>
-                </span></label>
             <input type="hidden" name="jform[protect_upload_directory]" value="0" />
-            <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
-                <input class="form-control form-control-sm" style="width: 50%; min-width: 280px;" type="text"
-                    value="<?php echo trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/com_contentbuilderng/upload'; ?>"
-                    name="jform[upload_directory]" id="upload_directory" />
-                <div class="form-check mb-0">
-                    <?php echo $renderCheckbox('jform[protect_upload_directory]', 'protect_upload_directory', trim((string) $this->item->protect_upload_directory) !== ''); ?>
-                    <label class="form-check-label" for="protect_upload_directory">
-                        <?php echo Text::_('COM_CONTENTBUILDERNG_PROTECT_UPLOAD_DIRECTORY'); ?>
-                    </label>
+            <div class="cb-upload-box">
+                <div class="row g-3 align-items-end">
+                    <div class="col-lg-8">
+                        <label for="upload_directory" class="form-label mb-2"><span class="editlinktip hasTip"
+                                title="<?php echo Text::_('COM_CONTENTBUILDERNG_UPLOAD_DIRECTORY_TIP'); ?>">
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_UPLOAD_DIRECTORY'); ?>
+                            </span></label>
+                        <input class="form-control form-control-sm" type="text"
+                            value="<?php echo trim($this->item->upload_directory) ? trim($this->item->upload_directory) : JPATH_SITE . '/media/com_contentbuilderng/upload'; ?>"
+                            name="jform[upload_directory]" id="upload_directory" />
+                    </div>
+                    <div class="col-lg-auto">
+                        <div class="form-check mb-1">
+                            <?php echo $renderCheckbox('jform[protect_upload_directory]', 'protect_upload_directory', trim((string) $this->item->protect_upload_directory) !== ''); ?>
+                            <label class="form-check-label" for="protect_upload_directory">
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_PROTECT_UPLOAD_DIRECTORY'); ?>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
             <input type="hidden" name="jform[create_editable_sample]" id="cb_create_editable_sample_flag" value="0" />
@@ -3328,17 +3335,36 @@ TXT;
         echo HTMLHelper::_('uitab.endTab');
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab7', Text::_('COM_CONTENTBUILDERNG_EMAIL_TEMPLATES'));
         ?>
-        <div class="mb-3">
-            <input type="hidden" name="jform[email_notifications]" value="0" />
-            <?php echo $renderCheckbox('jform[email_notifications]', 'email_notifications', (bool) $this->item->email_notifications); ?>
-            <label class="form-check-label me-4" for="email_notifications">
-                <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EMAIL_NOTIFICATIONS'); ?>
-            </label>
-            <input type="hidden" name="jform[email_update_notifications]" value="0" />
-            <?php echo $renderCheckbox('jform[email_update_notifications]', 'email_update_notifications', (bool) $this->item->email_update_notifications); ?>
-            <label class="form-check-label" for="email_update_notifications">
-                <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EMAIL_UPDATE_NOTIFICATIONS'); ?>
-            </label>
+        <h3 class="mb-3"><?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_TEMPLATES'); ?></h3>
+        <p class="text-muted mb-3">
+            <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_TAB_INTRO'); ?>
+        </p>
+        <div class="alert alert-info mb-3">
+            <?php echo Text::_('COM_CONTENTBUILDERNG_EMAIL_TAB_PERMISSION_HINT'); ?>
+        </div>
+        <div class="border rounded-3 p-3 mb-3 bg-body-tertiary">
+            <div class="row g-3 align-items-start">
+                <div class="col-lg-4 d-flex align-items-start gap-2">
+                    <input type="hidden" name="jform[email_notifications]" value="0" />
+                    <?php echo $renderCheckbox('jform[email_notifications]', 'email_notifications', (bool) $this->item->email_notifications); ?>
+                    <label class="form-check-label" for="email_notifications">
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EMAIL_NOTIFICATIONS'); ?>
+                    </label>
+                </div>
+                <div class="col-lg-8">
+                    <small class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EMAIL_NOTIFICATIONS_DESC'); ?></small>
+                </div>
+                <div class="col-lg-4 d-flex align-items-start gap-2">
+                    <input type="hidden" name="jform[email_update_notifications]" value="0" />
+                    <?php echo $renderCheckbox('jform[email_update_notifications]', 'email_update_notifications', (bool) $this->item->email_update_notifications); ?>
+                    <label class="form-check-label" for="email_update_notifications">
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EMAIL_UPDATE_NOTIFICATIONS'); ?>
+                    </label>
+                </div>
+                <div class="col-lg-8">
+                    <small class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EMAIL_UPDATE_NOTIFICATIONS_DESC'); ?></small>
+                </div>
+            </div>
         </div>
         <?php
 
