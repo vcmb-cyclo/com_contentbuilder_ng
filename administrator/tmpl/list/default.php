@@ -45,9 +45,8 @@ $wa->useScript('com_contentbuilderng.contentbuilderng');
 
 
 ?>
-<?php $document->addStyleDeclaration($this->theme_css); ?>
-<?php $document->addScriptDeclaration($this->theme_js); ?>
-
+<?php $wa->addInlineStyle($this->theme_css); ?>
+<?php $wa->addInlineScript($this->theme_js); ?>
 <script type="text/javascript">
 <!--
     function contentbuilderng_state() {

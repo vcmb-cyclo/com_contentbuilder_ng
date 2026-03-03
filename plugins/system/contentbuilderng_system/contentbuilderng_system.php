@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @version     6.0
  * @package     ContentBuilder NG
@@ -82,7 +83,7 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
     function onBeforeRender()
     {
         $pluginParams = $this->params;
-//        CBCompat::getPluginParams($this, 'system', 'contentbuilderng_system');
+        //        CBCompat::getPluginParams($this, 'system', 'contentbuilderng_system');
 
         if ($pluginParams->def('nocache', 1)) {
             $this->app->getConfig()->set('config.caching', $this->caching);
@@ -95,8 +96,9 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
             return;
         }
 
-        // managing auto-groups
-        $option = Factory::getApplication()->input->getCmd('option', '');
+        // Managing auto-groups
+        $app = $this->app;
+        $option = $app->input->getCmd('option', '');
         if ($option === 'com_kunena' || $option === 'com_contentbuilderng') {
 
             $pluginParams = $this->params;
@@ -113,7 +115,7 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
 
                 // KUNENA SUPPORT, REMOVES THE KUNENA SESSION IF EXISTING ON GROUP UPDATES
                 $kill_kunena_session = false;
-                if (is_dir(JPATH_SITE .'/administrator/components/com_kunena/')) {
+                if (is_dir(JPATH_SITE . '/administrator/components/com_kunena/')) {
                     $kill_kunena_session = true;
                 }
 
@@ -163,7 +165,8 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
                     }
                 }
 
-                $this->db->setQuery("
+                $this->db->setQuery(
+                    "
                         Select cv.id, groups.user_id, groups.group_id, cv.userid, cv.verified_view
                             From 
                         #__user_usergroup_map As groups
@@ -194,7 +197,13 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
 
         if ($this->app->isClient('site')) {
             // loading the required themes, if any
-            $body = $this->app->getDocument()->getBuffer('component');
+            $document = $this->app->getDocument();
+
+            if (method_exists($document, 'getBuffer')) {
+                $body = (string) $document->getBuffer('component');
+            } else {
+                return;
+            }
             preg_match_all("/<!--\(cbArticleId:(\d{1,})\)-->/si", $body, $matched_ids);
 
             $ids = array();
@@ -227,28 +236,31 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
                         $results_css = $eventresults_css->getArgument('result');
                         $results_js = $eventresults_js->getArgument('result');
 
-                        $this->app->getDocument()->addStyleDeclaration(implode('', $results_css));
-                        $this->app->getDocument()->addScriptDeclaration(implode('', $results_js));
+                        $css = is_array($results_css) ? implode('', $results_css) : (string) $results_css;
+                        $js  = is_array($results_js)  ? implode('', $results_js)  : (string) $results_js;
+
+                        if ($css !== '') $wa->addInlineStyle($css);
+                        if ($js !== '')  $wa->addInlineScript($js);
                     }
                 }
             }
             // theme loading end
 
-            $option = Factory::getApplication()->input->getCmd('option', '');
-            $view = Factory::getApplication()->input->getCmd('view', '');
-            $task = Factory::getApplication()->input->getCmd('task', '');
-            $layout = Factory::getApplication()->input->getCmd('layout', '');
-            $id = Factory::getApplication()->input->get('id', 0, 'string');
+            $option = $app->input->getCmd('option', '');
+            $view = $app->input->getCmd('view', '');
+            $task = $app->input->getCmd('task', '');
+            $layout = $app->input->getCmd('layout', '');
+            $id = $app->input->get('id', 0, 'string');
             $id = explode(':', $id);
             $id = intval($id[0]);
-            $a_id = Factory::getApplication()->input->get('a_id', 0, 'string');
+            $a_id = $app->input->get('a_id', 0, 'string');
             $a_id = explode(':', $a_id);
             $a_id = intval($a_id[0]);
 
             $pluginParams = $this->params;
 
             // if somebody tries to submit an article through the built-in joomla content submit
-            if ($pluginParams->def('disable_new_articles', 0) && trim(Factory::getApplication()->input->getCmd('option', '')) == 'com_content' && (trim(Factory::getApplication()->input->getCmd('task', '')) == 'new' || trim(Factory::getApplication()->input->getCmd('task', '')) == 'article.add' || (trim(Factory::getApplication()->input->getCmd('view', '')) == 'article' && trim(Factory::getApplication()->input->getCmd('layout', '')) == 'form') || (trim(Factory::getApplication()->input->getCmd('view', '')) == 'form' && trim(Factory::getApplication()->input->getCmd('layout', '')) == 'edit') && $a_id <= 0)) {
+            if ($pluginParams->def('disable_new_articles', 0) && trim($app->input->getCmd('option', '')) == 'com_content' && (trim($app->input->getCmd('task', '')) == 'new' || trim($app->input->getCmd('task', '')) == 'article.add' || (trim($app->input->getCmd('view', '')) == 'article' && trim($app->input->getCmd('layout', '')) == 'form') || (trim($app->input->getCmd('view', '')) == 'form' && trim($app->input->getCmd('layout', '')) == 'edit') && $a_id <= 0)) {
                 $this->app->getLanguage()->load('com_contentbuilderng');
                 $this->app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_NEW_NOT_ALLOWED'), 'error');
                 $this->app->redirect('index.php');
@@ -260,7 +272,7 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
                 $this->db->setQuery("Select article.record_id, article.form_id From #__contentbuilderng_articles As article, #__content As content Where content.id = " . intval($id) . " And (content.state = 0 Or content.state = 1) And article.article_id = content.id");
                 $article = $this->db->loadAssoc();
                 if (is_array($article)) {
-                    $this->app->redirect('index.php?option=com_contentbuilderng&task=edit.display&id=' . $article['form_id'] . "&record_id=" . $article['record_id'] . "&jsback=1&Itemid=" . Factory::getApplication()->input->getInt('Itemid', 0));
+                    $this->app->redirect('index.php?option=com_contentbuilderng&task=edit.display&id=' . $article['form_id'] . "&record_id=" . $article['record_id'] . "&jsback=1&Itemid=" . $app->input->getInt('Itemid', 0));
                 }
             }
         }
@@ -272,8 +284,9 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
             return;
         }
 
+        $app = $this->app;
         // register non-existent records
-        if (in_array(Factory::getApplication()->input->get('option', '', 'string'), array('com_contentbuilderng', 'com_content', 'com_breezingforms'))) {
+        if (in_array($app->input->get('option', '', 'string'), array('com_contentbuilderng', 'com_content', 'com_breezingforms'))) {
             $this->db->setQuery("Select `type`, `reference_id` From #__contentbuilderng_forms Where published = 1");
             $views = $this->db->loadAssocList();
             $typeview = array();
@@ -288,7 +301,7 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
             }
         }
 
-        if (Factory::getApplication()->input->getCmd('option', '') == 'com_content' || Factory::getApplication()->input->getCmd('option', '') == 'com_contentbuilderng') {
+        if ($app->input->getCmd('option', '') == 'com_content' || $app->input->getCmd('option', '') == 'com_contentbuilderng') {
             // managing published states
             $date = Factory::getDate()->toSql();
 
@@ -302,25 +315,25 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
         }
 
         // Keep logout return URLs stable when the return target points to com_contentbuilderng.
-        $enc = base64_decode(Factory::getApplication()->input->get('return', '', 'string'), true);
+        $enc = base64_decode($app->input->get('return', '', 'string'), true);
         if (is_string($enc) && $enc !== '') {
             $enc = explode('?', $enc);
             count($enc) > 1 ? parse_str($enc[1], $out) : $out = array();
             if (isset($out['option']) && $out['option'] == 'com_contentbuilderng') {
                 unset($out['view']);
                 $return = http_build_query($out, '', '&');
-                Factory::getApplication()->input->set('return', base64_encode('index.php' . ($return ? '?' : '') . $return));
+                $app->input->set('return', base64_encode('index.php' . ($return ? '?' : '') . $return));
             }
         }
 
-        $option = Factory::getApplication()->input->getCmd('option', '');
+        $option = $app->input->getCmd('option', '');
 
         if ($option === 'com_content') {
 
             $pluginParams = $this->params;
 
             if ($pluginParams->def('nocache', 1)) {
-                $this->caching = Factory::getApplication()->getConfig()->get(preg_replace("/^config./", '', 'config.caching', 1), null);
+                $this->caching = $app->getConfig()->get(preg_replace("/^config./", '', 'config.caching', 1), null);
                 $this->app->getConfig()->set('config.caching', 0);
             }
         }
