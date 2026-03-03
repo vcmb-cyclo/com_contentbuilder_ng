@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     ContentBuilder NG
  * @author      XDA+GIL
@@ -86,11 +87,11 @@ class com_contentbuilderngInstallerScript
     {
         $this->installStartedAt = microtime(true);
         $this->bootLogger();
-        $this->log('[INFO] ---------------------------------------------------------', Log::INFO, false);
-        $this->log('[OK] ContentBuilder NG installer script booted.', Log::INFO, false);
+        $this->log('[INFO] ---------------------------------------------------------', Log::INFO);
+        $this->log('[OK] ContentBuilder NG installer script booted.', Log::INFO);
 
-        $this->log('[INFO] Joomla version: <strong>' . htmlspecialchars(defined('JVERSION') ? JVERSION : 'unknown', ENT_QUOTES, 'UTF-8') . '</strong>.', Log::INFO, false);
-        $this->log('[INFO] PHP version: ' . PHP_VERSION . '.', Log::INFO, false);
+        $this->log('[INFO] Joomla version: <strong>' . htmlspecialchars(defined('JVERSION') ? JVERSION : 'unknown', ENT_QUOTES, 'UTF-8') . '</strong>.', Log::INFO);
+        $this->log('[INFO] PHP version: ' . PHP_VERSION . '.', Log::INFO);
 
         $detected = 'unknown';
         try {
@@ -98,12 +99,12 @@ class com_contentbuilderngInstallerScript
         } catch (\Throwable) {
             $detected = 'unknown';
         }
-        $this->log('[INFO] Detected installed version: ' . htmlspecialchars((string) $detected, ENT_QUOTES, 'UTF-8') . '.', Log::INFO, false);
+        $this->log('[INFO] Detected installed version: ' . htmlspecialchars((string) $detected, ENT_QUOTES, 'UTF-8') . '.', Log::INFO);
 
-        $this->logDatabaseRuntimeInfo(false);
-        $this->log('[INFO] User agent: ' . ($_SERVER['HTTP_USER_AGENT'] ?? 'CLI') . '.', Log::INFO, false);
-        $this->log('[INFO] ===================================================================', Log::INFO, false);
-        $this->log('[INFO] ---------------------------------------------------------', Log::INFO, false);
+        $this->logDatabaseRuntimeInfo();
+        $this->log('[INFO] User agent: ' . ($_SERVER['HTTP_USER_AGENT'] ?? 'CLI') . '.', Log::INFO);
+        $this->log('[INFO] ===================================================================', Log::INFO);
+        $this->log('[INFO] ---------------------------------------------------------', Log::INFO);
     }
 
     // ---------------------------------------------------------------------
@@ -124,8 +125,8 @@ class com_contentbuilderngInstallerScript
 
             $this->log(
                 '[OK] Preflight: action <strong>' . htmlspecialchars(strtoupper($type), ENT_QUOTES, 'UTF-8') . '</strong>'
-                . ' | package <strong>' . htmlspecialchars((string) $incomingVersion, ENT_QUOTES, 'UTF-8') . '</strong>'
-                . ' | installed <strong>' . htmlspecialchars((string) $currentVersion, ENT_QUOTES, 'UTF-8') . '</strong>.',
+                    . ' | package <strong>' . htmlspecialchars((string) $incomingVersion, ENT_QUOTES, 'UTF-8') . '</strong>'
+                    . ' | installed <strong>' . htmlspecialchars((string) $currentVersion, ENT_QUOTES, 'UTF-8') . '</strong>.',
                 Log::INFO
             );
 
@@ -160,7 +161,7 @@ class com_contentbuilderngInstallerScript
         return !$this->hasCriticalFailure();
     }
 
-    public function install(InstallerAdapter $parent): bool
+    public function install(?InstallerAdapter $parent): bool
     {
         $this->resetCriticalFailures();
 
@@ -180,7 +181,7 @@ class com_contentbuilderngInstallerScript
         }
     }
 
-    public function update(InstallerAdapter $parent): bool
+    public function update(?InstallerAdapter $parent): bool
     {
         $this->resetCriticalFailures();
 
@@ -199,7 +200,7 @@ class com_contentbuilderngInstallerScript
         }
     }
 
-    public function uninstall(InstallerAdapter $parent): bool
+    public function uninstall(?InstallerAdapter $parent): bool
     {
         $this->resetCriticalFailures();
         $this->log('[INFO] Uninstall of ContentBuilder NG.', Log::INFO);
@@ -276,7 +277,7 @@ class com_contentbuilderngInstallerScript
             // Install / update plugins shipped in package
             $source = $this->resolveInstallSourcePath($parent);
             if ($source && is_dir($source)) {
-                $this->log('[INFO] Plugin install source resolved: ' . $source, Log::INFO, false);
+                $this->log('[INFO] Plugin install source resolved: ' . $source, Log::INFO);
             } else {
                 $this->log('[WARNING] Plugin install source not resolved; missing plugins may not be installable in this run.', Log::WARNING);
             }
@@ -323,13 +324,15 @@ class com_contentbuilderngInstallerScript
             // Normalize legacy menu title keys (COM_CONTENTBUILDER -> COM_CONTENTBUILDERNG)
             $this->repairLegacyMenuTitleKeys();
 
+            $this->removeLegacyAdminMenuBranchByAlias('contentbuilder');
+            
             // Normalize storages ordering (your original behavior, update only)
             if ($type === 'update') {
                 $this->normalizeStoragesOrdering();
             }
 
             // Final cache purge (autoload + caches + opcache)
-            $this->purgeRuntimeCaches($context . ':final');
+            $this->purgeCaches($context . ':final');
 
             if ($this->hasCriticalFailure()) {
                 $summary = $this->getCriticalFailureSummary();
@@ -342,7 +345,7 @@ class com_contentbuilderngInstallerScript
 
             $this->log(
                 '[OK] ContentBuilder NG installation finished. ' . $finishedAt
-                . '. Duration: ' . number_format($durationSeconds, 2, '.', '') . 's.'
+                    . '. Duration: ' . number_format($durationSeconds, 2, '.', '') . 's.'
             );
         } catch (\Throwable $e) {
             // In installer scripts, throwing aborts installer; log & rethrow for visibility
@@ -423,7 +426,7 @@ class com_contentbuilderngInstallerScript
         );
     }
 
-    private function log(string $message, int $priority = Log::INFO, bool $enqueue = true): void
+    private function log(string $message, int $priority = Log::INFO): void
     {
         if ($priority === Log::ERROR) {
             $this->criticalFailureDetected = true;
@@ -434,8 +437,6 @@ class com_contentbuilderngInstallerScript
         }
 
         $this->writeInstallLogEntry($message, $priority);
-
-        $enqueue = true;
 
         try {
             $app = Factory::getApplication();
@@ -587,7 +588,7 @@ class com_contentbuilderngInstallerScript
     // ---------------------------------------------------------------------
     // Runtime info / charset checks
     // ---------------------------------------------------------------------
-    private function logDatabaseRuntimeInfo(bool $enqueue = true): void
+    private function logDatabaseRuntimeInfo(): void
     {
         try {
             $db = $this->db();
@@ -616,7 +617,7 @@ class com_contentbuilderngInstallerScript
                 $prefix = '(none)';
             }
 
-            $this->log('[INFO] Database: ' . $type . ' ' . $version . ' (prefix: ' . $prefix . ').', Log::INFO, $enqueue);
+            $this->log('[INFO] Database: ' . $type . ' ' . $version . ' (prefix: ' . $prefix . ').', Log::INFO);
 
             // Session charset/collation (best-effort; MySQL/MariaDB)
             try {
@@ -625,16 +626,16 @@ class com_contentbuilderngInstallerScript
                 $cs = trim((string) ($row[0] ?? ''));
                 $co = trim((string) ($row[1] ?? ''));
                 if ($cs !== '' || $co !== '') {
-                    $this->log('[INFO] Database session charset/collation: ' . ($cs ?: 'unknown') . ' / ' . ($co ?: 'unknown') . '.', Log::INFO, $enqueue);
+                    $this->log('[INFO] Database session charset/collation: ' . ($cs ?: 'unknown') . ' / ' . ($co ?: 'unknown') . '.', Log::INFO);
                     if ($cs !== '' && stripos($cs, 'utf8mb4') === false) {
-                        $this->log('[WARNING] Database session charset is not utf8mb4 (' . $cs . ').', Log::WARNING, $enqueue);
+                        $this->log('[WARNING] Database session charset is not utf8mb4 (' . $cs . ').', Log::WARNING);
                     }
                 }
             } catch (\Throwable) {
                 // ignore
             }
         } catch (\Throwable $e) {
-            $this->log('[WARNING] Could not resolve database runtime info: ' . $e->getMessage(), Log::WARNING, $enqueue);
+            $this->log('[WARNING] Could not resolve database runtime info: ' . $e->getMessage(), Log::WARNING);
         }
     }
 
@@ -740,7 +741,7 @@ class com_contentbuilderngInstallerScript
         if ($deleted > 0) {
             $this->log("[OK] Autoload cache cleared ({$deleted} file(s)) during {$context}.");
         } else {
-            $this->log("[INFO] No autoload cache file needed clearing during {$context}.", Log::INFO, false);
+            $this->log("[INFO] No autoload cache file needed clearing during {$context}.", Log::INFO);
         }
 
         // 2) Joomla caches
@@ -780,17 +781,13 @@ class com_contentbuilderngInstallerScript
         try {
             if (function_exists('opcache_reset')) {
                 @opcache_reset();
-                $this->log("[OK] OPcache reset attempted during {$context}.", Log::INFO, false);
+                $this->log("[OK] OPcache reset attempted during {$context}.", Log::INFO);
             }
         } catch (\Throwable) {
             // ignore
         }
     }
 
-    private function purgeRuntimeCaches(string $context = 'runtime'): void
-    {
-        $this->purgeCaches($context);
-    }
 
     // ---------------------------------------------------------------------
     // Filesystem
@@ -858,7 +855,6 @@ class com_contentbuilderngInstallerScript
             JPATH_SITE . '/components/com_contentbuilder/',
             JPATH_SITE . '/components/com_contentbuilder_ng/',
             JPATH_ROOT . '/media/contentbuilder/',
-            JPATH_ROOT . '/media/contentbuilder_ng/',
             JPATH_SITE . '/media/com_contentbuilder/',
             JPATH_SITE . '/media/com_contentbuilder_ng/',
         ];
@@ -869,10 +865,10 @@ class com_contentbuilderngInstallerScript
                     if (Folder::delete($path)) {
                         $this->log("[OK] Old {$path} folder successfully deleted.");
                     } else {
-                        $this->log("[ERROR] Failed to delete {$path} folder.", Log::ERROR);
+                        $this->log("[WARNING] Failed to delete {$path} folder.", Log::WARNING);
                     }
                 } elseif (is_file($path)) {
-                    $this->log("[ERROR] Not a {$path} folder, but a file.", Log::ERROR);
+                    $this->log("[WARNING] Not a {$path} folder, but a file.", Log::WARNING);
                 }
             } catch (\Throwable $e) {
                 $this->log("[WARNING] Failed removing {$path}: " . $e->getMessage(), Log::WARNING);
@@ -886,7 +882,6 @@ class com_contentbuilderngInstallerScript
             JPATH_ADMINISTRATOR . '/components/contentbuilder/classes/PHPExcel',
             JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/PHPExcel',
             JPATH_ADMINISTRATOR . '/components/com_contentbuilder/classes/PHPExcel.php',
-            JPATH_ADMINISTRATOR . '/components/com_contentbuilder_ng/src/Model/EditModel.php',
         ];
 
         foreach ($paths as $path) {
@@ -895,7 +890,7 @@ class com_contentbuilderngInstallerScript
                     if (File::delete($path)) {
                         $this->log("[OK] Removed obsolete file {$path}.");
                     } else {
-                        $this->log("[ERROR] Failed to remove obsolete file {$path}.", Log::ERROR);
+                        $this->log("[WARNING] Failed to remove obsolete file {$path}.", Log::WARNING);
                     }
                 }
             } catch (\Throwable $e) {
@@ -937,9 +932,9 @@ class com_contentbuilderngInstallerScript
 
                 $this->log(
                     '[WARNING] Table collision detected: '
-                    . $legacyFull . ' (has rows: ' . ($legacyHasRows ? 'yes' : 'no') . ')'
-                    . ' and '
-                    . $targetFull . ' (has rows: ' . ($targetHasRows ? 'yes' : 'no') . ').',
+                        . $legacyFull . ' (has rows: ' . ($legacyHasRows ? 'yes' : 'no') . ')'
+                        . ' and '
+                        . $targetFull . ' (has rows: ' . ($targetHasRows ? 'yes' : 'no') . ').',
                     Log::WARNING
                 );
                 $collisionCount++;
@@ -1119,7 +1114,7 @@ class com_contentbuilderngInstallerScript
         try {
             $db->setQuery(
                 'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_forms')
-                . ' ADD COLUMN ' . $db->quoteName('new_button') . " TINYINT(1) NOT NULL DEFAULT '0'"
+                    . ' ADD COLUMN ' . $db->quoteName('new_button') . " TINYINT(1) NOT NULL DEFAULT '0'"
             )->execute();
             $this->log('[OK] Added #__contentbuilderng_forms.new_button column.');
         } catch (\Throwable $e) {
@@ -1143,7 +1138,7 @@ class com_contentbuilderngInstallerScript
         try {
             $db->setQuery(
                 'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_elements')
-                . ' MODIFY ' . $db->quoteName('linkable') . " TINYINT(1) NOT NULL DEFAULT '0'"
+                    . ' MODIFY ' . $db->quoteName('linkable') . " TINYINT(1) NOT NULL DEFAULT '0'"
             )->execute();
             $this->log('[OK] Ensured #__contentbuilderng_elements.linkable default is 0.');
         } catch (\Throwable $e) {
@@ -1205,7 +1200,7 @@ class com_contentbuilderngInstallerScript
                 try {
                     $db->setQuery(
                         'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_storages')
-                        . ' CHANGE ' . $db->quoteName($legacy) . ' ' . $db->quoteName($target) . ' ' . $targetDef
+                            . ' CHANGE ' . $db->quoteName($legacy) . ' ' . $db->quoteName($target) . ' ' . $targetDef
                     )->execute();
                     $this->log("[OK] Renamed storage audit column {$legacy} to {$target}.");
                     $columns = $this->getStoragesTableColumnsLower();
@@ -1220,18 +1215,18 @@ class com_contentbuilderngInstallerScript
                 if ($target === 'modified' || $target === 'created') {
                     $db->setQuery(
                         'UPDATE ' . $db->quoteName('#__contentbuilderng_storages')
-                        . ' SET ' . $db->quoteName($target) . ' = ' . $db->quoteName($legacy)
-                        . ' WHERE (' . $db->quoteName($target) . ' IS NULL OR ' . $db->quoteName($target) . " IN ('0000-00-00', '0000-00-00 00:00:00'))"
-                        . ' AND ' . $db->quoteName($legacy) . ' IS NOT NULL'
-                        . ' AND ' . $db->quoteName($legacy) . " NOT IN ('0000-00-00', '0000-00-00 00:00:00')"
+                            . ' SET ' . $db->quoteName($target) . ' = ' . $db->quoteName($legacy)
+                            . ' WHERE (' . $db->quoteName($target) . ' IS NULL OR ' . $db->quoteName($target) . " IN ('0000-00-00', '0000-00-00 00:00:00'))"
+                            . ' AND ' . $db->quoteName($legacy) . ' IS NOT NULL'
+                            . ' AND ' . $db->quoteName($legacy) . " NOT IN ('0000-00-00', '0000-00-00 00:00:00')"
                     )->execute();
                 } else {
                     $db->setQuery(
                         'UPDATE ' . $db->quoteName('#__contentbuilderng_storages')
-                        . ' SET ' . $db->quoteName($target) . ' = ' . $db->quoteName($legacy)
-                        . ' WHERE (' . $db->quoteName($target) . " = '' OR " . $db->quoteName($target) . ' IS NULL)'
-                        . ' AND ' . $db->quoteName($legacy) . ' IS NOT NULL'
-                        . ' AND ' . $db->quoteName($legacy) . " <> ''"
+                            . ' SET ' . $db->quoteName($target) . ' = ' . $db->quoteName($legacy)
+                            . ' WHERE (' . $db->quoteName($target) . " = '' OR " . $db->quoteName($target) . ' IS NULL)'
+                            . ' AND ' . $db->quoteName($legacy) . ' IS NOT NULL'
+                            . ' AND ' . $db->quoteName($legacy) . " <> ''"
                     )->execute();
                 }
             } catch (\Throwable $e) {
@@ -1243,7 +1238,7 @@ class com_contentbuilderngInstallerScript
                 try {
                     $db->setQuery(
                         'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_storages')
-                        . ' DROP COLUMN ' . $db->quoteName($legacy)
+                            . ' DROP COLUMN ' . $db->quoteName($legacy)
                     )->execute();
                     $this->log("[OK] Removed legacy storage audit column {$legacy}.");
                     $columns = $this->getStoragesTableColumnsLower();
@@ -1261,7 +1256,7 @@ class com_contentbuilderngInstallerScript
             try {
                 $db->setQuery(
                     'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_storages')
-                    . ' ADD COLUMN ' . $db->quoteName($col) . ' ' . $this->storageAuditColumnDefinition($col)
+                        . ' ADD COLUMN ' . $db->quoteName($col) . ' ' . $this->storageAuditColumnDefinition($col)
                 )->execute();
                 $this->log("[OK] Added storage audit column {$col}.");
             } catch (\Throwable $e) {
@@ -1503,7 +1498,7 @@ class com_contentbuilderngInstallerScript
                 try {
                     $db->setQuery(
                         'ALTER TABLE ' . $tableQN
-                        . ' ADD COLUMN ' . $db->quoteName($col) . ' ' . $def
+                            . ' ADD COLUMN ' . $db->quoteName($col) . ' ' . $def
                     )->execute();
                     $columnsLower[$col] = true;
                     $tableChanged = true;
@@ -1517,8 +1512,8 @@ class com_contentbuilderngInstallerScript
                 $this->safe(function () use ($db, $tableQN, $storageId) {
                     $db->setQuery(
                         'UPDATE ' . $tableQN
-                        . ' SET ' . $db->quoteName('storage_id') . ' = ' . $storageId
-                        . ' WHERE ' . $db->quoteName('storage_id') . ' IS NULL OR ' . $db->quoteName('storage_id') . ' = 0'
+                            . ' SET ' . $db->quoteName('storage_id') . ' = ' . $storageId
+                            . ' WHERE ' . $db->quoteName('storage_id') . ' IS NULL OR ' . $db->quoteName('storage_id') . ' = 0'
                     )->execute();
                 });
             }
@@ -1531,8 +1526,8 @@ class com_contentbuilderngInstallerScript
                 $this->safe(function () use ($db, $tableQN, $actorColumn) {
                     $db->setQuery(
                         'UPDATE ' . $tableQN
-                        . ' SET ' . $db->quoteName($actorColumn) . " = ''"
-                        . ' WHERE ' . $db->quoteName($actorColumn) . ' IS NULL'
+                            . ' SET ' . $db->quoteName($actorColumn) . " = ''"
+                            . ' WHERE ' . $db->quoteName($actorColumn) . ' IS NULL'
                     )->execute();
                 });
             }
@@ -1549,7 +1544,7 @@ class com_contentbuilderngInstallerScript
                 try {
                     $db->setQuery(
                         'ALTER TABLE ' . $tableQN
-                        . ' ADD INDEX (' . $db->quoteName($indexColumn) . ')'
+                            . ' ADD INDEX (' . $db->quoteName($indexColumn) . ')'
                     )->execute();
                     $indexedColumns[$indexColumn] = true;
                     $tableChanged = true;
@@ -1693,7 +1688,7 @@ class com_contentbuilderngInstallerScript
     private function installPluginFromPath(string $path): bool
     {
         $installer = new Installer();
-        $installer->setDatabase(Factory::getContainer()->get('DatabaseDriver'));
+        $installer->setDatabase(Factory::getContainer()->get(DatabaseInterface::class));
         return (bool) $installer->install($path);
     }
 
@@ -1831,7 +1826,7 @@ class com_contentbuilderngInstallerScript
     {
         $db = $this->db();
         $installer = new Installer();
-        $installer->setDatabase(Factory::getContainer()->get('DatabaseDriver'));
+        $installer->setDatabase(Factory::getContainer()->get(DatabaseInterface::class));
 
         $supported = ['blank', 'joomla6', 'dark', 'khepri'];
 
@@ -1933,8 +1928,14 @@ class com_contentbuilderngInstallerScript
         $targetType = 'com_contentbuilderng';
 
         $legacyTypes = [
-            'contentbuilder', 'contentbuilderng', 'com_contentbuilder', 'com_contentbuilder_ng',
-            'com_contentbuilderng', 'COM_CONTENTBUILDER', 'COM_CONTENTBUILDER_NG', 'COM_CONTENTBUILDERNG',
+            'contentbuilder',
+            'contentbuilderng',
+            'com_contentbuilder',
+            'com_contentbuilder_ng',
+            'com_contentbuilderng',
+            'COM_CONTENTBUILDER',
+            'COM_CONTENTBUILDER_NG',
+            'COM_CONTENTBUILDERNG',
         ];
         $quoted = array_map(static fn($t) => $db->quote($t), $legacyTypes);
 
@@ -2208,7 +2209,7 @@ class com_contentbuilderngInstallerScript
         $disabledNow = max(0, count($ids) - $alreadyDisabled);
         $this->log("[OK] Legacy plugin disabled first: system/contentbuilder_system ({$disabledNow} newly disabled, " . count($ids) . " total) during {$context}.");
 
-        $this->purgeRuntimeCaches($context . ':disableLegacySystemPluginFirst');
+        $this->purgeCaches($context . ':disableLegacySystemPluginFirst');
 
         return count($ids);
     }
@@ -2304,7 +2305,7 @@ class com_contentbuilderngInstallerScript
         if (is_dir($path)) {
             if (Folder::delete($path)) {
                 $this->log("[OK] Legacy system plugin folder deleted first during {$context}: {$path}");
-                $this->purgeRuntimeCaches($context . ':removeLegacySystemPluginFolderEarly');
+                $this->purgeCaches($context . ':removeLegacySystemPluginFolderEarly');
             } else {
                 $this->log("[WARNING] Failed deleting legacy system plugin folder during {$context}: {$path}", Log::WARNING);
             }
@@ -2314,7 +2315,7 @@ class com_contentbuilderngInstallerScript
         if (is_file($path)) {
             if (File::delete($path)) {
                 $this->log("[OK] Legacy system plugin file deleted first during {$context}: {$path}");
-                $this->purgeRuntimeCaches($context . ':removeLegacySystemPluginFolderEarly');
+                $this->purgeCaches($context . ':removeLegacySystemPluginFolderEarly');
             } else {
                 $this->log("[WARNING] Failed deleting legacy system plugin file during {$context}: {$path}", Log::WARNING);
             }
@@ -2395,7 +2396,7 @@ class com_contentbuilderngInstallerScript
         }
 
         if ($deleted > 0) {
-            $this->purgeRuntimeCaches('postflight:legacyPluginFoldersCleanup');
+            $this->purgeCaches('postflight:legacyPluginFoldersCleanup');
         }
     }
 
@@ -2472,10 +2473,10 @@ class com_contentbuilderngInstallerScript
                 ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
                 ->where(
                     '('
-                    . $db->quoteName('folder') . ' LIKE ' . $db->quote('contentbuilder%')
-                    . ' OR '
-                    . $db->quoteName('element') . ' LIKE ' . $db->quote('contentbuilder%')
-                    . ')'
+                        . $db->quoteName('folder') . ' LIKE ' . $db->quote('contentbuilder%')
+                        . ' OR '
+                        . $db->quoteName('element') . ' LIKE ' . $db->quote('contentbuilder%')
+                        . ')'
                 )
                 ->order($db->quoteName('extension_id') . ' DESC');
             $db->setQuery($q);
@@ -2727,7 +2728,7 @@ class com_contentbuilderngInstallerScript
                     ->update($db->quoteName('#__menu'))
                     ->set(
                         $db->quoteName('link') . ' = REPLACE(' . $db->quoteName('link') . ', '
-                        . $db->quote('option=' . $legacyElement) . ', ' . $db->quote('option=' . $targetElement) . ')'
+                            . $db->quote('option=' . $legacyElement) . ', ' . $db->quote('option=' . $targetElement) . ')'
                     )
                     ->where('(' . implode(' OR ', $conditions) . ')')
             )->execute();
@@ -2751,7 +2752,7 @@ class com_contentbuilderngInstallerScript
                         ->update($db->quoteName('#__menu'))
                         ->set(
                             $db->quoteName('link') . ' = REPLACE(' . $db->quoteName('link') . ', '
-                            . $db->quote('option=com_contentbuilder_ng_ng') . ', ' . $db->quote('option=com_contentbuilderng') . ')'
+                                . $db->quote('option=com_contentbuilder_ng_ng') . ', ' . $db->quote('option=com_contentbuilderng') . ')'
                         )
                         ->where($db->quoteName('link') . ' LIKE ' . $db->quote('%option=com_contentbuilder_ng_ng%'))
                 )->execute();
@@ -2776,12 +2777,106 @@ class com_contentbuilderngInstallerScript
     private function ensureAdminMenuRootNodeExists(): void
     {
         $db = $this->db();
+
         try {
-            $db->setQuery("SELECT id FROM `#__menu` WHERE `alias`='root'");
-            if (!$db->loadResult()) {
-                $db->setQuery("INSERT INTO `#__menu` VALUES(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, 0, NULL, 0, 0, '', 0, '', 0, (SELECT MAX(mlft.rgt)+1 FROM #__menu AS mlft), 0, '*', 0)");
-                $db->execute();
+            // 1) Cas normal : id=1 existe
+            $db->setQuery(
+                $db->getQuery(true)
+                    ->select($db->quoteName(['id', 'alias', 'client_id']))
+                    ->from($db->quoteName('#__menu'))
+                    ->where($db->quoteName('id') . ' = 1')
+            );
+            $row = $db->loadAssoc();
+
+            if (is_array($row) && !empty($row)) {
+                $alias = strtolower(trim((string) ($row['alias'] ?? '')));
+                $clientId = (int) ($row['client_id'] ?? 1);
+
+                // Si c'est déjà root, OK
+                if ($alias === 'root' && $clientId === 1) {
+                    return;
+                }
+
+                // DB non-standard: on n'essaie pas de "forcer" un id=1 existant
+                $this->log('[WARNING] Admin menu root check: id=1 exists but is not the expected root node; leaving untouched.', Log::WARNING);
+                return;
             }
+
+            // 2) DB cassée : id=1 absent => tenter création best-effort
+            // On insère explicitement des colonnes "stables" (schéma Joomla récent).
+            // Si certaines colonnes manquent/existent en plus, l'exception est catchée.
+            $columns = [
+                'id',
+                'menutype',
+                'title',
+                'alias',
+                'note',
+                'path',
+                'link',
+                'type',
+                'published',
+                'parent_id',
+                'level',
+                'component_id',
+                'checked_out',
+                'checked_out_time',
+                'browserNav',
+                'access',
+                'img',
+                'template_style_id',
+                'params',
+                'lft',
+                'rgt',
+                'home',
+                'language',
+                'client_id',
+            ];
+
+            // lft/rgt : on calcule à partir du max(rgt) existant, sinon 0
+            $db->setQuery(
+                $db->getQuery(true)
+                    ->select('COALESCE(MAX(' . $db->quoteName('rgt') . '), 0)')
+                    ->from($db->quoteName('#__menu'))
+            );
+            $maxRgt = (int) $db->loadResult();
+            $lft = $maxRgt + 1;
+            $rgt = $maxRgt + 2;
+
+            $values = [
+                1,
+                $db->quote(''), // menutype
+                $db->quote('Menu_Item_Root'),
+                $db->quote('root'),
+                $db->quote(''),
+                $db->quote(''), // path
+                $db->quote(''),
+                $db->quote('component'), // type (peu importe tant que ça n'explose pas)
+                1,               // published
+                0,               // parent_id
+                0,               // level
+                0,               // component_id
+                0,               // checked_out
+                'NULL',          // checked_out_time
+                0,               // browserNav
+                1,               // access
+                $db->quote(''),
+                0,               // template_style_id
+                $db->quote(''),  // params
+                (int) $lft,
+                (int) $rgt,
+                0,               // home
+                $db->quote('*'),
+                1,               // client_id (admin)
+            ];
+
+            $db->setQuery(
+                $db->getQuery(true)
+                    ->insert($db->quoteName('#__menu'))
+                    ->columns(array_map([$db, 'quoteName'], $columns))
+                    ->values(implode(', ', $values))
+            )->execute();
+
+            $this->log('[OK] Admin menu root node (id=1, alias=root) recreated (best-effort).');
         } catch (\Throwable $e) {
             $this->log('[WARNING] Failed ensuring admin menu root node: ' . $e->getMessage(), Log::WARNING);
         }
@@ -2842,9 +2937,9 @@ class com_contentbuilderngInstallerScript
                 ->where($db->quoteName('type') . ' = ' . $db->quote('component'))
                 ->where(
                     '('
-                    . $db->quoteName('component_id') . ' = ' . (int) $componentId
-                    . ' OR ' . $db->quoteName('link') . ' LIKE ' . $db->quote('index.php?option=com_contentbuilderng%')
-                    . ')'
+                        . $db->quoteName('component_id') . ' = ' . (int) $componentId
+                        . ' OR ' . $db->quoteName('link') . ' LIKE ' . $db->quote('index.php?option=com_contentbuilderng%')
+                        . ')'
                 )
                 ->order($db->quoteName('id') . ' ASC');
             $db->setQuery($q);
@@ -2920,10 +3015,29 @@ class com_contentbuilderngInstallerScript
             )->execute();
 
             $columns = [
-                'menutype', 'title', 'alias', 'note', 'path', 'link', 'type', 'published',
-                'parent_id', 'level', 'component_id', 'checked_out', 'checked_out_time',
-                'browserNav', 'access', 'img', 'template_style_id', 'params', 'lft', 'rgt',
-                'home', 'language', 'client_id',
+                'menutype',
+                'title',
+                'alias',
+                'note',
+                'path',
+                'link',
+                'type',
+                'published',
+                'parent_id',
+                'level',
+                'component_id',
+                'checked_out',
+                'checked_out_time',
+                'browserNav',
+                'access',
+                'img',
+                'template_style_id',
+                'params',
+                'lft',
+                'rgt',
+                'home',
+                'language',
+                'client_id',
             ];
 
             $values = [
@@ -3098,11 +3212,11 @@ class com_contentbuilderngInstallerScript
                 ->where($db->quoteName('title') . ' LIKE ' . $db->quote('COM_CONTENTBUILDER%'))
                 ->where(
                     '('
-                    . $db->quoteName('link') . ' LIKE ' . $db->quote('%option=com_contentbuilder%')
-                    . ' OR ' . $db->quoteName('alias') . ' LIKE ' . $db->quote('contentbuilder%')
-                    . ' OR ' . $db->quoteName('alias') . ' LIKE ' . $db->quote('com-contentbuilder%')
-                    . ' OR ' . $db->quoteName('path') . ' LIKE ' . $db->quote('contentbuilder%')
-                    . ')'
+                        . $db->quoteName('link') . ' LIKE ' . $db->quote('%option=com_contentbuilder%')
+                        . ' OR ' . $db->quoteName('alias') . ' LIKE ' . $db->quote('contentbuilder%')
+                        . ' OR ' . $db->quoteName('alias') . ' LIKE ' . $db->quote('com-contentbuilder%')
+                        . ' OR ' . $db->quoteName('path') . ' LIKE ' . $db->quote('contentbuilder%')
+                        . ')'
                 )
                 ->order($db->quoteName('id') . ' ASC');
             $db->setQuery($q);
@@ -3186,4 +3300,90 @@ class com_contentbuilderngInstallerScript
             $this->log('[ERROR] Failed to normalize storages ordering: ' . $e->getMessage(), Log::ERROR);
         }
     }
+
+    private function removeLegacyAdminMenuBranchByAlias(string $alias = 'contentbuilder'): void
+{
+    $db = $this->db();
+
+    // 1) Trouver le parent admin à supprimer
+    $q = $db->getQuery(true)
+        ->select($db->quoteName(['id', 'lft', 'rgt', 'menutype', 'title', 'path', 'link']))
+        ->from($db->quoteName('#__menu'))
+        ->where($db->quoteName('client_id') . ' = 1')
+        ->where($db->quoteName('parent_id') . ' = 1')
+        ->where($db->quoteName('alias') . ' = ' . $db->quote($alias))
+        ->order($db->quoteName('id') . ' ASC');
+
+    $db->setQuery($q);
+    $parent = $db->loadAssoc();
+
+    if (!$parent) {
+        $this->log("[INFO] No legacy admin menu branch found for alias={$alias}.", \Joomla\CMS\Log\Log::INFO);
+        return;
+    }
+
+    $parentId = (int) ($parent['id'] ?? 0);
+    $lft = (int) ($parent['lft'] ?? 0);
+    $rgt = (int) ($parent['rgt'] ?? 0);
+
+    if ($parentId < 1 || $lft < 1 || $rgt <= $lft) {
+        $this->log("[WARNING] Legacy admin menu branch alias={$alias} has invalid nested set values; skipping delete.", \Joomla\CMS\Log\Log::WARNING);
+        return;
+    }
+
+    $width = $rgt - $lft + 1;
+
+    // 2) Collecter les ids supprimés (utile pour nettoyer les assets ensuite)
+    $db->setQuery(
+        $db->getQuery(true)
+            ->select($db->quoteName('id'))
+            ->from($db->quoteName('#__menu'))
+            ->where($db->quoteName('client_id') . ' = 1')
+            ->where($db->quoteName('lft') . ' BETWEEN ' . $lft . ' AND ' . $rgt)
+    );
+    $ids = $db->loadColumn() ?: [];
+
+    // 3) Supprimer toute la branche
+    $db->setQuery(
+        $db->getQuery(true)
+            ->delete($db->quoteName('#__menu'))
+            ->where($db->quoteName('client_id') . ' = 1')
+            ->where($db->quoteName('lft') . ' BETWEEN ' . $lft . ' AND ' . $rgt)
+    )->execute();
+
+    // 4) Réparer l’arbre nested set (shift)
+    $db->setQuery(
+        $db->getQuery(true)
+            ->update($db->quoteName('#__menu'))
+            ->set($db->quoteName('lft') . ' = ' . $db->quoteName('lft') . ' - ' . (int) $width)
+            ->where($db->quoteName('client_id') . ' = 1')
+            ->where($db->quoteName('lft') . ' > ' . (int) $rgt)
+    )->execute();
+
+    $db->setQuery(
+        $db->getQuery(true)
+            ->update($db->quoteName('#__menu'))
+            ->set($db->quoteName('rgt') . ' = ' . $db->quoteName('rgt') . ' - ' . (int) $width)
+            ->where($db->quoteName('client_id') . ' = 1')
+            ->where($db->quoteName('rgt') . ' > ' . (int) $rgt)
+    )->execute();
+
+    // 5) Best-effort : nettoyer les assets de menus (sinon orphelins)
+    // Dans Joomla, les assets des items admin sont typiquement "com_menus.menu.<id>"
+    if (!empty($ids)) {
+        $quotedNames = array_map(static fn($id) => $db->quote('com_menus.menu.' . (int) $id), $ids);
+        $this->safe(function () use ($db, $quotedNames) {
+            $db->setQuery(
+                $db->getQuery(true)
+                    ->delete($db->quoteName('#__assets'))
+                    ->where($db->quoteName('name') . ' IN (' . implode(',', $quotedNames) . ')')
+            )->execute();
+        });
+    }
+
+    $this->log("[OK] Legacy admin menu branch '{$alias}' removed: parent id={$parentId}, deleted " . count($ids) . " menu row(s).");
+
+    // Purge caches (menu + admin)
+    $this->purgeCaches('postflight:removeLegacyAdminMenuBranchByAlias');
+}
 }
