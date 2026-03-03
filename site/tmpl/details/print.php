@@ -20,6 +20,7 @@ $app = Factory::getApplication();
 /** @var CMSApplication $app */
 
 $wa = $app->getDocument()->getWebAssetManager();
+
 if (!empty($this->theme_css)) {
     $wa->addInlineStyle((string) $this->theme_css);
 }

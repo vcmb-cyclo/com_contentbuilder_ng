@@ -1,24 +1,25 @@
 <?php
+
 /**
  * @package     ContentBuilder NG
  * @author      Markus Bopp / XDA+GIL
  * @link        https://breezingforms-ng.vcmb.fr
+ * @copyright   Copyright © 2026 by XDA+GIL
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined( '_JEXEC' ) or die( 'Restricted access' );
+defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 
-function ContentbuilderngBuildRoute(&$query) {
-
+function ContentbuilderngBuildRoute(&$query)
+{
     $segments = array();
 
-    if(isset($query['controller'])){
-        
-        switch($query['controller']){
+    if (isset($query['controller'])) {
+        switch ($query['controller']) {
 
             case 'export':
-                
+
                 // idx 0 = controller
                 $segments[] = 'export';
 
@@ -29,31 +30,31 @@ function ContentbuilderngBuildRoute(&$query) {
                 } else {
                     $segments[] = 0;
                 }
-                
+
                 unset($query['title']);
-                
-            break;
-                
+
+                break;
+
             case 'list':
                 // idx 0 = controller
                 $segments[0] = '';
 
-               if (isset($query['id'])) {
+                if (isset($query['id'])) {
                     $segments[1] = $query['id'];
                     unset($query['id']);
-               } else {
+                } else {
                     $segments[1] = 0;
-               }
-               
-               if (isset($query['title'])) {
+                }
+
+                if (isset($query['title'])) {
                     $segments[2] = $query['title'];
                     unset($query['title']);
                 } else {
                     $segments[2] = 'entry';
                 }
-                
-            break;
-            
+
+                break;
+
             case 'edit':
             case 'details':
                 // idx 0 = controller
@@ -82,11 +83,11 @@ function ContentbuilderngBuildRoute(&$query) {
                 } else {
                     $segments[3] = 'entry';
                 }
-                
-            break;
+
+                break;
         }
     }
-    
+
     if (isset($query['limitstart']) && !$query['limitstart']) {
         unset($query['limitstart']);
     }
@@ -96,46 +97,47 @@ function ContentbuilderngBuildRoute(&$query) {
     }
 
     unset($query['view']);
-	unset($query['controller']);
+    unset($query['controller']);
 
     return $segments;
 }
 
-function ContentbuilderngParseRoute(&$segments) {
+function ContentbuilderngParseRoute(&$segments)
+{
 
-	$vars = array();
+    $vars = array();
 
-    if( isset($segments[0]) ){
+    if (isset($segments[0])) {
 
-        // the controller
+        // The controller
         $controller = $segments[0];
 
-        // assuming lack of controller
-        if(is_numeric($segments[0])){
+        // Assuming lack of controller
+        if (is_numeric($segments[0])) {
             $segments[0] = 'list';
             $segments[1] = $controller;
             $controller = 'list';
         }
 
-        switch($controller){
+        $app = Factory::getApplication();
+
+        switch ($controller) {
             case 'list':
             case 'export':
                 $vars['controller']   = $controller;
                 $vars['id']    = $segments[1];
-                if(isset($segments[2])){
+                if (isset($segments[2])) {
                     $vars['title'] = $segments[2];
                 } else {
                     $vars['title'] = '';
                 }
 
-		        Factory::getApplication()->input->set('controller', $controller);
-		        Factory::getApplication()->input->set('id', $vars['id']);
-		        Factory::getApplication()->input->set('title', $vars['title']);
-
+                $app->input->set('controller', $controller);
+                $app->input->set('id', $vars['id']);
+                $app->input->set('title', $vars['title']);
                 break;
 
             case 'details':
-
                 $vars['controller']   = $controller;
                 $vars['id']           = $segments[1];
                 $vars['record_id']    = '';
@@ -145,16 +147,14 @@ function ContentbuilderngParseRoute(&$segments) {
                 $vars['title']        = isset($segments[3]) ? $segments[3] : '';
                 $vars['view']         =  'details';
 
-                Factory::getApplication()->input->set('controller', $controller);
-                Factory::getApplication()->input->set('id', $vars['id']);
-                Factory::getApplication()->input->set('record_id', $vars['record_id']);
-                Factory::getApplication()->input->set('title', $vars['title']);
-                Factory::getApplication()->input->set('view', 'details');
-
+                $app->input->set('controller', $controller);
+                $app->input->set('id', $vars['id']);
+                $app->input->set('record_id', $vars['record_id']);
+                $app->input->set('title', $vars['title']);
+                $app->input->set('view', 'details');
                 break;
 
             case 'edit':
-
                 $vars['controller']   = $controller;
                 $vars['id']           = $segments[1];
                 $vars['record_id']    = '';
@@ -164,16 +164,15 @@ function ContentbuilderngParseRoute(&$segments) {
                 $vars['title']        = isset($segments[3]) ? $segments[3] : '';
                 $vars['view']         =  'edit';
 
-                Factory::getApplication()->input->set('controller', $controller);
-                Factory::getApplication()->input->set('id', $vars['id']);
-                Factory::getApplication()->input->set('record_id', $vars['record_id']);
-                Factory::getApplication()->input->set('title', $vars['title']);
-                Factory::getApplication()->input->set('view', 'edit');
-
+                $app->input->set('controller', $controller);
+                $app->input->set('id', $vars['id']);
+                $app->input->set('record_id', $vars['record_id']);
+                $app->input->set('title', $vars['title']);
+                $app->input->set('view', 'edit');
                 break;
         }
 
-	    $segments = array();
+        $segments = array();
     }
 
     return $vars;
