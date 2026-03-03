@@ -307,6 +307,9 @@ class com_contentbuilderngInstallerScript
 
                 // Deduplicate plugins (and component) extension rows pointing to contentbuilder*
                 $this->deduplicateTargetPluginExtensions();
+
+                // Remove old CB Menus.
+                $this->removeLegacyAdminMenuBranchByAlias('contentbuilder');
             }
 
             // Always keep component extension rows deduped
@@ -323,8 +326,6 @@ class com_contentbuilderngInstallerScript
 
             // Normalize legacy menu title keys (COM_CONTENTBUILDER -> COM_CONTENTBUILDERNG)
             $this->repairLegacyMenuTitleKeys();
-
-            $this->removeLegacyAdminMenuBranchByAlias('contentbuilder');
             
             // Normalize storages ordering (your original behavior, update only)
             if ($type === 'update') {
