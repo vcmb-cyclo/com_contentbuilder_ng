@@ -2044,7 +2044,9 @@ var contentbuilderng = new function(){
                 $___Date = $Date->toSql();
 
                 foreach ($sendEmail as $userid) {
-                    $messages[] = "(" . $userid . ", " . $userid . ", '" . $___Date . "', '" . Text::_('COM_USERS_MAIL_SEND_FAILURE_SUBJECT') . "', '" . Text::sprintf('COM_USERS_MAIL_SEND_FAILURE_BODY', $return, $data['username']) . "')";
+                $subject   = $db->quote(Text::_('COM_USERS_MAIL_SEND_FAILURE_SUBJECT'));
+                $body      = $db->quote(Text::sprintf('COM_USERS_MAIL_SEND_FAILURE_BODY', $return, $data['username']));
+                $messages[] = "(" . $userid . ", " . $userid . ", '" . $___Date . "', " . $subject . ", " . $body . ")";
                 }
                 $q .= implode(',', $messages);
                 $db->setQuery($q);
