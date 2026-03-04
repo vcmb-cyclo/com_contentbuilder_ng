@@ -67,7 +67,7 @@ class PublicformsModel extends ListModel
         parent::__construct($config, $factory);
 
         /** @var SiteApplication $app */
-        $app = $this->app;
+        $app = Factory::getApplication();
         $this->app = $app;
         $option = 'com_contentbuilderng';
 
@@ -159,7 +159,7 @@ class PublicformsModel extends ListModel
 
     private function buildOrderBy()
     {
-        $app = Factory::getApplication();
+        $app = $this->app;
         $option = 'com_contentbuilderng';
 
         $orderby = ' Order By ordering';
