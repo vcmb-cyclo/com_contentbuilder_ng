@@ -15,7 +15,7 @@ namespace CB\Component\Contentbuilderng\Site\Model;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Pagination\Pagination;
 use Joomla\CMS\MVC\Model\ListModel;
-use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\Application\SiteApplication;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
@@ -56,6 +56,9 @@ class PublicformsModel extends ListModel
 
     private $_show_page_heading = false;
 
+    /** @var SiteApplication */
+    private SiteApplication $app;
+
     public function __construct(
         $config,
         MVCFactoryInterface $factory
@@ -63,12 +66,14 @@ class PublicformsModel extends ListModel
         // IMPORTANT : on transmet factory/app/input à BaseController
         parent::__construct($config, $factory);
 
-        $app = Factory::getApplication();
+        /** @var SiteApplication $app */
+        $app = $this->app;
+        $this->app = $app;
         $option = 'com_contentbuilderng';
 
         // Get pagination request variables
         $limit = $app->getUserStateFromRequest('global.list.limit', 'limit', $app->get('list_limit'), 'int');
-        $limitstart = Factory::getApplication()->input->getInt('limitstart', 0);
+        $limitstart = $app->input->getInt('limitstart', 0);
 
         // In case limit has been changed, adjust it
         $limitstart = ($limit != 0 ? (floor($limitstart / $limit) * $limit) : 0);
@@ -88,15 +93,15 @@ class PublicformsModel extends ListModel
         $filter_tag = $app->getUserStateFromRequest($option . 'forms_filter_tag', 'filter_tag', '', 'string');
         $this->setState('forms_filter_tag', $filter_tag);
 
-        $this->frontend = Factory::getApplication()->isClient('site');
+        $this->frontend = $app->isClient('site');
 
-        if ($this->frontend && Factory::getApplication()->input->getInt('Itemid', 0)) {
+        if ($this->frontend && $app->input->getInt('Itemid', 0)) {
             $this->_menu_item = true;
 
             // try menu item
             $forms = null;
 
-            $menu = Factory::getApplication()->getMenu();
+            $menu = $app->getMenu();
             $item = $menu->getActive();
             if (is_object($item)) {
 
