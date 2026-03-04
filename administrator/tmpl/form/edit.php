@@ -332,9 +332,9 @@ $prepareEffectOptions = [
 ];
 
 $typeDisplayAliases = [
-    'com_breezingforms' => 'BF',
-    'com_breezingforms_ng' => 'BF',
-    'com_contentbuilderng' => 'CB',
+    'com_breezingforms' => 'BreezingForms',
+    'com_breezingforms_ng' => 'BreezingForms',
+    'com_contentbuilderng' => 'ContentBuilder',
 ];
 
 $formatTypeDisplay = static function (string $type) use ($typeDisplayAliases): array {
