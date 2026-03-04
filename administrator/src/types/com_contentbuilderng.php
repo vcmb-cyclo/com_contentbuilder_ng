@@ -43,7 +43,12 @@ class contentbuilderng_com_contentbuilderng
             $this->exists = true;
             $this->bytable = $this->properties->bytable == 1 ? '' : '#__';
 
-            $db->setQuery("Select * From #__contentbuilderng_storage_fields Where storage_id = " . intval($id) . " And published = 1 Order By `ordering`");
+            $db->setQuery(
+                "Select * From #__contentbuilderng_storage_fields"
+                . " Where storage_id = " . intval($id)
+                . " And COALESCE(published, 1) = 1"
+                . " Order By `ordering`"
+            );
             $this->elements = $db->loadAssocList();
         }
     }
@@ -92,11 +97,23 @@ class contentbuilderng_com_contentbuilderng
     public function getUniqueValues($element_id, $where_field = '', $where = '')
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select `name` From #__contentbuilderng_storage_fields Where id = " . intval($element_id) . " And storage_id = " . intval($this->properties->id) . " And published = 1 Order By `ordering`");
+        $db->setQuery(
+            "Select `name` From #__contentbuilderng_storage_fields"
+            . " Where id = " . intval($element_id)
+            . " And storage_id = " . intval($this->properties->id)
+            . " And COALESCE(published, 1) = 1"
+            . " Order By `ordering`"
+        );
         $name = $db->loadResult();
         $where_add = '';
         if ($where_field != '' && $where != '') {
-            $db->setQuery("Select `name` From #__contentbuilderng_storage_fields Where id = " . intval($where_field) . " And storage_id = " . intval($this->properties->id) . " And published = 1 Order By `ordering`");
+            $db->setQuery(
+                "Select `name` From #__contentbuilderng_storage_fields"
+                . " Where id = " . intval($where_field)
+                . " And storage_id = " . intval($this->properties->id)
+                . " And COALESCE(published, 1) = 1"
+                . " Order By `ordering`"
+            );
             $where_name = $db->loadResult();
             if ($where_name) {
                 $where_add = " And `" . $where_name . "` = " . $db->quote($where) . " ";
@@ -112,7 +129,12 @@ class contentbuilderng_com_contentbuilderng
     public function getAllElements()
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $db->setQuery("Select * From #__contentbuilderng_storage_fields Where storage_id = " . intval($this->properties->id) . " And published = 1 Order By `ordering`");
+        $db->setQuery(
+            "Select * From #__contentbuilderng_storage_fields"
+            . " Where storage_id = " . intval($this->properties->id)
+            . " And COALESCE(published, 1) = 1"
+            . " Order By `ordering`"
+        );
         $e = $db->loadAssocList();
         $elements = array();
         if ($e) {
@@ -832,8 +854,8 @@ class contentbuilderng_com_contentbuilderng
 
         $date = Factory::getDate();
         $now = $date->toSql();
-        $options = null;
         foreach ($cleaned_values as $id => $value) {
+            $options = null;
 
             $outVal = '';
 

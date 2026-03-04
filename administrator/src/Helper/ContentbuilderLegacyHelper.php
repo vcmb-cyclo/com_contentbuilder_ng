@@ -1237,6 +1237,23 @@ final class ContentbuilderLegacyHelper
 
     public static function getTemplate($contentbuilderng_form_id, $record_id, array $record, array $elements_allowed, $quiet_skip = false)
     {
+        /** @var CMSApplication $app */
+        $app = Factory::getApplication();
+        $input = $app->input;
+
+        // Never evaluate details templates while rendering list or edit/new displays.
+        // (New uses edit display with record_id=0 in this component.)
+        if (
+            $app->isClient('site')
+            && (
+                $input->getCmd('view', '') === 'list'
+                || $input->getCmd('view', '') === 'edit'
+                || str_starts_with($input->getCmd('task', ''), 'list.')
+                || $input->getCmd('task', '') === 'edit.display'
+            )
+        ) {
+            return '';
+        }
 
         static $_template;
 
@@ -1559,14 +1576,6 @@ final class ContentbuilderLegacyHelper
             }
 
             $hasLabels = count($labels);
-            $db->setQuery(
-                "Select Count(1) From #__contentbuilderng_elements"
-                . " Where published = 1"
-                . " And editable = 1"
-                . " And form_id = " . intval($contentbuilderng_form_id)
-            );
-            $hasEditableElements = ((int) $db->loadResult()) > 0;
-
             $form_type = $result['type'];
             $form_reference_id = $result['reference_id'];
             $form = self::getForm($form_type, $form_reference_id);
@@ -1630,7 +1639,6 @@ final class ContentbuilderLegacyHelper
                 $db->setQuery(
                     "Select * From #__contentbuilderng_elements"
                     . " Where published = 1"
-                    . ($hasEditableElements ? " And editable = 1" : "")
                     . " And reference_id = " . $db->quote($item['id'])
                     . " And form_id = " . intval($contentbuilderng_form_id)
                     . " Order By ordering"
@@ -1706,6 +1714,7 @@ final class ContentbuilderLegacyHelper
                     $elementReferenceId = $element['reference_id'] ?? '';
                     $elementCustomInit = $element['custom_init_script'] ?? '';
                     $elementHint = $element['hint'] ?? '';
+                    $isEditable = (int) ($element['editable'] ?? 1) === 1;
 
                     if ($elementType == 'captcha' || trim($element['validations'] ?? '') != '' || trim($element['custom_validation_script'] ?? '') != '') {
                         $asterisk = ' <span class="cbRequired" style="color:red;">*</span>';
@@ -1942,6 +1951,45 @@ final class ContentbuilderLegacyHelper
                             break;
                     }
 
+                    if (!$isEditable && $elementType !== 'hidden' && $the_item !== '') {
+                        $disableControl = static function (string $tag, bool $addReadonly): string {
+                            if (preg_match('/\btype\s*=\s*([\'"])hidden\1/i', $tag)) {
+                                return $tag;
+                            }
+                            if (stripos($tag, ' disabled=') === false) {
+                                $tag = rtrim($tag, '>') . ' disabled="disabled" aria-disabled="true">';
+                            }
+                            if ($addReadonly && stripos($tag, ' readonly=') === false) {
+                                $tag = rtrim($tag, '>') . ' readonly="readonly">';
+                            }
+                            return $tag;
+                        };
+
+                        $the_item = preg_replace_callback(
+                            '/<input\b[^>]*>/i',
+                            static fn($m) => $disableControl($m[0], true),
+                            $the_item
+                        );
+                        $the_item = preg_replace_callback(
+                            '/<textarea\b[^>]*>/i',
+                            static fn($m) => $disableControl($m[0], true),
+                            $the_item
+                        );
+                        $the_item = preg_replace_callback(
+                            '/<select\b[^>]*>/i',
+                            static fn($m) => $disableControl($m[0], false),
+                            $the_item
+                        );
+                        $the_item = preg_replace_callback(
+                            '/<button\b[^>]*>/i',
+                            static fn($m) => $disableControl($m[0], false),
+                            $the_item
+                        );
+
+                        // Avoid interactive captcha refresh when field is non-editable.
+                        $the_item = preg_replace('/\s+onclick="[^"]*"/i', '', $the_item);
+                    }
+
                     if ($elementCustomInit) {
                         $the_init_scripts .= $elementCustomInit . "\n";
                     }
@@ -1990,6 +2038,9 @@ final class ContentbuilderLegacyHelper
 
     public static function createArticle($contentbuilderng_form_id, $record_id, array $record, array $elements_allowed, $title_field = '', $metadata = null, $config = array(), $full = false, $limited_options = true, $menu_cat_id = null)
     {
+        $app = Factory::getApplication();
+        $input = $app->input;
+        $skipDetailsTemplateOnSave = $app->isClient('site') && $input->getCmd('task', '') === 'edit.save';
 
         $tz = new \DateTimeZone(Factory::getApplication()->get('offset'));
 
@@ -2015,9 +2066,13 @@ final class ContentbuilderLegacyHelper
             $config['publish_down'] = null;
         }
 
-        $tpl = self::getTemplate($contentbuilderng_form_id, $record_id, $record, $elements_allowed, true);
-        if (!$tpl)
-            return 0;
+        $tpl = '';
+        if (!$skipDetailsTemplateOnSave) {
+            $tpl = self::getTemplate($contentbuilderng_form_id, $record_id, $record, $elements_allowed, true);
+            if (!$tpl) {
+                return 0;
+            }
+        }
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery("Select * From #__contentbuilderng_forms Where id = " . intval($contentbuilderng_form_id) . " And published = 1");
         $form = $db->loadAssoc();
@@ -2106,6 +2161,15 @@ final class ContentbuilderLegacyHelper
         if (is_array($article)) {
             $alias = $article['alias'];
             $article = $article['article_id'];
+        }
+
+        if ($skipDetailsTemplateOnSave && (int) $article > 0) {
+            $db->setQuery("Select introtext, fulltext From #__content Where id = " . (int) $article);
+            $existingContent = $db->loadAssoc();
+            if (is_array($existingContent)) {
+                $introtext = (string) ($existingContent['introtext'] ?? '');
+                $fulltext = (string) ($existingContent['fulltext'] ?? '');
+            }
         }
 
         // params
@@ -2526,12 +2590,9 @@ final class ContentbuilderLegacyHelper
             $db->execute();
         }
 
-        if ($article) {
-            $row = new \Joomla\CMS\Table\Content($db);
-            if ($row->load($article)) {
-                $row->reorder('catid = ' . (int) $form['default_category'] . ' AND state >= 0');
-            }
-        }
+        // Intentionally skip Joomla content reorder on each save.
+        // Reorder may lock many rows in #__content and cause deadlocks
+        // under concurrent article updates.
 
         // cleaning cache
         // Trigger the onContentCleanCache event.

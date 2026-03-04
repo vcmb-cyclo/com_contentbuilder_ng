@@ -44,8 +44,16 @@ $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
 $wa->useScript('com_contentbuilderng.contentbuilderng');
 
 ?>
-<?php $wa->addInlineStyle($this->theme_css); ?>
-<?php $wa->addInlineScript($this->theme_js); ?>
+<?php
+$themeCss = trim((string) ($this->theme_css ?? ''));
+$themeJs = trim((string) ($this->theme_js ?? ''));
+if ($themeCss !== '') {
+    $wa->addInlineStyle($themeCss);
+}
+if ($themeJs !== '') {
+    $wa->addInlineScript($themeJs);
+}
+?>
 <script type="text/javascript">
     <!--
     function contentbuilderng_state() {

@@ -116,8 +116,16 @@ $wa->useScript('com_contentbuilderng.contentbuilderng');
 <?php if ($this->xreference)
     $document->setMetaData('xreference', $this->xreference); ?>
 
-<?php $wa->addInlineStyle($this->theme_css); ?>
-<?php $wa->addInlineScript($this->theme_js); ?>
+<?php
+$themeCss = trim((string) ($this->theme_css ?? ''));
+$themeJs = trim((string) ($this->theme_js ?? ''));
+if ($themeCss !== '') {
+    $wa->addInlineStyle($themeCss);
+}
+if ($themeJs !== '') {
+    $wa->addInlineScript($themeJs);
+}
+?>
 <?php
 $wa->addInlineStyle(
     <<<'CSS'
