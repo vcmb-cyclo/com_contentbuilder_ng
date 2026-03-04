@@ -412,10 +412,11 @@ class HtmlView extends BaseHtmlView
 			ToolbarHelper::title($subject->page_title, 'logo_left');
 		}
 
-			$themePlugin = (string) ($subject->theme_plugin ?? '');
-			if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
-				PluginHelper::importPlugin('contentbuilderng_themes', 'joomla6');
-			}
+				$themePlugin = trim((string) ($subject->theme_plugin ?? ''));
+				if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
+					$themePlugin = 'joomla6';
+					PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin);
+				}
 		$dispatcher = Factory::getApplication()->getDispatcher();
         $eventResult = $dispatcher->dispatch('onEditableTemplateCss', new \Joomla\CMS\Event\GenericEvent('onEditableTemplateCss', ['theme' => $themePlugin]));
         $results = $eventResult->getArgument('result') ?: [];

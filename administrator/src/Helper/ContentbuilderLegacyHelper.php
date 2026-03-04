@@ -794,20 +794,28 @@ final class ContentbuilderLegacyHelper
             return;
         }
 
-        if ($plugin && !PluginHelper::isEnabled('contentbuilderng_themes', $plugin)) {
-            $msg = "ContentBuilder NG theme plugin not enabled: contentbuilderng_themes/{$plugin}";
+        $requestedPlugin = trim((string) $plugin);
+        $activePlugin = $requestedPlugin !== '' ? $requestedPlugin : 'joomla6';
+
+        if (!PluginHelper::isEnabled('contentbuilderng_themes', $activePlugin)) {
+            $msg = "ContentBuilder NG theme plugin not enabled: contentbuilderng_themes/{$activePlugin}";
             Log::add($msg, Log::WARNING, 'com_contentbuilderng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }
 
-        PluginHelper::importPlugin('contentbuilderng_themes', $plugin);
+        if (!PluginHelper::importPlugin('contentbuilderng_themes', $activePlugin)) {
+            $activePlugin = 'joomla6';
+            PluginHelper::importPlugin('contentbuilderng_themes', $activePlugin);
+            $msg = 'ContentBuilder NG theme fallback applied for details sample: contentbuilderng_themes/joomla6';
+            Log::add($msg, Log::WARNING, 'com_contentbuilderng');
+        }
 
         $dispatcher = Factory::getApplication()->getDispatcher();
-        $eventResult = $dispatcher->dispatch('onContentTemplateSample', new \Joomla\CMS\Event\GenericEvent('onContentTemplateSample', [$contentbuilderng_form_id, $form, 'theme' => $plugin]));
+        $eventResult = $dispatcher->dispatch('onContentTemplateSample', new \Joomla\CMS\Event\GenericEvent('onContentTemplateSample', [$contentbuilderng_form_id, $form, 'theme' => $activePlugin]));
         $results = $eventResult->getArgument('result') ?: [];
         $out = implode('', $results);
-        if ($plugin && $out === '') {
-            $msg = "ContentBuilder NG theme plugin returned empty sample: contentbuilderng_themes/{$plugin}";
+        if ($activePlugin !== '' && $out === '') {
+            $msg = "ContentBuilder NG theme plugin returned empty sample: contentbuilderng_themes/{$activePlugin}";
             Log::add($msg, Log::WARNING, 'com_contentbuilderng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }
@@ -853,20 +861,28 @@ final class ContentbuilderLegacyHelper
             return;
         }
 
-        if ($plugin && !PluginHelper::isEnabled('contentbuilderng_themes', $plugin)) {
-            $msg = "ContentBuilder NG theme plugin not enabled: contentbuilderng_themes/{$plugin}";
+        $requestedPlugin = trim((string) $plugin);
+        $activePlugin = $requestedPlugin !== '' ? $requestedPlugin : 'joomla6';
+
+        if (!PluginHelper::isEnabled('contentbuilderng_themes', $activePlugin)) {
+            $msg = "ContentBuilder NG theme plugin not enabled: contentbuilderng_themes/{$activePlugin}";
             Log::add($msg, Log::WARNING, 'com_contentbuilderng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }
 
-        PluginHelper::importPlugin('contentbuilderng_themes', $plugin);
+        if (!PluginHelper::importPlugin('contentbuilderng_themes', $activePlugin)) {
+            $activePlugin = 'joomla6';
+            PluginHelper::importPlugin('contentbuilderng_themes', $activePlugin);
+            $msg = 'ContentBuilder NG theme fallback applied for editable sample: contentbuilderng_themes/joomla6';
+            Log::add($msg, Log::WARNING, 'com_contentbuilderng');
+        }
 
         $dispatcher = Factory::getApplication()->getDispatcher();
-        $eventResult = $dispatcher->dispatch('onEditableTemplateSample', new \Joomla\CMS\Event\GenericEvent('onEditableTemplateSample', [$contentbuilderng_form_id, $form, 'theme' => $plugin]));
+        $eventResult = $dispatcher->dispatch('onEditableTemplateSample', new \Joomla\CMS\Event\GenericEvent('onEditableTemplateSample', [$contentbuilderng_form_id, $form, 'theme' => $activePlugin]));
         $results = $eventResult->getArgument('result') ?: [];
         $out = implode('', $results);
-        if ($plugin && $out === '') {
-            $msg = "ContentBuilder NG theme plugin returned empty editable sample: contentbuilderng_themes/{$plugin}";
+        if ($activePlugin !== '' && $out === '') {
+            $msg = "ContentBuilder NG theme plugin returned empty editable sample: contentbuilderng_themes/{$activePlugin}";
             Log::add($msg, Log::WARNING, 'com_contentbuilderng');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
         }

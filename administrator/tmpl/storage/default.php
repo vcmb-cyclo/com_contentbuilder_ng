@@ -97,10 +97,10 @@ $wa->addInlineStyle(
     . '.cb-storage-pagination .cb-storage-pages{margin-left:auto}'
     . '.cb-storage-pagination .cb-storage-pages .pagination{margin:0!important;text-align:right!important}'
     . '.cb-storage-pagination .cb-storage-pages .pagination ul{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:.35rem;margin:0;padding:0}'
-    . '.cb-save-animate{background-color:var(--alert-heading-bg,var(--bs-success,#198754))!important;background-image:none!important;border-color:var(--bs-success,#198754)!important;color:#fff!important;filter:brightness(1.2)!important;box-shadow:0 0 0 .38rem rgba(25,135,84,.36)!important;transition:none!important}'
-    . '.cb-save-animate .fa-check,.cb-save-animate .fa-xmark,.cb-save-animate .fa-xmark-new{color:#fff!important}'
-    . '.cb-csv-preview-panel{margin-top:1rem;border:1px solid #dbe3ee;border-radius:.5rem;background:#fff}'
-    . '.cb-csv-preview-panel .cb-csv-preview-head{padding:.5rem .75rem;border-bottom:1px solid #edf1f6;font-weight:600}'
+    . '.cb-save-animate{background-color:var(--alert-heading-bg,var(--bs-success,#198754))!important;background-image:none!important;border-color:var(--bs-success,#198754)!important;color:var(--bs-white)!important;filter:brightness(1.2)!important;box-shadow:0 0 0 .38rem rgba(25,135,84,.36)!important;transition:none!important}'
+    . '.cb-save-animate .fa-check,.cb-save-animate .fa-xmark,.cb-save-animate .fa-xmark-new{color:var(--bs-white)!important}'
+    . '.cb-csv-preview-panel{margin-top:1rem;border:1px solid var(--bs-border-color);border-radius:.5rem;background:var(--bs-body-bg)}'
+    . '.cb-csv-preview-panel .cb-csv-preview-head{padding:.5rem .75rem;border-bottom:1px solid var(--bs-border-color);font-weight:600}'
     . '.cb-csv-preview-panel .table{margin-bottom:0}'
     . '.cb-csv-preview-panel .table td,.cb-csv-preview-panel .table th{vertical-align:middle}'
 );
@@ -1038,7 +1038,7 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', Text::_('COM_CONTENTBUIL
     ?>
 
     <div class="mb-2">
-        <span class="badge text-bg-light border">
+        <span class="badge bg-body-tertiary text-body border">
             <?php echo Text::_('COM_CONTENTBUILDERNG_ID'); ?> #<?php echo (int) ($this->item->id ?? 0); ?>
         </span>
     </div>

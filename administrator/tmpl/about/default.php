@@ -306,21 +306,21 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
         text-decoration: none;
     }
     .cb-about-intro-link--vcmb {
-        color: #0d6efd;
-        background: #eaf2ff;
-        border: 1px solid #b9d2ff;
+        color: var(--bs-primary-text-emphasis);
+        background: var(--bs-primary-bg-subtle);
+        border: 1px solid var(--bs-primary-border-subtle);
     }
     .cb-about-intro-link--github {
-        color: #ffffff;
-        background: linear-gradient(135deg, #0f172a 0%, #1f2937 100%);
-        border: 1px solid #111827;
-        box-shadow: 0 .35rem .9rem rgba(15, 23, 42, .26);
+        color: var(--bs-secondary-text-emphasis);
+        background: var(--bs-secondary-bg-subtle);
+        border: 1px solid var(--bs-secondary-border-subtle);
+        box-shadow: 0 .35rem .9rem rgba(15, 23, 42, .16);
     }
     .cb-about-intro-link--license {
-        color: #3f2d00;
-        background: linear-gradient(135deg, #fff3cd 0%, #ffe08a 100%);
-        border: 1px solid #ffcf66;
-        box-shadow: 0 .25rem .75rem rgba(191, 144, 0, .22);
+        color: var(--bs-warning-text-emphasis);
+        background: var(--bs-warning-bg-subtle);
+        border: 1px solid var(--bs-warning-border-subtle);
+        box-shadow: 0 .25rem .75rem rgba(191, 144, 0, .16);
     }
     @media (max-width: 767.98px) {
         .cb-about-intro {
@@ -331,23 +331,23 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
         background:
             radial-gradient(circle at 100% 0%, rgba(13, 110, 253, .10), transparent 48%),
             radial-gradient(circle at 0% 100%, rgba(25, 135, 84, .09), transparent 44%),
-            linear-gradient(140deg, #f8fafc 0%, #ffffff 72%);
-        border: 1px solid #dbe4ee;
+            linear-gradient(140deg, var(--bs-tertiary-bg) 0%, var(--bs-body-bg) 72%);
+        border: 1px solid var(--bs-border-color);
         border-radius: 1rem;
         overflow: hidden;
     }
     .cb-about-version-header {
-        border-bottom: 1px dashed #d2dbe6;
+        border-bottom: 1px dashed var(--bs-border-color);
         padding-bottom: .75rem;
     }
     .cb-about-version-title {
-        color: #172b4d;
+        color: var(--bs-emphasis-color);
         font-weight: 700;
         letter-spacing: .01em;
     }
     .cb-about-version-badge {
-        background-color: #172b4d;
-        color: #ffffff;
+        background-color: var(--bs-secondary-bg);
+        color: var(--bs-emphasis-color);
         border-radius: 999px;
         font-size: .72rem;
         letter-spacing: .04em;
@@ -360,9 +360,9 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
         flex-direction: column;
         gap: .35rem;
         height: 100%;
-        border: 1px solid #dce3eb;
+        border: 1px solid var(--bs-border-color);
         border-radius: .9rem;
-        background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+        background: linear-gradient(180deg, var(--bs-body-bg) 0%, var(--bs-tertiary-bg) 100%);
         padding: 1.05rem 1.05rem .95rem;
         box-shadow: 0 .5rem 1rem rgba(15, 23, 42, .06);
         transition: transform .2s ease, box-shadow .2s ease;
@@ -403,24 +403,24 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
         font-size: .72rem;
         font-weight: 700;
         letter-spacing: .04em;
-        background-color: #e8f1ff;
-        color: #0d6efd;
+        background-color: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary-text-emphasis);
     }
     .cb-about-version-tile--date .cb-about-version-icon {
-        background-color: #e7f6ed;
-        color: #198754;
+        background-color: var(--bs-success-bg-subtle);
+        color: var(--bs-success-text-emphasis);
     }
     .cb-about-version-tile--author .cb-about-version-icon {
-        background-color: #fff1e8;
-        color: #fd7e14;
+        background-color: var(--bs-warning-bg-subtle);
+        color: var(--bs-warning-text-emphasis);
     }
     .cb-about-version-tile--license .cb-about-version-icon {
-        background-color: #fff6d6;
-        color: #a87400;
+        background-color: var(--bs-warning-bg-subtle);
+        color: var(--bs-warning-text-emphasis);
     }
     .cb-about-version-label {
         margin: .15rem 0 0;
-        color: #6c757d;
+        color: var(--bs-secondary-color);
         font-size: .74rem;
         font-weight: 700;
         letter-spacing: .05em;
@@ -428,7 +428,7 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
     }
     .cb-about-version-value {
         margin: 0;
-        color: #1b2a41;
+        color: var(--bs-emphasis-color);
         font-size: 1.22rem;
         font-weight: 700;
         line-height: 1.25;
@@ -443,9 +443,9 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
         display: flex;
         align-items: center;
         gap: .5rem;
-        background-color: #eaf7ef;
-        border-color: #b7e1c1;
-        color: #0f5132;
+        background-color: var(--bs-success-bg-subtle);
+        border-color: var(--bs-success-border-subtle);
+        color: var(--bs-success-text-emphasis);
     }
     .cb-audit-ok-alert::before {
         content: "\2713";
@@ -455,17 +455,17 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
         width: 1.2rem;
         height: 1.2rem;
         border-radius: 50%;
-        background-color: #198754;
-        color: #ffffff;
+        background-color: var(--bs-success);
+        color: var(--bs-white);
         font-weight: 700;
         font-size: .78rem;
         line-height: 1;
         flex: 0 0 auto;
     }
     .cb-audit-warning-alert {
-        border-color: #ffda9f;
-        background-color: #fff4df;
-        color: #664d03;
+        border-color: var(--bs-warning-border-subtle);
+        background-color: var(--bs-warning-bg-subtle);
+        color: var(--bs-warning-text-emphasis);
     }
     .cb-audit-warning-alert .cb-audit-warning-title {
         font-weight: 600;
@@ -491,10 +491,10 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
         max-height: 400px;
         min-height: 280px;
         overflow-y: auto;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--bs-border-color);
         border-radius: .5rem;
         padding: .65rem .75rem;
-        background: #fff;
+        background: var(--bs-body-bg);
     }
     .cb-config-section-item {
         display: grid;
@@ -509,7 +509,7 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
         display: block;
         margin-top: .15rem;
         font-size: .78rem;
-        color: #6c757d;
+        color: var(--bs-secondary-color);
         line-height: 1.25;
     }
     .cb-import-log-scroll {
@@ -1198,7 +1198,7 @@ $formatAuditIssueList = static function (array $values, int $limit = 8): string 
                     <?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_LOG_NO_CONTENT'); ?>
                 </div>
             <?php else : ?>
-                <pre class="bg-light p-3 border rounded small mb-0" style="max-height: 420px; overflow: auto;"><?php echo htmlspecialchars($logDisplayContent, ENT_QUOTES, 'UTF-8'); ?></pre>
+                <pre class="bg-body-tertiary text-body p-3 border rounded small mb-0" style="max-height: 420px; overflow: auto;"><?php echo htmlspecialchars($logDisplayContent, ENT_QUOTES, 'UTF-8'); ?></pre>
             <?php endif; ?>
         <?php endif; ?>
     </div>

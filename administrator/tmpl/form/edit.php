@@ -28,8 +28,8 @@ $app = Factory::getApplication();
 $session = $app->getSession();
 $wa = $app->getDocument()->getWebAssetManager();
 $wa->addInlineStyle(
-    '.saveorder.btn{background-color:#fff;border-color:#ced4da;color:#1b1b1b}'
-        . '.saveorder.btn:hover{background-color:#f8f9fa}'
+    '.saveorder.btn{background-color:var(--bs-body-bg);border-color:var(--bs-border-color);color:var(--bs-body-color)}'
+        . '.saveorder.btn:hover{background-color:var(--bs-secondary-bg)}'
         . '.cb-display-in-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}'
         . '.cb-order-slot{display:inline-block;width:24px;text-align:center}'
         . '.cb-order-placeholder{visibility:hidden}'
@@ -44,14 +44,14 @@ $wa->addInlineStyle(
         . '.cb-prepare-tools .btn{text-wrap:nowrap}'
         . '.cb-prepare-tools .cb-snippet-select{display:inline-block;width:auto;min-width:12ch;max-width:42ch;flex:0 0 auto}'
         . '.cb-prepare-tools .cb-effect-select{min-width:170px;max-width:240px}'
-        . '.cb-upload-box{margin:0 0 1rem;padding:.85rem .95rem;border:1px solid #dbe1ea;border-radius:12px;background:linear-gradient(180deg,#f8fafc,#f1f5f9)}'
-        . '.cb-save-animate{background-color:var(--alert-heading-bg,var(--bs-success,#198754))!important;background-image:none!important;border-color:var(--bs-success,#198754)!important;color:#fff!important;filter:brightness(1.2)!important;box-shadow:0 0 0 .38rem rgba(25,135,84,.36)!important;transition:none!important}'
-        . '.cb-save-animate .fa-check,.cb-save-animate .fa-xmark,.cb-save-animate .fa-xmark-new{color:#fff!important}'
-        . '#view-pane .nav-tabs,#perm-pane .nav-tabs{display:flex;gap:.4rem;flex-wrap:wrap;padding:.42rem;margin-bottom:.9rem;border:1px solid #dbe1ea;border-bottom:1px solid #dbe1ea;border-radius:14px;background:linear-gradient(180deg,#f7f9fc,#eef3f9)}'
-        . '#view-pane .nav-tabs .nav-link,#view-pane .nav-tabs [role="tab"],#perm-pane .nav-tabs .nav-link,#perm-pane .nav-tabs [role="tab"]{border:1px solid transparent;border-radius:10px;padding:.45rem .8rem;font-weight:600;color:#334155;background:transparent;transition:all .18s ease}'
-        . '#view-pane .nav-tabs .nav-link:hover,#view-pane .nav-tabs [role="tab"]:hover,#perm-pane .nav-tabs .nav-link:hover,#perm-pane .nav-tabs [role="tab"]:hover{background:#fff;border-color:#cfd8e3;color:#0f172a;transform:translateY(-1px)}'
-        . '#view-pane .nav-tabs .nav-link:focus-visible,#view-pane .nav-tabs [role="tab"]:focus-visible,#perm-pane .nav-tabs .nav-link:focus-visible,#perm-pane .nav-tabs [role="tab"]:focus-visible{outline:2px solid #1d4ed8;outline-offset:1px}'
-        . '#view-pane .nav-tabs .nav-link.active,#view-pane .nav-tabs [role="tab"][aria-selected="true"],#perm-pane .nav-tabs .nav-link.active,#perm-pane .nav-tabs [role="tab"][aria-selected="true"]{color:#fff;background:linear-gradient(135deg,#0f4db8,#0ea5e9);border-color:#0f4db8;box-shadow:0 4px 12px rgba(15,77,184,.28)}'
+        . '.cb-upload-box{margin:0 0 1rem;padding:.85rem .95rem;border:1px solid var(--bs-border-color);border-radius:12px;background:linear-gradient(180deg,var(--bs-tertiary-bg),var(--bs-body-bg))}'
+        . '.cb-save-animate{background-color:var(--alert-heading-bg,var(--bs-success,#198754))!important;background-image:none!important;border-color:var(--bs-success,#198754)!important;color:var(--bs-white)!important;filter:brightness(1.2)!important;box-shadow:0 0 0 .38rem rgba(25,135,84,.36)!important;transition:none!important}'
+        . '.cb-save-animate .fa-check,.cb-save-animate .fa-xmark,.cb-save-animate .fa-xmark-new{color:var(--bs-white)!important}'
+        . '#view-pane .nav-tabs,#perm-pane .nav-tabs{display:flex;gap:.4rem;flex-wrap:wrap;padding:.42rem;margin-bottom:.9rem;border:1px solid var(--bs-border-color);border-bottom:1px solid var(--bs-border-color);border-radius:14px;background:linear-gradient(180deg,var(--bs-tertiary-bg),var(--bs-secondary-bg))}'
+        . '#view-pane .nav-tabs .nav-link,#view-pane .nav-tabs [role="tab"],#perm-pane .nav-tabs .nav-link,#perm-pane .nav-tabs [role="tab"]{border:1px solid transparent;border-radius:10px;padding:.45rem .8rem;font-weight:600;color:var(--bs-secondary-color);background:transparent;transition:all .18s ease}'
+        . '#view-pane .nav-tabs .nav-link:hover,#view-pane .nav-tabs [role="tab"]:hover,#perm-pane .nav-tabs .nav-link:hover,#perm-pane .nav-tabs [role="tab"]:hover{background:var(--bs-body-bg);border-color:var(--bs-border-color);color:var(--bs-emphasis-color);transform:translateY(-1px)}'
+        . '#view-pane .nav-tabs .nav-link:focus-visible,#view-pane .nav-tabs [role="tab"]:focus-visible,#perm-pane .nav-tabs .nav-link:focus-visible,#perm-pane .nav-tabs [role="tab"]:focus-visible{outline:2px solid var(--bs-primary);outline-offset:1px}'
+        . '#view-pane .nav-tabs .nav-link.active,#view-pane .nav-tabs [role="tab"][aria-selected="true"],#perm-pane .nav-tabs .nav-link.active,#perm-pane .nav-tabs [role="tab"][aria-selected="true"]{color:var(--bs-white);background:var(--bs-primary);border-color:var(--bs-primary);box-shadow:0 4px 12px rgba(13,110,253,.28)}'
         . '@media (max-width:991.98px){#view-pane .nav-tabs,#perm-pane .nav-tabs{flex-wrap:nowrap;overflow:auto;-webkit-overflow-scrolling:touch}#view-pane .nav-tabs .nav-link,#view-pane .nav-tabs [role="tab"],#perm-pane .nav-tabs .nav-link,#perm-pane .nav-tabs [role="tab"]{white-space:nowrap}}'
         . '@keyframes cb-blink{50%{opacity:0}}'
 );
@@ -1769,9 +1769,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     <select class="form-select-sm w-auto" name="jform[theme_plugin]" id="theme_plugin">
                                         <?php
                                         foreach ($this->theme_plugins as $theme_plugin) {
-                                            $isDarkTheme = ((string) $theme_plugin === 'dark');
                                         ?>
-                                            <option value="<?php echo htmlspecialchars((string) $theme_plugin, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $theme_plugin == $this->item->theme_plugin ? ' selected="selected"' : ''; ?><?php echo $isDarkTheme ? ' style="background:#111;color:#fff;font-weight:700;"' : ''; ?>>
+                                            <option value="<?php echo htmlspecialchars((string) $theme_plugin, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $theme_plugin == $this->item->theme_plugin ? ' selected="selected"' : ''; ?>>
                                                 <?php echo htmlspecialchars((string) $theme_plugin, ENT_QUOTES, 'UTF-8'); ?>
                                             </option>
                                         <?php
@@ -1809,37 +1808,6 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <style>
-                            #theme_plugin option[value="dark"] {
-                                background: #111;
-                                color: #fff;
-                                font-weight: 700;
-                            }
-                        </style>
-                        <script>
-                            (function() {
-                                var themeSelect = document.getElementById('theme_plugin');
-                                if (!themeSelect) {
-                                    return;
-                                }
-
-                                var applyThemeSelectStyle = function() {
-                                    if (themeSelect.value === 'dark') {
-                                        themeSelect.style.backgroundColor = '#111';
-                                        themeSelect.style.color = '#fff';
-                                        themeSelect.style.borderColor = '#333';
-                                    } else {
-                                        themeSelect.style.backgroundColor = '';
-                                        themeSelect.style.color = '';
-                                        themeSelect.style.borderColor = '';
-                                    }
-                                };
-
-                                themeSelect.addEventListener('change', applyThemeSelectStyle);
-                                applyThemeSelectStyle();
-                            })();
-                        </script>
-
                         <?php
                         if ($this->item->id < 1) {
                         ?>
@@ -1942,7 +1910,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         ?>
 
                         <?php ob_start(); ?>
-                        <div class="bg-light p-3" id="advancedOptions">
+                        <div class="bg-body-tertiary p-3" id="advancedOptions">
 
                             <fieldset>
                                 <legend>
@@ -1982,8 +1950,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
                                 <div class="row gx-3 gy-1 mt-0">
                                     <div class="col-12 col-xl-4">
-                                        <div class="border rounded bg-white p-3 h-100">
-                                            <h4 class="h6 text-secondary mb-2">
+                                        <div class="border rounded bg-body p-3 h-100">
+                                            <h4 class="h6 text-body-secondary mb-2">
                                                 <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_DATA_OPTIONS'); ?>
                                             </h4>
                                             <div class="d-flex flex-wrap align-items-center gap-3">
@@ -2064,8 +2032,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     </div>
 
                                     <div class="col-12 col-xl-4">
-                                        <div class="border rounded bg-white p-3 h-100">
-                                            <h4 class="h6 text-secondary mb-2">
+                                        <div class="border rounded bg-body p-3 h-100">
+                                            <h4 class="h6 text-body-secondary mb-2">
                                                 <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_BUTTON_OPTIONS'); ?>
                                             </h4>
                                             <div class="d-flex flex-wrap align-items-center gap-3">
@@ -2120,8 +2088,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                     </div>
 
                                     <div class="col-12 col-xl-4">
-                                        <div class="border rounded bg-white p-3 h-100">
-                                            <h4 class="h6 text-secondary mb-2">
+                                        <div class="border rounded bg-body p-3 h-100">
+                                            <h4 class="h6 text-body-secondary mb-2">
                                                 <?php echo Text::_('COM_CONTENTBUILDERNG_DISPLAY_OPTIONS'); ?>
                                             </h4>
                                             <div class="d-flex flex-wrap align-items-center gap-3">
@@ -3392,7 +3360,7 @@ TXT;
             $title = Text::_('COM_CONTENTBUILDERNG_EMAIL_ADMINS');
 
         ?>
-            <div id="email_admins" style="cursor:pointer; width: 100%; background-color: #ffffff;"
+            <div id="email_admins" style="cursor:pointer; width: 100%; background-color: var(--bs-body-bg);"
                 onclick="if(document.adminForm.email_admins.value=='none'){document.adminForm.email_admins.value='';document.getElementById('email_admins_div').style.display='';}else{document.adminForm.email_admins.value='none';document.getElementById('email_admins_div').style.display='none';}">
                 <h3>
                     <?php echo $title; ?>
@@ -3504,7 +3472,7 @@ TXT;
             $title = Text::_('COM_CONTENTBUILDERNG_EMAIL_USERS');
 
             ?>
-            <div id="email_users" style="cursor:pointer; width: 100%; background-color: #ffffff;">
+            <div id="email_users" style="cursor:pointer; width: 100%; background-color: var(--bs-body-bg);">
                 <h3>
                     <?php echo $title; ?>
                 </h3>
@@ -3730,13 +3698,13 @@ TXT;
                 </tr>
             </thead>
             <tr>
-                <td class="bg-light"></td>
+                <td class="bg-body-tertiary"></td>
                 <?php foreach ($permissionColumns as $permissionColumn) : ?>
                     <?php
                     $permKey = $permissionColumn['key'];
                     $permId = 'perms_fe_select_' . $permKey;
                     ?>
-                    <td class="bg-light">
+                    <td class="bg-body-tertiary">
                         <?php echo $renderCheckbox('', $permId, false, $permKey, ['onclick' => "contentbuilderng_selectAll(this,'fe')"]); ?>
                     </td>
                 <?php endforeach; ?>
