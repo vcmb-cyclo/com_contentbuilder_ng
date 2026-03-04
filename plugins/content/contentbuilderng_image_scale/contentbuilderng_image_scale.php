@@ -9,6 +9,7 @@
 /** ensure this file is being included by a parent file */
 \defined('_JEXEC') or die ('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Factory;
 use Joomla\Filesystem\Folder;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Filesystem\File;
@@ -21,7 +22,7 @@ use Joomla\Event\SubscriberInterface;
 use Joomla\Registry\Registry;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
-use use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
+use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 
 set_error_handler('myErrorHandler');
 register_shutdown_function('fatalErrorShutdownHandler');

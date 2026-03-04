@@ -16,7 +16,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\SubscriberInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
-
+use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 class plgContentContentbuilderng_permission_observer extends CMSPlugin implements SubscriberInterface
 {
     public static function getSubscribedEvents(): array
@@ -58,7 +58,7 @@ class plgContentContentbuilderng_permission_observer extends CMSPlugin implement
             $data = $db->loadAssoc();
 
             require_once (JPATH_SITE .'/administrator/components/com_contentbuilderng/src/contentbuilderng.php');
-            $form = \CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory::getForm($data['type'], $data['reference_id']);
+            $form = FormSourceFactory::getForm($data['type'], $data['reference_id']);
 
             if (!$form || !$form->exists) {
                 return true;

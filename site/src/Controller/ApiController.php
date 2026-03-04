@@ -23,6 +23,7 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Input\Input;
+use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 
 class ApiController extends BaseController
 {
@@ -232,7 +233,7 @@ class ApiController extends BaseController
             return ['items' => [], 'pagination' => ['total' => 0, 'limit' => 0, 'start' => 0]];
         }
 
-        $form = \CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory::getForm((string) $row['type'], (string) $row['reference_id']);
+        $form = FormSourceFactory::getForm((string) $row['type'], (string) $row['reference_id']);
         if (!$form || !is_object($form) || !method_exists($form, 'getRecord')) {
             return ['items' => [], 'pagination' => ['total' => 0, 'limit' => 0, 'start' => 0]];
         }
@@ -396,7 +397,7 @@ class ApiController extends BaseController
             return null;
         }
 
-        $form = \CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory::getForm((string) $row['type'], (string) $row['reference_id']);
+        $form = FormSourceFactory::getForm((string) $row['type'], (string) $row['reference_id']);
         if (!$form || !is_object($form) || !method_exists($form, 'getRecord')) {
             return null;
         }
@@ -572,7 +573,7 @@ class ApiController extends BaseController
             throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
         }
 
-        $form = \CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory::getForm((string) $row['type'], (string) $row['reference_id']);
+        $form = FormSourceFactory::getForm((string) $row['type'], (string) $row['reference_id']);
         if (!$form || !is_object($form)) {
             throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
         }

@@ -18,6 +18,7 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\SubscriberInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 
 class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberInterface
 {
@@ -294,7 +295,7 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
             foreach ($views as $view) {
                 if (!isset($typeview[$view['type'] . $view['reference_id']])) {
                     $typeview[$view['type'] . $view['reference_id']] = true;
-                    $form = \CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory::getForm($view['type'], $view['reference_id']);
+                    $form = FormSourceFactory::getForm($view['type'], $view['reference_id']);
                     if (is_object($form)) {
                         $form->synchRecords();
                     }
@@ -562,7 +563,7 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
 
                 if (is_array($data)) {
 
-                    $form = \CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory::getForm($data['type'], $data['reference_id']);
+                    $form = FormSourceFactory::getForm($data['type'], $data['reference_id']);
                     if (!$form || !$form->exists) {
                         return;
                     }

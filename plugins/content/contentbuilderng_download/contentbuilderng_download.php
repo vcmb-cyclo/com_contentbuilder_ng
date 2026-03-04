@@ -9,6 +9,7 @@
 /** ensure this file is being included by a parent file */
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\File;
@@ -19,7 +20,7 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\SubscriberInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
-use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory
+use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 class plgContentContentbuilderng_download extends CMSPlugin implements SubscriberInterface
 {
     /**
@@ -108,7 +109,7 @@ class plgContentContentbuilderng_download extends CMSPlugin implements Subscribe
         } elseif (function_exists('finfo_open')) {
             $finfo = finfo_open(FILEINFO_MIME);
             $mimetype = finfo_file($finfo, $filename);
-            finfo_close($finfo);
+            // finfo_close($finfo);
             return $mimetype;
         } else {
             return 'application/octet-stream';
@@ -368,7 +369,7 @@ class plgContentContentbuilderng_download extends CMSPlugin implements Subscribe
                                                 if (function_exists('finfo_open')) {
                                                     $finfo = finfo_open(FILEINFO_MIME_TYPE);
                                                     $mime = finfo_file($finfo, $the_value);
-                                                    finfo_close($finfo);
+                                                    // finfo_close($finfo);
                                                 } else {
                                                     $mime = $this->mime_content_type($the_value);
                                                 }

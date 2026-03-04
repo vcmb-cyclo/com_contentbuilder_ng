@@ -21,6 +21,7 @@ use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Input\Input;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 
 class DetailsController extends BaseController
 {
@@ -67,7 +68,7 @@ class DetailsController extends BaseController
 
             $db->setQuery('Select `type`, `reference_id` From #__contentbuilderng_forms Where id = ' . intval($this->siteApp->input->getInt('id', 0)) . ' And published = 1');
             $form = $db->loadAssoc();
-            $form = \CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory::getForm($form['type'], $form['reference_id']);
+            $form = FormSourceFactory::getForm($form['type'], $form['reference_id']);
 
             $labels = $form->getElementLabels();
             $ids = array();
