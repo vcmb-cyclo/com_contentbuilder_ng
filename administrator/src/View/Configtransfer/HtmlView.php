@@ -34,6 +34,11 @@ class HtmlView extends BaseHtmlView
 
     public function display($tpl = null)
     {
+        if ($this->getLayout() === 'help') {
+            parent::display($tpl);
+            return;
+        }
+
         /** @var AdministratorApplication $app */
         $app = Factory::getApplication();
         $user = $app->getIdentity();
@@ -70,11 +75,10 @@ class HtmlView extends BaseHtmlView
             'logo_left'
         );
 
-        ToolbarHelper::custom('configtransfer.back', 'arrow-left', '', 'JTOOLBAR_BACK', false);
         ToolbarHelper::help(
-            'COM_CONTENTBUILDERNG_HELP_ABOUT_TITLE',
+            'COM_CONTENTBUILDERNG_HELP_CONFIG_TRANSFER_TITLE',
             false,
-            Uri::base() . 'index.php?option=com_contentbuilderng&view=about&layout=help&tmpl=component'
+            Uri::base() . 'index.php?option=com_contentbuilderng&view=configtransfer&layout=help&tmpl=component'
         );
 
         $this->mode = $app->input->getCmd('mode', 'export');
