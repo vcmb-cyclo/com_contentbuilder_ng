@@ -77,34 +77,42 @@ class HtmlView extends BaseHtmlView
 
         /** @var Toolbar $toolbar */
         $toolbar = $document->getToolbar('toolbar');
-        $toolbar->standardButton('about_audit')
+        $maintenanceDropdown = $toolbar->dropdownButton('about-maintenance-group');
+        $maintenanceDropdown->text(Text::_('JTOOLBAR_ACTIONS'));
+        $maintenanceDropdown->toggleSplit(false);
+        $maintenanceDropdown->icon('fa fa-wrench');
+        $maintenanceDropdown->buttonClass('btn btn-action');
+        $maintenanceDropdown->listCheck(false);
+
+        $maintenanceChildToolbar = $maintenanceDropdown->getChildToolbar();
+        $maintenanceChildToolbar->standardButton('about_audit')
             ->task('about.runAudit')
             ->text('COM_CONTENTBUILDERNG_ABOUT_AUDIT')
             ->icon('fa fa-search')
             ->listCheck(false);
 
-        $toolbar->standardButton('about_migrate_packed_data')
+        $maintenanceChildToolbar->standardButton('about_migrate_packed_data')
             ->task('about.migratePackedData')
             ->text('COM_CONTENTBUILDERNG_ABOUT_MIGRATE_PACKED_DATA')
             ->icon('fa fa-refresh')
+            ->listCheck(false);
+
+        $maintenanceChildToolbar->standardButton('about_export_configuration')
+            ->task('about.exportConfiguration')
+            ->text('COM_CONTENTBUILDERNG_ABOUT_EXPORT_CONFIGURATION')
+            ->icon('fa fa-download')
+            ->listCheck(false);
+
+        $maintenanceChildToolbar->standardButton('about_import_configuration')
+            ->task('about.importConfiguration')
+            ->text('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION')
+            ->icon('fa fa-upload')
             ->listCheck(false);
 
         $toolbar->standardButton('about_show_log')
             ->task('about.showLog')
             ->text('COM_CONTENTBUILDERNG_ABOUT_SHOW_LOG')
             ->icon('fa fa-file-text-o')
-            ->listCheck(false);
-
-        $toolbar->standardButton('about_export_configuration')
-            ->task('about.exportConfiguration')
-            ->text('COM_CONTENTBUILDERNG_ABOUT_EXPORT_CONFIGURATION')
-            ->icon('fa fa-download')
-            ->listCheck(false);
-
-        $toolbar->standardButton('about_import_configuration')
-            ->task('about.importConfiguration')
-            ->text('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION')
-            ->icon('fa fa-upload')
             ->listCheck(false);
 
         ToolbarHelper::preferences('com_contentbuilderng');
