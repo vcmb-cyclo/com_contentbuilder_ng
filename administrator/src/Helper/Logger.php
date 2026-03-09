@@ -35,19 +35,23 @@ final class Logger
             return;
         }
 
+        self::applyJoomlaTimezone();
         self::rotateIfNeeded();
 
-        Log::addLogger(
-            [
-                'text_file'         => self::LOG_FILE,
-                'text_file_path'    => self::resolveLogDirectory(),
-                'text_entry_format' => "{DATETIME} {PRIORITY}\t{CATEGORY}\t{MESSAGE}", // aligne le format avec script.php.
-            ],
-            Log::ALL,
-            ['cb.admin', 'cb.site']
-        );
-
         self::$registered = true;
+    }
+
+    private static function applyJoomlaTimezone(): void
+    {
+        $app = Factory::getApplication();
+        $offset = is_object($app) && method_exists($app, 'get') ? (string) $app->get('offset', 'UTC') : 'UTC';
+
+        try {
+            $timezone = new \DateTimeZone($offset !== '' ? $offset : 'UTC');
+            date_default_timezone_set($timezone->getName());
+        } catch (\Throwable) {
+            date_default_timezone_set('UTC');
+        }
     }
 
     private static function resolveLogDirectory(): string
@@ -227,25 +231,25 @@ final class Logger
         }
 
         self::register();
-        Log::add(self::format($message, $context), Log::DEBUG, self::category());
+        self::write(self::format($message, $context), Log::DEBUG, self::category());
     }
 
     public static function info(string $message, array $context = []): void
     {
         self::register();
-        Log::add(self::format($message, $context), Log::INFO, self::category());
+        self::write(self::format($message, $context), Log::INFO, self::category());
     }
 
     public static function warning(string $message, array $context = []): void
     {
         self::register();
-        Log::add(self::format($message, $context), Log::WARNING, self::category());
+        self::write(self::format($message, $context), Log::WARNING, self::category());
     }
 
     public static function error(string $message, array $context = []): void
     {
         self::register();
-        Log::add(self::format($message, $context), Log::ERROR, self::category());
+        self::write(self::format($message, $context), Log::ERROR, self::category());
     }
 
     public static function exception(\Throwable $e, array $context = []): void
@@ -258,5 +262,38 @@ final class Logger
         ];
 
         self::error('Exception', $context);
+    }
+
+    private static function write(string $message, int $priority, string $category): void
+    {
+        $directory = self::resolveLogDirectory();
+        $file = $directory . '/' . self::LOG_FILE;
+        $now = new \DateTimeImmutable('now', new \DateTimeZone(date_default_timezone_get()));
+        $priorityName = self::priorityToString($priority);
+        $line = sprintf(
+            "%s %s %s\t%s\t%s\n",
+            $now->format('Y-m-d'),
+            $now->format('H:i:s'),
+            $priorityName,
+            $category,
+            $message
+        );
+
+        file_put_contents($file, $line, FILE_APPEND | LOCK_EX);
+    }
+
+    private static function priorityToString(int $priority): string
+    {
+        return match ($priority) {
+            Log::EMERGENCY => 'EMERGENCY',
+            Log::ALERT => 'ALERT',
+            Log::CRITICAL => 'CRITICAL',
+            Log::ERROR => 'ERROR',
+            Log::WARNING => 'WARNING',
+            Log::NOTICE => 'NOTICE',
+            Log::INFO => 'INFO',
+            Log::DEBUG => 'DEBUG',
+            default => 'INFO',
+        };
     }
 }

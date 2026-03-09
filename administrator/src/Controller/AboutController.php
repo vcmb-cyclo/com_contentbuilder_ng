@@ -670,7 +670,7 @@ final class AboutController extends BaseController
 
             $summary = $this->applyConfigurationImportPayload($payload, $selectedSections, $importMode);
             $app->setUserState('com_contentbuilderng.about.import', [
-                'generated_at' => Factory::getDate()->format('Y-m-d H:i:s'),
+                'generated_at' => $this->getJoomlaLocalDateTime(),
                 'summary' => $summary,
             ]);
             $this->logConfigurationImportReport($summary, $selectedSections, $importMode);
@@ -687,7 +687,7 @@ final class AboutController extends BaseController
             );
         } catch (\Throwable $e) {
             $app->setUserState('com_contentbuilderng.about.import', [
-                'generated_at' => Factory::getDate()->format('Y-m-d H:i:s'),
+                'generated_at' => $this->getJoomlaLocalDateTime(),
                 'summary' => [
                     'status' => 'error',
                     'details' => [(string) $e->getMessage()],
@@ -1919,10 +1919,24 @@ final class AboutController extends BaseController
             'path' => $logFile,
             'size' => max(0, $size),
             'content' => $content,
-            'loaded_at' => Factory::getDate()->format('Y-m-d H:i:s'),
+            'loaded_at' => $this->getJoomlaLocalDateTime(),
             'truncated' => $truncated ? 1 : 0,
             'tail_bytes' => $tailBytes,
         ];
+    }
+
+    private function getJoomlaLocalDateTime(): string
+    {
+        $app = Factory::getApplication();
+        $offset = is_object($app) && method_exists($app, 'get') ? (string) $app->get('offset', 'UTC') : 'UTC';
+
+        try {
+            $timezone = new \DateTimeZone($offset !== '' ? $offset : 'UTC');
+        } catch (\Throwable) {
+            $timezone = new \DateTimeZone('UTC');
+        }
+
+        return (new \DateTimeImmutable('now', $timezone))->format('Y-m-d H:i:s');
     }
 
     private function resolveLogDirectory(): string

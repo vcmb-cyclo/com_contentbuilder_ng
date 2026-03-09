@@ -414,17 +414,19 @@ class com_contentbuilderngInstallerScript
             Folder::create($logPath);
         }
 
+        $this->applyJoomlaTimezoneForLogging();
         $this->rotateSharedLogIfNeeded($logPath);
 
-        Log::addLogger(
-            [
-                'text_file'         => self::SHARED_LOG_FILE,
-                'text_entry_format' => '{DATETIME} {PRIORITY} {MESSAGE}',
-                'text_file_path'    => $logPath,
-            ],
-            Log::ALL,
-            ['com_contentbuilderng.install']
-        );
+    }
+
+    private function applyJoomlaTimezoneForLogging(): void
+    {
+        try {
+            $timezone = new DateTimeZone($this->resolveJoomlaTimezoneName());
+            date_default_timezone_set($timezone->getName());
+        } catch (\Throwable) {
+            date_default_timezone_set('UTC');
+        }
     }
 
     private function log(string $message, int $priority = Log::INFO): void
@@ -463,7 +465,15 @@ class com_contentbuilderngInstallerScript
         }
 
         try {
-            Log::add($message, $priority, 'com_contentbuilderng.install');
+            $now = new \DateTimeImmutable('now', new \DateTimeZone(date_default_timezone_get()));
+            $line = sprintf(
+                "%s %s %s %s\n",
+                $now->format('Y-m-d'),
+                $now->format('H:i:s'),
+                $this->priorityToString($priority),
+                $message
+            );
+            @file_put_contents($this->resolveSharedLogPath(), $line, FILE_APPEND | LOCK_EX);
         } finally {
             if ($switched) {
                 @date_default_timezone_set($previousTz);
@@ -483,6 +493,21 @@ class com_contentbuilderngInstallerScript
             ],
             $message
         );
+    }
+
+    private function priorityToString(int $priority): string
+    {
+        return match ($priority) {
+            Log::EMERGENCY => 'EMERGENCY',
+            Log::ALERT => 'ALERT',
+            Log::CRITICAL => 'CRITICAL',
+            Log::ERROR => 'ERROR',
+            Log::WARNING => 'WARNING',
+            Log::NOTICE => 'NOTICE',
+            Log::INFO => 'INFO',
+            Log::DEBUG => 'DEBUG',
+            default => 'INFO',
+        };
     }
 
     private function rotateSharedLogIfNeeded(string $logPath): void
@@ -517,6 +542,26 @@ class com_contentbuilderngInstallerScript
 
         @rename($activeLog, $archivePath);
         $this->cleanupRotatedSharedLogs($directory);
+    }
+
+    private function resolveSharedLogPath(): string
+    {
+        $logPath = '';
+
+        try {
+            $app = Factory::getApplication();
+            if (is_object($app) && method_exists($app, 'get')) {
+                $logPath = (string) $app->get('log_path', '');
+            }
+        } catch (\Throwable) {
+            $logPath = '';
+        }
+
+        if ($logPath === '') {
+            $logPath = JPATH_ROOT . '/logs';
+        }
+
+        return rtrim($logPath, '/\\') . '/' . self::SHARED_LOG_FILE;
     }
 
     private function cleanupRotatedSharedLogs(string $directory): void
@@ -701,6 +746,17 @@ class com_contentbuilderngInstallerScript
             }
         } catch (\Throwable) {
             $timezoneName = '';
+        }
+
+        if ($timezoneName === '') {
+            try {
+                $config = Factory::getConfig();
+                if (is_object($config) && method_exists($config, 'get')) {
+                    $timezoneName = trim((string) $config->get('offset', ''));
+                }
+            } catch (\Throwable) {
+                $timezoneName = '';
+            }
         }
 
         if ($timezoneName === '') {
