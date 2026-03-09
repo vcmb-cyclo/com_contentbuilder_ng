@@ -95,25 +95,9 @@ class HtmlView extends BaseHtmlView
                 'label' => Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_FORMS'),
                 'description' => Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_FORMS_DESC'),
             ],
-            'elements' => [
-                'label' => Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_ELEMENTS'),
-                'description' => Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_ELEMENTS_DESC'),
-            ],
-            'list_states' => [
-                'label' => Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_LIST_STATES'),
-                'description' => Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_LIST_STATES_DESC'),
-            ],
             'storages' => [
                 'label' => Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_STORAGES'),
                 'description' => Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_STORAGES_DESC'),
-            ],
-            'storage_fields' => [
-                'label' => Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_STORAGE_FIELDS'),
-                'description' => Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_STORAGE_FIELDS_DESC'),
-            ],
-            'resource_access' => [
-                'label' => Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_RESOURCE_ACCESS'),
-                'description' => Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_RESOURCE_ACCESS_DESC'),
             ],
         ];
 

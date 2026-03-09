@@ -30,6 +30,19 @@ final class AboutController extends BaseController
     private const ABOUT_LOG_TAIL_BYTES = 262144;
     private const CONFIG_IMPORT_MODE_MERGE = 'merge';
     private const CONFIG_IMPORT_MODE_REPLACE = 'replace';
+    private const CONFIG_TRANSFER_ROOT_SECTIONS = [
+        'component_params',
+        'forms',
+        'storages',
+    ];
+    private const CONFIG_FORM_DEPENDENT_SECTIONS = [
+        'elements',
+        'list_states',
+        'resource_access',
+    ];
+    private const CONFIG_STORAGE_DEPENDENT_SECTIONS = [
+        'storage_fields',
+    ];
     private const CONFIG_EXPORT_SECTIONS = [
         'component_params' => ['type' => 'component_params'],
         'forms' => ['type' => 'table', 'table' => '#__contentbuilderng_forms'],
@@ -641,12 +654,14 @@ final class AboutController extends BaseController
                 'summary' => $summary,
             ]);
 
+            $rowsImported = (int) ($summary['rows'] ?? 0);
+            $tablesImported = (int) ($summary['tables'] ?? 0);
+            $messageKey = $rowsImported > 0
+                ? 'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_SUCCESS'
+                : 'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_NO_CHANGES';
+
             $this->setMessage(
-                Text::sprintf(
-                    'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_SUCCESS',
-                    (int) ($summary['tables'] ?? 0),
-                    (int) ($summary['rows'] ?? 0)
-                ),
+                Text::sprintf($messageKey, $tablesImported, $rowsImported),
                 'message'
             );
         } catch (\Throwable $e) {
@@ -681,7 +696,7 @@ final class AboutController extends BaseController
         }
 
         $selected = array_values(array_unique($selected));
-        $allowed = array_keys(self::CONFIG_EXPORT_SECTIONS);
+        $allowed = self::CONFIG_TRANSFER_ROOT_SECTIONS;
 
         return array_values(array_intersect($selected, $allowed));
     }
@@ -692,7 +707,7 @@ final class AboutController extends BaseController
         $existingTables = array_map('strtolower', (array) $db->getTableList());
         $exportSections = [];
 
-        foreach ($selectedSections as $sectionKey) {
+        foreach ($this->expandConfigSections($selectedSections) as $sectionKey) {
             $sectionConfig = self::CONFIG_EXPORT_SECTIONS[$sectionKey] ?? null;
             if (!is_array($sectionConfig)) {
                 continue;
@@ -721,25 +736,7 @@ final class AboutController extends BaseController
                 ->select('*')
                 ->from($db->quoteName($tableAlias));
 
-            if ($selectedFormIds !== []) {
-                if ($sectionKey === 'forms' && in_array('id', $columns, true)) {
-                    $query->where($db->quoteName('id') . ' IN (' . implode(',', array_map('intval', $selectedFormIds)) . ')');
-                }
-
-                if (in_array($sectionKey, ['elements', 'list_states', 'resource_access'], true) && in_array('form_id', $columns, true)) {
-                    $query->where($db->quoteName('form_id') . ' IN (' . implode(',', array_map('intval', $selectedFormIds)) . ')');
-                }
-            }
-
-            if ($selectedStorageIds !== []) {
-                if ($sectionKey === 'storages' && in_array('id', $columns, true)) {
-                    $query->where($db->quoteName('id') . ' IN (' . implode(',', array_map('intval', $selectedStorageIds)) . ')');
-                }
-
-                if ($sectionKey === 'storage_fields' && in_array('storage_id', $columns, true)) {
-                    $query->where($db->quoteName('storage_id') . ' IN (' . implode(',', array_map('intval', $selectedStorageIds)) . ')');
-                }
-            }
+            $this->applyExportFilters($db, $query, $sectionKey, $columns, $selectedSections, $selectedFormIds, $selectedStorageIds);
 
             if (in_array('id', $columns, true)) {
                 $query->order($db->quoteName('id') . ' ASC');
@@ -780,6 +777,69 @@ final class AboutController extends BaseController
     private function getSelectedConfigStorageIds(): array
     {
         return $this->getSelectedNumericIds('cb_config_storage_ids');
+    }
+
+    private function expandConfigSections(array $selectedSections): array
+    {
+        $expanded = [];
+
+        foreach ($selectedSections as $sectionKey) {
+            if (!in_array($sectionKey, self::CONFIG_TRANSFER_ROOT_SECTIONS, true)) {
+                continue;
+            }
+
+            $expanded[] = $sectionKey;
+
+            if ($sectionKey === 'forms') {
+                foreach (self::CONFIG_FORM_DEPENDENT_SECTIONS as $dependentSection) {
+                    $expanded[] = $dependentSection;
+                }
+            }
+
+            if ($sectionKey === 'storages') {
+                foreach (self::CONFIG_STORAGE_DEPENDENT_SECTIONS as $dependentSection) {
+                    $expanded[] = $dependentSection;
+                }
+            }
+        }
+
+        return array_values(array_unique($expanded));
+    }
+
+    private function applyExportFilters(
+        DatabaseInterface $db,
+        \Joomla\Database\QueryInterface $query,
+        string $sectionKey,
+        array $columns,
+        array $selectedSections,
+        array $selectedFormIds,
+        array $selectedStorageIds
+    ): void {
+        if (
+            in_array('forms', $selectedSections, true)
+            && $selectedFormIds !== []
+        ) {
+            if ($sectionKey === 'forms' && in_array('id', $columns, true)) {
+                $query->where($db->quoteName('id') . ' IN (' . implode(',', array_map('intval', $selectedFormIds)) . ')');
+            }
+
+            if (in_array($sectionKey, self::CONFIG_FORM_DEPENDENT_SECTIONS, true) && in_array('form_id', $columns, true)) {
+                $query->where($db->quoteName('form_id') . ' IN (' . implode(',', array_map('intval', $selectedFormIds)) . ')');
+            }
+        }
+
+        if (
+            in_array('storages', $selectedSections, true)
+            && $selectedStorageIds !== []
+        ) {
+            if ($sectionKey === 'storages' && in_array('id', $columns, true)) {
+                $query->where($db->quoteName('id') . ' IN (' . implode(',', array_map('intval', $selectedStorageIds)) . ')');
+            }
+
+            if ($sectionKey === 'storage_fields' && in_array('storage_id', $columns, true)) {
+                $query->where($db->quoteName('storage_id') . ' IN (' . implode(',', array_map('intval', $selectedStorageIds)) . ')');
+            }
+        }
     }
 
     private function getSelectedNumericIds(string $inputKey): array
@@ -940,18 +1000,13 @@ final class AboutController extends BaseController
 
         try {
             foreach ($selectedSections as $sectionKey) {
-                $sectionConfig = self::CONFIG_EXPORT_SECTIONS[$sectionKey] ?? null;
-                if (!is_array($sectionConfig)) {
-                    continue;
-                }
+                if ($sectionKey === 'component_params') {
+                    $sectionPayload = $dataSections['component_params'] ?? null;
+                    if (!is_array($sectionPayload)) {
+                        $details[] = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_SECTION_MISSING', 'component_params');
+                        continue;
+                    }
 
-                $sectionPayload = $dataSections[$sectionKey] ?? null;
-                if (!is_array($sectionPayload)) {
-                    $details[] = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_SECTION_MISSING', $sectionKey);
-                    continue;
-                }
-
-                if (($sectionConfig['type'] ?? '') === 'component_params') {
                     $params = is_array($sectionPayload['params'] ?? null) ? $sectionPayload['params'] : [];
                     $query = $db->getQuery(true)
                         ->update($db->quoteName('#__extensions'))
@@ -963,16 +1018,24 @@ final class AboutController extends BaseController
                     continue;
                 }
 
-                $tableAlias = (string) ($sectionConfig['table'] ?? '');
-                $rows = is_array($sectionPayload['rows'] ?? null) ? $sectionPayload['rows'] : [];
-                $importedRows = $this->importConfigTableRows($db, $tableAlias, $rows, $importMode);
-                $tableRowsImported += $importedRows;
-                $tablesImported++;
-                $details[] = Text::sprintf(
-                    'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_TABLE_IMPORTED',
-                    $tableAlias,
-                    $importedRows
-                );
+                if ($sectionKey === 'forms') {
+                    $summary = $this->importFormsConfiguration($db, $dataSections, $importMode);
+                    $tableRowsImported += (int) ($summary['rows'] ?? 0);
+                    $tablesImported += (int) ($summary['tables'] ?? 0);
+                    foreach ((array) ($summary['details'] ?? []) as $detail) {
+                        $details[] = (string) $detail;
+                    }
+                    continue;
+                }
+
+                if ($sectionKey === 'storages') {
+                    $summary = $this->importStoragesConfiguration($db, $dataSections, $importMode);
+                    $tableRowsImported += (int) ($summary['rows'] ?? 0);
+                    $tablesImported += (int) ($summary['tables'] ?? 0);
+                    foreach ((array) ($summary['details'] ?? []) as $detail) {
+                        $details[] = (string) $detail;
+                    }
+                }
             }
 
             $db->transactionCommit();
@@ -1084,6 +1147,470 @@ final class AboutController extends BaseController
         }
 
         return $imported;
+    }
+
+    private function importFormsConfiguration(DatabaseInterface $db, array $dataSections, string $importMode): array
+    {
+        $details = [];
+        $tables = 0;
+        $rows = 0;
+
+        $formsPayload = $dataSections['forms'] ?? null;
+        if (!is_array($formsPayload)) {
+            return [
+                'tables' => 0,
+                'rows' => 0,
+                'details' => [Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_SECTION_MISSING', 'forms')],
+            ];
+        }
+
+        $formRows = is_array($formsPayload['rows'] ?? null) ? $formsPayload['rows'] : [];
+        [$formIdMap, $formsImported] = $this->importRowsByNaturalKey(
+            $db,
+            '#__contentbuilderng_forms',
+            $formRows,
+            ['name'],
+            [],
+            $importMode,
+            true
+        );
+        $tables++;
+        $rows += $formsImported;
+        $details[] = Text::sprintf(
+            'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_TABLE_IMPORTED',
+            '#__contentbuilderng_forms',
+            $formsImported
+        );
+
+        if ($formIdMap === []) {
+            return ['tables' => $tables, 'rows' => $rows, 'details' => $details];
+        }
+
+        $targetFormIds = array_values(array_unique(array_map('intval', array_values($formIdMap))));
+        if ($importMode === self::CONFIG_IMPORT_MODE_REPLACE && $targetFormIds !== []) {
+            $this->deleteRowsByIds($db, '#__contentbuilderng_elements', 'form_id', $targetFormIds);
+            $this->deleteRowsByIds($db, '#__contentbuilderng_list_states', 'form_id', $targetFormIds);
+            $this->deleteRowsByIds($db, '#__contentbuilderng_resource_access', 'form_id', $targetFormIds);
+        }
+
+        $elementsPayload = $dataSections['elements'] ?? null;
+        if (is_array($elementsPayload)) {
+            $elementRows = $this->remapRowsForeignKey(
+                is_array($elementsPayload['rows'] ?? null) ? $elementsPayload['rows'] : [],
+                'form_id',
+                $formIdMap
+            );
+            [$elementIdMap, $elementsImported] = $this->importRowsByNaturalKey(
+                $db,
+                '#__contentbuilderng_elements',
+                $elementRows,
+                ['form_id', 'reference_id'],
+                [],
+                $importMode,
+                true
+            );
+            $tables++;
+            $rows += $elementsImported;
+            $details[] = Text::sprintf(
+                'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_TABLE_IMPORTED',
+                '#__contentbuilderng_elements',
+                $elementsImported
+            );
+        } else {
+            $elementIdMap = [];
+            $details[] = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_SECTION_MISSING', 'elements');
+        }
+
+        $listStatesPayload = $dataSections['list_states'] ?? null;
+        if (is_array($listStatesPayload)) {
+            $listStateRows = $this->remapRowsForeignKey(
+                is_array($listStatesPayload['rows'] ?? null) ? $listStatesPayload['rows'] : [],
+                'form_id',
+                $formIdMap
+            );
+            [, $listStatesImported] = $this->importRowsByNaturalKey(
+                $db,
+                '#__contentbuilderng_list_states',
+                $listStateRows,
+                ['form_id', 'title'],
+                [],
+                $importMode,
+                true
+            );
+            $tables++;
+            $rows += $listStatesImported;
+            $details[] = Text::sprintf(
+                'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_TABLE_IMPORTED',
+                '#__contentbuilderng_list_states',
+                $listStatesImported
+            );
+        } else {
+            $details[] = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_SECTION_MISSING', 'list_states');
+        }
+
+        $resourceAccessPayload = $dataSections['resource_access'] ?? null;
+        if (is_array($resourceAccessPayload)) {
+            $resourceRows = $this->remapRowsForeignKey(
+                is_array($resourceAccessPayload['rows'] ?? null) ? $resourceAccessPayload['rows'] : [],
+                'form_id',
+                $formIdMap
+            );
+            $resourceRows = $this->remapRowsForeignKey($resourceRows, 'element_id', $elementIdMap);
+            [, $resourceImported] = $this->importRowsByNaturalKey(
+                $db,
+                '#__contentbuilderng_resource_access',
+                $resourceRows,
+                ['type', 'element_id', 'resource_id'],
+                ['form_id', 'hits'],
+                $importMode,
+                false
+            );
+            $tables++;
+            $rows += $resourceImported;
+            $details[] = Text::sprintf(
+                'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_TABLE_IMPORTED',
+                '#__contentbuilderng_resource_access',
+                $resourceImported
+            );
+        } else {
+            $details[] = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_SECTION_MISSING', 'resource_access');
+        }
+
+        return ['tables' => $tables, 'rows' => $rows, 'details' => $details];
+    }
+
+    private function importStoragesConfiguration(DatabaseInterface $db, array $dataSections, string $importMode): array
+    {
+        $details = [];
+        $tables = 0;
+        $rows = 0;
+
+        $storagesPayload = $dataSections['storages'] ?? null;
+        if (!is_array($storagesPayload)) {
+            return [
+                'tables' => 0,
+                'rows' => 0,
+                'details' => [Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_SECTION_MISSING', 'storages')],
+            ];
+        }
+
+        $storageRows = is_array($storagesPayload['rows'] ?? null) ? $storagesPayload['rows'] : [];
+        [$storageIdMap, $storagesImported] = $this->importRowsByNaturalKey(
+            $db,
+            '#__contentbuilderng_storages',
+            $storageRows,
+            ['name'],
+            [],
+            $importMode,
+            true
+        );
+        $tables++;
+        $rows += $storagesImported;
+        $details[] = Text::sprintf(
+            'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_TABLE_IMPORTED',
+            '#__contentbuilderng_storages',
+            $storagesImported
+        );
+
+        if ($storageIdMap === []) {
+            return ['tables' => $tables, 'rows' => $rows, 'details' => $details];
+        }
+
+        $targetStorageIds = array_values(array_unique(array_map('intval', array_values($storageIdMap))));
+        if ($importMode === self::CONFIG_IMPORT_MODE_REPLACE && $targetStorageIds !== []) {
+            $this->deleteRowsByIds($db, '#__contentbuilderng_storage_fields', 'storage_id', $targetStorageIds);
+        }
+
+        $storageFieldsPayload = $dataSections['storage_fields'] ?? null;
+        if (is_array($storageFieldsPayload)) {
+            $fieldRows = $this->remapRowsForeignKey(
+                is_array($storageFieldsPayload['rows'] ?? null) ? $storageFieldsPayload['rows'] : [],
+                'storage_id',
+                $storageIdMap
+            );
+            [, $fieldsImported] = $this->importRowsByNaturalKey(
+                $db,
+                '#__contentbuilderng_storage_fields',
+                $fieldRows,
+                ['storage_id', 'name'],
+                [],
+                $importMode,
+                true
+            );
+            $tables++;
+            $rows += $fieldsImported;
+            $details[] = Text::sprintf(
+                'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_TABLE_IMPORTED',
+                '#__contentbuilderng_storage_fields',
+                $fieldsImported
+            );
+        } else {
+            $details[] = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_DETAIL_SECTION_MISSING', 'storage_fields');
+        }
+
+        return ['tables' => $tables, 'rows' => $rows, 'details' => $details];
+    }
+
+    private function importRowsByNaturalKey(
+        DatabaseInterface $db,
+        string $tableAlias,
+        array $rows,
+        array $keyColumns,
+        array $extraUpdateColumns,
+        string $importMode,
+        bool $trackSourceIds
+    ): array {
+        $columns = array_keys((array) $db->getTableColumns($tableAlias, false));
+        if ($columns === []) {
+            return [[], 0];
+        }
+
+        $trackedIds = [];
+        $imported = 0;
+        $hasIdColumn = in_array('id', $columns, true);
+
+        foreach ($rows as $rowIndex => $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $filtered = [];
+            foreach ($columns as $columnName) {
+                if (array_key_exists($columnName, $row)) {
+                    $filtered[$columnName] = $row[$columnName];
+                }
+            }
+
+            if ($filtered === []) {
+                continue;
+            }
+
+            $keyValues = [];
+            foreach ($keyColumns as $keyColumn) {
+                $keyValue = $filtered[$keyColumn] ?? null;
+                if ($keyValue === null || $keyValue === '') {
+                    throw new \RuntimeException(
+                        Text::sprintf(
+                            'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_ROW_ERROR',
+                            $tableAlias,
+                            ((int) $rowIndex) + 1,
+                            'Missing natural key "' . $keyColumn . '"'
+                        )
+                    );
+                }
+                $keyValues[$keyColumn] = $keyValue;
+            }
+
+            try {
+                $existingRow = $this->findRowByColumns($db, $tableAlias, $keyValues);
+                $existingId = $this->findRowIdByColumns($db, $tableAlias, $keyValues);
+                $sourceId = (int) ($filtered['id'] ?? 0);
+
+                if ($existingId > 0) {
+                    $updateData = $filtered;
+                    unset($updateData['id']);
+
+                    if ($importMode === self::CONFIG_IMPORT_MODE_MERGE && $extraUpdateColumns !== []) {
+                        $allowedUpdateColumns = array_fill_keys(array_merge($keyColumns, $extraUpdateColumns), true);
+                        $updateData = array_intersect_key($updateData, $allowedUpdateColumns);
+                    }
+
+                    if ($trackSourceIds && $sourceId > 0 && $hasIdColumn) {
+                        $trackedIds[$sourceId] = $existingId;
+                    }
+
+                    if ($this->rowHasDifferences($existingRow, $updateData)) {
+                        if ($hasIdColumn) {
+                            $this->updateRowById($db, $tableAlias, $existingId, $updateData);
+                        } else {
+                            $this->updateRowByColumns($db, $tableAlias, $keyValues, $updateData);
+                        }
+                        $imported++;
+                    }
+
+                    continue;
+                }
+
+                unset($filtered['id']);
+                $insertedId = $this->insertRow($db, $tableAlias, $filtered);
+                if ($trackSourceIds && $sourceId > 0 && $insertedId > 0) {
+                    $trackedIds[$sourceId] = $insertedId;
+                }
+                $imported++;
+            } catch (\Throwable $e) {
+                throw new \RuntimeException(
+                    Text::sprintf(
+                        'COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_ROW_ERROR',
+                        $tableAlias,
+                        ((int) $rowIndex) + 1,
+                        $e->getMessage()
+                    )
+                );
+            }
+        }
+
+        return [$trackedIds, $imported];
+    }
+
+    private function remapRowsForeignKey(array $rows, string $columnName, array $idMap): array
+    {
+        $remapped = [];
+
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            if (array_key_exists($columnName, $row)) {
+                $sourceId = (int) $row[$columnName];
+                if ($sourceId > 0 && isset($idMap[$sourceId])) {
+                    $row[$columnName] = (int) $idMap[$sourceId];
+                }
+            }
+
+            $remapped[] = $row;
+        }
+
+        return $remapped;
+    }
+
+    private function deleteRowsByIds(DatabaseInterface $db, string $tableAlias, string $columnName, array $ids): void
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static fn(int $id): bool => $id > 0)));
+        if ($ids === []) {
+            return;
+        }
+
+        $query = $db->getQuery(true)
+            ->delete($db->quoteName($tableAlias))
+            ->where($db->quoteName($columnName) . ' IN (' . implode(',', $ids) . ')');
+        $db->setQuery($query)->execute();
+    }
+
+    private function findRowIdByColumns(DatabaseInterface $db, string $tableAlias, array $columnValues): int
+    {
+        $columns = array_keys((array) $db->getTableColumns($tableAlias, false));
+        $query = $db->getQuery(true)
+            ->select(in_array('id', $columns, true) ? $db->quoteName('id') : '1')
+            ->from($db->quoteName($tableAlias));
+
+        foreach ($columnValues as $columnName => $value) {
+            $query->where(
+                $db->quoteName($columnName) . ' = ' . ($value === null ? 'NULL' : $db->quote((string) $value))
+            );
+        }
+
+        $db->setQuery($query, 0, 1);
+        return (int) $db->loadResult();
+    }
+
+    private function findRowByColumns(DatabaseInterface $db, string $tableAlias, array $columnValues): array
+    {
+        $query = $db->getQuery(true)
+            ->select('*')
+            ->from($db->quoteName($tableAlias));
+
+        foreach ($columnValues as $columnName => $value) {
+            $query->where(
+                $db->quoteName($columnName) . ' = ' . ($value === null ? 'NULL' : $db->quote((string) $value))
+            );
+        }
+
+        $db->setQuery($query, 0, 1);
+        $row = $db->loadAssoc();
+
+        return is_array($row) ? $row : [];
+    }
+
+    private function rowHasDifferences(array $existingRow, array $updateData): bool
+    {
+        foreach ($updateData as $columnName => $value) {
+            $existingValue = $existingRow[$columnName] ?? null;
+            $normalizedExisting = $existingValue === null ? null : (string) $existingValue;
+            $normalizedIncoming = $value === null ? null : (string) $value;
+
+            if ($normalizedExisting !== $normalizedIncoming) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function updateRowById(DatabaseInterface $db, string $tableAlias, int $id, array $row): void
+    {
+        if ($id <= 0 || $row === []) {
+            return;
+        }
+
+        $query = $db->getQuery(true)
+            ->update($db->quoteName($tableAlias));
+
+        $setCount = 0;
+        foreach ($row as $columnName => $value) {
+            $query->set(
+                $db->quoteName($columnName) . ' = ' . ($value === null ? 'NULL' : $db->quote((string) $value))
+            );
+            $setCount++;
+        }
+
+        if ($setCount === 0) {
+            return;
+        }
+
+        $query->where($db->quoteName('id') . ' = ' . $id);
+        $db->setQuery($query)->execute();
+    }
+
+    private function updateRowByColumns(DatabaseInterface $db, string $tableAlias, array $columnValues, array $row): void
+    {
+        if ($columnValues === [] || $row === []) {
+            return;
+        }
+
+        $query = $db->getQuery(true)
+            ->update($db->quoteName($tableAlias));
+
+        $setCount = 0;
+        foreach ($row as $columnName => $value) {
+            $query->set(
+                $db->quoteName($columnName) . ' = ' . ($value === null ? 'NULL' : $db->quote((string) $value))
+            );
+            $setCount++;
+        }
+
+        if ($setCount === 0) {
+            return;
+        }
+
+        foreach ($columnValues as $columnName => $value) {
+            $query->where(
+                $db->quoteName($columnName) . ' = ' . ($value === null ? 'NULL' : $db->quote((string) $value))
+            );
+        }
+
+        $db->setQuery($query)->execute();
+    }
+
+    private function insertRow(DatabaseInterface $db, string $tableAlias, array $row): int
+    {
+        if ($row === []) {
+            return 0;
+        }
+
+        $query = $db->getQuery(true)
+            ->insert($db->quoteName($tableAlias))
+            ->columns(array_map([$db, 'quoteName'], array_keys($row)));
+
+        $values = [];
+        foreach ($row as $value) {
+            $values[] = $value === null ? 'NULL' : $db->quote((string) $value);
+        }
+
+        $query->values(implode(',', $values));
+        $db->setQuery($query)->execute();
+
+        return (int) $db->insertid();
     }
 
     private function readAboutLogReport(): array

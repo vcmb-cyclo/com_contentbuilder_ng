@@ -86,6 +86,12 @@ $selectedStorageIds = array_fill_keys(array_map('intval', (array) ($this->select
                                         <?php
                                         $sectionLabel = trim((string) ($sectionMeta['label'] ?? ''));
                                         $sectionDescription = trim((string) ($sectionMeta['description'] ?? ''));
+                                        if ((string) $sectionKey === 'forms') {
+                                            $sectionDescription .= ($sectionDescription !== '' ? ' ' : '') . 'Exporte aussi les elements, list states et resource access lies aux formulaires selectionnes.';
+                                        }
+                                        if ((string) $sectionKey === 'storages') {
+                                            $sectionDescription .= ($sectionDescription !== '' ? ' ' : '') . 'Exporte aussi les storage fields lies aux storages selectionnes.';
+                                        }
                                         ?>
                                         <div class="form-check mb-2">
                                             <input
@@ -322,12 +328,8 @@ $selectedStorageIds = array_fill_keys(array_map('intval', (array) ($this->select
         }
 
         function syncSectionFilters() {
-            var formFiltersEnabled = isSectionChecked('forms')
-                || isSectionChecked('elements')
-                || isSectionChecked('list_states')
-                || isSectionChecked('resource_access');
-            var storageFiltersEnabled = isSectionChecked('storages')
-                || isSectionChecked('storage_fields');
+            var formFiltersEnabled = isSectionChecked('forms');
+            var storageFiltersEnabled = isSectionChecked('storages');
 
             setGroupState('cb-config-forms-box', '.cb-config-form-item', formFiltersEnabled);
             setGroupState('cb-config-storages-box', '.cb-config-storage-item', storageFiltersEnabled);
