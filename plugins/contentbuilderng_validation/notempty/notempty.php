@@ -20,6 +20,8 @@ use Joomla\Event\SubscriberInterface;
 
 class plgContentbuilderng_validationNotempty extends CMSPlugin implements SubscriberInterface
 {
+    private const VALIDATION_NAME = 'notempty';
+
     private function pushEventResult(Event $event, string $value): string
     {
         $results = $event->getArgument('result') ?: [];
@@ -30,6 +32,12 @@ class plgContentbuilderng_validationNotempty extends CMSPlugin implements Subscr
         $event->setArgument('result', $results);
 
         return $value;
+    }
+
+    private function isValidationEnabled(array $field): bool
+    {
+        $validations = array_filter(array_map('trim', explode(',', (string) ($field['validations'] ?? ''))));
+        return in_array(self::VALIDATION_NAME, $validations, true);
     }
 
     public static function getSubscribedEvents(): array
@@ -44,7 +52,7 @@ class plgContentbuilderng_validationNotempty extends CMSPlugin implements Subscr
         $record_id = isset($args[2]) ? (int) $args[2] : 0;
         $form = $args[3] ?? null;
         $value = $args[4] ?? null;
-        if (!$field) {
+        if (!$field || !$this->isValidationEnabled($field)) {
             return '';
         }
 

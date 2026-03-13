@@ -20,6 +20,8 @@ use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 
 class plgContentbuilderng_validationDate_is_valid extends CMSPlugin implements SubscriberInterface
 {
+    private const VALIDATION_NAME = 'date_is_valid';
+
     private function pushEventResult(Event $event, string $value): string
     {
         $results = $event->getArgument('result') ?: [];
@@ -32,6 +34,12 @@ class plgContentbuilderng_validationDate_is_valid extends CMSPlugin implements S
         return $value;
     }
 
+    private function isValidationEnabled(array $field): bool
+    {
+        $validations = array_filter(array_map('trim', explode(',', (string) ($field['validations'] ?? ''))));
+        return in_array(self::VALIDATION_NAME, $validations, true);
+    }
+
     public static function getSubscribedEvents(): array
     {
         return ['onValidate' => 'onValidate'];
@@ -42,7 +50,7 @@ class plgContentbuilderng_validationDate_is_valid extends CMSPlugin implements S
         $args = array_values($event->getArguments());
         $field = isset($args[0]) && is_array($args[0]) ? $args[0] : [];
         $value = $args[4] ?? null;
-        if (!$field) {
+        if (!$field || !$this->isValidationEnabled($field)) {
             return '';
         }
 

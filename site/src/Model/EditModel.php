@@ -1204,7 +1204,6 @@ var contentbuilderng = new function(){
                                     $dispatcher = $this->app->getDispatcher();
                                     $eventResult = $dispatcher->dispatch('onValidate', new \Joomla\CMS\Event\GenericEvent('onValidate', array($the_upload_fields[$id], array_merge($the_upload_fields, $the_fields, $the_html_fields), $this->app->input->getCmd('record_id', 0), $data->form, isset($values[$id]) ? $values[$id] : '')));
                                     $results = $eventResult->getArgument('result') ?: [];
-                                    $dispatcher->clearListeners('onValidate');
 
                                     $all_errors = implode('', $results);
                                     if (!empty($all_errors)) {
@@ -1290,7 +1289,6 @@ var contentbuilderng = new function(){
                                     $dispatcher = $this->app->getDispatcher();
                                     $eventResult = $dispatcher->dispatch('onValidate', new \Joomla\CMS\Event\GenericEvent('onValidate', array($f, array_merge($the_upload_fields, $the_fields, $the_html_fields), $this->app->input->getCmd('record_id', 0), $data->form, $value)));
                                     $results = $eventResult->getArgument('result') ?: [];
-                                    $dispatcher->clearListeners('onValidate');
 
                                     $all_errors = implode('', $results);
                                     $values[$id] = $value;
