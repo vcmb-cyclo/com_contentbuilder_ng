@@ -133,7 +133,8 @@ class plgContentbuilderng_themesKhepri extends CMSPlugin implements SubscriberIn
 			return;
 		}
 
-		return '/* Administrator forms, lists */
+		return '/* Khepri theme migrated for Joomla 6.
+Keep the historical appearance while supporting current CB/Joomla markup. */
 fieldset.adminform {
 	margin: 10px;
 	overflow: hidden;
@@ -621,7 +622,10 @@ label.filter-published-lbl {
 	margin-left: 10px;
 }
 
-table.adminform {
+table.adminform,
+table.admintable,
+table.adminlist,
+table.admintable.adminlist {
 	background-color: #fff;
 	border: solid 1px #d5d5d5;
 	width: 100%;
@@ -631,15 +635,24 @@ table.adminform {
 	width: 100%;
 }
 
-table.adminform tr.row0 {
+table.adminform tr.row0,
+table.admintable tr.row0,
+table.adminlist tr.row0,
+table.admintable.adminlist tr.row0 {
 	background-color: #f9f9f9;
 }
 
-table.adminform tr.row1 {
+table.adminform tr.row1,
+table.admintable tr.row1,
+table.adminlist tr.row1,
+table.admintable.adminlist tr.row1 {
 	background-color: #eeeeee;
 }
 
-table.adminform th {
+table.adminform th,
+table.admintable th,
+table.adminlist th,
+table.admintable.adminlist th {
 	font-size: 1.091em;
 	padding: 6px 2px 4px 4px;
 	text-align: left;
@@ -648,17 +661,26 @@ table.adminform th {
 	background-repeat: repeat;
 }
 
-table.adminform td {
+table.adminform td,
+table.admintable td,
+table.adminlist td,
+table.admintable.adminlist td {
 	padding: 5px;
 	text-align: left;
 	font-size: 1.091em;
 }
 
-table.adminform td.filter {
+table.adminform td.filter,
+table.admintable td.filter,
+table.adminlist td.filter,
+table.admintable.adminlist td.filter {
 	text-align: left;
 }
 
-table.adminform td.helpMenu {
+table.adminform td.helpMenu,
+table.admintable td.helpMenu,
+table.adminlist td.helpMenu,
+table.admintable.adminlist td.helpMenu {
 	text-align: right;
 }
 
