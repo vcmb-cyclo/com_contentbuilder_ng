@@ -40,6 +40,9 @@ use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
+use CB\Component\Contentbuilderng\Administrator\Service\ArticleService;
+use CB\Component\Contentbuilderng\Administrator\Service\PathService;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 
 class EditModel extends BaseDatabaseModel
 {
@@ -164,7 +167,7 @@ class EditModel extends BaseDatabaseModel
         $path = str_replace('{time}', $_now->format('His'), $path);
         $path = str_replace('{datetime}', $_now->format('Y-m-d_His'), $path);
 
-        $endpath = ContentbuilderLegacyHelper::makeSafeFolder($path);
+        $endpath = (new PathService())->makeSafeFolder($path);
         $endpath = $this->normalizePath($endpath);
 
         $isAbsolute = strpos($endpath, '/') === 0 || (bool) preg_match('#^[A-Za-z]:/#', $endpath);
@@ -1537,8 +1540,9 @@ var contentbuilderng = new function(){
                         $config = $this->app->input->post->get('Form', [], 'array');
                     }
 
-                    $full = $this->frontend ? ContentbuilderLegacyHelper::authorizeFe('fullarticle') : ContentbuilderLegacyHelper::authorize('fullarticle');
-                    $article_id = ContentbuilderLegacyHelper::createArticle($this->_id, $record_return, $data->items, $ids, $data->title_field, $data->form->getRecordMetadata($record_return), $config, $full, $this->frontend ? $data->limited_article_options_fe : $data->limited_article_options, $this->app->input->get('cb_category_id', null, 'string'));
+                    $permissionService = new PermissionService();
+                    $full = $this->frontend ? $permissionService->authorizeFe('fullarticle') : $permissionService->authorize('fullarticle');
+                    $article_id = (new ArticleService())->createArticle($this->_id, $record_return, $data->items, $ids, $data->title_field, $data->form->getRecordMetadata($record_return), $config, $full, $this->frontend ? $data->limited_article_options_fe : $data->limited_article_options, $this->app->input->get('cb_category_id', null, 'string'));
 
                     if (isset($form_elements_objects)) {
                         foreach ($form_elements_objects as $form_elements_object) {

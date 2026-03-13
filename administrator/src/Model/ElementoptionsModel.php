@@ -22,6 +22,8 @@ use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
+use CB\Component\Contentbuilderng\Administrator\Service\PathService;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 
@@ -162,10 +164,12 @@ class ElementoptionsModel extends BaseDatabaseModel
             return 1;
         }
         $query = '';
-        $plugins = ContentbuilderLegacyHelper::getFormElementsPlugins();
+        $formSupportService = new FormSupportService(new PathService());
+        $pathService = new PathService();
+        $plugins = $formSupportService->getFormElementsPlugins();
         $type = Factory::getApplication()->input->getCmd('field_type', '');
         switch ($type) {
-            case in_array(Factory::getApplication()->input->getCmd('field_type', ''), ContentbuilderLegacyHelper::getFormElementsPlugins()):
+            case in_array(Factory::getApplication()->input->getCmd('field_type', ''), $formSupportService->getFormElementsPlugins()):
 
                 $hint = Factory::getApplication()->input->post->get('hint', '', 'html');
 
@@ -324,7 +328,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                         ? $setupUploadDirectory
                         : $siteRoot . '/' . ltrim($setupUploadDirectory, '/');
                 }
-                $upload_directory = ContentbuilderLegacyHelper::makeSafeFolder($upload_directory);
+                $upload_directory = $pathService->makeSafeFolder($upload_directory);
 
                 // rel check for element options
                 $is_opt_relative = strpos(strtolower($optionUploadDirectory), '{cbsite}') === 0;
@@ -341,7 +345,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                         ? $optionUploadDirectory
                         : $siteRoot . '/' . ltrim($optionUploadDirectory, '/');
                 }
-                $opt_upload_directory = ContentbuilderLegacyHelper::makeSafeFolder($opt_upload_directory);
+                $opt_upload_directory = $pathService->makeSafeFolder($opt_upload_directory);
 
 
                 $protect = $setup['protect_upload_directory'];
@@ -378,11 +382,11 @@ class ElementoptionsModel extends BaseDatabaseModel
 
                 if ($protect && is_dir($upload_directory)) {
 
-                    File::write(ContentbuilderLegacyHelper::makeSafeFolder($upload_directory) .'/.htaccess', $def = 'deny from all');
+                    File::write($pathService->makeSafeFolder($upload_directory) .'/.htaccess', $def = 'deny from all');
 
                 } else if (!$protect && is_dir($upload_directory)) {
-                    if (file_exists(ContentbuilderLegacyHelper::makeSafeFolder($upload_directory) .'/.htaccess')) {
-                        File::delete(ContentbuilderLegacyHelper::makeSafeFolder($upload_directory) .'/.htaccess');
+                    if (file_exists($pathService->makeSafeFolder($upload_directory) .'/.htaccess')) {
+                        File::delete($pathService->makeSafeFolder($upload_directory) .'/.htaccess');
                     }
 
                 }

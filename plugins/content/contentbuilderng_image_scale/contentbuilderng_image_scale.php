@@ -22,6 +22,7 @@ use Joomla\Event\SubscriberInterface;
 use Joomla\Registry\Registry;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 
 set_error_handler('myErrorHandler');
@@ -256,10 +257,10 @@ class plgContentContentbuilderng_image_scale extends CMSPlugin implements Subscr
 
 				// if it is a list, permissions will be handled by the list
 				if (!$is_list) {
-					ContentbuilderLegacyHelper::setPermissions($form_id, $record_id, $frontend ? '_fe' : '');
+					(new PermissionService())->setPermissions($form_id, $record_id, $frontend ? '_fe' : '');
 
 					if ($frontend) {
-						if (!ContentbuilderLegacyHelper::authorizeFe('view')) {
+						if (!(new PermissionService())->authorizeFe('view')) {
 							if (Factory::getApplication()->input->getInt('contentbuilderng_display', 0) || ($protect && Factory::getApplication()->input->getInt('contentbuilderng_display_detail', 0))) {
 								ob_end_clean();
 								die ('No Access');
@@ -268,7 +269,7 @@ class plgContentContentbuilderng_image_scale extends CMSPlugin implements Subscr
 							}
 						}
 					} else {
-						if (!ContentbuilderLegacyHelper::authorize('view')) {
+						if (!(new PermissionService())->authorize('view')) {
 							if (Factory::getApplication()->input->getInt('contentbuilderng_display', 0) || ($protect && Factory::getApplication()->input->getInt('contentbuilderng_display_detail', 0))) {
 								ob_end_clean();
 								die ('No Access');

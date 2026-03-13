@@ -20,6 +20,7 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\SubscriberInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 class plgContentContentbuilderng_download extends CMSPlugin implements SubscriberInterface
 {
@@ -243,10 +244,10 @@ class plgContentContentbuilderng_download extends CMSPlugin implements Subscribe
 
                 if (!$is_list) {
 
-                    ContentbuilderLegacyHelper::setPermissions($form_id, $record_id, $frontend ? '_fe' : '');
+                    (new PermissionService())->setPermissions($form_id, $record_id, $frontend ? '_fe' : '');
 
                     if ($frontend) {
-                        if (!ContentbuilderLegacyHelper::authorizeFe('view')) {
+                        if (!(new PermissionService())->authorizeFe('view')) {
                             if (Factory::getApplication()->input->get('contentbuilderng_download_file', '', 'GET', 'STRING', CBREQUEST_ALLOWRAW, 'string')) {
                                 ob_end_clean();
                                 die('No Access');
@@ -255,7 +256,7 @@ class plgContentContentbuilderng_download extends CMSPlugin implements Subscribe
                             }
                         }
                     } else {
-                        if (!ContentbuilderLegacyHelper::authorize('view')) {
+                        if (!(new PermissionService())->authorize('view')) {
                             if (Factory::getApplication()->input->get('contentbuilderng_download_file', '', 'GET', 'STRING', CBREQUEST_ALLOWRAW, 'string')) {
                                 ob_end_clean();
                                 die('No Access');

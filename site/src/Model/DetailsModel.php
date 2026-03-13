@@ -21,6 +21,7 @@ use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 
 class DetailsModel extends ListModel
@@ -318,8 +319,8 @@ class DetailsModel extends ListModel
                             $this->_record_id = $data->record_id;
                         } else {
                             $app->input->set('cbIsNew', 1);
-                            ContentbuilderLegacyHelper::setPermissions($app->input->getInt('id', 0), 0, $this->frontend ? '_fe' : '');
-                            $auth = $this->frontend ? ContentbuilderLegacyHelper::authorizeFe('new') : ContentbuilderLegacyHelper::authorize('new');
+                            (new PermissionService())->setPermissions($app->input->getInt('id', 0), 0, $this->frontend ? '_fe' : '');
+                            $auth = $this->frontend ? (new PermissionService())->authorizeFe('new') : (new PermissionService())->authorize('new');
 
                             if ($auth) {
                                 $state = $this->resolveListState();

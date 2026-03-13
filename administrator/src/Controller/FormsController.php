@@ -60,12 +60,14 @@ final class FormsController extends AdminController
             $session->set('email_admins', $this->input->get('email_admins', ''), 'com_contentbuilderng');
         }
 
-        if ($this->input->getInt('slideStartOffset', -1) !== -1) {
-            $session->set('slideStartOffset', $this->input->getInt('slideStartOffset', 1), 'com_contentbuilderng');
+        $slideStartOffset = trim((string) $this->input->getCmd('slideStartOffset', ''));
+        if ($slideStartOffset !== '') {
+            $session->set('slideStartOffset', $slideStartOffset, 'com_contentbuilderng');
         }
 
-        if ($this->input->getInt('tabStartOffset', -1) !== -1) {
-            $session->set('tabStartOffset', $this->input->getInt('tabStartOffset', 0), 'com_contentbuilderng');
+        $tabStartOffset = trim((string) $this->input->getCmd('tabStartOffset', ''));
+        if ($tabStartOffset !== '') {
+            $session->set('tabStartOffset', $tabStartOffset, 'com_contentbuilderng');
         }
     }
 

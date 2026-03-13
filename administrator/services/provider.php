@@ -21,6 +21,11 @@ use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
 use CB\Component\Contentbuilderng\Administrator\Service\DatatableService;
 use CB\Component\Contentbuilderng\Administrator\Service\StorageFieldService;
+use CB\Component\Contentbuilderng\Administrator\Service\PathService;
+use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
+use CB\Component\Contentbuilderng\Administrator\Service\TemplateSampleService;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
+use CB\Component\Contentbuilderng\Administrator\Service\ArticleService;
 
 //\Joomla\CMS\Factory::getApplication()->enqueueMessage('provider.php chargé', 'warning');
 return new class implements ServiceProviderInterface
@@ -40,7 +45,27 @@ return new class implements ServiceProviderInterface
         $container->set(
             StorageFieldService::class,
             static fn(Container $c) => new StorageFieldService()
-        );      
+        );
+        $container->set(
+            PathService::class,
+            static fn(Container $c) => new PathService()
+        );
+        $container->set(
+            TemplateSampleService::class,
+            static fn(Container $c) => new TemplateSampleService()
+        );
+        $container->set(
+            FormSupportService::class,
+            static fn(Container $c) => new FormSupportService($c->get(PathService::class))
+        );
+        $container->set(
+            PermissionService::class,
+            static fn(Container $c) => new PermissionService()
+        );
+        $container->set(
+            ArticleService::class,
+            static fn(Container $c) => new ArticleService()
+        );
 
         $container->set(
             ComponentInterface::class,

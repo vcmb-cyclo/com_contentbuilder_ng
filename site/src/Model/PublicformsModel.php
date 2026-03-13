@@ -19,6 +19,7 @@ use Joomla\CMS\Application\SiteApplication;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 
 class PublicformsModel extends ListModel
 {
@@ -235,10 +236,11 @@ class PublicformsModel extends ListModel
         $perms = array();
         if ($this->show_permissions) {
             foreach ($this->items as $item) {
-                ContentbuilderLegacyHelper::setPermissions($item->id, '', '_fe');
-                $view = ContentbuilderLegacyHelper::authorizeFe('view');
-                $new = ContentbuilderLegacyHelper::authorizeFe('new');
-                $edit = ContentbuilderLegacyHelper::authorizeFe('edit');
+                $permissionService = new PermissionService();
+                $permissionService->setPermissions($item->id, '', '_fe');
+                $view = $permissionService->authorizeFe('view');
+                $new = $permissionService->authorizeFe('new');
+                $edit = $permissionService->authorizeFe('edit');
 
                 $perms[$item->id] = array('view' => $view, 'new' => $new, 'edit' => $edit);
             }

@@ -17,21 +17,22 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
-use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\RatingHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 
 /** @var SiteApplication $app */
 $app = Factory::getApplication();
 $frontend = $app->isClient('site');
-$language_allowed = ContentbuilderLegacyHelper::authorizeFe('language');
-$edit_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('edit') : ContentbuilderLegacyHelper::authorize('edit');
-$delete_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('delete') : ContentbuilderLegacyHelper::authorize('delete');
-$view_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('view') : ContentbuilderLegacyHelper::authorize('view');
-$new_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('new') : ContentbuilderLegacyHelper::authorize('new');
-$state_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('state') : ContentbuilderLegacyHelper::authorize('state');
-$publish_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('publish') : ContentbuilderLegacyHelper::authorize('publish');
-$rating_allowed = $frontend ? ContentbuilderLegacyHelper::authorizeFe('rating') : ContentbuilderLegacyHelper::authorize('rating');
+$permissionService = new PermissionService();
+$language_allowed = $permissionService->authorizeFe('language');
+$edit_allowed = $frontend ? $permissionService->authorizeFe('edit') : $permissionService->authorize('edit');
+$delete_allowed = $frontend ? $permissionService->authorizeFe('delete') : $permissionService->authorize('delete');
+$view_allowed = $frontend ? $permissionService->authorizeFe('view') : $permissionService->authorize('view');
+$new_allowed = $frontend ? $permissionService->authorizeFe('new') : $permissionService->authorize('new');
+$state_allowed = $frontend ? $permissionService->authorizeFe('state') : $permissionService->authorize('state');
+$publish_allowed = $frontend ? $permissionService->authorizeFe('publish') : $permissionService->authorize('publish');
+$rating_allowed = $frontend ? $permissionService->authorizeFe('rating') : $permissionService->authorize('rating');
 $wordwrapLabel = static function (string $label): string {
 	return (string) ContentbuilderngHelper::contentbuilderng_wordwrap($label, 20, "\n", true);
 };

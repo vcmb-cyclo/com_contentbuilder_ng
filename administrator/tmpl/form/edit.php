@@ -1719,7 +1719,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         <?php
         $advancedOptionsContent = '';
         // Démarrer les onglets
-        $activeViewTab = Factory::getApplication()->input->getCmd('tab', 'tab0');
+        $activeViewTab = trim((string) $app->input->getCmd('tab', ''));
+        if ($activeViewTab === '') {
+            $activeViewTab = trim((string) $session->get('tabStartOffset', 'tab0', 'com_contentbuilderng'));
+        }
         $allowedViewTabs = ['tab0', 'tab1', 'tab2', 'tab3', 'tab5', 'tab7', 'tab8', 'tab9'];
         if (!in_array($activeViewTab, $allowedViewTabs, true)) {
             $activeViewTab = 'tab0';
@@ -4093,9 +4096,9 @@ TXT;
     <input type="hidden" name="list[direction]" value="<?php echo htmlspecialchars($listDirn, ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="hidemainmenu" value="0" />
-    <input type="hidden" name="tabStartOffset" value="<?php echo $session->get('tabStartOffset', 0); ?>" />
+    <input type="hidden" name="tabStartOffset" value="<?php echo htmlspecialchars((string) $session->get('tabStartOffset', 'tab0', 'com_contentbuilderng'), ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="slideStartOffset"
-        value="<?php echo $session->get('slideStartOffset', 1); ?>" />
+        value="<?php echo htmlspecialchars((string) $session->get('slideStartOffset', 'permtab1', 'com_contentbuilderng'), ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="jform[email_users]"
         value="<?php echo $session->get('email_users', 'none', 'com_contentbuilderng'); ?>" />
     <input type="hidden" name="jform[email_admins]"

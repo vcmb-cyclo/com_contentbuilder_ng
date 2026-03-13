@@ -18,6 +18,7 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\SubscriberInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\ArticleService;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 
 class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberInterface
@@ -635,7 +636,7 @@ class plgSystemContentbuilderng_system extends CMSPlugin implements SubscriberIn
 
                         $data['items'] = $form->getRecord($data['record_id'], false, -1, true);
 
-                        $article_id = ContentbuilderLegacyHelper::createArticle($data['form_id'], $data['record_id'], $data['items'], $ids, $data['title_field'], $form->getRecordMetadata($data['record_id']), array(), false, 1, $data['default_category']);
+                        $article_id = (new ArticleService())->createArticle($data['form_id'], $data['record_id'], $data['items'], $ids, $data['title_field'], $form->getRecordMetadata($data['record_id']), array(), false, 1, $data['default_category']);
 
                         if ($article_id) {
                             $this->db->setQuery("Update #__contentbuilderng_articles Set `last_update`=" . $this->db->Quote($now) . " Where article_id = " . $this->db->Quote($article_id) . " And record_id = " . $this->db->Quote($data['record_id']) . " And form_id = " . $this->db->Quote($data['form_id']));

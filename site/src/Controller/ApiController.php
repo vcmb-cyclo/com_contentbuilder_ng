@@ -11,6 +11,7 @@ namespace CB\Component\Contentbuilderng\Site\Controller;
 \defined('_JEXEC') or die('Restricted access');
 
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Site\Model\DetailsModel;
 use CB\Component\Contentbuilderng\Site\Model\EditModel;
@@ -82,7 +83,7 @@ class ApiController extends BaseController
             }
             $recordId = $resolvedRecordId;
 
-            ContentbuilderLegacyHelper::setPermissions($formId, $recordId, $this->frontend ? '_fe' : '');
+            (new PermissionService())->setPermissions($formId, $recordId, $this->frontend ? '_fe' : '');
             if (!$this->can('api')) {
                 throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_API_NOT_ALLOWED'), 403);
             }
@@ -101,7 +102,7 @@ class ApiController extends BaseController
                     throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_API_RECORD_ID_REQUIRED'), 400);
                 }
 
-                ContentbuilderLegacyHelper::setPermissions($formId, $recordId, $this->frontend ? '_fe' : '');
+                (new PermissionService())->setPermissions($formId, $recordId, $this->frontend ? '_fe' : '');
                 if (!$this->can('edit')) {
                     throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_EDIT_NOT_ALLOWED'), 403);
                 }
@@ -584,8 +585,8 @@ class ApiController extends BaseController
     private function can(string $action): bool
     {
         return $this->frontend
-            ? ContentbuilderLegacyHelper::authorizeFe($action)
-            : ContentbuilderLegacyHelper::authorize($action);
+            ? (new PermissionService())->authorizeFe($action)
+            : (new PermissionService())->authorize($action);
     }
 
     /**

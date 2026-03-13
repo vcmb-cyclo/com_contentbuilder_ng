@@ -18,7 +18,7 @@ use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
 
 
 $element = $this->element ?? null;
@@ -31,7 +31,7 @@ if (!is_object($element) || empty($element->id)) {
     return;
 }
 
-$plugins = ContentbuilderLegacyHelper::getFormElementsPlugins();
+$plugins = (new FormSupportService())->getFormElementsPlugins();
 
 $elementType = is_string($this->element->type) ? $this->element->type : '';
 if ($elementType !== '') {

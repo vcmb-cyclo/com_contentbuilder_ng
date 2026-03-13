@@ -13,6 +13,7 @@ namespace CB\Component\Contentbuilderng\Site\Controller;
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\BaseController;
@@ -21,12 +22,18 @@ use Joomla\CMS\Application\SiteApplication;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Site\Model\EditModel;
 
 class EditController extends BaseController
 {
     private SiteApplication $siteApp;
     private bool $frontend;
+
+    private function getPermissionService(): PermissionService
+    {
+        return new PermissionService();
+    }
 
     private function getEditModel(array $config = ['ignore_request' => true]): EditModel
     {
@@ -70,13 +77,13 @@ class EditController extends BaseController
 
         if ($this->siteApp->input->getCmd('task', '') == 'delete' || $this->siteApp->input->getCmd('task', '') == 'publish') {
             $items = $this->siteApp->input->get('cid', [], 'array');
-            ContentbuilderLegacyHelper::setPermissions($this->siteApp->input->getInt('id', 0), $items, $this->frontend ? '_fe' : '');
+            $this->getPermissionService()->setPermissions($this->siteApp->input->getInt('id', 0), $items, $this->frontend ? '_fe' : '');
         } else {
             if ($this->siteApp->input->getCmd('record_id', '')) {
-                ContentbuilderLegacyHelper::setPermissions($this->siteApp->input->getInt('id', 0), $this->siteApp->input->getCmd('record_id', ''), $this->frontend ? '_fe' : '');
+                $this->getPermissionService()->setPermissions($this->siteApp->input->getInt('id', 0), $this->siteApp->input->getCmd('record_id', ''), $this->frontend ? '_fe' : '');
             } else {
                 $this->siteApp->input->set('cbIsNew', 1);
-                ContentbuilderLegacyHelper::setPermissions($this->siteApp->input->getInt('id', 0), 0, $this->frontend ? '_fe' : '');
+                $this->getPermissionService()->setPermissions($this->siteApp->input->getInt('id', 0), 0, $this->frontend ? '_fe' : '');
             }
         }
     }
@@ -118,9 +125,9 @@ class EditController extends BaseController
 
         if (!$isAdminPreview) {
             if ($isEdit) {
-                ContentbuilderLegacyHelper::checkPermissions('edit', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_EDIT_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+                $this->getPermissionService()->checkPermissions('edit', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_EDIT_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
             } else {
-                ContentbuilderLegacyHelper::checkPermissions('new', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_NEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+                $this->getPermissionService()->checkPermissions('new', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_NEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
             }
         }
 
@@ -175,7 +182,7 @@ class EditController extends BaseController
     {
         $isAdminPreview = $this->applyPreviewContextForAction();
         if (!$isAdminPreview) {
-            ContentbuilderLegacyHelper::checkPermissions('delete', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_DELETE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+            $this->getPermissionService()->checkPermissions('delete', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_DELETE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
         }
 
         $selectedItems = array_values(
@@ -256,7 +263,7 @@ class EditController extends BaseController
     {
         $isAdminPreview = $this->applyPreviewContextForAction();
         if (!$isAdminPreview) {
-            ContentbuilderLegacyHelper::checkPermissions('state', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+            $this->getPermissionService()->checkPermissions('state', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
         }
 
         $model = $this->getEditModel(['ignore_request' => true]);
@@ -278,7 +285,7 @@ class EditController extends BaseController
                 throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'), 403);
             }
         } elseif (!$isAdminPreview) {
-            ContentbuilderLegacyHelper::checkPermissions('publish', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+            $this->getPermissionService()->checkPermissions('publish', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
         }
 
         $model = $this->getEditModel(['ignore_request' => true]);
@@ -308,7 +315,7 @@ class EditController extends BaseController
     {
         $isAdminPreview = $this->applyPreviewContextForAction();
         if (!$isAdminPreview) {
-            ContentbuilderLegacyHelper::checkPermissions('language', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_CHANGE_LANGUAGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+            $this->getPermissionService()->checkPermissions('language', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_CHANGE_LANGUAGE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
         }
 
         $model = $this->getEditModel(['ignore_request' => true]);
@@ -450,16 +457,16 @@ class EditController extends BaseController
         $this->siteApp->input->set('view', 'list');
 
         // Permissions
-        ContentbuilderLegacyHelper::setPermissions($formId, $recordId, $suffix);
+        $this->getPermissionService()->setPermissions($formId, $recordId, $suffix);
 
         $isAdminPreview = $this->isValidAdminPreviewRequest($formId);
         $this->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
         $this->siteApp->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
         if (!$isAdminPreview) {
             if ($this->siteApp->input->getCmd('record_id', '')) {
-                ContentbuilderLegacyHelper::checkPermissions('edit', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_EDIT_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+                $this->getPermissionService()->checkPermissions('edit', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_EDIT_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
             } else {
-                ContentbuilderLegacyHelper::checkPermissions('new', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_NEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+                $this->getPermissionService()->checkPermissions('new', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_NEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
             }
         }
 

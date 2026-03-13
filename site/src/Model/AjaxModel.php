@@ -18,6 +18,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Session\Session;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 
@@ -51,11 +52,11 @@ class AjaxModel extends BaseDatabaseModel
         switch ($this->_subject) {
             case 'get_unique_values':
                 if ($this->frontend) {
-                    if (!ContentbuilderLegacyHelper::authorizeFe('listaccess')) {
+                    if (!(new PermissionService())->authorizeFe('listaccess')) {
                         return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_VIEW_NOT_ALLOWED')));
                     }
                 } else {
-                    if (!ContentbuilderLegacyHelper::authorize('listaccess')) {
+                    if (!(new PermissionService())->authorize('listaccess')) {
                         return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_VIEW_NOT_ALLOWED')));
                     }
                 }
@@ -79,11 +80,11 @@ class AjaxModel extends BaseDatabaseModel
             case 'rating':
 
                 if ($this->frontend) {
-                    if (!ContentbuilderLegacyHelper::authorizeFe('rating')) {
+                    if (!(new PermissionService())->authorizeFe('rating')) {
                         return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDERNG_RATING_NOT_ALLOWED')));
                     }
                 } else {
-                    if (!ContentbuilderLegacyHelper::authorize('rating')) {
+                    if (!(new PermissionService())->authorize('rating')) {
                         return json_encode(array('code' => 1, 'msg' => Text::_('COM_CONTENTBUILDERNG_RATING_NOT_ALLOWED')));
                     }
                 }

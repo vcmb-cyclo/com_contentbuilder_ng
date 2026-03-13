@@ -20,16 +20,22 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\Database\DatabaseInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilderng\Site\Model\EditModel;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 
 class ListController extends BaseController
 {
+    private function getPermissionService(): PermissionService
+    {
+        return new PermissionService();
+    }
+
     public function delete(): void
     {
         if (!Session::checkToken('post')) {
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
         }
 
-        ContentbuilderLegacyHelper::checkPermissions(
+        $this->getPermissionService()->checkPermissions(
             'delete',
             Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_DELETE_NOT_ALLOWED'),
             '_fe'
@@ -129,7 +135,7 @@ class ListController extends BaseController
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
         }
 
-        ContentbuilderLegacyHelper::checkPermissions(
+        $this->getPermissionService()->checkPermissions(
             'state',
             Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'),
             '_fe'
@@ -205,7 +211,7 @@ class ListController extends BaseController
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
         }
 
-        ContentbuilderLegacyHelper::checkPermissions(
+        $this->getPermissionService()->checkPermissions(
             'publish',
             Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'),
             '_fe'
@@ -316,7 +322,7 @@ class ListController extends BaseController
 
         // Permissions
         if (!$isDirectStorageMode) {
-            ContentbuilderLegacyHelper::setPermissions($formId, $recordId, $suffix);
+            $this->getPermissionService()->setPermissions($formId, $recordId, $suffix);
         }
         $isAdminPreview = $this->isValidAdminPreviewRequest($formId, $storageId);
         $this->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
@@ -325,7 +331,7 @@ class ListController extends BaseController
             $this->enqueueUnpublishedPreviewNotice($formId);
         }
         if (!$isDirectStorageMode && !$isAdminPreview) {
-            ContentbuilderLegacyHelper::checkPermissions(
+            $this->getPermissionService()->checkPermissions(
                 'listaccess',
                 Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_LISTACCESS_NOT_ALLOWED'),
                 $suffix

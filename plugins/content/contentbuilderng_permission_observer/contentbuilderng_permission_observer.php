@@ -16,6 +16,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\SubscriberInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 class plgContentContentbuilderng_permission_observer extends CMSPlugin implements SubscriberInterface
 {
@@ -67,17 +68,17 @@ class plgContentContentbuilderng_permission_observer extends CMSPlugin implement
             if ($form && !(Factory::getApplication()->input->get('option', '', 'string') == 'com_contentbuilderng' && Factory::getApplication()->input->get('controller', '', 'string') == 'edit')) {
 
                 Factory::getApplication()->getLanguage()->load('com_contentbuilderng');
-                ContentbuilderLegacyHelper::setPermissions($data['form_id'], $data['record_id'], $frontend ? '_fe' : '');
+                (new PermissionService())->setPermissions($data['form_id'], $data['record_id'], $frontend ? '_fe' : '');
 
                 if (Factory::getApplication()->input->getCmd('view') == 'article') {
-                    ContentbuilderLegacyHelper::checkPermissions('view', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_VIEW_NOT_ALLOWED'), $frontend ? '_fe' : '');
+                    (new PermissionService())->checkPermissions('view', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_VIEW_NOT_ALLOWED'), $frontend ? '_fe' : '');
                 } else {
                     if ($frontend) {
-                        if (!ContentbuilderLegacyHelper::authorizeFe('view')) {
+                        if (!(new PermissionService())->authorizeFe('view')) {
                             $article->text = Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_VIEW_NOT_ALLOWED');
                         }
                     } else {
-                        if (!ContentbuilderLegacyHelper::authorize('view')) {
+                        if (!(new PermissionService())->authorize('view')) {
                             $article->text = Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_VIEW_NOT_ALLOWED');
                         }
                     }

@@ -19,20 +19,21 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\HTML\HTMLHelper;
-use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\RatingHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 
 HTMLHelper::_('behavior.multiselect');
 
-$language_allowed = ContentbuilderLegacyHelper::authorize('language');
-$edit_allowed = ContentbuilderLegacyHelper::authorize('edit');
-$delete_allowed = ContentbuilderLegacyHelper::authorize('delete');
-$view_allowed = ContentbuilderLegacyHelper::authorize('view');
-$new_allowed = ContentbuilderLegacyHelper::authorize('new');
-$state_allowed = ContentbuilderLegacyHelper::authorize('state');
-$publish_allowed = ContentbuilderLegacyHelper::authorize('publish');
-$rating_allowed = ContentbuilderLegacyHelper::authorize('rating');
+$permissionService = new PermissionService();
+$language_allowed = $permissionService->authorize('language');
+$edit_allowed = $permissionService->authorize('edit');
+$delete_allowed = $permissionService->authorize('delete');
+$view_allowed = $permissionService->authorize('view');
+$new_allowed = $permissionService->authorize('new');
+$state_allowed = $permissionService->authorize('state');
+$publish_allowed = $permissionService->authorize('publish');
+$rating_allowed = $permissionService->authorize('rating');
 
 /** @var AdministratorApplication $app */
 $app = Factory::getApplication();

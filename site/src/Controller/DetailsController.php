@@ -21,6 +21,7 @@ use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Input\Input;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 
 class DetailsController extends BaseController
@@ -33,6 +34,11 @@ class DetailsController extends BaseController
     private SiteApplication $siteApp;
     private bool $frontend;
     private $_show_back_button = true;
+
+    private function getPermissionService(): PermissionService
+    {
+        return new PermissionService();
+    }
 
     public function __construct(
         $config,
@@ -97,8 +103,8 @@ class DetailsController extends BaseController
 
             if (!$this->siteApp->input->getCmd('record_id', '')) {
                 $this->siteApp->input->set('cbIsNew', 1);
-                ContentbuilderLegacyHelper::setPermissions($this->siteApp->input->getInt('id', 0), 0, $this->frontend ? '_fe' : '');
-                $auth = $this->frontend ? ContentbuilderLegacyHelper::authorizeFe('new') : ContentbuilderLegacyHelper::authorize('new');
+                $this->getPermissionService()->setPermissions($this->siteApp->input->getInt('id', 0), 0, $this->frontend ? '_fe' : '');
+                $auth = $this->frontend ? $this->getPermissionService()->authorizeFe('new') : $this->getPermissionService()->authorize('new');
 
                 if ($auth) {
                     $state = $this->resolveListState();
@@ -118,7 +124,7 @@ class DetailsController extends BaseController
         }
 
         if ($this->siteApp->input->getInt('storage_id', 0) <= 0 || $this->siteApp->input->getInt('id', 0) > 0) {
-            ContentbuilderLegacyHelper::setPermissions($this->siteApp->input->getInt('id', 0), $this->siteApp->input->getCmd('record_id', 0), $this->frontend ? '_fe' : '');
+            $this->getPermissionService()->setPermissions($this->siteApp->input->getInt('id', 0), $this->siteApp->input->getCmd('record_id', 0), $this->frontend ? '_fe' : '');
         }
     }
 
@@ -160,13 +166,13 @@ class DetailsController extends BaseController
         }
 
         if (!$isDirectStorageMode) {
-            ContentbuilderLegacyHelper::setPermissions($form_id, $recordId, $suffix);
+            $this->getPermissionService()->setPermissions($form_id, $recordId, $suffix);
         }
         $isAdminPreview = !$isDirectStorageMode && $this->isValidAdminPreviewRequest($form_id);
         $this->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
         $this->siteApp->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
         if (!$isDirectStorageMode && !$isAdminPreview) {
-            ContentbuilderLegacyHelper::checkPermissions('view', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_VIEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
+            $this->getPermissionService()->checkPermissions('view', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_VIEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
         }
 
         $this->siteApp->input->set('tmpl', $this->siteApp->input->getWord('tmpl', null));

@@ -23,6 +23,7 @@ use Joomla\CMS\Event\Content\ContentPrepareEvent;
 use Joomla\CMS\MVC\Model\ListModel as BaseListModel;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 
 class ListModel extends BaseListModel
@@ -999,7 +1000,7 @@ class ListModel extends BaseListModel
                     if ($data->list_language) {
                         $data->lang_codes = ContentbuilderLegacyHelper::getRecordsLanguage($data->items, $data->type, $data->reference_id);
                     }
-                    $data->languages = ContentbuilderLegacyHelper::getLanguageCodes();
+                    $data->languages = (new FormSupportService())->getLanguageCodes();
 
                     // Search for the {readmore} tag and split the text up accordingly.
                     $pattern = '#<hr\s+id=("|\')system-readmore("|\')\s*\/*>#i';

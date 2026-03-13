@@ -19,6 +19,7 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\SubscriberInterface;
 use Joomla\Registry\Registry;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\RatingHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 
@@ -167,14 +168,14 @@ class plgContentContentbuilderng_rating extends CMSPlugin implements SubscriberI
 
                 if (!$is_list) {
 
-                    ContentbuilderLegacyHelper::setPermissions($form_id, $record_id, $frontend ? '_fe' : '');
+                    (new PermissionService())->setPermissions($form_id, $record_id, $frontend ? '_fe' : '');
 
                     if ($frontend) {
-                        if (!ContentbuilderLegacyHelper::authorizeFe('rating')) {
+                        if (!(new PermissionService())->authorizeFe('rating')) {
                             $rating_allowed = false;
                         }
                     } else {
-                        if (!ContentbuilderLegacyHelper::authorize('rating')) {
+                        if (!(new PermissionService())->authorize('rating')) {
                             $rating_allowed = false;
                         }
                     }

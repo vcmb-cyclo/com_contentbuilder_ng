@@ -29,6 +29,8 @@ use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
+use CB\Component\Contentbuilderng\Administrator\Service\PathService;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
@@ -707,10 +709,13 @@ class FormModel extends AdminModel
         }
 
         $data->forms = array();
-        $data->types = ContentbuilderLegacyHelper::getTypes();
+        $formSupportService = new FormSupportService(new PathService());
+        $pathService = new PathService();
+
+        $data->types = $formSupportService->getTypes();
 
         if ($data->type) {
-            $data->forms = ContentbuilderLegacyHelper::getForms($data->type);
+            $data->forms = $formSupportService->getForms($data->type);
         }
 
         $data->form = null;
@@ -740,7 +745,7 @@ class FormModel extends AdminModel
 
                 // En charge de la sauvegarde de la partie Element
                 if (is_object($data->form)) {
-                    $syncReport = ContentbuilderLegacyHelper::synchElements($data->id, $data->form);
+                    $syncReport = $formSupportService->synchElements($data->id, $data->form);
                     $elements_table = $this->getTable('Elementoptions');
                     $elements_table->reorder('form_id=' . $data->id);
                     $this->enqueueSourceSchemaSyncWarning($syncReport);
@@ -764,7 +769,7 @@ class FormModel extends AdminModel
             $data->list_states = $this->_default_list_states;
         }
 
-        $data->language_codes = ContentbuilderLegacyHelper::getLanguageCodes();
+        $data->language_codes = $formSupportService->getLanguageCodes();
 
         $data->sectioncategories = $this->getOptions();
         $data->accesslevels = array();
@@ -861,6 +866,8 @@ class FormModel extends AdminModel
         $app   = Factory::getApplication();
         $input = $app->input;
         $db    = $this->getDatabase();
+        $formSupportService = new FormSupportService(new PathService());
+        $pathService = new PathService();
 
         // 1) Récupération standard + RAW/HTML (nécessaire pour tes éditeurs)
         $jform     = (array) $input->post->get('jform', [], 'array');
@@ -1002,7 +1009,7 @@ class FormModel extends AdminModel
                 : $siteRoot . '/' . ltrim($basePath, '/');
         }
 
-        $resolved = ContentbuilderLegacyHelper::makeSafeFolder($resolved);
+        $resolved = $pathService->makeSafeFolder($resolved);
 
         $protect = !empty($jform['protect_upload_directory']);
 
@@ -1020,7 +1027,7 @@ class FormModel extends AdminModel
 
         // Applique protection (safe folder) si besoin
         if ($protect) {
-            $safe = ContentbuilderLegacyHelper::makeSafeFolder($resolved);
+            $safe = $pathService->makeSafeFolder($resolved);
 
             if (is_dir($safe)) {
                 if (!file_exists($safe . '/index.html')) {
@@ -1031,7 +1038,7 @@ class FormModel extends AdminModel
                 }
             }
         } else {
-            $safe = ContentbuilderLegacyHelper::makeSafeFolder($resolved);
+            $safe = $pathService->makeSafeFolder($resolved);
             if (file_exists($safe . '/.htaccess')) {
                 File::delete($safe . '/.htaccess');
             }
@@ -1109,7 +1116,7 @@ class FormModel extends AdminModel
             if (!$formObj) {
                 $app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
             }
-            $sample = ContentbuilderLegacyHelper::createDetailsSample($id, $formObj, $jform['theme_plugin']);
+            $sample = $formSupportService->createDetailsSample($id, $formObj, $jform['theme_plugin']);
             Logger::info('Details sample requested', [
                 'form_id' => $id,
                 'theme_plugin' => $jform['theme_plugin'] ?? null,
@@ -1126,7 +1133,7 @@ class FormModel extends AdminModel
             if (!$formObj) {
                 $app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
             }
-            $jform['editable_template'] = ContentbuilderLegacyHelper::createEditableSample($id, $formObj, $jform['theme_plugin']);
+            $jform['editable_template'] = $formSupportService->createEditableSample($id, $formObj, $jform['theme_plugin']);
         }
 
         $emailAdminHtml = !empty($jform['email_admin_html']);
@@ -1135,7 +1142,7 @@ class FormModel extends AdminModel
             if (!$formObj) {
                 $app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
             }
-            $jform['email_admin_template'] = ContentbuilderLegacyHelper::createEmailSample($id, $formObj, $emailAdminHtml);
+            $jform['email_admin_template'] = $formSupportService->createEmailSample($id, $formObj, $emailAdminHtml);
         }
 
         $emailCreateSample = !empty($jform['email_create_sample']);
@@ -1143,7 +1150,7 @@ class FormModel extends AdminModel
             if (!$formObj) {
                 $app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
             }
-            $jform['email_template'] = ContentbuilderLegacyHelper::createEmailSample($id, $formObj, Factory::getApplication()->input->getBool('email_html', false));
+            $jform['email_template'] = $formSupportService->createEmailSample($id, $formObj, Factory::getApplication()->input->getBool('email_html', false));
         }
 
         $isBreezingFormsType = in_array(

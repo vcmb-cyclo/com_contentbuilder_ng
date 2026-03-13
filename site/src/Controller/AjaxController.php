@@ -16,6 +16,7 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderLegacyHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 
 class AjaxController extends BaseController
 {
@@ -30,7 +31,7 @@ class AjaxController extends BaseController
 
         $bfrontend = $app->isClient('site');
 
-        ContentbuilderLegacyHelper::setPermissions($this->input->getInt('id', 0), 0, $bfrontend ? '_fe' : '');
+        (new PermissionService())->setPermissions($this->input->getInt('id', 0), 0, $bfrontend ? '_fe' : '');
     }
 
     function display($cachable = false, $urlparams = [])
