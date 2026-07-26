@@ -785,7 +785,7 @@ final class PackedDataMigrationHelper
                 $storageName = strtolower(trim((string) ($storage['name'] ?? '')));
                 $bytable = (int) ($storage['bytable'] ?? 0);
 
-                if ($storageName === '' || $bytable === 1) {
+                if ($storageName === '' || $bytable > 0) {
                     continue;
                 }
 

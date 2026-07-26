@@ -15,26 +15,42 @@
 
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Session\Session;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\StorageColumnTypeHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\StorageSystemFieldHelper;
 
 $item = $displayData['item'] ?? null;
-$tables = is_array($displayData['tables'] ?? null) ? $displayData['tables'] : [];
 $storageId = (int) ($displayData['storageId'] ?? 0);
-$renderCheckbox = $displayData['renderCheckbox'] ?? null;
-$csvToggleTooltip = (string) ($displayData['csvToggleTooltip'] ?? '');
 $addFieldTooltip = (string) ($displayData['addFieldTooltip'] ?? '');
 $sortLink = $displayData['sortLink'] ?? null;
 $fields = is_iterable($displayData['fields'] ?? null) ? $displayData['fields'] : [];
 $fieldsCount = (int) ($displayData['fieldsCount'] ?? 0);
+$recordsCount = $displayData['recordsCount'] ?? null;
 $pagination = $displayData['pagination'] ?? null;
 $ordering = !empty($displayData['ordering']);
 $storageSqlTypeOptions = StorageColumnTypeHelper::options();
+// Le type SQL ne peut être modifié qu'avant toute donnée (ALTER TABLE sûr
+// tant que la table est vide) ; jamais pour un champ système (son type
+// physique est fixe, cf. StorageSystemFieldHelper).
+$canEditSqlType = !$item->bytable && $recordsCount !== null && (int) $recordsCount === 0;
+
+// Colonnes réservées ajoutées automatiquement à la table physique
+// (StorageModel::syncStorageDataTableOrBytable()) mais pas encore exposées
+// comme field géré : preview en lecture seule, toujours en fin de liste
+// (peu importe le tri courant), sur la dernière page seulement.
+$existingFieldNames = [];
+foreach ($fields as $fieldRow) {
+    $existingFieldNames[(string) ($fieldRow->name ?? '')] = true;
+}
+$pendingSystemFields = array_diff_key(StorageSystemFieldHelper::definitions(), $existingFieldNames);
+$isLastPage = !$pagination || ((int) $pagination->pagesCurrent >= (int) $pagination->pagesTotal);
+$showPendingSystemFields = $storageId > 0 && $isLastPage && !empty($pendingSystemFields);
 $storageFieldColumns = [
+    'id' => Text::_('COM_CONTENTBUILDERNG_ID'),
     'name' => Text::_('COM_CONTENTBUILDERNG_NAME'),
     'title' => Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE'),
     'sql_type' => Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE'),
+    'field_size' => Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE'),
     'group' => Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'),
     'order' => Text::_('COM_CONTENTBUILDERNG_ORDERBY'),
     'publish' => Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED'),
@@ -43,333 +59,30 @@ $storageFieldColumns = [
 <table width="100%">
     <tr>
         <td class="align-top" style="width: 200px;">
-            <fieldset class="border rounded p-3 mb-3">
-                <table width="100%">
-                    <tr>
-                        <td style="min-width: 150px;">
-                            <label for="name">
-                                <b>
-                                    <?php echo Text::_('COM_CONTENTBUILDERNG_NAME'); ?>
-                                </b>
-                            </label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <?php if (!$item->bytable) : ?>
-                                <input class="form-control form-control-sm w-100" type="text" id="name" name="jform[name]"
-                                    value="<?php echo htmlspecialchars($item->name ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
-                                <br /><br />
-                            <?php else : ?>
-                                <input type="hidden" id="name" name="jform[name]"
-                                    value="<?php echo htmlspecialchars($item->name, ENT_QUOTES, 'UTF-8'); ?>" />
-                            <?php endif; ?>
-
-                            <?php if (!$item->id) : ?>
-                                <b>
-                                    <?php echo Text::_('COM_CONTENTBUILDERNG_CHOOSE_TABLE'); ?>
-                                </b>
-                                <br />
-                                <select class="form-select-sm"
-                                    onchange="if(this.selectedIndex != 0){ document.getElementById('name').disabled = true; document.getElementById('csvUploadHead').style.display = 'none'; document.getElementById('csvUpload').style.display = 'none'; alert('<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_CUSTOM_STORAGE_MSG')); ?>'); }else{ document.getElementById('name').disabled = false; document.getElementById('csvUploadHead').style.display = ''; document.getElementById('csvUpload').style.display = ''; }"
-                                    name="jform[bytable]" id="bytable" style="max-width: 150px;">
-                                    <option value=""> -
-                                        <?php echo Text::_('COM_CONTENTBUILDERNG_NONE'); ?> -
-                                    </option>
-                                    <?php foreach ($tables as $table) : ?>
-                                        <option value="<?php echo htmlspecialchars($table, ENT_QUOTES, 'UTF-8'); ?>">
-                                            <?php echo htmlspecialchars($table, ENT_QUOTES, 'UTF-8'); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            <?php elseif ($item->bytable) : ?>
-                                <input type="hidden" id="bytable" name="jform[bytable]"
-                                    value="<?php echo htmlspecialchars($item->name, ENT_QUOTES, 'UTF-8'); ?>" />
-                                <?php echo htmlspecialchars($item->name, ENT_QUOTES, 'UTF-8'); ?>
-                            <?php else : ?>
-                                <input type="hidden" id="bytable" name="jform[bytable]" value="" />
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 100px;">
-                            <label for="title">
-                                <b>
-                                    <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE'); ?>
-                                </b>
-                            </label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input class="form-control form-control-sm w-100" type="text" id="title"
-                                name="jform[title]"
-                                value="<?php echo htmlspecialchars($item->title ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
-                        </td>
-                    </tr>
-                    <tr id="csvUploadHead">
-                        <td style="width: 100px;">
-                            <br />
-                            <button
-                                type="button"
-                                id="csvToggleButton"
-                                class="btn btn-primary mb-2"
-                                onclick="return toggleCsvUploadOptions();"
-                                title="<?php echo htmlspecialchars($csvToggleTooltip, ENT_QUOTES, 'UTF-8'); ?>"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="top"
-                                aria-controls="csvUpload"
-                                aria-expanded="false"
-                                data-cb-default-text="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV'), ENT_QUOTES, 'UTF-8'); ?>"
-                                data-cb-create-text="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_CREATE_FROM_FILE'), ENT_QUOTES, 'UTF-8'); ?>"
-                                data-cb-new-storage="<?php echo ((int) $storageId === 0) ? '1' : '0'; ?>"
-                                data-cb-preview-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_PREVIEW_FROM_FILE'), ENT_QUOTES, 'UTF-8'); ?>"
-                                data-cb-token="<?php echo Session::getFormToken(); ?>"
-                            >
-                                <i class="fa fa-file-excel me-1" aria-hidden="true"></i>
-                                <span class="cb-csv-button-label">
-                                    <?php echo ((int) $storageId === 0)
-                                        ? Text::_('COM_CONTENTBUILDERNG_STORAGE_CREATE_FROM_FILE')
-                                        : Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV'); ?>
-                                </span>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr style="display: none;" id="csvUpload">
-                        <td>
-                            <input size="9" type="file" id="csv_file" name="csv_file" accept=".csv,.xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
-                            <br />
-                            Max.
-                            <?php
-                            $max_upload = (int) (ini_get('upload_max_filesize'));
-                            $max_post = (int) (ini_get('post_max_size'));
-                            $memory_limit = (int) (ini_get('memory_limit'));
-                            $upload_mb = min($max_upload, $max_post, $memory_limit);
-                            $val = trim((string) $upload_mb);
-                            $last = strtolower($val[strlen($val) - 1] ?? '');
-                            switch ($last) {
-                                case 'g':
-                                    $val .= ' GB';
-                                    break;
-                                case 'k':
-                                    $val .= ' kb';
-                                    break;
-                                default:
-                                    $val .= ' MB';
-                            }
-                            echo $val;
-                            ?>
-                            <br />
-                            <br />
-                            <label for="csv_drop_records">
-                                <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV_DROP_RECORDS'); ?>
-                            </label> <?php echo is_callable($renderCheckbox) ? $renderCheckbox('jform[csv_drop_records]', 'csv_drop_records', true) : ''; ?>
-                            <br />
-                            <label for="csv_published">
-                                <?php echo Text::_('COM_CONTENTBUILDERNG_AUTO_PUBLISH'); ?>
-                            </label> <?php echo is_callable($renderCheckbox) ? $renderCheckbox('jform[csv_published]', 'csv_published', true) : ''; ?>
-                            <br />
-                            <label for="csv_delimiter">
-                                <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV_DELIMITER'); ?>
-                            </label> <input class="form-control form-control-sm" maxlength="3" type="text"
-                                size="1" id="csv_delimiter" name="jform[csv_delimiter]" value="," />
-                            <br />
-                            <br />
-                            <label class="editlinktip hasTip"
-                                title="<?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV_REPAIR_ENCODING_TIP'); ?>"
-                                for="csv_repair_encoding">
-                                <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV_REPAIR_ENCODING'); ?>*
-                            </label>
-                            <br />
-                            <select class="form-select-sm" style="width: 150px;" name="jform[csv_repair_encoding]"
-                                id="csv_repair_encoding">
-                                <option value=""> -
-                                    <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV_NO_REPAIR_ENCODING'); ?>
-                                    -
-                                </option>
-                                <option value="WINDOWS-1250">WINDOWS-1250</option>
-                                <option value="WINDOWS-1251">WINDOWS-1251</option>
-                                <option value="WINDOWS-1252">WINDOWS-1252 (ANSI)</option>
-                                <option value="WINDOWS-1253">WINDOWS-1253</option>
-                                <option value="WINDOWS-1254">WINDOWS-1254</option>
-                                <option value="WINDOWS-1255">WINDOWS-1255</option>
-                                <option value="WINDOWS-1256">WINDOWS-1256</option>
-                                <option value="ISO-8859-1">ISO-8859-1 (LATIN1)</option>
-                                <option value="ISO-8859-2">ISO-8859-2</option>
-                                <option value="ISO-8859-3">ISO-8859-3</option>
-                                <option value="ISO-8859-4">ISO-8859-4</option>
-                                <option value="ISO-8859-5">ISO-8859-5</option>
-                                <option value="ISO-8859-6">ISO-8859-6</option>
-                                <option value="ISO-8859-7">ISO-8859-7</option>
-                                <option value="ISO-8859-8">ISO-8859-8</option>
-                                <option value="ISO-8859-9">ISO-8859-9</option>
-                                <option value="ISO-8859-10">ISO-8859-10</option>
-                                <option value="ISO-8859-11">ISO-8859-11</option>
-                                <option value="ISO-8859-12">ISO-8859-12</option>
-                                <option value="ISO-8859-13">ISO-8859-13</option>
-                                <option value="ISO-8859-14">ISO-8859-14</option>
-                                <option value="ISO-8859-15">ISO-8859-15 (LATIN-9)</option>
-                                <option value="ISO-8859-16">ISO-8859-16</option>
-                                <option value="UTF-8-MAC">UTF-8-MAC</option>
-                                <option value="UTF-16">UTF-16</option>
-                                <option value="UTF-16BE">UTF-16BE</option>
-                                <option value="UTF-16LE">UTF-16LE</option>
-                                <option value="UTF-32">UTF-32</option>
-                                <option value="UTF-32BE">UTF-32BE</option>
-                                <option value="UTF-32LE">UTF-32LE</option>
-                                <option value="ASCII">ASCII</option>
-                                <option value="BIG-5">BIG-5</option>
-                                <option value="HEBREW">HEBREW</option>
-                                <option value="CYRILLIC">CYRILLIC</option>
-                                <option value="ARABIC">ARABIC</option>
-                                <option value="GREEK">GREEK</option>
-                                <option value="CHINESE">CHINESE</option>
-                                <option value="KOREAN">KOREAN</option>
-                                <option value="KOI8-R">KOI8-R</option>
-                                <option value="KOI8-U">KOI8-U</option>
-                                <option value="KOI8-RU">KOI8-RU</option>
-                                <option value="EUC-JP">EUC-JP</option>
-                            </select>
-                            <div id="cbCsvPreviewPanel" class="cb-csv-preview-panel" style="display:none;">
-                                <div class="cb-csv-preview-head"><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_PREVIEW_FROM_FILE'); ?></div>
-                                <table class="table table-sm table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th style="width:40%;"><?php echo Text::_('COM_CONTENTBUILDERNG_NAME'); ?></th>
-                                            <th style="width:45%;"><?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE'); ?></th>
-                                            <th style="width:15%;"><?php echo Text::_('JSTATUS'); ?></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="cbCsvPreviewBody"></tbody>
-                                </table>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </fieldset>
-            <?php if (!$item->bytable) : ?>
-                <fieldset class="border rounded p-3 mb-3">
-                    <?php if ((int) $item->id === 0) : ?>
-                        <div class="alert alert-info">
-                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_SAVE_FIRST_ADD_FIELDS'); ?>
-                        </div>
-                        <button
-                            type="button"
-                            class="btn btn-success"
-                            disabled
-                            title="<?php echo htmlspecialchars($addFieldTooltip, ENT_QUOTES, 'UTF-8'); ?>"
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="top"
-                        >+ Add Field</button>
-                    <?php else : ?>
-                        <button type="button"
-                            class="btn btn-success"
-                            title="<?php echo htmlspecialchars($addFieldTooltip, ENT_QUOTES, 'UTF-8'); ?>"
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="top"
-                            onclick="Joomla.submitbutton('storage.addfield');">
-                            + Add Field
-                        </button>
-                        <table class="admintable" width="100%">
-                            <tr>
-                                <td>
-                                    <label for="fieldname">
-                                        <b>
-                                            <?php echo Text::_('COM_CONTENTBUILDERNG_NAME'); ?>
-                                        </b>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <input class="form-control form-control-sm w-100" type="text" id="fieldname"
-                                        name="jform[fieldname]" value="" />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="width: 100px;">
-                                    <label for="sql_type">
-                                        <b>
-                                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE'); ?>
-                                        </b>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <select class="form-select form-select-sm w-100" id="sql_type" name="jform[sql_type]">
-                                        <?php foreach ($storageSqlTypeOptions as $sqlTypeValue => $sqlTypeLabel) : ?>
-                                            <option value="<?php echo htmlspecialchars($sqlTypeValue, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $sqlTypeValue === StorageColumnTypeHelper::DEFAULT_TYPE ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($sqlTypeLabel, ENT_QUOTES, 'UTF-8'); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <div class="form-text">
-                                        <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE_CREATE_ONLY_HINT'); ?>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="width: 100px;">
-                                    <label for="fieldtitle">
-                                        <b>
-                                            <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE'); ?>
-                                        </b>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <input class="form-control form-control-sm w-100" type="text" id="fieldtitle"
-                                        name="jform[fieldtitle]" value="" />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="width: 100px;">
-                                    <label for="is_group">
-                                        <b>
-                                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'); ?>
-                                        </b>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <input class="form-check-input" type="radio" id="is_group" name="jform[is_group]"
-                                        value="1" /> <label for="is_group">
-                                        <?php echo Text::_('COM_CONTENTBUILDERNG_YES'); ?>
-                                    </label>
-                                    <input class="form-check-input" type="radio" id="is_group_no" name="jform[is_group]"
-                                        value="0" checked="checked" /> <label for="is_group_no">
-                                        <?php echo Text::_('COM_CONTENTBUILDERNG_NO'); ?>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="width: 100px;">
-                                    <label for="group_definition">
-                                        <b>
-                                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP_DEFINITION'); ?>
-                                        </b>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-end">
-                                    <textarea class="form-control form-control-sm" style="width: 100%; height: 100px;"
-                                        id="group_definition" name="jform[group_definition]">Label 1;value1
-Label 2;value2
-Label 3;value3</textarea>
-                                </td>
-                            </tr>
-                        </table>
-                    <?php endif; ?>
-                </fieldset>
+            <?php if (!$item->bytable && $item->id) : ?>
+                <script type="application/json" id="cb-storage-field-sql-types"><?php echo json_encode($storageSqlTypeOptions, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
             <?php endif; ?>
         </td>
 
         <td class="align-top">
-            <div class="d-flex justify-content-end m-3 mb-2">
+            <div class="d-flex justify-content-between align-items-center m-3 mb-2">
+                <div>
+                    <?php if (!$item->bytable && $item->id) : ?>
+                        <button type="button"
+                            id="cb-storage-field-add-button"
+                            class="btn btn-success btn-sm hasTooltip"
+                            title="<?php echo htmlspecialchars($addFieldTooltip, ENT_QUOTES, 'UTF-8'); ?>"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top">
+                            <span class="fa-solid fa-plus" aria-hidden="true"></span>
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_ADD_FIELD_BUTTON'); ?>
+                        </button>
+                    <?php elseif (!$item->bytable) : ?>
+                        <div class="alert alert-info py-1 px-2 mb-0 d-inline-block">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_SAVE_FIRST_ADD_FIELDS'); ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
                 <div class="dropdown cb-storage-columns-dropdown">
                     <button type="button"
                         class="btn btn-primary btn-sm dropdown-toggle"
@@ -377,7 +90,8 @@ Label 3;value3</textarea>
                         data-bs-toggle="dropdown"
                         data-bs-auto-close="outside"
                         aria-haspopup="true"
-                        aria-expanded="false">
+                        aria-expanded="false"
+                        title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_COLUMNS_TOGGLE_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                         <span class="cb-storage-columns-count"><?php echo count($storageFieldColumns); ?>/<?php echo count($storageFieldColumns); ?> <?php echo Text::_('COM_CONTENTBUILDERNG_COLUMNS'); ?></span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-end p-2 cb-storage-columns-menu" aria-labelledby="cb-storage-columns-toggle">
@@ -392,7 +106,7 @@ Label 3;value3</textarea>
                             </label>
                         <?php endforeach; ?>
                         <div class="dropdown-divider my-2"></div>
-                        <button type="button" class="btn btn-link btn-sm px-2 cb-storage-columns-reset" data-cb-storage-columns-reset="1">
+                        <button type="button" class="btn btn-link btn-sm px-2 cb-storage-columns-reset" data-cb-storage-columns-reset="1" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_COLUMNS_RESET_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                             <?php echo Text::_('COM_CONTENTBUILDERNG_RESET'); ?>
                         </button>
                     </div>
@@ -404,6 +118,9 @@ Label 3;value3</textarea>
                         <th width="20" data-cb-storage-col="check">
                             <input class="form-check-input" type="checkbox" name="checkall-toggle" value="" onclick="Joomla.checkAll(this);" aria-label="<?php echo htmlspecialchars(Text::_('JGLOBAL_CHECK_ALL'), ENT_QUOTES, 'UTF-8'); ?>">
                         </th>
+                        <th width="60" class="text-nowrap" data-cb-storage-col="id">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_ID'); ?>
+                        </th>
                         <th data-cb-storage-col="name" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_NAME_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                             <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_NAME'), 'name') : Text::_('COM_CONTENTBUILDERNG_NAME'); ?>
                         </th>
@@ -412,6 +129,9 @@ Label 3;value3</textarea>
                         </th>
                         <th data-cb-storage-col="sql_type" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                             <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE'), 'sql_type') : Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE'); ?>
+                        </th>
+                        <th width="90" data-cb-storage-col="field_size" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
+                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE'); ?>
                         </th>
                         <th data-cb-storage-col="group" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                             <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'), 'group_definition') : Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'); ?>
@@ -422,28 +142,67 @@ Label 3;value3</textarea>
                         <th data-cb-storage-col="publish" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_PUBLISHED_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                             <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED'), 'published') : Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED'); ?>
                         </th>
+                        <th width="40" data-cb-storage-col="actions"></th>
                     </tr>
                 </thead>
+                <tbody id="cb-storage-fields-tbody">
                 <?php $n = $fieldsCount; ?>
                 <?php foreach ($fields as $i => $row) :
                     $id = (int) ($row->id ?? 0);
-                    $name = htmlspecialchars((string) ($row->name ?? ''), ENT_QUOTES, 'UTF-8');
+                    $rawName = (string) ($row->name ?? '');
+                    $name = htmlspecialchars($rawName, ENT_QUOTES, 'UTF-8');
                     $title = htmlspecialchars((string) ($row->title ?? ''), ENT_QUOTES, 'UTF-8');
                     $sqlType = StorageColumnTypeHelper::normalize((string) ($row->sql_type ?? StorageColumnTypeHelper::DEFAULT_TYPE));
                     $sqlTypeLabel = htmlspecialchars(StorageColumnTypeHelper::label($sqlType), ENT_QUOTES, 'UTF-8');
+                    $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $row->field_size ?? null);
                     $groupDefinition = htmlspecialchars((string) ($row->group_definition ?? ''), ENT_QUOTES, 'UTF-8');
                     $isGroup = !empty($row->is_group);
                     $checked = '<input class="form-check-input" type="checkbox" id="cb' . (int) $i . '" name="cid[]" value="' . $id . '" onclick="Joomla.isChecked(this.checked);">';
                     $published = ContentbuilderngHelper::listPublish('storage', $row, $i);
+                    $isSystemField = StorageSystemFieldHelper::isSystemFieldName($rawName);
+                    $rowSqlTypeEditable = $canEditSqlType && !$isSystemField;
                 ?>
                     <tr class="row<?php echo $i % 2; ?>" data-cb-row-id="<?php echo $id; ?>" data-cb-item-label="<?php echo $title !== '' ? $title : $name; ?>">
                         <td class="text-center" data-cb-storage-col="check"><?php echo $checked; ?></td>
+                        <td class="text-nowrap" data-cb-storage-col="id"><?php echo $id; ?></td>
                         <td data-cb-storage-col="name"><?php echo $name; ?></td>
                         <td data-cb-storage-col="title"><?php echo $title; ?></td>
                         <td data-cb-storage-col="sql_type">
-                            <span title="<?php echo htmlspecialchars(StorageColumnTypeHelper::sqlDefinition($sqlType), ENT_QUOTES, 'UTF-8'); ?>">
-                                <?php echo $sqlTypeLabel; ?>
-                            </span>
+                            <?php if ($rowSqlTypeEditable) : ?>
+                                <select class="form-select form-select-sm cb-storage-field-type-select" data-field-id="<?php echo $id; ?>" style="width:auto; max-width:12rem;" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php foreach ($storageSqlTypeOptions as $sqlTypeValue => $sqlTypeOptionLabel) : ?>
+                                        <option
+                                            value="<?php echo htmlspecialchars($sqlTypeValue, ENT_QUOTES, 'UTF-8'); ?>"
+                                            data-supports-size="<?php echo StorageColumnTypeHelper::supportsSize($sqlTypeValue) ? '1' : '0'; ?>"
+                                            data-default-size="<?php echo (int) StorageColumnTypeHelper::defaultSize($sqlTypeValue); ?>"
+                                            <?php echo $sqlTypeValue === $sqlType ? 'selected' : ''; ?>
+                                        >
+                                            <?php echo htmlspecialchars($sqlTypeOptionLabel, ENT_QUOTES, 'UTF-8'); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            <?php else : ?>
+                                <span title="<?php echo htmlspecialchars(StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php echo $sqlTypeLabel; ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="text-nowrap" data-cb-storage-col="field_size">
+                            <?php if ($rowSqlTypeEditable && StorageColumnTypeHelper::supportsSize($sqlType)) : ?>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    class="form-control form-control-sm cb-storage-field-size-input"
+                                    data-field-id="<?php echo $id; ?>"
+                                    style="width:6rem;"
+                                    title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                    value="<?php echo (int) $fieldSize; ?>"
+                                >
+                            <?php elseif (StorageColumnTypeHelper::supportsSize($sqlType)) : ?>
+                                <?php echo (int) $fieldSize; ?>
+                            <?php else : ?>
+                                &mdash;
+                            <?php endif; ?>
                         </td>
                         <td data-cb-storage-col="group">
                             <input type="hidden" name="itemNames[<?php echo $id; ?>]" value="<?php echo $name; ?>" />
@@ -469,6 +228,7 @@ Label 3;value3</textarea>
 
                             <div id="itemGroupDefinitions_<?php echo $id; ?>">
                                 <button type="button" class="btn btn-link btn-sm p-0"
+                                    title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP_DEFINITION_EDIT_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
                                     onclick="document.getElementById('itemGroupDefinitions<?php echo $id; ?>').style.display='block'; this.parentNode.style.display='none'; document.getElementById('itemGroupDefinitions<?php echo $id; ?>').focus(); return false;">
                                     [<?php echo Text::_('COM_CONTENTBUILDERNG_EDIT'); ?>]
                                 </button>
@@ -504,10 +264,64 @@ Label 3;value3</textarea>
                             <?php endif; ?>
                         </td>
                         <td class="text-center" data-cb-storage-col="publish"><?php echo $published; ?></td>
+                        <td class="text-center" data-cb-storage-col="actions">
+                            <?php if ((int) ($item->bytable ?? 0) !== 2 && !$isSystemField) : ?>
+                                <button type="button"
+                                    class="btn btn-sm btn-link text-danger p-0 cb-storage-field-delete"
+                                    title="<?php echo htmlspecialchars(Text::_('JACTION_DELETE'), ENT_QUOTES, 'UTF-8'); ?>"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    onclick="return cbDeleteStorageField('cb<?php echo (int) $i; ?>');"
+                                >
+                                    <span class="fa-solid fa-trash" aria-hidden="true"></span>
+                                </button>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
+                <?php if ($showPendingSystemFields) : ?>
+                    <?php foreach ($pendingSystemFields as $pendingFieldName => $pendingFieldDefinition) : ?>
+                        <tr class="cb-storage-field-system-preview text-muted" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_PREVIEW_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
+                            <td class="text-center" data-cb-storage-col="check">
+                                <input class="form-check-input" type="checkbox" disabled>
+                            </td>
+                            <td class="text-nowrap" data-cb-storage-col="id">—</td>
+                            <td data-cb-storage-col="name">
+                                <?php echo htmlspecialchars($pendingFieldName, ENT_QUOTES, 'UTF-8'); ?>
+                                <span class="fa-solid fa-gear ms-1" aria-hidden="true"></span>
+                            </td>
+                            <td data-cb-storage-col="title"><?php echo htmlspecialchars((string) $pendingFieldDefinition['label'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td data-cb-storage-col="sql_type">
+                                <?php echo htmlspecialchars(StorageColumnTypeHelper::label((string) $pendingFieldDefinition['sql_type']), ENT_QUOTES, 'UTF-8'); ?>
+                            </td>
+                            <td class="text-nowrap" data-cb-storage-col="field_size">—</td>
+                            <td data-cb-storage-col="group">—</td>
+                            <td class="cb-order-col" data-cb-storage-col="order">—</td>
+                            <td class="text-center" data-cb-storage-col="publish">
+                                <button type="button"
+                                    class="btn btn-sm btn-link p-0"
+                                    title="<?php echo htmlspecialchars(Text::_('JLIB_HTML_PUBLISH_ITEM'), ENT_QUOTES, 'UTF-8'); ?>"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    onclick="document.getElementById('cb-system-field-name').value='<?php echo htmlspecialchars($pendingFieldName, ENT_QUOTES, 'UTF-8'); ?>'; Joomla.submitbutton('storage.publishSystemField'); return false;">
+                                    <span class="fa-solid fa-circle-xmark text-danger" aria-hidden="true"></span>
+                                    <span class="visually-hidden"><?php echo Text::_('JLIB_HTML_PUBLISH_ITEM'); ?></span>
+                                </button>
+                            </td>
+                            <td class="text-center" data-cb-storage-col="actions"></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                </tbody>
 
                 <tfoot>
+                    <?php if ($recordsCount !== null) : ?>
+                        <tr>
+                            <td colspan="7" class="text-muted small">
+                                <?php echo Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_RECORDS_COUNT_FOOTER', (int) $recordsCount); ?>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
                     <tr>
                             <td colspan="7">
                             <div class="cb-storage-pagination">

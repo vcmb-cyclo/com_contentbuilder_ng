@@ -413,7 +413,7 @@ use Joomla\CMS\Router\Route;
                                     <td><?php echo htmlspecialchars((string) ($missingAuditColumn['table'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo (int) ($missingAuditColumn['storage_id'] ?? 0); ?></td>
                                     <td><?php echo htmlspecialchars((string) ($missingAuditColumn['storage_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
-                                    <td><?php echo Text::_((int) ($missingAuditColumn['bytable'] ?? 0) === 1 ? 'JYES' : 'JNO'); ?></td>
+                                    <td><?php echo Text::_((int) ($missingAuditColumn['bytable'] ?? 0) > 0 ? 'JYES' : 'JNO'); ?></td>
                                     <td><?php echo htmlspecialchars(implode(', ', (array) ($missingAuditColumn['missing'] ?? [])), ENT_QUOTES, 'UTF-8'); ?></td>
                                 </tr>
                             <?php endforeach; ?>

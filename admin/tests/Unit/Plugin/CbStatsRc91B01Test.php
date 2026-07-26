@@ -86,7 +86,20 @@ final class CbStatsRc91B01Test extends TestCase
         self::assertNotFalse($manifest);
 
         $fields = $manifest->xpath('/extension/config/fields/fieldset/field');
-        self::assertCount(7, $fields);
+        self::assertSame([
+            'cbstats_syntax_note',
+            'cbstats_add_note',
+            'cbstats_debug_note',
+            'cbstats_manual_note',
+            'cbstats_export_note',
+            'cbstats_presentation_note',
+            'cbstats_headers_note',
+            'cbstats_display_options_note',
+        ], array_map(
+            static fn(\SimpleXMLElement $field): string => (string) $field['name'],
+            $fields
+        ));
+
         foreach ($fields as $field) {
             self::assertSame('alert alert-info w-100', (string) $field['class']);
         }

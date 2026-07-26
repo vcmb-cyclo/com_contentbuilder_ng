@@ -223,12 +223,6 @@ class DetailsController extends BaseController
             $this->siteApp->getInput()->set('record_id', $recordId);
         }
 
-        // En mode storage direct, $form_id pointe désormais vers un vrai
-        // #__contentbuilderng_forms (résolu/créé plus haut) : les droits
-        // configurés dessus (admin > Formulaires) doivent donc être chargés
-        // comme pour n'importe quel formulaire classique.
-        $this->getPermissionService()->setPermissions($form_id, $recordId, $suffix);
-
         $isAdminPreview = $isDirectStorageMode
             ? $this->isValidAdminPreviewRequest(0, $storageId)
             : $this->isValidAdminPreviewRequest($form_id);
@@ -241,6 +235,8 @@ class DetailsController extends BaseController
         }
         if ($isDirectStorageMode && $isAdminPreview) {
             $this->getPermissionService()->setStoragePreviewPermissions($storageId, $suffix);
+        } else {
+            $this->getPermissionService()->setPermissions($form_id, $recordId, $suffix);
         }
         if (!$isAdminPreview) {
             $this->getPermissionService()->checkPermissions('view', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_VIEW_NOT_ALLOWED'), $this->frontend ? '_fe' : '');

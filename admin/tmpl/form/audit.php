@@ -18,7 +18,7 @@ $audit = (array) ($this->audit ?? ['info' => [], 'checks' => []]);
 $auditForm = (array) ($audit['form'] ?? []);
 $statusBadges = [
     FormAuditService::STATUS_OK => ['bg-success', 'COM_CONTENTBUILDERNG_AUDIT_STATUS_OK'],
-    FormAuditService::STATUS_WARNING => ['bg-warning text-dark', 'COM_CONTENTBUILDERNG_AUDIT_STATUS_WARNING'],
+    FormAuditService::STATUS_WARNING => ['text-bg-warning', 'COM_CONTENTBUILDERNG_AUDIT_STATUS_WARNING'],
     FormAuditService::STATUS_ERROR => ['bg-danger', 'COM_CONTENTBUILDERNG_AUDIT_STATUS_ERROR'],
 ];
 $auditTitle = trim((string) ($auditForm['name'] ?? '')) !== ''

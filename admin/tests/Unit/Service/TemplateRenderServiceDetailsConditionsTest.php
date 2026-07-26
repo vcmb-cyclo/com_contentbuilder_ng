@@ -50,7 +50,7 @@ final class TemplateRenderServiceDetailsConditionsTest extends TestCase
             $this->source
         );
         self::assertStringContainsString(
-            '$template = $this->replaceTemplateFieldToken($template, (string) $key, \'label\', (string) $item[\'label\']);',
+            '$this->debugFieldNamePrefix((int) $contentbuilderngFormId, (string) $key, (string) ($result[\'type\'] ?? \'\')) . (string) $item[\'label\']',
             $this->source
         );
         self::assertStringContainsString(

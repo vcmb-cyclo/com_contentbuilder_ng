@@ -24,6 +24,25 @@
         padding: 0 1rem 1rem;
     }
 
+    /* Nom technique du champ source (BF/Storage) affiché à gauche du
+       libellé, en mode debug, sur les écrans Edit et Détails. Couleurs et
+       taille fixes (indépendantes du thème frontend actif, qui peut ne pas
+       définir les variables Bootstrap) pour garantir la lisibilité. */
+    .cb-debug-field-name {
+        display: inline-block;
+        vertical-align: middle;
+        margin-inline-end: .5rem;
+        padding: .15em .45em;
+        border-radius: .25rem;
+        font-family: "Courier New", Courier, monospace;
+        font-size: .7rem;
+        line-height: 1.4;
+        font-weight: 700;
+        color: #0a3622;
+        background-color: #a3cfbb;
+        border: 1px solid #0a3622;
+    }
+
     .cb-debug-permissions {
         display: flex;
         flex-wrap: wrap;

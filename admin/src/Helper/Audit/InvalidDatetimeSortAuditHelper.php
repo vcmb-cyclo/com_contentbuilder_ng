@@ -160,7 +160,7 @@ final class InvalidDatetimeSortAuditHelper
                 continue;
             }
 
-            $physicalTableName = ((int) ($storage['bytable'] ?? 0) === 1) ? $storageTableName : $prefix . $storageTableName;
+            $physicalTableName = ((int) ($storage['bytable'] ?? 0) > 0) ? $storageTableName : $prefix . $storageTableName;
 
             if (!isset($knownTables[$physicalTableName])) {
                 $errors[] = 'Could not inspect DATETIME order audit table ' . $physicalTableName . ' for form #' . $formId . ': table not found.';

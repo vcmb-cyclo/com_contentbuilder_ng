@@ -81,7 +81,7 @@ final class StorageColumnTypeAuditHelper
             try {
                 $db->setQuery(
                     $db->getQuery(true)
-                        ->select($db->quoteName(['id', 'name', 'title', 'sql_type']))
+                        ->select($db->quoteName(['id', 'name', 'title', 'sql_type', 'field_size']))
                         ->from($db->quoteName('#__contentbuilderng_storage_fields'))
                         ->where($db->quoteName('storage_id') . ' = ' . (int) $storageId)
                         ->order($db->quoteName('ordering') . ' ASC')
@@ -100,6 +100,7 @@ final class StorageColumnTypeAuditHelper
                 }
 
                 $expectedType = StorageColumnTypeHelper::normalize((string) ($field['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
+                $expectedSize = StorageColumnTypeHelper::normalizeSize($expectedType, $field['field_size'] ?? null);
                 $physicalDefinition = $physicalColumnsLower[$fieldName];
 
                 if (StorageColumnTypeHelper::physicalTypeMatches($expectedType, $physicalDefinition)) {
@@ -115,7 +116,7 @@ final class StorageColumnTypeAuditHelper
                     'column' => $fieldName,
                     'expected_type' => $expectedType,
                     'expected_label' => StorageColumnTypeHelper::label($expectedType),
-                    'expected_sql' => StorageColumnTypeHelper::sqlDefinition($expectedType),
+                    'expected_sql' => StorageColumnTypeHelper::sqlDefinition($expectedType, $expectedSize),
                     'physical_type' => StorageColumnTypeHelper::extractPhysicalType($physicalDefinition),
                 ];
             }

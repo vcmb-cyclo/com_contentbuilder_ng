@@ -27,6 +27,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Model\StorageModel;
 use CB\Component\Contentbuilderng\Administrator\Service\DirectStorageFormProvisioningService;
 use CB\Component\Contentbuilderng\Administrator\Service\StorageWizardService;
+use CB\Component\Contentbuilderng\Administrator\Service\ExternalTableService;
 
 /**
  * "Assistant" wizard: guides the admin from a blank Storage through fields
@@ -122,8 +123,173 @@ final class StoragewizardController extends BaseController
     }
 
     /**
-     * Task: storagewizard.saveStorage — étape 1, crée le storage (nom/titre)
-     * puis avance à l'étape "fields".
+     * Task: storagewizard.chooseStorageMode — sous-étape 1 de STEP_STORAGE :
+     * reprendre un storage existant, ou en créer un nouveau.
+     */
+    public function chooseStorageMode(): void
+    {
+        $this->checkToken();
+        $this->requireManagePermission();
+
+        $mode = trim((string) $this->input->post->getCmd('storage_mode', ''));
+
+        if (!in_array($mode, [StorageWizardService::MODE_RESUME, StorageWizardService::MODE_NEW], true)) {
+            $this->redirectToWizard(Text::_('COM_CONTENTBUILDERNG_WIZARD_STORAGE_MODE_REQUIRED'), 'error');
+
+            return;
+        }
+
+        $wizardService = $this->getWizardService();
+        $state = $wizardService->getState();
+        $state['storage_mode'] = $mode;
+        $state['storage_substep'] = $mode === StorageWizardService::MODE_RESUME
+            ? StorageWizardService::SUBSTEP_PICK_EXISTING
+            : StorageWizardService::SUBSTEP_CREATION_MODE;
+        $wizardService->saveState($state);
+
+        $this->redirectToWizard();
+    }
+
+    /**
+     * Task: storagewizard.selectExistingStorage — sous-étape "reprise" :
+     * choisit un storage déjà créé et saute directement à l'étape "fields",
+     * sans repasser par la création (nom/titre/table).
+     */
+    public function selectExistingStorage(): void
+    {
+        $this->checkToken();
+        $this->requireManagePermission();
+
+        $storageId = (int) $this->input->post->getInt('existing_storage_id', 0);
+
+        if ($storageId < 1) {
+            $this->redirectToWizard(Text::_('COM_CONTENTBUILDERNG_WIZARD_PICK_EXISTING_STORAGE_REQUIRED'), 'error');
+
+            return;
+        }
+
+        $db = $this->getComponent()->getContainer()->get(DatabaseInterface::class);
+        $query = $db->getQuery(true)
+            ->select('COUNT(*)')
+            ->from($db->quoteName('#__contentbuilderng_storages'))
+            ->where($db->quoteName('id') . ' = :storageId')
+            ->bind(':storageId', $storageId, ParameterType::INTEGER);
+        $db->setQuery($query);
+
+        if ((int) $db->loadResult() < 1) {
+            $this->redirectToWizard(Text::_('COM_CONTENTBUILDERNG_WIZARD_RESUME_INVALID_STORAGE'), 'error');
+
+            return;
+        }
+
+        $wizardService = $this->getWizardService();
+        $state = $wizardService->getState();
+        $state['storage_id'] = $storageId;
+        $state = $wizardService->advanceTo($state, StorageWizardService::STEP_FIELDS);
+        $wizardService->saveState($state);
+
+        $this->redirectToWizard();
+    }
+
+    /**
+     * Task: storagewizard.chooseCreationMode — choisit la source du nouveau
+     * storage : table interne gérée par ContentBuilder NG ou table existante.
+     */
+    public function chooseCreationMode(): void
+    {
+        $this->checkToken();
+        $this->requireManagePermission();
+
+        $source = trim((string) $this->input->post->getCmd('storage_source', ''));
+
+        if (!in_array($source, [
+            StorageWizardService::STORAGE_SOURCE_INTERNAL,
+            StorageWizardService::CREATION_MODE_EXISTING_TABLE,
+        ], true)) {
+            $this->redirectToWizard(Text::_('COM_CONTENTBUILDERNG_WIZARD_CREATION_MODE_REQUIRED'), 'error');
+
+            return;
+        }
+
+        $wizardService = $this->getWizardService();
+        $state = $wizardService->getState();
+        $state['storage_source'] = $source;
+        $state['creation_mode'] = $source === StorageWizardService::CREATION_MODE_EXISTING_TABLE
+            ? StorageWizardService::CREATION_MODE_EXISTING_TABLE
+            : '';
+        $state['storage_substep'] = $source === StorageWizardService::STORAGE_SOURCE_INTERNAL
+            ? StorageWizardService::SUBSTEP_INITIALIZATION_MODE
+            : StorageWizardService::SUBSTEP_NAME;
+        $wizardService->saveState($state);
+
+        $this->redirectToWizard();
+    }
+
+    /**
+     * Task: storagewizard.chooseInitializationMode — choisit comment initialiser
+     * les champs d'une nouvelle table interne : manuellement ou par fichier.
+     */
+    public function chooseInitializationMode(): void
+    {
+        $this->checkToken();
+        $this->requireManagePermission();
+
+        $mode = trim((string) $this->input->post->getCmd('creation_mode', ''));
+
+        if (!in_array($mode, [
+            StorageWizardService::CREATION_MODE_MANUAL,
+            StorageWizardService::CREATION_MODE_FILE,
+        ], true)) {
+            $this->redirectToWizard(Text::_('COM_CONTENTBUILDERNG_WIZARD_INITIALIZATION_MODE_REQUIRED'), 'error');
+
+            return;
+        }
+
+        $wizardService = $this->getWizardService();
+        $state = $wizardService->getState();
+        $state['creation_mode'] = $mode;
+        $state['storage_substep'] = StorageWizardService::SUBSTEP_NAME;
+        $wizardService->saveState($state);
+
+        $this->redirectToWizard();
+    }
+
+    /**
+     * Task: storagewizard.backSubstep — revient à la sous-étape précédente
+     * de STEP_STORAGE (mode → reprise/nouveau ; sous-étapes ultérieures →
+     * mode, ou création → mode pour "nouveau").
+     */
+    public function backSubstep(): void
+    {
+        $this->checkToken();
+        $this->requireManagePermission();
+
+        $wizardService = $this->getWizardService();
+        $state = $wizardService->getState();
+        $substep = (string) ($state['storage_substep'] ?? StorageWizardService::SUBSTEP_MODE);
+        $mode = (string) ($state['storage_mode'] ?? '');
+
+        $state['storage_substep'] = match ($substep) {
+            StorageWizardService::SUBSTEP_PICK_EXISTING, StorageWizardService::SUBSTEP_CREATION_MODE => StorageWizardService::SUBSTEP_MODE,
+            StorageWizardService::SUBSTEP_INITIALIZATION_MODE => StorageWizardService::SUBSTEP_CREATION_MODE,
+            StorageWizardService::SUBSTEP_NAME => match ((string) ($state['storage_source'] ?? '')) {
+                StorageWizardService::STORAGE_SOURCE_INTERNAL => StorageWizardService::SUBSTEP_INITIALIZATION_MODE,
+                StorageWizardService::CREATION_MODE_EXISTING_TABLE => StorageWizardService::SUBSTEP_CREATION_MODE,
+                default => $mode === StorageWizardService::MODE_NEW
+                    ? StorageWizardService::SUBSTEP_CREATION_MODE
+                    : StorageWizardService::SUBSTEP_MODE,
+            },
+            default => StorageWizardService::SUBSTEP_MODE,
+        };
+        $wizardService->saveState($state);
+
+        $this->redirectToWizard();
+    }
+
+    /**
+     * Task: storagewizard.saveStorage — sous-étape 3 (nom/titre, éventuellement
+     * imposé par une table existante), crée le storage puis avance à l'étape
+     * "fields".
      */
     public function saveStorage(): void
     {
@@ -132,11 +298,30 @@ final class StoragewizardController extends BaseController
 
         $name = trim((string) $this->input->post->getString('name', ''));
         $title = trim((string) $this->input->post->getString('title', ''));
+        $bytable = trim((string) $this->input->post->getString('bytable', ''));
 
         $wizardService = $this->getWizardService();
+        $wizardState = $wizardService->getState();
+        $creationMode = (string) ($wizardState['creation_mode'] ?? '');
+
+        $db = $this->getComponent()->getContainer()->get(DatabaseInterface::class);
+
+        if (
+            $bytable !== ''
+            && !$this->getComponent()->getContainer()->get(ExternalTableService::class)->isSelectable($bytable)
+        ) {
+            $bytable = '';
+        }
+
+        // Comme sur l'écran Storage classique : le nom est facultatif quand
+        // une table existante est choisie, StorageModel::prepareTable() le
+        // reprend depuis "bytable".
+        if ($bytable !== '' && $name === '') {
+            $name = $bytable;
+        }
 
         if ($name === '') {
-            $this->rememberStorageInput($wizardService, $name, $title);
+            $this->rememberStorageInput($wizardService, $name, $title, $bytable);
             $this->redirectToWizard(Text::_('COM_CONTENTBUILDERNG_WIZARD_STORAGE_FIELDS_REQUIRED'), 'error');
 
             return;
@@ -149,17 +334,26 @@ final class StoragewizardController extends BaseController
             $title = $name;
         }
 
-        $db = $this->getComponent()->getContainer()->get(DatabaseInterface::class);
         $query = $db->getQuery(true)
-            ->select('COUNT(*)')
+            ->select($db->quoteName('title'))
             ->from($db->quoteName('#__contentbuilderng_storages'))
             ->where($db->quoteName('name') . ' = :name')
             ->bind(':name', $name, ParameterType::STRING);
         $db->setQuery($query);
 
-        if ((int) $db->loadResult() > 0) {
-            $this->rememberStorageInput($wizardService, $name, $title);
-            $this->redirectToWizard(Text::sprintf('COM_CONTENTBUILDERNG_WIZARD_STORAGE_NAME_DUPLICATE', $name), 'error');
+        $duplicateStorageTitle = $db->loadResult();
+
+        if ($duplicateStorageTitle !== null) {
+            $duplicateStorageTitle = trim((string) $duplicateStorageTitle);
+            $this->rememberStorageInput($wizardService, $name, $title, $bytable);
+            $this->redirectToWizard(
+                Text::sprintf(
+                    'COM_CONTENTBUILDERNG_WIZARD_STORAGE_NAME_DUPLICATE',
+                    $name,
+                    $duplicateStorageTitle !== '' ? $duplicateStorageTitle : $name
+                ),
+                'error'
+            );
 
             return;
         }
@@ -175,6 +369,7 @@ final class StoragewizardController extends BaseController
             'id' => 0,
             'name' => $name,
             'title' => $title,
+            'bytable' => $bytable,
             'published' => 1,
             'ordering' => 0,
         ];
@@ -183,10 +378,10 @@ final class StoragewizardController extends BaseController
             $error = (string) ($model->getError() ?: Text::_('COM_CONTENTBUILDERNG_ERROR'));
 
             if (str_contains($error, 'Duplicate entry')) {
-                $error = Text::sprintf('COM_CONTENTBUILDERNG_WIZARD_STORAGE_NAME_DUPLICATE', $name);
+                $error = Text::sprintf('COM_CONTENTBUILDERNG_WIZARD_STORAGE_NAME_DUPLICATE', $name, $name);
             }
 
-            $this->rememberStorageInput($wizardService, $name, $title);
+            $this->rememberStorageInput($wizardService, $name, $title, $bytable);
             $this->redirectToWizard($error, 'error');
 
             return;
@@ -208,6 +403,19 @@ final class StoragewizardController extends BaseController
         $state = $wizardService->advanceTo($state, StorageWizardService::STEP_FIELDS);
         $wizardService->saveState($state);
 
+        if ($creationMode === StorageWizardService::CREATION_MODE_FILE) {
+            $this->setRedirect(
+                Route::_(
+                    'index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $storageId
+                    . '&wizard=1&tabStartOffset=tab1&csv_import=1',
+                    false
+                ),
+                Text::_('COM_CONTENTBUILDERNG_WIZARD_STORAGE_CREATED')
+            );
+
+            return;
+        }
+
         $this->redirectToWizard(Text::_('COM_CONTENTBUILDERNG_WIZARD_STORAGE_CREATED'));
     }
 
@@ -216,10 +424,10 @@ final class StoragewizardController extends BaseController
      * après un redirect d'erreur (name requis, doublon, etc.), au lieu de
      * les effacer.
      */
-    private function rememberStorageInput(StorageWizardService $wizardService, string $name, string $title): void
+    private function rememberStorageInput(StorageWizardService $wizardService, string $name, string $title, string $bytable = ''): void
     {
         $state = $wizardService->getState();
-        $state['pending_storage_input'] = ['name' => $name, 'title' => $title];
+        $state['pending_storage_input'] = ['name' => $name, 'title' => $title, 'bytable' => $bytable];
         $wizardService->saveState($state);
     }
 
@@ -404,7 +612,7 @@ final class StoragewizardController extends BaseController
 
         $this->getWizardService()->reset();
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&task=storages.display', false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=storages', false));
     }
 
     /**

@@ -18,6 +18,7 @@ namespace CB\Plugin\ContentbuilderngThemes\Blank\Extension;
 \defined('_JEXEC') or die ('Restricted access');
 
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;

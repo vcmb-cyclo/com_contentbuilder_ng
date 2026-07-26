@@ -37,16 +37,21 @@ $recordsCount = isset($this->storageRecordsCount) ? $this->storageRecordsCount :
 $storageTableExists = $this->storageTableExists ?? null;
 $storageTableLookupName = trim((string) ($this->storageTableLookupName ?? ''));
 $storageTableErrorMessage = trim((string) ($this->storageTableErrorMessage ?? ''));
-$storageModeKey = ((int) ($this->item->bytable ?? 0) === 1)
-    ? 'COM_CONTENTBUILDERNG_STORAGE_MODE_EXTERNAL'
-    : 'COM_CONTENTBUILDERNG_STORAGE_MODE_INTERNAL';
+$storageMode = (int) ($this->item->bytable ?? 0);
+$storageModeKey = match ($storageMode) {
+    2 => 'COM_CONTENTBUILDERNG_STORAGE_MODE_EXTERNAL_SYSTEM',
+    1 => 'COM_CONTENTBUILDERNG_STORAGE_MODE_EXTERNAL',
+    default => 'COM_CONTENTBUILDERNG_STORAGE_MODE_INTERNAL',
+};
 $storageName = trim((string) ($this->item->name ?? ''));
-$storageTitle = trim((string) ($this->item->title ?? ''));
-$dataTableName = $storageName !== '' ? $storageName : '-';
+$dataTableName = $this->dataTableName !== '' ? $this->dataTableName : '-';
 $createdBy = trim((string) ($this->item->created_by ?? ''));
 $modifiedBy = trim((string) ($this->item->modified_by ?? ''));
 $requestedTab = trim((string) $app->getInput()->getCmd('tabStartOffset', ''));
-$activeTab = preg_match('/^tab\d+$/', $requestedTab) ? $requestedTab : 'tab0';
+// À la création, on arrive sur l'onglet "Administration" (Nom/Titre s'y
+// trouvent désormais) ; ensuite, on rouvre toujours "Stockage de données".
+$defaultTab = $storageId < 1 ? 'tab1' : 'tab0';
+$activeTab = preg_match('/^tab\d+$/', $requestedTab) ? $requestedTab : $defaultTab;
 $isPublished = ((int) ($this->item->published ?? 0) === 1);
 $publishedIconClass = $isPublished ? 'fa-solid fa-check text-success' : 'fa-solid fa-circle-xmark text-danger';
 $publishedIconTitle = $isPublished ? Text::_('JPUBLISHED') : Text::_('JUNPUBLISHED');
@@ -69,7 +74,7 @@ if ((int) ($this->item->id ?? 0) > 0) {
     $publishedToggleHtml = preg_replace('#<div role="tooltip"[^>]*>.*?</div>#s', '', (string) $publishedToggleHtml) ?? (string) $publishedToggleHtml;
 }
 $csvToggleTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_CSV_TOGGLE_TOOLTIP');
-$addFieldTooltip = 'Add a new field to this storage.';
+$addFieldTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_ADD_FIELD_TOOLTIP');
 $tabStorageTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_TAB_TOOLTIP');
 $tabInfoTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_INFO_TAB_TOOLTIP');
 $storageTabLabel = static function (string $iconClass, string $labelKey): string {
@@ -264,6 +269,11 @@ const cbStorageColumnsLabel = <?php echo json_encode(Text::_('COM_CONTENTBUILDER
 const cbPublishedTitle = <?php echo json_encode(Text::_('JPUBLISHED'), JSON_UNESCAPED_UNICODE); ?>;
 const cbUnpublishedTitle = <?php echo json_encode(Text::_('JUNPUBLISHED'), JSON_UNESCAPED_UNICODE); ?>;
 const cbCloseUnsavedMessage = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_CONFIRM_CLOSE_UNSAVED'), JSON_UNESCAPED_UNICODE); ?>;
+const cbSaveFailedMessage = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED'), JSON_UNESCAPED_UNICODE); ?>;
+const cbFieldNamePlaceholder = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_NAME'), JSON_UNESCAPED_UNICODE); ?>;
+const cbFieldTitlePlaceholder = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE'), JSON_UNESCAPED_UNICODE); ?>;
+const cbFieldGroupLabel = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'), JSON_UNESCAPED_UNICODE); ?>;
+const cbFieldConfirmLabel = <?php echo json_encode(Text::_('JSAVE'), JSON_UNESCAPED_UNICODE); ?>;
 let cbAjaxBusy = false;
 let cbSaveButtonTimer = null;
 let cbStorageDirtyState = false;
@@ -653,6 +663,21 @@ if (typeof Joomla !== 'undefined') {
     Joomla.listItemTask = listItemTask;
 }
 
+function cbDeleteStorageField(checkboxId) {
+    var checkbox = document.getElementById(checkboxId);
+    var row = checkbox && typeof checkbox.closest === 'function' ? checkbox.closest('tr[data-cb-item-label]') : null;
+    var label = row ? row.getAttribute('data-cb-item-label') : '';
+    var message = (label && window.Joomla && typeof Joomla.Text._ === 'function')
+        ? Joomla.Text._('COM_CONTENTBUILDERNG_CONFIRM_DELETE_ONE').replace('%s', label)
+        : null;
+
+    if (message !== null && !window.confirm(message)) {
+        return false;
+    }
+
+    return listItemTask(checkboxId, 'storage.listDelete');
+}
+
 function cbStorageShouldIgnoreDirtyField(field) {
     if (!field || !field.name) {
         return true;
@@ -896,6 +921,234 @@ function toggleCsvUploadOptions() {
     return false;
 }
 
+
+function initStorageInlineAddField() {
+    var addButton = document.getElementById('cb-storage-field-add-button');
+    var tbody = document.getElementById('cb-storage-fields-tbody');
+    if (!addButton || !tbody) {
+        return;
+    }
+
+    var optionsScript = document.getElementById('cb-storage-field-sql-types');
+    var sqlTypeOptions = {};
+    if (optionsScript) {
+        try {
+            sqlTypeOptions = JSON.parse(optionsScript.textContent || '{}');
+        } catch (e) {
+            sqlTypeOptions = {};
+        }
+    }
+
+    function buildTypeOptionsHtml() {
+        var html = '';
+        Object.keys(sqlTypeOptions).forEach(function (value) {
+            html += '<option value="' + value + '">' + sqlTypeOptions[value] + '</option>';
+        });
+        return html;
+    }
+
+    function insertNewFieldRow() {
+        if (tbody.querySelector('.cb-storage-field-new-row')) {
+            return;
+        }
+
+        var row = document.createElement('tr');
+        row.className = 'cb-storage-field-new-row table-active';
+        row.innerHTML =
+            '<td class="text-center" data-cb-storage-col="check"><span class="fa-solid fa-plus text-success" aria-hidden="true"></span></td>' +
+            '<td class="text-nowrap" data-cb-storage-col="id">—</td>' +
+            '<td data-cb-storage-col="name"><input type="text" class="form-control form-control-sm" name="jform[fieldname]" placeholder="' + cbFieldNamePlaceholder + '"></td>' +
+            '<td data-cb-storage-col="title"><input type="text" class="form-control form-control-sm" name="jform[fieldtitle]" placeholder="' + cbFieldTitlePlaceholder + '"></td>' +
+            '<td data-cb-storage-col="sql_type"><select class="form-select form-select-sm" name="jform[sql_type]" style="width:auto; max-width:12rem;">' + buildTypeOptionsHtml() + '</select></td>' +
+            '<td class="text-nowrap" data-cb-storage-col="field_size"></td>' +
+            '<td data-cb-storage-col="group">' +
+                '<div class="form-check form-switch mb-1">' +
+                    '<input class="form-check-input cb-storage-field-new-is-group" type="checkbox" role="switch" id="cb-storage-field-new-is-group">' +
+                    '<label class="form-check-label" for="cb-storage-field-new-is-group">' + cbFieldGroupLabel + '</label>' +
+                '</div>' +
+                '<textarea class="form-control form-control-sm cb-storage-field-new-group-definition" name="jform[group_definition]" style="display:none;" rows="3">Label 1;value1\nLabel 2;value2\nLabel 3;value3</textarea>' +
+                '<input type="hidden" name="jform[is_group]" value="0" class="cb-storage-field-new-is-group-value">' +
+            '</td>' +
+            '<td class="cb-order-col" data-cb-storage-col="order"></td>' +
+            '<td class="text-center" data-cb-storage-col="publish"></td>' +
+            '<td class="text-center text-nowrap" data-cb-storage-col="actions">' +
+                '<button type="button" class="btn btn-sm btn-primary cb-storage-field-new-confirm" title="' + cbFieldConfirmLabel + '"><span class="fa-solid fa-floppy-disk" aria-hidden="true"></span></button>' +
+            '</td>';
+
+        tbody.insertBefore(row, tbody.firstChild);
+
+        var isGroupToggle = row.querySelector('.cb-storage-field-new-is-group');
+        var groupDefinition = row.querySelector('.cb-storage-field-new-group-definition');
+        var isGroupValue = row.querySelector('.cb-storage-field-new-is-group-value');
+        if (isGroupToggle && groupDefinition && isGroupValue) {
+            isGroupToggle.addEventListener('change', function () {
+                groupDefinition.style.display = isGroupToggle.checked ? '' : 'none';
+                isGroupValue.value = isGroupToggle.checked ? '1' : '0';
+            });
+        }
+
+        var nameInput = row.querySelector('input[name="jform[fieldname]"]');
+        if (nameInput) {
+            nameInput.focus();
+        }
+
+        addButton.disabled = true;
+
+        function cancelNewFieldRow() {
+            row.remove();
+            addButton.disabled = false;
+            document.removeEventListener('keydown', onKeyDown);
+        }
+
+        function onKeyDown(event) {
+            if (event.key === 'Escape') {
+                cancelNewFieldRow();
+            }
+        }
+
+        document.addEventListener('keydown', onKeyDown);
+
+        row.querySelector('.cb-storage-field-new-confirm').addEventListener('click', function () {
+            submitNewField(row);
+        });
+    }
+
+    function submitNewField(row) {
+        var nameInput = row.querySelector('input[name="jform[fieldname]"]');
+        if (!nameInput || !nameInput.value.trim()) {
+            nameInput.classList.add('is-invalid');
+            nameInput.focus();
+            return;
+        }
+
+        var confirmButton = row.querySelector('.cb-storage-field-new-confirm');
+        confirmButton.disabled = true;
+
+        var form = document.getElementById('adminForm') || document.adminForm;
+        var formData = new FormData(form);
+        formData.set('option', 'com_contentbuilderng');
+        formData.set('cb_ajax', '1');
+        formData.set('task', 'storage.ajax_addfield');
+        formData.set('jform[fieldname]', nameInput.value);
+
+        fetch('index.php', {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (payload) {
+                if (!payload.success) {
+                    throw new Error(payload.message || '');
+                }
+                cbStorageBypassDirtyBeforeUnload();
+                window.location.reload();
+            })
+            .catch(function (error) {
+                confirmButton.disabled = false;
+                window.alert((error && error.message) || cbSaveFailedMessage);
+            });
+    }
+
+    addButton.addEventListener('click', insertNewFieldRow);
+}
+
+function cbSubmitFieldTypeUpdate(fieldId, sqlType, fieldSize, onSuccess, onError) {
+    var form = document.getElementById('adminForm') || document.adminForm;
+    var formData = new FormData(form);
+    formData.set('option', 'com_contentbuilderng');
+    formData.set('cb_ajax', '1');
+    formData.set('task', 'storage.ajax_update_field_type');
+    formData.set('field_id', String(fieldId));
+    formData.set('sql_type', sqlType);
+    formData.set('field_size', String(fieldSize || 0));
+
+    fetch('index.php', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(function (response) { return response.json(); })
+        .then(function (payload) {
+            if (!payload.success) {
+                throw new Error(payload.message || '');
+            }
+            if (typeof onSuccess === 'function') {
+                onSuccess();
+            }
+        })
+        .catch(function (error) {
+            if (typeof onError === 'function') {
+                onError(error);
+            }
+        });
+}
+
+function initStorageFieldTypeSelect() {
+    document.addEventListener('change', function (event) {
+        var select = event.target;
+        if (select && select.classList && select.classList.contains('cb-storage-field-type-select')) {
+            var fieldId = parseInt(select.dataset.fieldId || '0', 10);
+            var sqlType = select.value;
+            var previousValue = select.dataset.previousValue || sqlType;
+            var row = select.closest('tr');
+            var sizeCell = row ? row.querySelector('[data-cb-storage-col="field_size"]') : null;
+            var sizeInput = sizeCell ? sizeCell.querySelector('.cb-storage-field-size-input') : null;
+            var selectedOption = select.options[select.selectedIndex];
+            var supportsSize = selectedOption && selectedOption.dataset.supportsSize === '1';
+            var defaultSize = selectedOption ? parseInt(selectedOption.dataset.defaultSize || '0', 10) : 0;
+
+            // La taille dépend du type : on régénère la cellule pour
+            // basculer entre "champ modifiable" et "—" (non applicable).
+            if (sizeCell) {
+                if (supportsSize) {
+                    sizeCell.innerHTML = '<input type="number" min="1" class="form-control form-control-sm cb-storage-field-size-input" '
+                        + 'data-field-id="' + fieldId + '" style="width:6rem;" value="' + defaultSize + '">';
+                } else {
+                    sizeCell.innerHTML = '&mdash;';
+                }
+            }
+
+            select.disabled = true;
+            cbSubmitFieldTypeUpdate(fieldId, sqlType, supportsSize ? defaultSize : 0, function () {
+                select.dataset.previousValue = sqlType;
+                select.disabled = false;
+            }, function (error) {
+                select.value = previousValue;
+                select.disabled = false;
+                window.alert((error && error.message) || cbSaveFailedMessage);
+            });
+            return;
+        }
+
+        var sizeInputChanged = event.target;
+        if (!sizeInputChanged || !sizeInputChanged.classList || !sizeInputChanged.classList.contains('cb-storage-field-size-input')) {
+            return;
+        }
+
+        var sizeRow = sizeInputChanged.closest('tr');
+        var typeSelect = sizeRow ? sizeRow.querySelector('.cb-storage-field-type-select') : null;
+        if (!typeSelect) {
+            return;
+        }
+
+        var sizeFieldId = parseInt(sizeInputChanged.dataset.fieldId || '0', 10);
+        var previousSize = sizeInputChanged.dataset.previousValue || sizeInputChanged.value;
+        sizeInputChanged.disabled = true;
+
+        cbSubmitFieldTypeUpdate(sizeFieldId, typeSelect.value, sizeInputChanged.value, function () {
+            sizeInputChanged.dataset.previousValue = sizeInputChanged.value;
+            sizeInputChanged.disabled = false;
+        }, function (error) {
+            sizeInputChanged.value = previousSize;
+            sizeInputChanged.disabled = false;
+            window.alert((error && error.message) || cbSaveFailedMessage);
+        });
+    });
+}
+
 function initStorageTooltips() {
     var adminUi = window.ContentBuilderNgAdmin;
 
@@ -964,12 +1217,29 @@ function initStorageUi() {
     cbStorageInitDirtyTracking();
     cbStorageInitColumnPicker();
     initStorageAjaxToggles();
+    initStorageInlineAddField();
+    initStorageFieldTypeSelect();
     initStorageTabTooltips();
     if (adminUi && typeof adminUi.persistJoomlaTabset === 'function') {
+        // restoreFromStorage désactivé : l'onglet de départ est déterminé
+        // côté serveur (Administration à la création, Stockage de données
+        // ensuite) et ne doit pas être écrasé par le dernier onglet visité
+        // sur un autre storage.
         adminUi.persistJoomlaTabset('view-pane', 'cb_active_storage_tab', function(id) {
             adminUi.setHiddenInputValue('tabStartOffset', id);
-        });
+        }, { restoreFromStorage: false });
     }
+
+    <?php if ($app->getInput()->getBool('csv_import', false)) : ?>
+    var csvPanel = document.getElementById('csvUpload');
+    if (csvPanel && (csvPanel.style.display === 'none' || window.getComputedStyle(csvPanel).display === 'none')) {
+        toggleCsvUploadOptions();
+    }
+    var csvFileInput = document.getElementById('csv_file');
+    if (csvFileInput) {
+        csvFileInput.focus();
+    }
+    <?php endif; ?>
 }
 
 if (document.readyState === 'loading') {
@@ -982,6 +1252,20 @@ if (document.readyState === 'loading') {
 <form action="index.php"
     method="post" name="adminForm" id="adminForm" enctype="multipart/form-data">
 
+<div class="position-relative">
+    <div class="cb-storage-publish-topright position-absolute top-0 end-0 mt-2 me-2" style="z-index:5;">
+        <?php if ($storageId > 0) : ?>
+            <?php echo $publishedToggleHtml; ?>
+            <input type="checkbox"
+                name="cid[]"
+                id="cbstorageitem0"
+                value="<?php echo $storageId; ?>"
+                style="display:none" />
+        <?php else : ?>
+            <span class="<?php echo $publishedIconClass; ?>" aria-hidden="true" title="<?php echo htmlspecialchars($publishedIconTitle, ENT_QUOTES, 'UTF-8'); ?>"></span>
+            <span class="visually-hidden"><?php echo htmlspecialchars($publishedIconTitle, ENT_QUOTES, 'UTF-8'); ?></span>
+        <?php endif; ?>
+    </div>
 <?php
 // Démarrer les onglets
 echo HTMLHelper::_('uitab.startTabSet', 'view-pane', ['active' => $activeTab]);
@@ -992,7 +1276,6 @@ echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', $storageTabLabel('fa-sol
 <?php
 echo LayoutHelper::render('storage.storage_tab', [
     'item' => $this->item,
-    'tables' => $this->tables,
     'storageId' => $storageId,
     'renderCheckbox' => $renderCheckbox,
     'csvToggleTooltip' => $csvToggleTooltip,
@@ -1000,24 +1283,30 @@ echo LayoutHelper::render('storage.storage_tab', [
     'sortLink' => $sortLink,
     'fields' => $fields,
     'fieldsCount' => $fieldsCount,
+    'recordsCount' => $recordsCount,
     'pagination' => $this->pagination,
     'ordering' => $this->ordering,
 ], JPATH_COMPONENT_ADMINISTRATOR . '/layouts');
 echo HTMLHelper::_('uitab.endTab');
-echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', $storageTabLabel('fa-solid fa-circle-info', 'COM_CONTENTBUILDERNG_STORAGE_INFORMATION'));
+echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', $storageTabLabel('fa-solid fa-gear', 'COM_CONTENTBUILDERNG_STORAGE_ADMINISTRATION'));
 echo LayoutHelper::render('storage.information_tab', [
     'item' => $this->item,
+    'storageId' => $storageId,
+    'tables' => $this->tables,
+    'tableModes' => $this->tableModes,
+    'tableSourceTypes' => $this->tableSourceTypes,
+    'tableSourceLabels' => $this->tableSourceLabels,
+    'tableSourceType' => $this->tableSourceType,
+    'renderCheckbox' => $renderCheckbox,
+    'csvToggleTooltip' => $csvToggleTooltip,
     'storageTableExists' => $storageTableExists,
     'storageTableLookupName' => $storageTableLookupName,
     'storageTableErrorMessage' => $storageTableErrorMessage,
-    'storageName' => $storageName,
-    'storageTitle' => $storageTitle,
     'publishedToggleHtml' => $publishedToggleHtml,
     'publishedIconClass' => $publishedIconClass,
     'publishedIconTitle' => $publishedIconTitle,
     'dataTableName' => $dataTableName,
     'storageModeKey' => $storageModeKey,
-    'fieldsCount' => $fieldsCount,
     'recordsCount' => $recordsCount,
     'createdBy' => $createdBy,
     'modifiedBy' => $modifiedBy,
@@ -1026,6 +1315,7 @@ echo LayoutHelper::render('storage.information_tab', [
 echo HTMLHelper::_('uitab.endTab');
 echo HTMLHelper::_('uitab.endTabSet');
 ?>
+</div>
 
     <div class="clr">
     </div>
@@ -1053,6 +1343,7 @@ echo HTMLHelper::_('uitab.endTabSet');
     <input type="hidden" id="list_fullordering" name="list[fullordering]" value="<?php echo htmlspecialchars($fullOrdering, ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="limitstart" value="<?php echo (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('limitstart', 0); ?>" />
     <input type="hidden" name="boxchecked" value="0" />
+    <input type="hidden" id="cb-system-field-name" name="system_field_name" value="" />
     <input type="hidden" name="tabStartOffset" value="<?php echo htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8'); ?>" />
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
@@ -1094,10 +1385,15 @@ echo HTMLHelper::_('uitab.endTabSet');
         toggleButton.dataset.bsOriginalTitle = text;
     }
 
+    var selectAllCheckbox = document.getElementById('cbCsvSelectAll');
+
     function removePreviewRows() {
         previewBody.innerHTML = '';
         previewPanel.style.display = 'none';
         previewNames.clear();
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = true;
+        }
     }
 
     function getExistingFieldNames() {
@@ -1136,19 +1432,46 @@ echo HTMLHelper::_('uitab.endTabSet');
         return name;
     }
 
-    function appendPreviewRow(name, title, statusText) {
+    function appendPreviewRow(index, name, title, statusText) {
         var row = document.createElement('tr');
         row.className = 'table-info';
+        var checkboxCell = document.createElement('td');
+        checkboxCell.innerHTML = '<input type="checkbox" class="form-check-input cb-csv-column-checkbox" '
+            + 'name="jform[csv_import_columns][]" value="' + index + '" checked />';
+        row.appendChild(checkboxCell);
+
         var cells = [
             '<code>' + name + '</code>',
             '<span>' + (title || name) + '</span>',
             '<span class="text-muted small">' + statusText + '</span>'
         ];
 
-        row.innerHTML = cells.map(function (cell) {
+        row.innerHTML += cells.map(function (cell) {
             return '<td>' + cell + '</td>';
         }).join('');
         previewBody.appendChild(row);
+    }
+
+    function updateSelectAllState() {
+        if (!selectAllCheckbox) {
+            return;
+        }
+        var checkboxes = previewBody.querySelectorAll('.cb-csv-column-checkbox');
+        var checkedCount = previewBody.querySelectorAll('.cb-csv-column-checkbox:checked').length;
+        selectAllCheckbox.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
+    }
+
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function () {
+            previewBody.querySelectorAll('.cb-csv-column-checkbox').forEach(function (checkbox) {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        });
+        previewBody.addEventListener('change', function (event) {
+            if (event.target && event.target.classList.contains('cb-csv-column-checkbox')) {
+                updateSelectAllState();
+            }
+        });
     }
 
     function renderPreview(columns) {
@@ -1161,7 +1484,7 @@ echo HTMLHelper::_('uitab.endTabSet');
         removePreviewRows();
         previewPanel.style.display = '';
 
-        columns.forEach(function (raw) {
+        columns.forEach(function (raw, index) {
             var column = (raw || '').replace(/\uFEFF/g, '').trim();
             if (column === '') {
                 return;
@@ -1170,14 +1493,14 @@ echo HTMLHelper::_('uitab.endTabSet');
             var sanitized = sanitizeName(column);
             var key = sanitized.toLowerCase();
             if (existing.has(key) || previewNames.has(key)) {
-                appendPreviewRow(sanitized, column, '<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_SKIPPED')); ?>');
+                appendPreviewRow(index, sanitized, column, '<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_SKIPPED')); ?>');
                 return;
             }
 
             previewNames.add(key);
             existing.add(key);
 
-            appendPreviewRow(sanitized, column, '<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_NEW')); ?>');
+            appendPreviewRow(index, sanitized, column, '<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_NEW')); ?>');
         });
 
         if (!previewBody.children.length) {

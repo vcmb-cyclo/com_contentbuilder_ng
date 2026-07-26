@@ -14,6 +14,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Service;
 \defined('_JEXEC') or die;
 
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
+use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 use CB\Component\Contentbuilderng\Administrator\types\contentbuilderng_com_breezingformsng;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
@@ -41,7 +42,8 @@ final class FormAuditService
         $query = $db->getQuery(true)
             ->select($db->quoteName([
                 'id', 'name', 'title', 'type', 'reference_id', 'details_template', 'editable_template', 'theme_plugin',
-                'created', 'modified', 'created_by', 'modified_by', 'published', 'debug_mode',
+                'created', 'modified', 'created_by', 'modified_by', 'published', 'debug_mode', 'config',
+                'new_button', 'edit_button',
             ]))
             ->from($db->quoteName('#__contentbuilderng_forms'))
             ->where($db->quoteName('id') . ' = ' . $formId);
@@ -98,6 +100,7 @@ final class FormAuditService
         $editable = array_values(array_filter($published, static fn(array $row): bool => (int) $row['editable'] === 1));
 
         $modified = trim((string) ($form['modified'] ?? ''));
+        [$groupPermissions, $ownerPermissions, $permissionChecks] = $this->auditFrontendPermissions($form);
 
         $info = [
             Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_ID') => (string) (int) $form['id'],
@@ -116,6 +119,8 @@ final class FormAuditService
             Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_DEBUG') => (int) ($form['debug_mode'] ?? 0) === 1
                 ? Text::_('JYES')
                 : Text::_('JNO'),
+            Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_FRONTEND_PERMISSIONS') => $groupPermissions,
+            Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_FRONTEND_OWNER_PERMISSIONS') => $ownerPermissions,
             Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_CREATED') => $this->formatAuditDate((string) ($form['created'] ?? '')),
             Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_CREATED_BY') => trim((string) ($form['created_by'] ?? '')) !== ''
                 ? (string) $form['created_by']
@@ -136,7 +141,8 @@ final class FormAuditService
             $this->checkTheme((string) ($form['theme_plugin'] ?? '')),
             $this->checkSourceSync($elements, $sourceNames, $sourceAvailable, (string) $form['type'], (string) $form['reference_id']),
             $this->checkElementReferences($elements),
-            $this->checkTemplates($published, $sourceNames, (string) $form['type'], (string) $form['details_template'], (string) $form['editable_template'])
+            $this->checkTemplates($published, $sourceNames, (string) $form['type'], (string) $form['details_template'], (string) $form['editable_template']),
+            $permissionChecks
         );
 
         if ($checks === []) {
@@ -155,6 +161,162 @@ final class FormAuditService
                 'title' => trim((string) $form['title']),
             ],
         ];
+    }
+
+    /**
+     * @param array<string,mixed> $form
+     * @return array{0:string,1:string,2:array<int,array{status:string,message:string}>}
+     */
+    private function auditFrontendPermissions(array $form): array
+    {
+        $rawConfig = (string) ($form['config'] ?? '');
+        $config = $rawConfig === ''
+            ? []
+            : PackedDataHelper::decodePackedData($rawConfig, null, true);
+
+        if (!is_array($config)) {
+            return [
+                Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_UNAVAILABLE'),
+                Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_UNAVAILABLE'),
+                [[
+                    'status' => self::STATUS_ERROR,
+                    'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_FRONTEND_PERMISSIONS_INVALID'),
+                ]],
+            ];
+        }
+
+        $actionLabels = [
+            'listaccess' => Text::_('COM_CONTENTBUILDERNG_PERM_LIST_ACCESS'),
+            'view' => Text::_('COM_CONTENTBUILDERNG_PERM_VIEW'),
+            'new' => Text::_('COM_CONTENTBUILDERNG_PERM_NEW'),
+            'edit' => Text::_('COM_CONTENTBUILDERNG_PERM_EDIT'),
+            'delete' => Text::_('COM_CONTENTBUILDERNG_PERM_DELETE'),
+            'state' => Text::_('COM_CONTENTBUILDERNG_PERM_STATE'),
+            'publish' => Text::_('COM_CONTENTBUILDERNG_PUBLISH'),
+            'api' => Text::_('COM_CONTENTBUILDERNG_PERM_API'),
+            'stats' => Text::_('COM_CONTENTBUILDERNG_PERM_STATS'),
+            'fullarticle' => Text::_('COM_CONTENTBUILDERNG_PERM_FULL_ARTICLE'),
+            'language' => Text::_('COM_CONTENTBUILDERNG_PERM_CHANGE_LANGUAGE'),
+            'rating' => Text::_('COM_CONTENTBUILDERNG_PERM_RATING'),
+        ];
+        $permissions = (array) ($config['permissions_fe'] ?? []);
+        $ownerPermissions = (array) ($config['own_fe'] ?? []);
+        $groupTitles = $this->loadUserGroupTitles();
+        $groupSummaries = [];
+
+        foreach ($permissions as $groupId => $groupPermission) {
+            if (!is_array($groupPermission)) {
+                continue;
+            }
+
+            $granted = $this->getGrantedPermissionLabels($groupPermission, $actionLabels);
+            if ($granted === []) {
+                continue;
+            }
+
+            $numericGroupId = (int) $groupId;
+            $groupTitle = $groupTitles[$numericGroupId]
+                ?? Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_INFO_FRONTEND_UNKNOWN_GROUP', $numericGroupId);
+            $groupSummaries[] = $groupTitle . ': ' . implode(', ', $granted);
+        }
+
+        $grantedOwnerPermissions = $this->getGrantedPermissionLabels($ownerPermissions, $actionLabels);
+        $checks = [];
+
+        if ($groupSummaries === [] && $grantedOwnerPermissions === []) {
+            $checks[] = [
+                'status' => self::STATUS_WARNING,
+                'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_FRONTEND_PERMISSIONS_EMPTY'),
+            ];
+        }
+
+        if (!empty($form['new_button']) && !$this->hasFrontendPermission($permissions, $ownerPermissions, 'new')) {
+            $checks[] = [
+                'status' => self::STATUS_WARNING,
+                'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_FRONTEND_NEW_WITHOUT_PERMISSION'),
+            ];
+        }
+
+        if (!empty($form['edit_button']) && !$this->hasFrontendPermission($permissions, $ownerPermissions, 'edit')) {
+            $checks[] = [
+                'status' => self::STATUS_WARNING,
+                'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_FRONTEND_EDIT_WITHOUT_PERMISSION'),
+            ];
+        }
+
+        return [
+            $groupSummaries !== []
+                ? implode(' ; ', $groupSummaries)
+                : Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_NONE'),
+            $grantedOwnerPermissions !== []
+                ? implode(', ', $grantedOwnerPermissions)
+                : Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_NONE'),
+            $checks,
+        ];
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    private function loadUserGroupTitles(): array
+    {
+        try {
+            $query = $this->db->getQuery(true)
+                ->select($this->db->quoteName(['id', 'title']))
+                ->from($this->db->quoteName('#__usergroups'))
+                ->order($this->db->quoteName('lft') . ' ASC');
+            $this->db->setQuery($query);
+            $rows = $this->db->loadAssocList() ?: [];
+        } catch (\Throwable $e) {
+            return [];
+        }
+
+        $titles = [];
+        foreach ($rows as $row) {
+            $groupId = (int) ($row['id'] ?? 0);
+            if ($groupId > 0) {
+                $titles[$groupId] = (string) ($row['title'] ?? $groupId);
+            }
+        }
+
+        return $titles;
+    }
+
+    /**
+     * @param array<string,mixed> $permissions
+     * @param array<string,string> $actionLabels
+     * @return array<int,string>
+     */
+    private function getGrantedPermissionLabels(array $permissions, array $actionLabels): array
+    {
+        $labels = [];
+
+        foreach ($actionLabels as $action => $label) {
+            if (!empty($permissions[$action])) {
+                $labels[] = $label;
+            }
+        }
+
+        return $labels;
+    }
+
+    /**
+     * @param array<string,mixed>|array<int,mixed> $groupPermissions
+     * @param array<string,mixed> $ownerPermissions
+     */
+    private function hasFrontendPermission(array $groupPermissions, array $ownerPermissions, string $action): bool
+    {
+        if (!empty($ownerPermissions[$action])) {
+            return true;
+        }
+
+        foreach ($groupPermissions as $permissions) {
+            if (is_array($permissions) && !empty($permissions[$action])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function formatAuditDate(string $value): string

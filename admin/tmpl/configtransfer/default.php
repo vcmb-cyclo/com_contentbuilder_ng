@@ -209,7 +209,7 @@ Text::script('COM_CONTENTBUILDERNG_ABOUT_EXPORT_CONFIGURATION_DOWNLOAD_FAILED');
                                                     $storageName = trim((string) ($storageRow['name'] ?? ''));
                                                     $storageLabel = $storageTitle !== '' ? $storageTitle : ($storageName !== '' ? $storageName : ('#' . $storageId));
                                                     $storageMeta = $storageName !== '' ? $storageName : ('#' . $storageId);
-                                                    if ((int) ($storageRow['bytable'] ?? 0) === 1) {
+                                                    if ((int) ($storageRow['bytable'] ?? 0) > 0) {
                                                         $storageMeta .= ' / bytable';
                                                     }
                                                     ?>
@@ -733,7 +733,7 @@ Text::script('COM_CONTENTBUILDERNG_ABOUT_EXPORT_CONFIGURATION_DOWNLOAD_FAILED');
                 }
 
                 var title = row && row.title ? String(row.title) : '';
-                var isExternalTable = row && Number(row.bytable || 0) === 1;
+                var isExternalTable = row && Number(row.bytable || 0) > 0;
                 var label = title && title !== name ? (title + ' (' + name + ')') : name;
                 var id = 'cb_config_import_storage_' + i;
                 var content = contentMap[normalizeStorageKey(name)] || null;

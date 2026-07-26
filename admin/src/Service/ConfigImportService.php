@@ -477,7 +477,7 @@ class ConfigImportService
             $storage = (array) $db->loadAssoc();
 
             $storageName = trim((string) ($storage['name'] ?? ''));
-            $isBytable = (int) ($storage['bytable'] ?? 0) === 1;
+            $isBytable = (int) ($storage['bytable'] ?? 0) > 0;
             if ($storageName === '' || $isBytable) {
                 continue;
             }

@@ -628,11 +628,18 @@ class ContentbuilderngHelper
 
     public static function listPublish($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark',  $prefix = '')
     {
+        $states = [
+            1 => ['unpublish', 'JPUBLISHED', 'JLIB_HTML_UNPUBLISH_ITEM', 'JPUBLISHED', false, 'publish', 'publish'],
+            0 => ['publish', 'JUNPUBLISHED', 'JLIB_HTML_PUBLISH_ITEM', 'JUNPUBLISHED', false, 'unpublish', 'unpublish'],
+        ];
+
         return HTMLHelper::_(
-            'jgrid.published',
+            'jgrid.state',
+            $states,
             !empty($row->published) ? 1 : 0,
             (int) $i,
             (string) $prefix . (string) $domain . '.',
+            true,
             true,
             'cb'
         );
@@ -687,8 +694,8 @@ class ContentbuilderngHelper
         string $disableTitleKey
     ): string {
         $states = [
-            1 => [$disableTask, '', $disableTitleKey, '', true, 'publish', 'publish'],
-            0 => [$enableTask, '', $enableTitleKey, '', true, 'unpublish', 'unpublish'],
+            1 => [$disableTask, '', $disableTitleKey, '', false, 'publish', 'publish'],
+            0 => [$enableTask, '', $enableTitleKey, '', false, 'unpublish', 'unpublish'],
         ];
 
         return HTMLHelper::_('jgrid.state', $states, $value ? 1 : 0, $i, $prefix, true, true, 'cb');

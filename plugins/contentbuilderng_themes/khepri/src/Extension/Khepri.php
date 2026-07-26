@@ -18,6 +18,7 @@ namespace CB\Plugin\ContentbuilderngThemes\Khepri\Extension;
 \defined('_JEXEC') or die ('Restricted access');
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
 use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Plugin\CMSPlugin;
@@ -281,7 +282,7 @@ final class Khepri extends CMSPlugin implements SubscriberInterface
 		$db->setQuery($checkEditable);
 		$hasEditable = (int) $db->loadResult() > 0;
 		if (!$hasEditable) {
-			$msg = 'No editable elements configured; generated editable sample uses all elements.';
+			$msg = Text::_('COM_CONTENTBUILDERNG_THEME_NO_EDITABLE_ELEMENTS');
 			Factory::getApplication()->enqueueMessage($msg, 'warning');
 			Log::add($msg, Log::WARNING, 'com_contentbuilderng');
 		}

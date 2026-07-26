@@ -60,6 +60,12 @@ $detailsBackButtonToggle = MenuParamHelper::resolveInputOrMenuToggle($runtimeApp
 $showAuthorToggle = MenuParamHelper::resolveInputOrMenuToggle($runtimeApp, 'cb_show_author', (int) ($this->cb_show_author ?? 1));
 $directStorageMode = !empty($this->direct_storage_mode);
 $directStorageId = (int) ($this->direct_storage_id ?? 0);
+$directStorageReadOnly = !empty($this->direct_storage_read_only);
+if ($directStorageReadOnly) {
+    $edit_allowed = false;
+    $delete_allowed = false;
+    $rating_allowed = false;
+}
 
 $list = (array) $input->get('list', [], 'array');
 $listState = NavigationLinkHelper::resolveListState(
@@ -104,12 +110,13 @@ $ownerPermissionMatrix = (array) $runtimeApp->getSession()->get('com_contentbuil
 $ownerRuleSet = (array) ($ownerPermissionMatrix['own_fe'] ?? []);
 $formInstance = $this->form ?? null;
 $recordId = (string) $input->getCmd('record_id', 0);
-$ownerEditAllowed = $ownerUserId > 0
+$ownerEditAllowed = !$directStorageReadOnly
+    && $ownerUserId > 0
     && !empty($ownerRuleSet['edit'])
     && is_object($formInstance)
     && method_exists($formInstance, 'isOwner')
     && $formInstance->isOwner($ownerUserId, $recordId);
-$canEditRecord = $edit_allowed || $ownerEditAllowed;
+$canEditRecord = !$directStorageReadOnly && ($edit_allowed || $ownerEditAllowed);
 $showPreviewSessionBadge = $isAdminPreview && $currentSessionLabel !== '' && $currentSessionLabel !== $previewActorLabel;
 $showTopBar = $detailsTopBarToggle === 1;
 $directStorageUnpublished = !empty($this->direct_storage_unpublished);

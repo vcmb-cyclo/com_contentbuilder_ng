@@ -443,8 +443,8 @@ if (formsTable && formsTable.tBodies.length) {
                                 $typeCode = (string) ($row->type ?? '');
                                 $typeShortMap = [
                                     'com_breezingforms'  => 'BF',
+                                    'com_breezingformsng' => 'breezingformsng',
                                     'com_contentbuilderng' => 'CB',
-                                    'com_contentbuilderng'  => 'CB',
                                 ];
                                 $typeShort = $typeShortMap[$typeCode] ?? $typeCode;
                                 echo htmlspecialchars($typeShort, ENT_QUOTES, 'UTF-8');

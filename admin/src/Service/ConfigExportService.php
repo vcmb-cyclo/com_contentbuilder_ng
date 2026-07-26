@@ -261,7 +261,7 @@ class ConfigExportService
         foreach ($storageRows as $storageRow) {
             $storageId = (int) ($storageRow['id'] ?? 0);
             $storageName = trim((string) ($storageRow['name'] ?? ''));
-            $isBytable = (int) ($storageRow['bytable'] ?? 0) === 1;
+            $isBytable = (int) ($storageRow['bytable'] ?? 0) > 0;
 
             if ($storageId <= 0 || $storageName === '' || $isBytable) {
                 continue;

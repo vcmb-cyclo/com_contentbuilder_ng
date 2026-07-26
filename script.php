@@ -33,12 +33,26 @@ use CB\Component\Contentbuilderng\Administrator\Service\SchemaService;
 $serviceBasePath = __DIR__ . '/admin/src/Service';
 $helperBasePath = __DIR__ . '/admin/src/Helper';
 
-require_once $helperBasePath . '/PackedDataHelper.php';
-require_once $helperBasePath . '/PackedDataMigrationHelper.php';
-require_once $serviceBasePath . '/InstallerService.php';
-require_once $serviceBasePath . '/MigrationService.php';
-require_once $serviceBasePath . '/PluginInstallerService.php';
-require_once $serviceBasePath . '/SchemaService.php';
+// On update, Joomla's PSR-4 autoloader is already registered for the
+// currently-installed (old) version of this component. If anything earlier
+// in the request autoloads one of these classes from the old install path,
+// the require_once below (which always targets the freshly extracted
+// package here in the tmp install dir) would redeclare the same class name
+// from a different file and fatal. class_exists(..., false) only checks
+// already-declared classes without triggering autoload, so it safely
+// no-ops the require in that case instead of crashing.
+class_exists('CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper', false)
+    || require_once $helperBasePath . '/PackedDataHelper.php';
+class_exists(PackedDataMigrationHelper::class, false)
+    || require_once $helperBasePath . '/PackedDataMigrationHelper.php';
+class_exists(InstallerService::class, false)
+    || require_once $serviceBasePath . '/InstallerService.php';
+class_exists(MigrationService::class, false)
+    || require_once $serviceBasePath . '/MigrationService.php';
+class_exists(PluginInstallerService::class, false)
+    || require_once $serviceBasePath . '/PluginInstallerService.php';
+class_exists(SchemaService::class, false)
+    || require_once $serviceBasePath . '/SchemaService.php';
 
 /**
  * Installer Script class for com_contentbuilderng
@@ -356,6 +370,7 @@ class com_contentbuilderngInstallerScript
 
                 // DB migrations / hardening
                 $this->updateDateColumns();
+                $this->schemaService->normalizeExternalStorageModes();
                 $this->ensureFormsDisplayColumns();
                 $this->ensureFormsFilterExactMatchDefault();
                 $this->ensureElementsLinkableDefault();
@@ -363,6 +378,7 @@ class com_contentbuilderngInstallerScript
                 $this->ensureElementsListIncludeDefault();
                 $this->ensureElementsSearchIncludeDefault();
                 $this->ensureStorageFieldSqlTypeColumn();
+                $this->ensureStorageFieldSizeColumn();
                 $this->migratePackedPayloadsToModernFormat();
 
                 // Normalize menu links and titles
@@ -1056,6 +1072,11 @@ class com_contentbuilderngInstallerScript
     private function ensureStorageFieldSqlTypeColumn(): void
     {
         $this->schemaService->ensureStorageFieldSqlTypeColumn();
+    }
+
+    private function ensureStorageFieldSizeColumn(): void
+    {
+        $this->schemaService->ensureStorageFieldSizeColumn();
     }
 
     private function buildMenuLinkOptionWhereClauses(DatabaseInterface $db, string $option): array

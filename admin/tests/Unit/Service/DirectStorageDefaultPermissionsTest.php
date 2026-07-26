@@ -1,0 +1,50 @@
+<?php
+
+declare(strict_types=1);
+
+namespace CB\Component\Contentbuilderng\Tests\Unit\Service;
+
+use PHPUnit\Framework\TestCase;
+
+final class DirectStorageDefaultPermissionsTest extends TestCase
+{
+    public function testAutoProvisionedFormsOnlyGrantGuestReadAccess(): void
+    {
+        $source = file_get_contents(
+            \dirname(__DIR__, 3) . '/src/Service/DirectStorageFormProvisioningService.php'
+        );
+
+        self::assertIsString($source);
+        self::assertStringContainsString("get('guest_usergroup')", $source);
+        self::assertStringContainsString("'listaccess' => true", $source);
+        self::assertStringContainsString("'view' => true", $source);
+        self::assertStringContainsString("'new' => false", $source);
+        self::assertStringContainsString("'edit' => false", $source);
+        self::assertStringContainsString("'delete' => false", $source);
+        self::assertStringContainsString("'state' => false", $source);
+        self::assertStringContainsString("'publish' => false", $source);
+        self::assertStringContainsString("'api' => false", $source);
+        self::assertStringContainsString("'stats' => false", $source);
+        self::assertStringContainsString("'fullarticle' => false", $source);
+        self::assertStringContainsString("'language' => false", $source);
+        self::assertStringContainsString("'rating' => false", $source);
+        self::assertStringNotContainsString('foreach ($groupIds as $groupId)', $source);
+    }
+
+    public function testAutoProvisionedFormsDisableArticleCreation(): void
+    {
+        $source = file_get_contents(
+            \dirname(__DIR__, 3) . '/src/Service/DirectStorageFormProvisioningService.php'
+        );
+
+        self::assertIsString($source);
+        self::assertMatchesRegularExpression(
+            "/'published',\\s*'create_articles',\\s*'config'/",
+            $source
+        );
+        self::assertStringContainsString(
+            ':cbType, :cbReferenceId, :cbName, :cbTitle, :cbTag, 1, 0, :cbConfig',
+            $source
+        );
+    }
+}

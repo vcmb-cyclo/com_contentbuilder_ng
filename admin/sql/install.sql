@@ -578,7 +578,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_resource_access`
 --   id           Auto-increment primary key.
 --   name         Machine name / slug (unique).
 --   title        Human-readable storage label.
---   bytable      1 = storage is addressed directly by table name.
+--   bytable      0 = internal storage; 1 = editable mapped table;
+--                2 = read-only known Joomla, BreezingForms or extension table.
 --   ordering     Display order in the admin storage list.
 --   created      Creation timestamp.
 --   modified     Last-modification timestamp.
@@ -613,6 +614,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_storages`
 --   name             Column name in the underlying data table.
 --   title            Human-readable column label.
 --   sql_type         Controlled SQL type used when creating internal storage columns.
+--   field_size       Column length (varchar/text only); NULL = use the type's default.
 --   is_group         1 = this row defines a repeating group of columns.
 --   group_definition JSON schema describing the group's sub-columns.
 --   ordering         Display order within the storage.
@@ -625,6 +627,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_storage_fields`
     `name`             varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `title`            varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `sql_type`         varchar(32)  COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'text',
+    `field_size`       int          NULL DEFAULT NULL,
     `is_group`         tinyint(1)   NOT NULL DEFAULT '0',
     `group_definition` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `ordering`         int          NOT NULL DEFAULT '0',

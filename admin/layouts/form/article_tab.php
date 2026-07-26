@@ -304,6 +304,25 @@ document.addEventListener('DOMContentLoaded', function () {
         categoryField.setCustomValidity(required && empty ? (categoryField.getAttribute('data-required-message') || '') : '');
     };
 
+    var showMissingCategoryMessage = function () {
+        var message = categoryField ? (categoryField.getAttribute('data-required-message') || '') : '';
+        var articleTabButton = document.querySelector('[role="tab"][aria-controls="tab10"]');
+
+        if (message && window.Joomla && typeof Joomla.renderMessages === 'function') {
+            Joomla.renderMessages({ error: [message] });
+        }
+
+        if (articleTabButton) {
+            articleTabButton.click();
+        }
+
+        window.requestAnimationFrame(function () {
+            categoryField.focus();
+            categoryField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            categoryField.reportValidity();
+        });
+    };
+
     createArticleFields.forEach(function (field) {
         field.addEventListener('change', syncCategoryRequirement);
     });
@@ -318,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (categoryField && !categoryField.checkValidity()) {
                 event.preventDefault();
-                categoryField.reportValidity();
+                showMissingCategoryMessage();
             }
         });
     }

@@ -73,10 +73,10 @@ class HtmlView extends BaseHtmlView
             }
         }
 
-        $title = Text::_('COM_CONTENTBUILDERNG') . ' &gt; ';
+        $title = Text::_('COM_CONTENTBUILDERNG') . ' › ';
 
         if ($formId > 0) {
-            $title .= Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_FORMS') . ' &gt; #' . $formId . ' &gt; ';
+            $title .= Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_FORMS') . ' › #' . $formId . ' › ';
         }
 
         $title .= Text::_('COM_CONTENTBUILDERNG_USERS')

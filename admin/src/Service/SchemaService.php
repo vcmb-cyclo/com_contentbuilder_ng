@@ -14,6 +14,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Service;
 \defined('_JEXEC') or die;
 
 require_once __DIR__ . '/../Helper/FormDisplayColumnsHelper.php';
+require_once __DIR__ . '/ExternalTableService.php';
 
 use CB\Component\Contentbuilderng\Administrator\Helper\FormDisplayColumnsHelper;
 use Joomla\CMS\Date\Date;
@@ -80,6 +81,37 @@ final class SchemaService
         $this->migrateInternalStorageDataTablesAuditColumns();
 
         $this->log('[OK] Date fields updated to support NULL correctly, if necessary.');
+    }
+
+    public function normalizeExternalStorageModes(): void
+    {
+        $db = $this->db();
+        $query = $db->getQuery(true)
+            ->select($db->quoteName(['id', 'name', 'bytable']))
+            ->from($db->quoteName('#__contentbuilderng_storages'))
+            ->where($db->quoteName('bytable') . ' > 0');
+        $db->setQuery($query);
+
+        $classifier = new ExternalTableService($db);
+        $updated = 0;
+
+        foreach ($db->loadObjectList() ?: [] as $storage) {
+            $mode = $classifier->getBytableMode((string) $storage->name);
+
+            if ((int) $storage->bytable === $mode) {
+                continue;
+            }
+
+            $update = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_storages'))
+                ->set($db->quoteName('bytable') . ' = ' . $mode)
+                ->where($db->quoteName('id') . ' = ' . (int) $storage->id);
+            $db->setQuery($update);
+            $db->execute();
+            $updated++;
+        }
+
+        $this->log("[OK] External storage modes normalized: {$updated} row(s) updated.");
     }
 
     public function ensureFormsDisplayColumns(): void
@@ -317,6 +349,38 @@ final class SchemaService
             $this->log('[OK] Added #__contentbuilderng_storage_fields.sql_type.');
         } catch (\Throwable $e) {
             $this->log('[WARNING] Failed to add #__contentbuilderng_storage_fields.sql_type: ' . $e->getMessage(), Log::WARNING);
+        }
+    }
+
+    /**
+     * "Taille" de colonne (longueur varchar/text), modifiable dans l'écran
+     * Storage, préremplie avec la valeur par défaut du type SQL choisi.
+     */
+    public function ensureStorageFieldSizeColumn(): void
+    {
+        $db = $this->db();
+
+        try {
+            $cols = $db->getTableColumns('#__contentbuilderng_storage_fields', false);
+
+            if (is_array($cols) && array_key_exists('field_size', $cols)) {
+                return;
+            }
+        } catch (\Throwable $e) {
+            $this->log('[WARNING] Could not inspect #__contentbuilderng_storage_fields columns: ' . $e->getMessage(), Log::WARNING);
+
+            return;
+        }
+
+        try {
+            $db->setQuery(
+                'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_storage_fields')
+                . ' ADD ' . $db->quoteName('field_size') . ' INT NULL DEFAULT NULL AFTER ' . $db->quoteName('sql_type')
+            );
+            $db->execute();
+            $this->log('[OK] Added #__contentbuilderng_storage_fields.field_size.');
+        } catch (\Throwable $e) {
+            $this->log('[WARNING] Failed to add #__contentbuilderng_storage_fields.field_size: ' . $e->getMessage(), Log::WARNING);
         }
     }
 

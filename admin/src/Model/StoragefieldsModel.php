@@ -163,6 +163,7 @@ class StoragefieldsModel extends ListModel
             'name',
             'title',
             'sql_type',
+            'field_size',
             'is_group',
             'group_definition',
             'ordering',
@@ -341,6 +342,10 @@ class StoragefieldsModel extends ListModel
             throw new \RuntimeException('Storage introuvable.');
         }
 
+        if ((int) ($storage['bytable'] ?? 0) === 2) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_READONLY_EXTERNAL_STORAGE_MSG'));
+        }
+
         $systemFields = ['id', 'storage_id', 'user_id', 'created', 'created_by', 'modified_user_id', 'modified', 'modified_by'];
 
         $fieldsQuery = $db->getQuery(true)
@@ -361,7 +366,7 @@ class StoragefieldsModel extends ListModel
             return 0;
         }
 
-        $isExternalTable = ((int) ($storage['bytable'] ?? 0) === 1);
+        $isExternalTable = ((int) ($storage['bytable'] ?? 0) > 0);
 
         if (!$isExternalTable) {
             $storageName = trim((string) $storage['name']);

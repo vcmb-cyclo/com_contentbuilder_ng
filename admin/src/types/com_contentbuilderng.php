@@ -53,7 +53,7 @@ class contentbuilderng_com_contentbuilderng
         $this->properties = $db->loadObject();
         if ($this->properties instanceof \stdClass) {
             $this->exists = true;
-            $this->bytable = $this->properties->bytable == 1 ? '' : '#__';
+            $this->bytable = (int) $this->properties->bytable > 0 ? '' : '#__';
 
             $query = $db->getQuery(true)
                 ->select('*')
@@ -123,8 +123,16 @@ class contentbuilderng_com_contentbuilderng
         $db->setQuery($query);
         $res = $db->loadAssoc();
         if (is_array($res)) {
-            $bytable = $res['bytable'] == 1 ? '' : '#__';
-            return 'Select count(id) From ' . $bytable . $res['name'] . ' Where user_id = ' . (int) $user_id;
+            $bytable = (int) $res['bytable'] > 0 ? '' : '#__';
+            $tableName = $bytable . (string) $res['name'];
+            $columns = $db->getTableColumns($tableName, false);
+
+            if (!array_key_exists('user_id', $columns)) {
+                return 'SELECT 0';
+            }
+
+            return 'SELECT COUNT(id) FROM ' . $db->quoteName($tableName)
+                . ' WHERE ' . $db->quoteName('user_id') . ' = ' . (int) $user_id;
         }
         return '';
     }
@@ -337,6 +345,7 @@ class contentbuilderng_com_contentbuilderng
         }
 
         $db = RuntimeContextHelper::getDatabase();
+        $recordReference = $this->getRecordReferenceExpression();
 
         $i = 0;
         $elSize = count($this->elements);
@@ -354,7 +363,7 @@ class contentbuilderng_com_contentbuilderng
                 joined_records.rating_sum As colRatingSum
             From
                 " . $this->bytable . $this->properties->name . " As r
-                " . ($published_only || !$show_all_languages || $show_all_languages ? " Left Join #__contentbuilderng_records As joined_records On ( joined_records.`type` = 'com_contentbuilderng' And joined_records.record_id = r.id And joined_records.reference_id = r.storage_id ) " : "") . "
+                " . ($published_only || !$show_all_languages || $show_all_languages ? " Left Join #__contentbuilderng_records As joined_records On ( joined_records.`type` = 'com_contentbuilderng' And joined_records.record_id = r.id And joined_records.reference_id = " . $recordReference . " ) " : "") . "
                 
             Where
                 r.id = " . $db->quote(intval($record_id)) . " And
@@ -364,7 +373,7 @@ class contentbuilderng_com_contentbuilderng
                 " . (intval($own_only) > -1 ? ' And r.user_id=' . intval($own_only) . ' ' : '') . "
                 " . ($published_only ? " And joined_records.published = 1 " : '') . "
             And
-                r.storage_id = " . $this->properties->id . "
+                " . $recordReference . " = " . (int) $this->properties->id . "
         ");
 
         $out = array();
@@ -643,6 +652,7 @@ class contentbuilderng_com_contentbuilderng
         $modifiedByExpr = $this->buildSourceColumnSelect('modified_by', "''");
         $createdExpr = $this->buildSourceColumnSelect('created', 'NULL');
         $modifiedExpr = $this->buildSourceColumnSelect('modified', 'NULL');
+        $recordReference = $this->getRecordReferenceExpression();
 
         $selectClause = "
             joined_records.published As colPublished,
@@ -702,7 +712,7 @@ class contentbuilderng_com_contentbuilderng
                 " . (intval($published) == 1 ? "joined_records.published = 1 And" : "") . "
                 " . ($record_id ? ' r.id = ' . $db->quote($record_id) . ' And ' : '') . "
                 " . ($article_category_filter > -1 ? ' content.catid = ' . intval($article_category_filter) . ' And ' : '') . "
-                joined_records.reference_id = r.storage_id And
+                joined_records.reference_id = " . $recordReference . " And
                 joined_records.record_id = r.id And
                 joined_records.`type` = 'com_contentbuilderng'
                 " . (!$show_all_languages ? " And ( joined_records.sef = " . $db->quote(RuntimeContextHelper::getApplication()->getInput()->getCmd('lang', '')) . " Or joined_records.sef = '' Or joined_records.sef is Null ) " : '') . "
@@ -761,6 +771,13 @@ class contentbuilderng_com_contentbuilderng
         ");
         $this->total = (int) $db->loadResult();
         return $return;
+    }
+
+    private function getRecordReferenceExpression(): string
+    {
+        return (int) ($this->properties->bytable ?? 0) > 0
+            ? (string) (int) $this->properties->id
+            : 'r.storage_id';
     }
 
     public function getListRecordsTotal(array $ids, $filter = '', $searchable_elements = array())
@@ -1174,6 +1191,10 @@ class contentbuilderng_com_contentbuilderng
 
     function isOwner($user_id, $record_id)
     {
+        if ((int) $user_id <= 0 || !$this->hasSourceColumn('user_id')) {
+            return false;
+        }
+
         $db = RuntimeContextHelper::getDatabase();
         $query = $db->getQuery(true)
             ->select($db->quoteName('id'))

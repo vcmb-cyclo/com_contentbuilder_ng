@@ -343,18 +343,13 @@ class ListController extends BaseController
         // Contexte CB correct pour cette page
         $app->getInput()->set('view', 'list');
 
-        // Permissions
-        // En mode storage direct, $formId pointe désormais vers un vrai
-        // #__contentbuilderng_forms (résolu/créé plus haut) : les droits
-        // configurés dessus (admin > Formulaires) doivent donc être chargés
-        // comme pour n'importe quel formulaire classique.
-        $this->getPermissionService()->setPermissions($formId, $recordId, $suffix);
-
         $isAdminPreview = $this->isValidAdminPreviewRequest($formId, $storageId);
         $this->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
         $app->getInput()->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
         if ($isDirectStorageMode && $isAdminPreview) {
             $this->getPermissionService()->setStoragePreviewPermissions($storageId, $suffix);
+        } else {
+            $this->getPermissionService()->setPermissions($formId, $recordId, $suffix);
         }
         if ($isAdminPreview && !$isDirectStorageMode) {
             $this->enqueueUnpublishedPreviewNotice($formId);

@@ -32,7 +32,7 @@ class StorageFieldService
             throw new \RuntimeException('Storage not found: ' . $storageId);
         }
 
-        if ((int) $storage->bytable === 1) {
+        if ((int) $storage->bytable > 0) {
             throw new \RuntimeException('bytable=1 : ajoute les champs via la synch bytable, pas via addField');
         }
 
@@ -51,6 +51,7 @@ class StorageFieldService
         $title = trim((string) ($fieldData['title'] ?? ''));
         $title = ($title !== '') ? $title : $name;
         $sqlType = StorageColumnTypeHelper::normalize((string) ($fieldData['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
+        $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $fieldData['field_size'] ?? null);
 
         $isGroup  = (int) ($fieldData['is_group'] ?? 0);
         $groupDef = (string) ($fieldData['group_definition'] ?? '');
@@ -79,13 +80,14 @@ class StorageFieldService
         // 5) Insert storage_fields
         $query = $db->getQuery(true)
             ->insert($db->quoteName('#__contentbuilderng_storage_fields'))
-            ->columns($db->quoteName(['ordering', 'storage_id', 'name', 'title', 'sql_type', 'is_group', 'group_definition', 'published']))
+            ->columns($db->quoteName(['ordering', 'storage_id', 'name', 'title', 'sql_type', 'field_size', 'is_group', 'group_definition', 'published']))
             ->values(
                 (int) $ordering . ', '
                 . (int) $storageId . ', '
                 . $db->quote($name) . ', '
                 . $db->quote($title) . ', '
                 . $db->quote($sqlType) . ', '
+                . ($fieldSize === null ? 'NULL' : (int) $fieldSize) . ', '
                 . (int) $isGroup . ', '
                 . $db->quote($groupDef) . ', '
                 . '1'
@@ -109,7 +111,7 @@ class StorageFieldService
             return;
         }
 
-        $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storageName) . ' ADD ' . $db->quoteName($name) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType));
+        $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storageName) . ' ADD ' . $db->quoteName($name) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize));
         $db->execute();
     }
 }
