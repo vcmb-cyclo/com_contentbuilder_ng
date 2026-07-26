@@ -26,6 +26,9 @@ final class StorageWizardServiceTest extends TestCase
     {
         self::assertSame([
             'current_step' => StorageWizardService::STEP_STORAGE,
+            'storage_substep' => StorageWizardService::SUBSTEP_MODE,
+            'storage_mode' => '',
+            'creation_mode' => '',
             'storage_id' => 0,
             'form_id' => 0,
             'menu_item_id' => 0,

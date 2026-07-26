@@ -365,9 +365,11 @@ if (storagesTable && storagesTable.tBodies.length) {
                         $id        = (int) ($row->id ?? 0);
                         $name      = htmlspecialchars((string) ($row->name ?? ''), ENT_QUOTES, 'UTF-8');
                         $title     = htmlspecialchars((string) ($row->title ?? ''), ENT_QUOTES, 'UTF-8');
-                        $storageMode = ((int) ($row->bytable ?? 0) === 1)
+                        $isExternalStorage = ((int) ($row->bytable ?? 0) === 1);
+                        $storageMode = $isExternalStorage
                             ? Text::_('COM_CONTENTBUILDERNG_STORAGE_MODE_EXTERNAL')
                             : Text::_('COM_CONTENTBUILDERNG_STORAGE_MODE_INTERNAL');
+                        $storageModeBadgeClass = $isExternalStorage ? 'text-bg-warning' : 'text-bg-info';
                         $lastUpdateRaw = $row->modified ?? ($row->created ?? '');
                         $lastUpdate = $lastUpdateRaw
                             ? HTMLHelper::_('date', $lastUpdateRaw, Text::_('DATE_FORMAT_LC5'))
@@ -401,7 +403,7 @@ if (storagesTable && storagesTable.tBodies.length) {
 
                         <td><a href="<?php echo $link; ?>"><?php echo $name; ?></a></td>
                         <td><a href="<?php echo $link; ?>"><?php echo $title; ?></a></td>
-                        <td class="text-nowrap"><?php echo htmlspecialchars($storageMode, ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td class="text-nowrap"><span class="badge <?php echo $storageModeBadgeClass; ?>"><?php echo htmlspecialchars($storageMode, ENT_QUOTES, 'UTF-8'); ?></span></td>
 
                         <td class="order text-nowrap">
                             <?php if ($saveOrder) : ?>

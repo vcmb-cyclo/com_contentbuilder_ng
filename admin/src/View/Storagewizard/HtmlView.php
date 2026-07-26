@@ -33,6 +33,8 @@ class HtmlView extends BaseHtmlView
     public int $fieldCount = 0;
     public array $menutypes = [];
     public array $menuItems = [];
+    public array $tables = [];
+    public array $existingStorages = [];
 
     private function getApp(): AdministratorApplication
     {
@@ -67,12 +69,31 @@ class HtmlView extends BaseHtmlView
         $app = $this->getApp();
         $app->getInput()->set('hidemainmenu', true);
 
+        $wa = $this->getDocument()->getWebAssetManager();
+        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
+        $wa->useScript('com_contentbuilderng.admin-ui');
+
         $wizardService = new StorageWizardService($app);
         $this->wizardState = $wizardService->getState();
         $this->steps = StorageWizardService::STEPS;
 
         $db = $this->getDatabase();
         $storageId = (int) ($this->wizardState['storage_id'] ?? 0);
+
+        if ($storageId < 1) {
+            // Comme sur l'écran Storage classique : ne proposer le choix
+            // d'une table existante qu'à la création (étape 1 pas encore
+            // franchie), pas lors d'une reprise du wizard sur un storage
+            // déjà créé.
+            $this->tables = $db->getTableList() ?: [];
+
+            $existingStoragesQuery = $db->getQuery(true)
+                ->select($db->quoteName(['id', 'name', 'title']))
+                ->from($db->quoteName('#__contentbuilderng_storages'))
+                ->order($db->quoteName('title'));
+            $db->setQuery($existingStoragesQuery);
+            $this->existingStorages = $db->loadObjectList() ?: [];
+        }
 
         if ($storageId > 0) {
             $query = $db->getQuery(true)

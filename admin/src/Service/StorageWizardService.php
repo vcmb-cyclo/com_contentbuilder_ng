@@ -42,6 +42,30 @@ class StorageWizardService
         self::STEP_DONE,
     ];
 
+    /**
+     * Sub-steps walked through inside STEP_STORAGE before a storage_id is
+     * settled: pick whether to resume an existing storage or start a new
+     * one, then (new storage only) how it should be created, then its
+     * name/title.
+     */
+    public const SUBSTEP_MODE = 'mode';
+    public const SUBSTEP_PICK_EXISTING = 'pick_existing';
+    public const SUBSTEP_CREATION_MODE = 'creation_mode';
+    public const SUBSTEP_NAME = 'name';
+
+    public const MODE_RESUME = 'resume';
+    public const MODE_NEW = 'new';
+
+    public const CREATION_MODE_EXISTING_TABLE = 'existing_table';
+    public const CREATION_MODE_MANUAL = 'manual';
+    public const CREATION_MODE_FILE = 'file';
+
+    public const CREATION_MODES = [
+        self::CREATION_MODE_EXISTING_TABLE,
+        self::CREATION_MODE_MANUAL,
+        self::CREATION_MODE_FILE,
+    ];
+
     public function __construct(private readonly AdministratorApplication $app)
     {
     }
@@ -50,6 +74,9 @@ class StorageWizardService
     {
         return [
             'current_step' => self::STEP_STORAGE,
+            'storage_substep' => self::SUBSTEP_MODE,
+            'storage_mode' => '',
+            'creation_mode' => '',
             'storage_id' => 0,
             'form_id' => 0,
             'menu_item_id' => 0,

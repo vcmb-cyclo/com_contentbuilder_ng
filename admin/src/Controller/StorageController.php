@@ -31,6 +31,8 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Filesystem\File;
 use Joomla\Utilities\ArrayHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilderng\Administrator\Helper\StorageColumnTypeHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\StorageSystemFieldHelper;
 use CB\Component\Contentbuilderng\Administrator\Model\StorageModel;
 use CB\Component\Contentbuilderng\Administrator\Model\StoragefieldsModel;
 
@@ -153,6 +155,33 @@ class StorageController extends BaseFormController
                 $data['title'] = $data['bytable'];
             }
             $this->input->post->set('jform', $data);
+        }
+
+        $postedName = trim((string) ($data['name'] ?? ''));
+        $postedId = (int) ($data['id'] ?? 0);
+
+        if ($postedName !== '') {
+            $db = $this->getDatabase();
+            $duplicateQuery = $db->getQuery(true)
+                ->select('COUNT(*)')
+                ->from($db->quoteName('#__contentbuilderng_storages'))
+                ->where($db->quoteName('name') . ' = ' . $db->quote($postedName));
+
+            if ($postedId > 0) {
+                $duplicateQuery->where($db->quoteName('id') . ' != ' . $postedId);
+            }
+
+            $db->setQuery($duplicateQuery);
+
+            if ((int) $db->loadResult() > 0) {
+                $this->setRedirect(
+                    $this->storageEditLink($postedId),
+                    Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_NAME_DUPLICATE', $postedName),
+                    'error'
+                );
+
+                return false;
+            }
         }
 
         // Pas de CSV → core
@@ -421,6 +450,10 @@ class StorageController extends BaseFormController
 
         if ($task === 'apply') {
             $link = $this->storageEditLink((int) $id);
+        } elseif ($this->input->getBool('wizard', false) && $task === 'save') {
+            // Même règle que le chemin sans CSV : "Enregistrer" depuis
+            // l'assistant doit y revenir, pas retomber sur la liste Storages.
+            $link = Route::_('index.php?option=com_contentbuilderng&view=storagewizard', false);
         } else {
             $return = $this->input->get('return', null, 'base64');
             $link = (!is_null($return) && Uri::isInternal(base64_decode((string) $return)))
@@ -983,5 +1016,124 @@ class StorageController extends BaseFormController
     {
         echo new JsonResponse(['ok' => $success], $message, !$success);
         $this->closeApp();
+    }
+
+    private function respondAjaxData(bool $success, string $message, array $data): void
+    {
+        echo new JsonResponse(array_merge(['ok' => $success], $data), $message, !$success);
+        $this->closeApp();
+    }
+
+    /**
+     * Task: storage.ajax_addfield — mécanisme moderne d'ajout de champ :
+     * soumis depuis la ligne éditable insérée en tête du tableau des champs
+     * (bouton "+"), au lieu de l'ancien mini-formulaire séparé sous le
+     * bouton "Add Field".
+     */
+    public function ajax_addfield(): void
+    {
+        $this->checkToken();
+
+        $jform = $this->input->post->get('jform', [], 'array');
+        $storageId = (int) ($jform['id'] ?? $this->input->getInt('id'));
+
+        try {
+            /** @var StorageModel|null $model */
+            $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
+
+            if (!$model) {
+                throw new \RuntimeException('StorageModel introuvable');
+            }
+
+            if (!$model->addFieldFromRequest($storageId)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_FIELD_ADD_FAILED'));
+            }
+
+            $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_FIELD_ADDED'));
+        } catch (\Throwable $e) {
+            $this->respondAjax(false, $e->getMessage());
+        }
+    }
+
+    /**
+     * Task: storage.ajax_update_field_type — change le type SQL d'un champ
+     * existant depuis la liste déroulante en ligne. Réservé aux storages
+     * internes (!bytable) sans le moindre enregistrement (ALTER TABLE sûr
+     * tant que la table est vide) et jamais pour un champ système (son type
+     * physique est fixe, cf. StorageSystemFieldHelper).
+     */
+    public function ajax_update_field_type(): void
+    {
+        $this->checkToken();
+
+        $storageId = (int) $this->input->getInt('id');
+        $fieldId = (int) $this->input->getInt('field_id', 0);
+        $sqlType = StorageColumnTypeHelper::normalize($this->input->getString('sql_type', ''));
+        $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $this->input->getInt('field_size', 0));
+
+        try {
+            if ($storageId <= 0 || $fieldId <= 0) {
+                throw new \RuntimeException(Text::_('JERROR_NO_ITEMS_SELECTED'));
+            }
+
+            $db = $this->getDatabase();
+
+            $storageQuery = $db->getQuery(true)
+                ->select($db->quoteName(['name', 'bytable']))
+                ->from($db->quoteName('#__contentbuilderng_storages'))
+                ->where($db->quoteName('id') . ' = ' . $storageId);
+            $db->setQuery($storageQuery);
+            $storage = $db->loadAssoc();
+
+            if (!is_array($storage)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ERROR'));
+            }
+
+            if ((int) ($storage['bytable'] ?? 0) === 1) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE_CREATE_ONLY_HINT'));
+            }
+
+            $countQuery = $db->getQuery(true)
+                ->select('COUNT(*)')
+                ->from($db->quoteName('#__' . (string) $storage['name']));
+            $db->setQuery($countQuery);
+
+            if ((int) $db->loadResult() > 0) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE_CREATE_ONLY_HINT'));
+            }
+
+            $fieldQuery = $db->getQuery(true)
+                ->select($db->quoteName('name'))
+                ->from($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->where($db->quoteName('id') . ' = ' . $fieldId)
+                ->where($db->quoteName('storage_id') . ' = ' . $storageId);
+            $db->setQuery($fieldQuery);
+            $fieldName = (string) $db->loadResult();
+
+            if ($fieldName === '' || StorageSystemFieldHelper::isSystemFieldName($fieldName)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_SELECT_REQUIRED'));
+            }
+
+            $updateFieldQuery = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->set($db->quoteName('sql_type') . ' = ' . $db->quote($sqlType))
+                ->set($db->quoteName('field_size') . ' = ' . ($fieldSize === null ? 'NULL' : (int) $fieldSize))
+                ->where($db->quoteName('id') . ' = ' . $fieldId)
+                ->where($db->quoteName('storage_id') . ' = ' . $storageId);
+            $db->setQuery($updateFieldQuery);
+            $db->execute();
+
+            $db->setQuery(
+                'ALTER TABLE ' . $db->quoteName('#__' . (string) $storage['name'])
+                . ' MODIFY ' . $db->quoteName($fieldName) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize)
+            );
+            $db->execute();
+
+            $this->respondAjaxData(true, Text::_('COM_CONTENTBUILDERNG_SAVED'), [
+                'sql_type_definition' => StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize),
+            ]);
+        } catch (\Throwable $e) {
+            $this->respondAjax(false, $e->getMessage());
+        }
     }
 }

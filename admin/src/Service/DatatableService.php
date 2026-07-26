@@ -569,7 +569,7 @@ class DatatableService
 
         // ✅ Query Joomla standard
         $query = $db->getQuery(true)
-            ->select($db->quoteName(['name', 'sql_type']))
+            ->select($db->quoteName(['name', 'sql_type', 'field_size']))
             ->from($db->quoteName('#__contentbuilderng_storage_fields'))
             ->where($db->quoteName('storage_id') . ' = :sid')
             ->bind(':sid', $storageId, ParameterType::INTEGER);
@@ -616,7 +616,8 @@ class DatatableService
             }
 
             $sqlType = StorageColumnTypeHelper::normalize((string) ($fieldRow['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
-            $db->setQuery("ALTER TABLE $tableQN ADD " . $db->quoteName($field) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType));
+            $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $fieldRow['field_size'] ?? null);
+            $db->setQuery("ALTER TABLE $tableQN ADD " . $db->quoteName($field) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize));
             $db->execute();
         }
     }

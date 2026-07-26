@@ -250,6 +250,31 @@ class TemplateRenderService
         return (int) $db->loadResult() === 1;
     }
 
+    /**
+     * En mode debug, préfixe le libellé (Edit/Détails) avec le nom
+     * technique du champ source BF/Storage (clé "recName"/$key des tableaux
+     * $items), pour identifier visuellement le mapping BF ↔ CB.
+     */
+    private function debugFieldNamePrefix(int $formId, string $fieldName, string $sourceType = ''): string
+    {
+        if (!$this->isFormDebugEnabled($formId)) {
+            return '';
+        }
+
+        $origin = match (true) {
+            str_starts_with($sourceType, 'com_breezingforms') => Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_ORIGIN_BF'),
+            $sourceType === 'com_contentbuilderng' => Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_ORIGIN_STORAGE'),
+            default => Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_ORIGIN_UNKNOWN'),
+        };
+
+        $tooltip = Text::sprintf('COM_CONTENTBUILDERNG_DEBUG_FIELD_NAME_TIP', $origin, $fieldName);
+
+        return '<span class="cb-debug-field-name" title="'
+            . htmlspecialchars($tooltip, ENT_QUOTES, 'UTF-8')
+            . '" data-bs-toggle="tooltip" data-bs-placement="top">'
+            . htmlspecialchars($fieldName, ENT_QUOTES, 'UTF-8') . '</span> ';
+    }
+
     private function addCaseMismatchWarnings(int $formId, string $template, string $fieldName): void
     {
         $patterns = [
@@ -949,7 +974,12 @@ class TemplateRenderService
                 if (!isset($item['label']) || !isset($item['id'])) {
                     continue;
                 }
-                $template = $this->replaceTemplateFieldToken($template, (string) $key, 'label', (string) $item['label']);
+                $template = $this->replaceTemplateFieldToken(
+                    $template,
+                    (string) $key,
+                    'label',
+                    $this->debugFieldNamePrefix((int) $contentbuilderngFormId, (string) $key, (string) ($result['type'] ?? '')) . (string) $item['label']
+                );
                 $template = $this->replaceTemplateFieldToken($template, (string) $key, 'value', (string) $item['value']);
                 $template = (string) preg_replace(
                     '/\\{webpath\\s+' . preg_quote((string) $key, '/') . '\\}/i',
@@ -1282,7 +1312,7 @@ class TemplateRenderService
 
                 $fallbackLabel = htmlspecialchars((string) ($item['label'] ?? ''), ENT_QUOTES, 'UTF-8');
                 $fallbackValue = htmlspecialchars((string) $rawValue, ENT_QUOTES, 'UTF-8');
-                $fallbackLabelHtml = '<label>' . $fallbackLabel . '</label>';
+                $fallbackLabelHtml = $this->debugFieldNamePrefix((int) $contentbuilderngFormId, (string) $key, (string) ($result['type'] ?? '')) . '<label>' . $fallbackLabel . '</label>';
 
                 $template = $this->replaceEditableReadonlyPair($template, (string) $key, $fallbackLabelHtml, $fallbackValue);
                 $template = str_replace('{' . $key . ':label}', $fallbackLabelHtml, $template);
@@ -1523,7 +1553,8 @@ class TemplateRenderService
             if ($theItem !== '' || $replaceTokens) {
                 $tip = 'hasTip';
                 $tipPrefix = htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') . '::';
-                $labelHtml = '<label ' . ($elementHint ? 'class="editlinktip ' . $tip . '" title="' . $tipPrefix . $elementHint . '" ' : '') . 'for="cb_' . $item['id'] . '">' . $item['label'] . $asterisk . ($elementHint ? ' <img style="cursor: pointer;" src="' . Uri::root(true) . '/media/com_contentbuilderng/images/icon_info.png" border="0"/>' : '') . '</label>';
+                $labelHtml = $this->debugFieldNamePrefix((int) $contentbuilderngFormId, (string) $key, (string) ($result['type'] ?? ''))
+                    . '<label ' . ($elementHint ? 'class="editlinktip ' . $tip . '" title="' . $tipPrefix . $elementHint . '" ' : '') . 'for="cb_' . $item['id'] . '">' . $item['label'] . $asterisk . ($elementHint ? ' <img style="cursor: pointer;" src="' . Uri::root(true) . '/media/com_contentbuilderng/images/icon_info.png" border="0"/>' : '') . '</label>';
                 $valueHtml = nl2br(htmlspecialchars((string) $hideIfEmptyValue, ENT_QUOTES, 'UTF-8'));
                 $template = $this->replaceEditableReadonlyPair($template, (string) $key, $labelHtml, $valueHtml);
                 $template = str_replace('{' . $key . ':label}', $labelHtml, $template);

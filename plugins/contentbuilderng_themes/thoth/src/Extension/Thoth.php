@@ -16,6 +16,7 @@ namespace CB\Plugin\ContentbuilderngThemes\Thoth\Extension;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Database\DatabaseInterface;
@@ -271,7 +272,7 @@ final class Thoth extends CMSPlugin implements SubscriberInterface
         }
 
         if (!$hasEditableElements) {
-            $msg = 'No editable elements configured; generated editable sample uses all elements.';
+            $msg = Text::_('COM_CONTENTBUILDERNG_THEME_NO_EDITABLE_ELEMENTS');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
             Log::add($msg, Log::WARNING, 'com_contentbuilderng');
         }

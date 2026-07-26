@@ -41,6 +41,7 @@ class HtmlView extends BaseHtmlView
     public string $storageTableLookupName = '';
     public string $storageTableErrorMessage = '';
     public string $wizardReturnUrl = '';
+    public string $dataTableName = '';
 
     private function getApp(): CMSApplicationInterface
     {
@@ -115,6 +116,16 @@ class HtmlView extends BaseHtmlView
         $this->loadStorageTableStatus($this->item);
         $this->storageRecordsCount = $this->getStorageRecordsCount($this->item);
 
+        $storageName = trim((string) ($this->item->name ?? ''));
+        $isBytableStorage = ((int) ($this->item->bytable ?? 0) === 1);
+        // La table interne n'est jamais stockée préfixée en base
+        // (StorageModel utilise "#__" + name) ; une table externe (bytable)
+        // vient de getTableList(), qui renvoie déjà, selon les pilotes, un
+        // nom potentiellement préfixé : ne pas la re-préfixer.
+        $this->dataTableName = $storageName === ''
+            ? ''
+            : ($isBytableStorage ? $storageName : $this->getDatabase()->getPrefix() . $storageName);
+
         $this->tables     = $this->get('DbTables');
 
         // Chargement sécurisé des éléments
@@ -181,17 +192,25 @@ class HtmlView extends BaseHtmlView
             : '';
 
         $saveButtons = [
-            ['apply', 'storage.apply', 'JTOOLBAR_APPLY'],
-            ['save', 'storage.save', 'JTOOLBAR_SAVE'],
+            ['apply', 'storage.apply', 'JTOOLBAR_APPLY', 'COM_CONTENTBUILDERNG_STORAGE_APPLY_TIP'],
+            ['save', 'storage.save', 'JTOOLBAR_SAVE', 'COM_CONTENTBUILDERNG_STORAGE_SAVE_TIP'],
         ];
 
         if (!$isFromWizard) {
-            $saveButtons[] = ['save2new', 'storage.save2new', 'JTOOLBAR_SAVE_AND_NEW'];
+            $saveButtons[] = ['save2new', 'storage.save2new', 'JTOOLBAR_SAVE_AND_NEW', 'COM_CONTENTBUILDERNG_STORAGE_SAVE_AND_NEW_TIP'];
         }
 
-        ToolbarHelper::saveGroup($saveButtons, 'btn-success');
-
         $toolbar = $this->getDocument()->getToolbar('toolbar');
+
+        $toolbar->dropdownButton('save-group')->configure(
+            function ($childBar) use ($saveButtons): void {
+                foreach ($saveButtons as $button) {
+                    $childBar->{$button[0]}($button[1])
+                        ->text($button[2])
+                        ->attributes(['title' => Text::_($button[3])]);
+                }
+            }
+        );
         $dropdown = $toolbar->dropdownButton('storage-status-group');
         $dropdown->text(Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS'));
         $dropdown->toggleSplit(false);
@@ -248,15 +267,45 @@ class HtmlView extends BaseHtmlView
                 ->target('_blank')
                 ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_TIP')]);
 
-            $toolbar->standardButton('datatable.sync')
+            // Regroupe "Synchroniser la table" et "Mettre à jour depuis un
+            // fichier" (panneau CSV/XLS existant sur l'onglet Stockage de
+            // données) sous un seul bouton "Mise à jour", plutôt que deux
+            // entrées séparées dans la barre d'outils.
+            $updateDropdown = $toolbar->dropdownButton('storage-update-group');
+            $updateDropdown->text('COM_CONTENTBUILDERNG_STORAGE_UPDATE_GROUP');
+            $updateDropdown->toggleSplit(false);
+            $updateDropdown->icon('fa fa-sync');
+            $updateDropdown->buttonClass('btn btn-action');
+            $updateDropdown->listCheck(false);
+            $updateDropdown->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_GROUP_TIP')]);
+
+            $updateChildToolbar = $updateDropdown->getChildToolbar();
+            $updateChildToolbar->standardButton('datatable.sync')
                 ->task('datatable.sync')
                 ->text('COM_CONTENTBUILDERNG_DATATABLE_SYNC')
                 ->icon('fa fa-sync')
                 ->listCheck(false)
                 ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_DATATABLE_SYNC_TIP')]);
+
+            $revealCsvPanelJs = "var tabBtn=document.querySelector('[data-bs-target=\"#tab1\"], [aria-controls=\"tab1\"]');"
+                . "if(tabBtn){tabBtn.click();}"
+                . "var csvBtn=document.getElementById('csvToggleButton');"
+                . "var csvPanel=document.getElementById('csvUpload');"
+                . "if(csvBtn){"
+                . "if(csvPanel && (csvPanel.style.display==='none' || getComputedStyle(csvPanel).display==='none')){csvBtn.click();}"
+                . "csvBtn.scrollIntoView({behavior:'smooth', block:'center'});"
+                . "}"
+                . "return false;";
+            $updateChildToolbar->link(Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV'), '#csvUploadHead')
+                ->icon('fa fa-file-excel')
+                ->attributes([
+                    'title' => Text::_('COM_CONTENTBUILDERNG_STORAGE_CSV_TOGGLE_TOOLTIP'),
+                    'onclick' => $revealCsvPanelJs,
+                ]);
         }
 
-        ToolbarHelper::cancel('storage.cancel', $isNew ? 'JTOOLBAR_CANCEL' : 'JTOOLBAR_CLOSE');
+        $toolbar->cancel('storage.cancel', $isNew ? 'JTOOLBAR_CANCEL' : 'JTOOLBAR_CLOSE')
+            ->attributes(['title' => Text::_($isNew ? 'COM_CONTENTBUILDERNG_STORAGE_CANCEL_TIP' : 'COM_CONTENTBUILDERNG_STORAGE_CLOSE_TIP')]);
         ToolbarHelper::help(
             'COM_CONTENTBUILDERNG_HELP_STORAGES_TITLE',
             false,

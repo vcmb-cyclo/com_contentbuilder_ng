@@ -320,6 +320,38 @@ final class SchemaService
         }
     }
 
+    /**
+     * "Taille" de colonne (longueur varchar/text), modifiable dans l'écran
+     * Storage, préremplie avec la valeur par défaut du type SQL choisi.
+     */
+    public function ensureStorageFieldSizeColumn(): void
+    {
+        $db = $this->db();
+
+        try {
+            $cols = $db->getTableColumns('#__contentbuilderng_storage_fields', false);
+
+            if (is_array($cols) && array_key_exists('field_size', $cols)) {
+                return;
+            }
+        } catch (\Throwable $e) {
+            $this->log('[WARNING] Could not inspect #__contentbuilderng_storage_fields columns: ' . $e->getMessage(), Log::WARNING);
+
+            return;
+        }
+
+        try {
+            $db->setQuery(
+                'ALTER TABLE ' . $db->quoteName('#__contentbuilderng_storage_fields')
+                . ' ADD ' . $db->quoteName('field_size') . ' INT NULL DEFAULT NULL AFTER ' . $db->quoteName('sql_type')
+            );
+            $db->execute();
+            $this->log('[OK] Added #__contentbuilderng_storage_fields.field_size.');
+        } catch (\Throwable $e) {
+            $this->log('[WARNING] Failed to add #__contentbuilderng_storage_fields.field_size: ' . $e->getMessage(), Log::WARNING);
+        }
+    }
+
     public function normalizeStoragesOrdering(): void
     {
         $db = $this->db();

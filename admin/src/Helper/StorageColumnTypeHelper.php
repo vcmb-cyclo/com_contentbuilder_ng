@@ -52,16 +52,71 @@ final class StorageColumnTypeHelper
         return (string) ($options[$type] ?? $type);
     }
 
-    public static function sqlDefinition(?string $type): string
+    /**
+     * "Taille" (longueur de colonne) : uniquement pertinente pour les
+     * champs texte (varchar/text) ; sans objet pour les autres types
+     * (int/decimal/date/datetime/boolean) et pour les champs système.
+     */
+    public static function supportsSize(?string $type): bool
+    {
+        return in_array(self::normalize($type), ['varchar', 'text'], true);
+    }
+
+    /**
+     * Taille pré-remplie à la sélection du type ("texte court"/"texte
+     * long"), modifiable ensuite par l'utilisateur.
+     */
+    public static function defaultSize(?string $type): ?int
     {
         return match (self::normalize($type)) {
-            'varchar' => 'VARCHAR(255) NULL',
+            'varchar' => 255,
+            'text' => 65535,
+            default => null,
+        };
+    }
+
+    /**
+     * Borne la taille saisie à des valeurs physiquement valides pour le
+     * type SQL choisi.
+     */
+    public static function normalizeSize(?string $type, mixed $size): ?int
+    {
+        if (!self::supportsSize($type)) {
+            return null;
+        }
+
+        $size = (int) $size;
+
+        if ($size < 1) {
+            return self::defaultSize($type);
+        }
+
+        return match (self::normalize($type)) {
+            // Limite MySQL pour un VARCHAR (au-delà, TEXT est le type adapté).
+            'varchar' => min($size, 65535),
+            // TEXT/MEDIUMTEXT/LONGTEXT : ceiling large mais fini.
+            'text' => min($size, 4294967295),
+            default => null,
+        };
+    }
+
+    public static function sqlDefinition(?string $type, mixed $size = null): string
+    {
+        $normalizedType = self::normalize($type);
+        $size = self::normalizeSize($normalizedType, $size ?? self::defaultSize($normalizedType));
+
+        return match ($normalizedType) {
+            'varchar' => 'VARCHAR(' . ($size ?? 255) . ') NULL',
             'int' => 'INT NULL',
             'decimal' => 'DECIMAL(15,4) NULL',
             'date' => 'DATE NULL',
             'datetime' => 'DATETIME NULL',
             'boolean' => 'TINYINT(1) NULL',
-            default => 'TEXT NULL',
+            default => match (true) {
+                $size !== null && $size > 16777215 => 'LONGTEXT NULL',
+                $size !== null && $size > 65535 => 'MEDIUMTEXT NULL',
+                default => 'TEXT NULL',
+            },
         };
     }
 

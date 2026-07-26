@@ -16,6 +16,7 @@ namespace CB\Plugin\ContentbuilderngThemes\Dark\Extension;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Database\DatabaseInterface;
@@ -250,7 +251,7 @@ final class Dark extends CMSPlugin implements SubscriberInterface
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $elementTypes = $this->fetchElementTypes($db, $contentbuilderng_form_id, true);
         if ($elementTypes === []) {
-            $msg = 'No editable elements configured; generated editable sample uses all elements.';
+            $msg = Text::_('COM_CONTENTBUILDERNG_THEME_NO_EDITABLE_ELEMENTS');
             Factory::getApplication()->enqueueMessage($msg, 'warning');
             Log::add($msg, Log::WARNING, 'com_contentbuilderng');
             $elementTypes = $this->fetchElementTypes($db, $contentbuilderng_form_id, false);

@@ -24,8 +24,9 @@ final class FormSourceFactory
     {
         $app = RuntimeContextHelper::getApplication();
         $input = $app->getInput();
+        $storageId = (int) $input->getInt('storage_id', 0);
 
-        if ($formId < 1 || !$input->getBool('cb_preview', false)) {
+        if (($formId < 1 && $storageId < 1) || !$input->getBool('cb_preview', false)) {
             return false;
         }
 
@@ -48,9 +49,25 @@ final class FormSourceFactory
             return false;
         }
 
-        $payload = PreviewLinkHelper::buildPayload((string) $formId, $until, $actorId, $actorName, $userId);
+        // Mirrore les cibles signées par le contrôleur front (mode "storage
+        // direct" : payload "storage:<id>" plutôt que le simple id de forme).
+        $targets = [];
+        if ($formId > 0) {
+            $targets[] = (string) $formId;
+        }
+        if ($storageId > 0) {
+            $targets[] = 'storage:' . $storageId;
+        }
 
-        return hash_equals(hash_hmac('sha256', $payload, $secret), $sig);
+        foreach ($targets as $target) {
+            $payload = PreviewLinkHelper::buildPayload($target, $until, $actorId, $actorName, $userId);
+
+            if (hash_equals(hash_hmac('sha256', $payload, $secret), $sig)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

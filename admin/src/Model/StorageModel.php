@@ -248,6 +248,7 @@ class StorageModel extends AdminModel
 
         $fieldtitle = trim((string) ($jform['fieldtitle'] ?? ''));
         $sqlType = StorageColumnTypeHelper::normalize((string) ($jform['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
+        $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $jform['field_size'] ?? null);
         $isGroup    = (int) ($jform['is_group'] ?? 0);
         $groupDef   = (string) ($jform['group_definition'] ?? '');
 
@@ -281,13 +282,14 @@ class StorageModel extends AdminModel
         // Insert field
         $query = $db->getQuery(true)
             ->insert($db->quoteName('#__contentbuilderng_storage_fields'))
-            ->columns($db->quoteName(['ordering', 'storage_id', 'name', 'title', 'sql_type', 'is_group', 'group_definition']))
+            ->columns($db->quoteName(['ordering', 'storage_id', 'name', 'title', 'sql_type', 'field_size', 'is_group', 'group_definition']))
             ->values(
                 (int) $max . ', '
                 . (int) $storageId . ', '
                 . $db->quote($newfieldname) . ', '
                 . $db->quote($newfieldtitle) . ', '
                 . $db->quote($sqlType) . ', '
+                . ($fieldSize === null ? 'NULL' : (int) $fieldSize) . ', '
                 . (int) $isGroup . ', '
                 . $db->quote($groupDef)
             );
@@ -298,7 +300,7 @@ class StorageModel extends AdminModel
         // (si ta table data existe toujours, tu peux garder juste l’ALTER)
         if (!empty($storage->name)) {
             try {
-                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storage->name) . ' ADD ' . $db->quoteName($newfieldname) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType));
+                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storage->name) . ' ADD ' . $db->quoteName($newfieldname) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize));
                 $db->execute();
             } catch (\Throwable $e) {
                 // Si la colonne existe déjà ou table absente, on log et on renvoie false
@@ -837,13 +839,14 @@ class StorageModel extends AdminModel
             if (!$bytable) {
                 // old name
                 $query = $db->getQuery(true)
-                    ->select($db->quoteName(['name', 'sql_type']))
+                    ->select($db->quoteName(['name', 'sql_type', 'field_size']))
                     ->from($db->quoteName('#__contentbuilderng_storage_fields'))
                     ->where($db->quoteName('id') . ' = ' . (int) $field_id);
                 $db->setQuery($query);
                 $oldField = $db->loadAssoc() ?: [];
                 $old_name = (string) ($oldField['name'] ?? '');
                 $oldSqlType = StorageColumnTypeHelper::normalize((string) ($oldField['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
+                $oldFieldSize = StorageColumnTypeHelper::normalizeSize($oldSqlType, $oldField['field_size'] ?? null);
 
                 // update storage_fields
                 $query = $db->getQuery(true)
@@ -861,7 +864,7 @@ class StorageModel extends AdminModel
                 // rename column if needed
                 if ($old_name !== '' && $old_name !== $name) {
                     try {
-                        $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storageTable->name) . ' CHANGE ' . $db->quoteName($old_name) . ' ' . $db->quoteName($name) . ' ' . StorageColumnTypeHelper::sqlDefinition($oldSqlType));
+                        $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storageTable->name) . ' CHANGE ' . $db->quoteName($old_name) . ' ' . $db->quoteName($name) . ' ' . StorageColumnTypeHelper::sqlDefinition($oldSqlType, $oldFieldSize));
                         $db->execute();
                     } catch (\Throwable $e) {
                         Logger::exception($e);
@@ -923,7 +926,7 @@ class StorageModel extends AdminModel
 
         // Liste des champs définis
         $query = $db->getQuery(true)
-            ->select($db->quoteName(['name', 'sql_type']))
+            ->select($db->quoteName(['name', 'sql_type', 'field_size']))
             ->from($db->quoteName('#__contentbuilderng_storage_fields'))
             ->where($db->quoteName('storage_id') . ' = ' . (int) $storageId);
         $db->setQuery($query);
@@ -944,11 +947,12 @@ class StorageModel extends AdminModel
             }
 
             $sqlType = StorageColumnTypeHelper::normalize((string) ($field['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
+            $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $field['field_size'] ?? null);
 
             try {
                 $db->setQuery(
                     'ALTER TABLE ' . $db->quoteName('#__' . $dataTableName)
-                    . ' ADD ' . $db->quoteName($fieldname) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType)
+                    . ' ADD ' . $db->quoteName($fieldname) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize)
                 );
                 $db->execute();
             } catch (\Throwable $e) {
@@ -1405,12 +1409,27 @@ class StorageModel extends AdminModel
                 $colCheck[] = $col;
             }
 
-            foreach ($columns as &$column) {
+            $selectedColumnsRaw = $this->getInput()->get('csv_import_columns', null, 'array');
+            $importAllColumns = $selectedColumnsRaw === null;
+            $selectedColumnIndexes = array();
+            if (!$importAllColumns) {
+                foreach ($selectedColumnsRaw as $rawIndex) {
+                    $selectedColumnIndexes[(int) $rawIndex] = true;
+                }
+            }
+            $importData = $this->getInput()->getBool('csv_import_data', true);
+
+            $includedColumnIndexes = array();
+            foreach ($columns as $index => $column) {
+                if (!$importAllColumns && !isset($selectedColumnIndexes[$index])) {
+                    continue;
+                }
                 $column = str_replace(".", "", trim($column));
                 $data['fieldname'] = $column;
                 $data['fieldtitle'] = $column;
                 $data['is_group'] = false;
                 $fieldnames[] = $this->store($data);
+                $includedColumnIndexes[] = $index;
                 $data['id'] = $this->storageId;
             }
 
@@ -1465,45 +1484,51 @@ class StorageModel extends AdminModel
                 $db->execute();
             }
 
-            $insert_query_prefix = 'INSERT INTO '
-                . $this->getDatabase()->quoteName('#__' . $this->target_table)
-                . ' (' . implode(',', $fieldnames) . ")\nVALUES";
+            if ($importData && !empty($fieldnames)) {
+                $insert_query_prefix = 'INSERT INTO '
+                    . $this->getDatabase()->quoteName('#__' . $this->target_table)
+                    . ' (' . implode(',', $fieldnames) . ")\nVALUES";
 
-            while (($data = fgetcsv($handle, $max_line_length, $this->getInput()->get('csv_delimiter', ',', 'string'), '"')) !== FALSE) {
-                $rowReadCount++;
-                while (count($data) < count($columns))
-                    array_push($data, NULL);
+                while (($data = fgetcsv($handle, $max_line_length, $this->getInput()->get('csv_delimiter', ',', 'string'), '"')) !== FALSE) {
+                    $rowReadCount++;
+                    while (count($data) < count($columns))
+                        array_push($data, NULL);
 
-                $isEmptyRow = true;
-                foreach ($data as $value) {
-                    if (trim((string) $value) !== '') {
-                        $isEmptyRow = false;
-                        break;
+                    $isEmptyRow = true;
+                    foreach ($data as $value) {
+                        if (trim((string) $value) !== '') {
+                            $isEmptyRow = false;
+                            break;
+                        }
                     }
-                }
-                if ($isEmptyRow) {
-                    $rowSkippedEmptyCount++;
-                    continue;
-                }
+                    if ($isEmptyRow) {
+                        $rowSkippedEmptyCount++;
+                        continue;
+                    }
 
-                $query = "$insert_query_prefix (" . join(", ", $this->quote_all_array($data)) . ")";
-                $this->getDatabase()->setQuery($query);
-                $this->getDatabase()->execute();
-                $db = $this->getDatabase();
-                $publishedValue = $this->getInput()->getInt('csv_published', 0);
-                $recordIdValue = (string) intval($db->insertid());
-                $referenceIdValue = (string) $this->storageId;
-                $insertQuery = $db->getQuery(true)
-                    ->insert($db->quoteName('#__contentbuilderng_records'))
-                    ->columns($db->quoteName(['type', 'last_update', 'is_future', 'lang_code', 'sef', 'published', 'record_id', 'reference_id']))
-                    ->values($db->quote('com_contentbuilderng') . ", :lastUpdate, 0, '*', '', :published, :recordId, :referenceId")
-                    ->bind(':lastUpdate', $last_update)
-                    ->bind(':published', $publishedValue, ParameterType::INTEGER)
-                    ->bind(':recordId', $recordIdValue)
-                    ->bind(':referenceId', $referenceIdValue);
-                $db->setQuery($insertQuery);
-                $db->execute();
-                $rowImportedCount++;
+                    $rowValues = $importAllColumns
+                        ? $data
+                        : array_map(static fn ($colIndex) => $data[$colIndex] ?? null, $includedColumnIndexes);
+
+                    $query = "$insert_query_prefix (" . join(", ", $this->quote_all_array($rowValues)) . ")";
+                    $this->getDatabase()->setQuery($query);
+                    $this->getDatabase()->execute();
+                    $db = $this->getDatabase();
+                    $publishedValue = $this->getInput()->getInt('csv_published', 0);
+                    $recordIdValue = (string) intval($db->insertid());
+                    $referenceIdValue = (string) $this->storageId;
+                    $insertQuery = $db->getQuery(true)
+                        ->insert($db->quoteName('#__contentbuilderng_records'))
+                        ->columns($db->quoteName(['type', 'last_update', 'is_future', 'lang_code', 'sef', 'published', 'record_id', 'reference_id']))
+                        ->values($db->quote('com_contentbuilderng') . ", :lastUpdate, 0, '*', '', :published, :recordId, :referenceId")
+                        ->bind(':lastUpdate', $last_update)
+                        ->bind(':published', $publishedValue, ParameterType::INTEGER)
+                        ->bind(':recordId', $recordIdValue)
+                        ->bind(':referenceId', $referenceIdValue);
+                    $db->setQuery($insertQuery);
+                    $db->execute();
+                    $rowImportedCount++;
+                }
             }
             fclose($handle);
 
@@ -1516,6 +1541,7 @@ class StorageModel extends AdminModel
                 'rows_skipped_empty' => $rowSkippedEmptyCount,
                 'published' => $this->getInput()->getInt('csv_published', 0),
                 'drop_records' => $this->getInput()->getBool('csv_drop_records', false),
+                'import_data' => $importData,
                 'dropped_data_records' => $droppedDataRecords,
                 'dropped_meta_records' => $droppedMetaRecords,
                 'dropped_article_links' => $droppedArticleLinks,

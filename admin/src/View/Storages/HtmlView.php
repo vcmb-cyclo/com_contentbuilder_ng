@@ -184,10 +184,12 @@ class HtmlView extends BaseHtmlView
             'logo_left'
         );
 
-        ToolbarHelper::addNew('storage.add');
         /** @var HtmlDocument $document */
         $document = $this->getDocument();
         $toolbar = $document->getToolbar('toolbar');
+
+        $toolbar->addNew('storage.add')
+            ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_STORAGE_ADD_NEW_TIP')]);
 
         $toolbar->standardButton('storagewizard-start')
             ->task('storagewizard.start')
