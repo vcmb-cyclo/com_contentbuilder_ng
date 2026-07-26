@@ -22,6 +22,7 @@ use Joomla\Database\DatabaseInterface;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\StorageWizardService;
+use CB\Component\Contentbuilderng\Administrator\Service\ExternalTableService;
 use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
@@ -34,6 +35,9 @@ class HtmlView extends BaseHtmlView
     public array $menutypes = [];
     public array $menuItems = [];
     public array $tables = [];
+    public array $tableModes = [];
+    public array $tableSourceTypes = [];
+    public array $tableSourceLabels = [];
     public array $existingStorages = [];
 
     private function getApp(): AdministratorApplication
@@ -85,7 +89,13 @@ class HtmlView extends BaseHtmlView
             // d'une table existante qu'à la création (étape 1 pas encore
             // franchie), pas lors d'une reprise du wizard sur un storage
             // déjà créé.
-            $this->tables = $db->getTableList() ?: [];
+            $externalTableService = $this->getComponent()->getContainer()->get(ExternalTableService::class);
+            $this->tables = $externalTableService->getSelectableTables();
+            foreach ($this->tables as $tableName) {
+                $this->tableModes[$tableName] = $externalTableService->getBytableMode($tableName);
+                $this->tableSourceTypes[$tableName] = $externalTableService->getSourceType($tableName);
+                $this->tableSourceLabels[$tableName] = $externalTableService->getSourceLabel($tableName);
+            }
 
             $existingStoragesQuery = $db->getQuery(true)
                 ->select($db->quoteName(['id', 'name', 'title']))
@@ -184,7 +194,7 @@ class HtmlView extends BaseHtmlView
         );
 
         ToolbarHelper::title(
-            Text::_('COM_CONTENTBUILDERNG') . ' &gt; ' . Text::_('COM_CONTENTBUILDERNG_WIZARD_TITLE')
+            Text::_('COM_CONTENTBUILDERNG') . ' › ' . Text::_('COM_CONTENTBUILDERNG_WIZARD_TITLE')
             . ' <span class="fa-solid fa-wand-magic-sparkles ms-2" aria-hidden="true"></span>',
             'logo_left'
         );

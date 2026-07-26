@@ -71,7 +71,8 @@ class ElementsModel extends ListModel
             'list_include',
             'search_include',
             'ordering',
-            'order_type'
+            'order_type',
+            'reference_id',
         ];
     }
 

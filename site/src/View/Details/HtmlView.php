@@ -68,6 +68,7 @@ class HtmlView extends BaseHtmlView
     public float $rating = 0.0;
     public int $rating_count = 0;
     public int $rating_sum = 0;
+    public int $direct_storage_read_only = 0;
 
     private function getApp(): SiteApplication
     {
@@ -516,6 +517,7 @@ class HtmlView extends BaseHtmlView
 		$this->rating_sum = (int) ($subject->rating_sum ?? 0);
 		$this->direct_storage_mode = (int) ($subject->direct_storage_mode ?? 0);
 		$this->direct_storage_id = (int) ($subject->direct_storage_id ?? 0);
+		$this->direct_storage_read_only = (int) ($subject->direct_storage_read_only ?? 0);
 		$this->direct_storage_unpublished = (int) ($subject->direct_storage_unpublished ?? 0);
 		$siblings = $this->resolveSiblingRecordIds($subject);
 		$this->prev_record_id = (int) ($siblings['previous'] ?? 0);

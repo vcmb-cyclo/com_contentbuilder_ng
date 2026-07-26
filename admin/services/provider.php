@@ -42,6 +42,7 @@ use CB\Component\Contentbuilderng\Administrator\Service\RuntimeUtilityService;
 use CB\Component\Contentbuilderng\Administrator\Service\TemplateRenderService;
 use CB\Component\Contentbuilderng\Administrator\Service\TextUtilityService;
 use CB\Component\Contentbuilderng\Administrator\Service\ApiFieldPermissionService;
+use CB\Component\Contentbuilderng\Administrator\Service\ExternalTableService;
 
 return new class implements ServiceProviderInterface
 {
@@ -69,6 +70,10 @@ return new class implements ServiceProviderInterface
         $container->set(
             StorageFieldService::class,
             static fn(Container $c) => new StorageFieldService($c->get(DatabaseInterface::class))
+        );
+        $container->set(
+            ExternalTableService::class,
+            static fn(Container $c) => new ExternalTableService($c->get(DatabaseInterface::class))
         );
         $container->set(
             PathService::class,

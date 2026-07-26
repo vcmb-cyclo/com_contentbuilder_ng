@@ -508,6 +508,17 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                             $componentLayoutBase
                         );
 
+                        $debugElementNames = [];
+                        if ($debugModeEnabled) {
+                            $debugSourceForm = FormSourceFactory::getForm(
+                                (string) ($this->item->type ?? ''),
+                                (int) ($this->item->reference_id ?? 0)
+                            );
+                            if (is_object($debugSourceForm) && method_exists($debugSourceForm, 'getElementNames')) {
+                                $debugElementNames = (array) $debugSourceForm->getElementNames();
+                            }
+                        }
+
                         $elementsTableHtml = LayoutHelper::render(
                             'form.elements_table',
                             [
@@ -518,6 +529,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                                 'sortLink' => $sortLink,
                                 'textUtilityService' => $textUtilityService,
                                 'isModifiedElementSettings' => $isModifiedElementSettings,
+                                'debugModeEnabled' => $debugModeEnabled,
+                                'debugElementNames' => $debugElementNames,
                             ],
                             $componentLayoutBase
                         );

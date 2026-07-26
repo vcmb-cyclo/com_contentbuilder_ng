@@ -163,7 +163,7 @@ class StorageController extends BaseFormController
         if ($postedName !== '') {
             $db = $this->getDatabase();
             $duplicateQuery = $db->getQuery(true)
-                ->select('COUNT(*)')
+                ->select($db->quoteName('title'))
                 ->from($db->quoteName('#__contentbuilderng_storages'))
                 ->where($db->quoteName('name') . ' = ' . $db->quote($postedName));
 
@@ -173,10 +173,17 @@ class StorageController extends BaseFormController
 
             $db->setQuery($duplicateQuery);
 
-            if ((int) $db->loadResult() > 0) {
+            $duplicateStorageTitle = $db->loadResult();
+
+            if ($duplicateStorageTitle !== null) {
+                $duplicateStorageTitle = trim((string) $duplicateStorageTitle);
                 $this->setRedirect(
                     $this->storageEditLink($postedId),
-                    Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_NAME_DUPLICATE', $postedName),
+                    Text::sprintf(
+                        'COM_CONTENTBUILDERNG_STORAGE_NAME_DUPLICATE',
+                        $postedName,
+                        $duplicateStorageTitle !== '' ? $duplicateStorageTitle : $postedName
+                    ),
                     'error'
                 );
 
@@ -384,7 +391,11 @@ class StorageController extends BaseFormController
                 return false;
             }
 
-            // (B) Import file (CSV/Excel)
+            // (B) Ensure the internal data table exists before the import
+            // creates its columns and inserts records.
+            $model->ensureDataTable($id, empty($data['id']), null);
+
+            // (C) Import file (CSV/Excel)
 	            $ok = $model->storeCsv($file, (int) $id);
 	            if (!$ok) {
 	                $error = trim((string) $model->getError());
@@ -804,6 +815,75 @@ class StorageController extends BaseFormController
         return $this->setStorageItemPublished(0, 'COM_CONTENTBUILDERNG_UNPUBLISHED');
     }
 
+    public function publishSystemField(): bool
+    {
+        $this->checkToken();
+
+        $storageId = (int) $this->input->getInt('id', 0);
+        $fieldName = trim((string) $this->input->getCmd('system_field_name', ''));
+        $definition = StorageSystemFieldHelper::definitions()[$fieldName] ?? null;
+        $redirect = Route::_(
+            'index.php?option=com_contentbuilderng&task=storage.display&layout=edit&id=' . $storageId . '&tabStartOffset=tab0#tab0',
+            false
+        );
+
+        try {
+            if ($storageId <= 0 || !is_array($definition)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_SELECT_REQUIRED'));
+            }
+
+            $db = $this->getDatabase();
+            $storageQuery = $db->getQuery(true)
+                ->select($db->quoteName(['name', 'bytable']))
+                ->from($db->quoteName('#__contentbuilderng_storages'))
+                ->where($db->quoteName('id') . ' = ' . $storageId);
+            $db->setQuery($storageQuery);
+            $storage = $db->loadAssoc();
+
+            if (!is_array($storage)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ERROR'));
+            }
+
+            $physicalTable = (int) ($storage['bytable'] ?? 0) > 0
+                ? (string) $storage['name']
+                : $db->getPrefix() . (string) $storage['name'];
+            $columns = $db->getTableColumns($physicalTable, false);
+
+            if (!array_key_exists($fieldName, $columns)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_SELECT_REQUIRED'));
+            }
+
+            $orderingQuery = $db->getQuery(true)
+                ->select('COALESCE(MAX(' . $db->quoteName('ordering') . '), 0) + 1')
+                ->from($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->where($db->quoteName('storage_id') . ' = ' . $storageId);
+            $db->setQuery($orderingQuery);
+            $ordering = (int) $db->loadResult();
+
+            $insert = $db->getQuery(true)
+                ->insert($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->columns($db->quoteName(['storage_id', 'name', 'title', 'sql_type', 'ordering', 'published']))
+                ->values(implode(',', [
+                    $storageId,
+                    $db->quote($fieldName),
+                    $db->quote((string) $definition['label']),
+                    $db->quote((string) $definition['sql_type']),
+                    $ordering,
+                    1,
+                ]));
+            $db->setQuery($insert);
+            $db->execute();
+
+            $this->setRedirect($redirect, Text::_('COM_CONTENTBUILDERNG_PUBLISHED'));
+
+            return true;
+        } catch (\Throwable $e) {
+            $this->setRedirect($redirect, $e->getMessage(), 'error');
+
+            return false;
+        }
+    }
+
     // Passe par le modèle.
     private function storagesPublish(int $state, string $successMsgKey)
     {
@@ -1089,7 +1169,7 @@ class StorageController extends BaseFormController
                 throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ERROR'));
             }
 
-            if ((int) ($storage['bytable'] ?? 0) === 1) {
+            if ((int) ($storage['bytable'] ?? 0) > 0) {
                 throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE_CREATE_ONLY_HINT'));
             }
 

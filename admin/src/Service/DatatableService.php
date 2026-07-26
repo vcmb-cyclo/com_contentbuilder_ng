@@ -273,7 +273,7 @@ class DatatableService
         $db = $this->db;
         $storage = $this->loadStorage($storageId);
 
-        if ((int) $storage->bytable === 1) {
+        if ((int) $storage->bytable > 0) {
             // External tables are managed separately.
             return;
         }
@@ -472,7 +472,7 @@ class DatatableService
         $db = $this->db;
         $storage = $this->loadStorage($storageId);
 
-        if ((int) $storage->bytable === 1) {
+        if ((int) $storage->bytable > 0) {
             throw new \RuntimeException('bytable=1 : pas de datatable à créer (table externe).');
         }
 
@@ -535,7 +535,7 @@ class DatatableService
         $db = $this->db;
         $storage = $this->loadStorage($storageId);
 
-        if ((int) $storage->bytable === 1) {
+        if ((int) $storage->bytable > 0) {
             throw new \RuntimeException('bytable=1 : sync colonnes non applicable ici (table externe).');
         }
 

@@ -473,7 +473,7 @@ class ListModel extends BaseListModel
         $db->setQuery($query);
         $storage = $db->loadObject();
 
-        if (!$storage || (int) ($storage->bytable ?? 0) === 1) {
+        if (!$storage) {
             throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
         }
 
@@ -542,6 +542,7 @@ class ListModel extends BaseListModel
             'form_id' => 0,
             'direct_storage_mode' => 1,
             'direct_storage_id' => (int) $storage->id,
+            'direct_storage_read_only' => (int) ($storage->bytable ?? 0) === 2 ? 1 : 0,
             'direct_storage_unpublished' => (int) ($storage->published ?? 0) === 0 ? 1 : 0,
             'labels' => $labels,
             'visible_cols' => $ids,
@@ -551,8 +552,8 @@ class ListModel extends BaseListModel
             'intro_text' => '',
             'export_xls' => 0,
             'display_filter' => !empty($ids),
-            'edit_button' => 1,
-            'new_button' => 1,
+            'edit_button' => (int) ($storage->bytable ?? 0) === 2 ? 0 : 1,
+            'new_button' => (int) ($storage->bytable ?? 0) === 2 ? 0 : 1,
             'select_column' => 0,
             'states' => [],
             'list_state' => 0,

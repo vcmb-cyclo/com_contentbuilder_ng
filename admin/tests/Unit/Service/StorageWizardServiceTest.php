@@ -28,6 +28,7 @@ final class StorageWizardServiceTest extends TestCase
             'current_step' => StorageWizardService::STEP_STORAGE,
             'storage_substep' => StorageWizardService::SUBSTEP_MODE,
             'storage_mode' => '',
+            'storage_source' => '',
             'creation_mode' => '',
             'storage_id' => 0,
             'form_id' => 0,

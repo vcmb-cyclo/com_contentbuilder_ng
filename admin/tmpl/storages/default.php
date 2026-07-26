@@ -365,11 +365,17 @@ if (storagesTable && storagesTable.tBodies.length) {
                         $id        = (int) ($row->id ?? 0);
                         $name      = htmlspecialchars((string) ($row->name ?? ''), ENT_QUOTES, 'UTF-8');
                         $title     = htmlspecialchars((string) ($row->title ?? ''), ENT_QUOTES, 'UTF-8');
-                        $isExternalStorage = ((int) ($row->bytable ?? 0) === 1);
-                        $storageMode = $isExternalStorage
-                            ? Text::_('COM_CONTENTBUILDERNG_STORAGE_MODE_EXTERNAL')
-                            : Text::_('COM_CONTENTBUILDERNG_STORAGE_MODE_INTERNAL');
-                        $storageModeBadgeClass = $isExternalStorage ? 'text-bg-warning' : 'text-bg-info';
+                        $bytableMode = (int) ($row->bytable ?? 0);
+                        $storageMode = match ($bytableMode) {
+                            2 => Text::_('COM_CONTENTBUILDERNG_STORAGE_MODE_EXTERNAL_SYSTEM'),
+                            1 => Text::_('COM_CONTENTBUILDERNG_STORAGE_MODE_EXTERNAL'),
+                            default => Text::_('COM_CONTENTBUILDERNG_STORAGE_MODE_INTERNAL'),
+                        };
+                        $storageModeBadgeClass = match ($bytableMode) {
+                            2 => 'text-bg-danger',
+                            1 => 'text-bg-warning',
+                            default => 'text-bg-info',
+                        };
                         $lastUpdateRaw = $row->modified ?? ($row->created ?? '');
                         $lastUpdate = $lastUpdateRaw
                             ? HTMLHelper::_('date', $lastUpdateRaw, Text::_('DATE_FORMAT_LC5'))

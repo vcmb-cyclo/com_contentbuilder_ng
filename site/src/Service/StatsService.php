@@ -221,7 +221,7 @@ final class StatsService
             return '1 = 0';
         }
 
-        $tableName = ((int) ($properties->bytable ?? 0) === 1 ? '' : '#__') . (string) $properties->name;
+        $tableName = ((int) ($properties->bytable ?? 0) > 0 ? '' : '#__') . (string) $properties->name;
         $valueColumn = 'TRIM(' . $this->db->quoteName('source.' . (string) $field['name']) . ')';
         $query = $this->db->getQuery(true)
             ->select($this->db->quoteName('source.id'))
@@ -614,7 +614,7 @@ final class StatsService
             return [];
         }
 
-        $tableName = ((int) ($properties->bytable ?? 0) === 1 ? '' : '#__') . (string) $properties->name;
+        $tableName = ((int) ($properties->bytable ?? 0) > 0 ? '' : '#__') . (string) $properties->name;
         $valueColumn = $this->db->quoteName('source.' . (string) $field['name']);
         $recordWhere = $this->getStatsRecordWhere($formRow, 'records');
 

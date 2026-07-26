@@ -24,6 +24,7 @@ use Joomla\Database\DatabaseInterface;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use CB\Component\Contentbuilderng\Administrator\Model\StoragefieldsModel;
+use CB\Component\Contentbuilderng\Administrator\Service\ExternalTableService;
 use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
 
 class HtmlView extends BaseHtmlView
@@ -31,6 +32,10 @@ class HtmlView extends BaseHtmlView
     public $form;
     public $fields;
     public $tables;
+    public array $tableModes = [];
+    public array $tableSourceTypes = [];
+    public array $tableSourceLabels = [];
+    public string $tableSourceType = '';
     public $pagination;
     public $ordering;
     public $item;
@@ -117,7 +122,7 @@ class HtmlView extends BaseHtmlView
         $this->storageRecordsCount = $this->getStorageRecordsCount($this->item);
 
         $storageName = trim((string) ($this->item->name ?? ''));
-        $isBytableStorage = ((int) ($this->item->bytable ?? 0) === 1);
+        $isBytableStorage = ((int) ($this->item->bytable ?? 0) > 0);
         // La table interne n'est jamais stockée préfixée en base
         // (StorageModel utilise "#__" + name) ; une table externe (bytable)
         // vient de getTableList(), qui renvoie déjà, selon les pilotes, un
@@ -126,7 +131,16 @@ class HtmlView extends BaseHtmlView
             ? ''
             : ($isBytableStorage ? $storageName : $this->getDatabase()->getPrefix() . $storageName);
 
-        $this->tables     = $this->get('DbTables');
+        $this->tables = $this->get('DbTables');
+        $externalTableService = $this->getComponent()->getContainer()->get(ExternalTableService::class);
+        foreach ((array) $this->tables as $tableName) {
+            $this->tableModes[(string) $tableName] = $externalTableService->getBytableMode((string) $tableName);
+            $this->tableSourceTypes[(string) $tableName] = $externalTableService->getSourceType((string) $tableName);
+            $this->tableSourceLabels[(string) $tableName] = $externalTableService->getSourceLabel((string) $tableName);
+        }
+        if ($isBytableStorage && $storageName !== '') {
+            $this->tableSourceType = $externalTableService->getSourceType($storageName);
+        }
 
         // Chargement sécurisé des éléments
         $storageId = (int) ($this->item->id ?? $input->getInt('id', 0));
@@ -179,7 +193,7 @@ class HtmlView extends BaseHtmlView
             : Text::_('COM_CONTENTBUILDERNG_STORAGES') . ' <span class="fa-solid fa-database mx-2" aria-hidden="true"></span>';
 
         ToolbarHelper::title(
-            Text::_('COM_CONTENTBUILDERNG') . ' &gt; ' . $breadcrumbMiddle . ' &gt; ' . $storageLabel
+            Text::_('COM_CONTENTBUILDERNG') . ' › ' . $breadcrumbMiddle . ' › ' . $storageLabel
             . ' <small><small>[ ' . $text . ' ]</small></small>',
             'logo_left'
         );
@@ -228,15 +242,17 @@ class HtmlView extends BaseHtmlView
             ->icon('fa-solid fa-circle-xmark text-danger')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_UNPUBLISH_ELEMENTS_TIP')]);
-        $childToolbar->delete('storage.listDelete', 'COM_CONTENTBUILDERNG_DELETE_FIELDS')
-            ->message('COM_CONTENTBUILDERNG_DELETE_FIELDS_CONFIRM')
-            ->listCheck(true)
-            ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_DELETE_FIELDS_TIP')]);
+        if ((int) ($this->item->bytable ?? 0) !== 2) {
+            $childToolbar->delete('storage.listDelete', 'COM_CONTENTBUILDERNG_DELETE_FIELDS')
+                ->message('COM_CONTENTBUILDERNG_DELETE_FIELDS_CONFIRM')
+                ->listCheck(true)
+                ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_DELETE_FIELDS_TIP')]);
+        }
 
         $id = (int) ($this->item->id ?? 0);
-        $isExternalTable = ((int) ($this->item->bytable ?? 0) === 1);
+        $isExternalTable = ((int) ($this->item->bytable ?? 0) > 0);
 
-        if ($id > 0 && !$isExternalTable) {
+        if ($id > 0) {
             $previewUntil = time() + 600;
             $previewActorId = (int) ($identity->id ?? 0);
             $previewActorName = trim((string) ($identity->name ?? ''));
@@ -267,6 +283,7 @@ class HtmlView extends BaseHtmlView
                 ->target('_blank')
                 ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_TIP')]);
 
+            if (!$isExternalTable) {
             // Regroupe "Synchroniser la table" et "Mettre à jour depuis un
             // fichier" (panneau CSV/XLS existant sur l'onglet Stockage de
             // données) sous un seul bouton "Mise à jour", plutôt que deux
@@ -293,7 +310,7 @@ class HtmlView extends BaseHtmlView
                 . "var csvPanel=document.getElementById('csvUpload');"
                 . "if(csvBtn){"
                 . "if(csvPanel && (csvPanel.style.display==='none' || getComputedStyle(csvPanel).display==='none')){csvBtn.click();}"
-                . "csvBtn.scrollIntoView({behavior:'smooth', block:'center'});"
+                . "if(csvPanel){csvPanel.scrollIntoView({behavior:'smooth', block:'center'});}"
                 . "}"
                 . "return false;";
             $updateChildToolbar->link(Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV'), '#csvUploadHead')
@@ -302,6 +319,7 @@ class HtmlView extends BaseHtmlView
                     'title' => Text::_('COM_CONTENTBUILDERNG_STORAGE_CSV_TOGGLE_TOOLTIP'),
                     'onclick' => $revealCsvPanelJs,
                 ]);
+            }
         }
 
         $toolbar->cancel('storage.cancel', $isNew ? 'JTOOLBAR_CANCEL' : 'JTOOLBAR_CLOSE')
@@ -347,7 +365,7 @@ class HtmlView extends BaseHtmlView
             return;
         }
 
-        $isExternalTable = ((int) ($item->bytable ?? 0) === 1);
+        $isExternalTable = ((int) ($item->bytable ?? 0) > 0);
         $lookupName = $isExternalTable ? $name : ('#__' . $name);
         $this->storageTableLookupName = $lookupName;
 

@@ -24,7 +24,7 @@ final class DetailsOwnerEditActionTest extends TestCase
             $template
         );
         self::assertStringContainsString(
-            '$canEditRecord = $edit_allowed || $ownerEditAllowed;',
+            '$canEditRecord = !$directStorageReadOnly && ($edit_allowed || $ownerEditAllowed);',
             $template
         );
         self::assertStringContainsString(

@@ -8,7 +8,7 @@
 - Preserved `headers=` in `export=manual`; Pie and Bar legends remain unchanged.
 - Updated the plugin help and CB → View → API documentation in English, French and German.
 
-### 6.1.7-RC94
+### 6.1.7-RC95
 
 - Added CBStats multi-view statistics merging with `idsum=`.
 - Added final-result limiting with `limit=` and visual total suppression with `total="hide"`.

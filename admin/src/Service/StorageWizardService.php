@@ -51,6 +51,7 @@ class StorageWizardService
     public const SUBSTEP_MODE = 'mode';
     public const SUBSTEP_PICK_EXISTING = 'pick_existing';
     public const SUBSTEP_CREATION_MODE = 'creation_mode';
+    public const SUBSTEP_INITIALIZATION_MODE = 'initialization_mode';
     public const SUBSTEP_NAME = 'name';
 
     public const MODE_RESUME = 'resume';
@@ -59,6 +60,7 @@ class StorageWizardService
     public const CREATION_MODE_EXISTING_TABLE = 'existing_table';
     public const CREATION_MODE_MANUAL = 'manual';
     public const CREATION_MODE_FILE = 'file';
+    public const STORAGE_SOURCE_INTERNAL = 'internal';
 
     public const CREATION_MODES = [
         self::CREATION_MODE_EXISTING_TABLE,
@@ -76,6 +78,7 @@ class StorageWizardService
             'current_step' => self::STEP_STORAGE,
             'storage_substep' => self::SUBSTEP_MODE,
             'storage_mode' => '',
+            'storage_source' => '',
             'creation_mode' => '',
             'storage_id' => 0,
             'form_id' => 0,

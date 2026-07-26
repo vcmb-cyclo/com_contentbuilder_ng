@@ -297,7 +297,7 @@ class DetailsModel extends ListModel
         $db->setQuery($query);
         $storage = $db->loadObject();
 
-        if (!$storage || (int) ($storage->bytable ?? 0) === 1) {
+        if (!$storage) {
             throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
         }
 
@@ -372,6 +372,7 @@ class DetailsModel extends ListModel
                 'form_id' => 0,
                 'direct_storage_mode' => 1,
                 'direct_storage_id' => (int) $storage->id,
+                'direct_storage_read_only' => (int) ($storage->bytable ?? 0) === 2 ? 1 : 0,
                 'direct_storage_unpublished' => (int) ($storage->published ?? 0) === 0 ? 1 : 0,
                 'record_id' => $recordId,
                 'show_page_heading' => $this->_show_page_heading,

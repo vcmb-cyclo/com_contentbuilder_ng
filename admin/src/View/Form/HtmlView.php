@@ -190,7 +190,7 @@ class HtmlView extends BaseHtmlView
             : Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_FORMS') . ' <span class="fa-solid fa-file-lines mx-2" aria-hidden="true"></span>';
 
         ToolbarHelper::title(
-            Text::_('COM_CONTENTBUILDERNG') . ' &gt; ' . $breadcrumbMiddle . ' &gt; ' . $formLabel
+            Text::_('COM_CONTENTBUILDERNG') . ' › ' . $breadcrumbMiddle . ' › ' . $formLabel
                 . ' <small><small>[ ' . $text . ' ]</small></small>',
             'logo_left'
         );

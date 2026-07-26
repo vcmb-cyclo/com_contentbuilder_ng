@@ -578,7 +578,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_resource_access`
 --   id           Auto-increment primary key.
 --   name         Machine name / slug (unique).
 --   title        Human-readable storage label.
---   bytable      1 = storage is addressed directly by table name.
+--   bytable      0 = internal storage; 1 = editable mapped table;
+--                2 = read-only known Joomla, BreezingForms or extension table.
 --   ordering     Display order in the admin storage list.
 --   created      Creation timestamp.
 --   modified     Last-modification timestamp.

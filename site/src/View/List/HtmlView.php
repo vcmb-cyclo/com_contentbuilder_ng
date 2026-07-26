@@ -38,6 +38,7 @@ class HtmlView extends BaseHtmlView
     public int $debug_show_permissions = 0;
     public int $debug_show_filters = 0;
     public int $debug_show_cb_id = 0;
+    public int $direct_storage_read_only = 0;
 
     private function getApp(): SiteApplication
     {
@@ -119,6 +120,7 @@ class HtmlView extends BaseHtmlView
         $this->show_preview_link = (int) ($subject->show_preview_link ?? 0);
         $this->direct_storage_mode = (int) ($subject->direct_storage_mode ?? 0);
         $this->direct_storage_id = (int) ($subject->direct_storage_id ?? 0);
+        $this->direct_storage_read_only = (int) ($subject->direct_storage_read_only ?? 0);
         $this->direct_storage_unpublished = (int) ($subject->direct_storage_unpublished ?? 0);
         $this->cb_show_top_bar = (int) ($subject->cb_show_top_bar ?? 1);
         $this->cb_show_bottom_bar = (int) ($subject->cb_show_bottom_bar ?? 1);

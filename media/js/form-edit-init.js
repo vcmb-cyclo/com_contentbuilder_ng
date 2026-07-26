@@ -723,6 +723,13 @@
         }
     }
 
+    // La colonne "Champ BF" (mode Debug) de la liste des fields est rendue
+    // côté serveur : un rechargement est nécessaire pour qu'elle apparaisse/disparaisse.
+    function cbReloadForDebugToggle(rowId) {
+        cbRememberViewport(rowId || '');
+        window.location.reload();
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         cbToggleDebugTab(cbDebugModeEnabled);
     });
@@ -877,8 +884,9 @@
                 cbSubmitTaskAjax(task, rowId, function() {
                     cbApplyAjaxToggleState(actionElement, task);
                     cbUpdateEditableBadge(actionElement, task, rowId);
-                    if (task === 'form.debug_on') { cbToggleDebugTab(true); }
-                    if (task === 'form.debug_off') { cbToggleDebugTab(false); }
+                    if (task === 'form.debug_on' || task === 'form.debug_off') {
+                        cbReloadForDebugToggle(rowId);
+                    }
                 }, null, actionElement);
                 return false;
             }
@@ -984,7 +992,7 @@
                 if (!error) {
                     cbSetDirtyState(false);
                     cbAnimateSaveButton();
-                    Joomla.submitform(task);
+                    Joomla.submitform(task, form);
                 }
 
                 break;
@@ -1609,8 +1617,9 @@
             cbSubmitTaskAjax(task, rowId, function() {
                 cbApplyAjaxToggleState(actionElement, task);
                 cbUpdateEditableBadge(actionElement, task, rowId);
-                if (task === 'form.debug_on') { cbToggleDebugTab(true); }
-                if (task === 'form.debug_off') { cbToggleDebugTab(false); }
+                if (task === 'form.debug_on' || task === 'form.debug_off') {
+                    cbReloadForDebugToggle(rowId);
+                }
             }, null, actionElement);
         }, true);
 

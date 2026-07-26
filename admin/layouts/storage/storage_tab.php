@@ -159,7 +159,8 @@ $storageFieldColumns = [
                     $isGroup = !empty($row->is_group);
                     $checked = '<input class="form-check-input" type="checkbox" id="cb' . (int) $i . '" name="cid[]" value="' . $id . '" onclick="Joomla.isChecked(this.checked);">';
                     $published = ContentbuilderngHelper::listPublish('storage', $row, $i);
-                    $rowSqlTypeEditable = $canEditSqlType && !StorageSystemFieldHelper::isSystemFieldName($rawName);
+                    $isSystemField = StorageSystemFieldHelper::isSystemFieldName($rawName);
+                    $rowSqlTypeEditable = $canEditSqlType && !$isSystemField;
                 ?>
                     <tr class="row<?php echo $i % 2; ?>" data-cb-row-id="<?php echo $id; ?>" data-cb-item-label="<?php echo $title !== '' ? $title : $name; ?>">
                         <td class="text-center" data-cb-storage-col="check"><?php echo $checked; ?></td>
@@ -264,15 +265,17 @@ $storageFieldColumns = [
                         </td>
                         <td class="text-center" data-cb-storage-col="publish"><?php echo $published; ?></td>
                         <td class="text-center" data-cb-storage-col="actions">
-                            <button type="button"
-                                class="btn btn-sm btn-link text-danger p-0 cb-storage-field-delete"
-                                title="<?php echo htmlspecialchars(Text::_('JACTION_DELETE'), ENT_QUOTES, 'UTF-8'); ?>"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="top"
-                                onclick="return cbDeleteStorageField('cb<?php echo (int) $i; ?>');"
-                            >
-                                <span class="fa-solid fa-trash" aria-hidden="true"></span>
-                            </button>
+                            <?php if ((int) ($item->bytable ?? 0) !== 2 && !$isSystemField) : ?>
+                                <button type="button"
+                                    class="btn btn-sm btn-link text-danger p-0 cb-storage-field-delete"
+                                    title="<?php echo htmlspecialchars(Text::_('JACTION_DELETE'), ENT_QUOTES, 'UTF-8'); ?>"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    onclick="return cbDeleteStorageField('cb<?php echo (int) $i; ?>');"
+                                >
+                                    <span class="fa-solid fa-trash" aria-hidden="true"></span>
+                                </button>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -294,7 +297,17 @@ $storageFieldColumns = [
                             <td class="text-nowrap" data-cb-storage-col="field_size">—</td>
                             <td data-cb-storage-col="group">—</td>
                             <td class="cb-order-col" data-cb-storage-col="order">—</td>
-                            <td class="text-center" data-cb-storage-col="publish">—</td>
+                            <td class="text-center" data-cb-storage-col="publish">
+                                <button type="button"
+                                    class="btn btn-sm btn-link p-0"
+                                    title="<?php echo htmlspecialchars(Text::_('JLIB_HTML_PUBLISH_ITEM'), ENT_QUOTES, 'UTF-8'); ?>"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    onclick="document.getElementById('cb-system-field-name').value='<?php echo htmlspecialchars($pendingFieldName, ENT_QUOTES, 'UTF-8'); ?>'; Joomla.submitbutton('storage.publishSystemField'); return false;">
+                                    <span class="fa-solid fa-circle-xmark text-danger" aria-hidden="true"></span>
+                                    <span class="visually-hidden"><?php echo Text::_('JLIB_HTML_PUBLISH_ITEM'); ?></span>
+                                </button>
+                            </td>
                             <td class="text-center" data-cb-storage-col="actions"></td>
                         </tr>
                     <?php endforeach; ?>

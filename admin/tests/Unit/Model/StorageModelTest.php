@@ -40,6 +40,37 @@ final class StorageModelTest extends TestCase
         ];
     }
 
+    public function testKnownExternalTableSynchronizationIsReadOnly(): void
+    {
+        $method = new \ReflectionMethod(StorageModel::class, 'syncStorageDataTableOrBytable');
+        $source = file(
+            (string) $method->getFileName(),
+            FILE_IGNORE_NEW_LINES
+        );
+        self::assertIsArray($source);
+
+        $methodSource = implode("\n", array_slice(
+            $source,
+            $method->getStartLine() - 1,
+            $method->getEndLine() - $method->getStartLine() + 1
+        ));
+        $externalMarker = '// BYTABLE = table externe';
+        $externalOffset = strpos($methodSource, $externalMarker);
+        self::assertNotFalse($externalOffset);
+
+        $externalSource = substr($methodSource, $externalOffset);
+        self::assertStringContainsString('if ($bytable === 1)', $externalSource);
+
+        $readOnlyMarker = '// bytable=2 ne fait que lire';
+        $readOnlyOffset = strpos($externalSource, $readOnlyMarker);
+        self::assertNotFalse($readOnlyOffset);
+        $readOnlySource = substr($externalSource, $readOnlyOffset);
+
+        self::assertStringNotContainsString('ALTER TABLE', $readOnlySource);
+        self::assertStringNotContainsString('->update($db->quoteName($name))', $readOnlySource);
+        self::assertStringContainsString("->select(\$db->quoteName('id'))", $readOnlySource);
+    }
+
     private function invokePrivateMethod(string $method, ...$args)
     {
         $reflection = new \ReflectionClass($this->model);

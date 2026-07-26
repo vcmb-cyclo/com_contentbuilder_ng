@@ -25,6 +25,7 @@ use Joomla\CMS\Application\CMSWebApplicationInterface;
 use Joomla\CMS\Application\SiteApplication;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
+use Joomla\Database\DatabaseInterface;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\DirectStorageFormProvisioningService;
@@ -54,6 +55,17 @@ class EditController extends BaseController
         }
 
         return $component->getContainer()->get(DirectStorageFormProvisioningService::class);
+    }
+
+    private function getComponentDatabase(): DatabaseInterface
+    {
+        $component = RuntimeContextHelper::getApplication()->bootComponent('com_contentbuilderng');
+
+        if (!$component instanceof ContentbuilderngComponent) {
+            throw new \RuntimeException('Unexpected component instance');
+        }
+
+        return $component->getContainer()->get(DatabaseInterface::class);
     }
 
     /**
@@ -87,9 +99,42 @@ class EditController extends BaseController
     {
         $formId = (int) $this->input->getInt('id', 0);
         $storageId = (int) $this->input->getInt('storage_id', 0);
+
+        if ($storageId > 0) {
+            $db = $this->getComponentDatabase();
+            $query = $db->getQuery(true)
+                ->select($db->quoteName('bytable'))
+                ->from($db->quoteName('#__contentbuilderng_storages'))
+                ->where($db->quoteName('id') . ' = ' . $storageId);
+            $query->setLimit(1);
+            $db->setQuery($query);
+
+            if ((int) $db->loadResult() === 2) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_READONLY_EXTERNAL_STORAGE_MSG'), 403);
+            }
+        }
+
         $isAdminPreview = $this->isValidAdminPreviewRequest($formId, $storageId);
         $this->input->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
         $this->siteApp->getInput()->set('cb_preview_ok', $isAdminPreview ? 1 : 0);
+
+        if ($storageId > 0 && !$isAdminPreview) {
+            $formId = $this->getDirectStorageFormProvisioningService()->resolveOrCreateFormId($storageId);
+            $recordId = $this->input->getCmd('record_id', '');
+
+            if ($formId < 1) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
+            }
+
+            $this->input->set('id', $formId);
+            $this->siteApp->getInput()->set('id', $formId);
+            $this->getPermissionService()->setPermissions(
+                $formId,
+                $recordId,
+                $this->frontend ? '_fe' : ''
+            );
+        }
+
         return $isAdminPreview;
     }
 
@@ -253,10 +298,12 @@ class EditController extends BaseController
     {
         $this->checkToken('post');
 
-        $isAdminPreview = $this->applyPreviewContextForAction();
-        if (!$isAdminPreview) {
-            $this->getPermissionService()->checkPermissions('delete', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_DELETE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
-        }
+        // Never bypassed for an admin-preview session: the preview permission
+        // set (setStoragePreviewPermissions()) intentionally does not grant
+        // delete, so this still correctly denies a preview link from deleting
+        // records.
+        $this->applyPreviewContextForAction();
+        $this->getPermissionService()->checkPermissions('delete', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_DELETE_NOT_ALLOWED'), $this->frontend ? '_fe' : '');
 
         $selectedItems = array_values(
             array_filter(
@@ -324,11 +371,12 @@ class EditController extends BaseController
 
     public function state()
     {
-        $isAdminPreview = $this->applyPreviewContextForAction();
-        if (!$isAdminPreview) {
-            if (!$this->checkPermissionForAjax('state', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'))) {
-                return;
-            }
+        // Never bypassed for an admin-preview session: the preview permission
+        // set does not grant state changes, so this still correctly denies a
+        // preview link from changing record state.
+        $this->applyPreviewContextForAction();
+        if (!$this->checkPermissionForAjax('state', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'))) {
+            return;
         }
 
         $model = $this->getEditModel(['ignore_request' => true]);
@@ -363,9 +411,16 @@ class EditController extends BaseController
     {
         $storageId = (int) $this->siteApp->getInput()->getInt('storage_id', 0);
         $isDirectStorageMode = $storageId > 0 && $this->siteApp->getInput()->getInt('id', 0) <= 0;
-        $isAdminPreview = $this->applyPreviewContextForAction();
+        // Never bypassed for an admin-preview session: both gates below are
+        // still enforced, and the preview permission set does not grant
+        // publish, so this still correctly denies a preview link from
+        // publishing/unpublishing records.
+        $this->applyPreviewContextForAction();
 
-        if ($isDirectStorageMode && !$isAdminPreview) {
+        // Direct-storage records require both the site-wide Joomla ACL rule
+        // (core.edit.state) AND the form's own per-group "publish" permission
+        // — neither one alone is sufficient.
+        if ($isDirectStorageMode) {
             if (!$this->siteApp->getIdentity()->authorise('core.edit.state', 'com_contentbuilderng')) {
                 if ($this->isAjaxCall()) {
                     $this->respondAjax(false, Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'));
@@ -374,10 +429,10 @@ class EditController extends BaseController
 
                 throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'), 403);
             }
-        } elseif (!$isAdminPreview) {
-            if (!$this->checkPermissionForAjax('publish', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'))) {
-                return;
-            }
+        }
+
+        if (!$this->checkPermissionForAjax('publish', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_PUBLISHING_NOT_ALLOWED'))) {
+            return;
         }
 
         $model = $this->getEditModel(['ignore_request' => true]);
@@ -411,11 +466,12 @@ class EditController extends BaseController
 
     public function language()
     {
-        $isAdminPreview = $this->applyPreviewContextForAction();
-        if (!$isAdminPreview) {
-            if (!$this->checkPermissionForAjax('language', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_CHANGE_LANGUAGE_NOT_ALLOWED'))) {
-                return;
-            }
+        // Never bypassed for an admin-preview session: the preview permission
+        // set does not grant language changes, so this still correctly
+        // denies a preview link from changing record language.
+        $this->applyPreviewContextForAction();
+        if (!$this->checkPermissionForAjax('language', Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_CHANGE_LANGUAGE_NOT_ALLOWED'))) {
+            return;
         }
 
         $model = $this->getEditModel(['ignore_request' => true]);

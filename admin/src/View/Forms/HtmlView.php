@@ -67,7 +67,7 @@ class HtmlView extends BaseHtmlView
 
         // Et pour le title, garde un identifiant cohérent :
         ToolbarHelper::title(
-            Text::_('COM_CONTENTBUILDERNG') . ' &gt; ' . Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_FORMS')
+            Text::_('COM_CONTENTBUILDERNG') . ' › ' . Text::_('COM_CONTENTBUILDERNG_ABOUT_CONFIG_SECTION_FORMS')
             . ' <span class="fa-solid fa-file-lines ms-2" aria-hidden="true"></span>',
             'logo_left'
         );

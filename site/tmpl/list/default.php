@@ -184,9 +184,18 @@ if (!isset($previewLayoutOptions[$currentListLayout])) {
 $previewLayoutSelectOptions = [];
 $directStorageMode = !empty($this->direct_storage_mode);
 $directStorageId = (int) ($this->direct_storage_id ?? 0);
+$directStorageReadOnly = !empty($this->direct_storage_read_only);
 $directStorageUnpublished = !empty($this->direct_storage_unpublished);
 $directStoragePublishAllowed = $directStorageMode
+    && !$directStorageReadOnly
     && ($isAdminPreview || $app->getIdentity()->authorise('core.edit.state', 'com_contentbuilderng'));
+if ($directStorageReadOnly) {
+    $edit_allowed = false;
+    $delete_allowed = false;
+    $new_allowed = false;
+    $state_allowed = false;
+    $publish_allowed = false;
+}
 if ($directStorageMode && $directStorageId > 0 && $adminReturnContext !== 'storages') {
     $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $directStorageId;
 }
@@ -458,9 +467,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 			<div class="alert alert-warning cbPreviewBanner d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
 				<span>
 					<strong><?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW_MODE'); ?></strong>
-					<?php if ($directStorageMode) : ?>
-						<?php echo ' - ' . Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_CURRENT_STORAGE', $previewFormName); ?>
-					<?php elseif (!empty($previewLayoutSelectOptions)) : ?>
+					<?php if (!$directStorageMode && !empty($previewLayoutSelectOptions)) : ?>
 						<span class="d-inline-flex align-items-center gap-2 ms-2">
 							<label for="cb-preview-layout-select"><?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT'); ?></label>
 							<select

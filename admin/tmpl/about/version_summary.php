@@ -36,8 +36,7 @@ use Joomla\CMS\Language\Text;
                 <div class="cb-about-version-tile cb-about-version-tile--author">
                     <span class="cb-about-version-icon"><?php echo Text::_('COM_CONTENTBUILDERNG_AUTHOR'); ?></span>
                     <p class="cb-about-version-value"><?php echo htmlspecialchars($authorValue, ENT_QUOTES, 'UTF-8'); ?></p>
-                    <p class="cb-about-version-label mt-2"><?php echo Text::_('COM_CONTENTBUILDERNG_COPYRIGHT_LABEL'); ?></p>
-                    <p class="cb-about-version-value"><?php echo htmlspecialchars($copyrightValue, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <p class="cb-about-version-value mt-2"><?php echo htmlspecialchars($copyrightValue, ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
             </div>
             <div class="col-12 col-md-12 col-lg-4">

@@ -30,13 +30,6 @@ final class DirectStorageFormProvisioningService
 {
     private const TYPE = 'com_contentbuilderng';
 
-    /**
-     * Group 1 ("Public") is Joomla's root usergroup, granted to every
-     * unauthenticated visitor: it must never get write access on a
-     * form auto-provisioned from a mere anonymous GET request.
-     */
-    private const PUBLIC_GROUP_ID = 1;
-
     public function __construct(
         private readonly DatabaseInterface $db,
         private readonly FormSupportService $formSupportService
@@ -108,8 +101,19 @@ final class DirectStorageFormProvisioningService
 
         $insertQuery = $this->db->getQuery(true)
             ->insert($this->db->quoteName('#__contentbuilderng_forms'))
-            ->columns($this->db->quoteName(['type', 'reference_id', 'name', 'title', 'tag', 'published', 'config', 'created', 'created_by']))
-            ->values(':cbType, :cbReferenceId, :cbName, :cbTitle, :cbTag, 1, :cbConfig, :cbCreated, :cbCreatedBy')
+            ->columns($this->db->quoteName([
+                'type',
+                'reference_id',
+                'name',
+                'title',
+                'tag',
+                'published',
+                'create_articles',
+                'config',
+                'created',
+                'created_by',
+            ]))
+            ->values(':cbType, :cbReferenceId, :cbName, :cbTitle, :cbTag, 1, 0, :cbConfig, :cbCreated, :cbCreatedBy')
             ->bind(':cbType', $type)
             ->bind(':cbReferenceId', $storageId, ParameterType::INTEGER)
             ->bind(':cbName', $name)
@@ -125,34 +129,31 @@ final class DirectStorageFormProvisioningService
     }
 
     /**
-     * Mirrors the checkboxes pre-checked by admin/layouts/form/permissions_tab.php
-     * for a brand-new form (listaccess/view/new), plus edit, applied to every
-     * authenticated user group so a freshly provisioned direct-storage form is
-     * immediately usable on the frontend without a manual permissions setup
-     * pass. The Public group only gets read access (listaccess/view): write
-     * access (new/edit) requires an admin to explicitly grant it via the
-     * Forms screen, since provisioning is triggered by an anonymous request,
-     * not an admin action.
+     * Auto-provisioning is triggered by a frontend request, so it grants read
+     * access only. Write permissions must be explicitly configured by an
+     * administrator on the generated form.
      */
     private function defaultPermissionsConfig(): array
     {
-        $query = $this->db->getQuery(true)
-            ->select($this->db->quoteName('id'))
-            ->from($this->db->quoteName('#__usergroups'));
-        $this->db->setQuery($query);
-        $groupIds = $this->db->loadColumn() ?: [];
-
-        $permissions = [];
-        foreach ($groupIds as $groupId) {
-            $groupId = (int) $groupId;
-            $isPublic = $groupId === self::PUBLIC_GROUP_ID;
-            $permissions[$groupId] = [
-                'listaccess' => true,
-                'view' => true,
-                'new' => !$isPublic,
-                'edit' => !$isPublic,
-            ];
-        }
+        $guestGroupId = (int) Factory::getApplication()->get('guest_usergroup');
+        $permissions = $guestGroupId > 0
+            ? [
+                $guestGroupId => [
+                    'listaccess' => true,
+                    'view' => true,
+                    'new' => false,
+                    'edit' => false,
+                    'delete' => false,
+                    'state' => false,
+                    'publish' => false,
+                    'api' => false,
+                    'stats' => false,
+                    'fullarticle' => false,
+                    'language' => false,
+                    'rating' => false,
+                ],
+            ]
+            : [];
 
         return ['permissions_fe' => $permissions];
     }

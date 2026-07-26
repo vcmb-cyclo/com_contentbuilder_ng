@@ -144,9 +144,8 @@ class HtmlView extends BaseHtmlView
 
         foreach ($items as $item) {
             $storageId = (int) ($item->id ?? 0);
-            $isExternal = (int) ($item->bytable ?? 0) === 1;
 
-            if ($storageId < 1 || $isExternal) {
+            if ($storageId < 1) {
                 continue;
             }
 
@@ -179,7 +178,7 @@ class HtmlView extends BaseHtmlView
     protected function addToolbar()
     {
         ToolbarHelper::title(
-            Text::_('COM_CONTENTBUILDERNG') . ' &gt; ' . Text::_('COM_CONTENTBUILDERNG_STORAGES')
+            Text::_('COM_CONTENTBUILDERNG') . ' › ' . Text::_('COM_CONTENTBUILDERNG_STORAGES')
             . ' <span class="fa-solid fa-database ms-2" aria-hidden="true"></span>',
             'logo_left'
         );

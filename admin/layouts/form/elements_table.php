@@ -24,6 +24,8 @@ $item = $displayData['item'] ?? null;
 $sortLink = $displayData['sortLink'] ?? null;
 $textUtilityService = $displayData['textUtilityService'] ?? null;
 $isModifiedElementSettings = $displayData['isModifiedElementSettings'] ?? null;
+$debugModeEnabled = (bool) ($displayData['debugModeEnabled'] ?? false);
+$debugElementNames = (array) ($displayData['debugElementNames'] ?? []);
 $hasBfSystemFields = false;
 foreach ($elements as $element) {
     if ((int) ($element->reference_id ?? 0) < 0) {
@@ -43,14 +45,23 @@ $columnOptions = [
     'publish' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_PUBLISH'),
     'order' => Text::_('COM_CONTENTBUILDERNG_ORDERBY'),
 ];
+if ($debugModeEnabled) {
+    $columnOptions = array_slice($columnOptions, 0, 1, true)
+        + ['debug-name' => Text::_('COM_CONTENTBUILDERNG_DEBUG_BF_ELEMENT_NAME')]
+        + array_slice($columnOptions, 1, null, true);
+}
 if ($hasBfSystemFields) {
-    $columnOptions = array_slice($columnOptions, 0, 2, true)
+    $labelSplitOffset = $debugModeEnabled ? 3 : 2;
+    $columnOptions = array_slice($columnOptions, 0, $labelSplitOffset, true)
         + ['actions' => Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS')]
-        + array_slice($columnOptions, 2, null, true);
+        + array_slice($columnOptions, $labelSplitOffset, null, true);
 }
 $defaultHiddenColumns = ['wordwrap'];
 $visibleColumnCount = count($columnOptions);
 $tableColumnCount = $hasBfSystemFields ? 12 : 11;
+if ($debugModeEnabled) {
+    $tableColumnCount++;
+}
 ?>
 <input type="hidden" name="bf_system_element_id" id="cb_bf_system_element_id" value="" />
 <div class="d-flex justify-content-end mb-2 cb-elements-columns-pending">
@@ -89,6 +100,14 @@ $tableColumnCount = $hasBfSystemFields ? 12 : 11;
             <th id="cb-form-view-elements-heading-id" width="5" data-cb-col="id">
                 <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_ID'), 'id') : Text::_('COM_CONTENTBUILDERNG_ID'); ?>
             </th>
+            <?php if ($debugModeEnabled) : ?>
+                <th id="cb-form-view-elements-heading-debug-name" data-cb-col="debug-name">
+                    <span class="editlinktip hasTip"
+                        title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_BF_ELEMENT_NAME_TIP'); ?>">
+                        <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_DEBUG_BF_ELEMENT_NAME'), 'reference_id') : Text::_('COM_CONTENTBUILDERNG_DEBUG_BF_ELEMENT_NAME'); ?>
+                    </span>
+                </th>
+            <?php endif; ?>
             <th id="cb-form-view-elements-heading-checkall" width="20" data-cb-col="check">
                 <input class="form-check-input" type="checkbox" name="checkall-toggle" value="" onclick="Joomla.checkAll(this);" aria-label="<?php echo htmlspecialchars(Text::_('JGLOBAL_CHECK_ALL'), ENT_QUOTES, 'UTF-8'); ?>">
             </th>
@@ -178,6 +197,11 @@ $tableColumnCount = $hasBfSystemFields ? 12 : 11;
                 <td class="align-top" data-cb-col="id">
                     <?php echo $row->id; ?>
                 </td>
+                <?php if ($debugModeEnabled) : ?>
+                    <td class="align-top" data-cb-col="debug-name">
+                        <?php echo htmlspecialchars((string) ($debugElementNames[(int) ($row->reference_id ?? 0)] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                    </td>
+                <?php endif; ?>
                 <td class="align-top" data-cb-col="check">
                     <?php echo $checked; ?>
                 </td>

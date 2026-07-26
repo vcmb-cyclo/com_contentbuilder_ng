@@ -14,6 +14,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Service;
 \defined('_JEXEC') or die;
 
 require_once __DIR__ . '/../Helper/FormDisplayColumnsHelper.php';
+require_once __DIR__ . '/ExternalTableService.php';
 
 use CB\Component\Contentbuilderng\Administrator\Helper\FormDisplayColumnsHelper;
 use Joomla\CMS\Date\Date;
@@ -80,6 +81,37 @@ final class SchemaService
         $this->migrateInternalStorageDataTablesAuditColumns();
 
         $this->log('[OK] Date fields updated to support NULL correctly, if necessary.');
+    }
+
+    public function normalizeExternalStorageModes(): void
+    {
+        $db = $this->db();
+        $query = $db->getQuery(true)
+            ->select($db->quoteName(['id', 'name', 'bytable']))
+            ->from($db->quoteName('#__contentbuilderng_storages'))
+            ->where($db->quoteName('bytable') . ' > 0');
+        $db->setQuery($query);
+
+        $classifier = new ExternalTableService($db);
+        $updated = 0;
+
+        foreach ($db->loadObjectList() ?: [] as $storage) {
+            $mode = $classifier->getBytableMode((string) $storage->name);
+
+            if ((int) $storage->bytable === $mode) {
+                continue;
+            }
+
+            $update = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_storages'))
+                ->set($db->quoteName('bytable') . ' = ' . $mode)
+                ->where($db->quoteName('id') . ' = ' . (int) $storage->id);
+            $db->setQuery($update);
+            $db->execute();
+            $updated++;
+        }
+
+        $this->log("[OK] External storage modes normalized: {$updated} row(s) updated.");
     }
 
     public function ensureFormsDisplayColumns(): void

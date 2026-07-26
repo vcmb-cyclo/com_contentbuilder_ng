@@ -37,9 +37,12 @@ $recordsCount = isset($this->storageRecordsCount) ? $this->storageRecordsCount :
 $storageTableExists = $this->storageTableExists ?? null;
 $storageTableLookupName = trim((string) ($this->storageTableLookupName ?? ''));
 $storageTableErrorMessage = trim((string) ($this->storageTableErrorMessage ?? ''));
-$storageModeKey = ((int) ($this->item->bytable ?? 0) === 1)
-    ? 'COM_CONTENTBUILDERNG_STORAGE_MODE_EXTERNAL'
-    : 'COM_CONTENTBUILDERNG_STORAGE_MODE_INTERNAL';
+$storageMode = (int) ($this->item->bytable ?? 0);
+$storageModeKey = match ($storageMode) {
+    2 => 'COM_CONTENTBUILDERNG_STORAGE_MODE_EXTERNAL_SYSTEM',
+    1 => 'COM_CONTENTBUILDERNG_STORAGE_MODE_EXTERNAL',
+    default => 'COM_CONTENTBUILDERNG_STORAGE_MODE_INTERNAL',
+};
 $storageName = trim((string) ($this->item->name ?? ''));
 $dataTableName = $this->dataTableName !== '' ? $this->dataTableName : '-';
 $createdBy = trim((string) ($this->item->created_by ?? ''));
@@ -270,8 +273,7 @@ const cbSaveFailedMessage = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG
 const cbFieldNamePlaceholder = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_NAME'), JSON_UNESCAPED_UNICODE); ?>;
 const cbFieldTitlePlaceholder = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE'), JSON_UNESCAPED_UNICODE); ?>;
 const cbFieldGroupLabel = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'), JSON_UNESCAPED_UNICODE); ?>;
-const cbFieldConfirmLabel = <?php echo json_encode(Text::_('JAPPLY'), JSON_UNESCAPED_UNICODE); ?>;
-const cbFieldCancelLabel = <?php echo json_encode(Text::_('JCANCEL'), JSON_UNESCAPED_UNICODE); ?>;
+const cbFieldConfirmLabel = <?php echo json_encode(Text::_('JSAVE'), JSON_UNESCAPED_UNICODE); ?>;
 let cbAjaxBusy = false;
 let cbSaveButtonTimer = null;
 let cbStorageDirtyState = false;
@@ -953,11 +955,13 @@ function initStorageInlineAddField() {
         var row = document.createElement('tr');
         row.className = 'cb-storage-field-new-row table-active';
         row.innerHTML =
-            '<td class="text-center"><span class="fa-solid fa-plus text-success" aria-hidden="true"></span></td>' +
-            '<td><input type="text" class="form-control form-control-sm" name="jform[fieldname]" placeholder="' + cbFieldNamePlaceholder + '"></td>' +
-            '<td><input type="text" class="form-control form-control-sm" name="jform[fieldtitle]" placeholder="' + cbFieldTitlePlaceholder + '"></td>' +
-            '<td><select class="form-select form-select-sm" name="jform[sql_type]" style="width:auto; max-width:12rem;">' + buildTypeOptionsHtml() + '</select></td>' +
-            '<td>' +
+            '<td class="text-center" data-cb-storage-col="check"><span class="fa-solid fa-plus text-success" aria-hidden="true"></span></td>' +
+            '<td class="text-nowrap" data-cb-storage-col="id">—</td>' +
+            '<td data-cb-storage-col="name"><input type="text" class="form-control form-control-sm" name="jform[fieldname]" placeholder="' + cbFieldNamePlaceholder + '"></td>' +
+            '<td data-cb-storage-col="title"><input type="text" class="form-control form-control-sm" name="jform[fieldtitle]" placeholder="' + cbFieldTitlePlaceholder + '"></td>' +
+            '<td data-cb-storage-col="sql_type"><select class="form-select form-select-sm" name="jform[sql_type]" style="width:auto; max-width:12rem;">' + buildTypeOptionsHtml() + '</select></td>' +
+            '<td class="text-nowrap" data-cb-storage-col="field_size"></td>' +
+            '<td data-cb-storage-col="group">' +
                 '<div class="form-check form-switch mb-1">' +
                     '<input class="form-check-input cb-storage-field-new-is-group" type="checkbox" role="switch" id="cb-storage-field-new-is-group">' +
                     '<label class="form-check-label" for="cb-storage-field-new-is-group">' + cbFieldGroupLabel + '</label>' +
@@ -965,10 +969,10 @@ function initStorageInlineAddField() {
                 '<textarea class="form-control form-control-sm cb-storage-field-new-group-definition" name="jform[group_definition]" style="display:none;" rows="3">Label 1;value1\nLabel 2;value2\nLabel 3;value3</textarea>' +
                 '<input type="hidden" name="jform[is_group]" value="0" class="cb-storage-field-new-is-group-value">' +
             '</td>' +
-            '<td></td>' +
-            '<td class="text-center text-nowrap">' +
-                '<button type="button" class="btn btn-sm btn-success cb-storage-field-new-confirm" title="' + cbFieldConfirmLabel + '"><span class="fa-solid fa-check" aria-hidden="true"></span></button> ' +
-                '<button type="button" class="btn btn-sm btn-secondary cb-storage-field-new-cancel" title="' + cbFieldCancelLabel + '"><span class="fa-solid fa-xmark" aria-hidden="true"></span></button>' +
+            '<td class="cb-order-col" data-cb-storage-col="order"></td>' +
+            '<td class="text-center" data-cb-storage-col="publish"></td>' +
+            '<td class="text-center text-nowrap" data-cb-storage-col="actions">' +
+                '<button type="button" class="btn btn-sm btn-primary cb-storage-field-new-confirm" title="' + cbFieldConfirmLabel + '"><span class="fa-solid fa-floppy-disk" aria-hidden="true"></span></button>' +
             '</td>';
 
         tbody.insertBefore(row, tbody.firstChild);
@@ -990,10 +994,19 @@ function initStorageInlineAddField() {
 
         addButton.disabled = true;
 
-        row.querySelector('.cb-storage-field-new-cancel').addEventListener('click', function () {
+        function cancelNewFieldRow() {
             row.remove();
             addButton.disabled = false;
-        });
+            document.removeEventListener('keydown', onKeyDown);
+        }
+
+        function onKeyDown(event) {
+            if (event.key === 'Escape') {
+                cancelNewFieldRow();
+            }
+        }
+
+        document.addEventListener('keydown', onKeyDown);
 
         row.querySelector('.cb-storage-field-new-confirm').addEventListener('click', function () {
             submitNewField(row);
@@ -1009,9 +1022,7 @@ function initStorageInlineAddField() {
         }
 
         var confirmButton = row.querySelector('.cb-storage-field-new-confirm');
-        var cancelButton = row.querySelector('.cb-storage-field-new-cancel');
         confirmButton.disabled = true;
-        cancelButton.disabled = true;
 
         var form = document.getElementById('adminForm') || document.adminForm;
         var formData = new FormData(form);
@@ -1036,7 +1047,6 @@ function initStorageInlineAddField() {
             })
             .catch(function (error) {
                 confirmButton.disabled = false;
-                cancelButton.disabled = false;
                 window.alert((error && error.message) || cbSaveFailedMessage);
             });
     }
@@ -1219,6 +1229,17 @@ function initStorageUi() {
             adminUi.setHiddenInputValue('tabStartOffset', id);
         }, { restoreFromStorage: false });
     }
+
+    <?php if ($app->getInput()->getBool('csv_import', false)) : ?>
+    var csvPanel = document.getElementById('csvUpload');
+    if (csvPanel && (csvPanel.style.display === 'none' || window.getComputedStyle(csvPanel).display === 'none')) {
+        toggleCsvUploadOptions();
+    }
+    var csvFileInput = document.getElementById('csv_file');
+    if (csvFileInput) {
+        csvFileInput.focus();
+    }
+    <?php endif; ?>
 }
 
 if (document.readyState === 'loading') {
@@ -1272,6 +1293,10 @@ echo LayoutHelper::render('storage.information_tab', [
     'item' => $this->item,
     'storageId' => $storageId,
     'tables' => $this->tables,
+    'tableModes' => $this->tableModes,
+    'tableSourceTypes' => $this->tableSourceTypes,
+    'tableSourceLabels' => $this->tableSourceLabels,
+    'tableSourceType' => $this->tableSourceType,
     'renderCheckbox' => $renderCheckbox,
     'csvToggleTooltip' => $csvToggleTooltip,
     'storageTableExists' => $storageTableExists,
@@ -1318,6 +1343,7 @@ echo HTMLHelper::_('uitab.endTabSet');
     <input type="hidden" id="list_fullordering" name="list[fullordering]" value="<?php echo htmlspecialchars($fullOrdering, ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="limitstart" value="<?php echo (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('limitstart', 0); ?>" />
     <input type="hidden" name="boxchecked" value="0" />
+    <input type="hidden" id="cb-system-field-name" name="system_field_name" value="" />
     <input type="hidden" name="tabStartOffset" value="<?php echo htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8'); ?>" />
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

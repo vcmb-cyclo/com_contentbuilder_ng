@@ -32,7 +32,7 @@ class StorageFieldService
             throw new \RuntimeException('Storage not found: ' . $storageId);
         }
 
-        if ((int) $storage->bytable === 1) {
+        if ((int) $storage->bytable > 0) {
             throw new \RuntimeException('bytable=1 : ajoute les champs via la synch bytable, pas via addField');
         }
 
