@@ -20,6 +20,18 @@ Exemples :
 {CBStats id=15 field=Element-2 value="Dét* | 3 | 4" output=bar}
 ```
 
+### Fusion de vues
+
+`idsum="25+27"` remplace `id=` pour additionner les statistiques de deux à
+cinq vues. Chaque vue applique ses droits, filtres et regroupements avant la
+fusion des libellés exactement identiques. `add=`, `titles=` et le tri
+s’appliquent ensuite au résultat final. Exemples :
+
+```text
+{CBStats idsum="25+27" field="Parcours" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum="31+32+33+34+35" field="Distance" output="bar" title="BRM"}
+```
+
 ## Recommended short description — English
 
 **ContentBuilder NG - CBStats - Content statistics** displays dynamic statistics from ContentBuilder NG views in Joomla content through `{CBStats ...}` tags, or publishes supported data outputs through URL/API requests. It supports totals, tables, aggregates, JSON, Pie and Bar charts, filters, sorting, signed external deltas with `add=`, total labels with `title=` and category display labels with `titles=`. Example: `{CBStats id=25 field=Route output=pie title="👥 Total registrations:"}`. View API settings and STATS and field permissions remain enforced.
@@ -36,6 +48,17 @@ Examples:
 {CBStats id=25 field=Route output=bar add='1=-2;2=3' titles='1=Group 1;2=Group 2' sort=value dir=desc}
 {CBStats id=15 field=Element-1 filter[field]=Element-2 filter[value]="Dét* | 3 | 4" output=bar}
 {CBStats id=15 field=Element-2 value="Dét* | 3 | 4" output=bar}
+```
+
+### Merging views
+
+`idsum="25+27"` replaces `id=` to add statistics from two to five views. Each
+view applies permissions, filters and grouping before exactly identical labels
+are merged. `add=`, `titles=` and sorting then apply to the final result.
+
+```text
+{CBStats idsum="25+27" field="Route" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum="31+32+33+34+35" field="Distance" output="bar" title="BRM"}
 ```
 
 ## Recommended short description — German
@@ -56,6 +79,18 @@ Beispiele:
 {CBStats id=15 field=Element-2 value="Dét* | 3 | 4" output=bar}
 ```
 
+### Ansichten zusammenführen
+
+`idsum="25+27"` ersetzt `id=`, um Statistiken aus zwei bis fünf Ansichten zu
+addieren. Jede Ansicht wendet Berechtigungen, Filter und Gruppierung an, bevor
+exakt gleiche Bezeichnungen zusammengeführt werden. `add=`, `titles=` und die
+Sortierung gelten anschließend für das Endergebnis.
+
+```text
+{CBStats idsum="25+27" field="Strecke" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum="31+32+33+34+35" field="Distanz" output="bar" title="BRM"}
+```
+
 ## Application rules
 
 When updating the real plugin:
@@ -65,3 +100,36 @@ When updating the real plugin:
 3. Do not claim `json`, `pie` or `bar` is available until the corresponding pass is actually implemented and validated.
 4. Document the exact outputs implemented and validated in the current release.
 5. Keep short descriptions short enough for Joomla extension listings and administrator views.
+### Result limit and total display
+
+`limit="10"` keeps the first ten values after sorting, then recalculates the
+displayed total and chart percentages from those values. `total="hide"` hides
+that total in Table, Pie and Bar without preventing its internal calculation.
+Both options work with `id` and `idsum`. No Other category is added.
+
+```text
+{CBStats id="25" field="Town" output="table" sort="value" dir="desc" limit="10"}
+{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" total="hide"}
+```
+
+### Limite du résultat et affichage du total
+
+`limit="10"` conserve les dix premières valeurs après le tri.
+Le total affiché et les pourcentages sont ensuite recalculés sur ces seules
+valeurs. `total="hide"` masque ce total dans Table, Pie et Bar sans empêcher
+son calcul interne. Les deux options fonctionnent avec `id` et `idsum`.
+Aucune catégorie Autres n’est ajoutée.
+
+```text
+{CBStats id="25" field="Ville" output="table" sort="value" dir="desc" limit="10"}
+{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" total="hide"}
+```
+
+### Ergebnisbegrenzung und Summenanzeige
+
+`limit="10"` behält die ersten zehn Werte nach der Sortierung.
+Die angezeigte Gesamtsumme und die Prozentsätze werden anschließend nur aus
+diesen Werten neu berechnet. `total="hide"` blendet diese Summe in Tabelle,
+Kreis- und Balkendiagramm aus, ohne ihre interne Berechnung zu verhindern.
+Beide Optionen funktionieren mit `id` und `idsum`. Eine Kategorie Sonstige
+wird nicht hinzugefügt.

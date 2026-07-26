@@ -28,6 +28,41 @@ Common field-based form:
 {CBStats id=IdVue field=NomDuChamp output=TYPE}
 ```
 
+### Merge two to five views with `idsum`
+
+`idsum` is an alternative to `id`; the two parameters cannot be supplied
+together. It accepts two to five unique positive view identifiers separated by
+`+`. Because the merge groups values, `field=` is required for every `idsum`
+output, including `output=total`:
+
+```text
+{CBStats idsum="25+27" field="Parcours" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum="25+27" field="Fédération" output="pie"}
+{CBStats idsum="31+32+33+34+35" field="Distance" output="bar" title="BRM"}
+```
+
+Each view independently enforces STATS and field permissions and applies the
+same filter. Its existing engine then groups values. CBStats adds counts whose
+labels are exactly identical according to the existing grouping semantics;
+labels found in only one view are retained.
+
+The processing order is:
+
+```text
+permissions → filter and grouping in each view → merge identical labels
+→ add → negative-to-zero normalization → titles → final sorting → output
+```
+
+Consequently, `titles=` cannot create artificial merge duplicates, and
+`sort=` applies to the final merged result. The global total is computed from
+the merged categories. `output=form_name` is unavailable because an `idsum`
+source has no single view name.
+
+CBStats rejects fewer than two or more than five identifiers, invalid or
+duplicate identifiers, a missing or inaccessible view, a missing or
+unauthorized field, and simultaneous `id`/`idsum` use. Duplicate identifiers
+are refused rather than deduplicated to prevent accidental double counting.
+
 ## 2. Existing outputs
 
 The following outputs must remain compatible:
@@ -296,3 +331,40 @@ Codex should update this section in the real canonical documentation after each 
 | URL scalar outputs | 1C | Implemented and validated |
 | Security/error hardening | Finalization | Implemented and validated |
 | Cross-repository docs/API | 4 | Completed |
+## Limiting the final result and hiding its total
+
+`limit` is optional and accepts a strictly positive integer:
+
+```text
+{CBStats id="25" field="Town" output="table" sort="value" dir="desc" limit="10"}
+{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="15"}
+```
+
+It is applied after the existing `sort=none|title|value` and `dir=asc|desc`.
+Without `limit`, every value is preserved. Empty, non-numeric, zero, negative,
+decimal or out-of-range integer values are rejected as invalid requests.
+It applies to `table`, `json`, `pie` and `bar`; scalar outputs are unchanged.
+
+`total="hide"` removes only the rendered total row or box from `table`, `pie`
+and `bar`. It does not change individual values, `title=` or `titles=`. JSON
+has no visual total to hide. `output="total"` deliberately remains unchanged
+and returns the global record total because returning that value is its sole
+purpose.
+
+The processing order is:
+
+```text
+source → filters → grouping → optional idsum merge → add/titles
+→ sort/dir → limit → limited-total recalculation
+→ rendering → visual total hiding
+```
+
+The displayed total and chart percentages are recalculated from the retained
+values only. With `total="hide"`, that limited total remains available
+internally for percentages. No `Other` category is added.
+
+```text
+{CBStats id="25" field="Name" output="table" sort="title" dir="asc" total="hide"}
+{CBStats id="25" field="Email" output="table" sort="title" dir="asc" limit="50" total="hide"}
+{CBStats idsum="25+27" field="Town" output="table" sort="value" dir="desc" limit="10" total="hide"}
+```

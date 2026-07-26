@@ -7,7 +7,7 @@
     <copyright>This Joomla! plugin is released under the GNU/GPL license</copyright>
     <authorEmail>noreply@vcmb.fr</authorEmail>
     <authorUrl>breezingforms-ng.vcmb.fr</authorUrl>
-    <version>6.1.7-RC93</version>
+    <version>6.1.7-RC94</version>
     <description>PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_XML_DESCRIPTION</description>
     <namespace path="src">CB\Plugin\Content\ContentbuilderngStats</namespace>
             <files>
@@ -63,6 +63,13 @@
                     type="note"
                     label="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_PRESENTATION_LABEL"
                     description="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_PRESENTATION_TEXT"
+                    class="alert alert-info w-100"
+                />
+                <field
+                    name="cbstats_display_options_note"
+                    type="note"
+                    label="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DISPLAY_OPTIONS_LABEL"
+                    description="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DISPLAY_OPTIONS_TEXT"
                     class="alert alert-info w-100"
                 />
             </fieldset>

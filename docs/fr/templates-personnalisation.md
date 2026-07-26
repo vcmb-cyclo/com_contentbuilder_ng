@@ -144,7 +144,28 @@ Exemples :
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert" output=total}
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert*" output=total}
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert* | En attente" output=total}
+{CBStats idsum="25+27" field="Parcours" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum="31+32+33+34+35" field="Distance" output="bar" title="BRM"}
 ```
+
+### Fusionner des vues avec `idsum`
+
+Utiliser `idsum="25+27"` à la place de `id=` pour additionner les statistiques
+de deux à cinq vues ContentBuilder NG. Les identifiants sont des entiers
+positifs uniques séparés par `+` ; `id` et `idsum` ne peuvent pas être combinés.
+`field=` est obligatoire pour tous les outputs `idsum`, y compris
+`output=total`.
+
+Chaque vue applique d’abord ses permissions STATS et de champ, ses filtres et
+son regroupement habituel. Les nombres associés aux libellés exactement
+identiques sont ensuite additionnés. Un libellé présent dans une seule vue est
+conservé. Le traitement se poursuit une seule fois sur les données fusionnées
+avec `add`, la normalisation à zéro, `titles`, le tri final et l’output. Le total
+est la somme des catégories fusionnées finales.
+
+Les identifiants invalides ou dupliqués, moins de deux ou plus de cinq vues, une
+vue absente ou inaccessible, un champ absent et `output=form_name` sont refusés.
+Les identifiants dupliqués sont rejetés afin d’éviter tout double comptage.
 
 ### Export manuel figé
 
@@ -295,3 +316,17 @@ Une mise à jour peut remplacer ces fichiers.
 - désactivez le Debug après validation.
 
 > 📷 *Capture à ajouter : génération d'un template exemple et éditeur de préparation PHP — `docs/fr/img/templates-preparation.png`*
+### Limiter les valeurs CBStats et masquer le total
+
+Utilisez `limit` après un tri existant pour ne conserver que les premières
+valeurs statistiques. Utilisez `total="hide"` pour retirer le total visuel de
+Table, Pie ou Bar :
+
+```text
+{CBStats id="25" field="Ville" output="table" sort="value" dir="desc" limit="10"}
+{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" total="hide"}
+```
+
+Le total affiché et les pourcentages des graphiques sont recalculés sur les
+valeurs conservées par `limit`. Aucune catégorie Autres n’est ajoutée.
+`output="total"` reste inchangé et JSON n’a aucun total visuel.

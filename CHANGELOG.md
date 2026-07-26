@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### 6.1.7-RC94
+
+- Added CBStats multi-view statistics merging with `idsum=`.
+- Added final-result limiting with `limit=` and visual total suppression with `total="hide"`.
+- Fixed limited Table, Pie and Bar totals and chart percentages so they use only the values actually displayed.
+- Updated the CBStats plugin help, CB → View → API reference and related English, French and German documentation.
+
 ### 6.1.7-RC91
 
 - Finalized the CBStats RC91 improvements validated through builds B01 to B07.

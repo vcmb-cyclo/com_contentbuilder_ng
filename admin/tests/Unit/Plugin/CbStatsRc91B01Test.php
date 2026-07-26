@@ -86,7 +86,7 @@ final class CbStatsRc91B01Test extends TestCase
         self::assertNotFalse($manifest);
 
         $fields = $manifest->xpath('/extension/config/fields/fieldset/field');
-        self::assertCount(6, $fields);
+        self::assertCount(7, $fields);
         foreach ($fields as $field) {
             self::assertSame('alert alert-info w-100', (string) $field['class']);
         }

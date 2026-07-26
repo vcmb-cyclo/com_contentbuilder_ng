@@ -13,9 +13,9 @@ final class PiePresentationService
      *     items: list<array{label: string, value: int|float, percentage: float, percentageLabel: string, color: string}>
      * }
      */
-    public static function prepare(array $fieldStats, string $locale): array
+    public static function prepare(array $fieldStats, string $locale, int|float|null $total = null): array
     {
-        $total = array_sum(array_column($fieldStats, 'value'));
+        $total ??= array_sum(array_column($fieldStats, 'value'));
         $colors = self::getColors(count($fieldStats));
         $items = [];
 

@@ -213,6 +213,8 @@ $wa->useStyle('com_contentbuilderng.admin-form-api');
                 </ul>
                 <h5 class="h6 mt-3 mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_FILTERS_TITLE'); ?></h5>
                 <p class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_FILTER_HINT'); ?></p>
+                <div class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_IDSUM_HINT'); ?></div>
+                <div class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_DISPLAY_OPTIONS_HINT'); ?></div>
                 <h5 class="h6 mt-3 mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_SORT_ADD_TITLE'); ?></h5>
                 <p class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_SORT_ADD_HINT'); ?></p>
                 <div class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_TITLE_HINT'); ?></div>

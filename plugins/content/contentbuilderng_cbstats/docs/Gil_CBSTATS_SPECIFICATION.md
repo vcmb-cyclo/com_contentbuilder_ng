@@ -73,6 +73,20 @@ The current behavior to preserve includes:
 
 Before refactoring, Codex must inspect the implementation to capture exact semantics, including case sensitivity, whitespace handling and wildcard matching details. Do not guess or silently change existing behavior.
 
+## 4.1 Multi-view source with `idsum`
+
+`idsum="25+27"` is an alternative to `id=` for field statistics. It accepts
+two to five unique positive view identifiers separated by `+`; simultaneous
+`id` and `idsum`, invalid identifiers and duplicate identifiers are rejected.
+
+For every view, CBStats enforces STATS and field permissions and runs the
+existing filter and grouping pipeline. It then adds counts with exactly
+identical grouped labels. Values present in only one view remain present.
+Signed additions, negative-to-zero normalization, title mappings and sorting
+run once after this merge. The total is recalculated from the merged values.
+`output=form_name` is not supported because the merged source has no single
+view name.
+
 ## 5. Normalized field statistics engine
 
 ### 5.1 Target internal contract
@@ -400,3 +414,19 @@ A pass is complete only when:
 - language keys are updated as needed;
 - documentation for the implemented public behavior is updated;
 - the final Codex report lists changed files and test results.
+## Final result options: `limit` and `total="hide"`
+
+- `limit` is an optional strictly positive integer.
+- It slices normalized field statistics only after `add`, `titles`, `sort` and
+  `dir` have produced the final ordered list.
+- It applies to list outputs: Table, JSON, Pie and Bar.
+- With `idsum`, views are merged before sorting and limiting.
+- After limiting, the visible total is recalculated from the retained values.
+  Pie and Bar percentages use that limited total as their denominator.
+- No synthetic `Other` category is created.
+- `total="hide"` suppresses the Table footer or chart total box without
+  rendering an empty container.
+- `total="hide"` has no effect on JSON and is intentionally non-applicable to
+  `output="total"`, which continues to return the global record total.
+- Any explicit `total` value other than `hide`, and any missing or invalid
+  `limit` value, is rejected through the normal CBStats invalid-request path.

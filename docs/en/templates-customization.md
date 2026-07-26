@@ -120,7 +120,26 @@ Examples:
 {CBStats id=3 filter[field]=Status filter[value]="Open" output=total}
 {CBStats id=3 filter[field]=Status filter[value]="Open*" output=total}
 {CBStats id=3 filter[field]=Status filter[value]="Open* | Pending" output=total}
+{CBStats idsum="25+27" field="Route" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum="31+32+33+34+35" field="Distance" output="bar" title="BRM"}
 ```
+
+### Merging views with `idsum`
+
+Use `idsum="25+27"` instead of `id=` to add statistics from two to five
+ContentBuilder NG views. Identifiers are unique positive integers separated by
+`+`; `id` and `idsum` cannot be combined. `field=` is required for every
+`idsum` output, including `output=total`.
+
+Each view first applies its STATS and field permissions, filters and normal
+grouping. Counts with exactly identical labels are then added. Labels present
+in only one view remain in the result. Processing continues once on the merged
+data with `add`, negative-to-zero normalization, `titles`, final sorting and
+output. The total is the sum of the final merged categories.
+
+Invalid or duplicate identifiers, fewer than two or more than five views,
+missing or inaccessible views, missing fields and `output=form_name` are
+rejected. Duplicate identifiers are refused to prevent double counting.
 
 ### Frozen manual export
 
@@ -261,3 +280,16 @@ plugin, or a maintained project patch instead.
 - disable Debug after diagnosis.
 
 > 📷 *Screenshot to add: generating a template example and opening the PHP preparation editor — `docs/en/img/templates-preparation.png`*
+### Limiting CBStats values and hiding the total
+
+Use `limit` after an existing sort to retain only the first statistical values.
+Use `total="hide"` to remove the visual total from Table, Pie or Bar:
+
+```text
+{CBStats id="25" field="Town" output="table" sort="value" dir="desc" limit="10"}
+{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" total="hide"}
+```
+
+The displayed total and chart percentages are recalculated from the values
+retained by `limit`. No Other category is added. `output="total"` remains
+unchanged, and JSON has no visual total.
