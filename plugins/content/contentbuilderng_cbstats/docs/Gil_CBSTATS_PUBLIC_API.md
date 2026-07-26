@@ -1,5 +1,17 @@
 # CBStats public syntax / API reference
 
+## Table column headers
+
+`headers=` customizes only the two column headers of `output=table`:
+
+```text
+{CBStats id=15 field=Dpt output=table headers="Dpt=Département;Total=Qté"}
+```
+
+The syntax is `key=label;key=label`, with surrounding spaces ignored. Unmapped headers keep their default label; unknown keys and empty labels are ignored. The displayed field can be addressed by its field name or current label, and the numeric column by the stable key `Total`. UTF-8 labels are supported.
+
+`title=` changes the global total label, `titles=` changes category labels and `headers=` changes Table column headers; these options are independent. Pie and Bar have legends rather than associated tables, so `headers=` does not alter them.
+
 ## Manual export
 
 Only `export=manual` enables export for `output=pie`, `output=bar` and `output=table` in Joomla content. Other `export=` values are ignored:
@@ -8,7 +20,7 @@ Only `export=manual` enables export for `output=pie`, `output=bar` and `output=t
 {CBStats id=25 field=Parcours output=pie title="👥 Total des inscrits" export=manual}
 ```
 
-The normal output is followed by the final title, labels, values and total, then by a visible frozen `{CBStats source=manual ...}` tag and a centered copy button. The exported `values=` uses the final displayed labels and values after filters, grouping, `add=`, negative-to-zero normalization, `titles=` and sorting. The final labels are embedded directly in `values=` and `titles=` is not copied. Dynamic parameters (`id`, `field`, filters, `add`, `titles`, `sort`, `dir`, `limit` and `export`) are not copied. `title` and the validated visual `background` option are retained when explicitly supplied.
+The normal output is followed by the final title, labels, values and total, then by a visible frozen `{CBStats source=manual ...}` tag and a centered copy button. The exported `values=` uses the final displayed labels and values after filters, grouping, `add=`, negative-to-zero normalization, `titles=` and sorting. The final labels are embedded directly in `values=` and `titles=` is not copied. Dynamic parameters (`id`, `field`, filters, `add`, `titles`, `sort`, `dir`, `limit` and `export`) are not copied. `title`, `headers=` and the validated visual `background` option are retained when explicitly supplied, so a frozen manual Table keeps its customized column headers.
 
 Labels use the RC83 manual escaping rules: `\;`, `\=` and `\\`. Pie remains Pie, Bar remains Bar and Table remains Table. `output=total` is not exported because it has no category presentation to freeze. With `source=manual export=manual`, CBStats displays one normalized export block without recursion.
 

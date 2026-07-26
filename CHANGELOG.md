@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### CBStats 6.1.7-RC95-B01
+
+- Added `headers=` mappings for the two column headers of `output=table`.
+- Preserved `headers=` in `export=manual`; Pie and Bar legends remain unchanged.
+- Updated the plugin help and CB → View → API documentation in English, French and German.
+
 ### 6.1.7-RC94
 
 - Added CBStats multi-view statistics merging with `idsum=`.

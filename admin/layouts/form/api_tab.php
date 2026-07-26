@@ -218,6 +218,7 @@ $wa->useStyle('com_contentbuilderng.admin-form-api');
                 <h5 class="h6 mt-3 mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_SORT_ADD_TITLE'); ?></h5>
                 <p class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_SORT_ADD_HINT'); ?></p>
                 <div class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_TITLE_HINT'); ?></div>
+                <div class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_HEADERS_HINT'); ?></div>
                 <h5 class="h6 mt-3 mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_EXPORT_TITLE'); ?></h5>
                 <p class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_EXPORT_HELP'); ?></p>
                 <div class="cb-form-api-cbstats-examples mb-2"><code><?php echo htmlspecialchars($cbStatsExportSyntax, ENT_QUOTES, 'UTF-8'); ?></code></div>

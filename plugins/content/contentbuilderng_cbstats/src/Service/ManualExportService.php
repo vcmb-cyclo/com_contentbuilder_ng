@@ -18,7 +18,8 @@ final class ManualExportService
         array $items,
         string $output,
         string $title = '',
-        string $background = ''
+        string $background = '',
+        string $headers = ''
     ): string {
         $values = [];
 
@@ -35,6 +36,10 @@ final class ManualExportService
 
         if ($background !== '') {
             $syntax .= ' background="' . self::escapeAttribute($background) . '"';
+        }
+
+        if ($headers !== '') {
+            $syntax .= ' headers="' . self::escapeAttribute($headers) . '"';
         }
 
         return $syntax . '}';

@@ -598,4 +598,5 @@ namespace {
     require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/ManualValuesParser.php';
     require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/ManualExportService.php';
     require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/TagSyntaxService.php';
+    require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/TableHeaderService.php';
 }

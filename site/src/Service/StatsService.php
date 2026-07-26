@@ -23,6 +23,7 @@ final class StatsService
 {
     public const CBSTATS_ERROR_INVALID_ADD = 1001;
     public const CBSTATS_ERROR_INVALID_TITLES = 1004;
+    public const CBSTATS_ERROR_INVALID_HEADERS = 1005;
 
     public function __construct(private readonly DatabaseInterface $db)
     {
@@ -487,21 +488,49 @@ final class StatsService
      */
     public static function parseFieldStatsTitles(string $titles): array
     {
-        $titles = trim($titles);
+        return self::parseFieldStatsMappings($titles);
+    }
 
-        if ($titles === '') {
+    /**
+     * @return array<int|string,string>
+     */
+    public static function parseFieldStatsHeaders(string $headers): array
+    {
+        return self::parseFieldStatsMappings($headers, true, self::CBSTATS_ERROR_INVALID_HEADERS);
+    }
+
+    /**
+     * @return array<int|string,string>
+     */
+    private static function parseFieldStatsMappings(
+        string $value,
+        bool $ignoreEmptyDisplay = false,
+        int $errorCode = self::CBSTATS_ERROR_INVALID_TITLES
+    ): array
+    {
+        $value = trim($value);
+
+        if ($value === '') {
             return [];
         }
 
         $mappings = [];
 
-        foreach (explode(';', $titles) as $entry) {
+        foreach (explode(';', $value) as $entry) {
             $parts = explode('=', $entry, 2);
             $original = trim((string) ($parts[0] ?? ''));
             $display = trim((string) ($parts[1] ?? ''));
 
-            if ($original === '' || $display === '' || count($parts) !== 2) {
-                throw new \InvalidArgumentException('', self::CBSTATS_ERROR_INVALID_TITLES);
+            if ($original === '' || count($parts) !== 2) {
+                throw new \InvalidArgumentException('', $errorCode);
+            }
+
+            if ($display === '' && $ignoreEmptyDisplay) {
+                continue;
+            }
+
+            if ($display === '') {
+                throw new \InvalidArgumentException('', $errorCode);
             }
 
             $mappings[$original] = $display;
