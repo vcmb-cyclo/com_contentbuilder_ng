@@ -302,7 +302,23 @@ class StorageController extends BaseFormController
                     return false;
                 }
 
-                $model->syncEditedFieldsFromRequest($id);
+                // syncEditedFields()/ensureMissingColumnsFromFields() remontent
+                // désormais leurs échecs DDL (renommage de colonne, colonne
+                // manquante) au lieu de les avaler : sans ce garde, l'exception
+                // remonterait jusqu'à Joomla et afficherait une page d'erreur
+                // au lieu du message d'erreur attendu sur l'écran Storage.
+                try {
+                    $model->syncEditedFieldsFromRequest($id);
+                } catch (\Throwable $e) {
+                    Logger::exception($e);
+                    $this->setRedirect(
+                        $this->storageEditLink($id),
+                        $e->getMessage(),
+                        'error'
+                    );
+
+                    return false;
+                }
 
                 $renameInfo = $model->getLastDataTableRename();
                 if (is_array($renameInfo) && !empty($renameInfo['from']) && !empty($renameInfo['to'])) {
