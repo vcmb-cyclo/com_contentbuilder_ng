@@ -94,6 +94,11 @@ final class ExternalTableService
         'modified_by',
     ];
 
+    /** @var array<string,true>|null */
+    private ?array $tablesWithIdColumn = null;
+
+    private bool $bulkLookupUnavailable = false;
+
     public function __construct(private readonly DatabaseInterface $db)
     {
     }
@@ -131,11 +136,59 @@ final class ExternalTableService
      */
     private function hasIdColumn(string $table): bool
     {
+        $bulk = $this->loadTablesWithIdColumn();
+
+        if ($bulk !== null) {
+            return isset($bulk[$table]);
+        }
+
+        // Degraded mode only (see loadTablesWithIdColumn()): one introspection
+        // query per table.
         try {
             return array_key_exists('id', $this->db->getTableColumns($table, false));
         } catch (\Throwable $e) {
             return false;
         }
+    }
+
+    /**
+     * Set of schema tables owning an "id" column, resolved in a single query
+     * and memoised for the request: getSelectableTables() has to test every
+     * table of the instance, and Joomla's driver issues an uncached
+     * "SHOW FULL COLUMNS" per getTableColumns() call, which turned that filter
+     * into one query per table.
+     *
+     * Returns null when INFORMATION_SCHEMA cannot be read (restricted grants
+     * on shared hosting, for instance). Callers then fall back to per-table
+     * introspection: degraded performance is preferable to reporting that no
+     * table qualifies, which would silently empty the selector.
+     *
+     * @return array<string,true>|null
+     */
+    private function loadTablesWithIdColumn(): ?array
+    {
+        if ($this->tablesWithIdColumn !== null || $this->bulkLookupUnavailable) {
+            return $this->tablesWithIdColumn;
+        }
+
+        try {
+            $query = $this->db->getQuery(true)
+                ->select('DISTINCT ' . $this->db->quoteName('TABLE_NAME'))
+                ->from($this->db->quoteName('INFORMATION_SCHEMA.COLUMNS'))
+                ->where($this->db->quoteName('TABLE_SCHEMA') . ' = DATABASE()')
+                ->where($this->db->quoteName('COLUMN_NAME') . ' = ' . $this->db->quote('id'));
+            $this->db->setQuery($query);
+
+            $this->tablesWithIdColumn = array_fill_keys(
+                array_map('strval', $this->db->loadColumn() ?: []),
+                true
+            );
+        } catch (\Throwable $e) {
+            $this->bulkLookupUnavailable = true;
+            $this->tablesWithIdColumn = null;
+        }
+
+        return $this->tablesWithIdColumn;
     }
 
     public function getBytableMode(string $table): int
