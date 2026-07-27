@@ -53,4 +53,21 @@ final class ExternalTableServiceTest extends TestCase
         self::assertNotContains('id', $missing);
         self::assertContains('storage_id', $missing);
     }
+
+    public function testTablesWithoutAnIdColumnAreNeverSelectable(): void
+    {
+        $db = $this->createStub(DatabaseInterface::class);
+        $db->method('getPrefix')->willReturn('jos_');
+        $db->method('getTableList')->willReturn(['jos_user_profiles', 'jos_external_catalogue']);
+        $db->method('getTableColumns')->willReturnMap([
+            ['jos_user_profiles', false, ['user_id' => 'int', 'profile_key' => 'varchar']],
+            ['jos_external_catalogue', false, ['id' => 'int', 'title' => 'varchar']],
+        ]);
+
+        $service = new ExternalTableService($db);
+
+        self::assertFalse($service->isSelectable('jos_user_profiles'));
+        self::assertTrue($service->isSelectable('jos_external_catalogue'));
+        self::assertSame(['jos_external_catalogue'], $service->getSelectableTables());
+    }
 }

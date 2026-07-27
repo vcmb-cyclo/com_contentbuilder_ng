@@ -105,17 +105,19 @@ final class StorageColumnTypeHelper
         $normalizedType = self::normalize($type);
         $size = self::normalizeSize($normalizedType, $size ?? self::defaultSize($normalizedType));
 
+        $charset = ' CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci';
+
         return match ($normalizedType) {
-            'varchar' => 'VARCHAR(' . ($size ?? 255) . ') NULL',
+            'varchar' => 'VARCHAR(' . ($size ?? 255) . ')' . $charset . ' NULL',
             'int' => 'INT NULL',
             'decimal' => 'DECIMAL(15,4) NULL',
             'date' => 'DATE NULL',
             'datetime' => 'DATETIME NULL',
             'boolean' => 'TINYINT(1) NULL',
             default => match (true) {
-                $size !== null && $size > 16777215 => 'LONGTEXT NULL',
-                $size !== null && $size > 65535 => 'MEDIUMTEXT NULL',
-                default => 'TEXT NULL',
+                $size !== null && $size > 16777215 => 'LONGTEXT' . $charset . ' NULL',
+                $size !== null && $size > 65535 => 'MEDIUMTEXT' . $charset . ' NULL',
+                default => 'TEXT' . $charset . ' NULL',
             },
         };
     }

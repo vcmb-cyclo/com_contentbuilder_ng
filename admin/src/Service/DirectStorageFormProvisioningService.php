@@ -36,7 +36,17 @@ final class DirectStorageFormProvisioningService
     ) {
     }
 
-    public function resolveOrCreateFormId(int $storageId, string $themePlugin = 'thoth'): int
+    /**
+     * @param bool $isAdminProvisioned Set to true when the form is created
+     *   from a deliberate, authenticated admin action (e.g. the Storage
+     *   wizard) rather than an anonymous/authenticated frontend request
+     *   auto-provisioning it on the fly. Only affects the default permissions
+     *   applied when the form does not already exist: an admin-provisioned
+     *   form is granted sensible read/write defaults so it is immediately
+     *   usable, while a frontend-auto-provisioned form stays read-only for
+     *   Guest and grants nothing else, since nobody reviewed it.
+     */
+    public function resolveOrCreateFormId(int $storageId, string $themePlugin = 'thoth', bool $isAdminProvisioned = false): int
     {
         if ($storageId < 1) {
             return 0;
@@ -50,7 +60,7 @@ final class DirectStorageFormProvisioningService
             return $formId;
         }
 
-        $formId = $this->createForm($storageId);
+        $formId = $this->createForm($storageId, $isAdminProvisioned);
 
         if ($formId < 1) {
             return 0;
@@ -76,7 +86,7 @@ final class DirectStorageFormProvisioningService
         return (int) $this->db->loadResult();
     }
 
-    private function createForm(int $storageId): int
+    private function createForm(int $storageId, bool $isAdminProvisioned): int
     {
         $storageQuery = $this->db->getQuery(true)
             ->select($this->db->quoteName(['name', 'title']))
@@ -94,7 +104,7 @@ final class DirectStorageFormProvisioningService
         $tag = 'Auto';
         $name = (string) $storage['name'];
         $title = (string) $storage['title'];
-        $config = PackedDataHelper::encodePackedData($this->defaultPermissionsConfig());
+        $config = PackedDataHelper::encodePackedData($this->defaultPermissionsConfig($isAdminProvisioned));
         $now = (new Date())->toSql();
         // created_by/modified_by are varchar(255) columns, mirroring FormModel::prepareTable().
         $userId = (string) (int) Factory::getApplication()->getIdentity()->id;
@@ -129,31 +139,60 @@ final class DirectStorageFormProvisioningService
     }
 
     /**
-     * Auto-provisioning is triggered by a frontend request, so it grants read
-     * access only. Write permissions must be explicitly configured by an
-     * administrator on the generated form.
+     * A frontend-auto-provisioned form (triggered anonymously or by a mere
+     * authenticated visit, never reviewed by an admin) grants read access to
+     * Guest only. An admin-provisioned form (built deliberately through the
+     * Storage wizard, an authenticated core.manage action) instead mirrors
+     * the checkboxes pre-checked for a brand-new form in the classic Form
+     * screen (listaccess/view/new, plus edit) applied to every real usergroup
+     * so it is immediately usable on the frontend — Guest still only gets
+     * read access, since write access for anonymous visitors always requires
+     * an explicit, reviewed choice.
      */
-    private function defaultPermissionsConfig(): array
+    private function defaultPermissionsConfig(bool $isAdminProvisioned): array
     {
         $guestGroupId = (int) Factory::getApplication()->get('guest_usergroup');
-        $permissions = $guestGroupId > 0
-            ? [
-                $guestGroupId => [
-                    'listaccess' => true,
-                    'view' => true,
-                    'new' => false,
-                    'edit' => false,
-                    'delete' => false,
-                    'state' => false,
-                    'publish' => false,
-                    'api' => false,
-                    'stats' => false,
-                    'fullarticle' => false,
-                    'language' => false,
-                    'rating' => false,
-                ],
-            ]
-            : [];
+
+        if (!$isAdminProvisioned) {
+            $permissions = $guestGroupId > 0
+                ? [
+                    $guestGroupId => [
+                        'listaccess' => true,
+                        'view' => true,
+                        'new' => false,
+                        'edit' => false,
+                        'delete' => false,
+                        'state' => false,
+                        'publish' => false,
+                        'api' => false,
+                        'stats' => false,
+                        'fullarticle' => false,
+                        'language' => false,
+                        'rating' => false,
+                    ],
+                ]
+                : [];
+
+            return ['permissions_fe' => $permissions];
+        }
+
+        $query = $this->db->getQuery(true)
+            ->select($this->db->quoteName('id'))
+            ->from($this->db->quoteName('#__usergroups'));
+        $this->db->setQuery($query);
+        $groupIds = $this->db->loadColumn() ?: [];
+
+        $permissions = [];
+        foreach ($groupIds as $groupId) {
+            $groupId = (int) $groupId;
+            $isGuest = $groupId === $guestGroupId;
+            $permissions[$groupId] = [
+                'listaccess' => true,
+                'view' => true,
+                'new' => !$isGuest,
+                'edit' => !$isGuest,
+            ];
+        }
 
         return ['permissions_fe' => $permissions];
     }

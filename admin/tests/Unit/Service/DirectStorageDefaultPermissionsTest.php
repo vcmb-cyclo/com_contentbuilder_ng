@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 final class DirectStorageDefaultPermissionsTest extends TestCase
 {
-    public function testAutoProvisionedFormsOnlyGrantGuestReadAccess(): void
+    public function testFrontendAutoProvisionedFormsOnlyGrantGuestReadAccess(): void
     {
         $source = file_get_contents(
             \dirname(__DIR__, 3) . '/src/Service/DirectStorageFormProvisioningService.php'
@@ -16,6 +16,7 @@ final class DirectStorageDefaultPermissionsTest extends TestCase
 
         self::assertIsString($source);
         self::assertStringContainsString("get('guest_usergroup')", $source);
+        self::assertStringContainsString('if (!$isAdminProvisioned) {', $source);
         self::assertStringContainsString("'listaccess' => true", $source);
         self::assertStringContainsString("'view' => true", $source);
         self::assertStringContainsString("'new' => false", $source);
@@ -28,7 +29,27 @@ final class DirectStorageDefaultPermissionsTest extends TestCase
         self::assertStringContainsString("'fullarticle' => false", $source);
         self::assertStringContainsString("'language' => false", $source);
         self::assertStringContainsString("'rating' => false", $source);
-        self::assertStringNotContainsString('foreach ($groupIds as $groupId)', $source);
+    }
+
+    public function testAdminProvisionedFormsGrantUsableDefaultsToRealGroups(): void
+    {
+        $source = file_get_contents(
+            \dirname(__DIR__, 3) . '/src/Service/DirectStorageFormProvisioningService.php'
+        );
+
+        self::assertIsString($source);
+        self::assertStringContainsString('foreach ($groupIds as $groupId)', $source);
+        self::assertStringContainsString("'new' => !\$isGuest", $source);
+        self::assertStringContainsString("'edit' => !\$isGuest", $source);
+
+        $wizardSource = file_get_contents(
+            \dirname(__DIR__, 3) . '/src/Controller/StoragewizardController.php'
+        );
+        self::assertIsString($wizardSource);
+        self::assertStringContainsString(
+            "->resolveOrCreateFormId(\$storageId, 'thoth', true);",
+            $wizardSource
+        );
     }
 
     public function testAutoProvisionedFormsDisableArticleCreation(): void

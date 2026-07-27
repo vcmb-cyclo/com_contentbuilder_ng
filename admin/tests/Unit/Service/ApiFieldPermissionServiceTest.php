@@ -71,6 +71,11 @@ final class ApiFieldPermissionDatabase implements DatabaseInterface
         return [];
     }
 
+    public function getTableList(): array
+    {
+        return [];
+    }
+
     public function quoteName(array|string $name, array|string|null $as = null): array|string
     {
         if (is_array($name)) {

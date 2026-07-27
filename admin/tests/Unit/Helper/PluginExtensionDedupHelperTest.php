@@ -160,6 +160,11 @@ final class PluginExtensionAuditDatabase implements DatabaseInterface
         return [];
     }
 
+    public function getTableList(): array
+    {
+        return [];
+    }
+
     public function quoteName(array|string $name, array|string|null $as = null): array|string
     {
         if (is_array($name)) {
@@ -255,6 +260,11 @@ final class PluginExtensionRepairDatabase implements DatabaseInterface
     }
 
     public function getTableColumns(string $table, bool $type = true): array
+    {
+        return [];
+    }
+
+    public function getTableList(): array
     {
         return [];
     }

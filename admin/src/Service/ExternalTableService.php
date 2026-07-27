@@ -105,7 +105,7 @@ final class ExternalTableService
     {
         $tables = array_values(array_filter(
             (array) $this->db->getTableList(),
-            fn(string $table): bool => !$this->isContentBuilderTable($table)
+            fn(string $table): bool => !$this->isContentBuilderTable($table) && $this->hasIdColumn($table)
         ));
         natcasesort($tables);
 
@@ -116,7 +116,26 @@ final class ExternalTableService
     {
         return $table !== ''
             && in_array($table, (array) $this->db->getTableList(), true)
-            && !$this->isContentBuilderTable($table);
+            && !$this->isContentBuilderTable($table)
+            && $this->hasIdColumn($table);
+    }
+
+    /**
+     * The whole "Storage" abstraction (list/details/edit rendering, unique
+     * values, record sync...) treats one row as one record identified by a
+     * stable "id" column. A table without one (e.g. Joomla's own
+     * #__user_profiles, keyed on user_id + profile_key) can't support that,
+     * and picking it as an existing-table source breaks throughout the
+     * codebase rather than in one isolated spot — so it must never be
+     * offered/accepted as selectable in the first place.
+     */
+    private function hasIdColumn(string $table): bool
+    {
+        try {
+            return array_key_exists('id', $this->db->getTableColumns($table, false));
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     public function getBytableMode(string $table): int

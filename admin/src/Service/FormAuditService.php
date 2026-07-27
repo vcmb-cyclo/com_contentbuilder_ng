@@ -61,7 +61,7 @@ final class FormAuditService
         }
 
         $query = $db->getQuery(true)
-            ->select($db->quoteName(['reference_id', 'label', 'published', 'editable', 'type']))
+            ->select($db->quoteName(['reference_id', 'label', 'published', 'editable', 'type', 'list_include', 'search_include']))
             ->from($db->quoteName('#__contentbuilderng_elements'))
             ->where($db->quoteName('form_id') . ' = ' . $formId)
             ->order($db->quoteName('ordering'));
@@ -101,6 +101,7 @@ final class FormAuditService
 
         $modified = trim((string) ($form['modified'] ?? ''));
         [$groupPermissions, $ownerPermissions, $permissionChecks] = $this->auditFrontendPermissions($form);
+        [$performanceInfo, $performanceChecks] = $this->auditPerformance($form, $published, $sourceNames);
 
         $info = [
             Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_ID') => (string) (int) $form['id'],
@@ -131,7 +132,7 @@ final class FormAuditService
             Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_MODIFIED_BY') => trim((string) ($form['modified_by'] ?? '')) !== ''
                 ? (string) $form['modified_by']
                 : Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_UNAVAILABLE'),
-        ];
+        ] + $performanceInfo;
 
         $checks = array_merge(
             $recordsCountUnavailable ? [[
@@ -142,7 +143,8 @@ final class FormAuditService
             $this->checkSourceSync($elements, $sourceNames, $sourceAvailable, (string) $form['type'], (string) $form['reference_id']),
             $this->checkElementReferences($elements),
             $this->checkTemplates($published, $sourceNames, (string) $form['type'], (string) $form['details_template'], (string) $form['editable_template']),
-            $permissionChecks
+            $permissionChecks,
+            $performanceChecks
         );
 
         if ($checks === []) {
@@ -317,6 +319,168 @@ final class FormAuditService
         }
 
         return false;
+    }
+
+    /**
+     * Volumétrie et temps de requête sur la table physique du storage
+     * (uniquement pour les formulaires adossés à un Storage CBNG : la source
+     * BreezingForms utilise un stockage EAV normalisé pour lequel une mesure
+     * de table unique n'aurait pas de sens comparable).
+     *
+     * @param array<string,mixed> $form
+     * @param array<int,array<string,mixed>> $publishedElements
+     * @param array<int|string,string> $sourceNames
+     * @return array{0:array<string,string>,1:array<int,array{status:string,message:string}>}
+     */
+    private function auditPerformance(array $form, array $publishedElements, array $sourceNames): array
+    {
+        if ((string) ($form['type'] ?? '') !== 'com_contentbuilderng') {
+            return [[], []];
+        }
+
+        $db = $this->db;
+        $storageId = (int) ($form['reference_id'] ?? 0);
+
+        try {
+            $query = $db->getQuery(true)
+                ->select($db->quoteName(['name', 'bytable']))
+                ->from($db->quoteName('#__contentbuilderng_storages'))
+                ->where($db->quoteName('id') . ' = ' . $storageId);
+            $db->setQuery($query);
+            $storageRow = $db->loadAssoc();
+        } catch (\Throwable $e) {
+            $storageRow = null;
+        }
+
+        $storageName = trim((string) ($storageRow['name'] ?? ''));
+        if (!is_array($storageRow) || $storageName === '') {
+            return [[], [[
+                'status' => self::STATUS_WARNING,
+                'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_STORAGE_UNAVAILABLE'),
+            ]]];
+        }
+
+        $bytable = (int) ($storageRow['bytable'] ?? 0);
+        $tableName = ($bytable > 0 ? '' : '#__') . $storageName;
+
+        $rowCount = null;
+        $rowCountMs = null;
+        try {
+            $start = microtime(true);
+            $countQuery = $db->getQuery(true)->select('COUNT(*)')->from($db->quoteName($tableName));
+            $db->setQuery($countQuery);
+            $rowCount = (int) $db->loadResult();
+            $rowCountMs = (microtime(true) - $start) * 1000;
+        } catch (\Throwable $e) {
+            // Table missing/unreadable: surfaced via the checks below.
+        }
+
+        if ($rowCount === null) {
+            return [[], [[
+                'status' => self::STATUS_WARNING,
+                'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_TABLE_UNAVAILABLE'),
+            ]]];
+        }
+
+        $listQueryMs = null;
+        try {
+            $start = microtime(true);
+            $listQuery = $db->getQuery(true)
+                ->select($db->quoteName('id'))
+                ->from($db->quoteName($tableName))
+                ->order($db->quoteName('id') . ' DESC');
+            $db->setQuery($listQuery, 0, 20);
+            $db->loadColumn();
+            $listQueryMs = (microtime(true) - $start) * 1000;
+        } catch (\Throwable $e) {
+            // Keep $listQueryMs null: reported as unavailable below.
+        }
+
+        $info = [
+            Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_PERFORMANCE_TABLE_ROWS') => Text::sprintf(
+                'COM_CONTENTBUILDERNG_AUDIT_INFO_PERFORMANCE_ROWS_VALUE',
+                number_format($rowCount, 0, ',', ' '),
+                number_format($rowCountMs ?? 0, 1)
+            ),
+            Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_PERFORMANCE_LIST_QUERY') => $listQueryMs !== null
+                ? Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_INFO_PERFORMANCE_QUERY_VALUE', number_format($listQueryMs, 1))
+                : Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_UNAVAILABLE'),
+        ];
+
+        $checks = [];
+        $slowQueryThresholdMs = 250.0;
+        if ($listQueryMs !== null && $listQueryMs > $slowQueryThresholdMs) {
+            $checks[] = [
+                'status' => self::STATUS_WARNING,
+                'message' => Text::sprintf(
+                    'COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_SLOW_LIST_QUERY',
+                    number_format($listQueryMs, 1)
+                ),
+            ];
+        }
+
+        $checks = array_merge($checks, $this->checkStorageIndexes($tableName, $publishedElements, $sourceNames));
+
+        return [$info, $checks];
+    }
+
+    /**
+     * Signale les colonnes utilisées pour le tri/la recherche frontend
+     * (list_include/search_include) qui n'ont pas d'index en base : ce sont
+     * les candidates les plus probables à un ralentissement des listes sur
+     * une volumétrie importante.
+     *
+     * @param array<int,array<string,mixed>> $publishedElements
+     * @param array<int|string,string> $sourceNames
+     * @return array<int,array{status:string,message:string}>
+     */
+    private function checkStorageIndexes(string $tableName, array $publishedElements, array $sourceNames): array
+    {
+        $db = $this->db;
+
+        try {
+            $realTableName = $db->replacePrefix($tableName);
+            $indexQuery = $db->getQuery(true)
+                ->select('DISTINCT ' . $db->quoteName('COLUMN_NAME'))
+                ->from($db->quoteName('INFORMATION_SCHEMA.STATISTICS'))
+                ->where($db->quoteName('TABLE_SCHEMA') . ' = DATABASE()')
+                ->where($db->quoteName('TABLE_NAME') . ' = :tableName')
+                ->bind(':tableName', $realTableName);
+            $db->setQuery($indexQuery);
+            $indexedColumns = array_map('strtolower', array_map('strval', $db->loadColumn() ?: []));
+        } catch (\Throwable $e) {
+            // Index metadata unavailable: skip this check rather than guessing.
+            return [];
+        }
+
+        $unindexed = [];
+        foreach ($publishedElements as $element) {
+            if (empty($element['list_include']) && empty($element['search_include'])) {
+                continue;
+            }
+
+            $referenceId = (string) ($element['reference_id'] ?? '');
+            $columnName = trim((string) ($sourceNames[$referenceId] ?? ''));
+            if ($columnName === '' || in_array(strtolower($columnName), $unindexed, true)) {
+                continue;
+            }
+
+            if (!in_array(strtolower($columnName), $indexedColumns, true)) {
+                $unindexed[] = $columnName;
+            }
+        }
+
+        if ($unindexed === []) {
+            return [];
+        }
+
+        return [[
+            'status' => self::STATUS_WARNING,
+            'message' => Text::sprintf(
+                'COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_UNINDEXED_COLUMNS',
+                implode(', ', $unindexed)
+            ),
+        ]];
     }
 
     private function formatAuditDate(string $value): string

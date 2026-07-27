@@ -72,7 +72,17 @@ class contentbuilderng_com_contentbuilderng
             return;
 
         $db = RuntimeContextHelper::getDatabase();
-        $tableName = $db->quoteName($this->bytable . $this->properties->name);
+        $rawTableName = $this->bytable . $this->properties->name;
+
+        // Une table externe (ex. Joomla #__user_profiles) peut ne pas avoir
+        // de colonne "id" du tout : rien à synchroniser dans ce cas plutôt
+        // qu'une requête en échec ("Unknown column 'r.id'").
+        $columns = $db->getTableColumns($rawTableName, false);
+        if (!array_key_exists('id', $columns)) {
+            return;
+        }
+
+        $tableName = $db->quoteName($rawTableName);
         $subQuery = $db->getQuery(true)
             ->select($db->quoteName('cr.record_id'))
             ->from($db->quoteName('#__contentbuilderng_records', 'cr'))
@@ -127,12 +137,17 @@ class contentbuilderng_com_contentbuilderng
             $tableName = $bytable . (string) $res['name'];
             $columns = $db->getTableColumns($tableName, false);
 
-            if (!array_key_exists('user_id', $columns)) {
+            if (!array_key_exists('user_id', $columns) || !array_key_exists('id', $columns)) {
                 return 'SELECT 0';
             }
 
-            return 'SELECT COUNT(id) FROM ' . $db->quoteName($tableName)
-                . ' WHERE ' . $db->quoteName('user_id') . ' = ' . (int) $user_id;
+            // "id" est qualifié par le nom de table : cette requête est
+            // imbriquée comme sous-requête scalaire dans le SELECT d'une
+            // requête plus large qui joint d'autres tables ayant elles aussi
+            // une colonne "id" (forms, contentbuilderng_records...) — MySQL
+            // considère alors "id" non qualifié comme ambigu.
+            return 'SELECT COUNT(' . $db->quoteName($tableName) . '.' . $db->quoteName('id') . ') FROM ' . $db->quoteName($tableName)
+                . ' WHERE ' . $db->quoteName($tableName) . '.' . $db->quoteName('user_id') . ' = ' . (int) $user_id;
         }
         return '';
     }

@@ -27,18 +27,15 @@ $wa->useStyle('com_contentbuilderng.admin-about');
 $versionValue = (string) ($this->componentVersion ?: Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
 $creationDateValue = (string) ($this->componentCreationDate ?: Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
 $buildTimestampValue = trim((string) ($this->componentBuildTimestamp ?? ''));
-$authorValue = (string) ($this->componentAuthor ?: Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
 $copyrightValue = (string) ($this->componentCopyright ?: Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
-$licenseValue = trim((string) $this->componentLicense);
+// La tuile n'affiche jamais le texte brut du manifeste (potentiellement long) :
+// un libellé court suffit puisque le lien juste en dessous pointe vers le texte complet.
+$licenseValue = Text::_('COM_CONTENTBUILDERNG_LICENSE_FALLBACK');
 $buildTypeValue = strtolower(trim((string) ($this->componentBuildType ?? '')));
 $isProductionBuild = $buildTypeValue === 'production';
 $buildTypeLabel = $isProductionBuild
     ? Text::_('COM_CONTENTBUILDERNG_PRODUCTION_BUILD_LABEL')
     : Text::_('COM_CONTENTBUILDERNG_DEV_BUILD_LABEL');
-$genericLicenseValues = ['gpl', 'gnu/gpl', 'gnu/gpl v2 or later'];
-if ($licenseValue === '' || in_array(strtolower($licenseValue), $genericLicenseValues, true)) {
-    $licenseValue = Text::_('COM_CONTENTBUILDERNG_LICENSE_FALLBACK');
-}
 $formatBuildTimestamp = static function (string $timestamp): string {
     if (trim($timestamp) === '') {
         return '';

@@ -160,6 +160,26 @@ class StorageController extends BaseFormController
         $postedName = trim((string) ($data['name'] ?? ''));
         $postedId = (int) ($data['id'] ?? 0);
 
+        // La table physique est "<préfixe><name>" : MySQL/MariaDB limite un
+        // identifiant à 64 caractères, tout dépassement échoue à la création
+        // (ou plus tard, silencieusement lors d'un simple audit). Ne s'applique
+        // pas à une table externe déjà existante (bytable) : son nom réel est
+        // déjà valide puisque la table existe en base.
+        if ($postedName !== '' && empty($data['bytable'])) {
+            $db = $this->getDatabase();
+            $maxNameLength = 64 - strlen($db->getPrefix());
+
+            if (strlen($postedName) > $maxNameLength) {
+                $this->setRedirect(
+                    $this->storageEditLink($postedId),
+                    Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_NAME_TOO_LONG', $maxNameLength),
+                    'error'
+                );
+
+                return false;
+            }
+        }
+
         if ($postedName !== '') {
             $db = $this->getDatabase();
             $duplicateQuery = $db->getQuery(true)
@@ -269,7 +289,19 @@ class StorageController extends BaseFormController
             }
 
             if ($id && $model) {
-                $model->ensureDataTable($id, $isNew, $oldName);
+                try {
+                    $model->ensureDataTable($id, $isNew, $oldName);
+                } catch (\Throwable $e) {
+                    Logger::exception($e);
+                    $this->setRedirect(
+                        $this->storageEditLink($id),
+                        $e->getMessage(),
+                        'error'
+                    );
+
+                    return false;
+                }
+
                 $model->syncEditedFieldsFromRequest($id);
 
                 $renameInfo = $model->getLastDataTableRename();

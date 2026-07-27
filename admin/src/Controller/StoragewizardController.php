@@ -334,6 +334,23 @@ final class StoragewizardController extends BaseController
             $title = $name;
         }
 
+        // Même contrainte que sur l'écran Storage classique : la table
+        // physique est "<préfixe><name>", limitée à 64 caractères par
+        // MySQL/MariaDB. Ne s'applique pas à une table existante (bytable).
+        if ($bytable === '') {
+            $maxNameLength = 64 - strlen($db->getPrefix());
+
+            if (strlen($name) > $maxNameLength) {
+                $this->rememberStorageInput($wizardService, $name, $title, $bytable);
+                $this->redirectToWizard(
+                    Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_NAME_TOO_LONG', $maxNameLength),
+                    'error'
+                );
+
+                return;
+            }
+        }
+
         $query = $db->getQuery(true)
             ->select($db->quoteName('title'))
             ->from($db->quoteName('#__contentbuilderng_storages'))
@@ -493,7 +510,7 @@ final class StoragewizardController extends BaseController
         try {
             $formId = $this->getComponent()->getContainer()
                 ->get(DirectStorageFormProvisioningService::class)
-                ->resolveOrCreateFormId($storageId);
+                ->resolveOrCreateFormId($storageId, 'thoth', true);
         } catch (\Throwable $e) {
             Logger::exception($e);
             $this->redirectToWizard($e->getMessage(), 'error');

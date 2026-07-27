@@ -403,134 +403,6 @@ class StorageModel extends AdminModel
      * Toute la logique de table/champs/rename/sync APRES le save core
      */
 
-    /*
-    protected function postSaveHook(\Joomla\CMS\Table\Table $table, $validData = [])
-    {
-        parent::postSaveHook($table, $validData);
-
-        $storageId = (int) $table->id;
-        $isNew     = empty($validData['id']) || (int) $validData['id'] === 0;
-        $bytable   = (int) ($table->bytable ?? 0);
-
-        Logger::info('StorageModel postSaveHook', [
-            'storageId' => $storageId,
-            'isNew' => $isNew,
-            'name' => $table->name ?? null,
-            'bytable' => $bytable,
-        ]);
-
-        // 1) Créer/renommer la table de données (si !bytable) OU sync bytable (si bytable)
-        $this->syncStorageDataTableOrBytable($storageId, $isNew, $table);
-
-        // 2) Ajouter un nouveau champ si demandé (jform[fieldname], etc.)
-        $this->maybeAddNewField($storageId, $bytable);
-
-        // 3) Appliquer les modifs sur les champs existants (itemNames/itemTitles/itemIsGroup/itemGroupDefinitions)
-        $this->syncEditedFields($storageId, $bytable, $table);
-
-        // 4) Reorder
-        try {
-            $this->getTable('Storage')->reorder();
-        } catch (\Throwable $e) {
-            Logger::exception($e);
-        }
-
-        try {
-            $fieldsTable = $this->getTable('StorageFields');
-            $fieldsTable->reorder('storage_id = ' . (int) $storageId);
-        } catch (\Throwable $e) {
-            Logger::exception($e);
-        }
-    }*/
-
-
-
-    /**
-     * Ajout d’un nouveau champ si jform[fieldname] rempli (ancienne logique "case of new field")
-     */
-    private function maybeAddNewField(int $storageId, int $bytable): void
-    {
-        if ($bytable) {
-            return;
-        }
-
-        $input = $this->getInput();
-        $jform = $input->post->get('jform', [], 'array');
-
-        $fieldname = trim((string)($jform['fieldname'] ?? ''));
-        if ($fieldname === '') {
-            return;
-        }
-
-        $fieldtitle = trim((string)($jform['fieldtitle'] ?? ''));
-        $sqlType = StorageColumnTypeHelper::normalize((string) ($jform['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
-        $isGroup    = (int)($jform['is_group'] ?? 0);
-        $groupDef   = (string)($jform['group_definition'] ?? '');
-
-        // Normalisation.
-        $newfieldname = $this->normalizeFieldIdentifier($fieldname);
-        $newfieldname = $newfieldname === '' ? $this->makeFallbackFieldIdentifier() : $newfieldname;
-
-        $newfieldtitle = $fieldtitle !== '' ? $fieldtitle : $newfieldname;
-
-        $db = $this->getDatabase();
-
-        // ordering max+1
-        $query = $db->getQuery(true)
-            ->select('COALESCE(MAX(' . $db->quoteName('ordering') . '), 0) + 1')
-            ->from($db->quoteName('#__contentbuilderng_storage_fields'))
-            ->where($db->quoteName('storage_id') . ' = ' . (int) $storageId);
-        $db->setQuery($query);
-        $max = (int) $db->loadResult();
-
-        // unicité
-        $query = $db->getQuery(true)
-            ->select($db->quoteName('name'))
-            ->from($db->quoteName('#__contentbuilderng_storage_fields'))
-            ->where($db->quoteName('name') . ' = ' . $db->quote($newfieldname))
-            ->where($db->quoteName('storage_id') . ' = ' . (int) $storageId);
-        $db->setQuery($query);
-        $exists = $db->loadResult();
-
-        if ($exists) {
-            Logger::info('maybeAddNewField skipped (exists)', ['storageId' => $storageId, 'field' => $newfieldname]);
-            return;
-        }
-
-        Logger::info('maybeAddNewField insert', [
-            'storageId' => $storageId,
-            'name' => $newfieldname,
-            'title' => $newfieldtitle,
-            'is_group' => $isGroup,
-        ]);
-
-        $query = $db->getQuery(true)
-            ->insert($db->quoteName('#__contentbuilderng_storage_fields'))
-            ->columns($db->quoteName(['ordering', 'storage_id', 'name', 'title', 'sql_type', 'is_group', 'group_definition']))
-            ->values(
-                (int) $max . ', '
-                . (int) $storageId . ', '
-                . $db->quote($newfieldname) . ', '
-                . $db->quote($newfieldtitle) . ', '
-                . $db->quote($sqlType) . ', '
-                . (int) $isGroup . ', '
-                . $db->quote($groupDef)
-            );
-        $db->setQuery($query);
-        $db->execute();
-
-        // Colonne dans table data (si table existe déjà)
-        $storage = $this->getItem($storageId);
-        if (!empty($storage->name)) {
-            try {
-                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storage->name) . ' ADD ' . $db->quoteName($newfieldname) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType));
-                $db->execute();
-            } catch (\Throwable $e) {
-                Logger::exception($e);
-            }
-        }
-    }
-
     // Crée une table #__<storage.name> ou synchronise une table externe (bytable).
     public function ensureDataTable(int $storageId, bool $isNew = false, ?string $oldName = null): void
     {
@@ -609,34 +481,34 @@ class StorageModel extends AdminModel
                 // create
                 Logger::info('Create data table', ['name' => $name, 'storageId' => $storageId]);
 
-                try {
-                    $db->setQuery(
-                        'CREATE TABLE ' . $db->quoteName('#__' . $name) . ' ('
-                        . $db->quoteName('id') . ' INT NOT NULL AUTO_INCREMENT PRIMARY KEY,'
-                        . $db->quoteName('storage_id') . ' INT NOT NULL DEFAULT ' . (int) $storageId . ','
-                        . $db->quoteName('user_id') . ' INT NOT NULL DEFAULT 0,'
-                        . $db->quoteName('created') . ' DATETIME NOT NULL DEFAULT ' . $db->quote($last_update) . ','
-                        . $db->quoteName('created_by') . " VARCHAR(255) NOT NULL DEFAULT '',"
-                        . $db->quoteName('modified_user_id') . ' INT NOT NULL DEFAULT 0,'
-                        . $db->quoteName('modified') . ' DATETIME NULL DEFAULT NULL,'
-                        . $db->quoteName('modified_by') . " VARCHAR(255) NOT NULL DEFAULT ''"
-                        . ')'
-                    );
-                    $db->execute();
+                // Ne pas avaler l'exception ici : une table non créée alors que
+                // l'enregistrement du storage lui-même a réussi (ex. nom trop
+                // long pour MySQL/MariaDB une fois préfixé) doit remonter comme
+                // une vraie erreur au contrôleur, pas rester silencieuse.
+                $db->setQuery(
+                    'CREATE TABLE ' . $db->quoteName('#__' . $name) . ' ('
+                    . $db->quoteName('id') . ' INT NOT NULL AUTO_INCREMENT PRIMARY KEY,'
+                    . $db->quoteName('storage_id') . ' INT NOT NULL DEFAULT ' . (int) $storageId . ','
+                    . $db->quoteName('user_id') . ' INT NOT NULL DEFAULT 0,'
+                    . $db->quoteName('created') . ' DATETIME NOT NULL DEFAULT ' . $db->quote($last_update) . ','
+                    . $db->quoteName('created_by') . " VARCHAR(255) NOT NULL DEFAULT '',"
+                    . $db->quoteName('modified_user_id') . ' INT NOT NULL DEFAULT 0,'
+                    . $db->quoteName('modified') . ' DATETIME NULL DEFAULT NULL,'
+                    . $db->quoteName('modified_by') . " VARCHAR(255) NOT NULL DEFAULT ''"
+                    . ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci'
+                );
+                $db->execute();
 
-                    $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('storage_id') . ')');
-                    $db->execute();
-                    $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('user_id') . ')');
-                    $db->execute();
-                    $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('created') . ')');
-                    $db->execute();
-                    $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('modified_user_id') . ')');
-                    $db->execute();
-                    $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('modified') . ')');
-                    $db->execute();
-                } catch (\Throwable $e) {
-                    Logger::exception($e);
-                }
+                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('storage_id') . ')');
+                $db->execute();
+                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('user_id') . ')');
+                $db->execute();
+                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('created') . ')');
+                $db->execute();
+                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('modified_user_id') . ')');
+                $db->execute();
+                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('modified') . ')');
+                $db->execute();
             }
 
             try {
@@ -851,14 +723,15 @@ class StorageModel extends AdminModel
                 $db->setQuery($query);
                 $db->execute();
 
-                // rename column if needed
+                // Renommer la colonne si besoin. Ne pas avaler l'exception ici :
+                // les métadonnées (#__contentbuilderng_storage_fields.name) ont
+                // déjà été mises à jour juste au-dessus, donc un ALTER échoué
+                // silencieusement laisserait le champ déclaré sous un nom que
+                // la table physique ne porte pas — la remontée fait échouer
+                // toute l'action de sauvegarde plutôt que de rester invisible.
                 if ($old_name !== '' && $old_name !== $name) {
-                    try {
-                        $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storageTable->name) . ' CHANGE ' . $db->quoteName($old_name) . ' ' . $db->quoteName($name) . ' ' . StorageColumnTypeHelper::sqlDefinition($oldSqlType, $oldFieldSize));
-                        $db->execute();
-                    } catch (\Throwable $e) {
-                        Logger::exception($e);
-                    }
+                    $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storageTable->name) . ' CHANGE ' . $db->quoteName($old_name) . ' ' . $db->quoteName($name) . ' ' . StorageColumnTypeHelper::sqlDefinition($oldSqlType, $oldFieldSize));
+                    $db->execute();
                 }
             } else {
                 // bytable => pas de rename colonne
@@ -930,6 +803,12 @@ class StorageModel extends AdminModel
             return;
         }
 
+        // Chaque colonne manquante est traitée indépendamment (une seule
+        // erreur ne doit pas empêcher la synchronisation des autres champs),
+        // mais un échec ne doit jamais rester invisible : il est journalisé
+        // ET remonté en fin de méthode pour faire échouer l'action de
+        // sauvegarde plutôt que de laisser croire que tout est synchronisé.
+        $failedFields = [];
         foreach ($fields as $field) {
             $fieldname = (string) ($field['name'] ?? '');
             if ($fieldname === '' || isset($cols[$fieldname])) {
@@ -947,7 +826,14 @@ class StorageModel extends AdminModel
                 $db->execute();
             } catch (\Throwable $e) {
                 Logger::exception($e);
+                $failedFields[] = $fieldname;
             }
+        }
+
+        if ($failedFields !== []) {
+            throw new \RuntimeException(
+                Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_MISSING_COLUMNS_FAILED', implode(', ', $failedFields))
+            );
         }
     }
 
@@ -962,6 +848,7 @@ class StorageModel extends AdminModel
 
         $db = $this->getDatabase();
         $row = $this->getTable('Storage');
+        $failedDrops = [];
 
         foreach ($pks as $pk) {
             $pk = (int)$pk;
@@ -987,12 +874,18 @@ class StorageModel extends AdminModel
                 return false;
             }
 
+            // Le DROP TABLE arrive après la suppression des métadonnées : un
+            // échec ici laisserait une table orpheline, sans plus aucune ligne
+            // pour la référencer. Ne pas avaler l'exception — elle est
+            // journalisée puis remontée en fin de méthode pour que
+            // l'utilisateur soit informé au lieu de croire tout nettoyé.
             if ($storage && empty($storage->bytable) && !empty($storage->name)) {
                 try {
                     $db->setQuery('DROP TABLE ' . $db->quoteName('#__' . (string) $storage->name));
                     $db->execute();
                 } catch (\Throwable $e) {
                     Logger::exception($e);
+                    $failedDrops[] = '#__' . (string) $storage->name;
                 }
             }
         }
@@ -1001,6 +894,12 @@ class StorageModel extends AdminModel
             $row->reorder();
         } catch (\Throwable $e) {
             Logger::exception($e);
+        }
+
+        if ($failedDrops !== []) {
+            throw new \RuntimeException(
+                Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_DROP_TABLE_FAILED', implode(', ', $failedDrops))
+            );
         }
 
         return true;

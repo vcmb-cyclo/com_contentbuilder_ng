@@ -128,6 +128,19 @@ class PermissionService
         $db->setQuery($query);
         $type = $db->loadAssoc();
 
+        // Contrat pour tout type de source custom (dans
+        // JPATH_SITE . '/media/contentbuilderng/types/') qui implémente
+        // getNumRecordsQuery(): la chaîne SQL brute renvoyée est injectée
+        // telle quelle comme sous-requête scalaire dans le SELECT de la
+        // requête plus bas, qui joint déjà #__contentbuilderng_forms,
+        // #__contentbuilderng_users et éventuellement
+        // #__contentbuilderng_records — toutes avec leur propre colonne "id".
+        // Toute colonne référencée dans cette sous-requête (notamment "id")
+        // DOIT être qualifiée par son nom de table, sinon MySQL peut la
+        // résoudre de façon ambiguë contre les tables de la requête englobante
+        // au lieu de la table de la sous-requête (cf. le correctif appliqué à
+        // contentbuilderng_com_contentbuilderng::getNumRecordsQuery() et
+        // contentbuilderng_com_breezingformsng::getNumRecordsQuery()).
         $numRecordsQuery = '';
 
         if (is_array($type)) {
