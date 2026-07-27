@@ -165,7 +165,12 @@ $storageFieldColumns = [
                     <tr class="row<?php echo $i % 2; ?>" data-cb-row-id="<?php echo $id; ?>" data-cb-item-label="<?php echo $title !== '' ? $title : $name; ?>">
                         <td class="text-center" data-cb-storage-col="check"><?php echo $checked; ?></td>
                         <td class="text-nowrap" data-cb-storage-col="id"><?php echo $id; ?></td>
-                        <td data-cb-storage-col="name"><?php echo $name; ?></td>
+                        <td data-cb-storage-col="name">
+                            <?php echo $name; ?>
+                            <?php if ($isSystemField) : ?>
+                                <span class="fa-solid fa-gear ms-1" aria-hidden="true" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_MANAGED_TIP'), ENT_QUOTES, 'UTF-8'); ?>"></span>
+                            <?php endif; ?>
+                        </td>
                         <td data-cb-storage-col="title"><?php echo $title; ?></td>
                         <td data-cb-storage-col="sql_type">
                             <?php if ($rowSqlTypeEditable) : ?>
@@ -208,36 +213,40 @@ $storageFieldColumns = [
                             <input type="hidden" name="itemNames[<?php echo $id; ?>]" value="<?php echo $name; ?>" />
                             <input type="hidden" name="itemTitles[<?php echo $id; ?>]" value="<?php echo $title; ?>" />
 
-                            <input class="form-check-input" type="radio"
-                                name="itemIsGroup[<?php echo $id; ?>]"
-                                value="1"
-                                id="itemIsGroup_<?php echo $id; ?>"
-                                <?php echo $isGroup ? 'checked="checked"' : ''; ?> />
-                            <label for="itemIsGroup_<?php echo $id; ?>">
-                                <?php echo Text::_('COM_CONTENTBUILDERNG_YES'); ?>
-                            </label>
+                            <?php if ($rawName === 'id') : ?>
+                                &mdash;
+                            <?php else : ?>
+                                <input class="form-check-input" type="radio"
+                                    name="itemIsGroup[<?php echo $id; ?>]"
+                                    value="1"
+                                    id="itemIsGroup_<?php echo $id; ?>"
+                                    <?php echo $isGroup ? 'checked="checked"' : ''; ?> />
+                                <label for="itemIsGroup_<?php echo $id; ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_YES'); ?>
+                                </label>
 
-                            <input class="form-check-input" type="radio"
-                                name="itemIsGroup[<?php echo $id; ?>]"
-                                value="0"
-                                id="itemIsGroupNo_<?php echo $id; ?>"
-                                <?php echo !$isGroup ? 'checked="checked"' : ''; ?> />
-                            <label for="itemIsGroupNo_<?php echo $id; ?>">
-                                <?php echo Text::_('COM_CONTENTBUILDERNG_NO'); ?>
-                            </label>
+                                <input class="form-check-input" type="radio"
+                                    name="itemIsGroup[<?php echo $id; ?>]"
+                                    value="0"
+                                    id="itemIsGroupNo_<?php echo $id; ?>"
+                                    <?php echo !$isGroup ? 'checked="checked"' : ''; ?> />
+                                <label for="itemIsGroupNo_<?php echo $id; ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_NO'); ?>
+                                </label>
 
-                            <div id="itemGroupDefinitions_<?php echo $id; ?>">
-                                <button type="button" class="btn btn-link btn-sm p-0"
-                                    title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP_DEFINITION_EDIT_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
-                                    onclick="document.getElementById('itemGroupDefinitions<?php echo $id; ?>').style.display='block'; this.parentNode.style.display='none'; document.getElementById('itemGroupDefinitions<?php echo $id; ?>').focus(); return false;">
-                                    [<?php echo Text::_('COM_CONTENTBUILDERNG_EDIT'); ?>]
-                                </button>
-                            </div>
-                            <textarea class="form-control form-control-sm mt-1"
-                                onblur="this.style.display='none'; document.getElementById('itemGroupDefinitions_<?php echo $id; ?>').style.display='block';"
-                                id="itemGroupDefinitions<?php echo $id; ?>"
-                                style="display:none; width:100%; height:50px;"
-                                name="itemGroupDefinitions[<?php echo $id; ?>]"><?php echo $groupDefinition; ?></textarea>
+                                <div id="itemGroupDefinitions_<?php echo $id; ?>">
+                                    <button type="button" class="btn btn-link btn-sm p-0"
+                                        title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP_DEFINITION_EDIT_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                        onclick="document.getElementById('itemGroupDefinitions<?php echo $id; ?>').style.display='block'; this.parentNode.style.display='none'; document.getElementById('itemGroupDefinitions<?php echo $id; ?>').focus(); return false;">
+                                        [<?php echo Text::_('COM_CONTENTBUILDERNG_EDIT'); ?>]
+                                    </button>
+                                </div>
+                                <textarea class="form-control form-control-sm mt-1"
+                                    onblur="this.style.display='none'; document.getElementById('itemGroupDefinitions_<?php echo $id; ?>').style.display='block';"
+                                    id="itemGroupDefinitions<?php echo $id; ?>"
+                                    style="display:none; width:100%; height:50px;"
+                                    name="itemGroupDefinitions[<?php echo $id; ?>]"><?php echo $groupDefinition; ?></textarea>
+                            <?php endif; ?>
                         </td>
                         <td class="order cb-order-col" data-cb-storage-col="order">
                             <?php if ($ordering) : ?>

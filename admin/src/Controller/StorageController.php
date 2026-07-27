@@ -605,6 +605,7 @@ class StorageController extends BaseFormController
 
         $jform = $this->input->post->get('jform', [], 'array');
         $storageId = (int) ($jform['id'] ?? $this->input->getInt('id'));
+        $column = trim((string) ($jform['index_column'] ?? ''));
 
         /** @var \CB\Component\Contentbuilderng\Administrator\Model\StorageModel $model */
         $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
@@ -618,7 +619,7 @@ class StorageController extends BaseFormController
 
         try {
             $model->addIndexFromRequest($storageId);
-            $this->setRedirect($redirect, Text::_('COM_CONTENTBUILDERNG_INDEX_ADDED'));
+            $this->setRedirect($redirect, Text::sprintf('COM_CONTENTBUILDERNG_INDEX_ADDED', $column !== '' ? $column : '?'));
 
             return true;
         } catch (\Throwable $e) {
@@ -647,7 +648,7 @@ class StorageController extends BaseFormController
 
         try {
             $model->deleteIndex($storageId, $indexName);
-            $this->setRedirect($redirect, Text::_('COM_CONTENTBUILDERNG_INDEX_DELETED'));
+            $this->setRedirect($redirect, Text::sprintf('COM_CONTENTBUILDERNG_INDEX_DELETED', $indexName !== '' ? $indexName : '?'));
 
             return true;
         } catch (\Throwable $e) {

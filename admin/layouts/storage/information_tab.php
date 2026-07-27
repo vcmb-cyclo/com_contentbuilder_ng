@@ -14,7 +14,6 @@
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
 
 $item = $displayData['item'] ?? null;
@@ -460,35 +459,6 @@ $usingForms = (array) ($displayData['usingForms'] ?? []);
                     <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_CSV_IMPORT_DATA'); ?>
                 </label> <?php echo is_callable($renderCheckbox) ? $renderCheckbox('jform[csv_import_data]', 'csv_import_data', true) : ''; ?>
             </div>
-        </div>
-    </div>
-<?php endif; ?>
-
-<?php if ((int) ($item->id ?? 0) > 0 && !empty($usingForms)) : ?>
-    <div class="card border rounded-3 mb-3">
-        <div class="card-body">
-            <label class="form-label d-block mb-2"><b><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_USING_FORMS_LABEL'); ?></b></label>
-            <ul class="list-unstyled mb-0">
-                <?php foreach ($usingForms as $usingForm) :
-                    $usingFormId = (int) ($usingForm->id ?? 0);
-                    $usingFormLabel = trim((string) ($usingForm->title ?? ''));
-                    if ($usingFormLabel === '') {
-                        $usingFormLabel = trim((string) ($usingForm->name ?? ''));
-                    }
-                    if ($usingFormLabel === '') {
-                        $usingFormLabel = '#' . $usingFormId;
-                    }
-                ?>
-                    <li>
-                        <a href="<?php echo htmlspecialchars(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $usingFormId, false), ENT_QUOTES, 'UTF-8'); ?>"
-                            target="_blank"
-                            title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_USING_FORMS_LINK_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
-                            <span class="fa-solid fa-file-lines me-1" aria-hidden="true"></span>
-                            <?php echo htmlspecialchars($usingFormLabel, ENT_QUOTES, 'UTF-8'); ?>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
         </div>
     </div>
 <?php endif; ?>
