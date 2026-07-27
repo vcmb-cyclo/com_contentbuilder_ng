@@ -37,8 +37,8 @@ final class StorageColumnTypeHelperTest extends TestCase
     public static function sqlDefinitionProvider(): array
     {
         return [
-            'text' => ['text', 'TEXT NULL'],
-            'varchar' => ['varchar', 'VARCHAR(255) NULL'],
+            'text' => ['text', 'TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL'],
+            'varchar' => ['varchar', 'VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL'],
             'integer' => ['int', 'INT NULL'],
             'decimal' => ['decimal', 'DECIMAL(15,4) NULL'],
             'date' => ['date', 'DATE NULL'],

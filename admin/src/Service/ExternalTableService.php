@@ -94,6 +94,11 @@ final class ExternalTableService
         'modified_by',
     ];
 
+    /** @var array<string,true>|null */
+    private ?array $tablesWithIdColumn = null;
+
+    private bool $bulkLookupUnavailable = false;
+
     public function __construct(private readonly DatabaseInterface $db)
     {
     }
@@ -105,7 +110,7 @@ final class ExternalTableService
     {
         $tables = array_values(array_filter(
             (array) $this->db->getTableList(),
-            fn(string $table): bool => !$this->isContentBuilderTable($table)
+            fn(string $table): bool => !$this->isContentBuilderTable($table) && $this->hasIdColumn($table)
         ));
         natcasesort($tables);
 
@@ -116,7 +121,74 @@ final class ExternalTableService
     {
         return $table !== ''
             && in_array($table, (array) $this->db->getTableList(), true)
-            && !$this->isContentBuilderTable($table);
+            && !$this->isContentBuilderTable($table)
+            && $this->hasIdColumn($table);
+    }
+
+    /**
+     * The whole "Storage" abstraction (list/details/edit rendering, unique
+     * values, record sync...) treats one row as one record identified by a
+     * stable "id" column. A table without one (e.g. Joomla's own
+     * #__user_profiles, keyed on user_id + profile_key) can't support that,
+     * and picking it as an existing-table source breaks throughout the
+     * codebase rather than in one isolated spot — so it must never be
+     * offered/accepted as selectable in the first place.
+     */
+    private function hasIdColumn(string $table): bool
+    {
+        $bulk = $this->loadTablesWithIdColumn();
+
+        if ($bulk !== null) {
+            return isset($bulk[$table]);
+        }
+
+        // Degraded mode only (see loadTablesWithIdColumn()): one introspection
+        // query per table.
+        try {
+            return array_key_exists('id', $this->db->getTableColumns($table, false));
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Set of schema tables owning an "id" column, resolved in a single query
+     * and memoised for the request: getSelectableTables() has to test every
+     * table of the instance, and Joomla's driver issues an uncached
+     * "SHOW FULL COLUMNS" per getTableColumns() call, which turned that filter
+     * into one query per table.
+     *
+     * Returns null when INFORMATION_SCHEMA cannot be read (restricted grants
+     * on shared hosting, for instance). Callers then fall back to per-table
+     * introspection: degraded performance is preferable to reporting that no
+     * table qualifies, which would silently empty the selector.
+     *
+     * @return array<string,true>|null
+     */
+    private function loadTablesWithIdColumn(): ?array
+    {
+        if ($this->tablesWithIdColumn !== null || $this->bulkLookupUnavailable) {
+            return $this->tablesWithIdColumn;
+        }
+
+        try {
+            $query = $this->db->getQuery(true)
+                ->select('DISTINCT ' . $this->db->quoteName('TABLE_NAME'))
+                ->from($this->db->quoteName('INFORMATION_SCHEMA.COLUMNS'))
+                ->where($this->db->quoteName('TABLE_SCHEMA') . ' = DATABASE()')
+                ->where($this->db->quoteName('COLUMN_NAME') . ' = ' . $this->db->quote('id'));
+            $this->db->setQuery($query);
+
+            $this->tablesWithIdColumn = array_fill_keys(
+                array_map('strval', $this->db->loadColumn() ?: []),
+                true
+            );
+        } catch (\Throwable $e) {
+            $this->bulkLookupUnavailable = true;
+            $this->tablesWithIdColumn = null;
+        }
+
+        return $this->tablesWithIdColumn;
     }
 
     public function getBytableMode(string $table): int

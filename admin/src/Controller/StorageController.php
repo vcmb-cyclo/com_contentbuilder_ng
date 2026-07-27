@@ -160,6 +160,29 @@ class StorageController extends BaseFormController
         $postedName = trim((string) ($data['name'] ?? ''));
         $postedId = (int) ($data['id'] ?? 0);
 
+        // La table physique est "<préfixe><name>" : MySQL/MariaDB limite un
+        // identifiant à 64 caractères, tout dépassement échoue à la création
+        // (ou plus tard, silencieusement lors d'un simple audit). Ne s'applique
+        // pas à une table externe déjà existante (bytable) : son nom réel est
+        // déjà valide puisque la table existe en base.
+        // La mesure porte sur le nom normalisé, seul persisté : la
+        // normalisation peut allonger la saisie (préfixe "field" devant un nom
+        // commençant par un chiffre).
+        if ($postedName !== '' && empty($data['bytable'])) {
+            $db = $this->getDatabase();
+            $maxNameLength = 64 - strlen($db->getPrefix());
+
+            if (strlen(StorageModel::normalizeStorageName($postedName)) > $maxNameLength) {
+                $this->setRedirect(
+                    $this->storageEditLink($postedId),
+                    Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_NAME_TOO_LONG', $maxNameLength),
+                    'error'
+                );
+
+                return false;
+            }
+        }
+
         if ($postedName !== '') {
             $db = $this->getDatabase();
             $duplicateQuery = $db->getQuery(true)
@@ -269,8 +292,36 @@ class StorageController extends BaseFormController
             }
 
             if ($id && $model) {
-                $model->ensureDataTable($id, $isNew, $oldName);
-                $model->syncEditedFieldsFromRequest($id);
+                try {
+                    $model->ensureDataTable($id, $isNew, $oldName);
+                } catch (\Throwable $e) {
+                    Logger::exception($e);
+                    $this->setRedirect(
+                        $this->storageEditLink($id),
+                        $e->getMessage(),
+                        'error'
+                    );
+
+                    return false;
+                }
+
+                // syncEditedFields()/ensureMissingColumnsFromFields() remontent
+                // désormais leurs échecs DDL (renommage de colonne, colonne
+                // manquante) au lieu de les avaler : sans ce garde, l'exception
+                // remonterait jusqu'à Joomla et afficherait une page d'erreur
+                // au lieu du message d'erreur attendu sur l'écran Storage.
+                try {
+                    $model->syncEditedFieldsFromRequest($id);
+                } catch (\Throwable $e) {
+                    Logger::exception($e);
+                    $this->setRedirect(
+                        $this->storageEditLink($id),
+                        $e->getMessage(),
+                        'error'
+                    );
+
+                    return false;
+                }
 
                 $renameInfo = $model->getLastDataTableRename();
                 if (is_array($renameInfo) && !empty($renameInfo['from']) && !empty($renameInfo['to'])) {
@@ -624,8 +675,18 @@ class StorageController extends BaseFormController
                 return false;
             }
         } catch (\Throwable $e) {
+            // Cas typique : les métadonnées ont bien été supprimées mais le
+            // DROP TABLE a échoué, laissant une table orpheline. On revient
+            // donc à la liste comme dans les branches voisines, avec un
+            // avertissement plutôt qu'une erreur : la suppression demandée a
+            // eu lieu, seul le nettoyage physique est incomplet.
             Logger::exception($e);
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setRedirect(
+                Route::_('index.php?option=com_contentbuilderng&task=storages.display', false),
+                $e->getMessage(),
+                'warning'
+            );
+
             return false;
         }
 

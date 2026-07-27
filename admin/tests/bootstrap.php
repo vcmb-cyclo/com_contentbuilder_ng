@@ -86,6 +86,7 @@ namespace Joomla\Database {
         {
             public function getPrefix(): string;
             public function getTableColumns(string $table, bool $type = true): array;
+            public function getTableList(): array;
             public function quoteName(array|string $name, array|string|null $as = null): array|string;
             public function setQuery(QueryInterface|string $query);
             public function execute(): void;
@@ -245,6 +246,11 @@ namespace CB\Component\Contentbuilderng\Tests\Stubs {
         }
 
         public function getTableColumns(string $table, bool $type = true): array
+        {
+            return [];
+        }
+
+        public function getTableList(): array
         {
             return [];
         }

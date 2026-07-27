@@ -549,7 +549,11 @@ class contentbuilderng_com_breezingformsng
 
     public static function getNumRecordsQuery($form_id, $user_id)
     {
-        return 'Select count(id) From #__facileforms_records Where form = ' . intval($form_id) . ' And user_id = ' . intval($user_id);
+        // "id" est qualifié par le nom de table : cette requête est imbriquée
+        // comme sous-requête scalaire dans le SELECT d'une requête plus large
+        // qui joint d'autres tables ayant elles aussi une colonne "id" —
+        // MySQL considère alors "id" non qualifié comme ambigu.
+        return 'Select count(`#__facileforms_records`.`id`) From #__facileforms_records Where form = ' . intval($form_id) . ' And user_id = ' . intval($user_id);
     }
 
     public function getUniqueValues($element_id, $where_field = '', $where = '')
