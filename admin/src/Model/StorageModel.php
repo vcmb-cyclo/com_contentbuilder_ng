@@ -319,6 +319,27 @@ class StorageModel extends AdminModel
     /**
      * Normalisation name/title/bytable.
      */
+    /**
+     * Normalise un nom de storage en identifiant de table exploitable, à
+     * l'identique de ce que prepareTable() persiste réellement. Exposée pour
+     * que les contrôles effectués en amont (unicité, longueur maximale de
+     * l'identifiant MySQL/MariaDB) portent sur la valeur finale et non sur la
+     * saisie brute : la normalisation peut allonger le nom, par exemple en
+     * préfixant "field" devant un nom commençant par un chiffre.
+     *
+     * Retourne une chaîne vide si la saisie ne produit aucun identifiant :
+     * prepareTable() lui substitue alors un nom aléatoire, volontairement non
+     * reproduit ici pour que la fonction reste déterministe.
+     */
+    public static function normalizeStorageName(string $name): string
+    {
+        $normalized = preg_replace("/[^a-zA-Z0-9_\s]/isU", "_", trim(strtolower($name)));
+        $normalized = str_replace([' ', "\n", "\r", "\t"], [''], (string) $normalized);
+        $normalized = preg_replace("/^([0-9\s])/isU", "field$1$2", $normalized);
+
+        return (string) $normalized;
+    }
+
     protected function prepareTable($table)
     {
         parent::prepareTable($table);
@@ -357,9 +378,7 @@ class StorageModel extends AdminModel
         } else {
             $table->bytable = 0;
 
-            $newname = preg_replace("/[^a-zA-Z0-9_\s]/isU", "_", trim($name));
-            $newname = str_replace([' ', "\n", "\r", "\t"], [''], $newname);
-            $newname = preg_replace("/^([0-9\s])/isU", "field$1$2", $newname);
+            $newname = self::normalizeStorageName($name);
             $newname = $newname === '' ? ('field' . mt_rand(0, mt_getrandmax())) : $newname;
 
             $this->target_table = $newname; // csv helper si besoin

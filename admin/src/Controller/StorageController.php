@@ -165,11 +165,14 @@ class StorageController extends BaseFormController
         // (ou plus tard, silencieusement lors d'un simple audit). Ne s'applique
         // pas à une table externe déjà existante (bytable) : son nom réel est
         // déjà valide puisque la table existe en base.
+        // La mesure porte sur le nom normalisé, seul persisté : la
+        // normalisation peut allonger la saisie (préfixe "field" devant un nom
+        // commençant par un chiffre).
         if ($postedName !== '' && empty($data['bytable'])) {
             $db = $this->getDatabase();
             $maxNameLength = 64 - strlen($db->getPrefix());
 
-            if (strlen($postedName) > $maxNameLength) {
+            if (strlen(StorageModel::normalizeStorageName($postedName)) > $maxNameLength) {
                 $this->setRedirect(
                     $this->storageEditLink($postedId),
                     Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_NAME_TOO_LONG', $maxNameLength),

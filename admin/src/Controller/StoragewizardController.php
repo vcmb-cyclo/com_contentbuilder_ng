@@ -337,10 +337,11 @@ final class StoragewizardController extends BaseController
         // Même contrainte que sur l'écran Storage classique : la table
         // physique est "<préfixe><name>", limitée à 64 caractères par
         // MySQL/MariaDB. Ne s'applique pas à une table existante (bytable).
+        // La mesure porte sur le nom normalisé, seul persisté.
         if ($bytable === '') {
             $maxNameLength = 64 - strlen($db->getPrefix());
 
-            if (strlen($name) > $maxNameLength) {
+            if (strlen(StorageModel::normalizeStorageName($name)) > $maxNameLength) {
                 $this->rememberStorageInput($wizardService, $name, $title, $bytable);
                 $this->redirectToWizard(
                     Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_NAME_TOO_LONG', $maxNameLength),
