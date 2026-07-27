@@ -672,8 +672,18 @@ class StorageController extends BaseFormController
                 return false;
             }
         } catch (\Throwable $e) {
+            // Cas typique : les métadonnées ont bien été supprimées mais le
+            // DROP TABLE a échoué, laissant une table orpheline. On revient
+            // donc à la liste comme dans les branches voisines, avec un
+            // avertissement plutôt qu'une erreur : la suppression demandée a
+            // eu lieu, seul le nettoyage physique est incomplet.
             Logger::exception($e);
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setRedirect(
+                Route::_('index.php?option=com_contentbuilderng&task=storages.display', false),
+                $e->getMessage(),
+                'warning'
+            );
+
             return false;
         }
 
