@@ -599,6 +599,64 @@ class StorageController extends BaseFormController
     }
 
 
+    public function addindex(): bool
+    {
+        $this->checkToken();
+
+        $jform = $this->input->post->get('jform', [], 'array');
+        $storageId = (int) ($jform['id'] ?? $this->input->getInt('id'));
+
+        /** @var \CB\Component\Contentbuilderng\Administrator\Model\StorageModel $model */
+        $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
+
+        if (!$model) {
+            throw new \RuntimeException('StorageModel not found');
+        }
+
+        $wizardParam = $this->input->getBool('wizard', false) ? '&wizard=1' : '';
+        $redirect = Route::_('index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . (int) $storageId . $wizardParam, false);
+
+        try {
+            $model->addIndexFromRequest($storageId);
+            $this->setRedirect($redirect, Text::_('COM_CONTENTBUILDERNG_INDEX_ADDED'));
+
+            return true;
+        } catch (\Throwable $e) {
+            $this->setRedirect($redirect, $e->getMessage(), 'warning');
+
+            return false;
+        }
+    }
+
+    public function deleteindex(): bool
+    {
+        $this->checkToken();
+
+        $storageId = (int) $this->input->getInt('id');
+        $indexName = trim((string) $this->input->getString('index_name', ''));
+
+        /** @var \CB\Component\Contentbuilderng\Administrator\Model\StorageModel $model */
+        $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
+
+        if (!$model) {
+            throw new \RuntimeException('StorageModel not found');
+        }
+
+        $wizardParam = $this->input->getBool('wizard', false) ? '&wizard=1' : '';
+        $redirect = Route::_('index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $storageId . $wizardParam, false);
+
+        try {
+            $model->deleteIndex($storageId, $indexName);
+            $this->setRedirect($redirect, Text::_('COM_CONTENTBUILDERNG_INDEX_DELETED'));
+
+            return true;
+        } catch (\Throwable $e) {
+            $this->setRedirect($redirect, $e->getMessage(), 'warning');
+
+            return false;
+        }
+    }
+
     protected function getRedirectToItemAppend($recordId = null, $urlVar = 'id')
     {
         // Si le core ne passe pas l'id, on tente de le retrouver

@@ -39,6 +39,7 @@ class HtmlView extends BaseHtmlView
     public int $debug_show_filters = 0;
     public int $debug_show_cb_id = 0;
     public int $direct_storage_read_only = 0;
+    public float $render_time_ms = 0;
 
     private function getApp(): SiteApplication
     {
@@ -53,6 +54,7 @@ class HtmlView extends BaseHtmlView
 
     function display($tpl = null)
     {
+        $debugRenderStart = microtime(true);
         $app = $this->getApp();
         $this->frontend = $app->isClient('site');
 
@@ -180,6 +182,11 @@ class HtmlView extends BaseHtmlView
         $this->invalid_list_setup = !empty($subject->invalid_list_setup);
         $own_only = $app->isClient('site') ? $subject->own_only_fe : $subject->own_only;
         $this->own_only = $own_only;
+
+        if (!empty($this->debug_mode)) {
+            $this->render_time_ms = round((microtime(true) - $debugRenderStart) * 1000, 1);
+        }
+
         parent::display($tpl);
     }
 }

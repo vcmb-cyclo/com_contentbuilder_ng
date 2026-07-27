@@ -315,6 +315,150 @@ class StorageModel extends AdminModel
         return true;
     }
 
+    /**
+     * Index existants de la table physique d'un storage interne (clé
+     * primaire incluse, en lecture seule). Aucune donnée renvoyée pour un
+     * storage bytable (externe) : on ne modifie jamais une table qui
+     * n'appartient pas au composant.
+     *
+     * @return array<int,array{name:string,columns:array<int,string>,unique:bool,primary:bool}>
+     */
+    public function getPhysicalIndexes(int $storageId): array
+    {
+        $storage = $this->getItem($storageId);
+        if (!$storage || !empty($storage->bytable) || empty($storage->name)) {
+            return [];
+        }
+
+        $db = $this->getDatabase();
+        $tableQN = $db->quoteName('#__' . $storage->name);
+
+        try {
+            $db->setQuery('SHOW INDEX FROM ' . $tableQN);
+            $rows = $db->loadAssocList() ?: [];
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+            return [];
+        }
+
+        $indexes = [];
+        foreach ($rows as $row) {
+            $keyName = (string) ($row['Key_name'] ?? '');
+            $columnName = (string) ($row['Column_name'] ?? '');
+            if ($keyName === '' || $columnName === '') {
+                continue;
+            }
+
+            if (!isset($indexes[$keyName])) {
+                $indexes[$keyName] = [
+                    'name' => $keyName,
+                    'columns' => [],
+                    'unique' => ((int) ($row['Non_unique'] ?? 1)) === 0,
+                    'primary' => $keyName === 'PRIMARY',
+                ];
+            }
+
+            $indexes[$keyName]['columns'][] = $columnName;
+        }
+
+        // La clé primaire en tête, puis le reste dans l'ordre naturel.
+        usort(
+            $indexes,
+            static fn(array $a, array $b): int => ($b['primary'] <=> $a['primary'])
+        );
+
+        return array_values($indexes);
+    }
+
+    /**
+     * Ajoute un index mono-colonne sur la table physique d'un storage
+     * interne (bytable=0 uniquement : ALTER TABLE sûr sur une table dont le
+     * composant est propriétaire).
+     */
+    public function addIndexFromRequest(int $storageId): bool
+    {
+        $storage = $this->getItem($storageId);
+        if (!$storage || !empty($storage->bytable) || empty($storage->name)) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_INDEX_ADD_FAILED_STORAGE'));
+        }
+
+        $input = $this->getInput();
+        $jform = $input->post->get('jform', [], 'array');
+        $column = trim((string) ($jform['index_column'] ?? ''));
+
+        if ($column === '' || !preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $column)) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_INDEX_ADD_FAILED_NO_COLUMN'));
+        }
+
+        $db = $this->getDatabase();
+        $prefixedTable = $db->getPrefix() . $storage->name;
+
+        try {
+            $columns = (array) $db->getTableColumns($prefixedTable, true);
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+            throw new \RuntimeException(Text::sprintf('COM_CONTENTBUILDERNG_INDEX_ADD_FAILED_COLUMN', $column, $e->getMessage()));
+        }
+
+        $columnsLower = array_change_key_case($columns, CASE_LOWER);
+        if (!isset($columnsLower[strtolower($column)])) {
+            throw new \RuntimeException(Text::sprintf('COM_CONTENTBUILDERNG_INDEX_ADD_FAILED_UNKNOWN_COLUMN', $column));
+        }
+
+        foreach ($this->getPhysicalIndexes($storageId) as $index) {
+            if (count($index['columns']) === 1 && strcasecmp($index['columns'][0], $column) === 0) {
+                throw new \RuntimeException(Text::sprintf('COM_CONTENTBUILDERNG_INDEX_ADD_FAILED_ALREADY_EXISTS', $column));
+            }
+        }
+
+        $tableQN = $db->quoteName('#__' . $storage->name);
+        $indexName = 'idx_' . strtolower($column);
+
+        try {
+            $db->setQuery(
+                'ALTER TABLE ' . $tableQN
+                . ' ADD INDEX ' . $db->quoteName($indexName) . ' (' . $db->quoteName($column) . ')'
+            );
+            $db->execute();
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+            throw new \RuntimeException(Text::sprintf('COM_CONTENTBUILDERNG_INDEX_ADD_FAILED_COLUMN', $column, $e->getMessage()));
+        }
+
+        return true;
+    }
+
+    /**
+     * Supprime un index de la table physique d'un storage interne
+     * (bytable=0 uniquement). La clé primaire n'est jamais une cible valide.
+     */
+    public function deleteIndex(int $storageId, string $indexName): bool
+    {
+        $storage = $this->getItem($storageId);
+        if (!$storage || !empty($storage->bytable) || empty($storage->name)) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_INDEX_DELETE_FAILED_STORAGE'));
+        }
+
+        $requestedIndexName = trim($indexName);
+        $indexName = $requestedIndexName;
+        if ($indexName === '' || $indexName === 'PRIMARY' || !preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $indexName)) {
+            throw new \RuntimeException(Text::sprintf('COM_CONTENTBUILDERNG_INDEX_DELETE_FAILED_INVALID', $requestedIndexName !== '' ? $requestedIndexName : '?'));
+        }
+
+        $db = $this->getDatabase();
+        $tableQN = $db->quoteName('#__' . $storage->name);
+
+        try {
+            $db->setQuery('ALTER TABLE ' . $tableQN . ' DROP INDEX ' . $db->quoteName($indexName));
+            $db->execute();
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+            throw new \RuntimeException(Text::sprintf('COM_CONTENTBUILDERNG_INDEX_DELETE_FAILED_NAME', $indexName, $e->getMessage()));
+        }
+
+        return true;
+    }
+
 
     /**
      * Normalisation name/title/bytable.
@@ -518,15 +662,13 @@ class StorageModel extends AdminModel
                 );
                 $db->execute();
 
-                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('storage_id') . ')');
-                $db->execute();
+                // Seul user_id est réellement filtré en WHERE (ownership,
+                // own_only/own_only_fe) : storage_id est constant sur la
+                // table d'un storage interne (cardinalité 1), created/modified
+                // ne sont jamais triés/filtrés directement (seulement via un
+                // COALESCE non indexable pour colLastModification), et
+                // modified_user_id n'est ni filtré ni trié.
                 $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('user_id') . ')');
-                $db->execute();
-                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('created') . ')');
-                $db->execute();
-                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('modified_user_id') . ')');
-                $db->execute();
-                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('modified') . ')');
                 $db->execute();
             }
 
@@ -610,18 +752,17 @@ class StorageModel extends AdminModel
                     continue;
                 }
 
+                // Seul user_id est indexé : voir la note dans le bloc
+                // !$bytable ci-dessus (storage_id constant, created/modified
+                // non exploitables tels quels, modified_user_id jamais filtré).
                 $definition = match ($missing) {
                     'id' => ' INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
-                    'storage_id' => ' INT NOT NULL DEFAULT ' . (int) $storageId
-                        . ', ADD INDEX (' . $db->quoteName('storage_id') . ')',
+                    'storage_id' => ' INT NOT NULL DEFAULT ' . (int) $storageId,
                     'user_id' => ' INT NOT NULL DEFAULT 0, ADD INDEX (' . $db->quoteName('user_id') . ')',
-                    'created' => ' DATETIME NOT NULL DEFAULT ' . $db->quote($last_update)
-                        . ', ADD INDEX (' . $db->quoteName('created') . ')',
+                    'created' => ' DATETIME NOT NULL DEFAULT ' . $db->quote($last_update),
                     'created_by' => " VARCHAR(255) NOT NULL DEFAULT ''",
-                    'modified_user_id' => ' INT NOT NULL DEFAULT 0, ADD INDEX ('
-                        . $db->quoteName('modified_user_id') . ')',
-                    'modified' => ' DATETIME NULL DEFAULT NULL, ADD INDEX ('
-                        . $db->quoteName('modified') . ')',
+                    'modified_user_id' => ' INT NOT NULL DEFAULT 0',
+                    'modified' => ' DATETIME NULL DEFAULT NULL',
                     'modified_by' => " VARCHAR(255) NOT NULL DEFAULT ''",
                 };
 
@@ -672,10 +813,13 @@ class StorageModel extends AdminModel
                 Logger::exception($e);
             }
         } elseif ($isNew) {
-            Logger::warning('External table has no id column; existing rows were not referenced', [
-                'table' => $name,
-                'storageId' => $storageId,
-            ]);
+            // bytable=2 (table externe connue, protégée) exige une colonne id
+            // existante : contrairement à bytable=1, aucun ALTER n'est jamais
+            // exécuté dessus, donc le CRUD des enregistrements (basé sur id)
+            // ne peut pas fonctionner sans elle.
+            throw new \RuntimeException(
+                Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_BYTABLE2_MISSING_ID', $db->replacePrefix($name))
+            );
         }
     }
 

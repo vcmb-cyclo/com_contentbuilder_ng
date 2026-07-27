@@ -69,6 +69,7 @@ class HtmlView extends BaseHtmlView
     public int $rating_count = 0;
     public int $rating_sum = 0;
     public int $direct_storage_read_only = 0;
+    public float $render_time_ms = 0;
 
     private function getApp(): SiteApplication
     {
@@ -272,6 +273,7 @@ class HtmlView extends BaseHtmlView
 
 	function display($tpl = null)
 	{
+        $debugRenderStart = microtime(true);
         $app = $this->getApp();
 		// Get data from the model
 		$this->frontend = $app->isClient('site');
@@ -524,6 +526,10 @@ class HtmlView extends BaseHtmlView
 		$this->next_record_id = (int) ($siblings['next'] ?? 0);
 		$this->prev_record_start = (int) ($siblings['previous_start'] ?? 0);
 		$this->next_record_start = (int) ($siblings['next_start'] ?? 0);
+
+		if (!empty($this->debug_mode)) {
+			$this->render_time_ms = round((microtime(true) - $debugRenderStart) * 1000, 1);
+		}
 
 		parent::display($tpl);
 	}

@@ -77,6 +77,7 @@ $csvToggleTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_CSV_TOGGLE_TOOLTIP');
 $addFieldTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_ADD_FIELD_TOOLTIP');
 $tabStorageTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_TAB_TOOLTIP');
 $tabInfoTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_INFO_TAB_TOOLTIP');
+$tabIndexTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_INDEX_TAB_TOOLTIP');
 $storageTabLabel = static function (string $iconClass, string $labelKey): string {
     return '<span class="' . htmlspecialchars($iconClass, ENT_QUOTES, 'UTF-8') . '" aria-hidden="true"></span> '
         . htmlspecialchars(Text::_($labelKey), ENT_QUOTES, 'UTF-8');
@@ -678,6 +679,24 @@ function cbDeleteStorageField(checkboxId) {
     return listItemTask(checkboxId, 'storage.listDelete');
 }
 
+function cbDeleteStorageIndex(indexName) {
+    var message = (window.Joomla && typeof Joomla.Text._ === 'function')
+        ? Joomla.Text._('COM_CONTENTBUILDERNG_CONFIRM_DELETE_ONE').replace('%s', indexName)
+        : null;
+
+    if (message !== null && !window.confirm(message)) {
+        return false;
+    }
+
+    var input = document.getElementById('cb-storage-index-name-input');
+    if (input) {
+        input.value = indexName;
+    }
+
+    cbStorageSubmitbutton('storage.deleteindex');
+    return false;
+}
+
 function cbStorageShouldIgnoreDirtyField(field) {
     if (!field || !field.name) {
         return true;
@@ -1166,7 +1185,8 @@ function initStorageTabTooltips(attempt) {
 
     adminUi.applyTabTooltips('view-pane', {
         tab0: <?php echo json_encode($tabStorageTooltip, JSON_UNESCAPED_UNICODE); ?>,
-        tab1: <?php echo json_encode($tabInfoTooltip, JSON_UNESCAPED_UNICODE); ?>
+        tab1: <?php echo json_encode($tabInfoTooltip, JSON_UNESCAPED_UNICODE); ?>,
+        tab2: <?php echo json_encode($tabIndexTooltip, JSON_UNESCAPED_UNICODE); ?>
     }, attempt || 0);
 }
 
@@ -1311,6 +1331,15 @@ echo LayoutHelper::render('storage.information_tab', [
     'createdBy' => $createdBy,
     'modifiedBy' => $modifiedBy,
     'formatDate' => $formatDate,
+    'usingForms' => $this->usingForms,
+], JPATH_COMPONENT_ADMINISTRATOR . '/layouts');
+echo HTMLHelper::_('uitab.endTab');
+echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', $storageTabLabel('fa-solid fa-list-ol', 'COM_CONTENTBUILDERNG_STORAGE_INDEX'));
+echo LayoutHelper::render('storage.index_tab', [
+    'item' => $this->item,
+    'storageId' => $storageId,
+    'indexes' => $this->indexes,
+    'indexableColumns' => $this->indexableColumns,
 ], JPATH_COMPONENT_ADMINISTRATOR . '/layouts');
 echo HTMLHelper::_('uitab.endTab');
 echo HTMLHelper::_('uitab.endTabSet');

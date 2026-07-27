@@ -89,6 +89,7 @@ class HtmlView extends BaseHtmlView
     public float $rating = 0.0;
     public int $rating_count = 0;
     public int $rating_sum = 0;
+    public float $render_time_ms = 0;
 
     protected $state;
     protected $item;
@@ -732,6 +733,7 @@ class HtmlView extends BaseHtmlView
     #[\Override]
     public function display($tpl = null): void
     {
+        $debugRenderStart = microtime(true);
         $app = $this->getApp();
         /** @var EditModel|null $model */
         $model = $this->getModel();
@@ -829,6 +831,10 @@ class HtmlView extends BaseHtmlView
                 Text::_('COM_CONTENTBUILDERNG_EDIT_MODEL_NOT_FOUND'),
                 'warning'
             );
+        }
+
+        if (!empty($this->debug_mode)) {
+            $this->render_time_ms = round((microtime(true) - $debugRenderStart) * 1000, 1);
         }
 
         parent::display($tpl);

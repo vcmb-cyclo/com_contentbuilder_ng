@@ -13,6 +13,7 @@ namespace CB\Component\Contentbuilderng\Administrator\View\Storage;
 
 \defined('_JEXEC') or die;
 
+use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
@@ -47,6 +48,12 @@ class HtmlView extends BaseHtmlView
     public string $storageTableErrorMessage = '';
     public string $wizardReturnUrl = '';
     public string $dataTableName = '';
+    /** @var array<int,array{name:string,columns:array<int,string>,unique:bool}> */
+    public array $indexes = [];
+    /** @var array<int,string> */
+    public array $indexableColumns = [];
+    /** @var array<int,object{id:int,name:string,title:string}> */
+    public array $usingForms = [];
 
     private function getApp(): CMSApplicationInterface
     {
@@ -173,6 +180,56 @@ class HtmlView extends BaseHtmlView
                 Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_LOAD_FIELDS_ERROR', $e->getMessage()),
                 'warning'
             );
+        }
+
+        // Onglet Index : uniquement pour un storage interne (bytable=0),
+        // seul cas où un ALTER TABLE sur la table physique est sûr.
+        if (!$isBytableStorage && $storageId > 0) {
+            try {
+                /** @var \CB\Component\Contentbuilderng\Administrator\Model\StorageModel $storageModel */
+                $storageModel = $this->getModel();
+                $this->indexes = $storageModel->getPhysicalIndexes($storageId);
+
+                $indexedColumns = [];
+                foreach ($this->indexes as $index) {
+                    if (count($index['columns']) === 1) {
+                        $indexedColumns[strtolower($index['columns'][0])] = true;
+                    }
+                }
+
+                $physicalColumns = $this->getDatabase()->getTableColumns($this->dataTableName, true);
+                foreach (array_keys((array) $physicalColumns) as $columnName) {
+                    $columnName = (string) $columnName;
+                    if ($columnName === '' || strtolower($columnName) === 'id' || isset($indexedColumns[strtolower($columnName)])) {
+                        continue;
+                    }
+                    $this->indexableColumns[] = $columnName;
+                }
+            } catch (\Throwable $e) {
+                $app->enqueueMessage(
+                    Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_LOAD_INDEXES_ERROR', $e->getMessage()),
+                    'warning'
+                );
+            }
+        }
+
+        // Formulaires construits sur ce storage (type=com_contentbuilderng,
+        // reference_id=storage.id), pour le lien "Formulaires" de l'onglet
+        // Administration.
+        if ($storageId > 0) {
+            try {
+                $db = $this->getDatabase();
+                $query = $db->getQuery(true)
+                    ->select($db->quoteName(['id', 'name', 'title']))
+                    ->from($db->quoteName('#__contentbuilderng_forms'))
+                    ->where($db->quoteName('type') . ' = ' . $db->quote('com_contentbuilderng'))
+                    ->where($db->quoteName('reference_id') . ' = ' . $storageId)
+                    ->order($db->quoteName('title'));
+                $db->setQuery($query);
+                $this->usingForms = $db->loadObjectList() ?: [];
+            } catch (\Throwable $e) {
+                Logger::exception($e);
+            }
         }
 
         $isNew = ((int) ($this->item->id ?? 0) < 1);

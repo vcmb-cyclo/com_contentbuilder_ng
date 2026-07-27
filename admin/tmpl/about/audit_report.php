@@ -385,6 +385,7 @@ use Joomla\CMS\Router\Route;
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('audit_columns'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 10;">
                 <h4 class="h6 mt-3<?php echo $hasMissingAuditColumnIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('audit_columns', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MISSING_AUDIT_COLUMNS'), $hasMissingAuditColumnIssues); ?></h4>
+                <div class="alert alert-info py-1 px-2 small mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_INDEX_SCOPE_NOTE'); ?></div>
                 <?php if (empty($missingAuditColumns)) : ?>
                     <div class="alert cb-audit-ok-alert">
                         <span class="cb-audit-section-title">
@@ -407,14 +408,24 @@ use Joomla\CMS\Router\Route;
                             </thead>
                             <tbody>
                             <?php $missingAuditColumnRowNumber = 1; ?>
-                            <?php foreach ($missingAuditColumns as $missingAuditColumn) : ?>
-                                <tr>
+                            <?php foreach ($missingAuditColumns as $missingAuditColumn) :
+                                $missingAuditColumnNames = (array) ($missingAuditColumn['missing'] ?? []);
+                                $missingAuditColumnIsId = in_array('id', $missingAuditColumnNames, true);
+                            ?>
+                                <tr class="<?php echo $missingAuditColumnIsId ? 'table-danger' : ''; ?>">
                                     <td><?php echo $missingAuditColumnRowNumber++; ?></td>
                                     <td><?php echo htmlspecialchars((string) ($missingAuditColumn['table'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo (int) ($missingAuditColumn['storage_id'] ?? 0); ?></td>
                                     <td><?php echo htmlspecialchars((string) ($missingAuditColumn['storage_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo Text::_((int) ($missingAuditColumn['bytable'] ?? 0) > 0 ? 'JYES' : 'JNO'); ?></td>
-                                    <td><?php echo htmlspecialchars(implode(', ', (array) ($missingAuditColumn['missing'] ?? [])), ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td>
+                                        <?php echo htmlspecialchars(implode(', ', array_diff($missingAuditColumnNames, ['id'])), ENT_QUOTES, 'UTF-8'); ?>
+                                        <?php if ($missingAuditColumnIsId) : ?>
+                                            <span class="badge bg-danger" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MISSING_ID_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
+                                                <?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MISSING_ID_BADGE'); ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>

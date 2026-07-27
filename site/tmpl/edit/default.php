@@ -794,6 +794,9 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
             <span class="badge text-bg-danger fs-6 px-3 py-2">
                 <span class="fa-solid fa-bug me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_BADGE'); ?>
             </span>
+            <span class="badge text-bg-secondary fs-6 px-3 py-2 ms-2">
+                <span class="fa-solid fa-stopwatch me-1" aria-hidden="true"></span><?php echo Text::sprintf('COM_CONTENTBUILDERNG_DEBUG_RENDER_TIME', $this->render_time_ms); ?>
+            </span>
         </div>
         <?php
         $debugPermissions = DebugPermissionHelper::resolvePermissions(

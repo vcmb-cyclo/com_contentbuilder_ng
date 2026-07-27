@@ -32,6 +32,10 @@ final class StorageSystemFieldHelper
     public static function definitions(): array
     {
         return [
+            'id' => [
+                'label' => Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_ID'),
+                'sql_type' => 'int',
+            ],
             'user_id' => [
                 'label' => Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_USER_ID'),
                 'sql_type' => 'int',

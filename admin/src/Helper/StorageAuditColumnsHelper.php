@@ -34,14 +34,16 @@ final class StorageAuditColumnsHelper
     ];
 
     /**
-     * Performance indexes expected on storage record tables.
+     * Performance indexes expected on storage record tables. Only user_id is
+     * actually filtered in WHERE clauses (ownership checks, own_only/
+     * own_only_fe); storage_id is constant on an internal storage's own
+     * table (cardinality 1), and created/modified/modified_user_id are
+     * never filtered or sorted on directly (created/modified only feed a
+     * COALESCE expression for colLastModification, which a plain index
+     * cannot serve).
      */
     private const INDEX_COLUMNS = [
-        'storage_id',
         'user_id',
-        'created',
-        'modified_user_id',
-        'modified',
     ];
 
     /**

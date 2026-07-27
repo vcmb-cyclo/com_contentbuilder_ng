@@ -209,6 +209,12 @@ class FormController extends BaseFormController
             $append .= '&' . $urlVar . '=' . (int) $recordId;
         }
 
+        // Le core ne reprend pas ce paramètre : sans cela, "Appliquer" depuis
+        // l'assistant fait retomber l'écran hors du fil de l'assistant.
+        if ($this->input->getBool('wizard', false)) {
+            $append .= '&wizard=1';
+        }
+
         return $append;
     }
 
