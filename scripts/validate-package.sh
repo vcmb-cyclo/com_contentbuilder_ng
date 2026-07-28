@@ -23,6 +23,9 @@ required=(
     "plugins/content/contentbuilderng_cbstats/contentbuilderng_cbstats.xml"
     "plugins/content/contentbuilderng_cbstats/services/provider.php"
     "plugins/content/contentbuilderng_cbstats/media/joomla.asset.json"
+    "plugins/content/contentbuilderng_cblist/contentbuilderng_cblist.xml"
+    "plugins/content/contentbuilderng_cblist/services/provider.php"
+    "plugins/content/contentbuilderng_cblist/media/joomla.asset.json"
 )
 
 for path in "${required[@]}"; do

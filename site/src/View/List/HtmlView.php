@@ -22,6 +22,7 @@ use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Uri\Uri;
 use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 class HtmlView extends BaseHtmlView
 {
@@ -60,6 +61,7 @@ class HtmlView extends BaseHtmlView
 
         // Get data from the model
         $subject = $this->get('Data');
+        $this->applyEmbeddedFieldFilter($subject, $app);
         $themePlugin = (string) ($subject->theme_plugin ?? '');
         if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
             $themePlugin = 'thoth';
@@ -188,5 +190,48 @@ class HtmlView extends BaseHtmlView
         }
 
         parent::display($tpl);
+    }
+
+    private function applyEmbeddedFieldFilter(object $subject, SiteApplication $app): void
+    {
+        $input = $app->getInput();
+        if (!EmbeddedListFieldFilterService::isEmbeddedRequest($input->getCmd('cblist_embed', ''))) {
+            return;
+        }
+
+        $rawSelectors = trim((string) $input->getString('cblist_fields', ''));
+        if ($rawSelectors === '') {
+            return;
+        }
+
+        $visibleColumns = is_array($subject->visible_cols ?? null) ? $subject->visible_cols : [];
+        $labels = is_array($subject->labels ?? null) ? $subject->labels : [];
+        $form = $subject->form ?? null;
+        $names = is_object($form) && method_exists($form, 'getElementNames')
+            ? (array) $form->getElementNames()
+            : [];
+        $filteredColumns = EmbeddedListFieldFilterService::filter(
+            $visibleColumns,
+            $labels,
+            $names,
+            $rawSelectors
+        );
+        $allowedReferences = array_fill_keys(
+            array_map(static fn(int|string $referenceId): string => (string) $referenceId, $filteredColumns),
+            true
+        );
+
+        $subject->visible_cols = $filteredColumns;
+        $subject->labels = array_filter(
+            $labels,
+            static fn(int|string $referenceId): bool => isset($allowedReferences[(string) $referenceId]),
+            ARRAY_FILTER_USE_KEY
+        );
+        $subject->linkable_elements = array_values(
+            array_filter(
+                is_array($subject->linkable_elements ?? null) ? $subject->linkable_elements : [],
+                static fn(int|string $referenceId): bool => isset($allowedReferences[(string) $referenceId])
+            )
+        );
     }
 }
