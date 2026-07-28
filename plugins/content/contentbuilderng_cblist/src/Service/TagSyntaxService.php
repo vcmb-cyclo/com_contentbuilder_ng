@@ -8,7 +8,7 @@ namespace CB\Plugin\Content\ContentbuilderngList\Service;
 
 final class TagSyntaxService
 {
-    public const TAG_PATTERN = '/\{CBList\b([^}]*)\}/i';
+    public const TAG_PATTERN = '/\{CBList\b((?:[^}"\']+|"(?:\\\\.|[^"\\\\])*"|\'(?:\\\\.|[^\'\\\\])*\')*)\}/i';
 
     /**
      * @return array<string, string>

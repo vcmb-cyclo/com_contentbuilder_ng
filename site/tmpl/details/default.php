@@ -29,6 +29,7 @@ use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewColorModeHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 $frontend = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->isClient('site');
 $permissionService = PermissionService::createFromRuntimeContext();
@@ -82,11 +83,12 @@ $listLimit = (int) $listState['limit'];
 $listOrdering = (string) $listState['ordering'];
 $listDirection = (string) $listState['direction'];
 $listQuery = NavigationLinkHelper::buildListQuery($listStart, $listLimit, $listOrdering, $listDirection);
-$embeddedListFields = $input->getBool('cblist_embed', false)
+$embeddedListContext = (string) $input->getCmd('cblist_embed', '');
+$embeddedListFields = EmbeddedListFieldFilterService::isEmbeddedRequest($embeddedListContext)
     ? trim((string) $input->getString('cblist_fields', ''))
     : '';
 $embeddedListParams = $embeddedListFields !== ''
-    ? ['cblist_embed' => 1, 'cblist_fields' => $embeddedListFields]
+    ? ['cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT, 'cblist_fields' => $embeddedListFields]
     : [];
 $embeddedListQuery = $embeddedListParams !== []
     ? '&' . http_build_query($embeddedListParams)

@@ -6,6 +6,7 @@ namespace CB\Plugin\Content\ContentbuilderngList\Extension;
 
 \defined('_JEXEC') or die;
 
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 use CB\Plugin\Content\ContentbuilderngList\Service\EmbedOptionsService;
 use CB\Plugin\Content\ContentbuilderngList\Service\TagSyntaxService;
 use Joomla\CMS\Application\SiteApplication;
@@ -71,7 +72,7 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
             'task' => 'list.display',
             'id' => $options['id'],
             'tmpl' => 'component',
-            'cblist_embed' => 1,
+            'cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT,
         ];
 
         if ($options['itemid'] > 0) {

@@ -195,7 +195,7 @@ class HtmlView extends BaseHtmlView
     private function applyEmbeddedFieldFilter(object $subject, SiteApplication $app): void
     {
         $input = $app->getInput();
-        if (!$input->getBool('cblist_embed', false)) {
+        if (!EmbeddedListFieldFilterService::isEmbeddedRequest($input->getCmd('cblist_embed', ''))) {
             return;
         }
 

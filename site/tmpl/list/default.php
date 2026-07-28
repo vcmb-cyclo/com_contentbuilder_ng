@@ -31,6 +31,7 @@ use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewColorModeHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 /** @var SiteApplication $app */
 $app = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication();
@@ -169,11 +170,12 @@ if ($currentListLayout === '') {
     $currentListLayout = 'default';
 }
 $currentListLayoutQuery = $currentListLayout !== 'default' ? '&layout=' . rawurlencode($currentListLayout) : '';
-$embeddedListFields = $input->getBool('cblist_embed', false)
+$embeddedListContext = (string) $input->getCmd('cblist_embed', '');
+$embeddedListFields = EmbeddedListFieldFilterService::isEmbeddedRequest($embeddedListContext)
     ? trim((string) $input->getString('cblist_fields', ''))
     : '';
 $embeddedListParams = $embeddedListFields !== ''
-    ? ['cblist_embed' => 1, 'cblist_fields' => $embeddedListFields]
+    ? ['cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT, 'cblist_fields' => $embeddedListFields]
     : [];
 $embeddedListQuery = $embeddedListParams !== []
     ? '&' . http_build_query($embeddedListParams)
@@ -1543,7 +1545,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	<input type="hidden" name="boxchecked" value="0" />
 	<input type="hidden" name="Itemid" value="<?php echo \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0); ?>" />
 	<?php if ($embeddedListParams !== []) : ?>
-	<input type="hidden" name="cblist_embed" value="1" />
+	<input type="hidden" name="cblist_embed" value="<?php echo EmbeddedListFieldFilterService::REQUEST_CONTEXT; ?>" />
 	<input type="hidden" name="cblist_fields" value="<?php echo htmlspecialchars($embeddedListFields, ENT_QUOTES, 'UTF-8'); ?>" />
 	<?php endif; ?>
 	<?php if ($currentListLayout !== 'default') : ?>

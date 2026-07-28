@@ -57,6 +57,18 @@ final class CbListPluginTest extends TestCase
         );
     }
 
+    public function testTagPatternAllowsClosingBraceInsideQuotedTitle(): void
+    {
+        $tag = '{CBList id=25 title="Registrations } archived"}';
+
+        self::assertSame(1, preg_match(TagSyntaxService::TAG_PATTERN, $tag, $matches));
+        self::assertSame($tag, $matches[0]);
+        self::assertSame(
+            'Registrations } archived',
+            TagSyntaxService::parseAttributes((string) $matches[1])['title']
+        );
+    }
+
     #[DataProvider('invalidOptionsProvider')]
     public function testInvalidOptionsAreRejected(array $attributes): void
     {
@@ -118,6 +130,17 @@ final class CbListPluginTest extends TestCase
                 'Name,Town'
             )
         );
+    }
+
+    public function testEmbeddedRequestRequiresExplicitPublicContext(): void
+    {
+        self::assertTrue(
+            EmbeddedListFieldFilterService::isEmbeddedRequest(
+                EmbeddedListFieldFilterService::REQUEST_CONTEXT
+            )
+        );
+        self::assertFalse(EmbeddedListFieldFilterService::isEmbeddedRequest('1'));
+        self::assertFalse(EmbeddedListFieldFilterService::isEmbeddedRequest(''));
     }
 
     public function testPluginIsBundledAndInstalled(): void

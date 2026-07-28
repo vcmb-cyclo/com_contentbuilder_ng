@@ -9,6 +9,16 @@ namespace CB\Component\Contentbuilderng\Site\Service;
 final class EmbeddedListFieldFilterService
 {
     /**
+     * Public rendering context marker, not an authorization token.
+     */
+    public const REQUEST_CONTEXT = 'content-plugin';
+
+    public static function isEmbeddedRequest(string $context): bool
+    {
+        return $context === self::REQUEST_CONTEXT;
+    }
+
+    /**
      * @param array<int|string, int|string> $visibleColumns
      * @param array<int|string, string>     $labels
      * @param array<int|string, string>     $names
