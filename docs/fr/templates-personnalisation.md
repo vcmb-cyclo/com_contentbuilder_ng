@@ -130,12 +130,15 @@ l’article :
 ```
 
 Le paramètre facultatif `itemid` applique les réglages d’un élément de menu
-ContentBuilder NG existant. `layout` sélectionne une mise en page de liste,
-`height` définit la hauteur minimale en pixels, `loading` accepte `lazy` ou
-`eager`, et `title` fournit le titre accessible du cadre :
+ContentBuilder NG existant. `layout` sélectionne une mise en page de liste.
+`fields` conserve un sous-ensemble de champs séparés par des virgules, en
+utilisant leurs noms source, leurs identifiants de référence ou leurs libellés
+exacts ; il peut uniquement réduire les champs déjà visibles et autorisés dans
+la vue. `height` définit la hauteur minimale en pixels, `loading` accepte `lazy`
+ou `eager`, et `title` fournit le titre accessible du cadre :
 
 ```text
-{CBList id=25 itemid=142 layout=cards height=700 title="Inscriptions"}
+{CBList id=25 itemid=142 layout=cards fields="Nom,Email,Ville" height=700 title="Inscriptions"}
 ```
 
 Le cadre intégré adapte automatiquement sa hauteur et conserve les ACL, les

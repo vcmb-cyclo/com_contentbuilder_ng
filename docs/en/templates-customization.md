@@ -105,12 +105,14 @@ article while keeping the component request isolated from the article:
 ```
 
 The optional `itemid` parameter applies the settings of an existing
-ContentBuilder NG menu item. `layout` selects a list layout, `height` sets the
-minimum height in pixels, `loading` accepts `lazy` or `eager`, and `title`
-provides the accessible frame title:
+ContentBuilder NG menu item. `layout` selects a list layout. `fields` keeps a
+comma-separated subset of fields using their source names, reference IDs or
+exact labels; it can only reduce the fields already visible and allowed by the
+view. `height` sets the minimum height in pixels, `loading` accepts `lazy` or
+`eager`, and `title` provides the accessible frame title:
 
 ```text
-{CBList id=25 itemid=142 layout=cards height=700 title="Registrations"}
+{CBList id=25 itemid=142 layout=cards fields="Name,Email,Town" height=700 title="Registrations"}
 ```
 
 The embedded frame resizes automatically and preserves the list ACLs, filters,

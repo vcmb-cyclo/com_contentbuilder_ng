@@ -169,6 +169,15 @@ if ($currentListLayout === '') {
     $currentListLayout = 'default';
 }
 $currentListLayoutQuery = $currentListLayout !== 'default' ? '&layout=' . rawurlencode($currentListLayout) : '';
+$embeddedListFields = $input->getBool('cblist_embed', false)
+    ? trim((string) $input->getString('cblist_fields', ''))
+    : '';
+$embeddedListParams = $embeddedListFields !== ''
+    ? ['cblist_embed' => 1, 'cblist_fields' => $embeddedListFields]
+    : [];
+$embeddedListQuery = $embeddedListParams !== []
+    ? '&' . http_build_query($embeddedListParams)
+    : '';
 $previewLayoutOptions = [
     'default' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_DEFAULT'),
     'listone' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_LISTONE'),
@@ -523,7 +532,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 <?php endif; ?>
 <?php echo $this->intro_text; ?>
 
-	<form action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=list.display&' . $listTarget . $currentListLayoutQuery . '&Itemid=' . (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . $previewQuery); ?>"
+	<form action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=list.display&' . $listTarget . $currentListLayoutQuery . '&Itemid=' . (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . $embeddedListQuery . $previewQuery); ?>"
 		method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm" class="cb-list-template-<?php echo htmlspecialchars($cbListTemplateVariant, ENT_QUOTES, 'UTF-8'); ?><?php echo !empty($this->list_header_sticky) && !$isCardsVariant && !$isTilesVariant ? ' cb-list-has-sticky-header' : ''; ?>">
 	<?php
 	$showNewButton = ($new_allowed && !empty($this->new_button));
@@ -537,7 +546,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 		'backtolist' => 1,
 		($directStorageMode ? 'storage_id' : 'id') => $directStorageMode ? $directStorageId : (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0),
 		'Itemid' => (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0),
-	];
+	] + $embeddedListParams;
 	$listEditTmpl = (string) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string');
 	if ($listEditTmpl !== '') {
 		$listEditBaseParams['tmpl'] = $listEditTmpl;
@@ -560,7 +569,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 		'backtolist' => 1,
 		($directStorageMode ? 'storage_id' : 'id') => $directStorageMode ? $directStorageId : (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0),
 		'Itemid' => (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0),
-	];
+	] + $embeddedListParams;
 	if ($listEditTmpl !== '') {
 		$listPublishBaseParams['tmpl'] = $listEditTmpl;
 	}
@@ -580,7 +589,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 		'task' => 'details.display',
 		($directStorageMode ? 'storage_id' : 'id') => $directStorageMode ? $directStorageId : (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0),
 		'Itemid' => (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0),
-	];
+	] + $embeddedListParams;
 	$listTmpl = (string) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string');
 	if ($listTmpl !== '') {
 		$listDetailsBaseParams['tmpl'] = $listTmpl;
@@ -1533,6 +1542,10 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	<input type="hidden" name="view" id="view" value="list" />
 	<input type="hidden" name="boxchecked" value="0" />
 	<input type="hidden" name="Itemid" value="<?php echo \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0); ?>" />
+	<?php if ($embeddedListParams !== []) : ?>
+	<input type="hidden" name="cblist_embed" value="1" />
+	<input type="hidden" name="cblist_fields" value="<?php echo htmlspecialchars($embeddedListFields, ENT_QUOTES, 'UTF-8'); ?>" />
+	<?php endif; ?>
 	<?php if ($currentListLayout !== 'default') : ?>
 	<input type="hidden" name="layout" value="<?php echo htmlspecialchars($currentListLayout, ENT_QUOTES, 'UTF-8'); ?>" />
 	<?php endif; ?>
