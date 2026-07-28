@@ -17,9 +17,11 @@ use Joomla\CMS\Language\Text;
 $item = $displayData['item'] ?? null;
 $storageId = (int) ($displayData['storageId'] ?? 0);
 /** @var array<int,array{name:string,columns:array<int,string>,unique:bool}> $indexes */
-$indexes = is_array($displayData['indexes'] ?? null) ? $displayData['indexes'] : [];
+$indexesData = $displayData['indexes'] ?? null;
+$indexes = is_array($indexesData) ? $indexesData : [];
 /** @var array<int,string> $indexableColumns */
-$indexableColumns = is_array($displayData['indexableColumns'] ?? null) ? $displayData['indexableColumns'] : [];
+$indexableColumnsData = $displayData['indexableColumns'] ?? null;
+$indexableColumns = is_array($indexableColumnsData) ? $indexableColumnsData : [];
 $isBytable = (int) ($item->bytable ?? 0) !== 0;
 ?>
 <div class="m-3">

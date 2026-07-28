@@ -16,7 +16,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 
 /** @var array<int,object{id:int,name:string,title:string}> $usingForms */
-$usingForms = is_array($displayData['usingForms'] ?? null) ? $displayData['usingForms'] : [];
+$usingFormsData = $displayData['usingForms'] ?? null;
+$usingForms = is_array($usingFormsData) ? $usingFormsData : [];
 ?>
 <div class="m-3">
     <ul class="list-unstyled mb-0">
