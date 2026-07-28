@@ -394,3 +394,5 @@ The `action=cbstats` URL accepts `avg`, `histogram`, `line` and `radar`.
 `ranges=18-29;30-39;40-49;50-59;60+` creates inclusive, declaration-ordered
 numeric ranges; overlaps are allowed. Chart outputs return normalized
 `total` and `items` data without HTML. Radar is recommended with 4 to 6 axes.
+Only `minimum-maximum` and `minimum+` are valid range items. Text such as
+`ranges=Gravel;Route` is rejected; omit `ranges` to count text field values.

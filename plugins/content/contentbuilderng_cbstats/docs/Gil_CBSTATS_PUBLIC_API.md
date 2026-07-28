@@ -410,6 +410,14 @@ are evaluated independently, so overlaps are intentionally supported:
 ranges="18-35;30-45;40-55;50+"
 ```
 
+`ranges=` is strictly numeric. For example, `ranges="Gravel;Route"` is rejected
+with a diagnostic identifying the first invalid item. To count text values, omit
+`ranges=` and use the normal grouped output:
+
+```text
+{CBStats id=25 field=pratique output=bar}
+```
+
 `titles=` renames range labels. Ranges work with Table, JSON, Pie, Bar,
 Histogram, Line and Radar, including an `idsum` source.
 

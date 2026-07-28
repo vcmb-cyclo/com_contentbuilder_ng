@@ -69,9 +69,28 @@ final class CbStatsRc96B01Test extends TestCase
 
     public static function invalidRangesProvider(): iterable
     {
+        yield ['Gravel;Route', 'Gravel'];
         yield ['0-17;18/29;60+', '18/29'];
+        yield ['18-', '18-'];
+        yield ['+60', '+60'];
+        yield ['18--29', '18--29'];
         yield ['20-10', '20-10'];
         yield ['0-17;;60+', ''];
+    }
+
+    public function testMixedFieldDataIgnoresTextWithoutTurningItIntoRangeSyntaxError(): void
+    {
+        $ranges = StatsService::parseFieldStatsRanges('18-29;30-49');
+
+        self::assertSame([
+            '18-29' => 2,
+            '30-49' => 1,
+        ], StatsService::applyFieldStatsRanges([
+            '18' => 1,
+            '27' => 1,
+            'Gravel' => 1,
+            '42' => 1,
+        ], $ranges));
     }
 
     public function testTitlesApplyToRangesWithoutChangingTheirOrder(): void
@@ -128,6 +147,36 @@ final class CbStatsRc96B01Test extends TestCase
         self::assertStringContainsString("htmlspecialchars(\$json", $plugin);
     }
 
+    public function testInvalidRangesDiagnosticIsSharedByArticleOutputsAndUrlApi(): void
+    {
+        $plugin = (string) file_get_contents(
+            self::ROOT . '/plugins/content/contentbuilderng_cbstats/src/Extension/ContentbuilderngStats.php'
+        );
+        $controller = (string) file_get_contents(self::ROOT . '/site/src/Controller/ApiController.php');
+
+        foreach (['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar'] as $output) {
+            self::assertStringContainsString("'$output'", $plugin);
+            self::assertStringContainsString("'$output'", $controller);
+        }
+
+        self::assertStringContainsString(
+            '$exception->getCode() === StatsService::CBSTATS_ERROR_INVALID_RANGES',
+            $plugin
+        );
+        self::assertStringContainsString(
+            'htmlspecialchars($message, ENT_QUOTES, \'UTF-8\')',
+            $plugin
+        );
+        self::assertStringContainsString(
+            "'COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_RANGES'",
+            $controller
+        );
+        self::assertStringContainsString(
+            'StatsService::parseFieldStatsRanges($ranges)',
+            $controller
+        );
+    }
+
     public function testChartAssetsAreLocalResponsiveAndInitialisedOnce(): void
     {
         $javascript = (string) file_get_contents(
@@ -154,16 +203,41 @@ final class CbStatsRc96B01Test extends TestCase
     public function testNewMessagesExistInAllMaintainedLanguages(): void
     {
         foreach (['en-GB', 'fr-FR', 'de-DE'] as $locale) {
-            $strings = parse_ini_file(
+            $pluginStrings = parse_ini_file(
                 self::ROOT . '/plugins/content/contentbuilderng_cbstats/language/'
                 . $locale . '/plg_content_contentbuilderng_cbstats.ini'
             );
+            $siteStrings = parse_ini_file(
+                self::ROOT . '/site/language/' . $locale . '/com_contentbuilderng.ini'
+            );
+            $adminStrings = parse_ini_file(
+                self::ROOT . '/admin/language/' . $locale . '/com_contentbuilderng.ini'
+            );
 
-            self::assertIsArray($strings);
-            self::assertArrayHasKey('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_RANGES', $strings);
-            self::assertArrayHasKey('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_CHART_ARIA_LABEL', $strings);
-            self::assertArrayHasKey('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_RADAR_TOO_FEW', $strings);
-            self::assertArrayHasKey('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_RADAR_TOO_MANY', $strings);
+            self::assertIsArray($pluginStrings);
+            self::assertIsArray($siteStrings);
+            self::assertIsArray($adminStrings);
+            self::assertArrayHasKey(
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_RANGES',
+                $pluginStrings
+            );
+            self::assertSame(
+                $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_RANGES'],
+                $siteStrings['COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_RANGES']
+            );
+            self::assertSame(
+                $siteStrings['COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_RANGES'],
+                $adminStrings['COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_RANGES']
+            );
+            self::assertStringContainsString('ranges', $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_RANGES']);
+            self::assertStringContainsString('%s', $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_RANGES']);
+            self::assertStringContainsString(
+                'minimum-maximum',
+                $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_RANGES']
+            );
+            self::assertArrayHasKey('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_CHART_ARIA_LABEL', $pluginStrings);
+            self::assertArrayHasKey('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_RADAR_TOO_FEW', $pluginStrings);
+            self::assertArrayHasKey('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_RADAR_TOO_MANY', $pluginStrings);
         }
     }
 }

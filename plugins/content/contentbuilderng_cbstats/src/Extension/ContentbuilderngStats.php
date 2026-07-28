@@ -338,6 +338,17 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                     : Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_INVALID_REQUEST');
             }
 
+            if (
+                $exception instanceof \InvalidArgumentException
+                && $exception->getCode() === StatsService::CBSTATS_ERROR_INVALID_RANGES
+            ) {
+                $message = $this->getFieldStatsErrorMessage($exception);
+
+                return $debug
+                    ? $this->renderDebugMessage($message)
+                    : htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+            }
+
             if (!$debug) {
                 return (int) $exception->getCode() === 400 || $exception instanceof \InvalidArgumentException
                     ? Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_INVALID_REQUEST')

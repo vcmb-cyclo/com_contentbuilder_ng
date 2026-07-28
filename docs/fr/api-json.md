@@ -409,3 +409,6 @@ L’URL `action=cbstats` accepte `avg`, `histogram`, `line` et `radar`.
 dans l’ordre déclaré ; les chevauchements sont autorisés. Les outputs
 graphiques retournent les données normalisées `total` et `items`, sans HTML.
 Le radar est recommandé avec 4 à 6 axes.
+Seuls `minimum-maximum` et `minimum+` sont valides. Un texte tel que
+`ranges=Gravel;Route` est rejeté ; omettez `ranges` pour compter les valeurs
+textuelles du champ.
