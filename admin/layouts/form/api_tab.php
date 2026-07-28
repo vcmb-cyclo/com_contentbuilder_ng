@@ -46,6 +46,9 @@ $cbStatsTableSyntax = '{CBStats id=' . $formId . ' field=NomDuChamp output=table
 $cbStatsJsonSyntax  = '{CBStats id=' . $formId . ' field=NomDuChamp output=json}';
 $cbStatsPieSyntax   = '{CBStats id=' . $formId . ' field=NomDuChamp output=pie}';
 $cbStatsBarSyntax   = '{CBStats id=' . $formId . ' field=NomDuChamp output=bar sort=value dir=desc}';
+$cbStatsHistogramSyntax = '{CBStats id=' . $formId . ' field=Age output=histogram ranges="18-29;30-39;40-49;50-59;60+"}';
+$cbStatsLineSyntax = '{CBStats id=' . $formId . ' field=DateInscription output=line sort=title dir=asc limit=30}';
+$cbStatsRadarSyntax = '{CBStats id=' . $formId . ' field=Age output=radar ranges="18-29;30-39;40-49;50-59;60+"}';
 $cbStatsAddSyntax   = '{CBStats id=' . $formId . ' field=NomDuChamp output=pie add="Existant=-2;Externe=3"}';
 $cbStatsTitleLabel = Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_TITLE_EXAMPLE_LABEL');
 $cbStatsTitlePieSyntax = '{CBStats id=' . $formId . ' field=Parcours output=pie title="' . $cbStatsTitleLabel . '"}';
@@ -61,10 +64,15 @@ $cbStatsApiTotalUrl = 'index.php?option=com_contentbuilderng&task=api.display&id
 $cbStatsApiSumUrl = 'index.php?option=com_contentbuilderng&task=api.display&id=' . $formId . '&action=cbstats&field=NomDuChamp&output=sum';
 $cbStatsApiMinUrl = 'index.php?option=com_contentbuilderng&task=api.display&id=' . $formId . '&action=cbstats&field=NomDuChamp&output=min';
 $cbStatsApiMaxUrl = 'index.php?option=com_contentbuilderng&task=api.display&id=' . $formId . '&action=cbstats&field=NomDuChamp&output=max';
+$cbStatsApiAvgUrl = 'index.php?option=com_contentbuilderng&task=api.display&id=' . $formId . '&action=cbstats&field=NomDuChamp&output=avg';
+$cbStatsApiHistogramUrl = 'index.php?option=com_contentbuilderng&task=api.display&id=' . $formId . '&action=cbstats&field=Age&output=histogram&ranges=18-29%3B30-39%3B40-49%3B50-59%3B60%2B';
+$cbStatsApiLineUrl = 'index.php?option=com_contentbuilderng&task=api.display&id=' . $formId . '&action=cbstats&field=DateInscription&output=line&sort=title&dir=asc&limit=30';
+$cbStatsApiRadarUrl = 'index.php?option=com_contentbuilderng&task=api.display&id=' . $formId . '&action=cbstats&field=Age&output=radar&ranges=18-29%3B30-39%3B40-49%3B50-59%3B60%2B';
 $cbStatsApiFormNameUrl = 'index.php?option=com_contentbuilderng&task=api.display&id=' . $formId . '&action=cbstats&output=form_name';
 $cbStatsSumSyntax   = '{CBStats id=' . $formId . ' field=NomDuChamp output=sum}';
 $cbStatsMinSyntax   = '{CBStats id=' . $formId . ' field=NomDuChamp output=min}';
 $cbStatsMaxSyntax   = '{CBStats id=' . $formId . ' field=NomDuChamp output=max}';
+$cbStatsAvgSyntax   = '{CBStats id=' . $formId . ' field=NomDuChamp output=avg}';
 $apiPermissionRequirements = new ApiPermissionRequirementService();
 $permissionLabelKeys = [
     'api' => 'COM_CONTENTBUILDERNG_PERM_API',
@@ -166,9 +174,13 @@ $wa->useStyle('com_contentbuilderng.admin-form-api');
                     <code><?php echo htmlspecialchars($cbStatsJsonSyntax, ENT_QUOTES, 'UTF-8'); ?></code>
                     <code><?php echo htmlspecialchars($cbStatsPieSyntax, ENT_QUOTES, 'UTF-8'); ?></code>
                     <code><?php echo htmlspecialchars($cbStatsBarSyntax, ENT_QUOTES, 'UTF-8'); ?></code>
+                    <code><?php echo htmlspecialchars($cbStatsHistogramSyntax, ENT_QUOTES, 'UTF-8'); ?></code>
+                    <code><?php echo htmlspecialchars($cbStatsLineSyntax, ENT_QUOTES, 'UTF-8'); ?></code>
+                    <code><?php echo htmlspecialchars($cbStatsRadarSyntax, ENT_QUOTES, 'UTF-8'); ?></code>
                     <code><?php echo htmlspecialchars($cbStatsSumSyntax, ENT_QUOTES, 'UTF-8'); ?></code>
                     <code><?php echo htmlspecialchars($cbStatsMinSyntax, ENT_QUOTES, 'UTF-8'); ?></code>
                     <code><?php echo htmlspecialchars($cbStatsMaxSyntax, ENT_QUOTES, 'UTF-8'); ?></code>
+                    <code><?php echo htmlspecialchars($cbStatsAvgSyntax, ENT_QUOTES, 'UTF-8'); ?></code>
                 </div>
                 <span class="d-block mb-1"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_EXAMPLES_FILTERS'); ?></span>
                 <div class="cb-form-api-cbstats-examples">
@@ -190,7 +202,7 @@ $wa->useStyle('com_contentbuilderng.admin-form-api');
                 </div>
                 <strong class="d-block mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_JSON_EXAMPLE'); ?></strong>
                 <div class="cb-form-api-cbstats-examples">
-                    <?php foreach ([$cbStatsApiJsonUrl, $cbStatsApiFilteredJsonUrl, $cbStatsApiAdjustedJsonUrl, $cbStatsApiTotalUrl, $cbStatsApiSumUrl, $cbStatsApiMinUrl, $cbStatsApiMaxUrl, $cbStatsApiFormNameUrl] as $cbStatsApiUrl) : ?>
+                    <?php foreach ([$cbStatsApiJsonUrl, $cbStatsApiFilteredJsonUrl, $cbStatsApiAdjustedJsonUrl, $cbStatsApiTotalUrl, $cbStatsApiSumUrl, $cbStatsApiMinUrl, $cbStatsApiMaxUrl, $cbStatsApiAvgUrl, $cbStatsApiHistogramUrl, $cbStatsApiLineUrl, $cbStatsApiRadarUrl, $cbStatsApiFormNameUrl] as $cbStatsApiUrl) : ?>
                         <a href="<?php echo htmlspecialchars(Route::_($cbStatsApiUrl, false), ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                             <code><?php echo htmlspecialchars($cbStatsApiUrl, ENT_QUOTES, 'UTF-8'); ?></code>
                         </a>
@@ -208,13 +220,16 @@ $wa->useStyle('com_contentbuilderng.admin-form-api');
                     <li><code>output=json</code> &mdash; <?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_OUTPUT_JSON'); ?></li>
                     <li><code>output=pie</code> &mdash; <?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_OUTPUT_PIE'); ?></li>
                     <li><code>output=bar</code> &mdash; <?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_OUTPUT_BAR'); ?></li>
+                    <li><code>output=histogram</code> / <code>output=line</code> / <code>output=radar</code> &mdash; <?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_OUTPUT_CHARTS'); ?></li>
                     <li><code>output=sum</code> &mdash; <?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_OUTPUT_SUM'); ?></li>
                     <li><code>output=min</code> / <code>output=max</code> &mdash; <?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_OUTPUT_MINMAX'); ?></li>
+                    <li><code>output=avg</code> &mdash; <?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_OUTPUT_AVG'); ?></li>
                 </ul>
                 <h5 class="h6 mt-3 mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_FILTERS_TITLE'); ?></h5>
                 <p class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_FILTER_HINT'); ?></p>
                 <div class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_IDSUM_HINT'); ?></div>
                 <div class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_DISPLAY_OPTIONS_HINT'); ?></div>
+                <div class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_RANGES_HINT'); ?></div>
                 <h5 class="h6 mt-3 mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_SORT_ADD_TITLE'); ?></h5>
                 <p class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_SORT_ADD_HINT'); ?></p>
                 <div class="mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_TITLE_HINT'); ?></div>

@@ -66,8 +66,9 @@ permissions → filter and grouping in each view → merge identical labels
 ```
 
 Consequently, `titles=` cannot create artificial merge duplicates, and
-`sort=` applies to the final merged result. The global total is computed from
-the merged categories. `output=form_name` is unavailable because an `idsum`
+`sort=` applies to the final merged result. The global total is the sum of the
+real retained record totals from every authorized view; it is not derived from
+grouped field values. `output=form_name` is unavailable because an `idsum`
 source has no single view name.
 
 CBStats rejects fewer than two or more than five identifiers, invalid or
@@ -86,6 +87,7 @@ output=table
 output=sum
 output=min
 output=max
+output=avg
 ```
 
 ## 3. JSON output
@@ -318,14 +320,16 @@ All outputs must preserve the plugin's existing:
 The existing `action=cbstats` endpoint supports:
 
 ```text
-output=json|total|sum|min|max|form_name
+output=json|table|pie|bar|histogram|line|radar|total|sum|min|max|avg|form_name
 ```
 
-`field` is required for `json`, `sum`, `min` and `max`. It is not required for
-`total` or `form_name`. Filters reuse the common CBStats engine. Sorting, signed
-`add` and `titles` apply only to `json`. The JSON output remains the raw normalized
-array; scalar outputs use the standard ContentBuilder NG API success envelope.
-`table`, `pie` and `bar` are not available through the URL endpoint.
+`field` is required for list, chart and numeric aggregate outputs. It is not
+required for `total` or `form_name`. Filters and permissions reuse the common
+CBStats engine. The JSON output remains the raw normalized array. Table and
+chart names return their normalized `total` and `items` data, without HTML;
+scalar outputs use the standard ContentBuilder NG API success envelope.
+`ranges`, `titles`, `add`, `sort`, `dir` and `limit` use the same validation
+and normalization path as article tags.
 
 ## 14. Status tracking
 
@@ -338,6 +342,11 @@ Codex should update this section in the real canonical documentation after each 
 | `output=json` | 1 | Implemented and validated |
 | `output=pie` | 2 | Implemented and validated |
 | `output=bar` | 3 | Implemented and validated |
+| `ranges` | RC96-B01 | Implemented; Docker validation pending |
+| `output=avg` | RC96-B01 | Implemented; Docker validation pending |
+| `output=histogram` | RC96-B01 | Implemented; Docker validation pending |
+| `output=line` | RC96-B01 | Implemented; Docker validation pending |
+| `output=radar` | RC96-B01 | Implemented; Docker validation pending |
 | `add` external counts | Intermediate | Implemented and validated |
 | Signed `add` deltas and `titles` | Finalization | Implemented; awaiting prod-test validation |
 | URL scalar outputs | 1C | Implemented and validated |
@@ -355,7 +364,8 @@ Codex should update this section in the real canonical documentation after each 
 It is applied after the existing `sort=none|title|value` and `dir=asc|desc`.
 Without `limit`, every value is preserved. Empty, non-numeric, zero, negative,
 decimal or out-of-range integer values are rejected as invalid requests.
-It applies to `table`, `json`, `pie` and `bar`; scalar outputs are unchanged.
+It applies to `table`, `json`, `pie`, `bar`, `histogram`, `line` and `radar`;
+scalar outputs are unchanged.
 
 `total="hide"` removes only the rendered total row or box from `table`, `pie`
 and `bar`. It does not change individual values, `title=` or `titles=`. JSON
@@ -375,8 +385,48 @@ The displayed total and chart percentages are recalculated from the retained
 values only. With `total="hide"`, that limited total remains available
 internally for percentages. No `Other` category is added.
 
+When `ranges=` is present, the displayed total is instead always the real
+retained record count after permissions and filters. It is never the sum of
+ranges, including after `limit`, because overlapping ranges can legitimately
+count one record several times.
+
 ```text
 {CBStats id="25" field="Name" output="table" sort="title" dir="asc" total="hide"}
 {CBStats id="25" field="Email" output="table" sort="title" dir="asc" limit="50" total="hide"}
 {CBStats idsum="25+27" field="Town" output="table" sort="value" dir="desc" limit="10" total="hide"}
 ```
+
+## Explicit numeric ranges
+
+```text
+ranges="18-29;30-39;40-49;50-59;60+"
+```
+
+Bounds are inclusive. `minimum-maximum` and `minimum+` are accepted. Empty and
+non-numeric field values are ignored. Declaration order is preserved and ranges
+are evaluated independently, so overlaps are intentionally supported:
+
+```text
+ranges="18-35;30-45;40-55;50+"
+```
+
+`titles=` renames range labels. Ranges work with Table, JSON, Pie, Bar,
+Histogram, Line and Radar, including an `idsum` source.
+
+## Average, Histogram, Line and Radar
+
+```text
+{CBStats id=25 field=Age output=avg}
+{CBStats id=25 field=Age output=histogram ranges="18-29;30-39;40-49;50-59;60+"}
+{CBStats id=25 field=RegistrationDate output=line sort=title dir=asc limit=30}
+{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50-59;60+"}
+```
+
+`avg` is the arithmetic mean of original individual numeric values after ACLs,
+filters and an optional `idsum` merge. It ignores empty and non-numeric values
+and is independent from ranges.
+
+Histogram and Line use the same normalized counts; neither creates missing
+dates or values. Histogram stays vertical and uses horizontal scrolling when
+needed. Radar requires at least 3 axes, accepts at most 8 and is recommended
+with **4 to 6 axes**.

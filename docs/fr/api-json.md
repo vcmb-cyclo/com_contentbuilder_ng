@@ -402,3 +402,10 @@ L'API utilise l'identité et la session Joomla de la requête. Le dépôt ne fou
 dans ces fichiers un mécanisme autonome documenté de jeton API permanent :
 **À vérifier** selon l'authentification mise en place sur votre site.
 
+### Tranches et outputs CBStats RC96-B01
+
+L’URL `action=cbstats` accepte `avg`, `histogram`, `line` et `radar`.
+`ranges=18-29;30-39;40-49;50-59;60+` crée des tranches numériques inclusives,
+dans l’ordre déclaré ; les chevauchements sont autorisés. Les outputs
+graphiques retournent les données normalisées `total` et `items`, sans HTML.
+Le radar est recommandé avec 4 à 6 axes.

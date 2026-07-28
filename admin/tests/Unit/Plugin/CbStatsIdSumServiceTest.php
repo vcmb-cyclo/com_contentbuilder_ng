@@ -87,6 +87,19 @@ final class CbStatsIdSumServiceTest extends TestCase
         self::assertSame(21, $merged['records']['total']);
     }
 
+    public function testRecordTotalDoesNotUseGroupedRangeOrFieldSums(): void
+    {
+        $left = $this->payload(['18' => 3, '30' => 2]);
+        $right = $this->payload(['40' => 4]);
+        $left['records']['total'] = 8;
+        $right['records']['total'] = 7;
+
+        $merged = IdSumService::mergePayloads([$left, $right]);
+
+        self::assertSame(15, $merged['records']['total']);
+        self::assertSame(9, $merged['field']['total']);
+    }
+
     public function testAddTitlesAndSortAreAppliedAfterMerge(): void
     {
         $merged = IdSumService::mergePayloads([

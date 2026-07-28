@@ -387,3 +387,10 @@ GET /index.php?option=com_contentbuilderng&task=api.display&id=3&action=stats&fi
 The API uses the Joomla identity and session attached to the request. The inspected
 files do not document a standalone permanent API-token mechanism: **To verify** for
 the authentication system deployed on the site.
+
+### CBStats ranges and RC96-B01 outputs
+
+The `action=cbstats` URL accepts `avg`, `histogram`, `line` and `radar`.
+`ranges=18-29;30-39;40-49;50-59;60+` creates inclusive, declaration-ordered
+numeric ranges; overlaps are allowed. Chart outputs return normalized
+`total` and `items` data without HTML. Radar is recommended with 4 to 6 axes.

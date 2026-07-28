@@ -87,7 +87,7 @@ final class CbStatsTableHeaderServiceTest extends TestCase
 
     public function testManualExportPreservesHeadersForEveryVisualOutput(): void
     {
-        foreach (['table', 'pie', 'bar'] as $output) {
+        foreach (['table', 'pie', 'bar', 'histogram', 'line', 'radar'] as $output) {
             $syntax = ManualExportService::buildSyntax(
                 [['label' => 'Yvelines', 'value' => 1]],
                 $output,

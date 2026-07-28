@@ -80,6 +80,9 @@ final class CbStatsManualExportServiceTest extends TestCase
         yield ['pie'];
         yield ['bar'];
         yield ['table'];
+        yield ['histogram'];
+        yield ['line'];
+        yield ['radar'];
     }
 
     public function testPreservesFinalOrderValuesDecimalsUnicodeAndVisualOptions(): void

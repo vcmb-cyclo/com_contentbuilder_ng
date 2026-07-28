@@ -1,0 +1,35 @@
+.cbstats-chart {
+  overflow: hidden;
+}
+
+.cbstats-chart-viewport {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0.25rem;
+}
+
+.cbstats-chart-canvas-wrapper {
+  position: relative;
+  height: 22rem;
+}
+
+.cbstats-chart-histogram .cbstats-chart-canvas-wrapper,
+.cbstats-chart-line .cbstats-chart-canvas-wrapper {
+  min-width: max(100%, calc(var(--cbstats-chart-items) * 4.5rem));
+}
+
+.cbstats-chart-radar .cbstats-chart-canvas-wrapper {
+  min-width: 20rem;
+}
+
+.cbstats-chart-empty,
+.cbstats-chart-message {
+  display: inline-block;
+  padding: 0.5rem 0;
+}
+
+@media (max-width: 575.98px) {
+  .cbstats-chart-canvas-wrapper {
+    height: 19rem;
+  }
+}
