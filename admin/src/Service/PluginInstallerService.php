@@ -591,7 +591,7 @@ final class PluginInstallerService
             'system' => ['contentbuilderng_system'],
             'contentbuilderng_submit' => ['submit_sample'],
             'contentbuilderng_listaction' => ['trash', 'untrash'],
-            'content' => ['contentbuilderng_verify', 'contentbuilderng_permission_observer', 'contentbuilderng_image_scale', 'contentbuilderng_download', 'contentbuilderng_rating', 'contentbuilderng_cbstats'],
+            'content' => ['contentbuilderng_verify', 'contentbuilderng_permission_observer', 'contentbuilderng_image_scale', 'contentbuilderng_download', 'contentbuilderng_rating', 'contentbuilderng_cbstats', 'contentbuilderng_cblist'],
         ];
     }
 

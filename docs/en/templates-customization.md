@@ -88,11 +88,33 @@ Do not inject untrusted values into raw attributes or scripts without escaping.
 
 Bundled content plugins include:
 
+- `CBList`;
 - `CBDownload`;
 - `CBImageScale`;
 - `CBRating`;
 - `CBStats`;
 - verification and permission-related output.
+
+### Embedding a list view with CBList
+
+The `CBList` content plugin embeds a complete interactive list view in a Joomla
+article while keeping the component request isolated from the article:
+
+```text
+{CBList id=25}
+```
+
+The optional `itemid` parameter applies the settings of an existing
+ContentBuilder NG menu item. `layout` selects a list layout, `height` sets the
+minimum height in pixels, `loading` accepts `lazy` or `eager`, and `title`
+provides the accessible frame title:
+
+```text
+{CBList id=25 itemid=142 layout=cards height=700 title="Registrations"}
+```
+
+The embedded frame resizes automatically and preserves the list ACLs, filters,
+pagination and record actions.
 
 CBStats inserts dynamic statistics from a ContentBuilder NG view into Joomla
 content. Its general syntax is:

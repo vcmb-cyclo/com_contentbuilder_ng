@@ -111,12 +111,35 @@ JavaScript sans échappement adapté.
 Balises détectées :
 
 ```text
+{CBList ...}
 {CBDownload ...}
 {CBImageScale ...}
 {CBRating ...}
 {CBVerify ...}
 {CBStats ...}
 ```
+
+### Intégrer une vue liste avec CBList
+
+Le plugin de contenu `CBList` intègre une vue liste interactive complète dans
+un article Joomla, tout en isolant la requête du composant de celle de
+l’article :
+
+```text
+{CBList id=25}
+```
+
+Le paramètre facultatif `itemid` applique les réglages d’un élément de menu
+ContentBuilder NG existant. `layout` sélectionne une mise en page de liste,
+`height` définit la hauteur minimale en pixels, `loading` accepte `lazy` ou
+`eager`, et `title` fournit le titre accessible du cadre :
+
+```text
+{CBList id=25 itemid=142 layout=cards height=700 title="Inscriptions"}
+```
+
+Le cadre intégré adapte automatiquement sa hauteur et conserve les ACL, les
+filtres, la pagination et les actions sur les enregistrements.
 
 CBStats insère dans les contenus Joomla des statistiques dynamiques provenant
 d'une vue ContentBuilder NG. Sa syntaxe générale est :

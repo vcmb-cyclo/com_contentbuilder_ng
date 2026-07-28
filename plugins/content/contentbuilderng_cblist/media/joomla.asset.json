@@ -1,0 +1,30 @@
+{
+    "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+    "name": "plg_content_contentbuilderng_cblist",
+    "version": "6.1.7-RC96",
+    "description": "ContentBuilder NG embedded list assets",
+    "license": "GPL-2.0-or-later",
+    "assets": [
+        {
+            "name": "plg_content_contentbuilderng_cblist.embed",
+            "type": "style",
+            "uri": "plg_content_contentbuilderng_cblist/cblist.css"
+        },
+        {
+            "name": "plg_content_contentbuilderng_cblist.embed",
+            "type": "script",
+            "uri": "plg_content_contentbuilderng_cblist/cblist.js",
+            "attributes": {
+                "defer": true
+            }
+        },
+        {
+            "name": "plg_content_contentbuilderng_cblist.embed",
+            "type": "preset",
+            "dependencies": [
+                "plg_content_contentbuilderng_cblist.embed#style",
+                "plg_content_contentbuilderng_cblist.embed#script"
+            ]
+        }
+    ]
+}
