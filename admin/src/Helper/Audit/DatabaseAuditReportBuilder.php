@@ -41,6 +41,7 @@ final class DatabaseAuditReportBuilder
      *   content_record_duplicate_issues:array<int,array<string,mixed>>,
      *   invalid_datetime_sort_issues:array<int,array<string,mixed>>,
      *   generated_article_category_issues:array<int,array<string,mixed>>,
+     *   form_audits:array<int,array<string,mixed>>,
      *   cb_tables:array<string,mixed>,
      *   errors:array<int,string>
      * } $data
@@ -69,6 +70,7 @@ final class DatabaseAuditReportBuilder
         $invalidDatetimeSortIssues = (array) ($data['invalid_datetime_sort_issues'] ?? []);
         $storageColumnTypeIssues = (array) ($data['storage_column_type_issues'] ?? []);
         $generatedArticleCategoryIssues = (array) ($data['generated_article_category_issues'] ?? []);
+        $formAudits = (array) ($data['form_audits'] ?? []);
         $staleLanguageFiles = (array) ($data['stale_language_files'] ?? []);
         $staleInstallerTempDirs = (array) ($data['stale_installer_temp_dirs'] ?? []);
         $cbTableStats = (array) ($data['cb_tables'] ?? []);
@@ -144,6 +146,28 @@ final class DatabaseAuditReportBuilder
             $invalidGeneratedArticleCategoryRows += (int) ($generatedArticleCategoryIssue['invalid_article_count'] ?? 0);
         }
 
+        $formAuditIssueForms = 0;
+        $formAuditIssueChecks = 0;
+        foreach ($formAudits as $formAudit) {
+            if (!is_array($formAudit)) {
+                continue;
+            }
+
+            $hasIssues = false;
+            foreach ((array) ($formAudit['checks'] ?? []) as $check) {
+                if (!is_array($check) || (string) ($check['status'] ?? '') === 'ok') {
+                    continue;
+                }
+
+                $hasIssues = true;
+                $formAuditIssueChecks++;
+            }
+
+            if ($hasIssues) {
+                $formAuditIssueForms++;
+            }
+        }
+
         $issuesTotal = count($duplicateIndexes)
             + count($historicalTables)
             + count($historicalMenuEntries)
@@ -163,7 +187,8 @@ final class DatabaseAuditReportBuilder
             + count($storageColumnTypeIssues)
             + count($generatedArticleCategoryIssues)
             + count($staleLanguageFiles)
-            + count($staleInstallerTempDirs);
+            + count($staleInstallerTempDirs)
+            + $formAuditIssueForms;
 
         return [
             'generated_at' => (new Date())->toSql(),
@@ -194,6 +219,7 @@ final class DatabaseAuditReportBuilder
             'generated_article_category_issues' => $generatedArticleCategoryIssues,
             'stale_language_files' => $staleLanguageFiles,
             'stale_installer_temp_dirs' => $staleInstallerTempDirs,
+            'form_audits' => $formAudits,
             'cb_tables' => $cbTableStats,
             'summary' => [
                 'duplicate_index_groups' => count($duplicateIndexes),
@@ -225,6 +251,9 @@ final class DatabaseAuditReportBuilder
                 'generated_article_category_rows' => $invalidGeneratedArticleCategoryRows,
                 'stale_language_files' => count($staleLanguageFiles),
                 'stale_installer_temp_dirs' => count($staleInstallerTempDirs),
+                'form_audits' => count($formAudits),
+                'form_audit_issue_forms' => $formAuditIssueForms,
+                'form_audit_issue_checks' => $formAuditIssueChecks,
                 'issues_total' => $issuesTotal,
             ],
             'errors' => $errors,

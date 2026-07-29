@@ -22,6 +22,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Controller;
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Date\Date;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\FormController as BaseFormController;
 use Joomla\CMS\Router\Route;
@@ -405,6 +406,58 @@ class FormController extends BaseFormController
     public function formunpublish(): bool
     {
         return $this->setFormPublishedState(0, 'COM_CONTENTBUILDERNG_UNPUBLISHED');
+    }
+
+    public function repairThemePlugin(): void
+    {
+        $this->checkToken();
+
+        $formId = $this->input->post->getInt('id', $this->input->getInt('id', 0));
+        $themePlugin = trim((string) $this->input->post->getString('theme_plugin', ''));
+
+        try {
+            if ($formId <= 0 || $themePlugin !== 'thoth') {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_INVALID'));
+            }
+
+            $identity = $this->getApp()->getIdentity();
+            $formAsset = 'com_contentbuilderng.form.' . $formId;
+            if (
+                !$identity->authorise('core.manage', 'com_contentbuilderng')
+                && !$identity->authorise('core.edit', $formAsset)
+                && !$identity->authorise('core.edit', 'com_contentbuilderng')
+            ) {
+                throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+            }
+
+            $db = $this->getDatabase();
+            $query = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_forms'))
+                ->set($db->quoteName('theme_plugin') . ' = ' . $db->quote($themePlugin))
+                ->set($db->quoteName('modified') . ' = ' . $db->quote((new Date())->toSql()))
+                ->set($db->quoteName('modified_by') . ' = ' . (int) $identity->id)
+                ->where($db->quoteName('id') . ' = ' . $formId);
+            $db->setQuery($query);
+            $db->execute();
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIRED', 'Thoth');
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=audit&tmpl=component&id=' . $formId, false));
     }
 
     public function debug_on(): bool

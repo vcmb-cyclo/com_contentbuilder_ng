@@ -98,6 +98,7 @@ $contentRecordDuplicateIssues = (array) ($auditReport['content_record_duplicate_
 $invalidDatetimeSortIssues = (array) ($auditReport['invalid_datetime_sort_issues'] ?? []);
 $storageColumnTypeIssues = (array) ($auditReport['storage_column_type_issues'] ?? []);
 $generatedArticleCategoryIssues = (array) ($auditReport['generated_article_category_issues'] ?? []);
+$formAudits = (array) ($auditReport['form_audits'] ?? []);
 $staleLanguageFiles = (array) ($auditReport['stale_language_files'] ?? []);
 $staleLanguageFilesCount = (int) ($auditSummary['stale_language_files'] ?? count($staleLanguageFiles));
 $hasStaleLanguageFiles = $staleLanguageFilesCount > 0;
@@ -362,6 +363,9 @@ if ($generatedArticleCategoryRowCount === 0 && $generatedArticleCategoryIssues !
     }
 }
 $hasGeneratedArticleCategoryIssues = $generatedArticleCategoryIssueCount > 0 || $generatedArticleCategoryRowCount > 0;
+$formAuditIssueForms = (int) ($auditSummary['form_audit_issue_forms'] ?? 0);
+$formAuditIssueChecks = (int) ($auditSummary['form_audit_issue_checks'] ?? 0);
+$hasFormAuditIssues = $formAuditIssueForms > 0 || $formAuditIssueChecks > 0;
 $invalidDatetimeSortIssueCount = (int) ($auditSummary['invalid_datetime_sort_issues'] ?? count($invalidDatetimeSortIssues));
 $invalidDatetimeSortRowCount = (int) ($auditSummary['invalid_datetime_sort_rows'] ?? 0);
 if ($invalidDatetimeSortRowCount === 0 && $invalidDatetimeSortIssues !== []) {
@@ -466,6 +470,7 @@ $auditSectionNumbers = [
     'cb_estimated_size' => 33,
     'content_record_duplicates' => 34,
     'content_record_duplicate_rows' => 35,
+    'form_audits' => 36,
 ];
 $getAuditSectionNumber = static function (string $sectionId) use ($auditSectionNumbers): int {
     return (int) ($auditSectionNumbers[$sectionId] ?? 0);

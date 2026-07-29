@@ -34,7 +34,11 @@ final class FormAuditService
     /**
      * Audits a form configuration.
      *
-     * @return array{info: array<string,string>, checks: array<int,array{status:string,message:string}>}
+     * @return array{
+     *   info:array<string,string>,
+     *   checks:array<int,array{status:string,message:string,code?:string}>,
+     *   form?:array{id:int,name:string,title:string}
+     * }
      */
     public function audit(int $formId): array
     {
@@ -495,7 +499,7 @@ final class FormAuditService
     /**
      * @param array<int,array<string,mixed>> $elements
      * @param array<int|string,string> $sourceNames
-     * @return array<int,array{status:string,message:string}>
+     * @return array<int,array{status:string,message:string,code?:string}>
      */
     private function checkSourceSync(array $elements, array $sourceNames, bool $sourceAvailable, string $sourceType, string $sourceReferenceId): array
     {
@@ -523,6 +527,7 @@ final class FormAuditService
                         (string) $element['label'],
                         $referenceId
                     ),
+                    'code' => 'element_reference',
                 ];
             }
         }
@@ -608,7 +613,7 @@ final class FormAuditService
     }
 
     /**
-     * @return array<int,array{status:string,message:string}>
+     * @return array<int,array{status:string,message:string,code?:string}>
      */
     private function checkTheme(string $themePlugin): array
     {
@@ -617,6 +622,7 @@ final class FormAuditService
             return [[
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_THEME_EMPTY'),
+                'code' => 'theme_empty',
             ]];
         }
 
@@ -639,7 +645,7 @@ final class FormAuditService
 
     /**
      * @param array<int,array<string,mixed>> $elements
-     * @return array<int,array{status:string,message:string}>
+     * @return array<int,array{status:string,message:string,code?:string}>
      */
     private function checkElementReferences(array $elements): array
     {
@@ -655,6 +661,7 @@ final class FormAuditService
                         'COM_CONTENTBUILDERNG_AUDIT_CHECK_ELEMENT_REFERENCE_EMPTY',
                         (string) ($element['label'] ?? '')
                     ),
+                    'code' => 'element_reference',
                 ];
                 continue;
             }
@@ -674,6 +681,7 @@ final class FormAuditService
                     $referenceId,
                     implode(', ', $labels)
                 ),
+                'code' => 'element_reference',
             ];
         }
 

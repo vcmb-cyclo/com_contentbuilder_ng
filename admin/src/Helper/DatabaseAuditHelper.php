@@ -30,6 +30,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleInstallerTempA
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleLanguageFilesAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StorageColumnTypeAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormDisplayColumnsHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\FormAuditService;
 final class DatabaseAuditHelper
 {
 
@@ -159,6 +160,7 @@ final class DatabaseAuditHelper
      *     invalid_count:int,
      *     sample_values:array<int,string>
      *   }>,
+     *   form_audits:array<int,array<string,mixed>>,
      *   cb_tables:array{
      *     summary:array{
      *       tables_total:int,
@@ -269,6 +271,43 @@ final class DatabaseAuditHelper
         [$staleInstallerTempDirs, $staleInstallerTempErrors] = StaleInstallerTempAuditHelper::inspect();
         $errors = array_merge($errors, $staleInstallerTempErrors);
 
+        $formAudits = [];
+        try {
+            $db->setQuery(
+                $db->getQuery(true)
+                    ->select($db->quoteName(['id', 'name', 'title']))
+                    ->from($db->quoteName('#__contentbuilderng_forms'))
+                    ->order($db->quoteName('id') . ' ASC')
+            );
+            $forms = $db->loadAssocList() ?: [];
+            $formAuditService = new FormAuditService($db);
+
+            foreach ($forms as $form) {
+                $formId = (int) ($form['id'] ?? 0);
+
+                try {
+                    $formAudit = $formAuditService->audit($formId);
+                } catch (\Throwable $e) {
+                    $formAudit = [
+                        'info' => [],
+                        'checks' => [[
+                            'status' => FormAuditService::STATUS_ERROR,
+                            'message' => 'Could not audit form #' . $formId . ': ' . $e->getMessage(),
+                        ]],
+                    ];
+                }
+
+                $formAudit['form'] = (array) ($formAudit['form'] ?? [
+                    'id' => $formId,
+                    'name' => trim((string) ($form['name'] ?? '')),
+                    'title' => trim((string) ($form['title'] ?? '')),
+                ]);
+                $formAudits[] = $formAudit;
+            }
+        } catch (\Throwable $e) {
+            $errors[] = 'Could not inspect forms for individual audits: ' . $e->getMessage();
+        }
+
         return DatabaseAuditReportBuilder::build([
             'tables' => $tables,
             'prefix' => $prefix,
@@ -296,6 +335,7 @@ final class DatabaseAuditHelper
             'generated_article_category_issues' => $generatedArticleCategoryIssues,
             'stale_language_files' => $staleLanguageFiles,
             'stale_installer_temp_dirs' => $staleInstallerTempDirs,
+            'form_audits' => $formAudits,
             'cb_tables' => $cbTableStats,
             'errors' => $errors,
         ], $toAlias);

@@ -336,6 +336,62 @@ final class AboutController extends BaseController
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
     }
 
+    public function repairFormThemePlugin(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $formId = $this->input->post->getInt('form_id', 0);
+
+        try {
+            if ($formId <= 0) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_INVALID'));
+            }
+
+            $db = $this->getComponent()->getContainer()->get(DatabaseInterface::class);
+            $query = $db->getQuery(true)
+                ->select($db->quoteName('id'))
+                ->from($db->quoteName('#__contentbuilderng_forms'))
+                ->where($db->quoteName('id') . ' = ' . $formId);
+            $db->setQuery($query);
+
+            if (!$db->loadResult()) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_INVALID'));
+            }
+
+            $update = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_forms'))
+                ->set($db->quoteName('theme_plugin') . ' = ' . $db->quote('thoth'))
+                ->set($db->quoteName('modified') . ' = ' . $db->quote((new Date())->toSql()))
+                ->set($db->quoteName('modified_by') . ' = ' . $this->getCurrentUserId())
+                ->where($db->quoteName('id') . ' = ' . $formId);
+            $db->setQuery($update);
+            $db->execute();
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIRED', 'Thoth');
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
     public function deleteStaleInstallerTemp(): void
     {
         $this->checkToken();

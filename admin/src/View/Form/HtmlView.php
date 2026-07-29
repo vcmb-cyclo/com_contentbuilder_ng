@@ -85,6 +85,12 @@ class HtmlView extends BaseHtmlView
                 throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
             }
 
+            $document = $this->getDocument();
+            $document->getWebAssetManager()->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
+            $document->getWebAssetManager()->useScript('com_contentbuilderng.form-audit.js');
+            Text::script('COM_CONTENTBUILDERNG_AUDIT_AJAX_REQUEST_FAILED');
+            Text::script('COM_CONTENTBUILDERNG_AUDIT_REFRESH_FAILED');
+
             $auditService = new FormAuditService($this->getDatabase());
             $this->audit = $auditService->audit($formId);
             parent::display($tpl);
