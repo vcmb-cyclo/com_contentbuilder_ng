@@ -31,7 +31,7 @@ use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView a
 
 class HtmlView extends BaseHtmlView
 {
-    /** @var array{info: array<string,string>, checks: array<int,array{status:string,message:string}>} */
+    /** @var array{info: array<string,string>, checks: array<int,array{status:string,message:string}>, performance?:array<string,string>, data?:array<string,mixed>} */
     public array $audit = ['info' => [], 'checks' => []];
 
     public string $wizardReturnUrl = '';
@@ -179,6 +179,20 @@ class HtmlView extends BaseHtmlView
                 Text::sprintf('COM_CONTENTBUILDERNG_ELEMENTS_LOAD_ERROR', $e->getMessage()),
                 'warning'
             );
+        }
+
+        if ($formId > 0) {
+            try {
+                $this->audit = (new FormAuditService($this->getDatabase()))->audit($formId);
+            } catch (\Throwable $e) {
+                $this->audit = [
+                    'info' => [],
+                    'checks' => [[
+                        'status' => FormAuditService::STATUS_ERROR,
+                        'message' => Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FAILED', $e->getMessage()),
+                    ]],
+                ];
+            }
         }
 
         $isNew = ($formId < 1);

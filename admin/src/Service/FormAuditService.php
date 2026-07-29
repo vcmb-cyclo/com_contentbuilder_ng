@@ -37,6 +37,8 @@ final class FormAuditService
      * @return array{
      *   info:array<string,string>,
      *   checks:array<int,array{status:string,message:string,code?:string}>,
+     *   performance:array<string,string>,
+     *   data:array<string,mixed>,
      *   form?:array{id:int,name:string,title:string}
      * }
      */
@@ -61,6 +63,8 @@ final class FormAuditService
                     'status' => self::STATUS_ERROR,
                     'message' => Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'),
                 ]],
+                'performance' => [],
+                'data' => [],
             ];
         }
 
@@ -73,12 +77,16 @@ final class FormAuditService
         $elements = $db->loadAssocList() ?: [];
 
         $sourceNames = [];
+        $sourceTitle = '';
         $sourceAvailable = false;
         try {
             $source = FormSourceFactory::getForm((string) $form['type'], (string) $form['reference_id']);
             if (is_object($source) && method_exists($source, 'getElementNames')) {
                 $sourceNames = (array) $source->getElementNames();
                 $sourceAvailable = true;
+            }
+            if (is_object($source) && method_exists($source, 'getTitle')) {
+                $sourceTitle = trim((string) $source->getTitle());
             }
         } catch (\Throwable $e) {
             $sourceAvailable = false;
@@ -161,6 +169,21 @@ final class FormAuditService
         return [
             'info' => $info,
             'checks' => $checks,
+            'performance' => $performanceInfo,
+            'data' => [
+                'id' => (int) $form['id'],
+                'name' => trim((string) $form['name']),
+                'source_type' => (string) $form['type'],
+                'source_reference_id' => (int) $form['reference_id'],
+                'source_title' => $sourceTitle,
+                'elements_total' => count($elements),
+                'elements_published' => count($published),
+                'elements_editable' => count($editable),
+                'records_total' => $recordsTotal,
+                'records_count_available' => !$recordsCountUnavailable,
+                'published' => (int) ($form['published'] ?? 0) === 1,
+                'debug_mode' => (int) ($form['debug_mode'] ?? 0) === 1,
+            ],
             'form' => [
                 'id' => (int) $form['id'],
                 'name' => trim((string) $form['name']),
@@ -334,7 +357,7 @@ final class FormAuditService
      * @param array<string,mixed> $form
      * @param array<int,array<string,mixed>> $publishedElements
      * @param array<int|string,string> $sourceNames
-     * @return array{0:array<string,string>,1:array<int,array{status:string,message:string}>}
+     * @return array{0:array<string,string>,1:array<int,array{status:string,message:string,code?:string}>}
      */
     private function auditPerformance(array $form, array $publishedElements, array $sourceNames): array
     {
@@ -361,6 +384,7 @@ final class FormAuditService
             return [[], [[
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_STORAGE_UNAVAILABLE'),
+                'code' => 'performance',
             ]]];
         }
 
@@ -383,6 +407,7 @@ final class FormAuditService
             return [[], [[
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_TABLE_UNAVAILABLE'),
+                'code' => 'performance',
             ]]];
         }
 
@@ -420,6 +445,7 @@ final class FormAuditService
                     'COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_SLOW_LIST_QUERY',
                     number_format($listQueryMs, 1)
                 ),
+                'code' => 'performance',
             ];
         }
 
@@ -436,7 +462,7 @@ final class FormAuditService
      *
      * @param array<int,array<string,mixed>> $publishedElements
      * @param array<int|string,string> $sourceNames
-     * @return array<int,array{status:string,message:string}>
+     * @return array<int,array{status:string,message:string,code?:string}>
      */
     private function checkStorageIndexes(string $tableName, array $publishedElements, array $sourceNames): array
     {
@@ -484,6 +510,7 @@ final class FormAuditService
                 'COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_UNINDEXED_COLUMNS',
                 implode(', ', $unindexed)
             ),
+            'code' => 'performance',
         ]];
     }
 
