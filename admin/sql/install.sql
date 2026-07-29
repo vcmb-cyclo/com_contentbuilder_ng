@@ -520,6 +520,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_records`
     `rights`       varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `xreference`   varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_type_reference_record` (`type`, `reference_id`, `record_id`),
     KEY `record_id`    (`record_id`),
     KEY `reference_id` (`reference_id`),
     KEY `type`         (`type`),
