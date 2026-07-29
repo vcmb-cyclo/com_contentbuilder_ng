@@ -368,16 +368,17 @@ It applies to `table`, `json`, `pie`, `bar`, `histogram`, `line` and `radar`;
 scalar outputs are unchanged.
 
 `hide` accepts `total`, `values` and `graph`, combined with `|` in any order.
-`total` hides only the rendered total, `values` hides category labels and their
-numeric values while retaining the chart drawing, and `graph` hides the chart
-drawing while retaining the lightweight textual labels and values. Without
-`hide`, all elements remain visible. Hiding all three elements is rejected
-instead of producing an empty block.
+`total` hides only the rendered total, `values` hides only the textual labels
+and values list below the graph without changing labels, values, axes or
+tooltips drawn inside the graph, and `graph` hides the chart drawing while
+retaining that lightweight textual list. Without `hide`, all elements remain
+visible. Hiding all three elements is rejected instead of producing an empty
+block.
 
-Common combinations are `hide="total|values"` for the graph only,
-`hide="graph|total"` for textual labels and values only, and
-`hide="graph|values"` for the total only. Order, surrounding spaces and
-duplicates do not change the result.
+Common combinations are `hide="total|values"` for the complete graph only,
+`hide="graph|total"` for the textual list only, `hide="graph"` for the textual
+list and total, and `hide="graph|values"` for the total only. Order, surrounding
+spaces and duplicates do not change the result.
 
 The chart options apply to `pie`, `bar`, `histogram`, `line` and `radar`.
 `output="table"` accepts only `hide="total"`. `json`, `min`, `max` and `avg`

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### CBStats 6.1.7-RC96-B05
+
+- Corrected `hide="values"` so it hides only the textual labels-and-values list below charts.
+- Preserved all labels, data values, axes, data labels and tooltips drawn inside Pie, Bar, Histogram, Line and Radar charts.
+- Kept the RC96-B04 pipe and `%7C` normalization for combined `hide=` values.
+
 ### CBStats 6.1.7-RC96-B04
 
 - Normalized complete pipe-separated `hide=` combinations for article and URL requests.

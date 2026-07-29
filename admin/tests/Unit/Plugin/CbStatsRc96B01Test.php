@@ -141,7 +141,7 @@ final class CbStatsRc96B01Test extends TestCase
         self::assertStringContainsString('StatsService::parseFieldStatsRanges($ranges)', $plugin);
         self::assertStringContainsString('StatsService::parseFieldStatsRanges($ranges)', $controller);
         self::assertStringContainsString(
-            "['type' => \$output, 'items' => \$chartItems, 'showValues' => !\$hideOptions['values']]",
+            "['type' => \$output, 'items' => \$items]",
             $plugin
         );
         self::assertStringContainsString("private const RADAR_MIN_AXES = 3", $plugin);

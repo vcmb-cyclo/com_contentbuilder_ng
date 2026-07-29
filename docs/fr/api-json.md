@@ -320,10 +320,10 @@ traitement commun de `add` signé et de `titles`.
 
 Les sorties scalaires ignorent `sort` et `dir`.
 
-`hide="total"` masque uniquement le Total affiché, `hide="values"` masque les
-libellés des données et leurs valeurs numériques tout en conservant le dessin,
-et `hide="graph"` masque le dessin tout en conservant des libellés et valeurs
-textuels légers. Ces valeurs peuvent
+`hide="total"` masque uniquement le Total affiché, `hide="values"` masque
+uniquement la liste textuelle des libellés et valeurs sous le graphique sans
+modifier le graphique, et `hide="graph"` masque le dessin tout en conservant
+cette liste textuelle légère. Ces valeurs peuvent
 être combinées avec `|` dans n’importe quel ordre. Les options non applicables
 et les combinaisons masquant tout le résultat sont refusées. L’ancienne syntaxe
 `total=hide` est refusée.

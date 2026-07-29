@@ -313,9 +313,9 @@ statistics payload used by the content renderers. JSON reuses the common signed
 
 Scalar outputs ignore `sort` and `dir`.
 
-`hide="total"` hides only a displayed total, `hide="values"` hides category
-labels and numeric values while retaining the chart drawing, and `hide="graph"`
-hides the drawing while retaining lightweight textual labels and values. Values may be combined
+`hide="total"` hides only a displayed total, `hide="values"` hides only the
+textual labels-and-values list below the graph without changing the graph, and
+`hide="graph"` hides the drawing while retaining that lightweight textual list. Values may be combined
 with `|` in any order. Non-applicable options and combinations hiding every
 result element are rejected. The former `total=hide` syntax is rejected.
 

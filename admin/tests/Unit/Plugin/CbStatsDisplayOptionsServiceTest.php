@@ -315,14 +315,17 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
         self::assertStringContainsString("if (!\$hideOptions['total']) {\n            \$html .= '<div class=\"cbstats-total-box\">", $source);
         self::assertStringContainsString("if (!\$hideOptions['graph']) {", $source);
         self::assertStringContainsString("if (!\$hideOptions['values']) {", $source);
-        self::assertStringContainsString("\$item['label'] = '';", $source);
-        self::assertStringContainsString('prepareChartPayloadItems($items, $hideOptions[\'values\'])', $source);
+        self::assertStringContainsString("['items' => \$items]", $source);
+        self::assertStringContainsString("['type' => \$output, 'items' => \$items]", $source);
+        self::assertStringNotContainsString("\$item['label'] = '';", $source);
+        self::assertStringNotContainsString('prepareChartPayloadItems', $source);
+        self::assertStringNotContainsString("'showValues' => !\$hideOptions['values']", $source);
         self::assertStringContainsString('StatsHideOptionsService::fromAttributes($attributes)', $source);
         self::assertStringNotContainsString('DisplayOptionsService::hidesTotal', $source);
         self::assertStringContainsString("'total' => (string) StatsService::resolveCbstatsOutput", $source);
     }
 
-    public function testJavascriptRespectsTheNormalizedShowValuesFlag(): void
+    public function testHideValuesDoesNotChangeTheGraphJavascript(): void
     {
         foreach (['cbstats-pie.js', 'cbstats-bar.js', 'cbstats-charts.js'] as $file) {
             $source = file_get_contents(
@@ -330,18 +333,21 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
             );
 
             self::assertIsString($source);
-            self::assertStringContainsString('payload.showValues !== false', $source);
-            self::assertStringContainsString('enabled: showValues', $source);
+            self::assertStringNotContainsString('showValues', $source);
         }
 
+        $pie = (string) file_get_contents(
+            dirname(__DIR__, 4) . '/plugins/content/contentbuilderng_cbstats/media/js/cbstats-pie.js'
+        );
         $bar = (string) file_get_contents(
             dirname(__DIR__, 4) . '/plugins/content/contentbuilderng_cbstats/media/js/cbstats-bar.js'
         );
         $charts = (string) file_get_contents(
             dirname(__DIR__, 4) . '/plugins/content/contentbuilderng_cbstats/media/js/cbstats-charts.js'
         );
-        self::assertStringContainsString('ticks: {' . "\n" . '                            display: showValues,', $bar);
-        self::assertStringContainsString('pointLabels: { display: showValues }', $charts);
+        self::assertStringContainsString('`${item.value} (${item.percentageLabel} %)`', $pie);
+        self::assertStringContainsString('`${item.value} (${item.percentageLabel} %)`', $bar);
+        self::assertStringContainsString('`${context.label}: ${context.formattedValue}`', $charts);
     }
 
     public function testArticleAndUrlPathsUseTheSameHideParserAndValidation(): void

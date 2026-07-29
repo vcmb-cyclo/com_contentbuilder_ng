@@ -105,8 +105,9 @@ When updating the real plugin:
 `limit="10"` keeps the first ten values after sorting, then recalculates the
 displayed total and chart percentages from those values. `hide=` accepts
 `total`, `values` and `graph`, combined with `|`: `total` hides the displayed
-total, `values` hides data labels and numeric values while keeping the graph
-visible, and `graph` hides the drawing but keeps lightweight textual values.
+total, `values` hides the textual labels-and-values list below the graph without
+changing the graph itself, and `graph` hides the drawing but keeps that
+lightweight textual list.
 Without `hide=`, everything is
 shown. Hiding all three elements produces a message. The former `total=hide`
 syntax is rejected; use `hide="total"`.
@@ -123,9 +124,9 @@ syntax is rejected; use `hide="total"`.
 
 `limit="10"` conserve les dix premières valeurs après le tri. `hide=` accepte
 `total`, `values` et `graph`, combinés avec `|`. `total` masque le Total,
-`values` masque les libellés des données et les valeurs numériques tout en
-conservant le graphique, et `graph` masque le dessin tout en conservant des
-valeurs textuelles légères. Sans `hide=`, tout
+`values` masque la liste textuelle des libellés et valeurs sous le graphique
+sans modifier le graphique lui-même, et `graph` masque le dessin tout en
+conservant cette liste textuelle légère. Sans `hide=`, tout
 est affiché. Masquer les trois éléments produit un message. L’ancienne syntaxe
 `total=hide` est refusée ; utilisez `hide="total"`.
 
@@ -140,7 +141,8 @@ est affiché. Masquer les trois éléments produit un message. L’ancienne synt
 
 `limit="10"` behält die ersten zehn Werte nach der Sortierung. `hide=` akzeptiert
 `total`, `values` und `graph`, mit `|` kombiniert. `total` blendet die Summe
-aus, `values` blendet Datenbeschriftungen und Zahlen aus und behält die Grafik
-bei, `graph` blendet die Zeichnung aus und behält leichte Textwerte bei. Ohne
+aus, `values` blendet nur die textuelle Beschriftungs- und Werteliste unter der
+Grafik aus, ohne die Grafik zu ändern, und `graph` blendet die Zeichnung aus und
+behält diese leichte Textliste bei. Ohne
 `hide=` wird alles angezeigt. Alle drei Werte zusammen erzeugen eine Meldung.
 Die frühere Syntax `total=hide` wird abgelehnt; verwenden Sie `hide="total"`.

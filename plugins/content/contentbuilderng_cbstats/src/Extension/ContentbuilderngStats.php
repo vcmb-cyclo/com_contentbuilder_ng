@@ -637,11 +637,10 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $html = '<section class="cbstats-pie cbstats-card"';
 
         if (!$hideOptions['graph']) {
-            $chartItems = $this->prepareChartPayloadItems($items, $hideOptions['values']);
             $this->loadPieAssets();
             $instanceId = 'cbstats-pie-' . ++self::$pieInstance;
             $json = json_encode(
-                ['items' => $chartItems, 'showValues' => !$hideOptions['values']],
+                ['items' => $items],
                 JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
             );
             $encodedPayload = htmlspecialchars($json === false ? '{"items":[]}' : $json, ENT_QUOTES, 'UTF-8');
@@ -697,11 +696,10 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $html = '<section class="cbstats-bar cbstats-card"';
 
         if (!$hideOptions['graph']) {
-            $chartItems = $this->prepareChartPayloadItems($items, $hideOptions['values']);
             $this->loadBarAssets();
             $instanceId = 'cbstats-bar-' . ++self::$barInstance;
             $json = json_encode(
-                ['items' => $chartItems, 'showValues' => !$hideOptions['values']],
+                ['items' => $items],
                 JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
             );
             $encodedPayload = htmlspecialchars($json === false ? '{"items":[]}' : $json, ENT_QUOTES, 'UTF-8');
@@ -772,11 +770,10 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $html = '<section class="cbstats-chart cbstats-chart-' . $output . ' cbstats-card"';
 
         if (!$hideOptions['graph']) {
-            $chartItems = $this->prepareChartPayloadItems($items, $hideOptions['values']);
             $this->loadChartAssets();
             $instanceId = 'cbstats-chart-' . ++self::$chartInstance;
             $json = json_encode(
-                ['type' => $output, 'items' => $chartItems, 'showValues' => !$hideOptions['values']],
+                ['type' => $output, 'items' => $items],
                 JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
             );
             $encodedPayload = htmlspecialchars($json === false ? '{"type":"","items":[]}' : $json, ENT_QUOTES, 'UTF-8');
@@ -864,25 +861,6 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         }
 
         return $html . '</section>';
-    }
-
-    /**
-     * @param list<array<string, mixed>> $items
-     * @return list<array<string, mixed>>
-     */
-    private function prepareChartPayloadItems(array $items, bool $hideValues): array
-    {
-        if (!$hideValues) {
-            return $items;
-        }
-
-        return array_map(
-            static function (array $item): array {
-                $item['label'] = '';
-                return $item;
-            },
-            $items
-        );
     }
 
     private function formatNumber(int|float $value): string

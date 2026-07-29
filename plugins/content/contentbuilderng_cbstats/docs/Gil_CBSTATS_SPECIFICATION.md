@@ -427,8 +427,9 @@ A pass is complete only when:
 - `hide` accepts only `total`, `values` and `graph`, combined with `|`.
 - `hide="total"` suppresses the displayed total without changing its internal
   calculation.
-- `hide="values"` suppresses category labels, range/custom titles and their
-  numeric values while retaining the chart drawing.
+- `hide="values"` suppresses only the complementary textual labels-and-values
+  list below the graph. It does not change labels, values, axes or tooltips
+  drawn inside the graph.
 - `hide="graph"` suppresses the chart drawing while retaining lightweight
   textual values.
 - These graph options apply to Pie, Bar, Histogram, Line and Radar. A
