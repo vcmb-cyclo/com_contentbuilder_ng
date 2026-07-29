@@ -38,6 +38,7 @@ final class DatabaseAuditReportBuilder
      *   menu_view_issues:array<int,array<string,mixed>>,
      *   frontend_permission_issues:array<int,array<string,mixed>>,
      *   element_reference_issues:array<int,array<string,mixed>>,
+     *   content_record_duplicate_issues:array<int,array<string,mixed>>,
      *   invalid_datetime_sort_issues:array<int,array<string,mixed>>,
      *   generated_article_category_issues:array<int,array<string,mixed>>,
      *   cb_tables:array<string,mixed>,
@@ -64,6 +65,7 @@ final class DatabaseAuditReportBuilder
         $menuViewIssues = (array) ($data['menu_view_issues'] ?? []);
         $frontendPermissionIssues = (array) ($data['frontend_permission_issues'] ?? []);
         $elementReferenceIssues = (array) ($data['element_reference_issues'] ?? []);
+        $contentRecordDuplicateIssues = (array) ($data['content_record_duplicate_issues'] ?? []);
         $invalidDatetimeSortIssues = (array) ($data['invalid_datetime_sort_issues'] ?? []);
         $storageColumnTypeIssues = (array) ($data['storage_column_type_issues'] ?? []);
         $generatedArticleCategoryIssues = (array) ($data['generated_article_category_issues'] ?? []);
@@ -124,6 +126,15 @@ final class DatabaseAuditReportBuilder
 
             $invalidDatetimeSortRows += (int) ($invalidDatetimeSortIssue['invalid_count'] ?? 0);
         }
+        $contentRecordDuplicateRowsToRemove = 0;
+        foreach ($contentRecordDuplicateIssues as $contentRecordDuplicateIssue) {
+            if (!is_array($contentRecordDuplicateIssue)) {
+                continue;
+            }
+
+            $contentRecordDuplicateRowsToRemove += count((array) ($contentRecordDuplicateIssue['duplicate_ids'] ?? []));
+        }
+
         $invalidGeneratedArticleCategoryRows = 0;
         foreach ($generatedArticleCategoryIssues as $generatedArticleCategoryIssue) {
             if (!is_array($generatedArticleCategoryIssue)) {
@@ -147,6 +158,7 @@ final class DatabaseAuditReportBuilder
             + count($menuViewIssues)
             + count($frontendPermissionIssues)
             + count($elementReferenceIssues)
+            + count($contentRecordDuplicateIssues)
             + count($invalidDatetimeSortIssues)
             + count($storageColumnTypeIssues)
             + count($generatedArticleCategoryIssues)
@@ -176,6 +188,7 @@ final class DatabaseAuditReportBuilder
             'menu_view_issues' => $menuViewIssues,
             'frontend_permission_issues' => $frontendPermissionIssues,
             'element_reference_issues' => $elementReferenceIssues,
+            'content_record_duplicate_issues' => $contentRecordDuplicateIssues,
             'invalid_datetime_sort_issues' => $invalidDatetimeSortIssues,
             'storage_column_type_issues' => $storageColumnTypeIssues,
             'generated_article_category_issues' => $generatedArticleCategoryIssues,
@@ -203,6 +216,8 @@ final class DatabaseAuditReportBuilder
                 'menu_view_issues' => count($menuViewIssues),
                 'frontend_permission_issues' => count($frontendPermissionIssues),
                 'element_reference_issues' => count($elementReferenceIssues),
+                'content_record_duplicate_issues' => count($contentRecordDuplicateIssues),
+                'content_record_duplicate_rows_to_remove' => $contentRecordDuplicateRowsToRemove,
                 'invalid_datetime_sort_issues' => count($invalidDatetimeSortIssues),
                 'invalid_datetime_sort_rows' => $invalidDatetimeSortRows,
                 'storage_column_type_issues' => count($storageColumnTypeIssues),

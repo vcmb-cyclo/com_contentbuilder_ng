@@ -91,6 +91,7 @@ $bfFieldSyncIssues = (array) ($auditReport['bf_view_field_sync_issues'] ?? []);
 $menuViewIssues = (array) ($auditReport['menu_view_issues'] ?? []);
 $frontendPermissionIssues = (array) ($auditReport['frontend_permission_issues'] ?? []);
 $elementReferenceIssues = (array) ($auditReport['element_reference_issues'] ?? []);
+$contentRecordDuplicateIssues = (array) ($auditReport['content_record_duplicate_issues'] ?? []);
 $invalidDatetimeSortIssues = (array) ($auditReport['invalid_datetime_sort_issues'] ?? []);
 $storageColumnTypeIssues = (array) ($auditReport['storage_column_type_issues'] ?? []);
 $generatedArticleCategoryIssues = (array) ($auditReport['generated_article_category_issues'] ?? []);
@@ -130,6 +131,16 @@ $bfFieldSyncViews = (int) ($auditSummary['bf_view_field_sync_views'] ?? count($b
 $bfFieldSyncMissingTotal = (int) ($auditSummary['bf_view_field_sync_missing_in_cb'] ?? 0);
 $bfFieldSyncOrphanTotal = (int) ($auditSummary['bf_view_field_sync_orphan_in_cb'] ?? 0);
 $historicalMenuEntriesCount = (int) ($auditSummary['historical_menu_entries'] ?? count($historicalMenuEntries));
+$contentRecordDuplicateRowsToRemove = (int) ($auditSummary['content_record_duplicate_rows_to_remove'] ?? 0);
+if ($contentRecordDuplicateRowsToRemove === 0 && $contentRecordDuplicateIssues !== []) {
+    foreach ($contentRecordDuplicateIssues as $contentRecordDuplicateIssue) {
+        if (!is_array($contentRecordDuplicateIssue)) {
+            continue;
+        }
+
+        $contentRecordDuplicateRowsToRemove += count((array) ($contentRecordDuplicateIssue['duplicate_ids'] ?? []));
+    }
+}
 
 if (($bfFieldSyncMissingTotal === 0 || $bfFieldSyncOrphanTotal === 0) && $bfFieldSyncIssues !== []) {
     $fallbackMissingTotal = 0;
@@ -275,6 +286,7 @@ $repairWorkflowStepLabels = [
     'menu_view_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MENU_VIEW_CONSISTENCY'),
     'frontend_permission_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FRONTEND_PERMISSION_CONSISTENCY'),
     'element_reference_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ELEMENT_REFERENCE_CONSISTENCY'),
+    'content_record_duplicates' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES'),
     'generated_article_categories' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES'),
     'stale_language_files' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_LANGUAGE_FILES'),
     'stale_installer_temp' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP'),
@@ -292,6 +304,7 @@ $repairWorkflowStepDescriptions = [
     'menu_view_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MENU_VIEW_CONSISTENCY'),
     'frontend_permission_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FRONTEND_PERMISSION_CONSISTENCY'),
     'element_reference_consistency' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_ELEMENT_REFERENCE_DESC'),
+    'content_record_duplicates' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_CONTENT_RECORD_DUPLICATES_DESC'),
     'generated_article_categories' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_GENERATED_ARTICLE_CATEGORIES_DESC'),
 ];
 $phpLibrariesCount = count((array) $this->phpLibraries);
@@ -319,6 +332,7 @@ $hasBfFieldSyncIssues = $bfFieldSyncViews > 0 || $bfFieldSyncMissingTotal > 0 ||
 $hasMenuViewIssues = (int) ($auditSummary['menu_view_issues'] ?? count($menuViewIssues)) > 0;
 $hasFrontendPermissionIssues = (int) ($auditSummary['frontend_permission_issues'] ?? count($frontendPermissionIssues)) > 0;
 $hasElementReferenceIssues = (int) ($auditSummary['element_reference_issues'] ?? count($elementReferenceIssues)) > 0;
+$hasContentRecordDuplicateIssues = (int) ($auditSummary['content_record_duplicate_issues'] ?? count($contentRecordDuplicateIssues)) > 0;
 $generatedArticleCategoryIssueCount = (int) ($auditSummary['generated_article_category_issues'] ?? count($generatedArticleCategoryIssues));
 $generatedArticleCategoryRowCount = (int) ($auditSummary['generated_article_category_rows'] ?? 0);
 if ($generatedArticleCategoryRowCount === 0 && $generatedArticleCategoryIssues !== []) {
@@ -433,6 +447,8 @@ $auditSectionNumbers = [
     'cb_storage_tables' => 31,
     'cb_estimated_rows' => 32,
     'cb_estimated_size' => 33,
+    'content_record_duplicates' => 34,
+    'content_record_duplicate_rows' => 35,
 ];
 $getAuditSectionNumber = static function (string $sectionId) use ($auditSectionNumbers): int {
     return (int) ($auditSectionNumbers[$sectionId] ?? 0);

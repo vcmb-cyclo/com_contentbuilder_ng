@@ -16,6 +16,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Helper;
 
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\BfFieldSyncAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\AuditTableSupportHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\ContentRecordDuplicateAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\DatabaseAuditReportBuilder;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\DuplicateIndexAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\ElementReferenceAuditHelper;
@@ -137,6 +138,14 @@ final class DatabaseAuditHelper
      *     duplicate_reference_ids:array<int,array{reference_id:string,count:int,labels:array<int,string>}>,
      *     orphan_reference_ids:array<int,array{reference_id:string,label:string}>
      *   }>,
+     *   content_record_duplicate_issues:array<int,array{
+     *     type:string,
+     *     reference_id:int,
+     *     record_id:int,
+     *     count:int,
+     *     keep_id:int,
+     *     duplicate_ids:array<int,int>
+     *   }>,
      *   invalid_datetime_sort_issues:array<int,array{
      *     form_id:int,
      *     form_name:string,
@@ -194,6 +203,8 @@ final class DatabaseAuditHelper
      *     menu_view_issues:int,
      *     frontend_permission_issues:int,
      *     element_reference_issues:int,
+     *     content_record_duplicate_issues:int,
+     *     content_record_duplicate_rows_to_remove:int,
      *     invalid_datetime_sort_issues:int,
      *     invalid_datetime_sort_rows:int,
      *     issues_total:int
@@ -245,6 +256,8 @@ final class DatabaseAuditHelper
         $errors = array_merge($errors, $permissionErrors);
         [$elementReferenceIssues, $elementReferenceErrors] = ElementReferenceAuditHelper::inspect($db);
         $errors = array_merge($errors, $elementReferenceErrors);
+        [$contentRecordDuplicateIssues, $contentRecordDuplicateErrors] = ContentRecordDuplicateAuditHelper::inspect($db);
+        $errors = array_merge($errors, $contentRecordDuplicateErrors);
         [$invalidDatetimeSortIssues, $invalidDatetimeSortErrors] = InvalidDatetimeSortAuditHelper::inspect($db);
         $errors = array_merge($errors, $invalidDatetimeSortErrors);
         [$storageColumnTypeIssues, $storageColumnTypeErrors] = StorageColumnTypeAuditHelper::inspect($db);
@@ -277,6 +290,7 @@ final class DatabaseAuditHelper
             'menu_view_issues' => $menuViewIssues,
             'frontend_permission_issues' => $frontendPermissionIssues,
             'element_reference_issues' => $elementReferenceIssues,
+            'content_record_duplicate_issues' => $contentRecordDuplicateIssues,
             'invalid_datetime_sort_issues' => $invalidDatetimeSortIssues,
             'storage_column_type_issues' => $storageColumnTypeIssues,
             'generated_article_category_issues' => $generatedArticleCategoryIssues,

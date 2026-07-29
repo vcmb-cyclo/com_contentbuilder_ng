@@ -22,6 +22,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\Audit\EncodingAuditHelper
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\GeneratedArticleCategoryAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\DatabaseAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\DatabaseRepairHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\ContentRecordDuplicateAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormDisplayColumnsHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataMigrationHelper;
@@ -48,6 +49,7 @@ class RepairWorkflowService
         'menu_view_consistency',
         'frontend_permission_consistency',
         'element_reference_consistency',
+        'content_record_duplicates',
         'generated_article_categories',
         'stale_language_files',
         'stale_installer_temp',
@@ -174,6 +176,7 @@ class RepairWorkflowService
             'bf_field_sync'        => $this->buildBfFieldSyncStepResult($this->repairBfFieldSync($this->db)),
             'generated_article_categories'   => $this->buildGeneratedArticleCategoryStepResult(GeneratedArticleCategoryAuditHelper::repair($this->db)),
             'element_reference_consistency'  => $this->buildElementReferenceConsistencyStepResult(ElementReferenceAuditHelper::repair($this->db)),
+            'content_record_duplicates'      => $this->buildContentRecordDuplicatesStepResult(ContentRecordDuplicateAuditHelper::repair($this->db)),
             'stale_language_files'           => $this->buildStaleLanguageFilesStepResult(StaleLanguageFilesAuditHelper::repair()),
             'stale_installer_temp'           => $this->buildStaleInstallerTempStepResult(StaleInstallerTempAuditHelper::repair()),
             default                          => throw new \RuntimeException('Unknown repair step: ' . $stepId),
@@ -627,6 +630,35 @@ class RepairWorkflowService
                 'lines'        => $orphanPreviewLines,
             ];
 
+            $contentRecordDuplicateIssues = (array) ($auditReport['content_record_duplicate_issues'] ?? []);
+            $contentRecordDuplicateGroupCount = count($contentRecordDuplicateIssues);
+            $contentRecordDuplicateRowsToRemove = (int) ($auditSummary['content_record_duplicate_rows_to_remove'] ?? 0);
+            $contentRecordDuplicatePreviewLines = [];
+            foreach ($contentRecordDuplicateIssues as $contentRecordDuplicateIssue) {
+                if (!is_array($contentRecordDuplicateIssue)) {
+                    continue;
+                }
+                $type = trim((string) ($contentRecordDuplicateIssue['type'] ?? ''));
+                $referenceId = (int) ($contentRecordDuplicateIssue['reference_id'] ?? 0);
+                $recordId = (int) ($contentRecordDuplicateIssue['record_id'] ?? 0);
+                $duplicateIds = array_map(static fn($id): int => (int) $id, (array) ($contentRecordDuplicateIssue['duplicate_ids'] ?? []));
+                $contentRecordDuplicatePreviewLines[] = $type . '/reference_id=' . $referenceId . '/record_id=' . $recordId
+                    . ': duplicate ids [' . implode(', ', $duplicateIds) . ']';
+            }
+
+            $prechecks['content_record_duplicates'] = [
+                'count'        => $contentRecordDuplicateGroupCount,
+                'description'  => match (true) {
+                    $contentRecordDuplicateGroupCount <= 0 => 'No duplicate #__contentbuilderng_records row was detected by the last audit.',
+                    $contentRecordDuplicateGroupCount === 1 => '1 record has ' . $contentRecordDuplicateRowsToRemove . ' duplicate row(s) that can be removed in this step.',
+                    default => $contentRecordDuplicateGroupCount . ' records have ' . $contentRecordDuplicateRowsToRemove . ' duplicate row(s) that can be removed in this step.',
+                },
+                'skip_summary' => 'No duplicate #__contentbuilderng_records row detected by the last audit. Skipped automatically.',
+                'has_errors'   => false,
+                'details'      => $contentRecordDuplicateRowsToRemove . ' duplicate row(s) across ' . $contentRecordDuplicateGroupCount . ' record(s).',
+                'lines'        => $contentRecordDuplicatePreviewLines,
+            ];
+
             $prechecks['generated_article_categories'] = [
                 'count' => count($generatedArticleCategoryIssues),
                 'description' => match (true) {
@@ -663,7 +695,7 @@ class RepairWorkflowService
                 'has_errors' => false,
             ];
         } catch (\Throwable $e) {
-            foreach (['duplicate_indexes', 'historical_tables', 'historical_menu_entries', 'table_encoding', 'audit_columns', 'form_audit_columns', 'plugin_duplicates', 'bf_field_sync', 'menu_view_consistency', 'frontend_permission_consistency', 'element_reference_consistency', 'generated_article_categories', 'stale_language_files', 'stale_installer_temp'] as $stepId) {
+            foreach (['duplicate_indexes', 'historical_tables', 'historical_menu_entries', 'table_encoding', 'audit_columns', 'form_audit_columns', 'plugin_duplicates', 'bf_field_sync', 'menu_view_consistency', 'frontend_permission_consistency', 'element_reference_consistency', 'content_record_duplicates', 'generated_article_categories', 'stale_language_files', 'stale_installer_temp'] as $stepId) {
                 $prechecks[$stepId] = [
                     'count' => 1,
                     'description' => 'Pre-check unavailable for this step. You can still run the repair manually.',
@@ -1146,6 +1178,49 @@ class RepairWorkflowService
                 $deleted,
                 $unchanged,
                 $errors
+            ),
+            'lines' => $lines,
+        ];
+    }
+
+    private function buildContentRecordDuplicatesStepResult(array $summary): array
+    {
+        $lines = [];
+
+        foreach ((array) ($summary['items'] ?? []) as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $type = trim((string) ($item['type'] ?? ''));
+            $referenceLabel = $type . '/' . (int) ($item['reference_id'] ?? 0) . '/' . (int) ($item['record_id'] ?? 0);
+            $removedIds = array_values(array_map(static fn($id): int => (int) $id, (array) ($item['removed_ids'] ?? [])));
+            $removedLabel = $removedIds !== [] ? implode(', ', $removedIds) : Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
+            $status = (string) ($item['status'] ?? '');
+
+            if ($status === 'repaired') {
+                $lines[] = Text::sprintf('COM_CONTENTBUILDERNG_CONTENT_RECORD_DUPLICATES_REPAIR_ITEM_REPAIRED', $referenceLabel, (int) ($item['keep_id'] ?? 0), $removedLabel);
+            } elseif ($status === 'error') {
+                $lines[] = Text::sprintf('COM_CONTENTBUILDERNG_CONTENT_RECORD_DUPLICATES_REPAIR_ITEM_ERROR', $referenceLabel, (int) ($item['keep_id'] ?? 0), $removedLabel, (string) ($item['error'] ?? ''));
+            }
+        }
+
+        foreach ((array) ($summary['warnings'] ?? []) as $warning) {
+            $warning = trim((string) $warning);
+            if ($warning !== '') {
+                $lines[] = Text::sprintf('COM_CONTENTBUILDERNG_CONTENT_RECORD_DUPLICATES_REPAIR_WARNING', $warning);
+            }
+        }
+
+        return [
+            'level' => (int) ($summary['errors'] ?? 0) > 0 ? 'warning' : 'message',
+            'summary' => Text::sprintf(
+                'COM_CONTENTBUILDERNG_CONTENT_RECORD_DUPLICATES_REPAIR_SUMMARY',
+                (int) ($summary['scanned'] ?? 0),
+                (int) ($summary['groups'] ?? 0),
+                (int) ($summary['rows_removed'] ?? 0),
+                (int) ($summary['unchanged'] ?? 0),
+                (int) ($summary['errors'] ?? 0)
             ),
             'lines' => $lines,
         ];

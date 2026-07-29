@@ -154,6 +154,16 @@ use Joomla\CMS\Router\Route;
                         <th scope="row"><?php echo $renderAuditSummaryLink('element_reference_consistency', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ELEMENT_REFERENCE_CONSISTENCY')); ?></th>
                         <td><?php echo (int) ($auditSummary['element_reference_issues'] ?? count($elementReferenceIssues)); ?></td>
                     </tr>
+                    <tr class="<?php echo $hasContentRecordDuplicateIssues ? 'table-warning' : ''; ?>">
+                        <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('content_record_duplicates'); ?></td>
+                        <th scope="row"><?php echo $renderAuditSummaryLink('content_record_duplicates', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES')); ?></th>
+                        <td><?php echo (int) ($auditSummary['content_record_duplicate_issues'] ?? count($contentRecordDuplicateIssues)); ?></td>
+                    </tr>
+                    <tr class="<?php echo $hasContentRecordDuplicateIssues ? 'table-warning' : ''; ?>">
+                        <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('content_record_duplicate_rows'); ?></td>
+                        <th scope="row"><?php echo $renderAuditSummaryLink('content_record_duplicates', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATE_ROWS')); ?></th>
+                        <td><?php echo $contentRecordDuplicateRowsToRemove; ?></td>
+                    </tr>
                     <tr class="<?php echo $hasGeneratedArticleCategoryIssues ? 'table-warning' : ''; ?>">
                         <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('generated_article_categories'); ?></td>
                         <th scope="row"><?php echo $renderAuditSummaryLink('generated_article_categories', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES')); ?></th>
@@ -914,6 +924,55 @@ use Joomla\CMS\Router\Route;
                                         <?php endforeach; ?>
                                     </ol>
                                 </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+            </div>
+
+            <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('content_record_duplicates'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 21;">
+                <h4 class="h6 mt-3<?php echo $hasContentRecordDuplicateIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('content_record_duplicates', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES'), $hasContentRecordDuplicateIssues); ?></h4>
+            <?php if (empty($contentRecordDuplicateIssues)) : ?>
+                <div class="alert cb-audit-ok-alert">
+                    <span class="cb-audit-section-title">
+                        <span class="cb-audit-ok-check icon-check-circle" aria-hidden="true"></span>
+                        <span><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES_OK'); ?></span>
+                    </span>
+                </div>
+            <?php else : ?>
+                <div class="table-responsive">
+                    <table id="cb-audit-content-record-duplicates-table" class="table table-sm table-striped align-middle">
+                        <thead>
+                        <tr>
+                            <th scope="col"><?php echo $auditRowNumberLabel; ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_TYPE'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_REFERENCE_ID'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_RECORD_ID'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_INDEX_KEEP'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_INDEX_DROP'); ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php $contentRecordDuplicateRowNumber = 1; ?>
+                        <?php foreach ($contentRecordDuplicateIssues as $contentRecordDuplicateIssue) : ?>
+                            <?php
+                            $contentRecordDuplicateType = trim((string) ($contentRecordDuplicateIssue['type'] ?? ''));
+                            $contentRecordDuplicateType = $contentRecordDuplicateType !== '' ? $contentRecordDuplicateType : Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
+                            $contentRecordDuplicateKeepId = (int) ($contentRecordDuplicateIssue['keep_id'] ?? 0);
+                            $contentRecordDuplicateDropIds = array_map(
+                                static fn($id): int => (int) $id,
+                                (array) ($contentRecordDuplicateIssue['duplicate_ids'] ?? [])
+                            );
+                            ?>
+                            <tr>
+                                <td><?php echo $contentRecordDuplicateRowNumber++; ?></td>
+                                <td><?php echo htmlspecialchars($contentRecordDuplicateType, ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo (int) ($contentRecordDuplicateIssue['reference_id'] ?? 0); ?></td>
+                                <td><?php echo (int) ($contentRecordDuplicateIssue['record_id'] ?? 0); ?></td>
+                                <td><?php echo $contentRecordDuplicateKeepId; ?></td>
+                                <td><?php echo htmlspecialchars(implode(', ', $contentRecordDuplicateDropIds), ENT_QUOTES, 'UTF-8'); ?></td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
