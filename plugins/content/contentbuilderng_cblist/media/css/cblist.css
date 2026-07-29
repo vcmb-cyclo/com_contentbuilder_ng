@@ -1,0 +1,11 @@
+.cblist-embed {
+    max-width: 100%;
+    width: 100%;
+}
+
+.cblist-embed__frame {
+    border: 0;
+    display: block;
+    max-width: 100%;
+    width: 100%;
+}

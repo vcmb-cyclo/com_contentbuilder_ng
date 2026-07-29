@@ -292,6 +292,7 @@ jobs:
           archive="${{ steps.release.outputs.archive }}"
           if gh release view "${tag}" >/dev/null 2>&1; then
             gh release upload "${tag}" "${archive}" --clobber
+            gh release edit "${tag}" --draft=false
           else
             gh release create "${tag}" \
               "${archive}" \

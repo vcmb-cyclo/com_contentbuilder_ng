@@ -29,6 +29,7 @@ use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewColorModeHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 $frontend = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->isClient('site');
 $permissionService = PermissionService::createFromRuntimeContext();
@@ -82,6 +83,16 @@ $listLimit = (int) $listState['limit'];
 $listOrdering = (string) $listState['ordering'];
 $listDirection = (string) $listState['direction'];
 $listQuery = NavigationLinkHelper::buildListQuery($listStart, $listLimit, $listOrdering, $listDirection);
+$embeddedListContext = (string) $input->getCmd('cblist_embed', '');
+$embeddedListFields = EmbeddedListFieldFilterService::isEmbeddedRequest($embeddedListContext)
+    ? trim((string) $input->getString('cblist_fields', ''))
+    : '';
+$embeddedListParams = $embeddedListFields !== ''
+    ? ['cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT, 'cblist_fields' => $embeddedListFields]
+    : [];
+$embeddedListQuery = $embeddedListParams !== []
+    ? '&' . http_build_query($embeddedListParams)
+    : '';
 $previewQuery = '';
 $previewHiddenFields = '';
 $previewEnabled = $input->getBool('cb_preview', false);
@@ -378,7 +389,7 @@ if ($themeJs !== '') {
         'task' => 'details.display',
         $directStorageMode ? 'storage_id' : 'id' => $directStorageMode ? $directStorageId : $input->getInt('id', 0),
         'Itemid' => $input->getInt('Itemid', 0),
-    ];
+    ] + $embeddedListParams;
     $detailsTmpl = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string');
     if ($detailsTmpl !== '') {
         $detailsBaseParams['tmpl'] = $detailsTmpl;
@@ -504,7 +515,7 @@ if ($themeJs !== '') {
             : '&id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0);
         ?>
         <a class="btn btn-sm btn-primary cbButton cbEditButton"
-            href="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . $detailsEditIdParam . '&record_id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getCmd('record_id', 0) . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') : '') . '&Itemid=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') != '' ? '&layout=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . $previewQuery); ?>"
+            href="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . $detailsEditIdParam . '&record_id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getCmd('record_id', 0) . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') : '') . '&Itemid=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') != '' ? '&layout=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') : '') . ($listQuery !== '' ? '&' . $listQuery : '') . $embeddedListQuery . $previewQuery); ?>"
             title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_DETAILS_EDIT_TOOLTIP'), ENT_QUOTES, 'UTF-8'); ?>">
             <span class="fa-solid fa-pen me-1" aria-hidden="true"></span>
             <?php echo Text::_('COM_CONTENTBUILDERNG_EDIT'); ?>
