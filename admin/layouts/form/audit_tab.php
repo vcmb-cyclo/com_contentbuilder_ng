@@ -27,10 +27,24 @@ $statusBadges = [
 ?>
 <div class="p-3" data-cb-form-audit-panel>
     <div class="alert alert-info">
-        <?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_SAVED_CONFIGURATION_NOTICE'); ?>
+        <span class="fa-solid fa-bug me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_SAVED_CONFIGURATION_NOTICE'); ?>
     </div>
 
-    <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECKS_HEADING'); ?></h2>
+    <?php if (!empty($audit['info'])) : ?>
+        <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_HEADING'); ?></h2>
+        <table class="table table-sm">
+            <tbody>
+                <?php foreach ($audit['info'] as $label => $value) : ?>
+                    <tr>
+                        <th scope="row" class="w-25"><?php echo htmlspecialchars((string) $label, ENT_QUOTES, 'UTF-8'); ?></th>
+                        <td><?php echo htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+
+    <h2 class="h5 mt-4"><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECKS_HEADING'); ?></h2>
     <ul class="list-group">
         <?php if ($checks === []) : ?>
             <li class="list-group-item">

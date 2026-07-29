@@ -426,8 +426,9 @@ final class FormAuditService
         }
 
         $info = [
-            Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_PERFORMANCE_TABLE_ROWS') => Text::sprintf(
+            Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_PERFORMANCE_TABLE_ROWS') => Text::plural(
                 'COM_CONTENTBUILDERNG_AUDIT_INFO_PERFORMANCE_ROWS_VALUE',
+                $rowCount,
                 number_format($rowCount, 0, ',', ' '),
                 number_format($rowCountMs ?? 0, 1)
             ),

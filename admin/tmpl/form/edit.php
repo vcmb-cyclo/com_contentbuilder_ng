@@ -485,7 +485,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         $activeViewTab = trim((string) $app->getInput()->getCmd('tab', ''));
         $allowedViewTabs = ['tab0', 'tab1', 'tab2', 'tab3', 'tab5', 'tab6', 'tab7', 'tab8', 'tab9', 'tab10'];
         $debugModeEnabled = !empty($this->item->debug_mode);
-        if ($formId > 0) {
+        if ($formId > 0 && $debugModeEnabled) {
             $allowedViewTabs[] = 'tab12';
             $allowedViewTabs[] = 'tab13';
             $allowedViewTabs[] = 'tab14';
@@ -587,7 +587,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
         <?php
         echo HTMLHelper::_('uitab.endTab');
-        if ($formId > 0) :
+        if ($formId > 0 && $debugModeEnabled) :
             echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab12', $viewTabLabel('fa-solid fa-route', 'COM_CONTENTBUILDERNG_AUDIT_TRAIL', 'COM_CONTENTBUILDERNG_TAB_TIP_AUDIT_TRAIL'));
             echo LayoutHelper::render(
                 'form.audit_tab',

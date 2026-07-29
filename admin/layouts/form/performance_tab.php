@@ -22,7 +22,7 @@ $checks = array_values(array_filter(
 ?>
 <div class="p-3">
     <div class="alert alert-info">
-        <?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_SAVED_CONFIGURATION_NOTICE'); ?>
+        <span class="fa-solid fa-bug me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_SAVED_CONFIGURATION_NOTICE'); ?>
     </div>
 
     <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_TAB_PERFORMANCE'); ?></h2>

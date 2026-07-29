@@ -39,7 +39,7 @@ $otherChecks = array_values(array_filter(
     <h1 class="h4 mb-3"><?php echo htmlspecialchars($auditTitle, ENT_QUOTES, 'UTF-8'); ?></h1>
 
     <div class="alert alert-info">
-        <?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_SAVED_CONFIGURATION_NOTICE'); ?>
+        <span class="fa-solid fa-bug me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_SAVED_CONFIGURATION_NOTICE'); ?>
     </div>
 
     <?php if (!empty($audit['info'])) : ?>

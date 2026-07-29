@@ -22,7 +22,7 @@ if (!is_object($item) || !is_callable($renderCheckbox)) {
 }
 ?>
 <h3 id="cb-form-debug" class="mb-3">
-    <?php echo Text::_('COM_CONTENTBUILDERNG_TAB_DEBUG'); ?>
+    <span class="fa-solid fa-bug me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_TAB_DEBUG'); ?>
 </h3>
 <p class="text-muted mb-3">
     <?php echo Text::_('COM_CONTENTBUILDERNG_TAB_DEBUG_INTRO'); ?>
