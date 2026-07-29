@@ -118,4 +118,51 @@ final class FieldValidationServiceTest extends TestCase
             $this->service->validate($field, $fields, 0, null, '01/02/2026')
         );
     }
+
+    public function testEmailValidationEscapesTheSubmittedValueInTheMessage(): void
+    {
+        $field = ['label' => 'Contact', 'validations' => 'email'];
+
+        self::assertSame(
+            ['COM_CONTENTBUILDERNG_VALIDATION_EMAIL_INVALID: Contact (&lt;img src=x onerror=alert(1)&gt;)'],
+            $this->service->validate($field, [], 0, null, '<img src=x onerror=alert(1)>')
+        );
+    }
+
+    public function testDateValidationEscapesTheSubmittedValueInTheMessage(): void
+    {
+        $field = [
+            'label' => 'Birthdate',
+            'validations' => 'date_is_valid',
+            'options' => (object) ['transfer_format' => 'DD/MM/YYYY'],
+        ];
+
+        self::assertSame(
+            ['COM_CONTENTBUILDERNG_VALIDATION_DATE_IS_VALID: Birthdate (&lt;script&gt;alert(1)&lt;/script&gt;)'],
+            $this->service->validate($field, [], 0, null, '<script>alert(1)</script>')
+        );
+    }
+
+    public function testDateNotBeforeEscapesTheOtherFieldValueInTheMessage(): void
+    {
+        $field = [
+            'name' => 'start_date',
+            'label' => 'Start date',
+            'validations' => 'date_not_before',
+            'options' => (object) ['transfer_format' => 'DD/MM/YYYY'],
+        ];
+        $fields = [
+            'start_date_later' => [
+                'name' => 'start_date_later',
+                'label' => 'End date',
+                'value' => '01/01/2020<svg onload=alert(document.cookie)>',
+                'options' => (object) ['transfer_format' => 'DD/MM/YYYY'],
+            ],
+        ];
+
+        self::assertSame(
+            ['COM_CONTENTBUILDERNG_VALIDATION_DATE_NOT_BEFORE: End date (01/01/2020&lt;svg onload=alert(document.cookie)&gt;)'],
+            $this->service->validate($field, $fields, 0, null, '01/02/2026')
+        );
+    }
 }

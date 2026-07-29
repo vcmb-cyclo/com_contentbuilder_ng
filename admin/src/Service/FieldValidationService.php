@@ -191,7 +191,9 @@ final class FieldValidationService
         $message = Text::_('COM_CONTENTBUILDERNG_VALIDATION_EMAIL_INVALID') . ': '
             . (string) ($field['label'] ?? '');
 
-        return $message . ($invalidValues !== [''] ? ' (' . implode('', $invalidValues) . ')' : '');
+        return $message . ($invalidValues !== ['']
+            ? ' (' . htmlspecialchars(implode('', $invalidValues), ENT_QUOTES, 'UTF-8') . ')'
+            : '');
     }
 
     private function validateDate(array $field, mixed $value): string
@@ -203,7 +205,7 @@ final class FieldValidationService
             if (!ContentbuilderngHelper::isValidDate((string) $item, $format)) {
                 return Text::_('COM_CONTENTBUILDERNG_VALIDATION_DATE_IS_VALID') . ': '
                     . (string) ($field['label'] ?? '')
-                    . ((string) $item !== '' ? ' (' . (string) $item . ')' : '');
+                    . ((string) $item !== '' ? ' (' . htmlspecialchars((string) $item, ENT_QUOTES, 'UTF-8') . ')' : '');
             }
         }
 
@@ -243,7 +245,8 @@ final class FieldValidationService
 
             if ($otherValue < $currentValue) {
                 return Text::_('COM_CONTENTBUILDERNG_VALIDATION_DATE_NOT_BEFORE') . ': '
-                    . (string) ($otherField['label'] ?? '') . ' (' . (string) ($otherField['value'] ?? '') . ')';
+                    . (string) ($otherField['label'] ?? '') . ' ('
+                    . htmlspecialchars((string) ($otherField['value'] ?? ''), ENT_QUOTES, 'UTF-8') . ')';
             }
 
             return '';
