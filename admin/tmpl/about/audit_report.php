@@ -719,6 +719,10 @@ use Joomla\CMS\Router\Route;
                                 : '';
                             $menuTitle = trim((string) ($menuViewIssue['title'] ?? ''));
                             $menuTitle = $menuTitle !== '' ? $menuTitle : ('#' . $menuId);
+                            $menuLink = trim((string) ($menuViewIssue['link'] ?? ''));
+                            $menuLinkUrl = $menuLink !== ''
+                                ? Route::link('site', $menuLink, false, Route::TLS_IGNORE, true)
+                                : '';
                             $menuIssueItems = array_values(array_filter(array_map(
                                 static fn($issue): string => trim((string) $issue),
                                 (array) ($menuViewIssue['issues'] ?? [])
@@ -737,7 +741,15 @@ use Joomla\CMS\Router\Route;
                                     <?php endif; ?>
                                 </td>
                                 <td><?php echo htmlspecialchars((string) ($menuViewIssue['target'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars((string) ($menuViewIssue['link'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td>
+                                    <?php if ($menuLinkUrl !== '') : ?>
+                                        <a href="<?php echo htmlspecialchars($menuLinkUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
+                                            <?php echo htmlspecialchars($menuLink, ENT_QUOTES, 'UTF-8'); ?>
+                                        </a>
+                                    <?php else : ?>
+                                        <?php echo htmlspecialchars($menuLink, ENT_QUOTES, 'UTF-8'); ?>
+                                    <?php endif; ?>
+                                </td>
                                 <td>
                                     <ol class="mb-0 ps-3">
                                         <?php foreach ($menuIssueItems as $menuIssueItem) : ?>
@@ -1101,10 +1113,11 @@ use Joomla\CMS\Router\Route;
                                     <?php endif; ?>
                                     <?php if ($staleInstallerTempPath !== '') : ?>
                                         <button
-                                            type="submit"
+                                            type="button"
                                             class="btn btn-sm btn-danger ms-2"
-                                            data-cb-stale-path="<?php echo htmlspecialchars($staleInstallerTempPath, ENT_QUOTES, 'UTF-8'); ?>"
-                                            onclick="document.getElementById('stale_installer_temp_path').value=this.dataset.cbStalePath; document.getElementById('task').value='about.deleteStaleInstallerTemp';"
+                                            data-cb-audit-ajax-task="about.deleteStaleInstallerTemp"
+                                            data-cb-audit-ajax-field="stale_installer_temp_path"
+                                            data-cb-audit-ajax-value="<?php echo htmlspecialchars($staleInstallerTempPath, ENT_QUOTES, 'UTF-8'); ?>"
                                         ><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE'); ?></button>
                                     <?php endif; ?>
                                 </li>
@@ -1434,9 +1447,11 @@ use Joomla\CMS\Router\Route;
                                         </a>
                                         <?php if (!empty($auditWarning['repair_available']) && (int) ($auditWarning['storage_id'] ?? 0) > 0) : ?>
                                             <button
-                                                type="submit"
+                                                type="button"
                                                 class="btn btn-sm btn-warning ms-2"
-                                                onclick="document.getElementById('repair_storage_id').value='<?php echo (int) $auditWarning['storage_id']; ?>'; document.getElementById('task').value='about.repairMissingStorageTable';"
+                                                data-cb-audit-ajax-task="about.repairMissingStorageTable"
+                                                data-cb-audit-ajax-field="repair_storage_id"
+                                                data-cb-audit-ajax-value="<?php echo (int) $auditWarning['storage_id']; ?>"
                                             ><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR'); ?></button>
                                         <?php endif; ?>
                                     <?php endif; ?>

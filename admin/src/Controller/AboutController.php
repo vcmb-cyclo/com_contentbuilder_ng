@@ -28,6 +28,7 @@ use Joomla\CMS\Application\AdministratorApplication;
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
+use Joomla\CMS\Response\JsonResponse;
 use Joomla\CMS\Router\Route;
 use Joomla\Database\DatabaseInterface;
 
@@ -115,6 +116,17 @@ final class AboutController extends BaseController
         }
 
         return (new \DateTimeImmutable('now', $timezone))->format('Y-m-d H:i:s');
+    }
+
+    private function isAjaxCall(): bool
+    {
+        return $this->input->getInt('cb_ajax', 0) === 1;
+    }
+
+    private function respondAjax(bool $success, string $message): void
+    {
+        echo new JsonResponse(['ok' => $success], $message, !$success);
+        $this->getApp()->close();
     }
 
     // -------------------------------------------------------------------------
@@ -304,15 +316,21 @@ final class AboutController extends BaseController
             $app->setUserState('com_contentbuilderng.about.audit', $report);
             $this->getRepairWorkflowService()->logAuditReport($report);
 
-            $this->setMessage(
-                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIRED', $tableName),
-                'message'
-            );
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIRED', $tableName);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $this->setMessage(
-                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_FAILED', $e->getMessage()),
-                'error'
-            );
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
         }
 
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
@@ -335,15 +353,21 @@ final class AboutController extends BaseController
             $app->setUserState('com_contentbuilderng.about.audit', $report);
             $this->getRepairWorkflowService()->logAuditReport($report);
 
-            $this->setMessage(
-                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETED', $deletedPath),
-                'message'
-            );
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETED', $deletedPath);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $this->setMessage(
-                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_FAILED', $e->getMessage()),
-                'error'
-            );
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
         }
 
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));

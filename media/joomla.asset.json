@@ -60,6 +60,17 @@
             "uri": "com_contentbuilderng/admin-about.css"
         },
         {
+            "name": "com_contentbuilderng.admin-about.js",
+            "type": "script",
+            "uri": "com_contentbuilderng/admin-about.js",
+            "dependencies": [
+                "core"
+            ],
+            "attributes": {
+                "defer": true
+            }
+        },
+        {
             "name": "com_contentbuilderng.elementoptions",
             "type": "style",
             "uri": "com_contentbuilderng/elementoptions.css"
