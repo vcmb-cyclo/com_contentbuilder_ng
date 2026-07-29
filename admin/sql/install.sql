@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_elements`
     `ordering`                 int        NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`),
     KEY `reference_id` (`reference_id`),
-    KEY `form_id`      (`form_id`, `reference_id`)
+    UNIQUE KEY `idx_form_reference` (`form_id`, `reference_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
@@ -415,6 +415,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_list_records`
     `reference_id` int      NOT NULL DEFAULT '0',
     `published`    tinyint(1) NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_form_record` (`form_id`, `record_id`),
     KEY `form_id` (`form_id`, `record_id`, `state_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -459,7 +460,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_rating_cache`
     `form_id`   int        NOT NULL DEFAULT '0',
     `ip`        varchar(50) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `date`      datetime   NULL DEFAULT NULL,
-    KEY `record_id` (`record_id`, `form_id`, `ip`),
+    UNIQUE KEY `idx_record_form_ip` (`record_id`, `form_id`, `ip`),
     KEY `date`      (`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -545,7 +546,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_registered_users`
     `record_id` bigint NOT NULL DEFAULT '0',
     `form_id`   int    NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`),
-    KEY `user_id` (`user_id`, `record_id`, `form_id`)
+    UNIQUE KEY `idx_user_record_form` (`user_id`, `record_id`, `form_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 

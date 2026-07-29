@@ -370,6 +370,7 @@ class com_contentbuilderngInstallerScript
 
                 // DB migrations / hardening
                 $this->updateDateColumns();
+                $this->schemaService->ensureUniqueConstraints();
                 $this->schemaService->normalizeExternalStorageModes();
                 $this->ensureFormsDisplayColumns();
                 $this->ensureFormsFilterExactMatchDefault();

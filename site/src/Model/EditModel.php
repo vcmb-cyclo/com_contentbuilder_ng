@@ -62,6 +62,12 @@ use CB\Component\Contentbuilderng\Site\Model\Edit\VisibilityTrait;
 
 class EditModel extends BaseDatabaseModel
 {
+    private static function isDuplicateKeyViolation(\Throwable $exception): bool
+    {
+        return str_contains(strtolower($exception->getMessage()), 'duplicate entry')
+            || str_contains(strtolower($exception->getMessage()), '1062');
+    }
+
     private function getComponent(): ContentbuilderngComponent
     {
         $component = RuntimeContextHelper::getApplication()->bootComponent('com_contentbuilderng');
@@ -1601,7 +1607,13 @@ var contentbuilderng = new function(){
                                     !empty($created_down) ? $db->quote($created_down) : 'NULL',
                                 ]));
                             $db->setQuery($query);
-                            $this->getDatabase()->execute();
+                            try {
+                                $this->getDatabase()->execute();
+                            } catch (\Throwable $e) {
+                                if (!self::isDuplicateKeyViolation($e)) {
+                                    throw $e;
+                                }
+                            }
                         } else {
                             $db = $this->getDatabase();
                             $languageValue = (string) $language;
@@ -1718,7 +1730,13 @@ var contentbuilderng = new function(){
                         ->bind(':formId', $formIdValue, ParameterType::INTEGER)
                         ->bind(':recordId', $recordReturnValue);
                     $db->setQuery($query);
-                    $db->execute();
+                    try {
+                        $db->execute();
+                    } catch (\Throwable $e) {
+                        if (!self::isDuplicateKeyViolation($e)) {
+                            throw $e;
+                        }
+                    }
                 }
 
                 if (!$data->edit_by_type) {
@@ -2470,7 +2488,15 @@ var contentbuilderng = new function(){
                     ->bind(':recordId', $itemValue)
                     ->bind(':referenceId', $referenceIdValue);
                 $db->setQuery($query);
-                $db->execute();
+                try {
+                    $db->execute();
+                } catch (\Throwable $e) {
+                    if (self::isDuplicateKeyViolation($e)) {
+                        continue;
+                    }
+
+                    throw $e;
+                }
                 $changedCount++;
             } else {
                 if ((int) $res['state_id'] === $listState) {

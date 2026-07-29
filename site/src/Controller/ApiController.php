@@ -43,6 +43,12 @@ class ApiController extends BaseController
     private SiteApplication $siteApp;
     private bool $frontend;
 
+    private static function isDuplicateKeyViolation(\Throwable $exception): bool
+    {
+        return str_contains(strtolower($exception->getMessage()), 'duplicate entry')
+            || str_contains(strtolower($exception->getMessage()), '1062');
+    }
+
     private function getDatabase(): DatabaseInterface
     {
         return $this->getComponent()->getContainer()->get(DatabaseInterface::class);
@@ -521,38 +527,51 @@ class ApiController extends BaseController
             return ['code' => 1, 'msg' => Text::_('COM_CONTENTBUILDERNG_RATED_ALREADY')];
         }
 
-        $this->siteApp->getSession()->set($ratingSessionKey, true);
-
         $typeValue = (string) $result['type'];
         $referenceIdValue = (string) $result['reference_id'];
         $ratingValue = (int) $rating;
 
-        $query = $db->getQuery(true)
-            ->update($db->quoteName('#__contentbuilderng_records'))
-            ->set($db->quoteName('rating_count') . ' = ' . $db->quoteName('rating_count') . ' + 1')
-            ->set($db->quoteName('rating_sum') . ' = ' . $db->quoteName('rating_sum') . ' + :rating')
-            ->set($db->quoteName('lastip') . ' = :ip')
-            ->where($db->quoteName('type') . ' = :type')
-            ->where($db->quoteName('reference_id') . ' = :referenceId')
-            ->where($db->quoteName('record_id') . ' = :recordId')
-            ->bind(':rating', $ratingValue, ParameterType::INTEGER)
-            ->bind(':ip', $clientIp)
-            ->bind(':type', $typeValue)
-            ->bind(':referenceId', $referenceIdValue)
-            ->bind(':recordId', $recordIdValue);
-        $db->setQuery($query);
-        $db->execute();
+        $db->transactionStart();
+        try {
+            $query = $db->getQuery(true)
+                ->insert($db->quoteName('#__contentbuilderng_rating_cache'))
+                ->columns($db->quoteName(['record_id', 'form_id', 'ip', 'date']))
+                ->values(':recordId, :formId, :ip, :now')
+                ->bind(':recordId', $recordIdValue)
+                ->bind(':formId', $formIdValue, ParameterType::INTEGER)
+                ->bind(':ip', $clientIp)
+                ->bind(':now', $nowSql);
+            $db->setQuery($query);
+            $db->execute();
 
-        $query = $db->getQuery(true)
-            ->insert($db->quoteName('#__contentbuilderng_rating_cache'))
-            ->columns($db->quoteName(['record_id', 'form_id', 'ip', 'date']))
-            ->values(':recordId, :formId, :ip, :now')
-            ->bind(':recordId', $recordIdValue)
-            ->bind(':formId', $formIdValue, ParameterType::INTEGER)
-            ->bind(':ip', $clientIp)
-            ->bind(':now', $nowSql);
-        $db->setQuery($query);
-        $db->execute();
+            $query = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_records'))
+                ->set($db->quoteName('rating_count') . ' = ' . $db->quoteName('rating_count') . ' + 1')
+                ->set($db->quoteName('rating_sum') . ' = ' . $db->quoteName('rating_sum') . ' + :rating')
+                ->set($db->quoteName('lastip') . ' = :ip')
+                ->where($db->quoteName('type') . ' = :type')
+                ->where($db->quoteName('reference_id') . ' = :referenceId')
+                ->where($db->quoteName('record_id') . ' = :recordId')
+                ->bind(':rating', $ratingValue, ParameterType::INTEGER)
+                ->bind(':ip', $clientIp)
+                ->bind(':type', $typeValue)
+                ->bind(':referenceId', $referenceIdValue)
+                ->bind(':recordId', $recordIdValue);
+            $db->setQuery($query);
+            $db->execute();
+
+            $db->transactionCommit();
+        } catch (\Throwable $e) {
+            $db->transactionRollback();
+
+            if (self::isDuplicateKeyViolation($e)) {
+                return ['code' => 1, 'msg' => Text::_('COM_CONTENTBUILDERNG_RATED_ALREADY')];
+            }
+
+            throw $e;
+        }
+
+        $this->siteApp->getSession()->set($ratingSessionKey, true);
 
         $query = $db->getQuery(true)
             ->select('a.' . $db->quoteName('article_id'))
