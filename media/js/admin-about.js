@@ -20,6 +20,18 @@
         window.alert(message);
     }
 
+    function initializeTooltips() {
+        if (!window.bootstrap || typeof window.bootstrap.Tooltip !== 'function') {
+            return;
+        }
+
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (element) {
+            if (!window.bootstrap.Tooltip.getInstance(element)) {
+                new window.bootstrap.Tooltip(element);
+            }
+        });
+    }
+
     function removeCompletedAction(button) {
         var item = button.closest('li');
 
@@ -93,4 +105,6 @@
         event.preventDefault();
         executeAuditAction(button);
     });
+
+    initializeTooltips();
 }());

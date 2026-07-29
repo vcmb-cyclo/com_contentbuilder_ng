@@ -1118,7 +1118,11 @@ use Joomla\CMS\Router\Route;
                                             data-cb-audit-ajax-task="about.deleteStaleInstallerTemp"
                                             data-cb-audit-ajax-field="stale_installer_temp_path"
                                             data-cb-audit-ajax-value="<?php echo htmlspecialchars($staleInstallerTempPath, ENT_QUOTES, 'UTF-8'); ?>"
-                                        ><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE'); ?></button>
+                                            title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                            aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE'), ENT_QUOTES, 'UTF-8'); ?>"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                        ><span class="fa-solid fa-trash" aria-hidden="true"></span></button>
                                     <?php endif; ?>
                                 </li>
                         <?php endforeach; ?>
@@ -1452,7 +1456,11 @@ use Joomla\CMS\Router\Route;
                                                 data-cb-audit-ajax-task="about.repairMissingStorageTable"
                                                 data-cb-audit-ajax-field="repair_storage_id"
                                                 data-cb-audit-ajax-value="<?php echo (int) $auditWarning['storage_id']; ?>"
-                                            ><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR'); ?></button>
+                                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                            ><span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR'); ?></button>
                                         <?php endif; ?>
                                     <?php endif; ?>
                                 </span>
