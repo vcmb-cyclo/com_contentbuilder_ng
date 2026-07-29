@@ -69,6 +69,7 @@ $labelDbRepairButton = Text::_('COM_CONTENTBUILDERNG_ABOUT_MIGRATE_PACKED_DATA')
 $labelShowLogButton = Text::_('COM_CONTENTBUILDERNG_ABOUT_LAST_LOG');
 $auditRowNumberLabel = Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ROW');
 Text::script('COM_CONTENTBUILDERNG_ABOUT_AUDIT_AJAX_REQUEST_FAILED');
+Text::script('COM_CONTENTBUILDERNG_ABOUT_AUDIT_REFRESH_FAILED');
 $auditReport = is_array($this->auditReport ?? null) ? $this->auditReport : [];
 $auditSummary = (array) ($auditReport['summary'] ?? []);
 $duplicateIndexes = (array) ($auditReport['duplicate_indexes'] ?? []);

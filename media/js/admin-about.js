@@ -9,6 +9,14 @@
         return 'The audit action could not be completed.';
     }
 
+    function refreshFailedMessage() {
+        if (window.Joomla && window.Joomla.Text && typeof window.Joomla.Text._ === 'function') {
+            return window.Joomla.Text._('COM_CONTENTBUILDERNG_ABOUT_AUDIT_REFRESH_FAILED');
+        }
+
+        return 'The audit display could not be refreshed.';
+    }
+
     function renderMessage(type, message) {
         if (window.Joomla && typeof window.Joomla.renderMessages === 'function') {
             var messages = {};
@@ -30,6 +38,40 @@
                 new window.bootstrap.Tooltip(element);
             }
         });
+    }
+
+    function refreshAuditSection() {
+        var auditSection = document.getElementById('cb-audit-section');
+
+        if (!auditSection) {
+            return Promise.resolve();
+        }
+
+        return fetch(window.location.href, {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error(refreshFailedMessage());
+                }
+
+                return response.text();
+            })
+            .then(function (html) {
+                var parsedDocument = new DOMParser().parseFromString(html, 'text/html');
+                var refreshedAuditSection = parsedDocument.getElementById('cb-audit-section');
+
+                if (!refreshedAuditSection) {
+                    throw new Error(refreshFailedMessage());
+                }
+
+                auditSection.replaceWith(refreshedAuditSection);
+                initializeTooltips();
+            });
     }
 
     function removeCompletedAction(button) {
@@ -86,7 +128,10 @@
                 }
 
                 renderMessage('success', message);
-                removeCompletedAction(button);
+                return refreshAuditSection().catch(function () {
+                    removeCompletedAction(button);
+                    renderMessage('warning', refreshFailedMessage());
+                });
             })
             .catch(function (error) {
                 renderMessage('error', error.message || requestFailedMessage());
