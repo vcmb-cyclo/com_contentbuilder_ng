@@ -68,7 +68,10 @@ This normalized structure is the source for:
 - `output=json`;
 - `output=pie`;
 - `output=bar`;
-- future visual outputs that use the same field statistics.
+- `output=histogram`;
+- `output=line`;
+- `output=radar`;
+- `output=avg` uses the same field-statistics source for its numeric aggregate.
 
 Do not duplicate filtering, grouping or counting logic inside visual outputs.
 
@@ -82,9 +85,16 @@ Existing public outputs must continue to work without regression:
 - `total`
 - `form_name`
 - `table`
+- `json`
+- `pie`
+- `bar`
+- `histogram`
+- `line`
+- `radar`
 - `sum`
 - `min`
 - `max`
+- `avg`
 
 Existing filter behavior must be preserved unless a mission explicitly changes it:
 
@@ -96,6 +106,17 @@ Existing filter behavior must be preserved unless a mission explicitly changes i
 - current empty-value behavior for `output=table`
 - STATS permission behavior
 - `debug=1` behavior
+
+RC97 documentation and implementation rules:
+
+- `histogram`, `line` and `radar` reuse the normalized field-statistics engine
+  and the common filtering, sorting, `add=`, `titles=`, `ranges=`, `limit=` and
+  `hide=` validation where applicable;
+- `avg` is the arithmetic mean of retained individual numeric values and
+  ignores empty and non-numeric values;
+- `ranges=` accepts inclusive `minimum-maximum` or `minimum+` items, preserves
+  declaration order and counts overlapping ranges independently;
+- Radar accepts 3 to 8 axes; 4 to 6 axes are recommended for readable labels.
 
 ## Public syntax
 

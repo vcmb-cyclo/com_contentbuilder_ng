@@ -292,6 +292,7 @@ GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&
 | `total` | Matching record count | No |
 | `sum` | Count-weighted numeric sum | Yes |
 | `min`, `max` | Numeric minimum/maximum, or chronological ISO date boundary | Yes |
+| `avg` | Arithmetic mean of retained individual numeric values | Yes |
 | `form_name` | View title or name | No |
 
 When `output` is absent, the endpoint defaults to `json`, so `field` is then
@@ -302,12 +303,12 @@ statistics payload used by the content renderers. JSON reuses the common signed
 #### Parameters
 
 - `id`: required positive ContentBuilder NG view ID;
-- `field`: required for `json`, `sum`, `min` and `max`;
+- `field`: required for `json`, all list/chart outputs, `sum`, `min`, `max` and `avg`;
 - `filter[field]` and `filter[value]`: optional, but must be provided together;
-- `sort=none|title|value`: optional and read only for `json`; default `none`;
-- `dir=asc|desc`: optional and read only for `json`; default `asc`.
-- `add=Label=SignedInteger;...`: optional and read only for `json`;
-- `titles=Original=Display title;...`: optional and read only for `json`.
+- `sort=none|title|value`: optional for list/chart outputs; default `none`;
+- `dir=asc|desc`: optional for list/chart outputs; default `asc`.
+- `add=Label=SignedInteger;...`: optional for list/chart outputs;
+- `titles=Original=Display title;...`: optional for list/chart outputs.
 - `hide=total|values|graph`: optional presentation selection. Article tags and
   URL requests use the same parser and applicability checks.
 
@@ -344,6 +345,10 @@ GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Amount&output=sum
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Amount&output=min
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Amount&output=max
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Amount&output=avg
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=histogram&ranges=18-29%3B30-39%3B40-49%3B50%2B
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=RegistrationDate&output=line&sort=title&dir=asc&limit=30
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=radar&ranges=18-29%3B30-39%3B40-49%3B50-59%3B60%2B
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Category&output=json&filter[field]=Status&filter[value]=Open*%20%7C%20Pending&sort=value&dir=desc
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Category&output=json&add=1%3D-2%3B2%3D3&titles=1%3DGroup%201%3B2%3DGroup%202
 ```
@@ -405,11 +410,22 @@ The API uses the Joomla identity and session attached to the request. The inspec
 files do not document a standalone permanent API-token mechanism: **To verify** for
 the authentication system deployed on the site.
 
-### CBStats ranges and RC96-B01 outputs
+### CBStats RC97 outputs and numeric ranges
 
-The `action=cbstats` URL accepts `avg`, `histogram`, `line` and `radar`.
+The `action=cbstats` URL accepts `avg`, `histogram`, `line` and `radar` in
+addition to the existing list, scalar and chart outputs. `avg` is the arithmetic
+mean of original individual numeric values after ACLs and filters; empty and
+non-numeric values are ignored. For example:
+
+```text
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=avg
+```
+
 `ranges=18-29;30-39;40-49;50-59;60+` creates inclusive, declaration-ordered
-numeric ranges; overlaps are allowed. Chart outputs return normalized
-`total` and `items` data without HTML. Radar is recommended with 4 to 6 axes.
+numeric ranges; overlaps are allowed and each range is counted independently.
+For example, `ranges=18-35;30-45;40-55;50+` deliberately counts an age in
+every matching bucket. Chart outputs return normalized `total` and `items`
+data without HTML. Histogram is vertical, Line preserves the final category
+order, and Radar is recommended with 4 to 6 axes (minimum 3, maximum 8).
 Only `minimum-maximum` and `minimum+` are valid range items. Text such as
 `ranges=Gravel;Route` is rejected; omit `ranges` to count text field values.

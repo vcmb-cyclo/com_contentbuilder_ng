@@ -2,7 +2,7 @@
 
 ## Goal
 
-Prevent regressions while evolving CBStats from independent outputs toward a common normalized field-statistics engine consumed by Table, JSON, Pie and Bar.
+Prevent regressions while maintaining the common normalized field-statistics engine consumed by Table, JSON, Pie, Bar, Histogram, Line and Radar, plus the `avg` scalar aggregate.
 
 Codex must first inspect and reuse the repository's actual test framework. Do not invent a parallel test framework unless no usable test infrastructure exists.
 
@@ -16,6 +16,7 @@ Verify existing behavior for:
 - `output=sum`
 - `output=min`
 - `output=max`
+- `output=avg`
 
 Expected result: unchanged unless explicitly specified.
 
@@ -65,7 +66,9 @@ Verify:
 - identical display titles do not merge source categories;
 - `sort=title` uses final display titles;
 - `sort=none` appends new labels in the supplied order;
-- Table, JSON, Pie and Bar receive the same enriched normalized data;
+- Table, JSON, Pie, Bar, Histogram, Line and Radar receive the same enriched normalized data;
+- `avg` uses original individual numeric values and ignores empty/non-numeric values;
+- `ranges=` accepts inclusive `minimum-maximum` and `minimum+` buckets, preserves order and counts overlaps independently;
 - filters, STATS permissions and debug behavior remain unchanged;
 - scalar outputs remain unaffected and URL/API JSON reuses the common parsers.
 
@@ -132,7 +135,18 @@ Verify:
 - empty data;
 - no JS errors.
 
-## H. Assets
+## H. Histogram, Line and Radar
+
+Verify:
+
+- `output=histogram` is vertical and uses normalized counts/ranges;
+- `output=line` preserves final sorted categories and does not invent missing values;
+- `output=radar` rejects fewer than 3 or more than 8 axes and renders 4 to 6 axes clearly;
+- each output accepts the applicable filters, sorting, `add=`, `titles=`, `limit=` and `hide=` options;
+- one chart, multiple charts and mixed chart types do not collide;
+- UTF-8 labels, empty data and no JavaScript errors.
+
+## I. Assets
 
 With multiple charts on one page verify:
 
@@ -143,7 +157,7 @@ With multiple charts on one page verify:
 - unique chart IDs;
 - no global initialization collision.
 
-## I. Security / escaping
+## J. Security / escaping
 
 Test labels containing:
 
@@ -161,7 +175,7 @@ Expected result:
 - no broken JavaScript;
 - no executable injected markup.
 
-## J. Permissions
+## K. Permissions
 
 Verify existing STATS permission behavior for:
 
@@ -169,7 +183,7 @@ Verify existing STATS permission behavior for:
 - unauthorized user;
 - debug behavior as currently defined.
 
-## K. Documentation acceptance
+## L. Documentation acceptance
 
 After each pass verify:
 
@@ -179,7 +193,7 @@ After each pass verify:
 - language files synchronized;
 - examples match actual implementation.
 
-## L. Codex final report format
+## M. Codex final report format
 
 For each pass report:
 

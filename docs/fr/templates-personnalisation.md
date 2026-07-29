@@ -160,6 +160,10 @@ Exemples :
 {CBStats id=25 field=Parcours output=json sort=title dir=asc}
 {CBStats id=25 field=Parcours output=pie sort=value dir=desc}
 {CBStats id=25 field=Parcours output=bar sort=value dir=desc}
+{CBStats id=25 field=Age output=avg}
+{CBStats id=25 field=Age output=histogram ranges="18-29;30-39;40-49;50+"}
+{CBStats id=25 field=DateInscription output=line sort=title dir=asc limit=30}
+{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50+"}
 {CBStats id=25 field=Parcours output=pie title="👥 Total des inscrits" export=manual}
 {CBStats id=25 field=Catégorie output=pie add="Existant=-2;Externe=3"}
 {CBStats id=25 field=Catégorie output=table titles="1=Groupe 1;2=Groupe 2"}
@@ -205,12 +209,19 @@ Ajoutez `export=manual` à une balise Pie, Bar ou Table pour afficher les libell
 | `json` | Tableau JSON brut d'objets `{label,value}` | Oui |
 | `pie` | Graphique Pie responsive | Oui |
 | `bar` | Graphique à barres horizontal responsive | Oui |
+| `histogram` | Histogramme vertical responsive | Oui |
+| `line` | Courbe responsive utilisant les comptes normalisés | Oui |
+| `radar` | Radar responsive de 3 à 8 axes | Oui |
 | `sum` | Somme pondérée des valeurs numériques | Oui |
 | `min`, `max` | Plus petite et plus grande valeur numérique | Oui |
+| `avg` | Moyenne arithmétique des valeurs numériques retenues | Oui |
 
-`table`, `json`, `pie` et `bar` consomment les mêmes données PHP normalisées. Un
-tableau vide affiche `0` ; un graphique vide affiche un message localisé. JSON ne
-possède aucune enveloppe HTML ou JavaScript :
+`table`, `json`, `pie`, `bar`, `histogram`, `line` et `radar` consomment les mêmes
+données PHP normalisées. Un tableau vide affiche `0` ; un graphique vide affiche
+un message localisé. Histogram est vertical, Line conserve les catégories dans
+l’ordre final et Radar exige de 3 à 8 axes (4 à 6 sont recommandés). `avg` ignore
+les valeurs vides ou non numériques et calcule la moyenne des valeurs
+individuelles. JSON ne possède aucune enveloppe HTML ou JavaScript :
 
 ```json
 [
@@ -254,7 +265,7 @@ Les sorties de statistiques de champ acceptent `sort=none|title|value` et
 naturel des libellés selon la langue active ; `sort=value` compare les nombres.
 `dir` modifie la direction du tri choisi.
 
-Pour `table`, `json`, `pie` et `bar`, `add="Libellé=EntierSigné"` applique des
+Pour `table`, `json`, `pie`, `bar`, `histogram`, `line` et `radar`, `add="Libellé=EntierSigné"` applique des
 deltas cumulatifs : une valeur positive ajoute, zéro ne modifie rien et une
 valeur négative retire des occurrences. Si le résultat final calculé devient
 négatif, CBStats utilise temporairement `0` pour ce libellé avant le tri, le
@@ -266,10 +277,12 @@ restent inchangés. L'ordre est données, filtres, regroupement, `add`, `titles`
 tri, puis output ; `sort=title` utilise les titres affichés finaux. Les
 points-virgules séparent les entrées et le premier signe égal sépare chaque paire.
 
-Pie et Bar affichent des pourcentages localisés avec une décimale, des infobulles,
-une légende compacte détaillée et un total. Les graphiques sont responsives,
-peuvent coexister dans toute combinaison Pie/Bar sur une page et partagent les
-mêmes ressources graphiques locales.
+Pie, Bar, Histogram, Line et Radar utilisent les mêmes données normalisées,
+infobulles et textes graphiques localisés. Les graphiques sont responsives et
+peuvent coexister dans toute combinaison sur une page. Utilisez
+`ranges="18-29;30-39;40-49;50+"` pour des tranches numériques inclusives,
+`output=line sort=title dir=asc` pour une séquence de dates/catégories et
+`output=radar` pour comparer de 3 à 8 dimensions.
 
 `sum`, `min` et `max` retournent `0` lorsque les valeurs correspondantes sont
 vides ou ne sont pas toutes numériques. Les champs de date peuvent fournir un
@@ -278,9 +291,10 @@ basées sur un champ vérifient sa disponibilité API/Stats.
 
 CBStats applique toujours la permission STATS de la vue. Pour l'URL/API, vérifiez
 les réglages **API + Droits**, la disponibilité API/Stats des champs et l'onglet
-**API** de la vue. Les outputs URL disponibles sont `json`, `total`, `sum`,
-`min`, `max` et `form_name` ; JSON accepte aussi `add`, `titles`, `sort` et `dir`,
-tandis que Table, Pie et Bar restent réservés aux contenus. Les erreurs publiques
+**API** de la vue. Les outputs URL disponibles sont `json`, `table`, `pie`, `bar`,
+`histogram`, `line`, `radar`, `total`, `sum`, `min`, `max`, `avg` et `form_name` ;
+les sorties de liste acceptent aussi `add`, `titles`, `sort`, `dir`, `ranges` et
+`limit`. Les erreurs publiques
 restent génériques. `debug=1` demande un
 diagnostic uniquement lorsque DEBUG est activé sur la vue ContentBuilder NG
 ciblée ; il n'accorde aucun accès et ne modifie jamais les permissions de vue, de

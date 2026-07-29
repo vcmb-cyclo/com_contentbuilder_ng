@@ -76,14 +76,20 @@ duplicate identifiers, a missing or inaccessible view, a missing or
 unauthorized field, and simultaneous `id`/`idsum` use. Duplicate identifiers
 are refused rather than deduplicated to prevent accidental double counting.
 
-## 2. Existing outputs
+## 2. Supported outputs
 
-The following outputs must remain compatible:
+The following outputs are implemented in RC97 and must remain compatible:
 
 ```text
 output=total
 output=form_name
 output=table
+output=json
+output=pie
+output=bar
+output=histogram
+output=line
+output=radar
 output=sum
 output=min
 output=max
@@ -142,7 +148,58 @@ Behavior:
 - uses the same compact detail legend, tooltip semantics, colors and total style as Pie;
 - supports multiple charts on one page.
 
-## 6. Filters
+## 6. Histogram output
+
+```text
+{CBStats id=25 field=Age output=histogram ranges="18-29;30-39;40-49;50-59;60+"}
+```
+
+Histogram is a responsive vertical chart using the same normalized labels and
+counts as Table, JSON, Pie and Bar. Use `ranges=` for numeric buckets; bounds
+are inclusive and declaration order is preserved. For example,
+`ranges="18-29;30-39;40-49;50+"` counts each age range independently and keeps
+the real filtered record total separate from the sum of buckets. It is useful
+for distributions such as age, distance or price.
+
+## 7. Line output
+
+```text
+{CBStats id=25 field=RegistrationDate output=line sort=title dir=asc limit=30}
+```
+
+Line charts plot the normalized count for each actual field value in the final
+sort order. They do not invent missing dates or categories and apply the same
+filters, permissions, `add=`, `titles=`, `limit=` and `hide=` rules as the other
+list outputs. For example, a date field can use
+`output=line sort=title dir=asc`, while a categorical trend can use
+`output=line sort=value dir=desc`.
+
+## 8. Radar output
+
+```text
+{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50-59;60+" hide="graph|total"}
+```
+
+Radar displays normalized values as axes in a responsive chart. It requires at
+least 3 axes and accepts at most 8; 4 to 6 axes are recommended for readable
+labels. Use `ranges=` for numeric dimensions or ordinary grouped values for
+categories, for example `{CBStats id=25 field=Skill output=radar}`. Radar uses
+the same tooltip, textual values list, permissions and no-data behavior as the
+other graphical outputs.
+
+## 9. Average output
+
+```text
+{CBStats id=25 field=Age output=avg}
+```
+
+`output=avg` returns the arithmetic mean of original individual numeric values
+after ACLs, filters and an optional `idsum` merge. Empty and non-numeric values
+are ignored; the average is independent from `ranges=` and is not a count of
+distinct labels. For example, values `20`, `30`, `40` return `30`, while an
+empty value and the text `unknown` do not affect the calculation.
+
+## 10. Filters
 
 Existing generic filter syntax includes:
 
@@ -178,7 +235,7 @@ This is strictly equivalent to the complete filter where both `field` and
 is reserved exclusively for `source=manual`. These examples illustrate syntax
 only. No example value may be hardcoded into plugin logic.
 
-## 7. External additions
+## 11. External additions
 
 External counts can be merged into field-statistics outputs with:
 
@@ -200,10 +257,11 @@ and rendering. This also applies to a missing label receiving a negative delta.
 The source data and `add` configuration remain unchanged, and a later zero or
 positive result is used normally. Invalid syntax rejects the complete parameter.
 
-`add` applies to `table`, `json`, `pie` and `bar`. It does not alter scalar outputs
-and is accepted by the URL/API endpoint for `output=json`.
+`add` applies to `table`, `json`, `pie`, `bar`, `histogram`, `line` and `radar`.
+It does not alter scalar outputs and is accepted by the URL/API endpoint for
+the corresponding list outputs.
 
-## 8. Display titles
+## 12. Display titles
 
 Labels can be renamed for display with:
 
@@ -217,7 +275,7 @@ renamed to the same display title are not merged. Semicolons delimit mappings an
 the first equals sign separates each original label from its non-empty display
 title. `sort=title` uses the final display titles.
 
-## 9. Sorting
+## 13. Sorting
 
 ### Total label and background
 
@@ -256,8 +314,8 @@ dir=asc
 
 `sort=title` uses the active Joomla language locale and natural numeric-label
 ordering. `sort=value` compares counts numerically. Sorting is performed by the
-common normalized engine, so Table, JSON, Pie and Bar share
-the same order.
+common normalized engine, so Table, JSON, Pie, Bar, Histogram, Line and Radar
+share the same order.
 
 Examples:
 
@@ -271,7 +329,7 @@ Examples:
 
 The numeric IDs and field names above are documentation examples only.
 
-## 10. JSON contract
+## 14. JSON contract
 
 Normalized records use:
 
@@ -290,7 +348,7 @@ Rules:
 - valid UTF-8;
 - valid JSON.
 
-## 11. Generic chart text
+## 15. Generic chart text
 
 Default generic format:
 
@@ -306,7 +364,7 @@ Total : <sum>
 
 The plugin core must not hardcode domain-specific nouns such as `inscrits`.
 
-## 12. Compatibility and permissions
+## 16. Compatibility and permissions
 
 All outputs must preserve the plugin's existing:
 
@@ -315,7 +373,7 @@ All outputs must preserve the plugin's existing:
 - filter semantics;
 - security/escaping requirements.
 
-## 13. URL/API data outputs
+## 17. URL/API data outputs
 
 The existing `action=cbstats` endpoint supports:
 
@@ -331,7 +389,7 @@ scalar outputs use the standard ContentBuilder NG API success envelope.
 `ranges`, `titles`, `add`, `sort`, `dir` and `limit` use the same validation
 and normalization path as article tags.
 
-## 14. Status tracking
+## 18. Status tracking
 
 Codex should update this section in the real canonical documentation after each pass:
 
@@ -342,11 +400,11 @@ Codex should update this section in the real canonical documentation after each 
 | `output=json` | 1 | Implemented and validated |
 | `output=pie` | 2 | Implemented and validated |
 | `output=bar` | 3 | Implemented and validated |
-| `ranges` | RC96-B01 | Implemented; Docker validation pending |
-| `output=avg` | RC96-B01 | Implemented; Docker validation pending |
-| `output=histogram` | RC96-B01 | Implemented; Docker validation pending |
-| `output=line` | RC96-B01 | Implemented; Docker validation pending |
-| `output=radar` | RC96-B01 | Implemented; Docker validation pending |
+| `ranges` | RC97 | Implemented and validated |
+| `output=avg` | RC97 | Implemented and validated |
+| `output=histogram` | RC97 | Implemented and validated |
+| `output=line` | RC97 | Implemented and validated |
+| `output=radar` | RC97 | Implemented and validated |
 | `add` external counts | Intermediate | Implemented and validated |
 | Signed `add` deltas and `titles` | Finalization | Implemented; awaiting prod-test validation |
 | URL scalar outputs | 1C | Implemented and validated |

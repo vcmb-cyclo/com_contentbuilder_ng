@@ -48,6 +48,9 @@ Document:
 - JSON contract;
 - Pie behavior;
 - Bar behavior;
+- Histogram, Line and Radar behavior;
+- `avg` arithmetic aggregate and `ranges=` numeric buckets;
+- `limit=` and `hide=` display controls;
 - debug behavior when relevant;
 - permissions when relevant;
 - multiple-chart behavior;
@@ -101,7 +104,9 @@ Update:
 
 Use `Gil_PLUGIN_DESCRIPTION.md` as proposed wording, adapted to the actual implementation state.
 
-Do not advertise JSON/Pie/Bar before implementation and validation.
+Do not advertise an output before implementation and validation. In RC97,
+`avg`, `histogram`, `line` and `radar` are implemented and validated alongside
+the earlier JSON, Pie and Bar outputs.
 
 ### E. API documentation in CB
 
@@ -137,6 +142,22 @@ Use generic examples and clearly identify sample-only values.
 
 ```text
 {CBStats id=25 field=Parcours output=bar sort=value dir=desc}
+```
+
+```text
+{CBStats id=25 field=Age output=avg}
+```
+
+```text
+{CBStats id=25 field=Age output=histogram ranges="18-29;30-39;40-49;50+"}
+```
+
+```text
+{CBStats id=25 field=RegistrationDate output=line sort=title dir=asc limit=30}
+```
+
+```text
+{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50+"}
 ```
 
 The plugin code must never depend on those example values.
