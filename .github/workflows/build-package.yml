@@ -176,7 +176,7 @@ jobs:
             --coverage-text
 
       - name: Enforce coverage threshold
-        run: php scripts/check-coverage.php admin/coverage/clover.xml 1
+        run: php scripts/check-coverage.php admin/coverage/clover.xml 5
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v7
