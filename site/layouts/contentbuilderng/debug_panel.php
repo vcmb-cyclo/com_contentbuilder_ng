@@ -15,6 +15,7 @@
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 
+$displayData = is_array($displayData ?? null) ? $displayData : [];
 $permissions = is_array($displayData['permissions'] ?? null) ? $displayData['permissions'] : [];
 $filters = is_array($displayData['filters'] ?? null) ? $displayData['filters'] : [];
 $logs = is_array($displayData['logs'] ?? null) ? $displayData['logs'] : [];
@@ -174,19 +175,9 @@ $wa->useStyle('com_contentbuilderng.debug-panel');
                             <td><code><?php echo htmlspecialchars((string) ($field['reference_id'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></code></td>
                             <td><code><?php echo htmlspecialchars((string) ($field['type'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></code></td>
                             <td class="text-center">
-                                <span
-                                    class="badge <?php echo $hasValidation ? 'text-bg-success' : 'text-bg-secondary'; ?>"
+                                <input id="<?php echo $fieldRowId; ?>-validation" class="form-check-input" type="checkbox" <?php echo $hasValidation ? 'checked' : ''; ?> disabled
                                     title="<?php echo htmlspecialchars($validationTooltip, ENT_QUOTES, 'UTF-8'); ?>"
-                                    aria-label="<?php echo htmlspecialchars($validationTooltip, ENT_QUOTES, 'UTF-8'); ?>"
-                                    tabindex="0"
-                                >
-                                    <?php if ($hasValidation) : ?>
-                                        <span class="fa-solid fa-check" aria-hidden="true"></span>
-                                    <?php else : ?>
-                                        <span aria-hidden="true">—</span>
-                                    <?php endif; ?>
-                                    <span class="visually-hidden"><?php echo htmlspecialchars($validationTooltip, ENT_QUOTES, 'UTF-8'); ?></span>
-                                </span>
+                                    aria-label="<?php echo htmlspecialchars($validationTooltip, ENT_QUOTES, 'UTF-8'); ?>" />
                             </td>
                             <td class="text-center">
                                 <input id="<?php echo $fieldRowId; ?>-editable" class="form-check-input" type="checkbox" <?php echo $rowEditable ? 'checked' : ''; ?> disabled aria-label="<?php echo htmlspecialchars((string) ($field['label'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" />
