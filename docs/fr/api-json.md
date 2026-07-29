@@ -270,7 +270,7 @@ filter[value]=200 km* | 300 km*
 Dans un contenu Joomla, `export=manual` peut être ajouté aux balises Pie, Bar et Table. Il affiche les valeurs finales normalisées et une balise `source=manual` visible et copiable. Cette option de présentation ne fait pas partie du contrat des sorties URL/API.
 
 Le plugin de contenu CBStats utilise une source normalisée unique pour ses sorties
-Table, JSON, Pie et Bar. Son contrat JSON est un tableau brut contenant des
+Table, JSON, Pie, Bar, Histogram, Line et Radar. Son contrat JSON est un tableau brut contenant des
 libellés sous forme de chaînes et des valeurs entières :
 
 ```text
@@ -295,15 +295,16 @@ GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&
 | `output` | Réponse | `field` obligatoire |
 | --- | --- | --- |
 | `json` | Tableau normalisé brut | Oui |
+| `table`, `pie`, `bar`, `histogram`, `line`, `radar` | Statistiques normalisées | Oui |
 | `total` | Nombre d'enregistrements correspondants | Non |
 | `sum` | Somme numérique pondérée | Oui |
 | `min`, `max` | Minimum/maximum numérique, ou borne chronologique d'une date ISO | Oui |
 | `form_name` | Titre ou nom de la vue | Non |
 
 En l'absence de `output`, le point d'accès utilise `json` par défaut ; `field` est
-donc obligatoire. `table`, `pie` et `bar` restent réservés au contenu et sont
-refusés par l'API URL. JSON réutilise le traitement commun de `add` signé et de
-`titles`.
+donc obligatoire. Les requêtes URL pour Table et les graphiques retournent les
+mêmes statistiques normalisées que les renderers de contenu. JSON réutilise le
+traitement commun de `add` signé et de `titles`.
 
 #### Paramètres
 
@@ -314,8 +315,23 @@ refusés par l'API URL. JSON réutilise le traitement commun de `add` signé et 
 - `dir=asc|desc` : facultatif et lu uniquement pour `json`, défaut `asc`.
 - `add=Libellé=EntierSigné;...` : facultatif et lu uniquement pour `json` ;
 - `titles=Original=Titre affiché;...` : facultatif et lu uniquement pour `json`.
+- `hide=total|values|graph` : sélection de présentation facultative. Les balises
+  d’article et les requêtes URL utilisent le même parser et les mêmes contrôles.
 
 Les sorties scalaires ignorent `sort` et `dir`.
+
+`hide="total"` masque uniquement le Total affiché, `hide="values"` masque les
+nombres du graphique tout en conservant les libellés et `hide="graph"` masque
+le dessin tout en conservant des valeurs textuelles légères. Ces valeurs peuvent
+être combinées avec `|` dans n’importe quel ordre. Les options non applicables
+et les combinaisons masquant tout le résultat sont refusées. L’ancienne syntaxe
+`total=hide` est refusée.
+
+```text
+{CBStats id=3 field=NomDuChamp output=bar hide="total"}
+{CBStats id=3 field=NomDuChamp output=radar hide="graph|total"}
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=NomDuChamp&output=bar&hide=total
+```
 
 Les valeurs de filtre sont nettoyées de leurs espaces de début et de fin. `*`
 représente une suite quelconque de caractères et `|` sépare les alternatives. Un

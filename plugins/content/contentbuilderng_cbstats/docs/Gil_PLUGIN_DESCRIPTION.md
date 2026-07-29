@@ -100,36 +100,43 @@ When updating the real plugin:
 3. Do not claim `json`, `pie` or `bar` is available until the corresponding pass is actually implemented and validated.
 4. Document the exact outputs implemented and validated in the current release.
 5. Keep short descriptions short enough for Joomla extension listings and administrator views.
-### Result limit and total display
+### Result limit and display options
 
 `limit="10"` keeps the first ten values after sorting, then recalculates the
-displayed total and chart percentages from those values. `total="hide"` hides
-that total in Table, Pie and Bar without preventing its internal calculation.
-Both options work with `id` and `idsum`. No Other category is added.
+displayed total and chart percentages from those values. `hide=` accepts
+`total`, `values` and `graph`, combined with `|`: `total` hides the displayed
+total, `values` hides result numbers but keeps labels, and `graph` hides the
+drawing but keeps lightweight textual values. Without `hide=`, everything is
+shown. Hiding all three elements produces a message. The former `total=hide`
+syntax is rejected; use `hide="total"`.
 
 ```text
 {CBStats id="25" field="Town" output="table" sort="value" dir="desc" limit="10"}
-{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" total="hide"}
+{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" hide="total"}
+{CBStats id="25" field="Age" output="histogram" ranges="18-29;30-39;40-49;50-59;60+" hide="total|values"}
+{CBStats id="25" field="Age" output="radar" ranges="18-29;30-39;40-49;50-59;60+" hide="graph|total"}
 ```
 
 ### Limite du résultat et affichage du total
 
-`limit="10"` conserve les dix premières valeurs après le tri.
-Le total affiché et les pourcentages sont ensuite recalculés sur ces seules
-valeurs. `total="hide"` masque ce total dans Table, Pie et Bar sans empêcher
-son calcul interne. Les deux options fonctionnent avec `id` et `idsum`.
-Aucune catégorie Autres n’est ajoutée.
+`limit="10"` conserve les dix premières valeurs après le tri. `hide=` accepte
+`total`, `values` et `graph`, combinés avec `|`. `total` masque le Total,
+`values` masque les nombres sans masquer les libellés et `graph` masque le
+dessin tout en conservant des valeurs textuelles légères. Sans `hide=`, tout
+est affiché. Masquer les trois éléments produit un message. L’ancienne syntaxe
+`total=hide` est refusée ; utilisez `hide="total"`.
 
 ```text
 {CBStats id="25" field="Ville" output="table" sort="value" dir="desc" limit="10"}
-{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" total="hide"}
+{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" hide="total"}
+{CBStats id="25" field="Age" output="radar" hide="graph|total"}
 ```
 
 ### Ergebnisbegrenzung und Summenanzeige
 
-`limit="10"` behält die ersten zehn Werte nach der Sortierung.
-Die angezeigte Gesamtsumme und die Prozentsätze werden anschließend nur aus
-diesen Werten neu berechnet. `total="hide"` blendet diese Summe in Tabelle,
-Kreis- und Balkendiagramm aus, ohne ihre interne Berechnung zu verhindern.
-Beide Optionen funktionieren mit `id` und `idsum`. Eine Kategorie Sonstige
-wird nicht hinzugefügt.
+`limit="10"` behält die ersten zehn Werte nach der Sortierung. `hide=` akzeptiert
+`total`, `values` und `graph`, mit `|` kombiniert. `total` blendet die Summe
+aus, `values` blendet Ergebniszahlen aus und behält Beschriftungen bei,
+`graph` blendet die Zeichnung aus und behält leichte Textwerte bei. Ohne
+`hide=` wird alles angezeigt. Alle drei Werte zusammen erzeugen eine Meldung.
+Die frühere Syntax `total=hide` wird abgelehnt; verwenden Sie `hide="total"`.

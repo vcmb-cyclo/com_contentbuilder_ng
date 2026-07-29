@@ -4,6 +4,10 @@
     const valueLabels = {
         id: 'cbstatsBarValueLabels',
         afterDatasetsDraw(chart) {
+            if (!chart.options.plugins.cbstatsBarValueLabels.showValues) {
+                return;
+            }
+
             const items = chart.options.plugins.cbstatsBarValueLabels.items;
             const context = chart.ctx;
 
@@ -46,6 +50,7 @@
         }
 
         const items = Array.isArray(payload.items) ? payload.items : [];
+        const showValues = payload.showValues !== false;
         const canvas = root.querySelector('.cbstats-bar-canvas');
 
         if (!canvas || items.length === 0 || typeof Chart === 'undefined') {
@@ -86,6 +91,7 @@
                         beginAtZero: true,
                         ticks: {
                             precision: 0,
+                            display: showValues,
                         },
                     },
                     y: {
@@ -100,6 +106,7 @@
                     },
                     cbstatsBarValueLabels: {
                         items,
+                        showValues,
                     },
                     tooltip: {
                         titleAlign: 'center',
@@ -110,7 +117,7 @@
                             title: (tooltipItems) => tooltipItems[0]?.label || '',
                             label: (context) => {
                                 const item = items[context.dataIndex];
-                                return item ? `${item.value} (${item.percentageLabel} %)` : '';
+                                return showValues && item ? `${item.value} (${item.percentageLabel} %)` : '';
                             },
                         },
                     },

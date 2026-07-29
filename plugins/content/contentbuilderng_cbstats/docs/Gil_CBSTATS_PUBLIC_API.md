@@ -352,7 +352,7 @@ Codex should update this section in the real canonical documentation after each 
 | URL scalar outputs | 1C | Implemented and validated |
 | Security/error hardening | Finalization | Implemented and validated |
 | Cross-repository docs/API | 4 | Completed |
-## Limiting the final result and hiding its total
+## Limiting the final result and hiding result elements
 
 `limit` is optional and accepts a strictly positive integer:
 
@@ -367,22 +367,28 @@ decimal or out-of-range integer values are rejected as invalid requests.
 It applies to `table`, `json`, `pie`, `bar`, `histogram`, `line` and `radar`;
 scalar outputs are unchanged.
 
-`total="hide"` removes only the rendered total row or box from `table`, `pie`
-and `bar`. It does not change individual values, `title=` or `titles=`. JSON
-has no visual total to hide. `output="total"` deliberately remains unchanged
-and returns the global record total because returning that value is its sole
-purpose.
+`hide` accepts `total`, `values` and `graph`, combined with `|` in any order.
+`total` hides only the rendered total, `values` hides numeric result labels
+while retaining category labels, and `graph` hides the chart drawing while
+retaining the lightweight textual values. Without `hide`, all elements remain
+visible. Hiding all three elements is rejected instead of producing an empty
+block.
+
+The chart options apply to `pie`, `bar`, `histogram`, `line` and `radar`.
+`output="table"` accepts only `hide="total"`. `json`, `min`, `max` and `avg`
+reject presentation options that would hide their primary result. The former
+`total=hide` syntax is no longer supported; use `hide="total"`.
 
 The processing order is:
 
 ```text
 source → filters → grouping → optional idsum merge → add/titles
 → sort/dir → limit → limited-total recalculation
-→ rendering → visual total hiding
+→ rendering → validated presentation hiding
 ```
 
 The displayed total and chart percentages are recalculated from the retained
-values only. With `total="hide"`, that limited total remains available
+values only. With `hide="total"`, that limited total remains available
 internally for percentages. No `Other` category is added.
 
 When `ranges=` is present, the displayed total is instead always the real
@@ -391,9 +397,10 @@ ranges, including after `limit`, because overlapping ranges can legitimately
 count one record several times.
 
 ```text
-{CBStats id="25" field="Name" output="table" sort="title" dir="asc" total="hide"}
-{CBStats id="25" field="Email" output="table" sort="title" dir="asc" limit="50" total="hide"}
-{CBStats idsum="25+27" field="Town" output="table" sort="value" dir="desc" limit="10" total="hide"}
+{CBStats id="25" field="Name" output="table" sort="title" dir="asc" hide="total"}
+{CBStats id="25" field="Email" output="histogram" sort="title" dir="asc" limit="50" hide="total"}
+{CBStats idsum="25+27" field="Town" output="radar" sort="value" dir="desc" limit="10" hide="graph|total"}
+index.php?option=com_contentbuilderng&task=api.display&format=json&action=cbstats&id=25&field=Town&output=bar&hide=total
 ```
 
 ## Explicit numeric ranges

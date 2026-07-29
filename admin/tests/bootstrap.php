@@ -596,6 +596,7 @@ namespace {
     require_once \dirname(__DIR__, 2) . '/site/src/Service/SparseFieldsetService.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/StatsFilterValueService.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/StatsService.php';
+    require_once \dirname(__DIR__, 2) . '/site/src/Service/StatsHideOptionsService.php';
     require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/PiePresentationService.php';
     require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/IdSumException.php';
     require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/IdSumService.php';

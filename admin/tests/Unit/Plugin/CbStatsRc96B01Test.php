@@ -140,7 +140,10 @@ final class CbStatsRc96B01Test extends TestCase
 
         self::assertStringContainsString('StatsService::parseFieldStatsRanges($ranges)', $plugin);
         self::assertStringContainsString('StatsService::parseFieldStatsRanges($ranges)', $controller);
-        self::assertStringContainsString("['type' => \$output, 'items' => \$items]", $plugin);
+        self::assertStringContainsString(
+            "['type' => \$output, 'items' => \$items, 'showValues' => !\$hideOptions['values']]",
+            $plugin
+        );
         self::assertStringContainsString("private const RADAR_MIN_AXES = 3", $plugin);
         self::assertStringContainsString("private const RADAR_MAX_AXES = 8", $plugin);
         self::assertStringContainsString('MAX_FRACTION_DIGITS, 2', $plugin);

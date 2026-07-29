@@ -4,6 +4,10 @@
   const valueLabels = {
     id: 'cbstatsValueLabels',
     afterDatasetsDraw(chart) {
+      if (!chart.options.plugins.cbstatsValueLabels.showValues) {
+        return;
+      }
+
       const dataset = chart.data.datasets[0];
       const meta = chart.getDatasetMeta(0);
 
@@ -42,6 +46,7 @@
     }
 
     const items = Array.isArray(payload.items) ? payload.items : [];
+    const showValues = payload.showValues !== false;
     const output = String(payload.type || '');
     const canvas = root.querySelector('canvas');
 
@@ -76,9 +81,10 @@
         layout: { padding: { top: 22, right: 12, bottom: 4, left: 8 } },
         plugins: {
           legend: { display: false },
+          cbstatsValueLabels: { showValues },
           tooltip: {
             callbacks: {
-              label: (context) => `${context.label}: ${context.formattedValue}`,
+              label: (context) => showValues ? `${context.label}: ${context.formattedValue}` : context.label,
             },
           },
         },
@@ -88,10 +94,10 @@
                 ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 },
                 grid: { display: false },
               },
-              y: { beginAtZero: true, ticks: { precision: 0 } },
+              y: { beginAtZero: true, ticks: { precision: 0, display: showValues } },
             }
           : {
-              r: { beginAtZero: true, ticks: { precision: 0, backdropColor: 'transparent' } },
+              r: { beginAtZero: true, ticks: { precision: 0, display: showValues, backdropColor: 'transparent' } },
             },
       },
       plugins: [valueLabels],

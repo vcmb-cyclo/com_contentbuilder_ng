@@ -79,6 +79,13 @@
                     description="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DISPLAY_OPTIONS_TEXT"
                     class="alert alert-info w-100"
                 />
+                <field
+                    name="cbstats_hide_note"
+                    type="note"
+                    label="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_HIDE_LABEL"
+                    description="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_HIDE_TEXT"
+                    class="alert alert-info w-100"
+                />
             </fieldset>
         </fields>
     </config>

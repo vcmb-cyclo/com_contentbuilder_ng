@@ -316,17 +316,22 @@ Une mise à jour peut remplacer ces fichiers.
 - désactivez le Debug après validation.
 
 > 📷 *Capture à ajouter : génération d'un template exemple et éditeur de préparation PHP — `docs/fr/img/templates-preparation.png`*
-### Limiter les valeurs CBStats et masquer le total
+### Limiter les valeurs CBStats et masquer des éléments
 
 Utilisez `limit` après un tri existant pour ne conserver que les premières
-valeurs statistiques. Utilisez `total="hide"` pour retirer le total visuel de
-Table, Pie ou Bar :
+valeurs statistiques. Utilisez `hide` avec `total`, `values` ou `graph`, séparés
+par `|`. `total` masque le Total affiché, `values` masque les nombres mais
+conserve les libellés et `graph` masque le dessin tout en conservant des valeurs
+textuelles légères :
 
 ```text
 {CBStats id="25" field="Ville" output="table" sort="value" dir="desc" limit="10"}
-{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" total="hide"}
+{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" hide="total"}
+{CBStats id="25" field="Age" output="histogram" hide="total|values"}
+{CBStats id="25" field="Age" output="radar" hide="graph|total"}
 ```
 
 Le total affiché et les pourcentages des graphiques sont recalculés sur les
-valeurs conservées par `limit`. Aucune catégorie Autres n’est ajoutée.
-`output="total"` reste inchangé et JSON n’a aucun total visuel.
+valeurs conservées par `limit`. Le masquage ne modifie ni les calculs, ni les
+ACL, ni les filtres. Masquer les trois éléments est refusé. L’ancienne syntaxe
+`total=hide` n’est plus prise en charge ; utilisez `hide="total"`.

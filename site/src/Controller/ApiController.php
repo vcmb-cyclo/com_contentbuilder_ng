@@ -24,6 +24,7 @@ use CB\Component\Contentbuilderng\Site\Model\EditModel;
 use CB\Component\Contentbuilderng\Site\Model\ListModel;
 use CB\Component\Contentbuilderng\Site\Service\SparseFieldsetService;
 use CB\Component\Contentbuilderng\Site\Service\StatsFilterValueService;
+use CB\Component\Contentbuilderng\Site\Service\StatsHideOptionsService;
 use CB\Component\Contentbuilderng\Site\Service\StatsService;
 use Joomla\CMS\Application\CMSWebApplicationInterface;
 use Joomla\CMS\Application\SiteApplication;
@@ -260,6 +261,19 @@ class ApiController extends BaseController
             ],
         ]);
 
+        try {
+            if ($this->input->exists('total')) {
+                throw new \InvalidArgumentException('total', StatsHideOptionsService::LEGACY_TOTAL);
+            }
+
+            $hideOptions = StatsHideOptionsService::parse(
+                $this->input->exists('hide') ? $this->input->getString('hide', '') : null
+            );
+            StatsHideOptionsService::validateForOutput($hideOptions, $output);
+        } catch (\InvalidArgumentException $exception) {
+            throw new \RuntimeException($this->getCbstatsHideErrorMessage($exception), 400, $exception);
+        }
+
         if (in_array($output, $listOutputs, true)) {
             $sort = strtolower(trim((string) $this->input->getCmd('sort', 'none')));
             $dir = strtolower(trim((string) $this->input->getCmd('dir', 'asc')));
@@ -337,6 +351,32 @@ class ApiController extends BaseController
                 'COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_TITLES'
             ),
             default => Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_ADD'),
+        };
+    }
+
+    private function getCbstatsHideErrorMessage(\InvalidArgumentException $exception): string
+    {
+        if ($exception->getCode() === StatsHideOptionsService::NOT_APPLICABLE) {
+            [$item, $output] = array_pad(explode('|', $exception->getMessage(), 2), 2, '');
+
+            return Text::sprintf('COM_CONTENTBUILDERNG_API_CBSTATS_HIDE_NOT_APPLICABLE', $item, $output);
+        }
+
+        return match ($exception->getCode()) {
+            StatsHideOptionsService::INVALID_SEPARATOR => Text::sprintf(
+                'COM_CONTENTBUILDERNG_API_CBSTATS_HIDE_INVALID_SEPARATOR',
+                $exception->getMessage()
+            ),
+            StatsHideOptionsService::ALL_HIDDEN => Text::_(
+                'COM_CONTENTBUILDERNG_API_CBSTATS_HIDE_ALL_HIDDEN'
+            ),
+            StatsHideOptionsService::LEGACY_TOTAL => Text::_(
+                'COM_CONTENTBUILDERNG_API_CBSTATS_HIDE_LEGACY_TOTAL'
+            ),
+            default => Text::sprintf(
+                'COM_CONTENTBUILDERNG_API_CBSTATS_HIDE_INVALID_ITEM',
+                $exception->getMessage()
+            ),
         };
     }
 

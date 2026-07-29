@@ -263,7 +263,7 @@ filter[value]=200 km* | 300 km*
 In Joomla content, `export=manual` can be added to Pie, Bar and Table tags. It displays the final normalized values and a visible, copyable `source=manual` tag. This presentation-only option is not part of the URL/API output contract.
 
 The CBStats content plugin uses one normalized field-statistics source for its
-HTML table, JSON, Pie and Bar outputs. Its JSON contract is a raw array containing
+Table, JSON, Pie, Bar, Histogram, Line and Radar outputs. Its JSON contract is a raw array containing
 string labels and integer values:
 
 ```text
@@ -288,14 +288,16 @@ GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&
 | `output` | Response | `field` required |
 | --- | --- | --- |
 | `json` | Raw normalized array | Yes |
+| `table`, `pie`, `bar`, `histogram`, `line`, `radar` | Normalized statistics payload | Yes |
 | `total` | Matching record count | No |
 | `sum` | Count-weighted numeric sum | Yes |
 | `min`, `max` | Numeric minimum/maximum, or chronological ISO date boundary | Yes |
 | `form_name` | View title or name | No |
 
 When `output` is absent, the endpoint defaults to `json`, so `field` is then
-required. `table`, `pie` and `bar` are content-only renderers and are rejected by
-the URL endpoint. JSON reuses the common signed `add` and `titles` processing.
+required. URL requests for Table and chart outputs return the same normalized
+statistics payload used by the content renderers. JSON reuses the common signed
+`add` and `titles` processing.
 
 #### Parameters
 
@@ -306,8 +308,22 @@ the URL endpoint. JSON reuses the common signed `add` and `titles` processing.
 - `dir=asc|desc`: optional and read only for `json`; default `asc`.
 - `add=Label=SignedInteger;...`: optional and read only for `json`;
 - `titles=Original=Display title;...`: optional and read only for `json`.
+- `hide=total|values|graph`: optional presentation selection. Article tags and
+  URL requests use the same parser and applicability checks.
 
 Scalar outputs ignore `sort` and `dir`.
+
+`hide="total"` hides only a displayed total, `hide="values"` hides numeric
+chart labels while retaining category labels, and `hide="graph"` hides the
+drawing while retaining lightweight textual values. Values may be combined
+with `|` in any order. Non-applicable options and combinations hiding every
+result element are rejected. The former `total=hide` syntax is rejected.
+
+```text
+{CBStats id=3 field=FieldName output=bar hide="total"}
+{CBStats id=3 field=FieldName output=radar hide="graph|total"}
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=FieldName&output=bar&hide=total
+```
 
 Filter values are trimmed. `*` matches any character sequence and `|` separates
 alternatives. A supplied filter must contain at least one non-empty alternative.

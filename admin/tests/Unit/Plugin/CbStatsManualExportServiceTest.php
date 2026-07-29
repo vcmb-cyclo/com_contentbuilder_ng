@@ -127,6 +127,21 @@ final class CbStatsManualExportServiceTest extends TestCase
         }
     }
 
+    public function testFrozenSyntaxPreservesCanonicalHideOption(): void
+    {
+        $syntax = ManualExportService::buildSyntax(
+            [['label' => 'Final', 'value' => 9]],
+            'pie',
+            '',
+            '',
+            '',
+            'total|values'
+        );
+
+        self::assertStringContainsString(' hide="total|values"', $syntax);
+        self::assertStringNotContainsString('total=hide', $syntax);
+    }
+
     #[DataProvider('finalTitleOutputProvider')]
     public function testExportsFinalTitlesAdditionsAndSortedOrder(string $output): void
     {

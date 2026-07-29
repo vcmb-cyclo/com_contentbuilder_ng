@@ -280,16 +280,21 @@ plugin, or a maintained project patch instead.
 - disable Debug after diagnosis.
 
 > 📷 *Screenshot to add: generating a template example and opening the PHP preparation editor — `docs/en/img/templates-preparation.png`*
-### Limiting CBStats values and hiding the total
+### Limiting CBStats values and hiding result elements
 
 Use `limit` after an existing sort to retain only the first statistical values.
-Use `total="hide"` to remove the visual total from Table, Pie or Bar:
+Use `hide` with `total`, `values` or `graph`, separated by `|`. `total` hides
+the displayed total, `values` hides numeric results but retains category labels,
+and `graph` hides the drawing while retaining lightweight textual values:
 
 ```text
 {CBStats id="25" field="Town" output="table" sort="value" dir="desc" limit="10"}
-{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" total="hide"}
+{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" hide="total"}
+{CBStats id="25" field="Age" output="histogram" hide="total|values"}
+{CBStats id="25" field="Age" output="radar" hide="graph|total"}
 ```
 
 The displayed total and chart percentages are recalculated from the values
-retained by `limit`. No Other category is added. `output="total"` remains
-unchanged, and JSON has no visual total.
+retained by `limit`. Hiding does not change calculations, ACLs or filters.
+Hiding all three elements is rejected. The former `total=hide` syntax is no
+longer supported; use `hide="total"`.

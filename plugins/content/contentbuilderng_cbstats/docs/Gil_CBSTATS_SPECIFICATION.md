@@ -414,7 +414,7 @@ A pass is complete only when:
 - language keys are updated as needed;
 - documentation for the implemented public behavior is updated;
 - the final Codex report lists changed files and test results.
-## Final result options: `limit` and `total="hide"`
+## Final result options: `limit` and `hide`
 
 - `limit` is an optional strictly positive integer.
 - It slices normalized field statistics only after `add`, `titles`, `sort` and
@@ -424,9 +424,16 @@ A pass is complete only when:
 - After limiting, the visible total is recalculated from the retained values.
   Pie and Bar percentages use that limited total as their denominator.
 - No synthetic `Other` category is created.
-- `total="hide"` suppresses the Table footer or chart total box without
-  rendering an empty container.
-- `total="hide"` has no effect on JSON and is intentionally non-applicable to
-  `output="total"`, which continues to return the global record total.
-- Any explicit `total` value other than `hide`, and any missing or invalid
-  `limit` value, is rejected through the normal CBStats invalid-request path.
+- `hide` accepts only `total`, `values` and `graph`, combined with `|`.
+- `hide="total"` suppresses the displayed total without changing its internal
+  calculation.
+- `hide="values"` suppresses numeric result labels while retaining category
+  labels.
+- `hide="graph"` suppresses the chart drawing while retaining lightweight
+  textual values.
+- These graph options apply to Pie, Bar, Histogram, Line and Radar. A
+  non-applicable option produces a soft diagnostic; hiding all result elements
+  is rejected instead of rendering an empty container.
+- The former `total=hide` syntax is rejected and is not treated as an alias.
+- Any invalid `hide` or `limit` value is rejected through the normal CBStats
+  invalid-request path.
