@@ -12,6 +12,7 @@
 \defined('_JEXEC') or die;
 
 use CB\Component\Contentbuilderng\Administrator\Service\FormAuditService;
+use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 
 $audit = (array) ($this->audit ?? ['info' => [], 'checks' => []]);
@@ -24,12 +25,21 @@ $statusBadges = [
 $auditTitle = trim((string) ($auditForm['name'] ?? '')) !== ''
     ? Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_MODAL_TITLE', trim((string) $auditForm['name']), (int) ($auditForm['id'] ?? 0))
     : Text::_('COM_CONTENTBUILDERNG_AUDIT');
+$formId = (int) ($auditForm['id'] ?? 0);
+$referenceChecks = array_values(array_filter(
+    (array) ($audit['checks'] ?? []),
+    static fn($check): bool => is_array($check) && (string) ($check['code'] ?? '') === 'element_reference'
+));
+$otherChecks = array_values(array_filter(
+    (array) ($audit['checks'] ?? []),
+    static fn($check): bool => is_array($check) && (string) ($check['code'] ?? '') !== 'element_reference'
+));
 ?>
-<div class="p-3">
+<div class="p-3" data-cb-form-audit-panel>
     <h1 class="h4 mb-3"><?php echo htmlspecialchars($auditTitle, ENT_QUOTES, 'UTF-8'); ?></h1>
 
     <div class="alert alert-info">
-        <?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_SAVED_CONFIGURATION_NOTICE'); ?>
+        <span class="fa-solid fa-bug me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_SAVED_CONFIGURATION_NOTICE'); ?>
     </div>
 
     <?php if (!empty($audit['info'])) : ?>
@@ -46,14 +56,80 @@ $auditTitle = trim((string) ($auditForm['name'] ?? '')) !== ''
         </table>
     <?php endif; ?>
 
-    <h2 class="h5 mt-4"><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECKS_HEADING'); ?></h2>
+    <h2 class="h5 mt-4">24. <?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ELEMENT_REFERENCE_CONSISTENCY'); ?></h2>
     <ul class="list-group">
-        <?php foreach ((array) $audit['checks'] as $check) : ?>
+        <?php if ($referenceChecks === []) : ?>
+            <li class="list-group-item d-flex align-items-start gap-2">
+                <span class="badge bg-success"><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_STATUS_OK'); ?></span>
+                <span><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ELEMENT_REFERENCE_CONSISTENCY_OK'); ?></span>
+            </li>
+        <?php else : ?>
+            <?php foreach ($referenceChecks as $check) : ?>
+                <?php [$badgeClass, $badgeKey] = $statusBadges[(string) ($check['status'] ?? FormAuditService::STATUS_WARNING)] ?? $statusBadges[FormAuditService::STATUS_WARNING]; ?>
+                <li class="list-group-item d-flex align-items-start gap-2">
+                    <span class="badge <?php echo $badgeClass; ?>"><?php echo Text::_($badgeKey); ?></span>
+                    <span><?php echo htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                </li>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </ul>
+
+    <?php if ($otherChecks !== []) : ?>
+        <h2 class="h5 mt-4"><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECKS_HEADING'); ?></h2>
+        <ul class="list-group">
+        <?php foreach ($otherChecks as $check) : ?>
             <?php [$badgeClass, $badgeKey] = $statusBadges[(string) ($check['status'] ?? FormAuditService::STATUS_WARNING)] ?? $statusBadges[FormAuditService::STATUS_WARNING]; ?>
             <li class="list-group-item d-flex align-items-start gap-2">
                 <span class="badge <?php echo $badgeClass; ?>"><?php echo Text::_($badgeKey); ?></span>
-                <span><?php echo htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                <div>
+                    <?php echo htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                    <?php if ((string) ($check['code'] ?? '') === 'theme_empty' && $formId > 0) : ?>
+                        <form
+                            class="d-inline ms-2"
+                            action="index.php?option=com_contentbuilderng"
+                            method="post"
+                            data-cb-form-audit-repair
+                        >
+                            <input type="hidden" name="option" value="com_contentbuilderng">
+                            <input type="hidden" name="task" value="form.repairThemePlugin">
+                            <input type="hidden" name="id" value="<?php echo $formId; ?>">
+                            <?php echo HTMLHelper::_('form.token'); ?>
+                            <button
+                                type="submit"
+                                class="btn btn-sm btn-warning"
+                                name="theme_plugin"
+                                value="thoth"
+                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                            >
+                                <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR'); ?>
+                            </button>
+                        </form>
+                    <?php elseif ((string) ($check['code'] ?? '') === 'editable_template_empty' && $formId > 0) : ?>
+                        <form
+                            class="d-inline ms-2"
+                            action="index.php?option=com_contentbuilderng"
+                            method="post"
+                            data-cb-form-audit-repair
+                        >
+                            <input type="hidden" name="option" value="com_contentbuilderng">
+                            <input type="hidden" name="task" value="form.repairEditableTemplate">
+                            <input type="hidden" name="id" value="<?php echo $formId; ?>">
+                            <?php echo HTMLHelper::_('form.token'); ?>
+                            <button
+                                type="submit"
+                                class="btn btn-sm btn-warning"
+                                value="thoth"
+                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                            >
+                                <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'); ?>
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                </div>
             </li>
         <?php endforeach; ?>
-    </ul>
+        </ul>
+    <?php endif; ?>
 </div>

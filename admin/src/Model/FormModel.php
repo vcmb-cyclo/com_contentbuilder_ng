@@ -239,20 +239,26 @@ class FormModel extends AdminModel
 
         $msg = Text::sprintf(
             'COM_CONTENTBUILDERNG_SOURCE_FIELDS_SYNC_CHANGED',
-            $addedCount,
-            $removedCount
+            Text::plural('COM_CONTENTBUILDERNG_SOURCE_FIELDS_SYNC_ADDED_COUNT', $addedCount),
+            Text::plural('COM_CONTENTBUILDERNG_SOURCE_FIELDS_SYNC_REMOVED_COUNT', $removedCount)
         );
 
         if ($addedCount > 0) {
+            $addedKey = $addedCount === 1
+                ? 'COM_CONTENTBUILDERNG_SOURCE_FIELDS_SYNC_ADDED_1'
+                : 'COM_CONTENTBUILDERNG_SOURCE_FIELDS_SYNC_ADDED_MORE';
             $msg .= ' ' . Text::sprintf(
-                'COM_CONTENTBUILDERNG_SOURCE_FIELDS_SYNC_ADDED',
+                $addedKey,
                 $this->formatSyncFieldList($added, $addedCount)
             );
         }
 
         if ($removedCount > 0) {
+            $removedKey = $removedCount === 1
+                ? 'COM_CONTENTBUILDERNG_SOURCE_FIELDS_SYNC_REMOVED_1'
+                : 'COM_CONTENTBUILDERNG_SOURCE_FIELDS_SYNC_REMOVED_MORE';
             $msg .= ' ' . Text::sprintf(
-                'COM_CONTENTBUILDERNG_SOURCE_FIELDS_SYNC_REMOVED',
+                $removedKey,
                 $this->formatSyncFieldList($removed, $removedCount)
             );
         }

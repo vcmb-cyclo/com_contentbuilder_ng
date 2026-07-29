@@ -53,6 +53,8 @@ use CB\Component\Contentbuilderng\Administrator\Service\ListSupportService;
 use CB\Component\Contentbuilderng\Administrator\Service\PathService;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Service\TemplateRenderService;
+use CB\Component\Contentbuilderng\Administrator\Service\FieldValidationService;
+use CB\Component\Contentbuilderng\Site\Helper\DuplicateKeyViolationHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PublishedRecordVisibilityHelper;
 use CB\Component\Contentbuilderng\Site\Model\Edit\ListStateAndRatingTrait;
@@ -82,6 +84,7 @@ class EditModel extends BaseDatabaseModel
     private readonly RuntimeUtilityService $runtimeUtilityService;
     private readonly ListSupportService $listSupportService;
     private readonly TemplateRenderService $templateRenderService;
+    private readonly FieldValidationService $fieldValidationService;
 
     private int $_id = 0;
     private $_record_id = 0;
@@ -138,6 +141,7 @@ class EditModel extends BaseDatabaseModel
         $this->runtimeUtilityService = new RuntimeUtilityService($app);
         $this->listSupportService = $container->get(ListSupportService::class);
         $this->templateRenderService = $container->get(TemplateRenderService::class);
+        $this->fieldValidationService = $container->get(FieldValidationService::class);
         $option = 'com_contentbuilderng';
 
         $this->app->getInput()->set('cb_category_id', null);
@@ -240,6 +244,58 @@ class EditModel extends BaseDatabaseModel
             $this->app->getLanguage()->load('com_content', JPATH_SITE . '/administrator');
             $this->app->getLanguage()->load('joomla', JPATH_SITE . '/administrator');
         }
+    }
+
+    /**
+     * @param array<string,mixed> $field
+     * @param array<string,array<string,mixed>> $fields
+     * @return list<string>
+     */
+    private function validateField(
+        array $field,
+        array $fields,
+        int $recordId,
+        mixed $form,
+        mixed $value
+    ): array {
+        $results = $this->fieldValidationService->validate($field, $fields, $recordId, $form, $value);
+        $externalValidations = $this->fieldValidationService->getExternalValidationNames($field);
+
+        foreach ($externalValidations as $validation) {
+            PluginHelper::importPlugin('contentbuilderng_validation', $validation);
+        }
+
+        if ($externalValidations === []) {
+            return $results;
+        }
+
+        $eventResult = $this->app->getDispatcher()->dispatch(
+            'onValidate',
+            new \Joomla\CMS\Event\GenericEvent(
+                'onValidate',
+                [$field, $fields, $recordId, $form, $value]
+            )
+        );
+        $externalResults = $eventResult->getArgument('result') ?: [];
+        if (!is_array($externalResults)) {
+            $externalResults = [$externalResults];
+        }
+
+        return array_merge($results, $externalResults);
+    }
+
+    private function enqueueFieldValidationMessage(array $field, string $message): void
+    {
+        $fieldName = trim((string) ($field['label'] ?? ''));
+        if ($fieldName === '') {
+            $fieldName = trim((string) ($field['name'] ?? ''));
+        }
+
+        $badge = '<span class="badge text-bg-secondary me-1">'
+            . htmlspecialchars($fieldName, ENT_QUOTES, 'UTF-8')
+            . '</span>';
+
+        $this->app->enqueueMessage($badge . $message, 'error');
     }
 
     /*
@@ -1216,19 +1272,20 @@ var contentbuilderng = new function(){
                                         $msg = trim($msg);
                                         if (!empty($msg)) {
                                             $this->app->getInput()->set('cb_submission_failed', 1);
-                                            $this->app->enqueueMessage(trim($msg), 'error');
+                                            $this->enqueueFieldValidationMessage(
+                                                $the_upload_fields[$id],
+                                                trim($msg)
+                                            );
                                         }
                                     }
 
-                                    $validations = explode(',', $the_upload_fields[$id]['validations']);
-
-                                    foreach ($validations as $validation) {
-                                        \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilderng_validation', $validation);
-                                    }
-
-                                    $dispatcher = $this->app->getDispatcher();
-                                    $eventResult = $dispatcher->dispatch('onValidate', new \Joomla\CMS\Event\GenericEvent('onValidate', array($the_upload_fields[$id], array_merge($the_upload_fields, $the_fields, $the_html_fields), $this->app->getInput()->getCmd('record_id', 0), $data->form, isset($values[$id]) ? $values[$id] : '')));
-                                    $results = $eventResult->getArgument('result') ?: [];
+                                    $results = $this->validateField(
+                                        $the_upload_fields[$id],
+                                        array_merge($the_upload_fields, $the_fields, $the_html_fields),
+                                        $this->app->getInput()->getCmd('record_id', 0),
+                                        $data->form,
+                                        isset($values[$id]) ? $values[$id] : ''
+                                    );
 
                                     $all_errors = implode('', $results);
                                     if (!empty($all_errors)) {
@@ -1239,7 +1296,10 @@ var contentbuilderng = new function(){
                                         foreach ($results as $result) {
                                             $result = trim($result);
                                             if (!empty($result)) {
-                                                $this->app->enqueueMessage(trim($result), 'error');
+                                                $this->enqueueFieldValidationMessage(
+                                                    $the_upload_fields[$id],
+                                                    $result
+                                                );
                                             }
                                         }
                                     }
@@ -1306,19 +1366,17 @@ var contentbuilderng = new function(){
                                         $msg = trim($msg);
                                         if (!empty($msg)) {
                                             $this->app->getInput()->set('cb_submission_failed', 1);
-                                            $this->app->enqueueMessage(trim($msg), 'error');
+                                            $this->enqueueFieldValidationMessage($f, trim($msg));
                                         }
                                     }
 
-                                    $validations = explode(',', $f['validations'] ?? '');
-
-                                    foreach ($validations as $validation) {
-                                        \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilderng_validation', $validation);
-                                    }
-
-                                    $dispatcher = $this->app->getDispatcher();
-                                    $eventResult = $dispatcher->dispatch('onValidate', new \Joomla\CMS\Event\GenericEvent('onValidate', array($f, array_merge($the_upload_fields, $the_fields, $the_html_fields), $this->app->getInput()->getCmd('record_id', 0), $data->form, $value)));
-                                    $results = $eventResult->getArgument('result') ?: [];
+                                    $results = $this->validateField(
+                                        $f,
+                                        array_merge($the_upload_fields, $the_fields, $the_html_fields),
+                                        $this->app->getInput()->getCmd('record_id', 0),
+                                        $data->form,
+                                        $value
+                                    );
 
                                     $all_errors = implode('', $results);
                                     $values[$id] = $value;
@@ -1327,7 +1385,7 @@ var contentbuilderng = new function(){
                                         foreach ($results as $result) {
                                             $result = trim($result);
                                             if (!empty($result)) {
-                                                $this->app->enqueueMessage(trim($result), 'error');
+                                                $this->enqueueFieldValidationMessage($f, $result);
                                             }
                                         }
                                     } else {
@@ -1601,7 +1659,13 @@ var contentbuilderng = new function(){
                                     !empty($created_down) ? $db->quote($created_down) : 'NULL',
                                 ]));
                             $db->setQuery($query);
-                            $this->getDatabase()->execute();
+                            try {
+                                $this->getDatabase()->execute();
+                            } catch (\Throwable $e) {
+                                if (!DuplicateKeyViolationHelper::isDuplicateKeyViolation($e)) {
+                                    throw $e;
+                                }
+                            }
                         } else {
                             $db = $this->getDatabase();
                             $languageValue = (string) $language;
@@ -1718,7 +1782,13 @@ var contentbuilderng = new function(){
                         ->bind(':formId', $formIdValue, ParameterType::INTEGER)
                         ->bind(':recordId', $recordReturnValue);
                     $db->setQuery($query);
-                    $db->execute();
+                    try {
+                        $db->execute();
+                    } catch (\Throwable $e) {
+                        if (!DuplicateKeyViolationHelper::isDuplicateKeyViolation($e)) {
+                            throw $e;
+                        }
+                    }
                 }
 
                 if (!$data->edit_by_type) {
@@ -2470,7 +2540,41 @@ var contentbuilderng = new function(){
                     ->bind(':recordId', $itemValue)
                     ->bind(':referenceId', $referenceIdValue);
                 $db->setQuery($query);
-                $db->execute();
+                try {
+                    $db->execute();
+                } catch (\Throwable $e) {
+                    if (!DuplicateKeyViolationHelper::isDuplicateKeyViolation($e)) {
+                        throw $e;
+                    }
+
+                    // Another request won the race and inserted this row first: fall
+                    // back to updating it to the state this request actually wanted,
+                    // instead of silently dropping the requested change.
+                    $existingStateQuery = $db->getQuery(true)
+                        ->select($db->quoteName('state_id'))
+                        ->from($db->quoteName('#__contentbuilderng_list_records'))
+                        ->where($db->quoteName('form_id') . ' = :formId')
+                        ->where($db->quoteName('record_id') . ' = :recordId')
+                        ->bind(':formId', $formIdValue, ParameterType::INTEGER)
+                        ->bind(':recordId', $itemValue);
+                    $db->setQuery($existingStateQuery);
+                    $existingStateId = $db->loadResult();
+
+                    if ($existingStateId === null || (int) $existingStateId === $listState) {
+                        continue;
+                    }
+
+                    $raceUpdateQuery = $db->getQuery(true)
+                        ->update($db->quoteName('#__contentbuilderng_list_records'))
+                        ->set($db->quoteName('state_id') . ' = :listState')
+                        ->where($db->quoteName('form_id') . ' = :formId')
+                        ->where($db->quoteName('record_id') . ' = :recordId')
+                        ->bind(':listState', $listState, ParameterType::INTEGER)
+                        ->bind(':formId', $formIdValue, ParameterType::INTEGER)
+                        ->bind(':recordId', $itemValue);
+                    $db->setQuery($raceUpdateQuery);
+                    $db->execute();
+                }
                 $changedCount++;
             } else {
                 if ((int) $res['state_id'] === $listState) {

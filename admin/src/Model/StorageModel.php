@@ -525,6 +525,13 @@ class StorageModel extends AdminModel
             $newname = self::normalizeStorageName($name);
             $newname = $newname === '' ? ('field' . mt_rand(0, mt_getrandmax())) : $newname;
 
+            $maxNameLength = 64 - strlen($this->getDatabase()->getPrefix());
+            if (strlen($newname) > $maxNameLength) {
+                throw new \RuntimeException(
+                    Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_NAME_TOO_LONG', $maxNameLength)
+                );
+            }
+
             $this->target_table = $newname; // csv helper si besoin
             $table->name  = $newname;
             $table->title = trim($title) !== '' ? trim($title) : $newname;

@@ -216,9 +216,12 @@ The exact meaning of every column depends on the configured verification workflo
 ## Joomla plugin management
 
 The package installs several plugin groups. Enable and configure them from
-**System > Manage > Plugins** only when required.
+**System > Manage > Plugins** only when required. The five standard field
+validations are built into the component and are not Joomla plugins; additional
+validation extensions may still use the `contentbuilderng_validation` plugin
+group.
 
-Bundled validation plugins:
+Built-in field validations:
 
 - not empty;
 - email;

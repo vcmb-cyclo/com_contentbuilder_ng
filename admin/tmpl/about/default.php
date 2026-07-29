@@ -23,6 +23,7 @@ use Joomla\CMS\Factory;
 $wa = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getDocument()->getWebAssetManager();
 $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
 $wa->useStyle('com_contentbuilderng.admin-about');
+$wa->useScript('com_contentbuilderng.admin-about.js');
 
 $versionValue = (string) ($this->componentVersion ?: Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
 $creationDateValue = (string) ($this->componentCreationDate ?: Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE'));
@@ -67,6 +68,8 @@ $labelAuditButton = Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT');
 $labelDbRepairButton = Text::_('COM_CONTENTBUILDERNG_ABOUT_MIGRATE_PACKED_DATA');
 $labelShowLogButton = Text::_('COM_CONTENTBUILDERNG_ABOUT_LAST_LOG');
 $auditRowNumberLabel = Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ROW');
+Text::script('COM_CONTENTBUILDERNG_ABOUT_AUDIT_AJAX_REQUEST_FAILED');
+Text::script('COM_CONTENTBUILDERNG_ABOUT_AUDIT_REFRESH_FAILED');
 $auditReport = is_array($this->auditReport ?? null) ? $this->auditReport : [];
 $auditSummary = (array) ($auditReport['summary'] ?? []);
 $duplicateIndexes = (array) ($auditReport['duplicate_indexes'] ?? []);
@@ -91,9 +94,11 @@ $bfFieldSyncIssues = (array) ($auditReport['bf_view_field_sync_issues'] ?? []);
 $menuViewIssues = (array) ($auditReport['menu_view_issues'] ?? []);
 $frontendPermissionIssues = (array) ($auditReport['frontend_permission_issues'] ?? []);
 $elementReferenceIssues = (array) ($auditReport['element_reference_issues'] ?? []);
+$contentRecordDuplicateIssues = (array) ($auditReport['content_record_duplicate_issues'] ?? []);
 $invalidDatetimeSortIssues = (array) ($auditReport['invalid_datetime_sort_issues'] ?? []);
 $storageColumnTypeIssues = (array) ($auditReport['storage_column_type_issues'] ?? []);
 $generatedArticleCategoryIssues = (array) ($auditReport['generated_article_category_issues'] ?? []);
+$formAudits = (array) ($auditReport['form_audits'] ?? []);
 $staleLanguageFiles = (array) ($auditReport['stale_language_files'] ?? []);
 $staleLanguageFilesCount = (int) ($auditSummary['stale_language_files'] ?? count($staleLanguageFiles));
 $hasStaleLanguageFiles = $staleLanguageFilesCount > 0;
@@ -130,6 +135,16 @@ $bfFieldSyncViews = (int) ($auditSummary['bf_view_field_sync_views'] ?? count($b
 $bfFieldSyncMissingTotal = (int) ($auditSummary['bf_view_field_sync_missing_in_cb'] ?? 0);
 $bfFieldSyncOrphanTotal = (int) ($auditSummary['bf_view_field_sync_orphan_in_cb'] ?? 0);
 $historicalMenuEntriesCount = (int) ($auditSummary['historical_menu_entries'] ?? count($historicalMenuEntries));
+$contentRecordDuplicateRowsToRemove = (int) ($auditSummary['content_record_duplicate_rows_to_remove'] ?? 0);
+if ($contentRecordDuplicateRowsToRemove === 0 && $contentRecordDuplicateIssues !== []) {
+    foreach ($contentRecordDuplicateIssues as $contentRecordDuplicateIssue) {
+        if (!is_array($contentRecordDuplicateIssue)) {
+            continue;
+        }
+
+        $contentRecordDuplicateRowsToRemove += count((array) ($contentRecordDuplicateIssue['duplicate_ids'] ?? []));
+    }
+}
 
 if (($bfFieldSyncMissingTotal === 0 || $bfFieldSyncOrphanTotal === 0) && $bfFieldSyncIssues !== []) {
     $fallbackMissingTotal = 0;
@@ -180,16 +195,28 @@ foreach ($auditErrors as $auditError) {
     $warningDetail = '';
     $warningLinkUrl = '';
     $warningLinkLabel = '';
+    $warningStorageId = 0;
+    $warningRepairAvailable = false;
     $storageTableNotFoundMatch = [];
-    if (preg_match('/^Storage\s+#(\d+)\s+\((.*?)\)\s*:?\s*table not found\.?(?:\s+.*)?$/i', $warningText, $storageTableNotFoundMatch) === 1) {
+    if (preg_match('/^Storage\s+#(\d+)\s+\((.*?)\)\s*:?\s*(table not found|table name too long)\.?$/i', $warningText, $storageTableNotFoundMatch) === 1) {
         $storageIdLabel = (int) ($storageTableNotFoundMatch[1] ?? 0);
+        $warningStorageId = $storageIdLabel;
         $storageNameLabel = trim((string) ($storageTableNotFoundMatch[2] ?? ''));
+        $storageIssueType = strtolower(trim((string) ($storageTableNotFoundMatch[3] ?? '')));
+        $isMissingTable = $storageIssueType === 'table not found';
         $warningText = Text::sprintf(
-            'COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NOT_FOUND',
+            $isMissingTable
+                ? 'COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NOT_FOUND'
+                : 'COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NAME_TOO_LONG',
             $storageIdLabel,
             $storageNameLabel
         );
-        $warningDetail = Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NOT_FOUND_DETAIL');
+        $warningDetail = Text::_(
+            $isMissingTable
+                ? 'COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NOT_FOUND_DETAIL'
+                : 'COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NAME_TOO_LONG_DETAIL'
+        );
+        $warningRepairAvailable = $isMissingTable;
         if ($storageIdLabel > 0) {
             $warningLinkUrl = Route::_(
                 'index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $storageIdLabel,
@@ -207,6 +234,8 @@ foreach ($auditErrors as $auditError) {
         'detail' => $warningDetail,
         'link_url' => $warningLinkUrl,
         'link_label' => $warningLinkLabel,
+        'storage_id' => $warningStorageId,
+        'repair_available' => $warningRepairAvailable,
     ];
 }
 $hasAuditReport = $auditReport !== [];
@@ -275,6 +304,7 @@ $repairWorkflowStepLabels = [
     'menu_view_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MENU_VIEW_CONSISTENCY'),
     'frontend_permission_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FRONTEND_PERMISSION_CONSISTENCY'),
     'element_reference_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ELEMENT_REFERENCE_CONSISTENCY'),
+    'content_record_duplicates' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES'),
     'generated_article_categories' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES'),
     'stale_language_files' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_LANGUAGE_FILES'),
     'stale_installer_temp' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP'),
@@ -292,6 +322,7 @@ $repairWorkflowStepDescriptions = [
     'menu_view_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MENU_VIEW_CONSISTENCY'),
     'frontend_permission_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FRONTEND_PERMISSION_CONSISTENCY'),
     'element_reference_consistency' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_ELEMENT_REFERENCE_DESC'),
+    'content_record_duplicates' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_CONTENT_RECORD_DUPLICATES_DESC'),
     'generated_article_categories' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_GENERATED_ARTICLE_CATEGORIES_DESC'),
 ];
 $phpLibrariesCount = count((array) $this->phpLibraries);
@@ -319,6 +350,7 @@ $hasBfFieldSyncIssues = $bfFieldSyncViews > 0 || $bfFieldSyncMissingTotal > 0 ||
 $hasMenuViewIssues = (int) ($auditSummary['menu_view_issues'] ?? count($menuViewIssues)) > 0;
 $hasFrontendPermissionIssues = (int) ($auditSummary['frontend_permission_issues'] ?? count($frontendPermissionIssues)) > 0;
 $hasElementReferenceIssues = (int) ($auditSummary['element_reference_issues'] ?? count($elementReferenceIssues)) > 0;
+$hasContentRecordDuplicateIssues = (int) ($auditSummary['content_record_duplicate_issues'] ?? count($contentRecordDuplicateIssues)) > 0;
 $generatedArticleCategoryIssueCount = (int) ($auditSummary['generated_article_category_issues'] ?? count($generatedArticleCategoryIssues));
 $generatedArticleCategoryRowCount = (int) ($auditSummary['generated_article_category_rows'] ?? 0);
 if ($generatedArticleCategoryRowCount === 0 && $generatedArticleCategoryIssues !== []) {
@@ -331,6 +363,9 @@ if ($generatedArticleCategoryRowCount === 0 && $generatedArticleCategoryIssues !
     }
 }
 $hasGeneratedArticleCategoryIssues = $generatedArticleCategoryIssueCount > 0 || $generatedArticleCategoryRowCount > 0;
+$formAuditIssueForms = (int) ($auditSummary['form_audit_issue_forms'] ?? 0);
+$formAuditIssueChecks = (int) ($auditSummary['form_audit_issue_checks'] ?? 0);
+$hasFormAuditIssues = $formAuditIssueForms > 0 || $formAuditIssueChecks > 0;
 $invalidDatetimeSortIssueCount = (int) ($auditSummary['invalid_datetime_sort_issues'] ?? count($invalidDatetimeSortIssues));
 $invalidDatetimeSortRowCount = (int) ($auditSummary['invalid_datetime_sort_rows'] ?? 0);
 if ($invalidDatetimeSortRowCount === 0 && $invalidDatetimeSortIssues !== []) {
@@ -433,6 +468,9 @@ $auditSectionNumbers = [
     'cb_storage_tables' => 31,
     'cb_estimated_rows' => 32,
     'cb_estimated_size' => 33,
+    'content_record_duplicates' => 34,
+    'content_record_duplicate_rows' => 35,
+    'form_audits' => 36,
 ];
 $getAuditSectionNumber = static function (string $sectionId) use ($auditSectionNumbers): int {
     return (int) ($auditSectionNumbers[$sectionId] ?? 0);
@@ -528,6 +566,8 @@ $renderNumberedAuditTitle = static function (string $sectionId, string $label, b
     <input type="hidden" name="option" value="com_contentbuilderng">
     <input type="hidden" name="repair_step" id="repair_step" value="">
     <input type="hidden" name="repair_action" id="repair_action" value="">
-    <input type="hidden" name="task" value="">
+    <input type="hidden" name="repair_storage_id" id="repair_storage_id" value="">
+    <input type="hidden" name="stale_installer_temp_path" id="stale_installer_temp_path" value="">
+    <input type="hidden" name="task" id="task" value="">
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

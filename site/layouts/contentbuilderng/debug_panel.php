@@ -15,11 +15,13 @@
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 
+$displayData = is_array($displayData ?? null) ? $displayData : [];
 $permissions = is_array($displayData['permissions'] ?? null) ? $displayData['permissions'] : [];
 $filters = is_array($displayData['filters'] ?? null) ? $displayData['filters'] : [];
 $logs = is_array($displayData['logs'] ?? null) ? $displayData['logs'] : [];
 $warnings = is_array($displayData['warnings'] ?? null) ? $displayData['warnings'] : [];
 $fields = is_array($displayData['fields'] ?? null) ? $displayData['fields'] : [];
+$validationsEnabled = !array_key_exists('validationsEnabled', $displayData) || !empty($displayData['validationsEnabled']);
 $formId = (int) ($displayData['formId'] ?? 0);
 $cbRecordId = (int) ($displayData['cbRecordId'] ?? 0);
 $showPermissions = !empty($displayData['showPermissions']);
@@ -139,19 +141,41 @@ $wa->useStyle('com_contentbuilderng.debug-panel');
                         <th id="<?php echo $debugIdBase; ?>-fields-col-label"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_LABEL'); ?></th>
                         <th id="<?php echo $debugIdBase; ?>-fields-col-reference"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_REFERENCE'); ?></th>
                         <th id="<?php echo $debugIdBase; ?>-fields-col-type"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_TYPE'); ?></th>
+                        <th id="<?php echo $debugIdBase; ?>-fields-col-validation" class="text-center"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_VALIDATION'); ?></th>
                         <th id="<?php echo $debugIdBase; ?>-fields-col-editable" class="text-center"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_EDITABLE'); ?></th>
                         <th id="<?php echo $debugIdBase; ?>-fields-col-published" class="text-center"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_PUBLISHED'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
+                    <?php $fieldsWithValidation = []; ?>
                     <?php foreach ($fields as $i => $field) : ?>
                         <?php $rowEditable = !empty($field['editable']); $rowPublished = !empty($field['published']); ?>
+                        <?php
+                        $validationNames = array_values(array_unique(array_filter(array_map(
+                            'trim',
+                            explode(',', (string) ($field['validations'] ?? ''))
+                        ))));
+                        $validationDetails = $validationNames;
+                        if (trim((string) ($field['custom_validation_script'] ?? '')) !== '') {
+                            $validationDetails[] = Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_CUSTOM_VALIDATION');
+                        }
+                        $hasValidation = $validationDetails !== [];
+                        if ($hasValidation) {
+                            $fieldsWithValidation[] = [
+                                'label' => (string) ($field['label'] ?? ''),
+                                'details' => $validationDetails,
+                            ];
+                        }
+                        ?>
                         <?php $fieldRowId = $debugIdBase . '-field-' . ((int) $i + 1); ?>
                         <tr id="<?php echo $fieldRowId; ?>" class="<?php echo (!$rowEditable || !$rowPublished) ? 'table-warning' : ''; ?>">
                             <td class="text-end text-muted pe-2"><?php echo $i + 1; ?></td>
                             <td><?php echo htmlspecialchars((string) ($field['label'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
                             <td><code><?php echo htmlspecialchars((string) ($field['reference_id'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></code></td>
                             <td><code><?php echo htmlspecialchars((string) ($field['type'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></code></td>
+                            <td class="text-center">
+                                <input id="<?php echo $fieldRowId; ?>-validation" class="form-check-input" type="checkbox" <?php echo $hasValidation ? 'checked' : ''; ?> disabled aria-label="<?php echo htmlspecialchars((string) ($field['label'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" />
+                            </td>
                             <td class="text-center">
                                 <input id="<?php echo $fieldRowId; ?>-editable" class="form-check-input" type="checkbox" <?php echo $rowEditable ? 'checked' : ''; ?> disabled aria-label="<?php echo htmlspecialchars((string) ($field['label'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" />
                             </td>
@@ -163,6 +187,20 @@ $wa->useStyle('com_contentbuilderng.debug-panel');
                 </tbody>
             </table>
         </div>
+        <?php if ($fieldsWithValidation !== []) : ?>
+            <h4 id="<?php echo $debugIdBase; ?>-fields-validation-heading" class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_VALIDATION_DETAILS_HEADING'); ?></h4>
+            <?php if (!$validationsEnabled) : ?>
+                <p id="<?php echo $debugIdBase; ?>-fields-validation-disabled" class="text-muted mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_VALIDATION_GLOBALLY_DISABLED'); ?></p>
+            <?php endif; ?>
+            <ul id="<?php echo $debugIdBase; ?>-fields-validation" class="mb-0" aria-labelledby="<?php echo $debugIdBase; ?>-fields-validation-heading">
+                <?php foreach ($fieldsWithValidation as $index => $fieldValidation) : ?>
+                    <li id="<?php echo $debugIdBase; ?>-fields-validation-<?php echo (int) $index + 1; ?>">
+                        <strong><?php echo htmlspecialchars($fieldValidation['label'], ENT_QUOTES, 'UTF-8'); ?></strong>:
+                        <?php echo htmlspecialchars(implode(', ', $fieldValidation['details']), ENT_QUOTES, 'UTF-8'); ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
     <?php endif; ?>
 
     <?php if ($showLogs) : ?>

@@ -485,6 +485,11 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         $activeViewTab = trim((string) $app->getInput()->getCmd('tab', ''));
         $allowedViewTabs = ['tab0', 'tab1', 'tab2', 'tab3', 'tab5', 'tab6', 'tab7', 'tab8', 'tab9', 'tab10'];
         $debugModeEnabled = !empty($this->item->debug_mode);
+        if ($formId > 0 && $debugModeEnabled) {
+            $allowedViewTabs[] = 'tab12';
+            $allowedViewTabs[] = 'tab13';
+            $allowedViewTabs[] = 'tab14';
+        }
         if ($debugModeEnabled) {
             $allowedViewTabs[] = 'tab11';
         }
@@ -582,6 +587,29 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
         <?php
         echo HTMLHelper::_('uitab.endTab');
+        if ($formId > 0 && $debugModeEnabled) :
+            echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab12', $viewTabLabel('fa-solid fa-route', 'COM_CONTENTBUILDERNG_AUDIT_TRAIL', 'COM_CONTENTBUILDERNG_TAB_TIP_AUDIT_TRAIL'));
+            echo LayoutHelper::render(
+                'form.audit_tab',
+                ['audit' => $this->audit],
+                $componentLayoutBase
+            );
+            echo HTMLHelper::_('uitab.endTab');
+            echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab13', $viewTabLabel('fa-solid fa-gauge-high', 'COM_CONTENTBUILDERNG_TAB_PERFORMANCE', 'COM_CONTENTBUILDERNG_TAB_TIP_PERFORMANCE'));
+            echo LayoutHelper::render(
+                'form.performance_tab',
+                ['audit' => $this->audit],
+                $componentLayoutBase
+            );
+            echo HTMLHelper::_('uitab.endTab');
+            echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab14', $viewTabLabel('fa-solid fa-database', 'COM_CONTENTBUILDERNG_TAB_DATA', 'COM_CONTENTBUILDERNG_TAB_TIP_DATA'));
+            echo LayoutHelper::render(
+                'form.data_tab',
+                ['audit' => $this->audit],
+                $componentLayoutBase
+            );
+            echo HTMLHelper::_('uitab.endTab');
+        endif;
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab9', $viewTabLabel('fa-solid fa-sliders', 'COM_CONTENTBUILDERNG_ADVANCED_OPTIONS', 'COM_CONTENTBUILDERNG_TAB_TIP_ADVANCED_OPTIONS'));
         echo $advancedOptionsContent;
         echo HTMLHelper::_('uitab.endTab');
@@ -809,6 +837,9 @@ $viewTabTooltips = [
     'tab6' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_API'),
     'tab7' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_EMAIL_TEMPLATES'),
     'tab8' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_PERMISSIONS'),
+    'tab12' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_AUDIT_TRAIL'),
+    'tab13' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_PERFORMANCE'),
+    'tab14' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_DATA'),
 ];
 
 $permTabTooltips = [

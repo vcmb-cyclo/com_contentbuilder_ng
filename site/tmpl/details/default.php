@@ -15,6 +15,7 @@
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Application\CMSApplication;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
@@ -297,6 +298,27 @@ if ($themeJs !== '') {
             'limit' => $listLimit,
             'start' => $listStart,
         ];
+        $debugFields = [];
+        $debugValidationsEnabled = (bool) ComponentHelper::getParams('com_contentbuilderng')->get('enable_validations', 1);
+        $debugFormId = (int) $input->getInt('id', 0);
+        if ($debugFormId > 0) {
+            $debugDb = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getDatabase();
+            $debugFieldsQuery = $debugDb->getQuery(true)
+                ->select([
+                    $debugDb->quoteName('label'),
+                    $debugDb->quoteName('reference_id'),
+                    $debugDb->quoteName('type'),
+                    $debugDb->quoteName('editable'),
+                    $debugDb->quoteName('published'),
+                    $debugDb->quoteName('validations'),
+                    $debugDb->quoteName('custom_validation_script'),
+                ])
+                ->from($debugDb->quoteName('#__contentbuilderng_elements'))
+                ->where($debugDb->quoteName('form_id') . ' = ' . $debugFormId)
+                ->order($debugDb->quoteName('ordering'));
+            $debugDb->setQuery($debugFieldsQuery);
+            $debugFields = $debugDb->loadAssocList() ?: [];
+        }
         if (!empty($this->debug_enable_logs)) {
             Logger::info('Frontend details debug request', [
                 'formId' => (int) $input->getInt('id', 0),
@@ -314,6 +336,8 @@ if ($themeJs !== '') {
             'showLogs' => !empty($this->debug_enable_logs) && !empty($this->debug_show_request_logs),
             'logs' => Logger::getRequestEntries(),
             'warnings' => $app->getSession()->get('com_contentbuilderng.debug.template_warnings', []),
+            'fields' => $debugFields,
+            'validationsEnabled' => $debugValidationsEnabled,
         ]);
         $app->getSession()->remove('com_contentbuilderng.debug.template_warnings');
         ?>
@@ -321,6 +345,7 @@ if ($themeJs !== '') {
     <?php if ($isAdminPreview || $directStorageMode): ?>
         <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
             <span>
+                <span class="icon-eye icon-fw" aria-hidden="true"></span>
                 <?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW_MODE') . ' - ' . Text::sprintf($directStorageMode ? 'COM_CONTENTBUILDERNG_PREVIEW_CURRENT_STORAGE' : 'COM_CONTENTBUILDERNG_PREVIEW_CURRENT_FORM', $previewFormName); ?>
                 <?php echo LayoutHelper::render('contentbuilderng.preview_color_mode', ['mode' => $previewColorMode]); ?>
                 <?php if ($previewActorLabel !== ''): ?>

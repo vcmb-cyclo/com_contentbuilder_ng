@@ -273,6 +273,66 @@ final class PluginInstallerService
         }
     }
 
+    public function removeCoreValidationPlugins(): void
+    {
+        $db = $this->db();
+        $elements = ['notempty', 'equal', 'email', 'date_not_before', 'date_is_valid'];
+
+        try {
+            $query = $db->getQuery(true)
+                ->select($db->quoteName('extension_id'))
+                ->from($db->quoteName('#__extensions'))
+                ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
+                ->where($db->quoteName('folder') . ' = ' . $db->quote('contentbuilderng_validation'))
+                ->whereIn($db->quoteName('element'), $elements, ParameterType::STRING);
+            $db->setQuery($query);
+            $extensionIds = array_map('intval', (array) $db->loadColumn());
+        } catch (\Throwable $e) {
+            $this->log('[WARNING] Failed reading built-in validation plugins: ' . $e->getMessage(), Log::WARNING);
+            $extensionIds = [];
+        }
+
+        foreach ($extensionIds as $extensionId) {
+            if ($extensionId < 1) {
+                continue;
+            }
+
+            $this->log("[INFO] Removing built-in validation plugin extension row (id {$extensionId}).");
+            $this->safe(function () use ($db, $extensionId): void {
+                foreach (['#__schemas', '#__update_sites_extensions'] as $table) {
+                    $db->setQuery(
+                        $db->getQuery(true)
+                            ->delete($db->quoteName($table))
+                            ->where($db->quoteName('extension_id') . ' = ' . $extensionId)
+                    );
+                    $db->execute();
+                }
+
+                $db->setQuery(
+                    $db->getQuery(true)
+                        ->delete($db->quoteName('#__extensions'))
+                        ->where($db->quoteName('extension_id') . ' = ' . $extensionId)
+                );
+                $db->execute();
+            });
+        }
+
+        foreach ($elements as $element) {
+            $pluginPath = JPATH_PLUGINS . '/contentbuilderng_validation/' . $element;
+            if (!is_dir($pluginPath)) {
+                continue;
+            }
+
+            $this->safe(function () use ($pluginPath, $element): void {
+                if (Folder::delete($pluginPath)) {
+                    $this->log("[OK] Removed built-in validation plugin files: contentbuilderng_validation/{$element}.");
+                } else {
+                    $this->log("[WARNING] Failed removing built-in validation plugin files: {$pluginPath}.", Log::WARNING);
+                }
+            });
+        }
+    }
+
     public function normalizeFormThemePlugins(): void
     {
         $db = $this->db();
@@ -586,7 +646,6 @@ final class PluginInstallerService
     {
         return [
             'contentbuilderng_verify' => ['paypal', 'passthrough'],
-            'contentbuilderng_validation' => ['notempty', 'equal', 'email', 'date_not_before', 'date_is_valid'],
             'contentbuilderng_themes' => ['khepri', 'blank', 'thoth', 'dark'],
             'system' => ['contentbuilderng_system'],
             'contentbuilderng_submit' => ['submit_sample'],

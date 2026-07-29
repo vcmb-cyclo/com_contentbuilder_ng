@@ -83,6 +83,115 @@ final class SchemaService
         $this->log('[OK] Date fields updated to support NULL correctly, if necessary.');
     }
 
+    public function ensureUniqueConstraints(): void
+    {
+        $db = $this->db();
+
+        $definitions = [
+            ['table' => '#__contentbuilderng_records', 'index' => 'idx_type_reference_record', 'columns' => ['type', 'reference_id', 'record_id'], 'order' => 'id'],
+            ['table' => '#__contentbuilderng_elements', 'index' => 'idx_form_reference', 'columns' => ['form_id', 'reference_id'], 'order' => 'id'],
+            ['table' => '#__contentbuilderng_list_records', 'index' => 'idx_form_record', 'columns' => ['form_id', 'record_id'], 'order' => 'id'],
+            // No `id` column on this table: `date` is the only column available to break ties deterministically.
+            ['table' => '#__contentbuilderng_rating_cache', 'index' => 'idx_record_form_ip', 'columns' => ['record_id', 'form_id', 'ip'], 'order' => 'date'],
+            ['table' => '#__contentbuilderng_registered_users', 'index' => 'idx_user_record_form', 'columns' => ['user_id', 'record_id', 'form_id'], 'order' => 'id'],
+        ];
+
+        foreach ($definitions as $definition) {
+            try {
+                $this->removeDuplicateRows(
+                    $db,
+                    (string) $definition['table'],
+                    (array) $definition['columns'],
+                    (string) $definition['order']
+                );
+                $this->ensureUniqueIndex($db, (string) $definition['table'], (string) $definition['index'], (array) $definition['columns']);
+            } catch (\Throwable $e) {
+                $this->log(
+                    '[WARNING] Could not ensure unique constraint ' . (string) $definition['index']
+                    . ' on ' . (string) $definition['table'] . ': ' . $e->getMessage(),
+                    Log::WARNING
+                );
+            }
+        }
+    }
+
+    /**
+     * Keeps the row with the oldest $orderColumn value in each duplicate group and
+     * removes the others. MySQL's DELETE with ORDER BY + LIMIT is deterministic:
+     * ordering DESC and deleting the first (duplicateCount - 1) rows always leaves
+     * the single smallest value behind.
+     */
+    private function removeDuplicateRows(DatabaseInterface $db, string $tableAlias, array $columns, string $orderColumn): void
+    {
+        $quotedColumns = array_map([$db, 'quoteName'], $columns);
+        $query = $db->getQuery(true)
+            ->select(array_merge(
+                $quotedColumns,
+                ['COUNT(*) AS ' . $db->quoteName('duplicate_count')]
+            ))
+            ->from($db->quoteName($tableAlias))
+            ->group($quotedColumns)
+            ->having('COUNT(*) > 1');
+        $db->setQuery($query);
+
+        foreach ((array) $db->loadAssocList() as $row) {
+            $duplicateCount = (int) ($row['duplicate_count'] ?? 0);
+
+            if ($duplicateCount < 2) {
+                continue;
+            }
+
+            $conditions = [];
+            foreach ($columns as $column) {
+                $value = $row[$column] ?? null;
+                $conditions[] = $value === null
+                    ? $db->quoteName($column) . ' IS NULL'
+                    : $db->quoteName($column) . ' = ' . $db->quote((string) $value);
+            }
+
+            $delete = $db->getQuery(true)
+                ->delete($db->quoteName($tableAlias))
+                ->where($conditions)
+                ->order($db->quoteName($orderColumn) . ' DESC');
+            $db->setQuery($delete, 0, $duplicateCount - 1);
+            $db->execute();
+        }
+    }
+
+    private function ensureUniqueIndex(DatabaseInterface $db, string $tableAlias, string $indexName, array $columns): void
+    {
+        $tableName = $db->quoteName($tableAlias);
+        $db->setQuery('SHOW INDEX FROM ' . $tableName);
+        $indexes = [];
+
+        foreach ((array) $db->loadAssocList() as $row) {
+            $name = (string) ($row['Key_name'] ?? $row['key_name'] ?? '');
+            $sequence = (int) ($row['Seq_in_index'] ?? $row['seq_in_index'] ?? 0);
+            $column = strtolower((string) ($row['Column_name'] ?? $row['column_name'] ?? ''));
+
+            if ($name === '' || $sequence < 1 || $column === '') {
+                continue;
+            }
+
+            $indexes[$name]['non_unique'] = (int) ($row['Non_unique'] ?? $row['non_unique'] ?? 1);
+            $indexes[$name]['columns'][$sequence] = $column;
+        }
+
+        $expected = array_map('strtolower', $columns);
+        foreach ($indexes as $index) {
+            ksort($index['columns'], SORT_NUMERIC);
+            if ((int) $index['non_unique'] === 0 && array_values($index['columns']) === $expected) {
+                return;
+            }
+        }
+
+        $db->setQuery(
+            'ALTER TABLE ' . $tableName . ' ADD UNIQUE KEY ' . $db->quoteName($indexName)
+            . ' (' . implode(', ', array_map([$db, 'quoteName'], $columns)) . ')'
+        );
+        $db->execute();
+    }
+
     public function normalizeExternalStorageModes(): void
     {
         $db = $this->db();

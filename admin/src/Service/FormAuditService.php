@@ -34,7 +34,13 @@ final class FormAuditService
     /**
      * Audits a form configuration.
      *
-     * @return array{info: array<string,string>, checks: array<int,array{status:string,message:string}>}
+     * @return array{
+     *   info:array<string,string>,
+     *   checks:array<int,array{status:string,message:string,code?:string}>,
+     *   performance:array<string,string>,
+     *   data:array<string,mixed>,
+     *   form?:array{id:int,name:string,title:string}
+     * }
      */
     public function audit(int $formId): array
     {
@@ -57,6 +63,8 @@ final class FormAuditService
                     'status' => self::STATUS_ERROR,
                     'message' => Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'),
                 ]],
+                'performance' => [],
+                'data' => [],
             ];
         }
 
@@ -69,12 +77,16 @@ final class FormAuditService
         $elements = $db->loadAssocList() ?: [];
 
         $sourceNames = [];
+        $sourceTitle = '';
         $sourceAvailable = false;
         try {
             $source = FormSourceFactory::getForm((string) $form['type'], (string) $form['reference_id']);
             if (is_object($source) && method_exists($source, 'getElementNames')) {
                 $sourceNames = (array) $source->getElementNames();
                 $sourceAvailable = true;
+            }
+            if (is_object($source) && method_exists($source, 'getTitle')) {
+                $sourceTitle = trim((string) $source->getTitle());
             }
         } catch (\Throwable $e) {
             $sourceAvailable = false;
@@ -157,6 +169,21 @@ final class FormAuditService
         return [
             'info' => $info,
             'checks' => $checks,
+            'performance' => $performanceInfo,
+            'data' => [
+                'id' => (int) $form['id'],
+                'name' => trim((string) $form['name']),
+                'source_type' => (string) $form['type'],
+                'source_reference_id' => (int) $form['reference_id'],
+                'source_title' => $sourceTitle,
+                'elements_total' => count($elements),
+                'elements_published' => count($published),
+                'elements_editable' => count($editable),
+                'records_total' => $recordsTotal,
+                'records_count_available' => !$recordsCountUnavailable,
+                'published' => (int) ($form['published'] ?? 0) === 1,
+                'debug_mode' => (int) ($form['debug_mode'] ?? 0) === 1,
+            ],
             'form' => [
                 'id' => (int) $form['id'],
                 'name' => trim((string) $form['name']),
@@ -330,7 +357,7 @@ final class FormAuditService
      * @param array<string,mixed> $form
      * @param array<int,array<string,mixed>> $publishedElements
      * @param array<int|string,string> $sourceNames
-     * @return array{0:array<string,string>,1:array<int,array{status:string,message:string}>}
+     * @return array{0:array<string,string>,1:array<int,array{status:string,message:string,code?:string}>}
      */
     private function auditPerformance(array $form, array $publishedElements, array $sourceNames): array
     {
@@ -357,6 +384,7 @@ final class FormAuditService
             return [[], [[
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_STORAGE_UNAVAILABLE'),
+                'code' => 'performance',
             ]]];
         }
 
@@ -379,6 +407,7 @@ final class FormAuditService
             return [[], [[
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_TABLE_UNAVAILABLE'),
+                'code' => 'performance',
             ]]];
         }
 
@@ -397,8 +426,9 @@ final class FormAuditService
         }
 
         $info = [
-            Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_PERFORMANCE_TABLE_ROWS') => Text::sprintf(
+            Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_PERFORMANCE_TABLE_ROWS') => Text::plural(
                 'COM_CONTENTBUILDERNG_AUDIT_INFO_PERFORMANCE_ROWS_VALUE',
+                $rowCount,
                 number_format($rowCount, 0, ',', ' '),
                 number_format($rowCountMs ?? 0, 1)
             ),
@@ -416,6 +446,7 @@ final class FormAuditService
                     'COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_SLOW_LIST_QUERY',
                     number_format($listQueryMs, 1)
                 ),
+                'code' => 'performance',
             ];
         }
 
@@ -432,7 +463,7 @@ final class FormAuditService
      *
      * @param array<int,array<string,mixed>> $publishedElements
      * @param array<int|string,string> $sourceNames
-     * @return array<int,array{status:string,message:string}>
+     * @return array<int,array{status:string,message:string,code?:string}>
      */
     private function checkStorageIndexes(string $tableName, array $publishedElements, array $sourceNames): array
     {
@@ -480,6 +511,7 @@ final class FormAuditService
                 'COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_UNINDEXED_COLUMNS',
                 implode(', ', $unindexed)
             ),
+            'code' => 'performance',
         ]];
     }
 
@@ -495,7 +527,7 @@ final class FormAuditService
     /**
      * @param array<int,array<string,mixed>> $elements
      * @param array<int|string,string> $sourceNames
-     * @return array<int,array{status:string,message:string}>
+     * @return array<int,array{status:string,message:string,code?:string}>
      */
     private function checkSourceSync(array $elements, array $sourceNames, bool $sourceAvailable, string $sourceType, string $sourceReferenceId): array
     {
@@ -523,6 +555,7 @@ final class FormAuditService
                         (string) $element['label'],
                         $referenceId
                     ),
+                    'code' => 'element_reference',
                 ];
             }
         }
@@ -608,7 +641,7 @@ final class FormAuditService
     }
 
     /**
-     * @return array<int,array{status:string,message:string}>
+     * @return array<int,array{status:string,message:string,code?:string}>
      */
     private function checkTheme(string $themePlugin): array
     {
@@ -617,6 +650,7 @@ final class FormAuditService
             return [[
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_THEME_EMPTY'),
+                'code' => 'theme_empty',
             ]];
         }
 
@@ -639,7 +673,7 @@ final class FormAuditService
 
     /**
      * @param array<int,array<string,mixed>> $elements
-     * @return array<int,array{status:string,message:string}>
+     * @return array<int,array{status:string,message:string,code?:string}>
      */
     private function checkElementReferences(array $elements): array
     {
@@ -655,6 +689,7 @@ final class FormAuditService
                         'COM_CONTENTBUILDERNG_AUDIT_CHECK_ELEMENT_REFERENCE_EMPTY',
                         (string) ($element['label'] ?? '')
                     ),
+                    'code' => 'element_reference',
                 ];
                 continue;
             }
@@ -674,6 +709,7 @@ final class FormAuditService
                     $referenceId,
                     implode(', ', $labels)
                 ),
+                'code' => 'element_reference',
             ];
         }
 
@@ -700,6 +736,7 @@ final class FormAuditService
             $checks[] = [
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_EDITABLE_TEMPLATE_EMPTY'),
+                'code' => 'editable_template_empty',
             ];
         }
 

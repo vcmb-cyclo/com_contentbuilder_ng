@@ -154,6 +154,21 @@ use Joomla\CMS\Router\Route;
                         <th scope="row"><?php echo $renderAuditSummaryLink('element_reference_consistency', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ELEMENT_REFERENCE_CONSISTENCY')); ?></th>
                         <td><?php echo (int) ($auditSummary['element_reference_issues'] ?? count($elementReferenceIssues)); ?></td>
                     </tr>
+                    <tr class="<?php echo $hasFormAuditIssues ? 'table-warning' : ''; ?>">
+                        <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('form_audits'); ?></td>
+                        <th scope="row"><?php echo $renderAuditSummaryLink('form_audits', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FORM_AUDITS')); ?></th>
+                        <td><?php echo count($formAudits); ?></td>
+                    </tr>
+                    <tr class="<?php echo $hasContentRecordDuplicateIssues ? 'table-warning' : ''; ?>">
+                        <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('content_record_duplicates'); ?></td>
+                        <th scope="row"><?php echo $renderAuditSummaryLink('content_record_duplicates', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES')); ?></th>
+                        <td><?php echo (int) ($auditSummary['content_record_duplicate_issues'] ?? count($contentRecordDuplicateIssues)); ?></td>
+                    </tr>
+                    <tr class="<?php echo $hasContentRecordDuplicateIssues ? 'table-warning' : ''; ?>">
+                        <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('content_record_duplicate_rows'); ?></td>
+                        <th scope="row"><?php echo $renderAuditSummaryLink('content_record_duplicates', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATE_ROWS')); ?></th>
+                        <td><?php echo $contentRecordDuplicateRowsToRemove; ?></td>
+                    </tr>
                     <tr class="<?php echo $hasGeneratedArticleCategoryIssues ? 'table-warning' : ''; ?>">
                         <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('generated_article_categories'); ?></td>
                         <th scope="row"><?php echo $renderAuditSummaryLink('generated_article_categories', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES')); ?></th>
@@ -709,6 +724,10 @@ use Joomla\CMS\Router\Route;
                                 : '';
                             $menuTitle = trim((string) ($menuViewIssue['title'] ?? ''));
                             $menuTitle = $menuTitle !== '' ? $menuTitle : ('#' . $menuId);
+                            $menuLink = trim((string) ($menuViewIssue['link'] ?? ''));
+                            $menuLinkUrl = $menuLink !== ''
+                                ? Route::link('site', $menuLink, false, Route::TLS_IGNORE, true)
+                                : '';
                             $menuIssueItems = array_values(array_filter(array_map(
                                 static fn($issue): string => trim((string) $issue),
                                 (array) ($menuViewIssue['issues'] ?? [])
@@ -727,7 +746,15 @@ use Joomla\CMS\Router\Route;
                                     <?php endif; ?>
                                 </td>
                                 <td><?php echo htmlspecialchars((string) ($menuViewIssue['target'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars((string) ($menuViewIssue['link'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td>
+                                    <?php if ($menuLinkUrl !== '') : ?>
+                                        <a href="<?php echo htmlspecialchars($menuLinkUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
+                                            <?php echo htmlspecialchars($menuLink, ENT_QUOTES, 'UTF-8'); ?>
+                                        </a>
+                                    <?php else : ?>
+                                        <?php echo htmlspecialchars($menuLink, ENT_QUOTES, 'UTF-8'); ?>
+                                    <?php endif; ?>
+                                </td>
                                 <td>
                                     <ol class="mb-0 ps-3">
                                         <?php foreach ($menuIssueItems as $menuIssueItem) : ?>
@@ -922,6 +949,178 @@ use Joomla\CMS\Router\Route;
             <?php endif; ?>
             </div>
 
+            <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('form_audits'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 36;">
+                <h4 class="h6 mt-3<?php echo $hasFormAuditIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('form_audits', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FORM_AUDITS'), $hasFormAuditIssues); ?></h4>
+                <?php if ($formAudits === []) : ?>
+                    <div class="alert cb-audit-ok-alert">
+                        <span class="cb-audit-section-title">
+                            <span class="cb-audit-ok-check icon-check-circle" aria-hidden="true"></span>
+                            <span><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FORM_AUDITS_NONE'); ?></span>
+                        </span>
+                    </div>
+                <?php else : ?>
+                    <div class="table-responsive">
+                        <table id="cb-audit-form-audits-table" class="table table-sm table-striped align-middle">
+                            <thead>
+                            <tr>
+                                <th scope="col"><?php echo $auditRowNumberLabel; ?></th>
+                                <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FORM'); ?></th>
+                                <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STATUS'); ?></th>
+                                <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CHECKS_HEADING'); ?></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php $formAuditRowNumber = 1; ?>
+                            <?php foreach ($formAudits as $formAudit) : ?>
+                                <?php
+                                $formAudit = is_array($formAudit) ? $formAudit : [];
+                                $formAuditForm = (array) ($formAudit['form'] ?? []);
+                                $formId = (int) ($formAuditForm['id'] ?? 0);
+                                $formName = trim((string) ($formAuditForm['name'] ?? ''));
+                                $formName = $formName !== '' ? $formName : ('#' . $formId);
+                                $formEditLink = $formId > 0
+                                    ? Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $formId, false)
+                                    : '';
+                                $formAuditChecks = array_values(array_filter(
+                                    (array) ($formAudit['checks'] ?? []),
+                                    static fn($check): bool => is_array($check)
+                                ));
+                                $formAuditErrors = array_values(array_filter(
+                                    $formAuditChecks,
+                                    static fn(array $check): bool => (string) ($check['status'] ?? '') === 'error'
+                                ));
+                                $formAuditWarnings = array_values(array_filter(
+                                    $formAuditChecks,
+                                    static fn(array $check): bool => (string) ($check['status'] ?? '') === 'warning'
+                                ));
+                                $formAuditHasIssues = $formAuditErrors !== [] || $formAuditWarnings !== [];
+                                $formAuditStatusClass = $formAuditErrors !== []
+                                    ? 'bg-danger'
+                                    : ($formAuditWarnings !== [] ? 'text-bg-warning' : 'bg-success');
+                                $formAuditStatusKey = $formAuditErrors !== []
+                                    ? 'COM_CONTENTBUILDERNG_AUDIT_STATUS_ERROR'
+                                    : ($formAuditWarnings !== [] ? 'COM_CONTENTBUILDERNG_AUDIT_STATUS_WARNING' : 'COM_CONTENTBUILDERNG_AUDIT_STATUS_OK');
+                                ?>
+                                <tr class="<?php echo $formAuditHasIssues ? 'table-warning' : ''; ?>">
+                                    <td><?php echo $formAuditRowNumber++; ?></td>
+                                    <td>
+                                        <?php if ($formEditLink !== '') : ?>
+                                            <a href="<?php echo htmlspecialchars($formEditLink, ENT_QUOTES, 'UTF-8'); ?>">
+                                                <?php echo htmlspecialchars($formName, ENT_QUOTES, 'UTF-8'); ?>
+                                            </a>
+                                        <?php else : ?>
+                                            <?php echo htmlspecialchars($formName, ENT_QUOTES, 'UTF-8'); ?>
+                                        <?php endif; ?>
+                                        <?php if ($formId > 0) : ?>
+                                            <span class="text-muted">(#<?php echo $formId; ?>)</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><span class="badge <?php echo $formAuditStatusClass; ?>"><?php echo Text::_($formAuditStatusKey); ?></span></td>
+                                    <td>
+                                        <?php if (!$formAuditHasIssues) : ?>
+                                            <span class="cb-audit-section-title">
+                                                <span class="cb-audit-ok-check icon-check-circle" aria-hidden="true"></span>
+                                                <span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_ALL_OK'); ?></span>
+                                            </span>
+                                        <?php else : ?>
+                                            <ul class="mb-0 ps-3">
+                                                <?php foreach ($formAuditChecks as $formAuditCheck) : ?>
+                                                    <?php if ((string) ($formAuditCheck['status'] ?? '') === 'ok') { continue; } ?>
+                                                    <li>
+                                                        <?php echo htmlspecialchars((string) ($formAuditCheck['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                                                        <?php if ((string) ($formAuditCheck['code'] ?? '') === 'theme_empty' && $formId > 0) : ?>
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-sm btn-warning ms-2"
+                                                                value="thoth"
+                                                                data-cb-audit-ajax-task="about.repairFormThemePlugin"
+                                                                data-cb-audit-ajax-field="form_id"
+                                                                data-cb-audit-ajax-value="<?php echo $formId; ?>"
+                                                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                                data-bs-toggle="tooltip"
+                                                                data-bs-placement="top"
+                                                            >
+                                                                <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR'); ?>
+                                                            </button>
+                                                        <?php elseif ((string) ($formAuditCheck['code'] ?? '') === 'editable_template_empty' && $formId > 0) : ?>
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-sm btn-warning ms-2"
+                                                                value="thoth"
+                                                                data-cb-audit-ajax-task="about.repairFormEditableTemplate"
+                                                                data-cb-audit-ajax-field="form_id"
+                                                                data-cb-audit-ajax-value="<?php echo $formId; ?>"
+                                                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                                data-bs-toggle="tooltip"
+                                                                data-bs-placement="top"
+                                                            >
+                                                                <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'); ?>
+                                                            </button>
+                                                        <?php endif; ?>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('content_record_duplicates'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 21;">
+                <h4 class="h6 mt-3<?php echo $hasContentRecordDuplicateIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('content_record_duplicates', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES'), $hasContentRecordDuplicateIssues); ?></h4>
+            <?php if (empty($contentRecordDuplicateIssues)) : ?>
+                <div class="alert cb-audit-ok-alert">
+                    <span class="cb-audit-section-title">
+                        <span class="cb-audit-ok-check icon-check-circle" aria-hidden="true"></span>
+                        <span><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES_OK'); ?></span>
+                    </span>
+                </div>
+            <?php else : ?>
+                <div class="table-responsive">
+                    <table id="cb-audit-content-record-duplicates-table" class="table table-sm table-striped align-middle">
+                        <thead>
+                        <tr>
+                            <th scope="col"><?php echo $auditRowNumberLabel; ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_TYPE'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_REFERENCE_ID'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_RECORD_ID'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_INDEX_KEEP'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_INDEX_DROP'); ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php $contentRecordDuplicateRowNumber = 1; ?>
+                        <?php foreach ($contentRecordDuplicateIssues as $contentRecordDuplicateIssue) : ?>
+                            <?php
+                            $contentRecordDuplicateType = trim((string) ($contentRecordDuplicateIssue['type'] ?? ''));
+                            $contentRecordDuplicateType = $contentRecordDuplicateType !== '' ? $contentRecordDuplicateType : Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
+                            $contentRecordDuplicateKeepId = (int) ($contentRecordDuplicateIssue['keep_id'] ?? 0);
+                            $contentRecordDuplicateDropIds = array_map(
+                                static fn($id): int => (int) $id,
+                                (array) ($contentRecordDuplicateIssue['duplicate_ids'] ?? [])
+                            );
+                            ?>
+                            <tr>
+                                <td><?php echo $contentRecordDuplicateRowNumber++; ?></td>
+                                <td><?php echo htmlspecialchars($contentRecordDuplicateType, ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo (int) ($contentRecordDuplicateIssue['reference_id'] ?? 0); ?></td>
+                                <td><?php echo (int) ($contentRecordDuplicateIssue['record_id'] ?? 0); ?></td>
+                                <td><?php echo $contentRecordDuplicateKeepId; ?></td>
+                                <td><?php echo htmlspecialchars(implode(', ', $contentRecordDuplicateDropIds), ENT_QUOTES, 'UTF-8'); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+            </div>
+
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('generated_article_categories'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 22;">
                 <h4 class="h6 mt-3<?php echo $hasGeneratedArticleCategoryIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('generated_article_categories', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES'), $hasGeneratedArticleCategoryIssues); ?></h4>
             <?php if (empty($generatedArticleCategoryIssues)) : ?>
@@ -1032,14 +1231,28 @@ use Joomla\CMS\Router\Route;
                     </div>
                 <?php else : ?>
                     <ol class="mb-0 ps-3">
-                        <?php foreach ($staleInstallerTempDirs as $staleInstallerTempDir) : ?>
-                            <?php if (!is_array($staleInstallerTempDir)) { continue; } ?>
-                            <li>
-                                <code><?php echo htmlspecialchars((string) ($staleInstallerTempDir['path'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></code>
-                                <?php if (!empty($staleInstallerTempDir['modified'])) : ?>
-                                    <span class="text-muted ms-1">(<?php echo htmlspecialchars((string) $staleInstallerTempDir['modified'], ENT_QUOTES, 'UTF-8'); ?>)</span>
-                                <?php endif; ?>
-                            </li>
+                            <?php foreach ($staleInstallerTempDirs as $staleInstallerTempDir) : ?>
+                                <?php if (!is_array($staleInstallerTempDir)) { continue; } ?>
+                                <?php $staleInstallerTempPath = (string) ($staleInstallerTempDir['path'] ?? ''); ?>
+                                <li>
+                                    <code><?php echo htmlspecialchars($staleInstallerTempPath, ENT_QUOTES, 'UTF-8'); ?></code>
+                                    <?php if (!empty($staleInstallerTempDir['modified'])) : ?>
+                                        <span class="text-muted ms-1">(<?php echo htmlspecialchars((string) $staleInstallerTempDir['modified'], ENT_QUOTES, 'UTF-8'); ?>)</span>
+                                    <?php endif; ?>
+                                    <?php if ($staleInstallerTempPath !== '') : ?>
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-danger ms-2"
+                                            data-cb-audit-ajax-task="about.deleteStaleInstallerTemp"
+                                            data-cb-audit-ajax-field="stale_installer_temp_path"
+                                            data-cb-audit-ajax-value="<?php echo htmlspecialchars($staleInstallerTempPath, ENT_QUOTES, 'UTF-8'); ?>"
+                                            title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                            aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE'), ENT_QUOTES, 'UTF-8'); ?>"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                        ><span class="fa-solid fa-trash" aria-hidden="true"></span></button>
+                                    <?php endif; ?>
+                                </li>
                         <?php endforeach; ?>
                     </ol>
                 <?php endif; ?>
@@ -1364,6 +1577,19 @@ use Joomla\CMS\Router\Route;
                                         <a class="cb-audit-warning-link" href="<?php echo htmlspecialchars((string) $auditWarning['link_url'], ENT_QUOTES, 'UTF-8'); ?>">
                                             <?php echo htmlspecialchars((string) ($auditWarning['link_label'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
                                         </a>
+                                        <?php if (!empty($auditWarning['repair_available']) && (int) ($auditWarning['storage_id'] ?? 0) > 0) : ?>
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-warning ms-2"
+                                                data-cb-audit-ajax-task="about.repairMissingStorageTable"
+                                                data-cb-audit-ajax-field="repair_storage_id"
+                                                data-cb-audit-ajax-value="<?php echo (int) $auditWarning['storage_id']; ?>"
+                                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                            ><span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR'); ?></button>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </span>
                             <?php endif; ?>

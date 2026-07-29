@@ -282,10 +282,12 @@ configuré dans la vue.
 ## Gestion des plugins Joomla
 
 Le paquet installe plusieurs groupes de plugins. Leur activation se contrôle dans
-**Système > Gestion > Plugins**. Ne les activez que lorsqu'une vue ou un contenu en a
-besoin.
+**Système > Gestion > Plugins**. Les cinq validations de champ standard sont
+intégrées au composant et ne sont pas des plugins Joomla ; des extensions de
+validation supplémentaires peuvent toutefois utiliser le groupe de plugins
+`contentbuilderng_validation`.
 
-Plugins de validation livrés :
+Validations de champ intégrées :
 
 - valeur non vide ;
 - adresse e-mail ;

@@ -16,6 +16,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Helper;
 
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\BfFieldSyncAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\AuditTableSupportHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\ContentRecordDuplicateAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\DatabaseAuditReportBuilder;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\DuplicateIndexAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\ElementReferenceAuditHelper;
@@ -29,6 +30,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleInstallerTempA
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleLanguageFilesAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StorageColumnTypeAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormDisplayColumnsHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\FormAuditService;
 final class DatabaseAuditHelper
 {
 
@@ -137,6 +139,14 @@ final class DatabaseAuditHelper
      *     duplicate_reference_ids:array<int,array{reference_id:string,count:int,labels:array<int,string>}>,
      *     orphan_reference_ids:array<int,array{reference_id:string,label:string}>
      *   }>,
+     *   content_record_duplicate_issues:array<int,array{
+     *     type:string,
+     *     reference_id:int,
+     *     record_id:int,
+     *     count:int,
+     *     keep_id:int,
+     *     duplicate_ids:array<int,int>
+     *   }>,
      *   invalid_datetime_sort_issues:array<int,array{
      *     form_id:int,
      *     form_name:string,
@@ -150,6 +160,7 @@ final class DatabaseAuditHelper
      *     invalid_count:int,
      *     sample_values:array<int,string>
      *   }>,
+     *   form_audits:array<int,array<string,mixed>>,
      *   cb_tables:array{
      *     summary:array{
      *       tables_total:int,
@@ -194,6 +205,8 @@ final class DatabaseAuditHelper
      *     menu_view_issues:int,
      *     frontend_permission_issues:int,
      *     element_reference_issues:int,
+     *     content_record_duplicate_issues:int,
+     *     content_record_duplicate_rows_to_remove:int,
      *     invalid_datetime_sort_issues:int,
      *     invalid_datetime_sort_rows:int,
      *     issues_total:int
@@ -245,6 +258,8 @@ final class DatabaseAuditHelper
         $errors = array_merge($errors, $permissionErrors);
         [$elementReferenceIssues, $elementReferenceErrors] = ElementReferenceAuditHelper::inspect($db);
         $errors = array_merge($errors, $elementReferenceErrors);
+        [$contentRecordDuplicateIssues, $contentRecordDuplicateErrors] = ContentRecordDuplicateAuditHelper::inspect($db);
+        $errors = array_merge($errors, $contentRecordDuplicateErrors);
         [$invalidDatetimeSortIssues, $invalidDatetimeSortErrors] = InvalidDatetimeSortAuditHelper::inspect($db);
         $errors = array_merge($errors, $invalidDatetimeSortErrors);
         [$storageColumnTypeIssues, $storageColumnTypeErrors] = StorageColumnTypeAuditHelper::inspect($db);
@@ -255,6 +270,43 @@ final class DatabaseAuditHelper
         $errors = array_merge($errors, $staleLanguageErrors);
         [$staleInstallerTempDirs, $staleInstallerTempErrors] = StaleInstallerTempAuditHelper::inspect();
         $errors = array_merge($errors, $staleInstallerTempErrors);
+
+        $formAudits = [];
+        try {
+            $db->setQuery(
+                $db->getQuery(true)
+                    ->select($db->quoteName(['id', 'name', 'title']))
+                    ->from($db->quoteName('#__contentbuilderng_forms'))
+                    ->order($db->quoteName('id') . ' ASC')
+            );
+            $forms = $db->loadAssocList() ?: [];
+            $formAuditService = new FormAuditService($db);
+
+            foreach ($forms as $form) {
+                $formId = (int) ($form['id'] ?? 0);
+
+                try {
+                    $formAudit = $formAuditService->audit($formId);
+                } catch (\Throwable $e) {
+                    $formAudit = [
+                        'info' => [],
+                        'checks' => [[
+                            'status' => FormAuditService::STATUS_ERROR,
+                            'message' => 'Could not audit form #' . $formId . ': ' . $e->getMessage(),
+                        ]],
+                    ];
+                }
+
+                $formAudit['form'] = (array) ($formAudit['form'] ?? [
+                    'id' => $formId,
+                    'name' => trim((string) ($form['name'] ?? '')),
+                    'title' => trim((string) ($form['title'] ?? '')),
+                ]);
+                $formAudits[] = $formAudit;
+            }
+        } catch (\Throwable $e) {
+            $errors[] = 'Could not inspect forms for individual audits: ' . $e->getMessage();
+        }
 
         return DatabaseAuditReportBuilder::build([
             'tables' => $tables,
@@ -277,11 +329,13 @@ final class DatabaseAuditHelper
             'menu_view_issues' => $menuViewIssues,
             'frontend_permission_issues' => $frontendPermissionIssues,
             'element_reference_issues' => $elementReferenceIssues,
+            'content_record_duplicate_issues' => $contentRecordDuplicateIssues,
             'invalid_datetime_sort_issues' => $invalidDatetimeSortIssues,
             'storage_column_type_issues' => $storageColumnTypeIssues,
             'generated_article_category_issues' => $generatedArticleCategoryIssues,
             'stale_language_files' => $staleLanguageFiles,
             'stale_installer_temp_dirs' => $staleInstallerTempDirs,
+            'form_audits' => $formAudits,
             'cb_tables' => $cbTableStats,
             'errors' => $errors,
         ], $toAlias);

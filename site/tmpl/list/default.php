@@ -14,6 +14,7 @@
 // No direct access
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Application\SiteApplication;
 use Joomla\CMS\Language\Text;
@@ -462,6 +463,27 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 				'total' => (int) ($this->total ?? 0),
 			]);
 		}
+		$debugFields = [];
+		$debugValidationsEnabled = (bool) ComponentHelper::getParams('com_contentbuilderng')->get('enable_validations', 1);
+		$debugFormId = (int) ($this->form_id ?? 0);
+		if ($debugFormId > 0) {
+			$debugDb = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getDatabase();
+			$debugFieldsQuery = $debugDb->getQuery(true)
+				->select([
+					$debugDb->quoteName('label'),
+					$debugDb->quoteName('reference_id'),
+					$debugDb->quoteName('type'),
+					$debugDb->quoteName('editable'),
+					$debugDb->quoteName('published'),
+					$debugDb->quoteName('validations'),
+					$debugDb->quoteName('custom_validation_script'),
+				])
+				->from($debugDb->quoteName('#__contentbuilderng_elements'))
+				->where($debugDb->quoteName('form_id') . ' = ' . $debugFormId)
+				->order($debugDb->quoteName('ordering'));
+			$debugDb->setQuery($debugFieldsQuery);
+			$debugFields = $debugDb->loadAssocList() ?: [];
+		}
 		echo LayoutHelper::render('contentbuilderng.debug_panel', [
 			'formId' => (int) ($this->form_id ?? 0),
 			'showPermissions' => !empty($this->debug_show_permissions),
@@ -470,6 +492,8 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 			'filters' => $debugFilters,
 			'showLogs' => !empty($this->debug_enable_logs) && !empty($this->debug_show_request_logs),
 			'logs' => Logger::getRequestEntries(),
+			'fields' => $debugFields,
+			'validationsEnabled' => $debugValidationsEnabled,
 		]);
 		?>
 	<?php endif; ?>
@@ -480,6 +504,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	<?php if ($isAdminPreview): ?>
 			<div class="alert alert-warning cbPreviewBanner d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
 				<span>
+					<span class="icon-eye icon-fw" aria-hidden="true"></span>
 					<strong><?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW_MODE'); ?></strong>
 					<?php if (!$directStorageMode && !empty($previewLayoutSelectOptions)) : ?>
 						<span class="d-inline-flex align-items-center gap-2 ms-2">

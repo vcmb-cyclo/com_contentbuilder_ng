@@ -16,15 +16,19 @@ namespace CB\Component\Contentbuilderng\Administrator\Controller;
 
 use CB\Component\Contentbuilderng\Administrator\Helper\DatabaseAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleInstallerTempAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
+use CB\Component\Contentbuilderng\Administrator\Model\StorageModel;
 use CB\Component\Contentbuilderng\Administrator\Service\ConfigExportService;
 use CB\Component\Contentbuilderng\Administrator\Service\ConfigImportService;
+use CB\Component\Contentbuilderng\Administrator\Service\DatatableService;
 use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
 use CB\Component\Contentbuilderng\Administrator\Service\RepairWorkflowService;
 use Joomla\CMS\Application\AdministratorApplication;
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
+use Joomla\CMS\Response\JsonResponse;
 use Joomla\CMS\Router\Route;
 use Joomla\Database\DatabaseInterface;
 
@@ -112,6 +116,17 @@ final class AboutController extends BaseController
         }
 
         return (new \DateTimeImmutable('now', $timezone))->format('Y-m-d H:i:s');
+    }
+
+    private function isAjaxCall(): bool
+    {
+        return $this->input->getInt('cb_ajax', 0) === 1;
+    }
+
+    private function respondAjax(bool $success, string $message): void
+    {
+        echo new JsonResponse(['ok' => $success], $message, !$success);
+        $this->getApp()->close();
     }
 
     // -------------------------------------------------------------------------
@@ -257,6 +272,197 @@ final class AboutController extends BaseController
     // -------------------------------------------------------------------------
     // Audit
     // -------------------------------------------------------------------------
+
+    public function repairMissingStorageTable(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $storageId = $this->input->post->getInt('repair_storage_id', 0);
+
+        try {
+            if ($storageId <= 0) {
+                throw new \RuntimeException(Text::_('JERROR_NO_ITEMS_SELECTED'));
+            }
+
+            $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
+
+            if (!$model instanceof StorageModel) {
+                throw new \RuntimeException('StorageModel not found');
+            }
+
+            $storage = $model->getItem($storageId);
+
+            if (!$storage || (int) ($storage->bytable ?? 0) > 0 || trim((string) ($storage->name ?? '')) === '') {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_INVALID_STORAGE'));
+            }
+
+            $model->ensureDataTable($storageId);
+            $this->getComponent()->getContainer()->get(DatatableService::class)->syncColumnsFromFields($storageId);
+
+            $tableName = $this->getComponent()->getContainer()
+                ->get(DatabaseInterface::class)
+                ->getPrefix() . trim((string) $storage->name);
+
+            $tableList = $this->getComponent()->getContainer()
+                ->get(DatabaseInterface::class)
+                ->getTableList();
+
+            if (!in_array($tableName, $tableList, true)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_NOT_CREATED'));
+            }
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIRED', $tableName);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function repairFormThemePlugin(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $formId = $this->input->post->getInt('form_id', 0);
+
+        try {
+            if ($formId <= 0) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_INVALID'));
+            }
+
+            $db = $this->getComponent()->getContainer()->get(DatabaseInterface::class);
+            $query = $db->getQuery(true)
+                ->select($db->quoteName('id'))
+                ->from($db->quoteName('#__contentbuilderng_forms'))
+                ->where($db->quoteName('id') . ' = ' . $formId);
+            $db->setQuery($query);
+
+            if (!$db->loadResult()) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_INVALID'));
+            }
+
+            $update = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_forms'))
+                ->set($db->quoteName('theme_plugin') . ' = ' . $db->quote('thoth'))
+                ->set($db->quoteName('modified') . ' = ' . $db->quote((new Date())->toSql()))
+                ->set($db->quoteName('modified_by') . ' = ' . $this->getCurrentUserId())
+                ->where($db->quoteName('id') . ' = ' . $formId);
+            $db->setQuery($update);
+            $db->execute();
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIRED', 'Thoth');
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function repairFormEditableTemplate(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $formId = $this->input->post->getInt('form_id', 0);
+
+        try {
+            $formSupportService = $this->getComponent()->getContainer()->get(FormSupportService::class);
+            $formSupportService->regenerateEditableTemplate($formId, $this->getCurrentUserId());
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIRED');
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function deleteStaleInstallerTemp(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $path = trim((string) $this->input->post->getString('stale_installer_temp_path', ''));
+
+        try {
+            if ($path === '') {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_NOT_SELECTED'));
+            }
+
+            $deletedPath = StaleInstallerTempAuditHelper::delete($path);
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETED', $deletedPath);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
 
     public function runAudit(): void
     {

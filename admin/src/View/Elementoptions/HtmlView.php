@@ -31,7 +31,7 @@ class HtmlView extends BaseHtmlView
         /** @var ElementoptionsModel $model */
         $model = $this->getModel();
         $element = $model->getData();
-        $validations = $model->getValidationPlugins();
+        $validations = $model->getValidationRules();
         $this->validations = $validations;
         $this->element = $element;
         $groupdef = $model->getGroupDefinition();

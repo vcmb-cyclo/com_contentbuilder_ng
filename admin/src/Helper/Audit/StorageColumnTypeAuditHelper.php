@@ -52,6 +52,12 @@ final class StorageColumnTypeAuditHelper
             return [[], ['Could not inspect storages for storage type audit: ' . $e->getMessage()]];
         }
 
+        try {
+            $availableTables = array_fill_keys(array_map('strval', (array) $db->getTableList()), true);
+        } catch (\Throwable $e) {
+            return [[], ['Could not list database tables for storage type audit: ' . $e->getMessage()]];
+        }
+
         foreach ($storages as $storage) {
             $storageId = (int) ($storage['id'] ?? 0);
             $storageTable = strtolower(trim((string) ($storage['name'] ?? '')));
@@ -61,6 +67,16 @@ final class StorageColumnTypeAuditHelper
             }
 
             $physicalTable = $prefix . $storageTable;
+
+            if (strlen($physicalTable) > 64) {
+                $errors[] = 'Storage #' . $storageId . ' (' . $storageTable . '): table name too long.';
+                continue;
+            }
+
+            if (!isset($availableTables[$physicalTable])) {
+                $errors[] = 'Storage #' . $storageId . ' (' . $storageTable . '): table not found.';
+                continue;
+            }
 
             try {
                 $physicalColumns = $db->getTableColumns($physicalTable, true);

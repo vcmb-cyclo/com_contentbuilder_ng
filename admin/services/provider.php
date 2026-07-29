@@ -15,6 +15,7 @@
 
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use Joomla\CMS\Dispatcher\ComponentDispatcherFactoryInterface;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Component\Router\RouterFactoryInterface;
 use Joomla\CMS\Extension\ComponentInterface;
 use Joomla\CMS\Extension\Service\Provider\ComponentDispatcherFactory;
@@ -43,6 +44,7 @@ use CB\Component\Contentbuilderng\Administrator\Service\TemplateRenderService;
 use CB\Component\Contentbuilderng\Administrator\Service\TextUtilityService;
 use CB\Component\Contentbuilderng\Administrator\Service\ApiFieldPermissionService;
 use CB\Component\Contentbuilderng\Administrator\Service\ExternalTableService;
+use CB\Component\Contentbuilderng\Administrator\Service\FieldValidationService;
 
 return new class implements ServiceProviderInterface
 {
@@ -92,6 +94,13 @@ return new class implements ServiceProviderInterface
                 $c->get(PathService::class),
                 $c->get(DatabaseInterface::class),
                 $c->get(TemplateSampleService::class)
+            )
+        );
+        $container->set(
+            FieldValidationService::class,
+            static fn(Container $c) => new FieldValidationService(
+                $c->get(DatabaseInterface::class),
+                (bool) ComponentHelper::getParams('com_contentbuilderng')->get('enable_validations', 1)
             )
         );
         $container->set(

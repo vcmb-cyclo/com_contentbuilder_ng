@@ -16,6 +16,7 @@
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Application\SiteApplication;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Router\Route;
@@ -819,10 +820,19 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
             ]);
         }
         $debugFields = [];
+        $debugValidationsEnabled = (bool) ComponentHelper::getParams('com_contentbuilderng')->get('enable_validations', 1);
         if ($id > 0) {
             $debugDb = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getDatabase();
             $debugFieldsQuery = $debugDb->getQuery(true)
-                ->select([$debugDb->quoteName('label'), $debugDb->quoteName('reference_id'), $debugDb->quoteName('type'), $debugDb->quoteName('editable'), $debugDb->quoteName('published')])
+                ->select([
+                    $debugDb->quoteName('label'),
+                    $debugDb->quoteName('reference_id'),
+                    $debugDb->quoteName('type'),
+                    $debugDb->quoteName('editable'),
+                    $debugDb->quoteName('published'),
+                    $debugDb->quoteName('validations'),
+                    $debugDb->quoteName('custom_validation_script'),
+                ])
                 ->from($debugDb->quoteName('#__contentbuilderng_elements'))
                 ->where($debugDb->quoteName('form_id') . ' = ' . (int) $id)
                 ->order($debugDb->quoteName('ordering'));
@@ -841,6 +851,7 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
             'logs' => Logger::getRequestEntries(),
             'warnings' => $app->getSession()->get('com_contentbuilderng.debug.template_warnings', []),
             'fields' => $debugFields,
+            'validationsEnabled' => $debugValidationsEnabled,
         ]);
         $app->getSession()->remove('com_contentbuilderng.debug.template_warnings');
         ?>
@@ -848,6 +859,7 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
     <?php if ($isAdminPreview): ?>
         <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
             <span>
+                <span class="icon-eye icon-fw" aria-hidden="true"></span>
                 <?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_CURRENT_FORM', $previewFormName); ?>
                 <?php echo LayoutHelper::render('contentbuilderng.preview_color_mode', ['mode' => $previewColorMode]); ?>
                 <?php if ($previewActorLabel !== ''): ?>

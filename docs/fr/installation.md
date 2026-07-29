@@ -54,8 +54,9 @@ production assemblées comme le paquet de release.
   `#__contentbuilderng_list_records`, `#__contentbuilderng_list_states`,
   `#__contentbuilderng_resource_access`, `#__contentbuilderng_verifications`,
   `#__contentbuilderng_rating_cache`.
-- Les plugins livrés (thèmes, validations, actions de liste, soumission,
-  vérification, plugins de contenu et plugin système). Voir
+- Les plugins livrés (thèmes, actions de liste, soumission, vérification,
+  plugins de contenu et plugin système). Les validations de champ standard sont
+  intégrées au composant. Voir
   [Administration](administration.md#plugins) pour la liste détaillée.
 
 ## Vérifications après installation
