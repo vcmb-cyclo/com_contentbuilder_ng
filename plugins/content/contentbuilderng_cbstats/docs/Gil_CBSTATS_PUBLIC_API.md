@@ -66,8 +66,9 @@ permissions → filter and grouping in each view → merge identical labels
 ```
 
 Consequently, `titles=` cannot create artificial merge duplicates, and
-`sort=` applies to the final merged result. The global total is computed from
-the merged categories. `output=form_name` is unavailable because an `idsum`
+`sort=` applies to the final merged result. The global total is the sum of the
+real retained record totals from every authorized view; it is not derived from
+grouped field values. `output=form_name` is unavailable because an `idsum`
 source has no single view name.
 
 CBStats rejects fewer than two or more than five identifiers, invalid or
@@ -75,17 +76,24 @@ duplicate identifiers, a missing or inaccessible view, a missing or
 unauthorized field, and simultaneous `id`/`idsum` use. Duplicate identifiers
 are refused rather than deduplicated to prevent accidental double counting.
 
-## 2. Existing outputs
+## 2. Supported outputs
 
-The following outputs must remain compatible:
+The following outputs are implemented in RC97 and must remain compatible:
 
 ```text
 output=total
 output=form_name
 output=table
+output=json
+output=pie
+output=bar
+output=histogram
+output=line
+output=radar
 output=sum
 output=min
 output=max
+output=avg
 ```
 
 ## 3. JSON output
@@ -140,7 +148,58 @@ Behavior:
 - uses the same compact detail legend, tooltip semantics, colors and total style as Pie;
 - supports multiple charts on one page.
 
-## 6. Filters
+## 6. Histogram output
+
+```text
+{CBStats id=25 field=Age output=histogram ranges="18-29;30-39;40-49;50-59;60+"}
+```
+
+Histogram is a responsive vertical chart using the same normalized labels and
+counts as Table, JSON, Pie and Bar. Use `ranges=` for numeric buckets; bounds
+are inclusive and declaration order is preserved. For example,
+`ranges="18-29;30-39;40-49;50+"` counts each age range independently and keeps
+the real filtered record total separate from the sum of buckets. It is useful
+for distributions such as age, distance or price.
+
+## 7. Line output
+
+```text
+{CBStats id=25 field=RegistrationDate output=line sort=title dir=asc limit=30}
+```
+
+Line charts plot the normalized count for each actual field value in the final
+sort order. They do not invent missing dates or categories and apply the same
+filters, permissions, `add=`, `titles=`, `limit=` and `hide=` rules as the other
+list outputs. For example, a date field can use
+`output=line sort=title dir=asc`, while a categorical trend can use
+`output=line sort=value dir=desc`.
+
+## 8. Radar output
+
+```text
+{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50-59;60+" hide="graph|total"}
+```
+
+Radar displays normalized values as axes in a responsive chart. It requires at
+least 3 axes and accepts at most 8; 4 to 6 axes are recommended for readable
+labels. Use `ranges=` for numeric dimensions or ordinary grouped values for
+categories, for example `{CBStats id=25 field=Skill output=radar}`. Radar uses
+the same tooltip, textual values list, permissions and no-data behavior as the
+other graphical outputs.
+
+## 9. Average output
+
+```text
+{CBStats id=25 field=Age output=avg}
+```
+
+`output=avg` returns the arithmetic mean of original individual numeric values
+after ACLs, filters and an optional `idsum` merge. Empty and non-numeric values
+are ignored; the average is independent from `ranges=` and is not a count of
+distinct labels. For example, values `20`, `30`, `40` return `30`, while an
+empty value and the text `unknown` do not affect the calculation.
+
+## 10. Filters
 
 Existing generic filter syntax includes:
 
@@ -176,7 +235,7 @@ This is strictly equivalent to the complete filter where both `field` and
 is reserved exclusively for `source=manual`. These examples illustrate syntax
 only. No example value may be hardcoded into plugin logic.
 
-## 7. External additions
+## 11. External additions
 
 External counts can be merged into field-statistics outputs with:
 
@@ -198,10 +257,11 @@ and rendering. This also applies to a missing label receiving a negative delta.
 The source data and `add` configuration remain unchanged, and a later zero or
 positive result is used normally. Invalid syntax rejects the complete parameter.
 
-`add` applies to `table`, `json`, `pie` and `bar`. It does not alter scalar outputs
-and is accepted by the URL/API endpoint for `output=json`.
+`add` applies to `table`, `json`, `pie`, `bar`, `histogram`, `line` and `radar`.
+It does not alter scalar outputs and is accepted by the URL/API endpoint for
+the corresponding list outputs.
 
-## 8. Display titles
+## 12. Display titles
 
 Labels can be renamed for display with:
 
@@ -215,7 +275,7 @@ renamed to the same display title are not merged. Semicolons delimit mappings an
 the first equals sign separates each original label from its non-empty display
 title. `sort=title` uses the final display titles.
 
-## 9. Sorting
+## 13. Sorting
 
 ### Total label and background
 
@@ -254,8 +314,8 @@ dir=asc
 
 `sort=title` uses the active Joomla language locale and natural numeric-label
 ordering. `sort=value` compares counts numerically. Sorting is performed by the
-common normalized engine, so Table, JSON, Pie and Bar share
-the same order.
+common normalized engine, so Table, JSON, Pie, Bar, Histogram, Line and Radar
+share the same order.
 
 Examples:
 
@@ -269,7 +329,7 @@ Examples:
 
 The numeric IDs and field names above are documentation examples only.
 
-## 10. JSON contract
+## 14. JSON contract
 
 Normalized records use:
 
@@ -288,7 +348,7 @@ Rules:
 - valid UTF-8;
 - valid JSON.
 
-## 11. Generic chart text
+## 15. Generic chart text
 
 Default generic format:
 
@@ -304,7 +364,7 @@ Total : <sum>
 
 The plugin core must not hardcode domain-specific nouns such as `inscrits`.
 
-## 12. Compatibility and permissions
+## 16. Compatibility and permissions
 
 All outputs must preserve the plugin's existing:
 
@@ -313,21 +373,23 @@ All outputs must preserve the plugin's existing:
 - filter semantics;
 - security/escaping requirements.
 
-## 13. URL/API data outputs
+## 17. URL/API data outputs
 
 The existing `action=cbstats` endpoint supports:
 
 ```text
-output=json|total|sum|min|max|form_name
+output=json|table|pie|bar|histogram|line|radar|total|sum|min|max|avg|form_name
 ```
 
-`field` is required for `json`, `sum`, `min` and `max`. It is not required for
-`total` or `form_name`. Filters reuse the common CBStats engine. Sorting, signed
-`add` and `titles` apply only to `json`. The JSON output remains the raw normalized
-array; scalar outputs use the standard ContentBuilder NG API success envelope.
-`table`, `pie` and `bar` are not available through the URL endpoint.
+`field` is required for list, chart and numeric aggregate outputs. It is not
+required for `total` or `form_name`. Filters and permissions reuse the common
+CBStats engine. The JSON output remains the raw normalized array. Table and
+chart names return their normalized `total` and `items` data, without HTML;
+scalar outputs use the standard ContentBuilder NG API success envelope.
+`ranges`, `titles`, `add`, `sort`, `dir` and `limit` use the same validation
+and normalization path as article tags.
 
-## 14. Status tracking
+## 18. Status tracking
 
 Codex should update this section in the real canonical documentation after each pass:
 
@@ -338,12 +400,17 @@ Codex should update this section in the real canonical documentation after each 
 | `output=json` | 1 | Implemented and validated |
 | `output=pie` | 2 | Implemented and validated |
 | `output=bar` | 3 | Implemented and validated |
+| `ranges` | RC97 | Implemented and validated |
+| `output=avg` | RC97 | Implemented and validated |
+| `output=histogram` | RC97 | Implemented and validated |
+| `output=line` | RC97 | Implemented and validated |
+| `output=radar` | RC97 | Implemented and validated |
 | `add` external counts | Intermediate | Implemented and validated |
 | Signed `add` deltas and `titles` | Finalization | Implemented; awaiting prod-test validation |
 | URL scalar outputs | 1C | Implemented and validated |
 | Security/error hardening | Finalization | Implemented and validated |
 | Cross-repository docs/API | 4 | Completed |
-## Limiting the final result and hiding its total
+## Limiting the final result and hiding result elements
 
 `limit` is optional and accepts a strictly positive integer:
 
@@ -355,28 +422,91 @@ Codex should update this section in the real canonical documentation after each 
 It is applied after the existing `sort=none|title|value` and `dir=asc|desc`.
 Without `limit`, every value is preserved. Empty, non-numeric, zero, negative,
 decimal or out-of-range integer values are rejected as invalid requests.
-It applies to `table`, `json`, `pie` and `bar`; scalar outputs are unchanged.
+It applies to `table`, `json`, `pie`, `bar`, `histogram`, `line` and `radar`;
+scalar outputs are unchanged.
 
-`total="hide"` removes only the rendered total row or box from `table`, `pie`
-and `bar`. It does not change individual values, `title=` or `titles=`. JSON
-has no visual total to hide. `output="total"` deliberately remains unchanged
-and returns the global record total because returning that value is its sole
-purpose.
+`hide` accepts `total`, `values` and `graph`, combined with `|` in any order.
+`total` hides only the rendered total, `values` hides only the textual labels
+and values list below the graph without changing labels, values, axes or
+tooltips drawn inside the graph, and `graph` hides the chart drawing while
+retaining that lightweight textual list. Without `hide`, all elements remain
+visible. Hiding all three elements is rejected instead of producing an empty
+block.
+
+Common combinations are `hide="total|values"` for the complete graph only,
+`hide="graph|total"` for the textual list only, `hide="graph"` for the textual
+list and total, and `hide="graph|values"` for the total only. Order, surrounding
+spaces and duplicates do not change the result.
+
+The chart options apply to `pie`, `bar`, `histogram`, `line` and `radar`.
+`output="table"` accepts only `hide="total"`. `json`, `min`, `max` and `avg`
+reject presentation options that would hide their primary result. The former
+`total=hide` syntax is no longer supported; use `hide="total"`.
 
 The processing order is:
 
 ```text
 source → filters → grouping → optional idsum merge → add/titles
 → sort/dir → limit → limited-total recalculation
-→ rendering → visual total hiding
+→ rendering → validated presentation hiding
 ```
 
 The displayed total and chart percentages are recalculated from the retained
-values only. With `total="hide"`, that limited total remains available
+values only. With `hide="total"`, that limited total remains available
 internally for percentages. No `Other` category is added.
 
+When `ranges=` is present, the displayed total is instead always the real
+retained record count after permissions and filters. It is never the sum of
+ranges, including after `limit`, because overlapping ranges can legitimately
+count one record several times.
+
 ```text
-{CBStats id="25" field="Name" output="table" sort="title" dir="asc" total="hide"}
-{CBStats id="25" field="Email" output="table" sort="title" dir="asc" limit="50" total="hide"}
-{CBStats idsum="25+27" field="Town" output="table" sort="value" dir="desc" limit="10" total="hide"}
+{CBStats id="25" field="Name" output="table" sort="title" dir="asc" hide="total"}
+{CBStats id="25" field="Email" output="histogram" sort="title" dir="asc" limit="50" hide="total"}
+{CBStats idsum="25+27" field="Town" output="radar" sort="value" dir="desc" limit="10" hide="graph|total"}
+{CBStats id="25" field="RegistrationDate" output="line" sort="value" dir="asc" hide="values"}
+index.php?option=com_contentbuilderng&task=api.display&format=json&action=cbstats&id=25&field=Town&output=bar&hide=graph%7Ctotal
 ```
+
+## Explicit numeric ranges
+
+```text
+ranges="18-29;30-39;40-49;50-59;60+"
+```
+
+Bounds are inclusive. `minimum-maximum` and `minimum+` are accepted. Empty and
+non-numeric field values are ignored. Declaration order is preserved and ranges
+are evaluated independently, so overlaps are intentionally supported:
+
+```text
+ranges="18-35;30-45;40-55;50+"
+```
+
+`ranges=` is strictly numeric. For example, `ranges="Gravel;Route"` is rejected
+with a diagnostic identifying the first invalid item. To count text values, omit
+`ranges=` and use the normal grouped output:
+
+```text
+{CBStats id=25 field=pratique output=bar}
+```
+
+`titles=` renames range labels. Ranges work with Table, JSON, Pie, Bar,
+Histogram, Line and Radar, including an `idsum` source.
+
+## Average, Histogram, Line and Radar
+
+```text
+{CBStats id=25 field=Age output=avg}
+{CBStats id=25 field=Age output=histogram ranges="18-29;30-39;40-49;50-59;60+"}
+{CBStats id=25 field=RegistrationDate output=line sort=title dir=asc limit=30}
+{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50-59;60+"}
+```
+
+`avg` is the arithmetic mean of original individual numeric values after ACLs,
+filters and an optional `idsum` merge. It ignores empty and non-numeric values
+and is independent from ranges.
+
+Histogram and Line use the same normalized counts; neither creates missing
+dates or values. Histogram stays vertical and uses horizontal scrolling when
+needed. Radar requires at least 3 axes, accepts at most 8 and is recommended
+with **4 to 6 axes**.

@@ -134,6 +134,10 @@ Examples:
 {CBStats id=3 field=FieldName output=json sort=title dir=asc}
 {CBStats id=3 field=FieldName output=pie sort=value dir=desc}
 {CBStats id=3 field=FieldName output=bar sort=value dir=desc}
+{CBStats id=3 field=Age output=avg}
+{CBStats id=3 field=Age output=histogram ranges="18-29;30-39;40-49;50+"}
+{CBStats id=3 field=RegistrationDate output=line sort=title dir=asc limit=30}
+{CBStats id=3 field=Age output=radar ranges="18-29;30-39;40-49;50+"}
 {CBStats id=25 field=Route output=pie title="👥 Total registrations" export=manual}
 {CBStats id=3 field=Category output=pie add="Existing=-2;External=3"}
 {CBStats id=3 field=Category output=table titles="1=Group 1;2=Group 2"}
@@ -177,12 +181,19 @@ Add `export=manual` to a Pie, Bar or Table tag to show the final labels, values 
 | `json` | Raw JSON array of `{label,value}` objects | Yes |
 | `pie` | Responsive Pie chart | Yes |
 | `bar` | Responsive horizontal bar chart | Yes |
+| `histogram` | Responsive vertical histogram | Yes |
+| `line` | Responsive line chart using normalized counts | Yes |
+| `radar` | Responsive radar chart with 3 to 8 axes | Yes |
 | `sum` | Count-weighted sum of numeric field values | Yes |
 | `min`, `max` | Smallest and largest numeric value | Yes |
+| `avg` | Arithmetic mean of retained numeric values | Yes |
 
-`table`, `json`, `pie` and `bar` consume the same normalized PHP data. An empty
-table displays `0`; empty charts display a localized no-data message. JSON has no
-HTML or JavaScript wrapper:
+`table`, `json`, `pie`, `bar`, `histogram`, `line` and `radar` consume the same
+normalized PHP data. An empty table displays `0`; empty charts display a
+localized no-data message. Histogram uses vertical buckets, Line preserves the
+final sorted categories, and Radar requires at least 3 and at most 8 axes (4 to
+6 are recommended). `avg` ignores empty and non-numeric values and returns the
+mean of individual numeric values. JSON has no HTML or JavaScript wrapper:
 
 ```json
 [
@@ -224,7 +235,7 @@ The defaults are `sort=none` and `dir=asc`. `sort=none` preserves the engine's
 natural order; `sort=title` uses locale-aware natural label ordering;
 `sort=value` compares counts numerically. `dir` changes the chosen sort direction.
 
-For `table`, `json`, `pie` and `bar`, `add="Label=SignedInteger"` applies
+For `table`, `json`, `pie`, `bar`, `histogram`, `line` and `radar`, `add="Label=SignedInteger"` applies
 cumulative deltas: positive adds, zero changes nothing and negative removes
 occurrences. If the final calculated result is negative, CBStats temporarily
 uses `0` for that label before sorting, percentage calculation and rendering;
@@ -235,9 +246,11 @@ unchanged. Processing order is data, filters, grouping, `add`, `titles`, sorting
 then output; `sort=title` uses final display titles. Semicolons delimit entries
 and the first equals sign separates each pair.
 
-Pie and Bar use localized percentages with one decimal, tooltips, a compact
-detailed legend and a total. Charts are responsive, can coexist in any Pie/Bar
-combination on one page, and reuse the same locally bundled chart assets.
+Pie, Bar, Histogram, Line and Radar use the same normalized data, tooltips and
+localized chart text. Charts are responsive and can coexist in any combination
+on one page. Use `ranges="18-29;30-39;40-49;50+"` for inclusive numeric buckets,
+`output=line sort=title dir=asc` for a date/category sequence, and
+`output=radar` for a compact comparison of 3 to 8 dimensions.
 
 `sum`, `min` and `max` return `0` when the matching field values are empty or not
 all numeric. Date fields may provide chronological `min` and `max`, while `sum`
@@ -245,9 +258,9 @@ remains `0`. All field-based outputs enforce the field's API/Stats availability.
 
 CBStats always enforces the view's STATS permission. For URL/API use, check the
 view's **API + Rights** settings, API/Stats field availability and the **API** tab.
-The supported URL outputs are `json`, `total`, `sum`, `min`, `max` and
-`form_name`; JSON also accepts `add`, `titles`, `sort` and `dir`, while Table,
-Pie and Bar remain content-only. Public errors
+The supported URL outputs are `json`, `table`, `pie`, `bar`, `histogram`, `line`,
+`radar`, `total`, `sum`, `min`, `max`, `avg` and `form_name`; list outputs also
+accept `add`, `titles`, `sort`, `dir`, `ranges` and `limit`. Public errors
 remain generic. `debug=1` requests diagnostics only when DEBUG is enabled on the
 target ContentBuilder NG view; it never grants access or changes view, field or
 STATS permissions.
@@ -304,16 +317,22 @@ plugin, or a maintained project patch instead.
 - disable Debug after diagnosis.
 
 > 📷 *Screenshot to add: generating a template example and opening the PHP preparation editor — `docs/en/img/templates-preparation.png`*
-### Limiting CBStats values and hiding the total
+### Limiting CBStats values and hiding result elements
 
 Use `limit` after an existing sort to retain only the first statistical values.
-Use `total="hide"` to remove the visual total from Table, Pie or Bar:
+Use `hide` with `total`, `values` or `graph`, separated by `|`. `total` hides
+the displayed total, `values` hides only the textual labels-and-values list
+below the graph without changing the graph itself, and `graph` hides the
+drawing while retaining that lightweight textual list:
 
 ```text
 {CBStats id="25" field="Town" output="table" sort="value" dir="desc" limit="10"}
-{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" total="hide"}
+{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" hide="total"}
+{CBStats id="25" field="Age" output="histogram" hide="total|values"}
+{CBStats id="25" field="Age" output="radar" hide="graph|total"}
 ```
 
 The displayed total and chart percentages are recalculated from the values
-retained by `limit`. No Other category is added. `output="total"` remains
-unchanged, and JSON has no visual total.
+retained by `limit`. Hiding does not change calculations, ACLs or filters.
+Hiding all three elements is rejected. The former `total=hide` syntax is no
+longer supported; use `hide="total"`.

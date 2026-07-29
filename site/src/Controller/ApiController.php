@@ -24,6 +24,7 @@ use CB\Component\Contentbuilderng\Site\Model\EditModel;
 use CB\Component\Contentbuilderng\Site\Model\ListModel;
 use CB\Component\Contentbuilderng\Site\Service\SparseFieldsetService;
 use CB\Component\Contentbuilderng\Site\Service\StatsFilterValueService;
+use CB\Component\Contentbuilderng\Site\Service\StatsHideOptionsService;
 use CB\Component\Contentbuilderng\Site\Service\StatsService;
 use Joomla\CMS\Application\CMSWebApplicationInterface;
 use Joomla\CMS\Application\SiteApplication;
@@ -132,7 +133,7 @@ class ApiController extends BaseController
                     $output = $this->getCbstatsOutput();
                     $payload = $this->getCbstatsPayload($formId, $output);
 
-                    if ($output === 'json') {
+                    if (in_array($output, ['json', 'table', 'pie', 'bar', 'histogram', 'line', 'radar'], true)) {
                         $this->sendRawJson((array) $payload);
                     } else {
                         $this->sendJson($payload);
@@ -207,7 +208,10 @@ class ApiController extends BaseController
     private function getCbstatsOutput(): string
     {
         $output = strtolower(trim((string) $this->input->getCmd('output', 'json')));
-        $supportedOutputs = ['json', 'total', 'sum', 'min', 'max', 'form_name'];
+        $supportedOutputs = [
+            'json', 'table', 'pie', 'bar', 'histogram', 'line', 'radar',
+            'total', 'sum', 'min', 'max', 'avg', 'form_name',
+        ];
 
         if (!in_array($output, $supportedOutputs, true)) {
             throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_OUTPUT'), 400);
@@ -218,7 +222,8 @@ class ApiController extends BaseController
 
     private function getCbstatsPayload(int $formId, string $output): array|int|float|string
     {
-        $fieldOutputs = ['json', 'sum', 'min', 'max'];
+        $listOutputs = ['json', 'table', 'pie', 'bar', 'histogram', 'line', 'radar'];
+        $fieldOutputs = [...$listOutputs, 'sum', 'min', 'max', 'avg'];
 
         $field = trim((string) $this->input->getString('field', ''));
 
@@ -256,11 +261,25 @@ class ApiController extends BaseController
             ],
         ]);
 
-        if ($output === 'json') {
+        try {
+            if ($this->input->exists('total')) {
+                throw new \InvalidArgumentException('total', StatsHideOptionsService::LEGACY_TOTAL);
+            }
+
+            $hideOptions = StatsHideOptionsService::parse(
+                $this->input->exists('hide') ? $this->input->getString('hide', '') : null
+            );
+            StatsHideOptionsService::validateForOutput($hideOptions, $output);
+        } catch (\InvalidArgumentException $exception) {
+            throw new \RuntimeException($this->getCbstatsHideErrorMessage($exception), 400, $exception);
+        }
+
+        if (in_array($output, $listOutputs, true)) {
             $sort = strtolower(trim((string) $this->input->getCmd('sort', 'none')));
             $dir = strtolower(trim((string) $this->input->getCmd('dir', 'asc')));
             $add = trim((string) $this->input->getString('add', ''));
             $titles = trim((string) $this->input->getString('titles', ''));
+            $ranges = trim((string) $this->input->getString('ranges', ''));
 
             if (!in_array($sort, ['none', 'title', 'value'], true)) {
                 throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_SORT'), 400);
@@ -271,14 +290,33 @@ class ApiController extends BaseController
             }
 
             try {
-                return StatsService::normalizeFieldStats(
-                    (array) ($payload['field']['values'] ?? []),
-                    $sort,
+                $rangeDefinitions = StatsService::parseFieldStatsRanges($ranges);
+                $values = (array) ($payload['field']['values'] ?? []);
+
+                if ($rangeDefinitions !== []) {
+                    $values = StatsService::applyFieldStatsRanges($values, $rangeDefinitions);
+                }
+
+                $items = StatsService::normalizeFieldStats(
+                    $values,
+                    $rangeDefinitions === [] ? $sort : 'none',
                     $dir,
                     $this->siteApp->getLanguage()->getTag(),
                     StatsService::parseFieldStatsAdditions($add),
                     StatsService::parseFieldStatsTitles($titles)
                 );
+                $items = array_slice($items, 0, $this->getCbstatsLimit(count($items)));
+
+                if ($output === 'json') {
+                    return $items;
+                }
+
+                return [
+                    'total' => $rangeDefinitions === []
+                        ? array_sum(array_column($items, 'value'))
+                        : (int) ($payload['records']['total'] ?? 0),
+                    'items' => $items,
+                ];
             } catch (\InvalidArgumentException $exception) {
                 throw new \RuntimeException($this->getCbstatsFieldStatsErrorMessage($exception), 400, $exception);
             }
@@ -287,13 +325,58 @@ class ApiController extends BaseController
         return StatsService::resolveCbstatsOutput($payload, $output);
     }
 
+    private function getCbstatsLimit(int $itemCount): int
+    {
+        $rawLimit = trim((string) $this->input->getString('limit', ''));
+
+        if ($rawLimit === '') {
+            return $itemCount;
+        }
+
+        if (preg_match('/^[1-9][0-9]*$/D', $rawLimit) !== 1) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_LIMIT'), 400);
+        }
+
+        return min((int) $rawLimit, $itemCount);
+    }
+
     private function getCbstatsFieldStatsErrorMessage(\InvalidArgumentException $exception): string
     {
         return match ($exception->getCode()) {
+            StatsService::CBSTATS_ERROR_INVALID_RANGES => Text::sprintf(
+                'COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_RANGES',
+                $exception->getMessage()
+            ),
             StatsService::CBSTATS_ERROR_INVALID_TITLES => Text::_(
                 'COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_TITLES'
             ),
             default => Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_ADD'),
+        };
+    }
+
+    private function getCbstatsHideErrorMessage(\InvalidArgumentException $exception): string
+    {
+        if ($exception->getCode() === StatsHideOptionsService::NOT_APPLICABLE) {
+            [$item, $output] = array_pad(explode('|', $exception->getMessage(), 2), 2, '');
+
+            return Text::sprintf('COM_CONTENTBUILDERNG_API_CBSTATS_HIDE_NOT_APPLICABLE', $item, $output);
+        }
+
+        return match ($exception->getCode()) {
+            StatsHideOptionsService::INVALID_SEPARATOR => Text::sprintf(
+                'COM_CONTENTBUILDERNG_API_CBSTATS_HIDE_INVALID_SEPARATOR',
+                $exception->getMessage()
+            ),
+            StatsHideOptionsService::ALL_HIDDEN => Text::_(
+                'COM_CONTENTBUILDERNG_API_CBSTATS_HIDE_ALL_HIDDEN'
+            ),
+            StatsHideOptionsService::LEGACY_TOTAL => Text::_(
+                'COM_CONTENTBUILDERNG_API_CBSTATS_HIDE_LEGACY_TOTAL'
+            ),
+            default => Text::sprintf(
+                'COM_CONTENTBUILDERNG_API_CBSTATS_HIDE_INVALID_ITEM',
+                $exception->getMessage()
+            ),
         };
     }
 

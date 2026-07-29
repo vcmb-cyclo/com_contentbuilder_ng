@@ -95,6 +95,7 @@ final class CbStatsRc91B01Test extends TestCase
             'cbstats_presentation_note',
             'cbstats_headers_note',
             'cbstats_display_options_note',
+            'cbstats_hide_note',
         ], array_map(
             static fn(\SimpleXMLElement $field): string => (string) $field['name'],
             $fields

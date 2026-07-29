@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace ContentBuilder\Tests\Unit\Plugin;
 
 use CB\Component\Contentbuilderng\Site\Service\StatsService;
+use CB\Component\Contentbuilderng\Site\Service\StatsHideOptionsService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\DisplayOptionsService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\IdSumService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\PiePresentationService;
+use CB\Plugin\Content\ContentbuilderngStats\Service\TagSyntaxService;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -130,22 +132,177 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
         self::assertSame(40, array_sum(array_column($limited, 'value')));
     }
 
-    public function testTotalIsDisplayedByDefaultAndHiddenOnlyByExactOption(): void
+    public function testMissingHidePreservesEveryDisplayElement(): void
     {
-        self::assertFalse(DisplayOptionsService::hidesTotal([]));
-        self::assertTrue(DisplayOptionsService::hidesTotal(['total' => 'hide']));
-        self::assertTrue(DisplayOptionsService::hidesTotal(['total' => ' HIDE ']));
+        self::assertSame(
+            ['total' => false, 'values' => false, 'graph' => false],
+            StatsHideOptionsService::fromAttributes([])
+        );
     }
 
-    public function testInvalidTotalOptionIsRejected(): void
+    #[DataProvider('validHideProvider')]
+    public function testHideValuesAreNormalized(string $raw, array $expected): void
+    {
+        self::assertSame($expected, StatsHideOptionsService::parse($raw));
+    }
+
+    public static function validHideProvider(): iterable
+    {
+        yield ['total', ['total' => true, 'values' => false, 'graph' => false]];
+        yield ['values', ['total' => false, 'values' => true, 'graph' => false]];
+        yield ['graph', ['total' => false, 'values' => false, 'graph' => true]];
+        yield ['values|total', ['total' => true, 'values' => true, 'graph' => false]];
+        yield [' graph | total ', ['total' => true, 'values' => false, 'graph' => true]];
+        yield ['total|total|values', ['total' => true, 'values' => true, 'graph' => false]];
+        yield ['total|values|graph', ['total' => true, 'values' => true, 'graph' => true]];
+        yield ['graph|total', ['total' => true, 'values' => false, 'graph' => true]];
+        yield ['total|graph', ['total' => true, 'values' => false, 'graph' => true]];
+        yield [' graph | total ', ['total' => true, 'values' => false, 'graph' => true]];
+        yield ['graph|graph|total', ['total' => true, 'values' => false, 'graph' => true]];
+        yield ['values|total', ['total' => true, 'values' => true, 'graph' => false]];
+        yield ['graph|values', ['total' => false, 'values' => true, 'graph' => true]];
+        yield ['values|graph', ['total' => false, 'values' => true, 'graph' => true]];
+        yield ['graph|values|total', ['total' => true, 'values' => true, 'graph' => true]];
+    }
+
+    public function testQuotedShortcodePreservesTheCompletePipeSeparatedHideValue(): void
+    {
+        $tag = '{CBStats id=25 field=age output=histogram hide="graph|total"}';
+        self::assertSame(1, preg_match(TagSyntaxService::TAG_PATTERN, $tag, $matches));
+
+        $attributes = TagSyntaxService::parseAttributes((string) ($matches[1] ?? ''));
+        self::assertSame('graph|total', $attributes['hide']);
+        self::assertSame(
+            ['total' => true, 'values' => false, 'graph' => true],
+            StatsHideOptionsService::fromAttributes($attributes)
+        );
+    }
+
+    public function testEncodedUrlPipeUsesTheSameNormalizedParserResult(): void
+    {
+        self::assertSame(
+            StatsHideOptionsService::parse('graph|total'),
+            StatsHideOptionsService::parse('graph%7Ctotal')
+        );
+    }
+
+    #[DataProvider('invalidHideProvider')]
+    public function testInvalidHideSyntaxIsRejected(string $raw, int $code, string $item): void
+    {
+        try {
+            StatsHideOptionsService::parse($raw);
+            self::fail('Invalid hide syntax was accepted.');
+        } catch (\InvalidArgumentException $exception) {
+            self::assertSame($code, $exception->getCode());
+            self::assertSame($item, $exception->getMessage());
+        }
+    }
+
+    public static function invalidHideProvider(): iterable
+    {
+        yield ['', StatsHideOptionsService::INVALID_ITEM, ''];
+        yield ['table', StatsHideOptionsService::INVALID_ITEM, 'table'];
+        yield ['total||values', StatsHideOptionsService::INVALID_ITEM, ''];
+        yield ['total,values', StatsHideOptionsService::INVALID_SEPARATOR, 'total,values'];
+        yield ['total;values', StatsHideOptionsService::INVALID_SEPARATOR, 'total;values'];
+    }
+
+    public function testLegacyTotalOptionIsRejectedWithoutAliasConversion(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionCode(DisplayOptionsService::INVALID_TOTAL);
+        $this->expectExceptionCode(StatsHideOptionsService::LEGACY_TOTAL);
 
-        DisplayOptionsService::hidesTotal(['total' => 'no']);
+        StatsHideOptionsService::fromAttributes(['total' => 'hide']);
     }
 
-    public function testPluginAppliesLimitOnceAfterNormalizedStatisticsAndHidesRenderedTotals(): void
+    public function testHideApplicabilityIsValidatedCentrally(): void
+    {
+        $totalOnly = StatsHideOptionsService::parse('total');
+        StatsHideOptionsService::validateForOutput($totalOnly, 'table');
+        StatsHideOptionsService::validateForOutput($totalOnly, 'pie');
+
+        try {
+            StatsHideOptionsService::validateForOutput(StatsHideOptionsService::parse('graph'), 'json');
+            self::fail('hide=graph was accepted for JSON.');
+        } catch (\InvalidArgumentException $exception) {
+            self::assertSame(StatsHideOptionsService::NOT_APPLICABLE, $exception->getCode());
+            self::assertSame('graph|json', $exception->getMessage());
+        }
+
+        try {
+            StatsHideOptionsService::validateForOutput(
+                StatsHideOptionsService::parse('total|values|graph'),
+                'radar'
+            );
+            self::fail('A fully hidden radar was accepted.');
+        } catch (\InvalidArgumentException $exception) {
+            self::assertSame(StatsHideOptionsService::ALL_HIDDEN, $exception->getCode());
+        }
+
+        try {
+            StatsHideOptionsService::validateForOutput(StatsHideOptionsService::parse('values'), 'avg');
+            self::fail('hide=values was accepted for AVG.');
+        } catch (\InvalidArgumentException $exception) {
+            self::assertSame('values|avg', $exception->getMessage());
+        }
+    }
+
+    #[DataProvider('nonApplicableHideProvider')]
+    public function testNonGraphOutputsRejectIncompatibleHideOptions(
+        string $output,
+        string $hide,
+        string $expectedMessage
+    ): void {
+        try {
+            StatsHideOptionsService::validateForOutput(StatsHideOptionsService::parse($hide), $output);
+            self::fail(sprintf('hide=%s was accepted for %s.', $hide, $output));
+        } catch (\InvalidArgumentException $exception) {
+            self::assertSame(StatsHideOptionsService::NOT_APPLICABLE, $exception->getCode());
+            self::assertSame($expectedMessage, $exception->getMessage());
+        }
+    }
+
+    public static function nonApplicableHideProvider(): iterable
+    {
+        yield ['table', 'graph', 'graph|table'];
+        yield ['json', 'values', 'values|json'];
+        yield ['min', 'graph', 'graph|min'];
+        yield ['max', 'values', 'values|max'];
+        yield ['avg', 'graph', 'graph|avg'];
+    }
+
+    #[DataProvider('chartOutputProvider')]
+    public function testEveryChartOutputAcceptsIndividualAndCombinedHideOptions(string $output): void
+    {
+        foreach (['total', 'values', 'graph', 'total|values', 'total|graph', 'values|graph'] as $hide) {
+            StatsHideOptionsService::validateForOutput(StatsHideOptionsService::parse($hide), $output);
+            self::addToAssertionCount(1);
+        }
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionCode(StatsHideOptionsService::ALL_HIDDEN);
+        StatsHideOptionsService::validateForOutput(
+            StatsHideOptionsService::parse('total|values|graph'),
+            $output
+        );
+    }
+
+    public static function chartOutputProvider(): iterable
+    {
+        foreach (['pie', 'bar', 'histogram', 'line', 'radar'] as $output) {
+            yield [$output];
+        }
+    }
+
+    public function testHideSerializationUsesCanonicalOrder(): void
+    {
+        self::assertSame(
+            'total|values',
+            StatsHideOptionsService::serialize(StatsHideOptionsService::parse('values|total|values'))
+        );
+    }
+
+    public function testPluginUsesNormalizedHideFlagsAcrossEveryChartRenderer(): void
     {
         $source = file_get_contents(
             dirname(__DIR__, 4) . '/plugins/content/contentbuilderng_cbstats/src/Extension/ContentbuilderngStats.php'
@@ -154,9 +311,61 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
         self::assertIsString($source);
         self::assertStringContainsString('DisplayOptionsService::applyLimit($fullFieldStats, $limit)', $source);
         self::assertStringContainsString("\$fieldTotal = array_sum(array_column(\$fieldStats, 'value'));", $source);
-        self::assertStringContainsString("if (!\$hideTotal) {\n            \$html .= '<tfoot>", $source);
-        self::assertStringContainsString("if (!\$hideTotal) {\n            \$html .= '<div class=\"cbstats-total-box\">", $source);
+        self::assertStringContainsString("if (!\$hideOptions['total']) {\n            \$html .= '<tfoot>", $source);
+        self::assertStringContainsString("if (!\$hideOptions['total']) {\n            \$html .= '<div class=\"cbstats-total-box\">", $source);
+        self::assertStringContainsString("if (!\$hideOptions['graph']) {", $source);
+        self::assertStringContainsString("if (!\$hideOptions['values']) {", $source);
+        self::assertStringContainsString("['items' => \$items]", $source);
+        self::assertStringContainsString("['type' => \$output, 'items' => \$items]", $source);
+        self::assertStringNotContainsString("\$item['label'] = '';", $source);
+        self::assertStringNotContainsString('prepareChartPayloadItems', $source);
+        self::assertStringNotContainsString("'showValues' => !\$hideOptions['values']", $source);
+        self::assertStringContainsString('StatsHideOptionsService::fromAttributes($attributes)', $source);
+        self::assertStringNotContainsString('DisplayOptionsService::hidesTotal', $source);
         self::assertStringContainsString("'total' => (string) StatsService::resolveCbstatsOutput", $source);
+    }
+
+    public function testHideValuesDoesNotChangeTheGraphJavascript(): void
+    {
+        foreach (['cbstats-pie.js', 'cbstats-bar.js', 'cbstats-charts.js'] as $file) {
+            $source = file_get_contents(
+                dirname(__DIR__, 4) . '/plugins/content/contentbuilderng_cbstats/media/js/' . $file
+            );
+
+            self::assertIsString($source);
+            self::assertStringNotContainsString('showValues', $source);
+        }
+
+        $pie = (string) file_get_contents(
+            dirname(__DIR__, 4) . '/plugins/content/contentbuilderng_cbstats/media/js/cbstats-pie.js'
+        );
+        $bar = (string) file_get_contents(
+            dirname(__DIR__, 4) . '/plugins/content/contentbuilderng_cbstats/media/js/cbstats-bar.js'
+        );
+        $charts = (string) file_get_contents(
+            dirname(__DIR__, 4) . '/plugins/content/contentbuilderng_cbstats/media/js/cbstats-charts.js'
+        );
+        self::assertStringContainsString('`${item.value} (${item.percentageLabel} %)`', $pie);
+        self::assertStringContainsString('`${item.value} (${item.percentageLabel} %)`', $bar);
+        self::assertStringContainsString('`${context.label}: ${context.formattedValue}`', $charts);
+    }
+
+    public function testArticleAndUrlPathsUseTheSameHideParserAndValidation(): void
+    {
+        $root = dirname(__DIR__, 4);
+        $plugin = (string) file_get_contents(
+            $root . '/plugins/content/contentbuilderng_cbstats/src/Extension/ContentbuilderngStats.php'
+        );
+        $api = (string) file_get_contents($root . '/site/src/Controller/ApiController.php');
+
+        foreach ([$plugin, $api] as $source) {
+            self::assertStringContainsString('StatsHideOptionsService::', $source);
+            self::assertStringContainsString('StatsHideOptionsService::validateForOutput', $source);
+        }
+        self::assertStringContainsString('StatsHideOptionsService::fromAttributes($attributes)', $plugin);
+        self::assertStringContainsString('StatsHideOptionsService::parse(', $api);
+        self::assertStringContainsString("\$this->input->exists('total')", $api);
+        self::assertStringNotContainsString("'total' => 'hide'", $api);
     }
 
     /** @return list<array{label: string, value: int}> */

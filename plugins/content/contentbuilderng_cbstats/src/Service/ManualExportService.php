@@ -19,7 +19,8 @@ final class ManualExportService
         string $output,
         string $title = '',
         string $background = '',
-        string $headers = ''
+        string $headers = '',
+        string $hide = ''
     ): string {
         $values = [];
 
@@ -40,6 +41,10 @@ final class ManualExportService
 
         if ($headers !== '') {
             $syntax .= ' headers="' . self::escapeAttribute($headers) . '"';
+        }
+
+        if ($hide !== '') {
+            $syntax .= ' hide="' . self::escapeAttribute($hide) . '"';
         }
 
         return $syntax . '}';

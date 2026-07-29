@@ -22,6 +22,7 @@ use Joomla\Database\DatabaseInterface;
 final class StatsService
 {
     public const CBSTATS_ERROR_INVALID_ADD = 1001;
+    public const CBSTATS_ERROR_INVALID_RANGES = 1002;
     public const CBSTATS_ERROR_INVALID_TITLES = 1004;
     public const CBSTATS_ERROR_INVALID_HEADERS = 1005;
 
@@ -296,21 +297,35 @@ final class StatsService
 
     /**
      * Aggregates over a value => occurrence-count map. When every distinct
-     * value is numeric: count-weighted sum and numeric min/max. When every
+     * value is numeric: count-weighted sum, average and numeric min/max. The
+     * average independently ignores empty and non-numeric values. When every
      * distinct value is an ISO date (Y-m-d, optional H:i or H:i:s): earliest
-     * and latest date as min/max, sum null. All null otherwise or when the
-     * map is empty.
+     * and latest date as min/max, sum null. Other aggregates are null when
+     * their existing type contract cannot be satisfied.
      *
-     * @return array{sum: float|null, min: float|string|null, max: float|string|null}
+     * @return array{sum: float|null, min: float|string|null, max: float|string|null, avg: float|null}
      */
     public static function computeFieldAggregates(array $values): array
     {
-        $none = ['sum' => null, 'min' => null, 'max' => null];
+        $none = ['sum' => null, 'min' => null, 'max' => null, 'avg' => null];
 
         if ($values === []) {
             return $none;
         }
 
+        $numericSum = 0.0;
+        $numericCount = 0;
+
+        foreach ($values as $value => $count) {
+            if ((string) $value === '' || !is_numeric($value) || !is_numeric($count) || (float) $count <= 0) {
+                continue;
+            }
+
+            $numericSum += (float) $value * (float) $count;
+            $numericCount += (int) $count;
+        }
+
+        $average = $numericCount > 0 ? $numericSum / $numericCount : null;
         $sum = 0.0;
         $min = null;
         $max = null;
@@ -331,7 +346,7 @@ final class StatsService
         }
 
         if ($sum !== null) {
-            return ['sum' => $sum, 'min' => $min, 'max' => $max];
+            return ['sum' => $sum, 'min' => $min, 'max' => $max, 'avg' => $average];
         }
 
         foreach ($values as $value => $count) {
@@ -342,13 +357,13 @@ final class StatsService
         }
 
         if (!$allDates) {
-            return $none;
+            return ['sum' => null, 'min' => null, 'max' => null, 'avg' => $average];
         }
 
         $dates = array_map('strval', array_keys($values));
         sort($dates, SORT_STRING);
 
-        return ['sum' => null, 'min' => $dates[0], 'max' => $dates[count($dates) - 1]];
+        return ['sum' => null, 'min' => $dates[0], 'max' => $dates[count($dates) - 1], 'avg' => $average];
     }
 
     public static function resolveCbstatsOutput(array $payload, string $output): int|float|string
@@ -356,7 +371,7 @@ final class StatsService
         return match ($output) {
             'total' => (int) ($payload['records']['total'] ?? 0),
             'form_name' => self::resolveFormName($payload),
-            'sum', 'min', 'max' => self::resolveFieldAggregate($payload, $output),
+            'sum', 'min', 'max', 'avg' => self::resolveFieldAggregate($payload, $output),
             default => throw new \InvalidArgumentException('Unsupported CBStats scalar output.'),
         };
     }
@@ -430,6 +445,75 @@ final class StatsService
         }
 
         return $items;
+    }
+
+    /**
+     * @return list<array{label: string, min: float, max: float|null}>
+     */
+    public static function parseFieldStatsRanges(string $ranges): array
+    {
+        $ranges = trim($ranges);
+
+        if ($ranges === '') {
+            return [];
+        }
+
+        $parsed = [];
+        $number = '[+-]?(?:\d+(?:\.\d+)?|\.\d+)';
+
+        foreach (explode(';', $ranges) as $entry) {
+            $entry = trim($entry);
+            $minimum = null;
+            $maximum = null;
+
+            if (preg_match('/^(' . $number . ')\s*-\s*(' . $number . ')$/D', $entry, $matches) === 1) {
+                $minimum = (float) $matches[1];
+                $maximum = (float) $matches[2];
+            } elseif (preg_match('/^(' . $number . ')\s*\+$/D', $entry, $matches) === 1) {
+                $minimum = (float) $matches[1];
+            }
+
+            if ($minimum === null || ($maximum !== null && $minimum > $maximum)) {
+                throw new \InvalidArgumentException($entry, self::CBSTATS_ERROR_INVALID_RANGES);
+            }
+
+            $parsed[] = ['label' => $entry, 'min' => $minimum, 'max' => $maximum];
+        }
+
+        return $parsed;
+    }
+
+    /**
+     * Count every range independently. Overlapping ranges intentionally count
+     * the same source entry more than once.
+     *
+     * @param array<int|string,int|float> $values
+     * @param list<array{label: string, min: float, max: float|null}> $ranges
+     * @return array<string,int|float>
+     */
+    public static function applyFieldStatsRanges(array $values, array $ranges): array
+    {
+        $counts = [];
+
+        foreach ($ranges as $range) {
+            $count = 0;
+
+            foreach ($values as $value => $occurrences) {
+                if ((string) $value === '' || !is_numeric($value) || !is_numeric($occurrences)) {
+                    continue;
+                }
+
+                $number = (float) $value;
+
+                if ($number >= $range['min'] && ($range['max'] === null || $number <= $range['max'])) {
+                    $count += (int) $occurrences;
+                }
+            }
+
+            $counts[$range['label']] = $count;
+        }
+
+        return $counts;
     }
 
     /**

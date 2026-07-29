@@ -89,14 +89,17 @@ final class IdSumService
 
         $merged = $payloads[0];
         $values = [];
+        $recordTotal = 0;
 
         foreach ($payloads as $payload) {
+            $recordTotal += (int) ($payload['records']['total'] ?? 0);
+
             foreach ((array) ($payload['field']['values'] ?? []) as $label => $value) {
                 $values[$label] = ($values[$label] ?? 0) + (int) $value;
             }
         }
 
-        $merged['records']['total'] = array_sum($values);
+        $merged['records']['total'] = $recordTotal;
         $merged['field'] = (array) ($merged['field'] ?? []);
         $merged['field']['total'] = array_sum($values);
         $merged['field']['values'] = $values;

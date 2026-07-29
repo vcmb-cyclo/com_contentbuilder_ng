@@ -185,8 +185,11 @@ final class OpenApiSpecService
                 ],
                 'CbstatsOutputParam' => [
                     'name' => 'output', 'in' => 'query', 'required' => false,
-                    'description' => 'CBStats URL data output. Defaults to json. HTML and chart outputs are not supported.',
-                    'schema' => ['type' => 'string', 'enum' => ['json', 'total', 'sum', 'min', 'max', 'form_name']],
+                    'description' => 'CBStats URL data output. List and chart outputs return normalized chart data, not HTML.',
+                    'schema' => ['type' => 'string', 'enum' => [
+                        'json', 'table', 'pie', 'bar', 'histogram', 'line', 'radar',
+                        'total', 'sum', 'min', 'max', 'avg', 'form_name',
+                    ]],
                     'example' => 'json',
                 ],
                 'CbstatsSortParam' => [
@@ -210,6 +213,17 @@ final class OpenApiSpecService
                     'description' => 'JSON display-label mappings as Original=Display title entries separated by semicolons. '
                         . 'Mappings apply after add and before sorting and do not merge categories.',
                     'schema' => ['type' => 'string'], 'example' => '1=Group 1;2=Group 2',
+                ],
+                'CbstatsRangesParam' => [
+                    'name' => 'ranges', 'in' => 'query', 'required' => false,
+                    'description' => 'Inclusive numeric ranges in declared order. Overlaps are allowed. '
+                        . 'Syntax: minimum-maximum or minimum+, separated by semicolons.',
+                    'schema' => ['type' => 'string'], 'example' => '18-29;30-39;40-49;50-59;60+',
+                ],
+                'CbstatsLimitParam' => [
+                    'name' => 'limit', 'in' => 'query', 'required' => false,
+                    'description' => 'Strictly positive maximum number of normalized items.',
+                    'schema' => ['type' => 'integer', 'minimum' => 1], 'example' => 30,
                 ],
             ],
             'responses' => [
@@ -386,7 +400,7 @@ final class OpenApiSpecService
                         ['name' => 'action', 'in' => 'query', 'required' => true, 'schema' => ['type' => 'string', 'enum' => ['cbstats']]],
                         [
                             'name' => 'field', 'in' => 'query', 'required' => false,
-                            'description' => 'Required for json, sum, min and max; not required for total or form_name. '
+                            'description' => 'Required for list, chart, sum, min, max and avg outputs; not required for total or form_name. '
                                 . 'Resolved by reference, name, or label; must be published and API-authorized.',
                             'schema' => ['type' => 'string'], 'example' => 'FieldName',
                         ],
@@ -397,6 +411,8 @@ final class OpenApiSpecService
                         ['$ref' => '#/components/parameters/CbstatsDirParam'],
                         ['$ref' => '#/components/parameters/CbstatsAddParam'],
                         ['$ref' => '#/components/parameters/CbstatsTitlesParam'],
+                        ['$ref' => '#/components/parameters/CbstatsRangesParam'],
+                        ['$ref' => '#/components/parameters/CbstatsLimitParam'],
                     ],
                     'responses' => [
                         '200' => [

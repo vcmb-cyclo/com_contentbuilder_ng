@@ -270,7 +270,7 @@ filter[value]=200 km* | 300 km*
 Dans un contenu Joomla, `export=manual` peut être ajouté aux balises Pie, Bar et Table. Il affiche les valeurs finales normalisées et une balise `source=manual` visible et copiable. Cette option de présentation ne fait pas partie du contrat des sorties URL/API.
 
 Le plugin de contenu CBStats utilise une source normalisée unique pour ses sorties
-Table, JSON, Pie et Bar. Son contrat JSON est un tableau brut contenant des
+Table, JSON, Pie, Bar, Histogram, Line et Radar. Son contrat JSON est un tableau brut contenant des
 libellés sous forme de chaînes et des valeurs entières :
 
 ```text
@@ -295,27 +295,46 @@ GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&
 | `output` | Réponse | `field` obligatoire |
 | --- | --- | --- |
 | `json` | Tableau normalisé brut | Oui |
+| `table`, `pie`, `bar`, `histogram`, `line`, `radar` | Statistiques normalisées | Oui |
 | `total` | Nombre d'enregistrements correspondants | Non |
 | `sum` | Somme numérique pondérée | Oui |
 | `min`, `max` | Minimum/maximum numérique, ou borne chronologique d'une date ISO | Oui |
+| `avg` | Moyenne arithmétique des valeurs numériques individuelles retenues | Oui |
 | `form_name` | Titre ou nom de la vue | Non |
 
 En l'absence de `output`, le point d'accès utilise `json` par défaut ; `field` est
-donc obligatoire. `table`, `pie` et `bar` restent réservés au contenu et sont
-refusés par l'API URL. JSON réutilise le traitement commun de `add` signé et de
-`titles`.
+donc obligatoire. Les requêtes URL pour Table et les graphiques retournent les
+mêmes statistiques normalisées que les renderers de contenu. JSON réutilise le
+traitement commun de `add` signé et de `titles`.
 
 #### Paramètres
 
 - `id` : identifiant positif obligatoire de la vue ContentBuilder NG ;
-- `field` : obligatoire pour `json`, `sum`, `min` et `max` ;
+- `field` : obligatoire pour `json`, toutes les sorties de liste/graphiques, `sum`, `min`, `max` et `avg` ;
 - `filter[field]` et `filter[value]` : facultatifs, mais obligatoirement fournis ensemble ;
-- `sort=none|title|value` : facultatif et lu uniquement pour `json`, défaut `none` ;
-- `dir=asc|desc` : facultatif et lu uniquement pour `json`, défaut `asc`.
-- `add=Libellé=EntierSigné;...` : facultatif et lu uniquement pour `json` ;
-- `titles=Original=Titre affiché;...` : facultatif et lu uniquement pour `json`.
+- `sort=none|title|value` : facultatif pour les sorties de liste/graphiques, défaut `none` ;
+- `dir=asc|desc` : facultatif pour les sorties de liste/graphiques, défaut `asc`.
+- `add=Libellé=EntierSigné;...` : facultatif pour les sorties de liste/graphiques ;
+- `titles=Original=Titre affiché;...` : facultatif pour les sorties de liste/graphiques.
+- `hide=total|values|graph` : sélection de présentation facultative. Les balises
+  d’article et les requêtes URL utilisent le même parser et les mêmes contrôles.
 
 Les sorties scalaires ignorent `sort` et `dir`.
+
+`hide="total"` masque uniquement le Total affiché, `hide="values"` masque
+uniquement la liste textuelle des libellés et valeurs sous le graphique sans
+modifier le graphique, et `hide="graph"` masque le dessin tout en conservant
+cette liste textuelle légère. Ces valeurs peuvent
+être combinées avec `|` dans n’importe quel ordre. Les options non applicables
+et les combinaisons masquant tout le résultat sont refusées. L’ancienne syntaxe
+`total=hide` est refusée.
+
+```text
+{CBStats id=3 field=NomDuChamp output=bar hide="total"}
+{CBStats id=3 field=NomDuChamp output=radar hide="graph|total"}
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=NomDuChamp&output=bar&hide=total
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=NomDuChamp&output=bar&hide=graph%7Ctotal
+```
 
 Les valeurs de filtre sont nettoyées de leurs espaces de début et de fin. `*`
 représente une suite quelconque de caractères et `|` sépare les alternatives. Un
@@ -337,6 +356,10 @@ GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Montant&output=sum
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Montant&output=min
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Montant&output=max
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Montant&output=avg
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=histogram&ranges=18-29%3B30-39%3B40-49%3B50%2B
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=DateInscription&output=line&sort=title&dir=asc&limit=30
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=radar&ranges=18-29%3B30-39%3B40-49%3B50-59%3B60%2B
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Catégorie&output=json&filter[field]=Statut&filter[value]=Ouvert*%20%7C%20En%20attente&sort=value&dir=desc
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Catégorie&output=json&add=1%3D-2%3B2%3D3&titles=1%3DGroupe%201%3B2%3DGroupe%202
 ```
@@ -402,3 +425,23 @@ L'API utilise l'identité et la session Joomla de la requête. Le dépôt ne fou
 dans ces fichiers un mécanisme autonome documenté de jeton API permanent :
 **À vérifier** selon l'authentification mise en place sur votre site.
 
+### Outputs CBStats RC97 et tranches numériques
+
+L’URL `action=cbstats` accepte `avg`, `histogram`, `line` et `radar`, en plus
+des sorties de liste, scalaires et graphiques déjà disponibles. `avg` calcule
+la moyenne arithmétique des valeurs numériques individuelles après les ACL et
+les filtres ; les valeurs vides ou non numériques sont ignorées. Exemple :
+
+```text
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=avg
+```
+
+`ranges=18-29;30-39;40-49;50-59;60+` crée des tranches numériques inclusives,
+dans l’ordre déclaré ; les chevauchements sont autorisés et chaque tranche est
+comptée indépendamment. Par exemple, `ranges=18-35;30-45;40-55;50+` compte
+volontairement un âge dans chaque tranche correspondante. Les graphiques
+retournent les données normalisées `total` et `items`, sans HTML. Histogram est
+vertical, Line conserve l’ordre final des catégories et Radar est recommandé
+avec 4 à 6 axes (minimum 3, maximum 8). Seuls `minimum-maximum` et `minimum+`
+sont valides. Un texte tel que `ranges=Gravel;Route` est rejeté ; omettez
+`ranges` pour compter les valeurs textuelles du champ.

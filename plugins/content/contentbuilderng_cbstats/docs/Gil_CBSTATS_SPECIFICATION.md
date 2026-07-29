@@ -46,9 +46,16 @@ The plugin already accepts:
 output=total
 output=form_name
 output=table
+output=json
+output=pie
+output=bar
+output=histogram
+output=line
+output=radar
 output=sum
 output=min
 output=max
+output=avg
 ```
 
 These outputs are existing public contracts and must not regress.
@@ -125,6 +132,9 @@ output=table
 output=json
 output=pie
 output=bar
+output=histogram
+output=line
+output=radar
 ```
 
 The HTML table uses intrinsic content width within a horizontally scrollable
@@ -161,12 +171,12 @@ items. `sort=title` uses final display titles. Semicolons delimit mappings and t
 first equals sign separates the original and display title. Empty sides are invalid.
 
 The complete order is filtering, grouping, signed `add`, `titles`, sorting and
-output. `add` and `titles` apply only to `table`, `json`, `pie` and `bar`; they do
-not change scalar outputs. The URL/API JSON output reuses the same parsers and
-normalization path.
+output. `add` and `titles` apply to `table`, `json`, `pie`, `bar`, `histogram`,
+`line` and `radar`; they do not change scalar outputs. URL/API list outputs
+reuse the same parsers and normalization path.
 
 The distinct `title=` parameter customizes the localized total label in Table,
-Pie and Bar. An empty value uses the translated default; a missing final colon is
+Pie, Bar, Histogram, Line and Radar. An empty value uses the translated default; a missing final colon is
 added with localized punctuation. `background=` optionally applies a validated
 background to those HTML containers. Unicode is preserved and HTML is escaped.
 
@@ -286,7 +296,24 @@ Bar must consume the same normalized field statistics engine.
 - Same tooltip semantics as Pie.
 - Display numeric values on bars only when readable and without clutter.
 
-## 10. Front-end architecture
+## 10. Histogram, Line, Radar and Average outputs
+
+The RC97 visual outputs consume the same normalized field-statistics array:
+
+```text
+{CBStats id=25 field=Age output=histogram ranges="18-29;30-39;40-49;50+"}
+{CBStats id=25 field=RegistrationDate output=line sort=title dir=asc limit=30}
+{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50+"}
+{CBStats id=25 field=Age output=avg}
+```
+
+Histogram is vertical and preserves declared numeric range order. Line plots
+the final sorted categories without inventing missing values. Radar requires
+3 to 8 axes and recommends 4 to 6. `avg` computes the arithmetic mean of
+retained individual numeric values, ignoring empty and non-numeric values;
+`ranges=` does not change that scalar calculation.
+
+## 11. Front-end architecture
 
 Target flow:
 
@@ -306,7 +333,7 @@ The browser layer is a renderer, not a data source.
 
 No AJAX is required merely to reconstruct statistics already available server-side.
 
-## 11. Asset loading
+## 12. Asset loading
 
 Assets must be loaded once per page, including when multiple charts exist.
 
@@ -325,7 +352,7 @@ All CBStats CSS classes must start with:
 cbstats-
 ```
 
-## 12. Multiple charts per page
+## 13. Multiple charts per page
 
 Requirements:
 
@@ -335,7 +362,7 @@ Requirements:
 - each chart receives only its own dataset/configuration;
 - no collision between two Pie charts, two Bar charts, or mixed chart types.
 
-## 13. No-data behavior
+## 14. No-data behavior
 
 When no data is available:
 
@@ -344,14 +371,14 @@ When no data is available:
 - do not throw a JavaScript error;
 - do not emit malformed JSON.
 
-## 14. Escaping and encoding
+## 15. Escaping and encoding
 
 - Escape field labels and values for HTML context.
 - Use proper JSON encoding for JSON and JavaScript payloads.
 - Never interpolate unescaped values into JavaScript source.
 - Preserve UTF-8 characters.
 
-## 15. Localization
+## 16. Localization
 
 Public labels, errors, empty-state messages, totals and help text must use language keys.
 
@@ -363,17 +390,15 @@ At minimum, preserve/update the language families already maintained by the plug
 
 Codex must inspect the actual repository language files and naming conventions before adding keys.
 
-## 16. Debug mode
+## 17. Debug mode
 
-`debug=1` must recognize newly supported outputs as they are implemented:
-
-- JSON in Pass 1;
-- Pie in Pass 2;
-- Bar in Pass 3.
+`debug=1` must recognize every supported output, including `avg`, `histogram`,
+`line` and `radar`. Diagnostics must identify invalid output names, fields,
+ranges, limits and hide combinations without exposing protected data.
 
 Debug output must remain safe and must not expose secrets or unnecessary internals.
 
-## 17. Documentation contract
+## 18. Documentation contract
 
 Every public syntax change requires updates to:
 
@@ -385,7 +410,7 @@ Every public syntax change requires updates to:
 
 Before creating documentation files in the real repository, find and update existing canonical files.
 
-## 18. Implementation phases
+## 19. Implementation phases
 
 ### Pass 1 — normalized engine + JSON
 
@@ -401,9 +426,11 @@ After Pie is validated, implement `output=bar` using the same engine.
 
 ### Pass 4 — documentation/API consolidation
 
-Ensure all descriptions, syntax references, examples and API documentation reflect the implemented state.
+Ensure all descriptions, syntax references, examples and API documentation
+reflect the implemented RC97 state, including `avg`, `histogram`, `line`,
+`radar`, numeric `ranges`, `limit` and `hide`.
 
-## 19. Definition of done
+## 20. Definition of done
 
 A pass is complete only when:
 
@@ -414,19 +441,27 @@ A pass is complete only when:
 - language keys are updated as needed;
 - documentation for the implemented public behavior is updated;
 - the final Codex report lists changed files and test results.
-## Final result options: `limit` and `total="hide"`
+## Final result options: `limit` and `hide`
 
 - `limit` is an optional strictly positive integer.
 - It slices normalized field statistics only after `add`, `titles`, `sort` and
   `dir` have produced the final ordered list.
-- It applies to list outputs: Table, JSON, Pie and Bar.
+- It applies to list outputs: Table, JSON, Pie, Bar, Histogram, Line and Radar.
 - With `idsum`, views are merged before sorting and limiting.
 - After limiting, the visible total is recalculated from the retained values.
   Pie and Bar percentages use that limited total as their denominator.
 - No synthetic `Other` category is created.
-- `total="hide"` suppresses the Table footer or chart total box without
-  rendering an empty container.
-- `total="hide"` has no effect on JSON and is intentionally non-applicable to
-  `output="total"`, which continues to return the global record total.
-- Any explicit `total` value other than `hide`, and any missing or invalid
-  `limit` value, is rejected through the normal CBStats invalid-request path.
+- `hide` accepts only `total`, `values` and `graph`, combined with `|`.
+- `hide="total"` suppresses the displayed total without changing its internal
+  calculation.
+- `hide="values"` suppresses only the complementary textual labels-and-values
+  list below the graph. It does not change labels, values, axes or tooltips
+  drawn inside the graph.
+- `hide="graph"` suppresses the chart drawing while retaining lightweight
+  textual values.
+- These graph options apply to Pie, Bar, Histogram, Line and Radar. A
+  non-applicable option produces a soft diagnostic; hiding all result elements
+  is rejected instead of rendering an empty container.
+- The former `total=hide` syntax is rejected and is not treated as an alias.
+- Any invalid `hide` or `limit` value is rejected through the normal CBStats
+  invalid-request path.

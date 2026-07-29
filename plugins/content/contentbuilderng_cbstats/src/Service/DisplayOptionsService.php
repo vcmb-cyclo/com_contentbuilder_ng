@@ -7,7 +7,6 @@ namespace CB\Plugin\Content\ContentbuilderngStats\Service;
 final class DisplayOptionsService
 {
     public const INVALID_LIMIT = 1;
-    public const INVALID_TOTAL = 2;
 
     /** @param array<string, string> $attributes */
     public static function parseLimit(array $attributes): ?int
@@ -29,20 +28,6 @@ final class DisplayOptionsService
         }
 
         return $limit;
-    }
-
-    /** @param array<string, string> $attributes */
-    public static function hidesTotal(array $attributes): bool
-    {
-        if (!array_key_exists('total', $attributes)) {
-            return false;
-        }
-
-        if (TagSyntaxService::normalizeKeyword((string) $attributes['total']) !== 'hide') {
-            throw new \InvalidArgumentException('Invalid CBStats total option.', self::INVALID_TOTAL);
-        }
-
-        return true;
     }
 
     /**

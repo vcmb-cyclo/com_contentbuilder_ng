@@ -80,6 +80,9 @@ final class CbStatsManualExportServiceTest extends TestCase
         yield ['pie'];
         yield ['bar'];
         yield ['table'];
+        yield ['histogram'];
+        yield ['line'];
+        yield ['radar'];
     }
 
     public function testPreservesFinalOrderValuesDecimalsUnicodeAndVisualOptions(): void
@@ -122,6 +125,21 @@ final class CbStatsManualExportServiceTest extends TestCase
         foreach ([' id=', ' field=', ' filter[', ' add=', ' titles=', ' sort=', ' dir=', ' limit=', ' export='] as $forbidden) {
             self::assertStringNotContainsString($forbidden, $syntax);
         }
+    }
+
+    public function testFrozenSyntaxPreservesCanonicalHideOption(): void
+    {
+        $syntax = ManualExportService::buildSyntax(
+            [['label' => 'Final', 'value' => 9]],
+            'pie',
+            '',
+            '',
+            '',
+            'total|values'
+        );
+
+        self::assertStringContainsString(' hide="total|values"', $syntax);
+        self::assertStringNotContainsString('total=hide', $syntax);
     }
 
     #[DataProvider('finalTitleOutputProvider')]
