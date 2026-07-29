@@ -15,6 +15,7 @@
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Application\CMSApplication;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
@@ -297,6 +298,27 @@ if ($themeJs !== '') {
             'limit' => $listLimit,
             'start' => $listStart,
         ];
+        $debugFields = [];
+        $debugValidationsEnabled = (bool) ComponentHelper::getParams('com_contentbuilderng')->get('enable_validations', 1);
+        $debugFormId = (int) $input->getInt('id', 0);
+        if ($debugFormId > 0) {
+            $debugDb = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getDatabase();
+            $debugFieldsQuery = $debugDb->getQuery(true)
+                ->select([
+                    $debugDb->quoteName('label'),
+                    $debugDb->quoteName('reference_id'),
+                    $debugDb->quoteName('type'),
+                    $debugDb->quoteName('editable'),
+                    $debugDb->quoteName('published'),
+                    $debugDb->quoteName('validations'),
+                    $debugDb->quoteName('custom_validation_script'),
+                ])
+                ->from($debugDb->quoteName('#__contentbuilderng_elements'))
+                ->where($debugDb->quoteName('form_id') . ' = ' . $debugFormId)
+                ->order($debugDb->quoteName('ordering'));
+            $debugDb->setQuery($debugFieldsQuery);
+            $debugFields = $debugDb->loadAssocList() ?: [];
+        }
         if (!empty($this->debug_enable_logs)) {
             Logger::info('Frontend details debug request', [
                 'formId' => (int) $input->getInt('id', 0),
@@ -314,6 +336,8 @@ if ($themeJs !== '') {
             'showLogs' => !empty($this->debug_enable_logs) && !empty($this->debug_show_request_logs),
             'logs' => Logger::getRequestEntries(),
             'warnings' => $app->getSession()->get('com_contentbuilderng.debug.template_warnings', []),
+            'fields' => $debugFields,
+            'validationsEnabled' => $debugValidationsEnabled,
         ]);
         $app->getSession()->remove('com_contentbuilderng.debug.template_warnings');
         ?>

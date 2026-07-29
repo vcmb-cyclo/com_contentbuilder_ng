@@ -490,11 +490,6 @@ class HtmlView extends BaseHtmlView
             'contentbuilderng_themes.dark' => 'COM_CONTENTBUILDERNG_EXTENSION_PURPOSE_THEME_DARK',
             'contentbuilderng_themes.thoth' => 'COM_CONTENTBUILDERNG_EXTENSION_PURPOSE_THEME_THOTH',
             'contentbuilderng_themes.khepri' => 'COM_CONTENTBUILDERNG_EXTENSION_PURPOSE_THEME_KHEPRI',
-            'contentbuilderng_validation.date_is_valid' => 'COM_CONTENTBUILDERNG_EXTENSION_PURPOSE_VALIDATION_DATE_IS_VALID',
-            'contentbuilderng_validation.date_not_before' => 'COM_CONTENTBUILDERNG_EXTENSION_PURPOSE_VALIDATION_DATE_NOT_BEFORE',
-            'contentbuilderng_validation.email' => 'COM_CONTENTBUILDERNG_EXTENSION_PURPOSE_VALIDATION_EMAIL',
-            'contentbuilderng_validation.equal' => 'COM_CONTENTBUILDERNG_EXTENSION_PURPOSE_VALIDATION_EQUAL',
-            'contentbuilderng_validation.notempty' => 'COM_CONTENTBUILDERNG_EXTENSION_PURPOSE_VALIDATION_NOTEMPTY',
             'contentbuilderng_verify.passthrough' => 'COM_CONTENTBUILDERNG_EXTENSION_PURPOSE_VERIFY_PASSTHROUGH',
             'contentbuilderng_verify.paypal' => 'COM_CONTENTBUILDERNG_EXTENSION_PURPOSE_VERIFY_PAYPAL',
             'system.contentbuilderng_system' => 'COM_CONTENTBUILDERNG_EXTENSION_PURPOSE_SYSTEM',
@@ -520,13 +515,7 @@ class HtmlView extends BaseHtmlView
             'system' => 'COM_CONTENTBUILDERNG_EXTENSION_USAGE_SYSTEM',
         ];
 
-        $pluginUsages = [
-            'contentbuilderng_validation.date_is_valid' => 'COM_CONTENTBUILDERNG_EXTENSION_USAGE_VALIDATION_DATE_IS_VALID',
-            'contentbuilderng_validation.date_not_before' => 'COM_CONTENTBUILDERNG_EXTENSION_USAGE_VALIDATION_DATE_NOT_BEFORE',
-            'contentbuilderng_validation.email' => 'COM_CONTENTBUILDERNG_EXTENSION_USAGE_VALIDATION_EMAIL',
-            'contentbuilderng_validation.equal' => 'COM_CONTENTBUILDERNG_EXTENSION_USAGE_VALIDATION_EQUAL',
-            'contentbuilderng_validation.notempty' => 'COM_CONTENTBUILDERNG_EXTENSION_USAGE_VALIDATION_NOTEMPTY',
-        ];
+        $pluginUsages = [];
 
         return [
             'category' => $categories[$group] ?? 'COM_CONTENTBUILDERNG_EXTENSION_CATEGORY_OTHER',

@@ -468,10 +468,6 @@ class FormController extends BaseFormController
         $formId = $this->input->post->getInt('id', $this->input->getInt('id', 0));
 
         try {
-            if ($formId <= 0) {
-                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_INVALID'));
-            }
-
             $identity = $this->getApp()->getIdentity();
             $formAsset = 'com_contentbuilderng.form.' . $formId;
             if (
@@ -482,40 +478,9 @@ class FormController extends BaseFormController
                 throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
             }
 
-            $db = $this->getDatabase();
-            $query = $db->getQuery(true)
-                ->select($db->quoteName(['type', 'reference_id', 'theme_plugin']))
-                ->from($db->quoteName('#__contentbuilderng_forms'))
-                ->where($db->quoteName('id') . ' = ' . $formId);
-            $db->setQuery($query, 0, 1);
-            $formRow = $db->loadAssoc();
-
-            if (!is_array($formRow)) {
-                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_INVALID'));
-            }
-
-            $sourceForm = FormSourceFactory::getForm((string) $formRow['type'], (string) $formRow['reference_id']);
-            if (!is_object($sourceForm)) {
-                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'));
-            }
-
             $component = $this->getApp()->bootComponent('com_contentbuilderng');
             $formSupportService = $component->getContainer()->get(FormSupportService::class);
-            $themePlugin = trim((string) ($formRow['theme_plugin'] ?? '')) ?: 'thoth';
-            $editableTemplate = (string) $formSupportService->createEditableSample($formId, $sourceForm, $themePlugin);
-
-            if (trim($editableTemplate) === '') {
-                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_EMPTY'));
-            }
-
-            $update = $db->getQuery(true)
-                ->update($db->quoteName('#__contentbuilderng_forms'))
-                ->set($db->quoteName('editable_template') . ' = ' . $db->quote($editableTemplate))
-                ->set($db->quoteName('modified') . ' = ' . $db->quote((new Date())->toSql()))
-                ->set($db->quoteName('modified_by') . ' = ' . (int) $identity->id)
-                ->where($db->quoteName('id') . ' = ' . $formId);
-            $db->setQuery($update);
-            $db->execute();
+            $formSupportService->regenerateEditableTemplate($formId, (int) $identity->id);
 
             $message = Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIRED');
             if ($this->isAjaxCall()) {

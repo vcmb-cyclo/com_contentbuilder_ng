@@ -27,6 +27,7 @@ use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngCompon
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
+use CB\Component\Contentbuilderng\Administrator\Service\FieldValidationService;
 use CB\Component\Contentbuilderng\Administrator\Service\PathService;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
@@ -152,18 +153,9 @@ class ElementoptionsModel extends BaseDatabaseModel
         return is_object($this->_data) ? $this->_data : null;
     }
 
-    function getValidationPlugins()
+    function getValidationRules(): array
     {
-        $db = $this->getDatabase();
-        $query = $db->getQuery(true)
-            ->select($db->quoteName('element'))
-            ->from($db->quoteName('#__extensions'))
-            ->where($db->quoteName('folder') . ' = ' . $db->quote('contentbuilderng_validation'))
-            ->where($db->quoteName('enabled') . ' = 1');
-        $db->setQuery($query);
-
-        $res = $db->loadColumn();
-        return $res;
+        return $this->getComponent()->getContainer()->get(FieldValidationService::class)->getAvailableValidationNames();
     }
 
     function getGroupDefinition()

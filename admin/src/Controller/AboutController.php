@@ -19,7 +19,6 @@ use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleInstallerTempAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use CB\Component\Contentbuilderng\Administrator\Model\StorageModel;
-use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Administrator\Service\ConfigExportService;
 use CB\Component\Contentbuilderng\Administrator\Service\ConfigImportService;
 use CB\Component\Contentbuilderng\Administrator\Service\DatatableService;
@@ -401,43 +400,8 @@ final class AboutController extends BaseController
         $formId = $this->input->post->getInt('form_id', 0);
 
         try {
-            if ($formId <= 0) {
-                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_INVALID'));
-            }
-
-            $db = $this->getComponent()->getContainer()->get(DatabaseInterface::class);
-            $query = $db->getQuery(true)
-                ->select($db->quoteName(['type', 'reference_id', 'theme_plugin']))
-                ->from($db->quoteName('#__contentbuilderng_forms'))
-                ->where($db->quoteName('id') . ' = ' . $formId);
-            $db->setQuery($query, 0, 1);
-            $formRow = $db->loadAssoc();
-
-            if (!is_array($formRow)) {
-                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_INVALID'));
-            }
-
-            $sourceForm = FormSourceFactory::getForm((string) $formRow['type'], (string) $formRow['reference_id']);
-            if (!is_object($sourceForm)) {
-                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'));
-            }
-
             $formSupportService = $this->getComponent()->getContainer()->get(FormSupportService::class);
-            $themePlugin = trim((string) ($formRow['theme_plugin'] ?? '')) ?: 'thoth';
-            $editableTemplate = (string) $formSupportService->createEditableSample($formId, $sourceForm, $themePlugin);
-
-            if (trim($editableTemplate) === '') {
-                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_EMPTY'));
-            }
-
-            $update = $db->getQuery(true)
-                ->update($db->quoteName('#__contentbuilderng_forms'))
-                ->set($db->quoteName('editable_template') . ' = ' . $db->quote($editableTemplate))
-                ->set($db->quoteName('modified') . ' = ' . $db->quote((new Date())->toSql()))
-                ->set($db->quoteName('modified_by') . ' = ' . $this->getCurrentUserId())
-                ->where($db->quoteName('id') . ' = ' . $formId);
-            $db->setQuery($update);
-            $db->execute();
+            $formSupportService->regenerateEditableTemplate($formId, $this->getCurrentUserId());
 
             $report = DatabaseAuditHelper::run();
             $app->setUserState('com_contentbuilderng.about.audit', $report);

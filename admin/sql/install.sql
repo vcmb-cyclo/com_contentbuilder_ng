@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_articles`
 --   linkable                 1 = value is rendered as a link to the details view.
 --   api_allowed              1 = field is exposed via the CB REST API.
 --   editable                 1 = field is editable in the inline edit view.
---   validations              JSON array of active validation plugin names.
+--   validations              Comma-separated built-in or external validation names.
 --   published                1 = active; 0 = hidden everywhere.
 --   order_type               Sort strategy for this field (e.g. "natural", "numeric").
 --   ordering                 Display position within the view (ascending).

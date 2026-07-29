@@ -406,6 +406,9 @@ class com_contentbuilderngInstallerScript
                 // Refresh plugins on update (keeps manifest_cache aligned)
                 $this->ensurePluginsInstalled($source, $type === 'update');
                 $this->activatePlugins();
+
+                // The five built-in field validations now live in the component service.
+                $this->removeCoreValidationPlugins();
             }
 
             if ($type === 'update') {
@@ -1358,6 +1361,11 @@ class com_contentbuilderngInstallerScript
     private function removeDeprecatedThemePlugins(): void
     {
         $this->pluginInstallerService->removeDeprecatedThemePlugins();
+    }
+
+    private function removeCoreValidationPlugins(): void
+    {
+        $this->pluginInstallerService->removeCoreValidationPlugins();
     }
 
     private function normalizeFormThemePlugins(): void

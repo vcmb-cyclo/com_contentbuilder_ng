@@ -18,6 +18,7 @@ use CB\Component\Contentbuilderng\Administrator\Service\ApiPermissionRequirement
 use CB\Component\Contentbuilderng\Administrator\Service\ApiFieldPermissionService;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilderng\Site\Helper\DuplicateKeyViolationHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
 use CB\Component\Contentbuilderng\Site\Model\DetailsModel;
 use CB\Component\Contentbuilderng\Site\Model\EditModel;
@@ -42,12 +43,6 @@ class ApiController extends BaseController
 {
     private SiteApplication $siteApp;
     private bool $frontend;
-
-    private static function isDuplicateKeyViolation(\Throwable $exception): bool
-    {
-        return str_contains(strtolower($exception->getMessage()), 'duplicate entry')
-            || str_contains(strtolower($exception->getMessage()), '1062');
-    }
 
     private function getDatabase(): DatabaseInterface
     {
@@ -564,7 +559,7 @@ class ApiController extends BaseController
         } catch (\Throwable $e) {
             $db->transactionRollback();
 
-            if (self::isDuplicateKeyViolation($e)) {
+            if (DuplicateKeyViolationHelper::isDuplicateKeyViolation($e)) {
                 return ['code' => 1, 'msg' => Text::_('COM_CONTENTBUILDERNG_RATED_ALREADY')];
             }
 

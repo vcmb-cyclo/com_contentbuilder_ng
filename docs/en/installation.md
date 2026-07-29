@@ -50,8 +50,9 @@ production dependencies.
   `#__contentbuilderng_list_records`, `#__contentbuilderng_list_states`,
   `#__contentbuilderng_resource_access`, `#__contentbuilderng_verifications`,
   `#__contentbuilderng_rating_cache`.
-- The bundled plugins (themes, validations, list actions, submission, verification,
-  content plugins, and a system plugin). See
+- The bundled plugins (themes, list actions, submission, verification, content
+  plugins, and a system plugin). Standard field validations are built into the
+  component. See
   [Administration](administration.md#plugins) for the detailed list.
 
 ## Post-installation checks

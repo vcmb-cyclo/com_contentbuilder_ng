@@ -4,8 +4,12 @@ namespace CB\Component\Contentbuilderng\Administrator\Service;
 
 \defined('_JEXEC') or die;
 
+use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
+use Joomla\CMS\Date\Date;
+use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
+use Joomla\Database\ParameterType;
 use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
 
@@ -51,6 +55,61 @@ class FormSupportService
     public function createEditableSample($formId, $form, $plugin)
     {
         return $this->templateSampleService->createEditableSample($formId, $form, $plugin);
+    }
+
+    /**
+     * Regenerates and saves the editable-template sample for a view, using its
+     * currently configured theme plugin. Shared by the admin About audit repair
+     * action and the per-form audit tab repair action, which only differ in how
+     * they read the form id and enforce their own ACL before calling this.
+     *
+     * @throws \RuntimeException when the form cannot be resolved or the theme
+     *                            produces an empty template.
+     */
+    public function regenerateEditableTemplate(int $formId, int $modifiedByUserId): void
+    {
+        if ($formId <= 0) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_INVALID'));
+        }
+
+        $db = $this->db;
+        $query = $db->getQuery(true)
+            ->select($db->quoteName(['type', 'reference_id', 'theme_plugin']))
+            ->from($db->quoteName('#__contentbuilderng_forms'))
+            ->where($db->quoteName('id') . ' = :formId')
+            ->bind(':formId', $formId, ParameterType::INTEGER);
+        $db->setQuery($query, 0, 1);
+        $formRow = $db->loadAssoc();
+
+        if (!is_array($formRow)) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_INVALID'));
+        }
+
+        $sourceForm = FormSourceFactory::getForm((string) $formRow['type'], (string) $formRow['reference_id']);
+        if (!is_object($sourceForm)) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'));
+        }
+
+        $themePlugin = trim((string) ($formRow['theme_plugin'] ?? '')) ?: 'thoth';
+        $editableTemplate = (string) $this->createEditableSample($formId, $sourceForm, $themePlugin);
+
+        if (trim($editableTemplate) === '') {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_EMPTY'));
+        }
+
+        $modifiedValue = (new Date())->toSql();
+        $update = $db->getQuery(true)
+            ->update($db->quoteName('#__contentbuilderng_forms'))
+            ->set($db->quoteName('editable_template') . ' = :editableTemplate')
+            ->set($db->quoteName('modified') . ' = :modified')
+            ->set($db->quoteName('modified_by') . ' = :modifiedBy')
+            ->where($db->quoteName('id') . ' = :formId2')
+            ->bind(':editableTemplate', $editableTemplate)
+            ->bind(':modified', $modifiedValue)
+            ->bind(':modifiedBy', $modifiedByUserId, ParameterType::INTEGER)
+            ->bind(':formId2', $formId, ParameterType::INTEGER);
+        $db->setQuery($update);
+        $db->execute();
     }
 
     public function synchElements($formId, $form): array

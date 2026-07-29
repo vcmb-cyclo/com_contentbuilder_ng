@@ -20,6 +20,7 @@ $filters = is_array($displayData['filters'] ?? null) ? $displayData['filters'] :
 $logs = is_array($displayData['logs'] ?? null) ? $displayData['logs'] : [];
 $warnings = is_array($displayData['warnings'] ?? null) ? $displayData['warnings'] : [];
 $fields = is_array($displayData['fields'] ?? null) ? $displayData['fields'] : [];
+$validationsEnabled = !array_key_exists('validationsEnabled', $displayData) || !empty($displayData['validationsEnabled']);
 $formId = (int) ($displayData['formId'] ?? 0);
 $cbRecordId = (int) ($displayData['cbRecordId'] ?? 0);
 $showPermissions = !empty($displayData['showPermissions']);
@@ -139,6 +140,7 @@ $wa->useStyle('com_contentbuilderng.debug-panel');
                         <th id="<?php echo $debugIdBase; ?>-fields-col-label"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_LABEL'); ?></th>
                         <th id="<?php echo $debugIdBase; ?>-fields-col-reference"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_REFERENCE'); ?></th>
                         <th id="<?php echo $debugIdBase; ?>-fields-col-type"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_TYPE'); ?></th>
+                        <th id="<?php echo $debugIdBase; ?>-fields-col-validation" class="text-center"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_VALIDATION'); ?></th>
                         <th id="<?php echo $debugIdBase; ?>-fields-col-editable" class="text-center"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_EDITABLE'); ?></th>
                         <th id="<?php echo $debugIdBase; ?>-fields-col-published" class="text-center"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_PUBLISHED'); ?></th>
                     </tr>
@@ -146,12 +148,46 @@ $wa->useStyle('com_contentbuilderng.debug-panel');
                 <tbody>
                     <?php foreach ($fields as $i => $field) : ?>
                         <?php $rowEditable = !empty($field['editable']); $rowPublished = !empty($field['published']); ?>
+                        <?php
+                        $validationNames = array_values(array_unique(array_filter(array_map(
+                            'trim',
+                            explode(',', (string) ($field['validations'] ?? ''))
+                        ))));
+                        $validationDetails = $validationNames;
+                        if (trim((string) ($field['custom_validation_script'] ?? '')) !== '') {
+                            $validationDetails[] = Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_CUSTOM_VALIDATION');
+                        }
+                        $hasValidation = $validationDetails !== [];
+                        $validationTooltip = $hasValidation
+                            ? Text::sprintf(
+                                $validationsEnabled
+                                    ? 'COM_CONTENTBUILDERNG_DEBUG_FIELD_VALIDATION_TIP'
+                                    : 'COM_CONTENTBUILDERNG_DEBUG_FIELD_VALIDATION_TIP_DISABLED',
+                                implode(', ', $validationDetails)
+                            )
+                            : Text::_('COM_CONTENTBUILDERNG_DEBUG_FIELD_VALIDATION_NONE');
+                        ?>
                         <?php $fieldRowId = $debugIdBase . '-field-' . ((int) $i + 1); ?>
                         <tr id="<?php echo $fieldRowId; ?>" class="<?php echo (!$rowEditable || !$rowPublished) ? 'table-warning' : ''; ?>">
                             <td class="text-end text-muted pe-2"><?php echo $i + 1; ?></td>
                             <td><?php echo htmlspecialchars((string) ($field['label'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
                             <td><code><?php echo htmlspecialchars((string) ($field['reference_id'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></code></td>
                             <td><code><?php echo htmlspecialchars((string) ($field['type'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></code></td>
+                            <td class="text-center">
+                                <span
+                                    class="badge <?php echo $hasValidation ? 'text-bg-success' : 'text-bg-secondary'; ?>"
+                                    title="<?php echo htmlspecialchars($validationTooltip, ENT_QUOTES, 'UTF-8'); ?>"
+                                    aria-label="<?php echo htmlspecialchars($validationTooltip, ENT_QUOTES, 'UTF-8'); ?>"
+                                    tabindex="0"
+                                >
+                                    <?php if ($hasValidation) : ?>
+                                        <span class="fa-solid fa-check" aria-hidden="true"></span>
+                                    <?php else : ?>
+                                        <span aria-hidden="true">—</span>
+                                    <?php endif; ?>
+                                    <span class="visually-hidden"><?php echo htmlspecialchars($validationTooltip, ENT_QUOTES, 'UTF-8'); ?></span>
+                                </span>
+                            </td>
                             <td class="text-center">
                                 <input id="<?php echo $fieldRowId; ?>-editable" class="form-check-input" type="checkbox" <?php echo $rowEditable ? 'checked' : ''; ?> disabled aria-label="<?php echo htmlspecialchars((string) ($field['label'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" />
                             </td>

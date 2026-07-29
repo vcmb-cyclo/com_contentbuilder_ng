@@ -37,12 +37,6 @@ final class PluginNamespaceMigrationTest extends TestCase
             'themes/thoth' => ['contentbuilderng_themes', 'thoth', 'Thoth', 'CB\Plugin\ContentbuilderngThemes\Thoth\Extension'],
             'themes/khepri'  => ['contentbuilderng_themes', 'khepri',  'Khepri',  'CB\Plugin\ContentbuilderngThemes\Khepri\Extension'],
 
-            'validation/email'           => ['contentbuilderng_validation', 'email',           'Email',         'CB\Plugin\ContentbuilderngValidation\Email\Extension'],
-            'validation/notempty'        => ['contentbuilderng_validation', 'notempty',        'Notempty',      'CB\Plugin\ContentbuilderngValidation\Notempty\Extension'],
-            'validation/equal'           => ['contentbuilderng_validation', 'equal',           'Equal',         'CB\Plugin\ContentbuilderngValidation\Equal\Extension'],
-            'validation/date_is_valid'   => ['contentbuilderng_validation', 'date_is_valid',   'DateIsValid',   'CB\Plugin\ContentbuilderngValidation\DateIsValid\Extension'],
-            'validation/date_not_before' => ['contentbuilderng_validation', 'date_not_before', 'DateNotBefore', 'CB\Plugin\ContentbuilderngValidation\DateNotBefore\Extension'],
-
             'listaction/trash'   => ['contentbuilderng_listaction', 'trash',   'Trash',   'CB\Plugin\ContentbuilderngListaction\Trash\Extension'],
             'listaction/untrash' => ['contentbuilderng_listaction', 'untrash', 'Untrash', 'CB\Plugin\ContentbuilderngListaction\Untrash\Extension'],
 

@@ -88,16 +88,22 @@ final class SchemaService
         $db = $this->db();
 
         $definitions = [
-            ['table' => '#__contentbuilderng_records', 'index' => 'idx_type_reference_record', 'columns' => ['type', 'reference_id', 'record_id']],
-            ['table' => '#__contentbuilderng_elements', 'index' => 'idx_form_reference', 'columns' => ['form_id', 'reference_id']],
-            ['table' => '#__contentbuilderng_list_records', 'index' => 'idx_form_record', 'columns' => ['form_id', 'record_id']],
-            ['table' => '#__contentbuilderng_rating_cache', 'index' => 'idx_record_form_ip', 'columns' => ['record_id', 'form_id', 'ip']],
-            ['table' => '#__contentbuilderng_registered_users', 'index' => 'idx_user_record_form', 'columns' => ['user_id', 'record_id', 'form_id']],
+            ['table' => '#__contentbuilderng_records', 'index' => 'idx_type_reference_record', 'columns' => ['type', 'reference_id', 'record_id'], 'order' => 'id'],
+            ['table' => '#__contentbuilderng_elements', 'index' => 'idx_form_reference', 'columns' => ['form_id', 'reference_id'], 'order' => 'id'],
+            ['table' => '#__contentbuilderng_list_records', 'index' => 'idx_form_record', 'columns' => ['form_id', 'record_id'], 'order' => 'id'],
+            // No `id` column on this table: `date` is the only column available to break ties deterministically.
+            ['table' => '#__contentbuilderng_rating_cache', 'index' => 'idx_record_form_ip', 'columns' => ['record_id', 'form_id', 'ip'], 'order' => 'date'],
+            ['table' => '#__contentbuilderng_registered_users', 'index' => 'idx_user_record_form', 'columns' => ['user_id', 'record_id', 'form_id'], 'order' => 'id'],
         ];
 
         foreach ($definitions as $definition) {
             try {
-                $this->removeDuplicateRows($db, (string) $definition['table'], (array) $definition['columns']);
+                $this->removeDuplicateRows(
+                    $db,
+                    (string) $definition['table'],
+                    (array) $definition['columns'],
+                    (string) $definition['order']
+                );
                 $this->ensureUniqueIndex($db, (string) $definition['table'], (string) $definition['index'], (array) $definition['columns']);
             } catch (\Throwable $e) {
                 $this->log(
@@ -109,7 +115,13 @@ final class SchemaService
         }
     }
 
-    private function removeDuplicateRows(DatabaseInterface $db, string $tableAlias, array $columns): void
+    /**
+     * Keeps the row with the oldest $orderColumn value in each duplicate group and
+     * removes the others. MySQL's DELETE with ORDER BY + LIMIT is deterministic:
+     * ordering DESC and deleting the first (duplicateCount - 1) rows always leaves
+     * the single smallest value behind.
+     */
+    private function removeDuplicateRows(DatabaseInterface $db, string $tableAlias, array $columns, string $orderColumn): void
     {
         $quotedColumns = array_map([$db, 'quoteName'], $columns);
         $query = $db->getQuery(true)
@@ -139,7 +151,8 @@ final class SchemaService
 
             $delete = $db->getQuery(true)
                 ->delete($db->quoteName($tableAlias))
-                ->where($conditions);
+                ->where($conditions)
+                ->order($db->quoteName($orderColumn) . ' DESC');
             $db->setQuery($delete, 0, $duplicateCount - 1);
             $db->execute();
         }
