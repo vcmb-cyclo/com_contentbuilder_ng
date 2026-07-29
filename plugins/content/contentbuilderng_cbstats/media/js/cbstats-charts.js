@@ -83,6 +83,7 @@
           legend: { display: false },
           cbstatsValueLabels: { showValues },
           tooltip: {
+            enabled: showValues,
             callbacks: {
               label: (context) => showValues ? `${context.label}: ${context.formattedValue}` : context.label,
             },
@@ -91,13 +92,17 @@
         scales: cartesian
           ? {
               x: {
-                ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 },
+                ticks: { autoSkip: false, maxRotation: 45, minRotation: 0, display: showValues },
                 grid: { display: false },
               },
               y: { beginAtZero: true, ticks: { precision: 0, display: showValues } },
             }
           : {
-              r: { beginAtZero: true, ticks: { precision: 0, display: showValues, backdropColor: 'transparent' } },
+              r: {
+                beginAtZero: true,
+                ticks: { precision: 0, display: showValues, backdropColor: 'transparent' },
+                pointLabels: { display: showValues },
+              },
             },
       },
       plugins: [valueLabels],

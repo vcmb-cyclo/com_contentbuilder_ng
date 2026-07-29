@@ -313,9 +313,9 @@ statistics payload used by the content renderers. JSON reuses the common signed
 
 Scalar outputs ignore `sort` and `dir`.
 
-`hide="total"` hides only a displayed total, `hide="values"` hides numeric
-chart labels while retaining category labels, and `hide="graph"` hides the
-drawing while retaining lightweight textual values. Values may be combined
+`hide="total"` hides only a displayed total, `hide="values"` hides category
+labels and numeric values while retaining the chart drawing, and `hide="graph"`
+hides the drawing while retaining lightweight textual labels and values. Values may be combined
 with `|` in any order. Non-applicable options and combinations hiding every
 result element are rejected. The former `total=hide` syntax is rejected.
 
@@ -323,6 +323,7 @@ result element are rejected. The former `total=hide` syntax is rejected.
 {CBStats id=3 field=FieldName output=bar hide="total"}
 {CBStats id=3 field=FieldName output=radar hide="graph|total"}
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=FieldName&output=bar&hide=total
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=FieldName&output=bar&hide=graph%7Ctotal
 ```
 
 Filter values are trimmed. `*` matches any character sequence and `|` separates

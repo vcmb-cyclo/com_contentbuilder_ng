@@ -83,6 +83,7 @@
                         showValues,
                     },
                     tooltip: {
+                        enabled: showValues,
                         titleAlign: 'center',
                         bodyAlign: 'left',
                         displayColors: true,

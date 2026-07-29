@@ -95,6 +95,9 @@
                         },
                     },
                     y: {
+                        ticks: {
+                            display: showValues,
+                        },
                         grid: {
                             display: false,
                         },
@@ -109,6 +112,7 @@
                         showValues,
                     },
                     tooltip: {
+                        enabled: showValues,
                         titleAlign: 'center',
                         bodyAlign: 'left',
                         displayColors: true,

@@ -368,11 +368,16 @@ It applies to `table`, `json`, `pie`, `bar`, `histogram`, `line` and `radar`;
 scalar outputs are unchanged.
 
 `hide` accepts `total`, `values` and `graph`, combined with `|` in any order.
-`total` hides only the rendered total, `values` hides numeric result labels
-while retaining category labels, and `graph` hides the chart drawing while
-retaining the lightweight textual values. Without `hide`, all elements remain
-visible. Hiding all three elements is rejected instead of producing an empty
-block.
+`total` hides only the rendered total, `values` hides category labels and their
+numeric values while retaining the chart drawing, and `graph` hides the chart
+drawing while retaining the lightweight textual labels and values. Without
+`hide`, all elements remain visible. Hiding all three elements is rejected
+instead of producing an empty block.
+
+Common combinations are `hide="total|values"` for the graph only,
+`hide="graph|total"` for textual labels and values only, and
+`hide="graph|values"` for the total only. Order, surrounding spaces and
+duplicates do not change the result.
 
 The chart options apply to `pie`, `bar`, `histogram`, `line` and `radar`.
 `output="table"` accepts only `hide="total"`. `json`, `min`, `max` and `avg`
@@ -400,7 +405,8 @@ count one record several times.
 {CBStats id="25" field="Name" output="table" sort="title" dir="asc" hide="total"}
 {CBStats id="25" field="Email" output="histogram" sort="title" dir="asc" limit="50" hide="total"}
 {CBStats idsum="25+27" field="Town" output="radar" sort="value" dir="desc" limit="10" hide="graph|total"}
-index.php?option=com_contentbuilderng&task=api.display&format=json&action=cbstats&id=25&field=Town&output=bar&hide=total
+{CBStats id="25" field="RegistrationDate" output="line" sort="value" dir="asc" hide="values"}
+index.php?option=com_contentbuilderng&task=api.display&format=json&action=cbstats&id=25&field=Town&output=bar&hide=graph%7Ctotal
 ```
 
 ## Explicit numeric ranges

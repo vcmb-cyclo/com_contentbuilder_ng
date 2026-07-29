@@ -284,8 +284,9 @@ plugin, or a maintained project patch instead.
 
 Use `limit` after an existing sort to retain only the first statistical values.
 Use `hide` with `total`, `values` or `graph`, separated by `|`. `total` hides
-the displayed total, `values` hides numeric results but retains category labels,
-and `graph` hides the drawing while retaining lightweight textual values:
+the displayed total, `values` hides data labels and numeric values while
+retaining the graph, and `graph` hides the drawing while retaining lightweight
+textual labels and values:
 
 ```text
 {CBStats id="25" field="Town" output="table" sort="value" dir="desc" limit="10"}

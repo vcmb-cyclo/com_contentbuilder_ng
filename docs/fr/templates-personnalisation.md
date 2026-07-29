@@ -320,9 +320,9 @@ Une mise à jour peut remplacer ces fichiers.
 
 Utilisez `limit` après un tri existant pour ne conserver que les premières
 valeurs statistiques. Utilisez `hide` avec `total`, `values` ou `graph`, séparés
-par `|`. `total` masque le Total affiché, `values` masque les nombres mais
-conserve les libellés et `graph` masque le dessin tout en conservant des valeurs
-textuelles légères :
+par `|`. `total` masque le Total affiché, `values` masque les libellés des
+données et leurs valeurs numériques tout en conservant le graphique, et
+`graph` masque le dessin tout en conservant des valeurs textuelles légères :
 
 ```text
 {CBStats id="25" field="Ville" output="table" sort="value" dir="desc" limit="10"}

@@ -48,6 +48,10 @@ final class StatsHideOptionsService
             return $options;
         }
 
+        // Joomla normally decodes URL and editor entities before this service,
+        // but normalize them here as well so article and URL callers always
+        // deliver the complete pipe-separated value to the same parser.
+        $value = html_entity_decode(rawurldecode($value), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $value = trim($value);
 
         if ($value === '') {

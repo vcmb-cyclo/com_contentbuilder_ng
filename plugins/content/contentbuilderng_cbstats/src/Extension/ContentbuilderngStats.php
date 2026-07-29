@@ -637,10 +637,11 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $html = '<section class="cbstats-pie cbstats-card"';
 
         if (!$hideOptions['graph']) {
+            $chartItems = $this->prepareChartPayloadItems($items, $hideOptions['values']);
             $this->loadPieAssets();
             $instanceId = 'cbstats-pie-' . ++self::$pieInstance;
             $json = json_encode(
-                ['items' => $items, 'showValues' => !$hideOptions['values']],
+                ['items' => $chartItems, 'showValues' => !$hideOptions['values']],
                 JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
             );
             $encodedPayload = htmlspecialchars($json === false ? '{"items":[]}' : $json, ENT_QUOTES, 'UTF-8');
@@ -696,10 +697,11 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $html = '<section class="cbstats-bar cbstats-card"';
 
         if (!$hideOptions['graph']) {
+            $chartItems = $this->prepareChartPayloadItems($items, $hideOptions['values']);
             $this->loadBarAssets();
             $instanceId = 'cbstats-bar-' . ++self::$barInstance;
             $json = json_encode(
-                ['items' => $items, 'showValues' => !$hideOptions['values']],
+                ['items' => $chartItems, 'showValues' => !$hideOptions['values']],
                 JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
             );
             $encodedPayload = htmlspecialchars($json === false ? '{"items":[]}' : $json, ENT_QUOTES, 'UTF-8');
@@ -770,10 +772,11 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $html = '<section class="cbstats-chart cbstats-chart-' . $output . ' cbstats-card"';
 
         if (!$hideOptions['graph']) {
+            $chartItems = $this->prepareChartPayloadItems($items, $hideOptions['values']);
             $this->loadChartAssets();
             $instanceId = 'cbstats-chart-' . ++self::$chartInstance;
             $json = json_encode(
-                ['type' => $output, 'items' => $items, 'showValues' => !$hideOptions['values']],
+                ['type' => $output, 'items' => $chartItems, 'showValues' => !$hideOptions['values']],
                 JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
             );
             $encodedPayload = htmlspecialchars($json === false ? '{"type":"","items":[]}' : $json, ENT_QUOTES, 'UTF-8');
@@ -820,20 +823,24 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         array $hideOptions
     ): string
     {
-        $html = '<div class="cbstats-pie-legend" role="list">';
+        $html = '';
 
-        foreach ($items as $item) {
-            $html .= '<div class="cbstats-pie-legend-row" role="listitem">'
-                . '<span class="cbstats-pie-swatch" style="--cbstats-color:'
-                . htmlspecialchars($item['color'], ENT_QUOTES, 'UTF-8') . '" aria-hidden="true"></span>'
-                . '<span class="cbstats-pie-label">' . htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') . '</span>'
-                . ($hideOptions['values'] ? '' : '<span class="cbstats-pie-value"><span aria-hidden="true">&mdash; </span>'
+        if (!$hideOptions['values']) {
+            $html .= '<div class="cbstats-pie-legend" role="list">';
+
+            foreach ($items as $item) {
+                $html .= '<div class="cbstats-pie-legend-row" role="listitem">'
+                    . '<span class="cbstats-pie-swatch" style="--cbstats-color:'
+                    . htmlspecialchars($item['color'], ENT_QUOTES, 'UTF-8') . '" aria-hidden="true"></span>'
+                    . '<span class="cbstats-pie-label">' . htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') . '</span>'
+                    . '<span class="cbstats-pie-value"><span aria-hidden="true">&mdash; </span>'
                     . $this->formatNumber($item['value']) . ' ('
-                    . htmlspecialchars($item['percentageLabel'], ENT_QUOTES, 'UTF-8') . '&nbsp;%)</span>')
-                . '</div>';
-        }
+                    . htmlspecialchars($item['percentageLabel'], ENT_QUOTES, 'UTF-8') . '&nbsp;%)</span>'
+                    . '</div>';
+            }
 
-        $html .= '</div>';
+            $html .= '</div>';
+        }
 
         if (!$hideOptions['total']) {
             $html .= '<div class="cbstats-total-box"><span class="cbstats-total-label">'
@@ -857,6 +864,25 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         }
 
         return $html . '</section>';
+    }
+
+    /**
+     * @param list<array<string, mixed>> $items
+     * @return list<array<string, mixed>>
+     */
+    private function prepareChartPayloadItems(array $items, bool $hideValues): array
+    {
+        if (!$hideValues) {
+            return $items;
+        }
+
+        return array_map(
+            static function (array $item): array {
+                $item['label'] = '';
+                return $item;
+            },
+            $items
+        );
     }
 
     private function formatNumber(int|float $value): string

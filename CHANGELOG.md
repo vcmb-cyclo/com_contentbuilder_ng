@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### CBStats 6.1.7-RC96-B04
+
+- Normalized complete pipe-separated `hide=` combinations for article and URL requests.
+- Changed `hide="values"` to hide category/range labels, numeric values, data legends and tooltips while keeping the chart drawing visible.
+- Added regression coverage for shortcode and `%7C` URL parsing plus all chart-only, text-only and total-only combinations.
+
 ### CBStats 6.1.7-RC95-B01
 
 - Added `headers=` mappings for the two column headers of `output=table`.

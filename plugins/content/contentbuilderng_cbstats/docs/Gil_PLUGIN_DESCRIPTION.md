@@ -105,8 +105,9 @@ When updating the real plugin:
 `limit="10"` keeps the first ten values after sorting, then recalculates the
 displayed total and chart percentages from those values. `hide=` accepts
 `total`, `values` and `graph`, combined with `|`: `total` hides the displayed
-total, `values` hides result numbers but keeps labels, and `graph` hides the
-drawing but keeps lightweight textual values. Without `hide=`, everything is
+total, `values` hides data labels and numeric values while keeping the graph
+visible, and `graph` hides the drawing but keeps lightweight textual values.
+Without `hide=`, everything is
 shown. Hiding all three elements produces a message. The former `total=hide`
 syntax is rejected; use `hide="total"`.
 
@@ -115,14 +116,16 @@ syntax is rejected; use `hide="total"`.
 {CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" hide="total"}
 {CBStats id="25" field="Age" output="histogram" ranges="18-29;30-39;40-49;50-59;60+" hide="total|values"}
 {CBStats id="25" field="Age" output="radar" ranges="18-29;30-39;40-49;50-59;60+" hide="graph|total"}
+{CBStats id="25" field="RegistrationDate" output="line" sort="value" dir="asc" hide="values"}
 ```
 
 ### Limite du résultat et affichage du total
 
 `limit="10"` conserve les dix premières valeurs après le tri. `hide=` accepte
 `total`, `values` et `graph`, combinés avec `|`. `total` masque le Total,
-`values` masque les nombres sans masquer les libellés et `graph` masque le
-dessin tout en conservant des valeurs textuelles légères. Sans `hide=`, tout
+`values` masque les libellés des données et les valeurs numériques tout en
+conservant le graphique, et `graph` masque le dessin tout en conservant des
+valeurs textuelles légères. Sans `hide=`, tout
 est affiché. Masquer les trois éléments produit un message. L’ancienne syntaxe
 `total=hide` est refusée ; utilisez `hide="total"`.
 
@@ -130,13 +133,14 @@ est affiché. Masquer les trois éléments produit un message. L’ancienne synt
 {CBStats id="25" field="Ville" output="table" sort="value" dir="desc" limit="10"}
 {CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" hide="total"}
 {CBStats id="25" field="Age" output="radar" hide="graph|total"}
+{CBStats id="25" field="DateInscription" output="line" hide="values"}
 ```
 
 ### Ergebnisbegrenzung und Summenanzeige
 
 `limit="10"` behält die ersten zehn Werte nach der Sortierung. `hide=` akzeptiert
 `total`, `values` und `graph`, mit `|` kombiniert. `total` blendet die Summe
-aus, `values` blendet Ergebniszahlen aus und behält Beschriftungen bei,
-`graph` blendet die Zeichnung aus und behält leichte Textwerte bei. Ohne
+aus, `values` blendet Datenbeschriftungen und Zahlen aus und behält die Grafik
+bei, `graph` blendet die Zeichnung aus und behält leichte Textwerte bei. Ohne
 `hide=` wird alles angezeigt. Alle drei Werte zusammen erzeugen eine Meldung.
 Die frühere Syntax `total=hide` wird abgelehnt; verwenden Sie `hide="total"`.

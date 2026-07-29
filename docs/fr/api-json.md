@@ -321,8 +321,9 @@ traitement commun de `add` signé et de `titles`.
 Les sorties scalaires ignorent `sort` et `dir`.
 
 `hide="total"` masque uniquement le Total affiché, `hide="values"` masque les
-nombres du graphique tout en conservant les libellés et `hide="graph"` masque
-le dessin tout en conservant des valeurs textuelles légères. Ces valeurs peuvent
+libellés des données et leurs valeurs numériques tout en conservant le dessin,
+et `hide="graph"` masque le dessin tout en conservant des libellés et valeurs
+textuels légers. Ces valeurs peuvent
 être combinées avec `|` dans n’importe quel ordre. Les options non applicables
 et les combinaisons masquant tout le résultat sont refusées. L’ancienne syntaxe
 `total=hide` est refusée.
@@ -331,6 +332,7 @@ et les combinaisons masquant tout le résultat sont refusées. L’ancienne synt
 {CBStats id=3 field=NomDuChamp output=bar hide="total"}
 {CBStats id=3 field=NomDuChamp output=radar hide="graph|total"}
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=NomDuChamp&output=bar&hide=total
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=NomDuChamp&output=bar&hide=graph%7Ctotal
 ```
 
 Les valeurs de filtre sont nettoyées de leurs espaces de début et de fin. `*`

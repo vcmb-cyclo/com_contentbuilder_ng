@@ -9,6 +9,7 @@ use CB\Component\Contentbuilderng\Site\Service\StatsHideOptionsService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\DisplayOptionsService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\IdSumService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\PiePresentationService;
+use CB\Plugin\Content\ContentbuilderngStats\Service\TagSyntaxService;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -154,6 +155,35 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
         yield [' graph | total ', ['total' => true, 'values' => false, 'graph' => true]];
         yield ['total|total|values', ['total' => true, 'values' => true, 'graph' => false]];
         yield ['total|values|graph', ['total' => true, 'values' => true, 'graph' => true]];
+        yield ['graph|total', ['total' => true, 'values' => false, 'graph' => true]];
+        yield ['total|graph', ['total' => true, 'values' => false, 'graph' => true]];
+        yield [' graph | total ', ['total' => true, 'values' => false, 'graph' => true]];
+        yield ['graph|graph|total', ['total' => true, 'values' => false, 'graph' => true]];
+        yield ['values|total', ['total' => true, 'values' => true, 'graph' => false]];
+        yield ['graph|values', ['total' => false, 'values' => true, 'graph' => true]];
+        yield ['values|graph', ['total' => false, 'values' => true, 'graph' => true]];
+        yield ['graph|values|total', ['total' => true, 'values' => true, 'graph' => true]];
+    }
+
+    public function testQuotedShortcodePreservesTheCompletePipeSeparatedHideValue(): void
+    {
+        $tag = '{CBStats id=25 field=age output=histogram hide="graph|total"}';
+        self::assertSame(1, preg_match(TagSyntaxService::TAG_PATTERN, $tag, $matches));
+
+        $attributes = TagSyntaxService::parseAttributes((string) ($matches[1] ?? ''));
+        self::assertSame('graph|total', $attributes['hide']);
+        self::assertSame(
+            ['total' => true, 'values' => false, 'graph' => true],
+            StatsHideOptionsService::fromAttributes($attributes)
+        );
+    }
+
+    public function testEncodedUrlPipeUsesTheSameNormalizedParserResult(): void
+    {
+        self::assertSame(
+            StatsHideOptionsService::parse('graph|total'),
+            StatsHideOptionsService::parse('graph%7Ctotal')
+        );
     }
 
     #[DataProvider('invalidHideProvider')]
@@ -284,7 +314,9 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
         self::assertStringContainsString("if (!\$hideOptions['total']) {\n            \$html .= '<tfoot>", $source);
         self::assertStringContainsString("if (!\$hideOptions['total']) {\n            \$html .= '<div class=\"cbstats-total-box\">", $source);
         self::assertStringContainsString("if (!\$hideOptions['graph']) {", $source);
-        self::assertStringContainsString("\$hideOptions['values'] ? ''", $source);
+        self::assertStringContainsString("if (!\$hideOptions['values']) {", $source);
+        self::assertStringContainsString("\$item['label'] = '';", $source);
+        self::assertStringContainsString('prepareChartPayloadItems($items, $hideOptions[\'values\'])', $source);
         self::assertStringContainsString('StatsHideOptionsService::fromAttributes($attributes)', $source);
         self::assertStringNotContainsString('DisplayOptionsService::hidesTotal', $source);
         self::assertStringContainsString("'total' => (string) StatsService::resolveCbstatsOutput", $source);
@@ -299,7 +331,17 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
 
             self::assertIsString($source);
             self::assertStringContainsString('payload.showValues !== false', $source);
+            self::assertStringContainsString('enabled: showValues', $source);
         }
+
+        $bar = (string) file_get_contents(
+            dirname(__DIR__, 4) . '/plugins/content/contentbuilderng_cbstats/media/js/cbstats-bar.js'
+        );
+        $charts = (string) file_get_contents(
+            dirname(__DIR__, 4) . '/plugins/content/contentbuilderng_cbstats/media/js/cbstats-charts.js'
+        );
+        self::assertStringContainsString('ticks: {' . "\n" . '                            display: showValues,', $bar);
+        self::assertStringContainsString('pointLabels: { display: showValues }', $charts);
     }
 
     public function testArticleAndUrlPathsUseTheSameHideParserAndValidation(): void
