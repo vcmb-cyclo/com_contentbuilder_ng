@@ -191,16 +191,28 @@ foreach ($auditErrors as $auditError) {
     $warningDetail = '';
     $warningLinkUrl = '';
     $warningLinkLabel = '';
+    $warningStorageId = 0;
+    $warningRepairAvailable = false;
     $storageTableNotFoundMatch = [];
-    if (preg_match('/^Storage\s+#(\d+)\s+\((.*?)\)\s*:?\s*table not found\.?(?:\s+.*)?$/i', $warningText, $storageTableNotFoundMatch) === 1) {
+    if (preg_match('/^Storage\s+#(\d+)\s+\((.*?)\)\s*:?\s*(table not found|table name too long)\.?$/i', $warningText, $storageTableNotFoundMatch) === 1) {
         $storageIdLabel = (int) ($storageTableNotFoundMatch[1] ?? 0);
+        $warningStorageId = $storageIdLabel;
         $storageNameLabel = trim((string) ($storageTableNotFoundMatch[2] ?? ''));
+        $storageIssueType = strtolower(trim((string) ($storageTableNotFoundMatch[3] ?? '')));
+        $isMissingTable = $storageIssueType === 'table not found';
         $warningText = Text::sprintf(
-            'COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NOT_FOUND',
+            $isMissingTable
+                ? 'COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NOT_FOUND'
+                : 'COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NAME_TOO_LONG',
             $storageIdLabel,
             $storageNameLabel
         );
-        $warningDetail = Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NOT_FOUND_DETAIL');
+        $warningDetail = Text::_(
+            $isMissingTable
+                ? 'COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NOT_FOUND_DETAIL'
+                : 'COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NAME_TOO_LONG_DETAIL'
+        );
+        $warningRepairAvailable = $isMissingTable;
         if ($storageIdLabel > 0) {
             $warningLinkUrl = Route::_(
                 'index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $storageIdLabel,
@@ -218,6 +230,8 @@ foreach ($auditErrors as $auditError) {
         'detail' => $warningDetail,
         'link_url' => $warningLinkUrl,
         'link_label' => $warningLinkLabel,
+        'storage_id' => $warningStorageId,
+        'repair_available' => $warningRepairAvailable,
     ];
 }
 $hasAuditReport = $auditReport !== [];
@@ -544,6 +558,8 @@ $renderNumberedAuditTitle = static function (string $sectionId, string $label, b
     <input type="hidden" name="option" value="com_contentbuilderng">
     <input type="hidden" name="repair_step" id="repair_step" value="">
     <input type="hidden" name="repair_action" id="repair_action" value="">
-    <input type="hidden" name="task" value="">
+    <input type="hidden" name="repair_storage_id" id="repair_storage_id" value="">
+    <input type="hidden" name="stale_installer_temp_path" id="stale_installer_temp_path" value="">
+    <input type="hidden" name="task" id="task" value="">
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

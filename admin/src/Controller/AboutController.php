@@ -16,9 +16,12 @@ namespace CB\Component\Contentbuilderng\Administrator\Controller;
 
 use CB\Component\Contentbuilderng\Administrator\Helper\DatabaseAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleInstallerTempAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
+use CB\Component\Contentbuilderng\Administrator\Model\StorageModel;
 use CB\Component\Contentbuilderng\Administrator\Service\ConfigExportService;
 use CB\Component\Contentbuilderng\Administrator\Service\ConfigImportService;
+use CB\Component\Contentbuilderng\Administrator\Service\DatatableService;
 use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
 use CB\Component\Contentbuilderng\Administrator\Service\RepairWorkflowService;
 use Joomla\CMS\Application\AdministratorApplication;
@@ -257,6 +260,94 @@ final class AboutController extends BaseController
     // -------------------------------------------------------------------------
     // Audit
     // -------------------------------------------------------------------------
+
+    public function repairMissingStorageTable(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $storageId = $this->input->post->getInt('repair_storage_id', 0);
+
+        try {
+            if ($storageId <= 0) {
+                throw new \RuntimeException(Text::_('JERROR_NO_ITEMS_SELECTED'));
+            }
+
+            $model = $this->getModel('Storage', 'Administrator', ['ignore_request' => true]);
+
+            if (!$model instanceof StorageModel) {
+                throw new \RuntimeException('StorageModel not found');
+            }
+
+            $storage = $model->getItem($storageId);
+
+            if (!$storage || (int) ($storage->bytable ?? 0) > 0 || trim((string) ($storage->name ?? '')) === '') {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_INVALID_STORAGE'));
+            }
+
+            $model->ensureDataTable($storageId);
+            $this->getComponent()->getContainer()->get(DatatableService::class)->syncColumnsFromFields($storageId);
+
+            $tableName = $this->getComponent()->getContainer()
+                ->get(DatabaseInterface::class)
+                ->getPrefix() . trim((string) $storage->name);
+
+            $tableList = $this->getComponent()->getContainer()
+                ->get(DatabaseInterface::class)
+                ->getTableList();
+
+            if (!in_array($tableName, $tableList, true)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_NOT_CREATED'));
+            }
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $this->setMessage(
+                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIRED', $tableName),
+                'message'
+            );
+        } catch (\Throwable $e) {
+            $this->setMessage(
+                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_FAILED', $e->getMessage()),
+                'error'
+            );
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function deleteStaleInstallerTemp(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $path = trim((string) $this->input->post->getString('stale_installer_temp_path', ''));
+
+        try {
+            if ($path === '') {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_NOT_SELECTED'));
+            }
+
+            $deletedPath = StaleInstallerTempAuditHelper::delete($path);
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $this->setMessage(
+                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETED', $deletedPath),
+                'message'
+            );
+        } catch (\Throwable $e) {
+            $this->setMessage(
+                Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_FAILED', $e->getMessage()),
+                'error'
+            );
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
 
     public function runAudit(): void
     {

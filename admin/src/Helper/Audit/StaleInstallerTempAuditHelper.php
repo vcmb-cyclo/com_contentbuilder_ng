@@ -15,6 +15,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Helper\Audit;
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\Filesystem\Folder;
+use Joomla\CMS\Language\Text;
 
 /**
  * Detects and removes stale Joomla installer temporary directories
@@ -127,6 +128,31 @@ final class StaleInstallerTempAuditHelper
             'removed'   => $removed,
             'warnings'  => $warnings,
         ];
+    }
+
+    /**
+     * Delete one directory only when it is currently identified as stale.
+     */
+    public static function delete(string $path): string
+    {
+        $requestedPath = realpath($path);
+
+        if ($requestedPath === false) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_NOT_FOUND'));
+        }
+
+        [$found] = self::inspect();
+        $allowedPaths = array_column($found, 'path');
+
+        if (!in_array($requestedPath, $allowedPaths, true)) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_NOT_ALLOWED'));
+        }
+
+        if (!Folder::delete($requestedPath)) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_FAILED_GENERIC'));
+        }
+
+        return $requestedPath;
     }
 
     /**
