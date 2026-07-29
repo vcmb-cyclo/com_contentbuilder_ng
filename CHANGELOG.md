@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 6.1.7-RC97
 
 ### CBStats 6.1.7-RC96-B05
 
