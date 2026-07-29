@@ -106,6 +106,9 @@ class HtmlView extends BaseHtmlView
         $wa = $document->getWebAssetManager();
         $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
         $wa->useScript('com_contentbuilderng.admin-ui');
+        $wa->useScript('com_contentbuilderng.form-audit.js');
+        Text::script('COM_CONTENTBUILDERNG_AUDIT_AJAX_REQUEST_FAILED');
+        Text::script('COM_CONTENTBUILDERNG_AUDIT_REFRESH_FAILED');
         HTMLHelper::_('script', 'com_contentbuilderng/admin-ui.js', ['version' => 'auto', 'relative' => true], ['defer' => true]);
         $wa->useStyle('com_contentbuilderng.coloris.css');
         $wa->useScript('com_contentbuilderng.coloris.js');

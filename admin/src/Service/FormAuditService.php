@@ -735,6 +735,7 @@ final class FormAuditService
             $checks[] = [
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_EDITABLE_TEMPLATE_EMPTY'),
+                'code' => 'editable_template_empty',
             ];
         }
 

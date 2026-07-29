@@ -36,6 +36,7 @@ use CB\Component\Contentbuilderng\Administrator\Model\ElementsModel;
 use CB\Component\Contentbuilderng\Administrator\Model\ElementoptionsModel;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
 
 class FormController extends BaseFormController
 {
@@ -449,6 +450,82 @@ class FormController extends BaseFormController
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
             $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=audit&tmpl=component&id=' . $formId, false));
+    }
+
+    public function repairEditableTemplate(): void
+    {
+        $this->checkToken();
+
+        $formId = $this->input->post->getInt('id', $this->input->getInt('id', 0));
+
+        try {
+            if ($formId <= 0) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_INVALID'));
+            }
+
+            $identity = $this->getApp()->getIdentity();
+            $formAsset = 'com_contentbuilderng.form.' . $formId;
+            if (
+                !$identity->authorise('core.manage', 'com_contentbuilderng')
+                && !$identity->authorise('core.edit', $formAsset)
+                && !$identity->authorise('core.edit', 'com_contentbuilderng')
+            ) {
+                throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+            }
+
+            $db = $this->getDatabase();
+            $query = $db->getQuery(true)
+                ->select($db->quoteName(['type', 'reference_id', 'theme_plugin']))
+                ->from($db->quoteName('#__contentbuilderng_forms'))
+                ->where($db->quoteName('id') . ' = ' . $formId);
+            $db->setQuery($query, 0, 1);
+            $formRow = $db->loadAssoc();
+
+            if (!is_array($formRow)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_INVALID'));
+            }
+
+            $sourceForm = FormSourceFactory::getForm((string) $formRow['type'], (string) $formRow['reference_id']);
+            if (!is_object($sourceForm)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'));
+            }
+
+            $component = $this->getApp()->bootComponent('com_contentbuilderng');
+            $formSupportService = $component->getContainer()->get(FormSupportService::class);
+            $themePlugin = trim((string) ($formRow['theme_plugin'] ?? '')) ?: 'thoth';
+            $editableTemplate = (string) $formSupportService->createEditableSample($formId, $sourceForm, $themePlugin);
+
+            if (trim($editableTemplate) === '') {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_EMPTY'));
+            }
+
+            $update = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_forms'))
+                ->set($db->quoteName('editable_template') . ' = ' . $db->quote($editableTemplate))
+                ->set($db->quoteName('modified') . ' = ' . $db->quote((new Date())->toSql()))
+                ->set($db->quoteName('modified_by') . ' = ' . (int) $identity->id)
+                ->where($db->quoteName('id') . ' = ' . $formId);
+            $db->setQuery($update);
+            $db->execute();
+
+            $message = Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIRED');
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_FAILED', $e->getMessage());
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;

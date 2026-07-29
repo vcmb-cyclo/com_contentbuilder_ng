@@ -1043,6 +1043,21 @@ use Joomla\CMS\Router\Route;
                                                             >
                                                                 <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR'); ?>
                                                             </button>
+                                                        <?php elseif ((string) ($formAuditCheck['code'] ?? '') === 'editable_template_empty' && $formId > 0) : ?>
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-sm btn-warning ms-2"
+                                                                value="thoth"
+                                                                data-cb-audit-ajax-task="about.repairFormEditableTemplate"
+                                                                data-cb-audit-ajax-field="form_id"
+                                                                data-cb-audit-ajax-value="<?php echo $formId; ?>"
+                                                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                                data-bs-toggle="tooltip"
+                                                                data-bs-placement="top"
+                                                            >
+                                                                <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'); ?>
+                                                            </button>
                                                         <?php endif; ?>
                                                     </li>
                                                 <?php endforeach; ?>

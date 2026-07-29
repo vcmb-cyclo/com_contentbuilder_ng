@@ -21,7 +21,7 @@
     }
 
     function refreshAudit() {
-        var currentAudit = document.querySelector('.p-3');
+        var currentAudit = document.querySelector('[data-cb-form-audit-panel]');
 
         if (!currentAudit) {
             return Promise.resolve();
@@ -46,7 +46,7 @@
             })
             .then(function (html) {
                 var parsedDocument = new DOMParser().parseFromString(html, 'text/html');
-                var refreshedAudit = parsedDocument.querySelector('.p-3');
+                var refreshedAudit = parsedDocument.querySelector('[data-cb-form-audit-panel]');
 
                 if (!refreshedAudit) {
                     throw new Error(localizedText(
@@ -117,6 +117,67 @@
                     button.disabled = false;
                     button.removeAttribute('aria-busy');
                 }
+            });
+    });
+
+    document.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-cb-form-audit-repair-button]');
+
+        if (!button) {
+            return;
+        }
+
+        var form = document.getElementById('adminForm');
+
+        if (!form) {
+            return;
+        }
+
+        event.preventDefault();
+
+        var formData = new FormData(form);
+        formData.set('task', button.dataset.cbFormAuditTask || 'form.repairEditableTemplate');
+        formData.set('id', button.dataset.cbFormAuditId || '0');
+        formData.set('cb_ajax', '1');
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) {
+                return response.json().then(function (payload) {
+                    return {response: response, payload: payload || {}};
+                });
+            })
+            .then(function (result) {
+                var payload = result.payload;
+                var success = payload.success === true || payload.ok === true;
+                var message = payload.message || localizedText(
+                    'COM_CONTENTBUILDERNG_AUDIT_AJAX_REQUEST_FAILED',
+                    'The audit action could not be completed.'
+                );
+
+                if (!result.response.ok || !success) {
+                    throw new Error(message);
+                }
+
+                return refreshAudit().then(function () {
+                    renderMessage('success', message);
+                });
+            })
+            .catch(function (error) {
+                renderMessage('error', error.message || localizedText(
+                    'COM_CONTENTBUILDERNG_AUDIT_AJAX_REQUEST_FAILED',
+                    'The audit action could not be completed.'
+                ));
+                button.disabled = false;
+                button.removeAttribute('aria-busy');
             });
     });
 }());

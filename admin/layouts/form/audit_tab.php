@@ -18,13 +18,14 @@ $checks = array_values(array_filter(
     (array) ($audit['checks'] ?? []),
     static fn($check): bool => is_array($check)
 ));
+$formId = (int) (($audit['form']['id'] ?? 0));
 $statusBadges = [
     FormAuditService::STATUS_OK => ['bg-success', 'COM_CONTENTBUILDERNG_AUDIT_STATUS_OK'],
     FormAuditService::STATUS_WARNING => ['text-bg-warning', 'COM_CONTENTBUILDERNG_AUDIT_STATUS_WARNING'],
     FormAuditService::STATUS_ERROR => ['bg-danger', 'COM_CONTENTBUILDERNG_AUDIT_STATUS_ERROR'],
 ];
 ?>
-<div class="p-3">
+<div class="p-3" data-cb-form-audit-panel>
     <div class="alert alert-info">
         <?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_SAVED_CONFIGURATION_NOTICE'); ?>
     </div>
@@ -40,7 +41,22 @@ $statusBadges = [
                 <?php [$badgeClass, $badgeKey] = $statusBadges[(string) ($check['status'] ?? FormAuditService::STATUS_WARNING)] ?? $statusBadges[FormAuditService::STATUS_WARNING]; ?>
                 <li class="list-group-item d-flex align-items-start gap-2">
                     <span class="badge <?php echo $badgeClass; ?>"><?php echo Text::_($badgeKey); ?></span>
-                    <span><?php echo htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                    <div>
+                        <?php echo htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                        <?php if ((string) ($check['code'] ?? '') === 'editable_template_empty' && $formId > 0) : ?>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-warning ms-2"
+                                data-cb-form-audit-repair-button
+                                data-cb-form-audit-task="form.repairEditableTemplate"
+                                data-cb-form-audit-id="<?php echo $formId; ?>"
+                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                            >
+                                <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'); ?>
+                            </button>
+                        <?php endif; ?>
+                    </div>
                 </li>
             <?php endforeach; ?>
         <?php endif; ?>
