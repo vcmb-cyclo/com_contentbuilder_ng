@@ -28,7 +28,7 @@ if (!is_object($item) || !is_callable($formatTypeDisplay)) {
 }
 
 ?>
-<fieldset id="cb-form-view-general" class="border rounded p-3 mb-3">
+<fieldset id="cb-form-view-general" class="mb-3">
     <div class="row g-3 align-items-end mb-2">
         <div class="col-12 col-lg-3">
             <label for="name">

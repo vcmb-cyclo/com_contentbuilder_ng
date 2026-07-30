@@ -153,7 +153,7 @@ final class AboutController extends BaseController
             'steps' => count((array) ($workflow['steps'] ?? [])),
         ]);
 
-        $this->setMessage(Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STARTED'), 'message');
+        $this->setMessage(Text::_(!empty($workflow['completed']) ? 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STARTED_NO_ACTION' : 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STARTED'), 'message');
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about&repair_workflow=1', false));
     }
 
@@ -701,26 +701,25 @@ final class AboutController extends BaseController
             $report = DatabaseAuditHelper::run();
             $app->setUserState('com_contentbuilderng.about.audit', $report);
 
+            $auditErrorCount = (int) ($report['summary']['audit_errors'] ?? count((array) ($report['errors'] ?? [])));
+            $auditWarningCount = (int) ($report['summary']['audit_warnings'] ?? 0);
             $issuesTotal = (int) ($report['summary']['issues_total'] ?? 0);
             $scannedTables = (int) ($report['scanned_tables'] ?? 0);
-            $errorsCount = count((array) ($report['errors'] ?? []));
 
             $this->getRepairWorkflowService()->logAuditReport($report);
 
             Logger::info('Database audit completed', [
                 'issues_total' => $issuesTotal,
                 'scanned_tables' => $scannedTables,
-                'errors' => $errorsCount,
+                'errors' => $auditErrorCount,
+                'warnings' => $auditWarningCount,
             ]);
 
-            if ($issuesTotal === 0 && $errorsCount === 0) {
+            if ($auditErrorCount === 0 && $auditWarningCount === 0) {
                 $this->setMessage(Text::plural('COM_CONTENTBUILDERNG_ABOUT_AUDIT_SUMMARY_CLEAN', $scannedTables), 'message');
             } else {
-                $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_SUMMARY_ISSUES', $issuesTotal, $scannedTables);
-                if ($errorsCount > 0) {
-                    $message .= ' ' . Text::plural('COM_CONTENTBUILDERNG_ABOUT_AUDIT_SUMMARY_PARTIAL', $errorsCount);
-                }
-                $this->setMessage($message, 'warning');
+                $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_SUMMARY_COUNTS', $auditErrorCount, $auditWarningCount);
+                $this->setMessage($message, $auditErrorCount > 0 ? 'error' : 'warning');
             }
         } catch (\Throwable $e) {
             $this->setMessage(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FAILED', $e->getMessage()), 'error');

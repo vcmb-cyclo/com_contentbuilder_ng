@@ -99,12 +99,12 @@ class RepairWorkflowService
             }
 
             if ((int) ($prechecks[$stepId]['count'] ?? 0) === 0 && empty($prechecks[$stepId]['has_errors'])) {
-                $step['status'] = 'skipped';
-                $step['decision'] = 'skip';
+                $step['status'] = 'not_required';
+                $step['decision'] = 'not_required';
                 $step['completed_at'] = $now;
                 $step['result'] = [
                     'level' => 'message',
-                    'summary' => (string) ($prechecks[$stepId]['skip_summary'] ?? 'Skipped automatically because there is nothing to repair.'),
+                    'summary' => (string) ($prechecks[$stepId]['skip_summary'] ?? Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY')),
                     'lines' => [],
                 ];
             }
@@ -432,7 +432,7 @@ class RepairWorkflowService
                     $duplicateIndexesToDrop === 1 => '1 duplicate index was detected in ' . max(1, $duplicateIndexGroups) . ' group and can be removed in this step.',
                     default => $duplicateIndexesToDrop . ' duplicate indexes were detected in ' . max(1, $duplicateIndexGroups) . ' groups and can be removed in this step.',
                 },
-                'skip_summary' => 'No duplicate index detected by the pre-check. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
             ];
 
@@ -443,7 +443,7 @@ class RepairWorkflowService
                     $historicalTablesCount === 1 => '1 historical table name was detected by the last audit and can be renamed in this step when the NG target table does not already exist.',
                     default => $historicalTablesCount . ' historical table names were detected by the last audit and can be renamed in this step when the NG target tables do not already exist.',
                 },
-                'skip_summary' => 'No historical table name detected by the pre-check. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
             ];
 
@@ -453,7 +453,7 @@ class RepairWorkflowService
                     $collationIssueCount <= 0 => Text::sprintf('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_ENCODING_PRECHECK_NONE', 'utf8mb4', $encodingTargetCollation),
                     default => Text::sprintf('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_ENCODING_PRECHECK', $collationIssueCount, $tableEncodingCount, $columnEncodingCount, $mixedCollationsCount, 'utf8mb4', $encodingTargetCollation),
                 },
-                'skip_summary' => 'No encoding/collation issue detected by the pre-check. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
             ];
 
@@ -464,7 +464,7 @@ class RepairWorkflowService
                     $missingAuditColumnsTotal === 1 => '1 missing audit column was detected across ' . max(1, $missingAuditColumnsTables) . ' table and can be repaired in this step.',
                     default => $missingAuditColumnsTotal . ' missing audit columns were detected across ' . max(1, $missingAuditColumnsTables) . ' tables and can be repaired in this step.',
                 },
-                'skip_summary' => 'No missing audit column detected by the pre-check. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
             ];
 
@@ -475,7 +475,7 @@ class RepairWorkflowService
                     $missingFormAuditColumnsTotal === 1 => '1 missing form column was detected across ' . max(1, $missingFormAuditColumnsTables) . ' table and can be repaired in this step.',
                     default => $missingFormAuditColumnsTotal . ' missing form columns were detected across ' . max(1, $missingFormAuditColumnsTables) . ' tables and can be repaired in this step.',
                 },
-                'skip_summary' => 'No missing form column detected by the pre-check. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
             ];
 
@@ -486,7 +486,7 @@ class RepairWorkflowService
                     $pluginDuplicateRows === 1 => '1 duplicate plugin row was detected in ' . max(1, $pluginDuplicateGroups) . ' group and can be removed in this step.',
                     default => $pluginDuplicateRows . ' duplicate plugin rows were detected in ' . max(1, $pluginDuplicateGroups) . ' groups and can be removed in this step.',
                 },
-                'skip_summary' => 'No duplicate plugin row detected by the pre-check. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
             ];
 
@@ -497,7 +497,7 @@ class RepairWorkflowService
                     $historicalMenuEntriesCount === 1 => '1 historical menu entry was detected by the last audit and can be repaired in this step.',
                     default => $historicalMenuEntriesCount . ' historical menu entries were detected by the last audit and can be repaired in this step.',
                 },
-                'skip_summary' => 'No historical menu entry detected by the pre-check. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
             ];
 
@@ -507,7 +507,7 @@ class RepairWorkflowService
                     $bfFieldSyncViews <= 0 => 'No BF-linked CB view synchronization issue was detected by the last audit.',
                     default => $bfFieldSyncViews . ' BF-linked CB views have synchronization issues (' . $bfMissingInCbTotal . ' source fields missing in CB, ' . $bfOrphanInCbTotal . ' extra fields in CB). Missing source fields will be automatically added and orphan CB elements will be deleted.',
                 },
-                'skip_summary' => 'No BF-linked CB view synchronization issue detected by the pre-check. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
             ];
 
@@ -529,7 +529,7 @@ class RepairWorkflowService
                     count($menuViewIssues) === 1 => '1 ContentBuilder menu points to an invalid or inconsistent target. This diagnostic step does not perform an automatic repair.',
                     default => count($menuViewIssues) . ' ContentBuilder menus point to invalid or inconsistent targets. This diagnostic step does not perform an automatic repair.',
                 },
-                'skip_summary' => '',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
                 'mode' => 'diagnostic',
                 'result' => [
@@ -561,7 +561,7 @@ class RepairWorkflowService
                     count($frontendPermissionIssues) === 1 => '1 view has an incoherent frontend permission setup. This diagnostic step does not perform an automatic repair.',
                     default => count($frontendPermissionIssues) . ' views have an incoherent frontend permission setup. This diagnostic step does not perform an automatic repair.',
                 },
-                'skip_summary' => '',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
                 'mode' => 'diagnostic',
                 'result' => [
@@ -624,7 +624,7 @@ class RepairWorkflowService
                     $orphanFormsCount === 1 => '1 view has ' . $totalOrphanCount . ' orphan element reference_id(s) that can be removed in this step.',
                     default => $orphanFormsCount . ' views have ' . $totalOrphanCount . ' orphan element reference_id(s) that can be removed in this step.',
                 },
-                'skip_summary' => 'No orphan element reference_id detected by the last audit. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors'   => false,
                 'details'      => $totalOrphanCount . ' orphan element mapping(s) across ' . $orphanFormsCount . ' view(s).',
                 'lines'        => $orphanPreviewLines,
@@ -653,7 +653,7 @@ class RepairWorkflowService
                     $contentRecordDuplicateGroupCount === 1 => '1 record has ' . $contentRecordDuplicateRowsToRemove . ' duplicate row(s) that can be removed in this step.',
                     default => $contentRecordDuplicateGroupCount . ' records have ' . $contentRecordDuplicateRowsToRemove . ' duplicate row(s) that can be removed in this step.',
                 },
-                'skip_summary' => 'No duplicate #__contentbuilderng_records row detected by the last audit. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors'   => false,
                 'details'      => $contentRecordDuplicateRowsToRemove . ' duplicate row(s) across ' . $contentRecordDuplicateGroupCount . ' record(s).',
                 'lines'        => $contentRecordDuplicatePreviewLines,
@@ -666,7 +666,7 @@ class RepairWorkflowService
                     count($generatedArticleCategoryIssues) === 1 => '1 ContentBuilder view has an invalid generated article category setup and can be repaired in this step.',
                     default => count($generatedArticleCategoryIssues) . ' ContentBuilder views have invalid generated article category setups and can be repaired in this step.',
                 },
-                'skip_summary' => 'No generated article category issue detected by the pre-check. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
                 'details' => $generatedArticleCategoryRows . ' generated articles currently use an invalid category.',
             ];
@@ -679,7 +679,7 @@ class RepairWorkflowService
                     $staleLanguageCount === 1 => '1 stale ContentBuilder language file was found in the global language directories and can be removed in this step.',
                     default => $staleLanguageCount . ' stale ContentBuilder language files were found in the global language directories and can be removed in this step.',
                 },
-                'skip_summary' => 'No stale language file found. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
             ];
 
@@ -691,7 +691,7 @@ class RepairWorkflowService
                     $staleInstallerTempCount === 1 => '1 stale Joomla installer temporary directory was found and can be removed in this step.',
                     default => $staleInstallerTempCount . ' stale Joomla installer temporary directories were found and can be removed in this step.',
                 },
-                'skip_summary' => 'No stale installer temporary directory found. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
             ];
         } catch (\Throwable $e) {
@@ -699,7 +699,7 @@ class RepairWorkflowService
                 $prechecks[$stepId] = [
                     'count' => 1,
                     'description' => 'Pre-check unavailable for this step. You can still run the repair manually.',
-                    'skip_summary' => '',
+                    'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                     'has_errors' => true,
                 ];
             }
@@ -718,14 +718,14 @@ class RepairWorkflowService
                     $packedDataCandidates === 1 => '1 packed payload needing migration was detected by the pre-check.',
                     default => $packedDataCandidates . ' packed payloads needing migration were detected by the pre-check.',
                 },
-                'skip_summary' => 'No packed payload needing migration was detected by the pre-check. Skipped automatically.',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => $packedDataErrors > 0,
             ];
         } catch (\Throwable $e) {
             $prechecks['packed_data'] = [
                 'count' => 1,
                 'description' => 'Packed data pre-check unavailable. You can still run the repair manually.',
-                'skip_summary' => '',
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => true,
             ];
         }

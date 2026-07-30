@@ -20,6 +20,7 @@ use CB\Component\Contentbuilderng\Administrator\types\contentbuilderng_com_breez
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\Database\DatabaseInterface;
 
 final class FormAuditService
@@ -45,6 +46,9 @@ final class FormAuditService
      */
     public function audit(int $formId): array
     {
+        $componentParams = ComponentHelper::getParams('com_contentbuilderng');
+        $auditDetailsTemplateEmpty = (bool) $componentParams->get('audit_details_template_empty', 0);
+        $auditFieldMissingInEdit = (bool) $componentParams->get('audit_field_missing_in_edit', 0);
         $db = $this->db;
         $query = $db->getQuery(true)
             ->select($db->quoteName([
@@ -173,7 +177,9 @@ final class FormAuditService
                 (string) $form['details_template'],
                 (string) $form['editable_template'],
                 $hasFrontendViewPermission,
-                $hasFrontendEditPermission
+                $hasFrontendEditPermission,
+                $auditDetailsTemplateEmpty,
+                $auditFieldMissingInEdit
             ),
             $permissionChecks,
             $performanceChecks
@@ -769,20 +775,23 @@ final class FormAuditService
         string $detailsTemplate,
         string $editableTemplate,
         bool $hasFrontendViewPermission,
-        bool $hasFrontendEditPermission
+        bool $hasFrontendEditPermission,
+        bool $auditDetailsTemplateEmpty,
+        bool $auditFieldMissingInEdit
     ): array {
         $checks = [];
         $detailsEmpty = $published !== [] && trim($detailsTemplate) === '' && $hasFrontendViewPermission;
         $editableEmpty = $published !== [] && trim($editableTemplate) === '' && $hasFrontendEditPermission;
+        $detailsTemplateCheckEnabled = $detailsEmpty && $auditDetailsTemplateEmpty;
 
-        if ($detailsEmpty && $editableEmpty) {
+        if ($detailsTemplateCheckEnabled && $editableEmpty) {
             $checks[] = [
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_TEMPLATES_EMPTY'),
                 'reference' => 'CBNG-AUDIT-TEMPLATES-EMPTY',
                 'code' => 'templates_empty',
             ];
-        } elseif ($detailsEmpty) {
+        } elseif ($detailsTemplateCheckEnabled) {
             $checks[] = [
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_DETAILS_TEMPLATE_EMPTY'),
@@ -813,7 +822,7 @@ final class FormAuditService
             $hasEditAny = $hasEditItem || preg_match('/\\{' . $quoted . ':(label|value)\\}/i', $editableTemplate);
             $isEditable = (int) $element['editable'] === 1;
 
-            if ($detailsTemplate !== '' && !$inDetails) {
+            if ($detailsTemplate !== '' && !$inDetails && $auditDetailsTemplateEmpty) {
                 $checks[] = [
                     'status' => self::STATUS_WARNING,
                     'message' => Text::sprintf(
@@ -824,7 +833,7 @@ final class FormAuditService
                 ];
             }
 
-            if ($editableTemplate !== '' && !$hasEditAny) {
+            if ($editableTemplate !== '' && !$hasEditAny && $auditFieldMissingInEdit) {
                 $checks[] = [
                     'status' => self::STATUS_WARNING,
                     'message' => Text::sprintf(

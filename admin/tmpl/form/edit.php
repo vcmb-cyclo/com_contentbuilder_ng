@@ -489,17 +489,60 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         $debugModeEnabled = !empty($this->item->debug_mode);
         // At-a-glance state of the two template tabs, so an empty template is
         // visible without opening the tab.
-        $templateStateBadge = static function (bool $filled): string {
-            $tip = Text::_($filled
-                ? 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_FILLED'
-                : 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY');
+        $templateAuditReferences = [
+            'details' => [
+                'CBNG-AUDIT-TEMPLATES-EMPTY',
+                'CBNG-AUDIT-DETAILS-TEMPLATE-EMPTY',
+                'CBNG-AUDIT-FIELD-MISSING-IN-DETAILS',
+                'CBNG-AUDIT-SYSTEM-FIELD-MISSING-IN-DETAILS',
+                'CBNG-AUDIT-UNKNOWN-MARKER-DETAILS',
+            ],
+            'edit' => [
+                'CBNG-AUDIT-TEMPLATES-EMPTY',
+                'CBNG-AUDIT-EDITABLE-TEMPLATE-EMPTY',
+                'CBNG-AUDIT-FIELD-MISSING-IN-EDIT',
+                'CBNG-AUDIT-SYSTEM-FIELD-MISSING-IN-EDIT',
+                'CBNG-AUDIT-UNKNOWN-MARKER-EDIT',
+                'CBNG-AUDIT-EDITABLE-FIELD-WITHOUT-ITEM',
+                'CBNG-AUDIT-NONEDITABLE-FIELD-WITH-ITEM',
+            ],
+        ];
+        $templateAuditChecks = array_values(array_filter(
+            (array) ($this->audit['checks'] ?? []),
+            static fn($check): bool => is_array($check)
+                && in_array((string) ($check['status'] ?? ''), [FormAuditService::STATUS_WARNING, FormAuditService::STATUS_ERROR], true)
+        ));
+        $hasTemplateAuditIssue = static function (array $references) use ($templateAuditChecks): bool {
+            foreach ($templateAuditChecks as $check) {
+                if (in_array((string) ($check['reference'] ?? ''), $references, true)) {
+                    return true;
+                }
+            }
 
-            return ' <span class="' . ($filled ? 'fa-solid fa-circle-check text-success' : 'fa-regular fa-circle text-muted')
+            return false;
+        };
+        $templateStateBadge = static function (bool $filled, bool $inconsistent, string $emptyTipKey): string {
+            $tip = Text::_($inconsistent
+                ? 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_INCONSISTENT'
+                : ($filled ? 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_FILLED' : $emptyTipKey));
+            $stateClass = $inconsistent
+                ? 'cb-template-state is-inconsistent'
+                : ($filled ? 'cb-template-state is-filled' : 'cb-template-state is-empty');
+
+            return ' <span class="' . $stateClass
                 . ' ms-1" aria-hidden="true" title="' . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '"></span>'
                 . '<span class="visually-hidden">' . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '</span>';
         };
-        $detailsTemplateBadge = $templateStateBadge(trim((string) ($this->item->details_template ?? '')) !== '');
-        $editableTemplateBadge = $templateStateBadge(trim((string) ($this->item->editable_template ?? '')) !== '');
+        $detailsTemplateBadge = $templateStateBadge(
+            trim((string) ($this->item->details_template ?? '')) !== '',
+            $hasTemplateAuditIssue($templateAuditReferences['details']),
+            'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY'
+        );
+        $editableTemplateBadge = $templateStateBadge(
+            trim((string) ($this->item->editable_template ?? '')) !== '',
+            $hasTemplateAuditIssue($templateAuditReferences['edit']),
+            'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY'
+        );
         if ($formId > 0 && $debugModeEnabled) {
             $allowedViewTabs[] = 'tab12';
             $allowedViewTabs[] = 'tab13';
@@ -536,9 +579,6 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 </div>
             <?php endif; ?>
             <div class="d-inline-flex align-items-center gap-2">
-                <span class="fw-semibold editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_TIP'); ?>">
-                    <?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE'); ?> :
-                </span>
                 <?php if ($formId > 0) : ?>
                     <?php
                     $debugEnabled = !empty($this->item->debug_mode);
@@ -549,6 +589,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     $debugToggleHtml = HTMLHelper::_('jgrid.state', $debugStates, $debugEnabled ? 1 : 0, 0, 'form.', true, true, 'cbdebugstate');
                     $debugToggleHtml = preg_replace('/\saria-labelledby="[^"]*"/', '', (string) $debugToggleHtml) ?? (string) $debugToggleHtml;
                     $debugToggleHtml = preg_replace('#<div role="tooltip"[^>]*>.*?</div>#s', '', (string) $debugToggleHtml) ?? (string) $debugToggleHtml;
+                    $debugToggleHtml = preg_replace('/<a\b/', '<a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_TIP'), ENT_QUOTES, 'UTF-8') . '"', (string) $debugToggleHtml, 1) ?? (string) $debugToggleHtml;
+                    $debugToggleHtml = str_replace('icon-unpublish', 'fa fa-bug text-muted', (string) $debugToggleHtml);
                     if ($debugEnabled) {
                         $debugToggleHtml = str_replace('icon-publish', 'fa fa-bug text-success', $debugToggleHtml);
                     }
@@ -559,9 +601,12 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     <input type="hidden" name="jform[debug_mode]" id="debug_mode" value="0" />
                     <a href="#"
                        class="tbody-icon"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="bottom"
+                       data-bs-title="<?php echo Text::_("COM_CONTENTBUILDERNG_DEBUG_MODE_TIP"); ?>"
                        title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_TIP'); ?>"
                        onclick="this.classList.toggle('active'); document.getElementById('debug_mode').value = this.classList.contains('active') ? '1' : '0'; return false;">
-                        <span class="icon-unpublish" aria-hidden="true"></span>
+                        <span class="fa fa-bug text-muted" aria-hidden="true"></span>
                     </a>
                 <?php endif; ?>
             </div>
@@ -670,15 +715,21 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             static fn(array $check): bool => (string) ($check['status'] ?? '') === FormAuditService::STATUS_WARNING
         ));
         $auditTabBadges = '';
-        if ($auditErrorCount > 0) {
-            $auditTabBadges .= ' <span class="badge bg-danger ms-1" title="'
-                . htmlspecialchars(Text::plural('COM_CONTENTBUILDERNG_AUDIT_N_ERRORS', $auditErrorCount), ENT_QUOTES, 'UTF-8')
-                . '">' . $auditErrorCount . '</span>';
-        }
-        if ($auditWarningCount > 0) {
-            $auditTabBadges .= ' <span class="badge text-bg-warning ms-1" title="'
-                . htmlspecialchars(Text::plural('COM_CONTENTBUILDERNG_AUDIT_N_WARNINGS', $auditWarningCount), ENT_QUOTES, 'UTF-8')
-                . '">' . $auditWarningCount . '</span>';
+        if ($auditErrorCount > 0 || $auditWarningCount > 0) {
+            $auditBadgeLabels = [];
+            if ($auditErrorCount > 0) {
+                $auditBadgeLabels[] = Text::plural('COM_CONTENTBUILDERNG_AUDIT_N_ERRORS', $auditErrorCount);
+            }
+            if ($auditWarningCount > 0) {
+                $auditBadgeLabels[] = Text::plural('COM_CONTENTBUILDERNG_AUDIT_N_WARNINGS', $auditWarningCount);
+            }
+            $auditBadgeLabel = implode(' · ', $auditBadgeLabels);
+            $auditBadgeClass = $auditErrorCount > 0 ? 'cb-audit-state-dot is-error' : 'cb-audit-state-dot is-warning';
+            $auditTabBadges = ' <span class="' . $auditBadgeClass . ' ms-1" aria-hidden="true" title="'
+                . htmlspecialchars($auditBadgeLabel, ENT_QUOTES, 'UTF-8')
+                . '"></span><span class="visually-hidden">'
+                . htmlspecialchars($auditBadgeLabel, ENT_QUOTES, 'UTF-8')
+                . '</span>';
         }
         if ($formId > 0 && $debugModeEnabled) :
             echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab12', $viewTabLabel('fa-solid fa-stethoscope', 'COM_CONTENTBUILDERNG_AUDIT_TRAIL', 'COM_CONTENTBUILDERNG_TAB_TIP_AUDIT_TRAIL', $auditTabBadges));

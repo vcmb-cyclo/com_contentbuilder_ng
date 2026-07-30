@@ -38,7 +38,7 @@ use Joomla\CMS\Language\Text;
                     if ($stepIsCurrent && $stepStatus === 'pending') {
                         $stepClasses[] = 'is-current';
                         $statusClasses[] = 'is-current';
-                    } elseif ($stepStatus === 'done' || $stepStatus === 'skipped') {
+                    } elseif ($stepStatus === 'done' || in_array($stepStatus, ['skipped', 'not_required'], true)) {
                         $stepClasses[] = 'is-' . $stepStatus;
                         $statusClasses[] = 'is-' . $stepStatus;
                     }
@@ -50,16 +50,17 @@ use Joomla\CMS\Language\Text;
                     $stepDescription = trim((string) ($stepPrecheck['description'] ?? ($repairWorkflowStepDescriptions[$stepId] ?? '')));
                     $statusLabelKey = match ($stepStatus) {
                         'done' => 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_DONE',
-                        'skipped' => 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_SKIPPED',
+                        'skipped' => 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_NOT_APPLIED',
+                        'not_required' => 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_NOT_REQUIRED',
                         default => $stepIsCurrent
                             ? 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_CURRENT'
                             : 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_PENDING',
                     };
                     $statusIconClass = match (true) {
-                        ($stepStatus === 'done' || $stepStatus === 'skipped') && !in_array($stepResultLevel, ['warning', 'error', 'danger'], true) => 'icon-check-circle',
+                        ($stepStatus === 'done' || in_array($stepStatus, ['skipped', 'not_required'], true)) && !in_array($stepResultLevel, ['warning', 'error', 'danger'], true) => 'icon-check-circle',
                         default => '',
                     };
-                    $showStepCheck = ($stepStatus === 'done' || $stepStatus === 'skipped')
+                    $showStepCheck = ($stepStatus === 'done' || in_array($stepStatus, ['skipped', 'not_required'], true))
                         && !in_array($stepResultLevel, ['warning', 'error', 'danger'], true);
                     ?>
                     <div class="<?php echo implode(' ', $stepClasses); ?>">
@@ -118,14 +119,14 @@ use Joomla\CMS\Language\Text;
                     default => 'info',
                 };
                 $currentStepPanelClasses = ['cb-repair-workflow-result'];
-                if ($repairWorkflowCurrentStatus === 'skipped' || $currentStepAlertClass === 'success') {
+                if (in_array($repairWorkflowCurrentStatus, ['skipped', 'not_required'], true) || $currentStepAlertClass === 'success') {
                     $currentStepPanelClasses[] = 'is-success';
                 } elseif ($currentStepAlertClass === 'warning') {
                     $currentStepPanelClasses[] = 'is-warning';
                 } elseif ($currentStepAlertClass === 'danger') {
                     $currentStepPanelClasses[] = 'is-danger';
                 }
-                $currentStepShowCheck = $repairWorkflowCurrentStatus === 'skipped' || $currentStepAlertClass === 'success';
+                $currentStepShowCheck = in_array($repairWorkflowCurrentStatus, ['skipped', 'not_required'], true) || $currentStepAlertClass === 'success';
                 ?>
                 <div class="<?php echo implode(' ', $currentStepPanelClasses); ?>">
                     <h4 class="h6 mb-2 cb-repair-workflow-result-title">

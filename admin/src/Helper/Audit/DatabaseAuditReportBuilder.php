@@ -150,6 +150,8 @@ final class DatabaseAuditReportBuilder
 
         $formAuditIssueForms = 0;
         $formAuditIssueChecks = 0;
+        $formAuditIssueErrors = 0;
+        $formAuditIssueWarnings = 0;
         foreach ($formAudits as $formAudit) {
             if (!is_array($formAudit)) {
                 continue;
@@ -163,12 +165,41 @@ final class DatabaseAuditReportBuilder
 
                 $hasIssues = true;
                 $formAuditIssueChecks++;
+                if ((string) ($check['status'] ?? '') === 'error') {
+                    $formAuditIssueErrors++;
+                } else {
+                    $formAuditIssueWarnings++;
+                }
             }
 
             if ($hasIssues) {
                 $formAuditIssueForms++;
             }
         }
+
+        $auditWarningCount = count($duplicateIndexes)
+            + count($historicalTables)
+            + count($historicalMenuEntries)
+            + count($tableEncodingIssues)
+            + (int) ($packedDataAudit['candidates'] ?? 0)
+            + count($columnEncodingIssues)
+            + $mixedCollationIssueGroups
+            + count($missingAuditColumns)
+            + count($missingFormAuditColumns)
+            + count($pluginExtensionDuplicates)
+            + count($bfFieldSyncIssues)
+            + count($menuViewIssues)
+            + count($frontendPermissionIssues)
+            + count($elementReferenceIssues)
+            + count($contentRecordDuplicateIssues)
+            + count($invalidDatetimeSortIssues)
+            + count($storageColumnTypeIssues)
+            + count($generatedArticleCategoryIssues)
+            + count($debugModeIssues)
+            + count($staleLanguageFiles)
+            + count($staleInstallerTempDirs)
+            + $formAuditIssueWarnings;
+        $auditErrorCount = count($errors) + $formAuditIssueErrors;
 
         $issuesTotal = count($duplicateIndexes)
             + count($historicalTables)
@@ -259,6 +290,8 @@ final class DatabaseAuditReportBuilder
                 'form_audits' => count($formAudits),
                 'form_audit_issue_forms' => $formAuditIssueForms,
                 'form_audit_issue_checks' => $formAuditIssueChecks,
+                'audit_errors' => $auditErrorCount,
+                'audit_warnings' => $auditWarningCount,
                 'issues_total' => $issuesTotal,
             ],
             'errors' => $errors,

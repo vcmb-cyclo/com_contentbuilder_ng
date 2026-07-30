@@ -276,7 +276,7 @@ $repairWorkflowShowCurrentPanel = true;
 if (
     $repairWorkflowIsCompleted
     && is_array($repairWorkflowCurrentStep)
-    && in_array($repairWorkflowCurrentStatus, ['done', 'skipped'], true)
+    && in_array($repairWorkflowCurrentStatus, ['done', 'skipped', 'not_required'], true)
 ) {
     $currentResultLines = (array) ($repairWorkflowCurrentResult['lines'] ?? []);
     $currentResultSummary = trim((string) ($repairWorkflowCurrentResult['summary'] ?? ''));

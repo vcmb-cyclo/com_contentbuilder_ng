@@ -14,8 +14,32 @@
             layout="joomla.form.field.radio.switcher"
             filter="boolean"
         >
-            <option value="1">JYES</option>
             <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+        <field
+            name="audit_details_template_empty"
+            type="radio"
+            default="0"
+            label="COM_CONTENTBUILDERNG_CONFIG_AUDIT_DETAILS_TEMPLATE_EMPTY_LABEL"
+            description="COM_CONTENTBUILDERNG_CONFIG_AUDIT_DETAILS_TEMPLATE_EMPTY_DESC"
+            layout="joomla.form.field.radio.switcher"
+            filter="boolean"
+        >
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+        <field
+            name="audit_field_missing_in_edit"
+            type="radio"
+            default="0"
+            label="COM_CONTENTBUILDERNG_CONFIG_AUDIT_FIELD_MISSING_IN_EDIT_LABEL"
+            description="COM_CONTENTBUILDERNG_CONFIG_AUDIT_FIELD_MISSING_IN_EDIT_DESC"
+            layout="joomla.form.field.radio.switcher"
+            filter="boolean"
+        >
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
         </field>
     </fieldset>
 

@@ -344,7 +344,8 @@
         box-shadow: 0 0 0 .2rem rgba(var(--bs-primary-rgb), .08);
     }
     .cb-repair-workflow-step.is-done,
-    .cb-repair-workflow-step.is-skipped {
+    .cb-repair-workflow-step.is-skipped,
+    .cb-repair-workflow-step.is-not_required {
         border-color: var(--bs-success-border-subtle);
         background: var(--bs-success-bg-subtle);
     }
@@ -385,7 +386,8 @@
         white-space: nowrap;
     }
     .cb-repair-workflow-status.is-done,
-    .cb-repair-workflow-status.is-skipped {
+    .cb-repair-workflow-status.is-skipped,
+    .cb-repair-workflow-status.is-not_required {
         background: var(--bs-success-bg-subtle);
         color: var(--bs-success-text-emphasis);
     }
