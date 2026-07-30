@@ -280,9 +280,11 @@ final class Blank extends CMSPlugin implements SubscriberInterface
         $db->setQuery($checkEditable);
         $hasEditable = (int) $db->loadResult() > 0;
         if (!$hasEditable) {
-            $msg = 'No editable elements configured; generated editable sample uses all elements.';
-            Factory::getApplication()->enqueueMessage($msg, 'warning');
-            Log::add($msg, Log::WARNING, 'com_contentbuilderng');
+            if ($event instanceof Event) {
+                $this->pushEventResult($event, '');
+                return;
+            }
+            return '';
         }
         $out = '<table border="0" width="100%" class="blanktable_edit"><tbody>' . "\n";
         $names = $form->getElementNames();

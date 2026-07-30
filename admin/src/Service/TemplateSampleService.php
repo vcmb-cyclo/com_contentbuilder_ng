@@ -4,6 +4,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Service;
 
 \defined('_JEXEC') or die;
 
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Log\Log;
 use Joomla\CMS\Plugin\PluginHelper;
@@ -113,6 +114,18 @@ class TemplateSampleService
     {
         if (!$formId || !is_object($form)) {
             return;
+        }
+
+        $editableQuery = $this->db->getQuery(true)
+            ->select('COUNT(*)')
+            ->from($this->db->quoteName('#__contentbuilderng_elements'))
+            ->where($this->db->quoteName('published') . ' = 1')
+            ->where($this->db->quoteName('editable') . ' = 1')
+            ->where($this->db->quoteName('form_id') . ' = ' . (int) $formId);
+        $this->db->setQuery($editableQuery);
+
+        if ((int) $this->db->loadResult() < 1) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_THEME_NO_EDITABLE_ELEMENTS'));
         }
 
         $requestedPlugin = trim((string) $plugin);

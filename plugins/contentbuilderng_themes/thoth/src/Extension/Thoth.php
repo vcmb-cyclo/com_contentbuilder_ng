@@ -272,9 +272,7 @@ final class Thoth extends CMSPlugin implements SubscriberInterface
         }
 
         if (!$hasEditableElements) {
-            $msg = Text::_('COM_CONTENTBUILDERNG_THEME_NO_EDITABLE_ELEMENTS');
-            Factory::getApplication()->enqueueMessage($msg, 'warning');
-            Log::add($msg, Log::WARNING, 'com_contentbuilderng');
+            return '';
         }
 
         $out = "\n";
