@@ -31,7 +31,7 @@ use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView a
 
 class HtmlView extends BaseHtmlView
 {
-    /** @var array{info: array<string,string>, checks: array<int,array{status:string,message:string}>, performance?:array<string,string>, data?:array<string,mixed>} */
+    /** @var array{info: array<string,string>, checks: array<int,array{status:string,message:string,reference?:string,code?:string}>, performance?:array<string,string>, data?:array<string,mixed>} */
     public array $audit = ['info' => [], 'checks' => []];
 
     public string $wizardReturnUrl = '';
@@ -67,32 +67,6 @@ class HtmlView extends BaseHtmlView
     public function display($tpl = null)
     {
         if ($this->getLayout() === 'help') {
-            parent::display($tpl);
-            return;
-        }
-
-        if ($this->getLayout() === 'audit') {
-            $app = $this->getApp();
-            $formId = $app->getInput()->getInt('id', 0);
-            $identity = $app->getIdentity();
-            $formAsset = $formId > 0 ? 'com_contentbuilderng.form.' . $formId : 'com_contentbuilderng';
-
-            if (
-                !$identity->authorise('core.manage', 'com_contentbuilderng')
-                && !$identity->authorise('core.edit', $formAsset)
-                && !$identity->authorise('core.edit', 'com_contentbuilderng')
-            ) {
-                throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
-            }
-
-            $document = $this->getDocument();
-            $document->getWebAssetManager()->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
-            $document->getWebAssetManager()->useScript('com_contentbuilderng.form-audit.js');
-            Text::script('COM_CONTENTBUILDERNG_AUDIT_AJAX_REQUEST_FAILED');
-            Text::script('COM_CONTENTBUILDERNG_AUDIT_REFRESH_FAILED');
-
-            $auditService = new FormAuditService($this->getDatabase());
-            $this->audit = $auditService->audit($formId);
             parent::display($tpl);
             return;
         }
@@ -193,6 +167,7 @@ class HtmlView extends BaseHtmlView
                     'checks' => [[
                         'status' => FormAuditService::STATUS_ERROR,
                         'message' => Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FAILED', $e->getMessage()),
+                        'reference' => 'CBNG-AUDIT-FORM-EXCEPTION',
                     ]],
                 ];
             }
@@ -314,18 +289,6 @@ class HtmlView extends BaseHtmlView
             ->icon('fa-solid fa-circle-xmark text-danger')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_UNPUBLISH_ELEMENTS_TIP')]);
-
-        if ($formId > 0) {
-            // Disabled by form-edit-init.js while the form is dirty: the audit
-            // reads the saved configuration, not the unsaved editor state.
-            $toolbar->popupButton('audit', 'COM_CONTENTBUILDERNG_AUDIT')
-                ->popupType('iframe')
-                ->url(Route::_('index.php?option=com_contentbuilderng&view=form&layout=audit&tmpl=component&id=' . $formId, false))
-                ->icon('fa fa-stethoscope')
-                ->iframeWidth(800)
-                ->iframeHeight(600)
-                ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_AUDIT_TIP')]);
-        }
 
         ToolbarHelper::cancel('form.cancel', 'JTOOLBAR_CLOSE');
 

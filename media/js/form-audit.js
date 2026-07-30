@@ -138,6 +138,15 @@
         var formData = new FormData(form);
         formData.set('task', button.dataset.cbFormAuditTask || 'form.repairEditableTemplate');
         formData.set('id', button.dataset.cbFormAuditId || '0');
+
+        if (button.dataset.cbFormAuditField) {
+            formData.set('field_name', button.dataset.cbFormAuditField);
+        }
+
+        if (button.dataset.cbFormAuditTheme) {
+            formData.set('theme_plugin', button.dataset.cbFormAuditTheme);
+        }
+
         formData.set('cb_ajax', '1');
         button.disabled = true;
         button.setAttribute('aria-busy', 'true');

@@ -93,6 +93,7 @@
         var field = button.dataset.cbAuditAjaxField || '';
         var value = button.dataset.cbAuditAjaxValue || '';
         var task = button.dataset.cbAuditAjaxTask || '';
+        var checkboxSelector = button.dataset.cbAuditAjaxCheckboxSelector || '';
 
         if (!form || field === '' || task === '') {
             return;
@@ -100,7 +101,15 @@
 
         var formData = new FormData(form);
         formData.set('task', task);
-        formData.set(field, value);
+        if (checkboxSelector !== '') {
+            formData.delete(field);
+            formData.delete(field + '[]');
+            document.querySelectorAll(checkboxSelector + ':checked').forEach(function (checkbox) {
+                formData.append(field + '[]', checkbox.value);
+            });
+        } else {
+            formData.set(field, value);
+        }
         formData.set('cb_ajax', '1');
         button.disabled = true;
         button.setAttribute('aria-busy', 'true');
@@ -149,6 +158,38 @@
 
         event.preventDefault();
         executeAuditAction(button);
+    });
+
+    document.addEventListener('change', function (event) {
+        var target = event.target;
+
+        if (!(target instanceof HTMLInputElement)) {
+            return;
+        }
+
+        var group = target.dataset.cbSelectAll || target.dataset.cbSelectItem || '';
+
+        if (group === '') {
+            return;
+        }
+
+        var masterSelector = '[data-cb-select-all="' + group + '"]';
+        var itemSelector = '[data-cb-select-item="' + group + '"]';
+
+        if (target.matches(masterSelector)) {
+            document.querySelectorAll(itemSelector).forEach(function (checkbox) {
+                checkbox.checked = target.checked;
+            });
+        }
+
+        var masters = document.querySelectorAll(masterSelector);
+        var items = document.querySelectorAll(itemSelector);
+        var checkedCount = document.querySelectorAll(itemSelector + ':checked').length;
+
+        masters.forEach(function (master) {
+            master.checked = items.length > 0 && checkedCount === items.length;
+            master.indeterminate = checkedCount > 0 && checkedCount < items.length;
+        });
     });
 
     initializeTooltips();

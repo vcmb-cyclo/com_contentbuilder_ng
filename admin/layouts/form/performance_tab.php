@@ -55,9 +55,15 @@ $checks = array_values(array_filter(
                 <?php $status = (string) ($check['status'] ?? FormAuditService::STATUS_WARNING); ?>
                 <?php $badgeClass = $status === FormAuditService::STATUS_ERROR ? 'bg-danger' : 'text-bg-warning'; ?>
                 <?php $badgeKey = $status === FormAuditService::STATUS_ERROR ? 'COM_CONTENTBUILDERNG_AUDIT_STATUS_ERROR' : 'COM_CONTENTBUILDERNG_AUDIT_STATUS_WARNING'; ?>
+                <?php $checkReference = trim((string) ($check['reference'] ?? '')); ?>
                 <li class="list-group-item d-flex align-items-start gap-2">
                     <span class="badge <?php echo $badgeClass; ?>"><?php echo Text::_($badgeKey); ?></span>
-                    <span><?php echo htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                    <div>
+                        <span><?php echo htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <?php if ($checkReference !== '') : ?>
+                            <small class="d-block text-muted"><?php echo htmlspecialchars(Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_REFERENCE', $checkReference), ENT_QUOTES, 'UTF-8'); ?></small>
+                        <?php endif; ?>
+                    </div>
                 </li>
             <?php endforeach; ?>
         <?php endif; ?>

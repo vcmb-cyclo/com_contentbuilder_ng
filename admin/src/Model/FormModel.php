@@ -36,6 +36,7 @@ use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngCompon
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
 use CB\Component\Contentbuilderng\Administrator\Service\PathService;
+use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceDiagnosticHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
@@ -802,14 +803,13 @@ class FormModel extends AdminModel
         if ($data->type && $data->reference_id) {
             $data->form = FormSourceFactory::getForm((string) $data->type, (string) $data->reference_id);
             if (!$data->form || !$data->form->exists) {
-                if ((string) $data->type === 'com_breezingformsng') {
-                    $this->getApp()->enqueueMessage(
-                        Text::sprintf('COM_CONTENTBUILDERNG_BREEZINGFORMS_SOURCE_NOT_FOUND', (int) $data->reference_id),
-                        'warning'
-                    );
-                } else {
-                    $this->getApp()->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
-                }
+                $this->getApp()->enqueueMessage(
+                    Text::sprintf(
+                        'COM_CONTENTBUILDERNG_SOURCE_NOT_RESOLVED',
+                        FormSourceDiagnosticHelper::describe((string) $data->type, $data->reference_id)
+                    ),
+                    'warning'
+                );
 
                 // Keep the form editable and let admin choose a new source.
                 $data->reference_id = 0;
@@ -1222,7 +1222,13 @@ class FormModel extends AdminModel
         $createSample = !empty($jform['create_sample']);
         if ($createSample) {
             if (!$formObj) {
-                $app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
+                $app->enqueueMessage(
+                    Text::sprintf(
+                        'COM_CONTENTBUILDERNG_SOURCE_NOT_RESOLVED',
+                        FormSourceDiagnosticHelper::describe((string) ($jform['type'] ?? ''), $jform['reference_id'] ?? 0)
+                    ),
+                    'warning'
+                );
             }
             $sample = $formSupportService->createDetailsSample($id, $formObj, $jform['theme_plugin']);
             Logger::info('Details sample requested', [
@@ -1245,7 +1251,13 @@ class FormModel extends AdminModel
         $createEditableSample = !empty($jform['create_editable_sample']);
         if ($createEditableSample) {
             if (!$formObj) {
-                $app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
+                $app->enqueueMessage(
+                    Text::sprintf(
+                        'COM_CONTENTBUILDERNG_SOURCE_NOT_RESOLVED',
+                        FormSourceDiagnosticHelper::describe((string) ($jform['type'] ?? ''), $jform['reference_id'] ?? 0)
+                    ),
+                    'warning'
+                );
             }
             $jform['editable_template'] = $formSupportService->createEditableSample($id, $formObj, $jform['theme_plugin']);
         }
@@ -1254,7 +1266,13 @@ class FormModel extends AdminModel
         $emailAdminTemplate = !empty($jform['email_admin_create_sample']);
         if ($emailAdminTemplate) {
             if (!$formObj) {
-                $app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
+                $app->enqueueMessage(
+                    Text::sprintf(
+                        'COM_CONTENTBUILDERNG_SOURCE_NOT_RESOLVED',
+                        FormSourceDiagnosticHelper::describe((string) ($jform['type'] ?? ''), $jform['reference_id'] ?? 0)
+                    ),
+                    'warning'
+                );
             }
             $jform['email_admin_template'] = $formSupportService->createEmailSample($id, $formObj, $emailAdminHtml);
         }
@@ -1262,7 +1280,13 @@ class FormModel extends AdminModel
         $emailCreateSample = !empty($jform['email_create_sample']);
         if ($emailCreateSample) {
             if (!$formObj) {
-                $app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 'warning');
+                $app->enqueueMessage(
+                    Text::sprintf(
+                        'COM_CONTENTBUILDERNG_SOURCE_NOT_RESOLVED',
+                        FormSourceDiagnosticHelper::describe((string) ($jform['type'] ?? ''), $jform['reference_id'] ?? 0)
+                    ),
+                    'warning'
+                );
             }
             $jform['email_template'] = $formSupportService->createEmailSample($id, $formObj, $this->getInput()->getBool('email_html', false));
         }

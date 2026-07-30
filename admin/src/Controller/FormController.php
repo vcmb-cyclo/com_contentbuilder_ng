@@ -458,7 +458,7 @@ class FormController extends BaseFormController
             $this->setMessage($message, 'error');
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=audit&tmpl=component&id=' . $formId, false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $formId . '&tab=tab12', false));
     }
 
     public function repairEditableTemplate(): void
@@ -480,9 +480,9 @@ class FormController extends BaseFormController
 
             $component = $this->getApp()->bootComponent('com_contentbuilderng');
             $formSupportService = $component->getContainer()->get(FormSupportService::class);
-            $formSupportService->regenerateEditableTemplate($formId, (int) $identity->id);
+            $formName = $formSupportService->regenerateEditableTemplate($formId, (int) $identity->id);
 
-            $message = Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIRED');
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIRED', $formName);
             if ($this->isAjaxCall()) {
                 $this->respondAjax(true, $message);
                 return;
@@ -499,7 +499,131 @@ class FormController extends BaseFormController
             $this->setMessage($message, 'error');
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=audit&tmpl=component&id=' . $formId, false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $formId . '&tab=tab12', false));
+    }
+
+    public function repairDetailsTemplate(): void
+    {
+        $this->checkToken();
+
+        $formId = $this->input->post->getInt('id', $this->input->getInt('id', 0));
+
+        try {
+            $identity = $this->getApp()->getIdentity();
+            $formAsset = 'com_contentbuilderng.form.' . $formId;
+            if (
+                !$identity->authorise('core.manage', 'com_contentbuilderng')
+                && !$identity->authorise('core.edit', $formAsset)
+                && !$identity->authorise('core.edit', 'com_contentbuilderng')
+            ) {
+                throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+            }
+
+            $component = $this->getApp()->bootComponent('com_contentbuilderng');
+            $formSupportService = $component->getContainer()->get(FormSupportService::class);
+            $formName = $formSupportService->regenerateDetailsTemplate($formId, (int) $identity->id);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIRED', $formName);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $formId . '&tab=tab12', false));
+    }
+
+    public function repairTemplates(): void
+    {
+        $this->checkToken();
+
+        $formId = $this->input->post->getInt('id', $this->input->getInt('id', 0));
+
+        try {
+            $identity = $this->getApp()->getIdentity();
+            $formAsset = 'com_contentbuilderng.form.' . $formId;
+            if (
+                !$identity->authorise('core.manage', 'com_contentbuilderng')
+                && !$identity->authorise('core.edit', $formAsset)
+                && !$identity->authorise('core.edit', 'com_contentbuilderng')
+            ) {
+                throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+            }
+
+            $component = $this->getApp()->bootComponent('com_contentbuilderng');
+            $formSupportService = $component->getContainer()->get(FormSupportService::class);
+            $formName = $formSupportService->regenerateBothTemplates($formId, (int) $identity->id);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIRED', $formName);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $formId . '&tab=tab12', false));
+    }
+
+    public function repairEditableFieldItem(): void
+    {
+        $this->checkToken();
+
+        $formId = $this->input->post->getInt('id', $this->input->getInt('id', 0));
+        $fieldName = $this->input->post->getString('field_name', '');
+
+        try {
+            $identity = $this->getApp()->getIdentity();
+            $formAsset = 'com_contentbuilderng.form.' . $formId;
+            if (
+                !$identity->authorise('core.manage', 'com_contentbuilderng')
+                && !$identity->authorise('core.edit', $formAsset)
+                && !$identity->authorise('core.edit', 'com_contentbuilderng')
+            ) {
+                throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+            }
+
+            $component = $this->getApp()->bootComponent('com_contentbuilderng');
+            $formSupportService = $component->getContainer()->get(FormSupportService::class);
+            $formSupportService->replaceEditableFieldValueWithItem($formId, $fieldName, (int) $identity->id);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_ITEM_REPAIRED', $fieldName);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_ITEM_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $formId . '&tab=tab12', false));
     }
 
     public function debug_on(): bool
@@ -868,6 +992,26 @@ class FormController extends BaseFormController
         }
     }
 
+    /**
+     * Label of a BreezingForms system field mapping, read before it is deleted
+     * so the confirmation message can name which field was removed.
+     */
+    private function getBfSystemFieldLabel(int $formId, int $elementId): string
+    {
+        $db = $this->getDatabase();
+        $query = $db->getQuery(true)
+            ->select($db->quoteName('label'))
+            ->from($db->quoteName('#__contentbuilderng_elements'))
+            ->where($db->quoteName('id') . ' = ' . $elementId)
+            ->where($db->quoteName('form_id') . ' = ' . $formId)
+            ->where($db->quoteName('reference_id') . ' < 0');
+        $db->setQuery($query, 0, 1);
+
+        $label = trim((string) $db->loadResult());
+
+        return $label !== '' ? $label : ('#' . $elementId);
+    }
+
     public function ajax_remove_bf_system_field(): void
     {
         $this->checkToken();
@@ -881,6 +1025,7 @@ class FormController extends BaseFormController
             }
 
             $db          = $this->getDatabase();
+            $fieldLabel  = $this->getBfSystemFieldLabel($formId, $elementId);
             $deleteQuery = $db->getQuery(true)
                 ->delete($db->quoteName('#__contentbuilderng_elements'))
                 ->where($db->quoteName('id') . ' = ' . $elementId)
@@ -896,7 +1041,7 @@ class FormController extends BaseFormController
             $table = $this->getElementsModelForListActions(true)->getTable('Elementoptions');
             $table->reorder('form_id = ' . $formId);
 
-            $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_DELETED'));
+            $this->respondAjax(true, Text::sprintf('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_DELETED', $fieldLabel));
         } catch (\Throwable $e) {
             $this->respondAjax(false, $e->getMessage());
         }
@@ -919,6 +1064,7 @@ class FormController extends BaseFormController
             }
 
             $db = $this->getDatabase();
+            $fieldLabel = $this->getBfSystemFieldLabel($formId, $elementId);
             $deleteQuery = $db->getQuery(true)
                 ->delete($db->quoteName('#__contentbuilderng_elements'))
                 ->where($db->quoteName('id') . ' = ' . $elementId)
@@ -930,7 +1076,7 @@ class FormController extends BaseFormController
             $table = $this->getElementsModelForListActions(true)->getTable('Elementoptions');
             $table->reorder('form_id = ' . $formId);
 
-            $this->setRedirect($this->getEditRedirectUrl($formId), Text::_('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_DELETED'));
+            $this->setRedirect($this->getEditRedirectUrl($formId), Text::sprintf('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_DELETED', $fieldLabel));
             return true;
         } catch (\Throwable $e) {
             $this->setRedirect($this->getEditRedirectUrl($formId), $e->getMessage(), 'warning');

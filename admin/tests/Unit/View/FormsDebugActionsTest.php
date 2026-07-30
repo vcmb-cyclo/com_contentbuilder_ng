@@ -52,7 +52,7 @@ final class FormsDebugActionsTest extends TestCase
 
     public function testEditViewUsesGreenBugIconForEnabledDebugState(): void
     {
-        $layout = $this->read('admin/layouts/form/view_tab.php');
+        $layout = $this->read('admin/tmpl/form/edit.php');
         $script = $this->read('media/js/form-edit-init.js');
 
         self::assertStringContainsString(
@@ -104,6 +104,24 @@ final class FormsDebugActionsTest extends TestCase
         $model = $this->read('admin/src/Model/FormsModel.php');
 
         self::assertGreaterThanOrEqual(2, \substr_count($model, "'a.debug_mode'"));
+    }
+
+    public function testFormAuditRepairTasksHaveControllerHandlers(): void
+    {
+        $layout = $this->read('admin/layouts/form/audit_tab.php');
+        $controller = $this->read('admin/src/Controller/FormController.php');
+        $tasks = [
+            'form.repairThemePlugin' => 'repairThemePlugin',
+            'form.repairEditableTemplate' => 'repairEditableTemplate',
+            'form.repairDetailsTemplate' => 'repairDetailsTemplate',
+            'form.repairTemplates' => 'repairTemplates',
+            'form.repairEditableFieldItem' => 'repairEditableFieldItem',
+        ];
+
+        foreach ($tasks as $task => $method) {
+            self::assertStringContainsString("'task' => '{$task}'", $layout, $task);
+            self::assertStringContainsString("public function {$method}(): void", $controller, $method);
+        }
     }
 
     #[DataProvider('languageProvider')]

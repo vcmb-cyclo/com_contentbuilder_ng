@@ -13,6 +13,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Service;
 
 \defined('_JEXEC') or die;
 
+use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceDiagnosticHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 use CB\Component\Contentbuilderng\Administrator\types\contentbuilderng_com_breezingformsng;
@@ -36,7 +37,7 @@ final class FormAuditService
      *
      * @return array{
      *   info:array<string,string>,
-     *   checks:array<int,array{status:string,message:string,code?:string}>,
+     *   checks:array<int,array{status:string,message:string,reference?:string,code?:string}>,
      *   performance:array<string,string>,
      *   data:array<string,mixed>,
      *   form?:array{id:int,name:string,title:string}
@@ -62,6 +63,7 @@ final class FormAuditService
                 'checks' => [[
                     'status' => self::STATUS_ERROR,
                     'message' => Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'),
+                    'reference' => 'CBNG-AUDIT-FORM-NOT-FOUND',
                 ]],
                 'performance' => [],
                 'data' => [],
@@ -81,7 +83,14 @@ final class FormAuditService
         $sourceAvailable = false;
         try {
             $source = FormSourceFactory::getForm((string) $form['type'], (string) $form['reference_id']);
-            if (is_object($source) && method_exists($source, 'getElementNames')) {
+            // The type classes always return an instance, even when the storage
+            // row (or BF form) behind reference_id is gone; only "exists" tells
+            // the two apart. Without this check the element list below would be
+            // compared against an empty name map and every single field would be
+            // reported as an orphan reference, hiding the actual root cause.
+            $sourceResolved = is_object($source)
+                && (!property_exists($source, 'exists') || (bool) ($source->exists ?? false));
+            if ($sourceResolved && method_exists($source, 'getElementNames')) {
                 $sourceNames = (array) $source->getElementNames();
                 $sourceAvailable = true;
             }
@@ -112,7 +121,9 @@ final class FormAuditService
         $editable = array_values(array_filter($published, static fn(array $row): bool => (int) $row['editable'] === 1));
 
         $modified = trim((string) ($form['modified'] ?? ''));
-        [$groupPermissions, $ownerPermissions, $permissionChecks] = $this->auditFrontendPermissions($form);
+        [$groupPermissions, $ownerPermissions, $permissionChecks, $rawGroupPermissions, $rawOwnerPermissions] = $this->auditFrontendPermissions($form);
+        $hasFrontendViewPermission = $this->hasFrontendPermission($rawGroupPermissions, $rawOwnerPermissions, 'view');
+        $hasFrontendEditPermission = $this->hasFrontendPermission($rawGroupPermissions, $rawOwnerPermissions, 'edit');
         [$performanceInfo, $performanceChecks] = $this->auditPerformance($form, $published, $sourceNames);
 
         $info = [
@@ -150,11 +161,20 @@ final class FormAuditService
             $recordsCountUnavailable ? [[
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_RECORDS_COUNT_UNAVAILABLE'),
+                'reference' => 'CBNG-AUDIT-RECORDS-COUNT-UNAVAILABLE',
             ]] : [],
             $this->checkTheme((string) ($form['theme_plugin'] ?? '')),
             $this->checkSourceSync($elements, $sourceNames, $sourceAvailable, (string) $form['type'], (string) $form['reference_id']),
             $this->checkElementReferences($elements),
-            $this->checkTemplates($published, $sourceNames, (string) $form['type'], (string) $form['details_template'], (string) $form['editable_template']),
+            $this->checkTemplates(
+                $published,
+                $sourceNames,
+                (string) $form['type'],
+                (string) $form['details_template'],
+                (string) $form['editable_template'],
+                $hasFrontendViewPermission,
+                $hasFrontendEditPermission
+            ),
             $permissionChecks,
             $performanceChecks
         );
@@ -194,7 +214,7 @@ final class FormAuditService
 
     /**
      * @param array<string,mixed> $form
-     * @return array{0:string,1:string,2:array<int,array{status:string,message:string}>}
+     * @return array{0:string,1:string,2:array<int,array{status:string,message:string,reference?:string}>,3:array<string,mixed>,4:array<string,mixed>}
      */
     private function auditFrontendPermissions(array $form): array
     {
@@ -210,7 +230,10 @@ final class FormAuditService
                 [[
                     'status' => self::STATUS_ERROR,
                     'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_FRONTEND_PERMISSIONS_INVALID'),
+                    'reference' => 'CBNG-AUDIT-FRONTEND-PERMISSIONS-INVALID',
                 ]],
+                [],
+                [],
             ];
         }
 
@@ -256,6 +279,7 @@ final class FormAuditService
             $checks[] = [
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_FRONTEND_PERMISSIONS_EMPTY'),
+                'reference' => 'CBNG-AUDIT-FRONTEND-PERMISSIONS-EMPTY',
             ];
         }
 
@@ -263,6 +287,7 @@ final class FormAuditService
             $checks[] = [
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_FRONTEND_NEW_WITHOUT_PERMISSION'),
+                'reference' => 'CBNG-AUDIT-FRONTEND-NEW-WITHOUT-PERMISSION',
             ];
         }
 
@@ -270,6 +295,7 @@ final class FormAuditService
             $checks[] = [
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_FRONTEND_EDIT_WITHOUT_PERMISSION'),
+                'reference' => 'CBNG-AUDIT-FRONTEND-EDIT-WITHOUT-PERMISSION',
             ];
         }
 
@@ -281,6 +307,8 @@ final class FormAuditService
                 ? implode(', ', $grantedOwnerPermissions)
                 : Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_NONE'),
             $checks,
+            $permissions,
+            $ownerPermissions,
         ];
     }
 
@@ -357,7 +385,7 @@ final class FormAuditService
      * @param array<string,mixed> $form
      * @param array<int,array<string,mixed>> $publishedElements
      * @param array<int|string,string> $sourceNames
-     * @return array{0:array<string,string>,1:array<int,array{status:string,message:string,code?:string}>}
+     * @return array{0:array<string,string>,1:array<int,array{status:string,message:string,reference?:string,code?:string}>}
      */
     private function auditPerformance(array $form, array $publishedElements, array $sourceNames): array
     {
@@ -384,6 +412,7 @@ final class FormAuditService
             return [[], [[
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_STORAGE_UNAVAILABLE'),
+                'reference' => 'CBNG-AUDIT-PERFORMANCE-STORAGE-UNAVAILABLE',
                 'code' => 'performance',
             ]]];
         }
@@ -407,6 +436,7 @@ final class FormAuditService
             return [[], [[
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_TABLE_UNAVAILABLE'),
+                'reference' => 'CBNG-AUDIT-PERFORMANCE-TABLE-UNAVAILABLE',
                 'code' => 'performance',
             ]]];
         }
@@ -446,6 +476,7 @@ final class FormAuditService
                     'COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_SLOW_LIST_QUERY',
                     number_format($listQueryMs, 1)
                 ),
+                'reference' => 'CBNG-AUDIT-PERFORMANCE-SLOW-LIST-QUERY',
                 'code' => 'performance',
             ];
         }
@@ -463,7 +494,7 @@ final class FormAuditService
      *
      * @param array<int,array<string,mixed>> $publishedElements
      * @param array<int|string,string> $sourceNames
-     * @return array<int,array{status:string,message:string,code?:string}>
+     * @return array<int,array{status:string,message:string,reference?:string,code?:string}>
      */
     private function checkStorageIndexes(string $tableName, array $publishedElements, array $sourceNames): array
     {
@@ -511,7 +542,8 @@ final class FormAuditService
                 'COM_CONTENTBUILDERNG_AUDIT_CHECK_PERFORMANCE_UNINDEXED_COLUMNS',
                 implode(', ', $unindexed)
             ),
-            'code' => 'performance',
+            'reference' => 'CBNG-AUDIT-PERFORMANCE-UNINDEXED-COLUMNS',
+            'code' => 'unindexed_columns',
         ]];
     }
 
@@ -527,7 +559,7 @@ final class FormAuditService
     /**
      * @param array<int,array<string,mixed>> $elements
      * @param array<int|string,string> $sourceNames
-     * @return array<int,array{status:string,message:string,code?:string}>
+     * @return array<int,array{status:string,message:string,reference?:string,code?:string}>
      */
     private function checkSourceSync(array $elements, array $sourceNames, bool $sourceAvailable, string $sourceType, string $sourceReferenceId): array
     {
@@ -537,7 +569,9 @@ final class FormAuditService
         if (!$sourceAvailable) {
             $checks[] = [
                 'status' => self::STATUS_ERROR,
-                'message' => Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_CHECK_SOURCE_UNAVAILABLE', $sourceType, $sourceReferenceId),
+                'message' => Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_CHECK_SOURCE_UNAVAILABLE', $sourceType, $sourceReferenceId)
+                    . ' ' . FormSourceDiagnosticHelper::describe($sourceType, $sourceReferenceId),
+                'reference' => 'CBNG-AUDIT-SOURCE-UNAVAILABLE',
             ];
 
             return $checks;
@@ -555,6 +589,7 @@ final class FormAuditService
                         (string) $element['label'],
                         $referenceId
                     ),
+                    'reference' => 'CBNG-AUDIT-SOURCE-MISSING',
                     'code' => 'element_reference',
                 ];
             }
@@ -569,6 +604,7 @@ final class FormAuditService
                 $checks[] = [
                     'status' => self::STATUS_WARNING,
                     'message' => Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_CHECK_SOURCE_UNSYNCED', (string) $name),
+                    'reference' => 'CBNG-AUDIT-SOURCE-UNSYNCED',
                 ];
             }
         }
@@ -641,7 +677,7 @@ final class FormAuditService
     }
 
     /**
-     * @return array<int,array{status:string,message:string,code?:string}>
+     * @return array<int,array{status:string,message:string,reference?:string,code?:string}>
      */
     private function checkTheme(string $themePlugin): array
     {
@@ -650,6 +686,7 @@ final class FormAuditService
             return [[
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_THEME_EMPTY'),
+                'reference' => 'CBNG-AUDIT-THEME-EMPTY',
                 'code' => 'theme_empty',
             ]];
         }
@@ -658,6 +695,7 @@ final class FormAuditService
             return [[
                 'status' => self::STATUS_ERROR,
                 'message' => Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_CHECK_THEME_LEGACY', $themePlugin),
+                'reference' => 'CBNG-AUDIT-THEME-LEGACY',
             ]];
         }
 
@@ -665,6 +703,7 @@ final class FormAuditService
             return [[
                 'status' => self::STATUS_ERROR,
                 'message' => Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_CHECK_THEME_DISABLED', $themePlugin),
+                'reference' => 'CBNG-AUDIT-THEME-DISABLED',
             ]];
         }
 
@@ -673,7 +712,7 @@ final class FormAuditService
 
     /**
      * @param array<int,array<string,mixed>> $elements
-     * @return array<int,array{status:string,message:string,code?:string}>
+     * @return array<int,array{status:string,message:string,reference?:string,code?:string}>
      */
     private function checkElementReferences(array $elements): array
     {
@@ -689,6 +728,7 @@ final class FormAuditService
                         'COM_CONTENTBUILDERNG_AUDIT_CHECK_ELEMENT_REFERENCE_EMPTY',
                         (string) ($element['label'] ?? '')
                     ),
+                    'reference' => 'CBNG-AUDIT-ELEMENT-REFERENCE-EMPTY',
                     'code' => 'element_reference',
                 ];
                 continue;
@@ -709,6 +749,7 @@ final class FormAuditService
                     $referenceId,
                     implode(', ', $labels)
                 ),
+                'reference' => 'CBNG-AUDIT-ELEMENT-REFERENCE-DUPLICATE',
                 'code' => 'element_reference',
             ];
         }
@@ -719,23 +760,40 @@ final class FormAuditService
     /**
      * @param array<int,array<string,mixed>> $published
      * @param array<int|string,string> $sourceNames
-     * @return array<int,array{status:string,message:string}>
+     * @return array<int,array{status:string,message:string,reference?:string}>
      */
-    private function checkTemplates(array $published, array $sourceNames, string $sourceType, string $detailsTemplate, string $editableTemplate): array
-    {
+    private function checkTemplates(
+        array $published,
+        array $sourceNames,
+        string $sourceType,
+        string $detailsTemplate,
+        string $editableTemplate,
+        bool $hasFrontendViewPermission,
+        bool $hasFrontendEditPermission
+    ): array {
         $checks = [];
+        $detailsEmpty = $published !== [] && trim($detailsTemplate) === '' && $hasFrontendViewPermission;
+        $editableEmpty = $published !== [] && trim($editableTemplate) === '' && $hasFrontendEditPermission;
 
-        if ($published !== [] && trim($detailsTemplate) === '') {
+        if ($detailsEmpty && $editableEmpty) {
+            $checks[] = [
+                'status' => self::STATUS_WARNING,
+                'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_TEMPLATES_EMPTY'),
+                'reference' => 'CBNG-AUDIT-TEMPLATES-EMPTY',
+                'code' => 'templates_empty',
+            ];
+        } elseif ($detailsEmpty) {
             $checks[] = [
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_DETAILS_TEMPLATE_EMPTY'),
+                'reference' => 'CBNG-AUDIT-DETAILS-TEMPLATE-EMPTY',
+                'code' => 'details_template_empty',
             ];
-        }
-
-        if ($published !== [] && trim($editableTemplate) === '') {
+        } elseif ($editableEmpty) {
             $checks[] = [
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_EDITABLE_TEMPLATE_EMPTY'),
+                'reference' => 'CBNG-AUDIT-EDITABLE-TEMPLATE-EMPTY',
                 'code' => 'editable_template_empty',
             ];
         }
@@ -762,6 +820,7 @@ final class FormAuditService
                         $isSystemField ? 'COM_CONTENTBUILDERNG_AUDIT_CHECK_SYSTEM_MISSING_IN_DETAILS' : 'COM_CONTENTBUILDERNG_AUDIT_CHECK_MISSING_IN_DETAILS',
                         $auditLabel
                     ),
+                    'reference' => $isSystemField ? 'CBNG-AUDIT-SYSTEM-FIELD-MISSING-IN-DETAILS' : 'CBNG-AUDIT-FIELD-MISSING-IN-DETAILS',
                 ];
             }
 
@@ -772,6 +831,7 @@ final class FormAuditService
                         $isSystemField ? 'COM_CONTENTBUILDERNG_AUDIT_CHECK_SYSTEM_MISSING_IN_EDIT' : 'COM_CONTENTBUILDERNG_AUDIT_CHECK_MISSING_IN_EDIT',
                         $auditLabel
                     ),
+                    'reference' => $isSystemField ? 'CBNG-AUDIT-SYSTEM-FIELD-MISSING-IN-EDIT' : 'CBNG-AUDIT-FIELD-MISSING-IN-EDIT',
                 ];
             }
 
@@ -779,6 +839,9 @@ final class FormAuditService
                 $checks[] = [
                     'status' => self::STATUS_ERROR,
                     'message' => Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_CHECK_EDITABLE_WITHOUT_ITEM', $name),
+                    'reference' => 'CBNG-AUDIT-EDITABLE-FIELD-WITHOUT-ITEM',
+                    'code' => 'editable_field_without_item',
+                    'field' => $name,
                 ];
             }
 
@@ -786,6 +849,7 @@ final class FormAuditService
                 $checks[] = [
                     'status' => self::STATUS_WARNING,
                     'message' => Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_CHECK_NONEDITABLE_WITH_ITEM', $name),
+                    'reference' => 'CBNG-AUDIT-NONEDITABLE-FIELD-WITH-ITEM',
                 ];
             }
         }
@@ -802,6 +866,9 @@ final class FormAuditService
                     $checks[] = [
                         'status' => self::STATUS_ERROR,
                         'message' => Text::sprintf($key, $markerName),
+                        'reference' => $key === 'COM_CONTENTBUILDERNG_AUDIT_CHECK_UNKNOWN_MARKER_DETAILS'
+                            ? 'CBNG-AUDIT-UNKNOWN-MARKER-DETAILS'
+                            : 'CBNG-AUDIT-UNKNOWN-MARKER-EDIT',
                     ];
                 }
             }

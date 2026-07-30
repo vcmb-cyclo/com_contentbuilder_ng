@@ -65,8 +65,121 @@ class FormSupportService
      *
      * @throws \RuntimeException when the form cannot be resolved or the theme
      *                            produces an empty template.
+     *
+     * @return string the form's name (HTML-escaped), for use in a confirmation message
      */
-    public function regenerateEditableTemplate(int $formId, int $modifiedByUserId): void
+    public function regenerateEditableTemplate(int $formId, int $modifiedByUserId): string
+    {
+        [$sourceForm, $themePlugin, $formName] = $this->resolveFormForTemplateRegeneration($formId);
+
+        $editableTemplate = (string) $this->createEditableSample($formId, $sourceForm, $themePlugin);
+
+        if (trim($editableTemplate) === '') {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_EMPTY'));
+        }
+
+        $this->saveRegeneratedTemplate($formId, 'editable_template', $editableTemplate, $modifiedByUserId);
+
+        return $formName;
+    }
+
+    /**
+     * Regenerates and saves the details-template sample for a view, using its
+     * currently configured theme plugin. See regenerateEditableTemplate() for
+     * the shared resolution logic and callers.
+     *
+     * @throws \RuntimeException when the form cannot be resolved or the theme
+     *                            produces an empty template.
+     *
+     * @return string the form's name (HTML-escaped), for use in a confirmation message
+     */
+    public function regenerateDetailsTemplate(int $formId, int $modifiedByUserId): string
+    {
+        [$sourceForm, $themePlugin, $formName] = $this->resolveFormForTemplateRegeneration($formId);
+
+        $detailsTemplate = (string) $this->createDetailsSample($formId, $sourceForm, $themePlugin);
+
+        if (trim($detailsTemplate) === '') {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR_EMPTY'));
+        }
+
+        $this->saveRegeneratedTemplate($formId, 'details_template', $detailsTemplate, $modifiedByUserId);
+
+        return $formName;
+    }
+
+    /**
+     * Regenerates and saves both the details- and editable-template samples
+     * for a view in one call, used when the audit flags both as empty at once.
+     *
+     * @throws \RuntimeException when the form cannot be resolved or the theme
+     *                            produces an empty template for either one.
+     *
+     * @return string the form's name (HTML-escaped), for use in a confirmation message
+     */
+    public function regenerateBothTemplates(int $formId, int $modifiedByUserId): string
+    {
+        $this->regenerateDetailsTemplate($formId, $modifiedByUserId);
+
+        return $this->regenerateEditableTemplate($formId, $modifiedByUserId);
+    }
+
+    /**
+     * Replaces the {field:value} marker with {field:item} for a single field in
+     * the existing, non-empty editable template, leaving everything else in the
+     * template untouched. Used when the audit's "editable field without item"
+     * check fires on a template that already has custom layout around it, where
+     * a full regeneration from the theme would discard that customization.
+     *
+     * @throws \RuntimeException when the form cannot be resolved, the field name
+     *                            is empty, or no {field:value} marker is found.
+     *
+     * @return string the form's name (HTML-escaped), for use in a confirmation message
+     */
+    public function replaceEditableFieldValueWithItem(int $formId, string $fieldName, int $modifiedByUserId): string
+    {
+        if ($formId <= 0) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_INVALID'));
+        }
+
+        $fieldName = trim($fieldName);
+        if ($fieldName === '') {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_ITEM_REPAIR_INVALID_FIELD'));
+        }
+
+        $db = $this->db;
+        $query = $db->getQuery(true)
+            ->select($db->quoteName(['editable_template', 'name']))
+            ->from($db->quoteName('#__contentbuilderng_forms'))
+            ->where($db->quoteName('id') . ' = :formId')
+            ->bind(':formId', $formId, ParameterType::INTEGER);
+        $db->setQuery($query, 0, 1);
+        $formRow = $db->loadAssoc();
+
+        if (!is_array($formRow)) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_INVALID'));
+        }
+
+        $formName = htmlspecialchars(trim((string) ($formRow['name'] ?? '')) ?: ('#' . $formId), ENT_QUOTES, 'UTF-8');
+        $editableTemplate = (string) ($formRow['editable_template'] ?? '');
+
+        $pattern = '/\{' . preg_quote($fieldName, '/') . ':value\}/i';
+        $updatedTemplate = preg_replace($pattern, '{' . $fieldName . ':item}', $editableTemplate, -1, $replacedCount);
+
+        if ($updatedTemplate === null || $replacedCount < 1) {
+            throw new \RuntimeException(Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_ITEM_REPAIR_NOT_FOUND', $fieldName));
+        }
+
+        $this->saveRegeneratedTemplate($formId, 'editable_template', $updatedTemplate, $modifiedByUserId);
+
+        return $formName;
+    }
+
+    /**
+     * @return array{0:object,1:string,2:string} the resolved source form, theme plugin and form name
+     * @throws \RuntimeException when the form or its source cannot be resolved.
+     */
+    private function resolveFormForTemplateRegeneration(int $formId): array
     {
         if ($formId <= 0) {
             throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_INVALID'));
@@ -74,7 +187,7 @@ class FormSupportService
 
         $db = $this->db;
         $query = $db->getQuery(true)
-            ->select($db->quoteName(['type', 'reference_id', 'theme_plugin']))
+            ->select($db->quoteName(['type', 'reference_id', 'theme_plugin', 'name']))
             ->from($db->quoteName('#__contentbuilderng_forms'))
             ->where($db->quoteName('id') . ' = :formId')
             ->bind(':formId', $formId, ParameterType::INTEGER);
@@ -91,23 +204,26 @@ class FormSupportService
         }
 
         $themePlugin = trim((string) ($formRow['theme_plugin'] ?? '')) ?: 'thoth';
-        $editableTemplate = (string) $this->createEditableSample($formId, $sourceForm, $themePlugin);
+        $formName = trim((string) ($formRow['name'] ?? '')) ?: ('#' . $formId);
+        $formName = htmlspecialchars($formName, ENT_QUOTES, 'UTF-8');
 
-        if (trim($editableTemplate) === '') {
-            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_EMPTY'));
-        }
+        return [$sourceForm, $themePlugin, $formName];
+    }
 
+    private function saveRegeneratedTemplate(int $formId, string $column, string $template, int $modifiedByUserId): void
+    {
+        $db = $this->db;
         $modifiedValue = (new Date())->toSql();
         $update = $db->getQuery(true)
             ->update($db->quoteName('#__contentbuilderng_forms'))
-            ->set($db->quoteName('editable_template') . ' = :editableTemplate')
+            ->set($db->quoteName($column) . ' = :template')
             ->set($db->quoteName('modified') . ' = :modified')
             ->set($db->quoteName('modified_by') . ' = :modifiedBy')
-            ->where($db->quoteName('id') . ' = :formId2')
-            ->bind(':editableTemplate', $editableTemplate)
+            ->where($db->quoteName('id') . ' = :formId')
+            ->bind(':template', $template)
             ->bind(':modified', $modifiedValue)
             ->bind(':modifiedBy', $modifiedByUserId, ParameterType::INTEGER)
-            ->bind(':formId2', $formId, ParameterType::INTEGER);
+            ->bind(':formId', $formId, ParameterType::INTEGER);
         $db->setQuery($update);
         $db->execute();
     }

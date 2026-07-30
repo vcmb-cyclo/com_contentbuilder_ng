@@ -12,7 +12,6 @@
 
 \defined('_JEXEC') or die;
 
-use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Router\Route;
@@ -59,61 +58,6 @@ if (!is_object($item) || !is_callable($formatTypeDisplay)) {
                         </option>
                     <?php endforeach; ?>
                 </select>
-            </div>
-        </div>
-        <div class="col-12 col-lg-3">
-            <div class="d-flex flex-wrap align-items-center gap-3 ms-sm-4 ps-sm-2">
-                <?php if ((int) ($item->id ?? 0) > 0) : ?>
-                <div class="d-inline-flex align-items-center gap-2">
-                    <span class="fw-semibold editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_PUBLISH_TIP'); ?>">
-                        <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED'); ?> :
-                    </span>
-                    <?php
-                    $publishedToggleHtml = HTMLHelper::_(
-                        'jgrid.published',
-                        !empty($item->published) ? 1 : 0,
-                        0,
-                        'form.form',
-                        true,
-                        'cbformstate'
-                    );
-                    $publishedToggleHtml = preg_replace('/\saria-labelledby="[^"]*"/', '', (string) $publishedToggleHtml) ?? (string) $publishedToggleHtml;
-                    $publishedToggleHtml = preg_replace('#<div role="tooltip"[^>]*>.*?</div>#s', '', (string) $publishedToggleHtml) ?? (string) $publishedToggleHtml;
-                    echo $publishedToggleHtml;
-                    ?>
-                    <input type="checkbox" name="cid[]" id="cbformstate0" value="<?php echo (int) $item->id; ?>" style="display:none" />
-                </div>
-                <?php endif; ?>
-                <div class="d-inline-flex align-items-center gap-2">
-                    <span class="fw-semibold editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_TIP'); ?>">
-                        <?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE'); ?> :
-                    </span>
-                    <?php if ((int) ($item->id ?? 0) > 0) : ?>
-                    <?php
-                    $debugEnabled = !empty($item->debug_mode);
-                    $debugStates = [
-                        1 => ['debug_off', 'COM_CONTENTBUILDERNG_DEBUG_MODE', '', '', false, 'publish', 'publish'],
-                        0 => ['debug_on',  'COM_CONTENTBUILDERNG_DEBUG_MODE', '', '', false, 'unpublish', 'unpublish'],
-                    ];
-                    $debugToggleHtml = HTMLHelper::_('jgrid.state', $debugStates, $debugEnabled ? 1 : 0, 0, 'form.', true, true, 'cbdebugstate');
-                    $debugToggleHtml = preg_replace('/\saria-labelledby="[^"]*"/', '', (string) $debugToggleHtml) ?? (string) $debugToggleHtml;
-                    $debugToggleHtml = preg_replace('#<div role="tooltip"[^>]*>.*?</div>#s', '', (string) $debugToggleHtml) ?? (string) $debugToggleHtml;
-                    if ($debugEnabled) {
-                        $debugToggleHtml = str_replace('icon-publish', 'fa fa-bug text-success', $debugToggleHtml);
-                    }
-                    echo $debugToggleHtml;
-                    ?>
-                    <input type="checkbox" name="cid[]" id="cbdebugstate0" value="<?php echo (int) $item->id; ?>" style="display:none" />
-                    <?php else : ?>
-                    <input type="hidden" name="jform[debug_mode]" id="debug_mode" value="0" />
-                    <a href="#"
-                       class="tbody-icon"
-                       title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_TIP'); ?>"
-                       onclick="this.classList.toggle('active'); document.getElementById('debug_mode').value = this.classList.contains('active') ? '1' : '0'; return false;">
-                        <span class="icon-unpublish" aria-hidden="true"></span>
-                    </a>
-                    <?php endif; ?>
-                </div>
             </div>
         </div>
     </div>

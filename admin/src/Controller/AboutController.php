@@ -15,6 +15,8 @@ namespace CB\Component\Contentbuilderng\Administrator\Controller;
 \defined('_JEXEC') or die('Restricted access');
 
 use CB\Component\Contentbuilderng\Administrator\Helper\DatabaseAuditHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\DebugModeAuditHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\GeneratedArticleCategoryAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleInstallerTempAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
@@ -401,13 +403,13 @@ final class AboutController extends BaseController
 
         try {
             $formSupportService = $this->getComponent()->getContainer()->get(FormSupportService::class);
-            $formSupportService->regenerateEditableTemplate($formId, $this->getCurrentUserId());
+            $formName = $formSupportService->regenerateEditableTemplate($formId, $this->getCurrentUserId());
 
             $report = DatabaseAuditHelper::run();
             $app->setUserState('com_contentbuilderng.about.audit', $report);
             $this->getRepairWorkflowService()->logAuditReport($report);
 
-            $message = Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIRED');
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIRED', $formName);
             if ($this->isAjaxCall()) {
                 $this->respondAjax(true, $message);
                 return;
@@ -427,24 +429,244 @@ final class AboutController extends BaseController
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
     }
 
+    public function repairFormDetailsTemplate(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $formId = $this->input->post->getInt('form_id', 0);
+
+        try {
+            $formSupportService = $this->getComponent()->getContainer()->get(FormSupportService::class);
+            $formName = $formSupportService->regenerateDetailsTemplate($formId, $this->getCurrentUserId());
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIRED', $formName);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function repairFormTemplates(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $formId = $this->input->post->getInt('form_id', 0);
+
+        try {
+            $formSupportService = $this->getComponent()->getContainer()->get(FormSupportService::class);
+            $formName = $formSupportService->regenerateBothTemplates($formId, $this->getCurrentUserId());
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIRED', $formName);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function repairGeneratedArticleCategories(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $formIds = array_values(array_unique(array_filter(
+            array_map('intval', (array) $this->input->post->get('form_ids', [], 'array')),
+            static fn(int $formId): bool => $formId > 0
+        )));
+
+        try {
+            if ($formIds === []) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_NO_SELECTION'));
+            }
+
+            $summary = GeneratedArticleCategoryAuditHelper::repair(
+                $this->getComponent()->getContainer()->get(DatabaseInterface::class),
+                $formIds
+            );
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf(
+                'COM_CONTENTBUILDERNG_GENERATED_ARTICLE_CATEGORIES_REPAIR_SUMMARY',
+                (int) ($summary['scanned'] ?? 0),
+                (int) ($summary['issues'] ?? 0),
+                (int) ($summary['repaired'] ?? 0),
+                (int) ($summary['unchanged'] ?? 0),
+                (int) ($summary['forms_updated'] ?? 0),
+                (int) ($summary['articles_updated'] ?? 0),
+                (int) ($summary['assets_updated'] ?? 0),
+                (int) ($summary['workflows_updated'] ?? 0),
+                (int) ($summary['errors'] ?? 0)
+            );
+
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, (int) ($summary['errors'] ?? 0) > 0 ? 'warning' : 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function repairDebugMode(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+
+        // Accepts the per-row button (single form_id) and the bulk button
+        // (checkbox selection). An empty selection is rejected rather than
+        // silently disabling debug mode on every view at once.
+        $formIds = array_map('intval', (array) $this->input->post->get('form_ids', [], 'array'));
+        $singleFormId = (int) $this->input->post->getInt('form_id', 0);
+        if ($singleFormId > 0) {
+            $formIds[] = $singleFormId;
+        }
+        $formIds = array_values(array_unique(array_filter(
+            $formIds,
+            static fn(int $formId): bool => $formId > 0
+        )));
+
+        try {
+            if ($formIds === []) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_NO_SELECTION'));
+            }
+
+            $summary = DebugModeAuditHelper::repair(
+                $this->getComponent()->getContainer()->get(DatabaseInterface::class),
+                $formIds
+            );
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf(
+                'COM_CONTENTBUILDERNG_DEBUG_MODE_REPAIR_SUMMARY',
+                (int) ($summary['scanned'] ?? 0),
+                (int) ($summary['repaired'] ?? 0),
+                (int) ($summary['unchanged'] ?? 0),
+                (int) ($summary['errors'] ?? 0)
+            );
+
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, (int) ($summary['errors'] ?? 0) > 0 ? 'warning' : 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
     public function deleteStaleInstallerTemp(): void
     {
         $this->checkToken();
 
         $app = $this->getAuthorizedApplication();
-        $path = trim((string) $this->input->post->getString('stale_installer_temp_path', ''));
+
+        // Accepts both the per-row button (single path) and the bulk button
+        // (checkbox selection). Each path is revalidated against the current
+        // stale list by the helper before anything is removed from disk.
+        $paths = array_map(
+            static fn($path): string => trim((string) $path),
+            (array) $this->input->post->get('stale_installer_temp_paths', [], 'array')
+        );
+        $singlePath = trim((string) $this->input->post->getString('stale_installer_temp_path', ''));
+        if ($singlePath !== '') {
+            $paths[] = $singlePath;
+        }
+        $paths = array_values(array_unique(array_filter($paths, static fn(string $path): bool => $path !== '')));
 
         try {
-            if ($path === '') {
+            if ($paths === []) {
                 throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_NOT_SELECTED'));
             }
 
-            $deletedPath = StaleInstallerTempAuditHelper::delete($path);
+            $deletedPaths = [];
+            $failures = [];
+            foreach ($paths as $path) {
+                try {
+                    $deletedPaths[] = StaleInstallerTempAuditHelper::delete($path);
+                } catch (\Throwable $e) {
+                    $failures[] = $path . ' (' . $e->getMessage() . ')';
+                }
+            }
+
+            if ($deletedPaths === []) {
+                throw new \RuntimeException(implode(' ; ', $failures));
+            }
+
             $report = DatabaseAuditHelper::run();
             $app->setUserState('com_contentbuilderng.about.audit', $report);
             $this->getRepairWorkflowService()->logAuditReport($report);
 
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETED', $deletedPath);
+            $message = count($deletedPaths) === 1
+                ? Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETED', $deletedPaths[0])
+                : Text::plural('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETED_N', count($deletedPaths));
+
+            if ($failures !== []) {
+                $message .= ' ' . Text::sprintf(
+                    'COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_PARTIAL',
+                    implode(' ; ', $failures)
+                );
+            }
             if ($this->isAjaxCall()) {
                 $this->respondAjax(true, $message);
                 return;
