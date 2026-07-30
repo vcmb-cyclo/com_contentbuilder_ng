@@ -63,12 +63,14 @@ use Joomla\CMS\Language\Text;
                     };
                     $showStepCheck = ($stepStatus === 'done' || in_array($stepStatus, ['skipped', 'not_required'], true))
                         && !in_array($stepResultLevel, ['warning', 'error', 'danger'], true);
+                    $stepCheckClass = in_array($stepStatus, ['skipped', 'not_required'], true) ? 'is-neutral' : 'is-ok';
                     ?>
                     <div class="<?php echo implode(' ', $stepClasses); ?>">
                         <div class="cb-repair-workflow-step-head">
                             <p class="cb-repair-workflow-step-title">
                                 <?php if ($showStepCheck) : ?>
-                                    <span class="cb-repair-workflow-step-check icon-check-circle" aria-hidden="true"></span>
+                                    <span class="cb-repair-workflow-step-check <?php echo $stepCheckClass; ?> icon-check-circle"
+ aria-hidden="true"></span>
                                 <?php endif; ?>
                                 <?php echo htmlspecialchars(($stepNumber > 0 ? $stepNumber . '. ' : '') . $stepLabel, ENT_QUOTES, 'UTF-8'); ?>
                             </p>
@@ -128,11 +130,13 @@ use Joomla\CMS\Language\Text;
                     $currentStepPanelClasses[] = 'is-danger';
                 }
                 $currentStepShowCheck = in_array($repairWorkflowCurrentStatus, ['skipped', 'not_required'], true) || $currentStepAlertClass === 'success';
+                $currentStepCheckClass = in_array($repairWorkflowCurrentStatus, ['skipped', 'not_required'], true) ? 'is-neutral' : 'is-ok';
                 ?>
                 <div class="<?php echo implode(' ', $currentStepPanelClasses); ?>">
                     <h4 class="h6 mb-2 cb-repair-workflow-result-title">
                         <?php if ($currentStepShowCheck) : ?>
-                            <span class="cb-repair-workflow-step-check icon-check-circle" aria-hidden="true"></span>
+                            <span class="cb-repair-workflow-step-check <?php echo $currentStepCheckClass; ?> icon-check-circle"
+ aria-hidden="true"></span>
                         <?php endif; ?>
                         <span><?php echo htmlspecialchars($currentStepTitle, ENT_QUOTES, 'UTF-8'); ?></span>
                     </h4>
