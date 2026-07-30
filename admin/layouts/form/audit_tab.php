@@ -70,10 +70,14 @@ $templateRepairs = [
         <?php else : ?>
             <?php foreach ($checks as $check) : ?>
                 <?php [$badgeClass, $badgeKey] = $statusBadges[(string) ($check['status'] ?? FormAuditService::STATUS_WARNING)] ?? $statusBadges[FormAuditService::STATUS_WARNING]; ?>
+                <?php $checkReference = trim((string) ($check['reference'] ?? '')); ?>
                 <li class="list-group-item d-flex align-items-start gap-2">
                     <span class="badge <?php echo $badgeClass; ?>"><?php echo Text::_($badgeKey); ?></span>
                     <div>
                         <?php echo htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                        <?php if ($checkReference !== '') : ?>
+                            <small class="d-block text-muted"><?php echo htmlspecialchars(Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_REFERENCE', $checkReference), ENT_QUOTES, 'UTF-8'); ?></small>
+                        <?php endif; ?>
                         <?php $templateRepair = $templateRepairs[(string) ($check['code'] ?? '')] ?? null; ?>
                         <?php if ($templateRepair !== null && $formId > 0) : ?>
                             <button

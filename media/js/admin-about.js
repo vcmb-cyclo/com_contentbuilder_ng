@@ -93,6 +93,7 @@
         var field = button.dataset.cbAuditAjaxField || '';
         var value = button.dataset.cbAuditAjaxValue || '';
         var task = button.dataset.cbAuditAjaxTask || '';
+        var checkboxSelector = button.dataset.cbAuditAjaxCheckboxSelector || '';
 
         if (!form || field === '' || task === '') {
             return;
@@ -100,7 +101,15 @@
 
         var formData = new FormData(form);
         formData.set('task', task);
-        formData.set(field, value);
+        if (checkboxSelector !== '') {
+            formData.delete(field);
+            formData.delete(field + '[]');
+            document.querySelectorAll(checkboxSelector + ':checked').forEach(function (checkbox) {
+                formData.append(field + '[]', checkbox.value);
+            });
+        } else {
+            formData.set(field, value);
+        }
         formData.set('cb_ajax', '1');
         button.disabled = true;
         button.setAttribute('aria-busy', 'true');
@@ -149,6 +158,31 @@
 
         event.preventDefault();
         executeAuditAction(button);
+    });
+
+    document.addEventListener('change', function (event) {
+        var target = event.target;
+
+        if (!(target instanceof HTMLInputElement)) {
+            return;
+        }
+
+        if (target.matches('[data-cb-generated-article-categories-select-all]')) {
+            document.querySelectorAll('.cb-generated-article-category-checkbox').forEach(function (checkbox) {
+                checkbox.checked = target.checked;
+            });
+        }
+
+        if (target.matches('.cb-generated-article-category-checkbox') || target.matches('[data-cb-generated-article-categories-select-all]')) {
+            var selectAllCheckboxes = document.querySelectorAll('[data-cb-generated-article-categories-select-all]');
+            var checkboxes = document.querySelectorAll('.cb-generated-article-category-checkbox');
+            var checkedCount = document.querySelectorAll('.cb-generated-article-category-checkbox:checked').length;
+
+            selectAllCheckboxes.forEach(function (selectAll) {
+                selectAll.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
+                selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+            });
+        }
     });
 
     initializeTooltips();

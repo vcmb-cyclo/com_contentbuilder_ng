@@ -31,7 +31,7 @@ use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView a
 
 class HtmlView extends BaseHtmlView
 {
-    /** @var array{info: array<string,string>, checks: array<int,array{status:string,message:string}>, performance?:array<string,string>, data?:array<string,mixed>} */
+    /** @var array{info: array<string,string>, checks: array<int,array{status:string,message:string,reference?:string,code?:string}>, performance?:array<string,string>, data?:array<string,mixed>} */
     public array $audit = ['info' => [], 'checks' => []];
 
     public string $wizardReturnUrl = '';
@@ -193,6 +193,7 @@ class HtmlView extends BaseHtmlView
                     'checks' => [[
                         'status' => FormAuditService::STATUS_ERROR,
                         'message' => Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FAILED', $e->getMessage()),
+                        'reference' => 'CBNG-AUDIT-FORM-EXCEPTION',
                     ]],
                 ];
             }

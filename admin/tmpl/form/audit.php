@@ -66,9 +66,15 @@ $otherChecks = array_values(array_filter(
         <?php else : ?>
             <?php foreach ($referenceChecks as $check) : ?>
                 <?php [$badgeClass, $badgeKey] = $statusBadges[(string) ($check['status'] ?? FormAuditService::STATUS_WARNING)] ?? $statusBadges[FormAuditService::STATUS_WARNING]; ?>
+                <?php $checkReference = trim((string) ($check['reference'] ?? '')); ?>
                 <li class="list-group-item d-flex align-items-start gap-2">
                     <span class="badge <?php echo $badgeClass; ?>"><?php echo Text::_($badgeKey); ?></span>
-                    <span><?php echo htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                    <div>
+                        <span><?php echo htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <?php if ($checkReference !== '') : ?>
+                            <small class="d-block text-muted"><?php echo htmlspecialchars(Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_REFERENCE', $checkReference), ENT_QUOTES, 'UTF-8'); ?></small>
+                        <?php endif; ?>
+                    </div>
                 </li>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -79,10 +85,14 @@ $otherChecks = array_values(array_filter(
         <ul class="list-group">
         <?php foreach ($otherChecks as $check) : ?>
             <?php [$badgeClass, $badgeKey] = $statusBadges[(string) ($check['status'] ?? FormAuditService::STATUS_WARNING)] ?? $statusBadges[FormAuditService::STATUS_WARNING]; ?>
+            <?php $checkReference = trim((string) ($check['reference'] ?? '')); ?>
             <li class="list-group-item d-flex align-items-start gap-2">
                 <span class="badge <?php echo $badgeClass; ?>"><?php echo Text::_($badgeKey); ?></span>
                 <div>
                     <?php echo htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                    <?php if ($checkReference !== '') : ?>
+                        <small class="d-block text-muted"><?php echo htmlspecialchars(Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_REFERENCE', $checkReference), ENT_QUOTES, 'UTF-8'); ?></small>
+                    <?php endif; ?>
                     <?php if ((string) ($check['code'] ?? '') === 'theme_empty' && $formId > 0) : ?>
                         <form
                             class="d-inline ms-2"

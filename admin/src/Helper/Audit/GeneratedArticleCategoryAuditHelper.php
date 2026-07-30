@@ -114,9 +114,21 @@ final class GeneratedArticleCategoryAuditHelper
     /**
      * @return array<string,mixed>
      */
-    public static function repair(DatabaseInterface $db): array
+    public static function repair(DatabaseInterface $db, array $selectedFormIds = []): array
     {
         [$issues, $warnings] = self::inspect($db);
+        $selectedFormIds = array_values(array_unique(array_filter(
+            array_map('intval', $selectedFormIds),
+            static fn(int $formId): bool => $formId > 0
+        )));
+
+        if ($selectedFormIds !== []) {
+            $issues = array_values(array_filter(
+                $issues,
+                static fn(array $issue): bool => in_array((int) ($issue['form_id'] ?? 0), $selectedFormIds, true)
+            ));
+        }
+
         $fallbackCategory = self::loadFallbackCategory($db);
         $summary = [
             'scanned' => count($issues),

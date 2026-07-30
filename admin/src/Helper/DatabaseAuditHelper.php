@@ -293,9 +293,16 @@ final class DatabaseAuditHelper
                         'checks' => [[
                             'status' => FormAuditService::STATUS_ERROR,
                             'message' => 'Could not audit form #' . $formId . ': ' . $e->getMessage(),
+                            'reference' => 'CBNG-AUDIT-FORM-EXCEPTION',
                         ]],
                     ];
                 }
+
+                $formAudit['checks'] = array_values(array_filter(
+                    (array) ($formAudit['checks'] ?? []),
+                    static fn($check): bool => is_array($check)
+                        && (string) ($check['code'] ?? '') !== 'unindexed_columns'
+                ));
 
                 $formAudit['form'] = (array) ($formAudit['form'] ?? [
                     'id' => $formId,

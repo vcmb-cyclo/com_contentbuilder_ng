@@ -15,6 +15,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Controller;
 \defined('_JEXEC') or die('Restricted access');
 
 use CB\Component\Contentbuilderng\Administrator\Helper\DatabaseAuditHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\GeneratedArticleCategoryAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleInstallerTempAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
@@ -486,6 +487,62 @@ final class AboutController extends BaseController
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
             $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function repairGeneratedArticleCategories(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $formIds = array_values(array_unique(array_filter(
+            array_map('intval', (array) $this->input->post->get('form_ids', [], 'array')),
+            static fn(int $formId): bool => $formId > 0
+        )));
+
+        try {
+            if ($formIds === []) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_NO_SELECTION'));
+            }
+
+            $summary = GeneratedArticleCategoryAuditHelper::repair(
+                $this->getComponent()->getContainer()->get(DatabaseInterface::class),
+                $formIds
+            );
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf(
+                'COM_CONTENTBUILDERNG_GENERATED_ARTICLE_CATEGORIES_REPAIR_SUMMARY',
+                (int) ($summary['scanned'] ?? 0),
+                (int) ($summary['issues'] ?? 0),
+                (int) ($summary['repaired'] ?? 0),
+                (int) ($summary['unchanged'] ?? 0),
+                (int) ($summary['forms_updated'] ?? 0),
+                (int) ($summary['articles_updated'] ?? 0),
+                (int) ($summary['assets_updated'] ?? 0),
+                (int) ($summary['workflows_updated'] ?? 0),
+                (int) ($summary['errors'] ?? 0)
+            );
+
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, (int) ($summary['errors'] ?? 0) > 0 ? 'warning' : 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_REPAIR_FAILED', $e->getMessage());
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;

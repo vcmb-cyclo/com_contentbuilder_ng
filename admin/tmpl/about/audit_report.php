@@ -1026,8 +1026,12 @@ use Joomla\CMS\Router\Route;
                                             <ul class="mb-0 ps-3">
                                                 <?php foreach ($formAuditChecks as $formAuditCheck) : ?>
                                                     <?php if ((string) ($formAuditCheck['status'] ?? '') === 'ok') { continue; } ?>
+                                                    <?php $formAuditReference = trim((string) ($formAuditCheck['reference'] ?? '')); ?>
                                                     <li>
                                                         <?php echo htmlspecialchars((string) ($formAuditCheck['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                                                        <?php if ($formAuditReference !== '') : ?>
+                                                            <small class="d-block text-muted"><?php echo htmlspecialchars(Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_REFERENCE', $formAuditReference), ENT_QUOTES, 'UTF-8'); ?></small>
+                                                        <?php endif; ?>
                                                         <?php if ((string) ($formAuditCheck['code'] ?? '') === 'theme_empty' && $formId > 0) : ?>
                                                             <button
                                                                 type="button"
@@ -1161,11 +1165,42 @@ use Joomla\CMS\Router\Route;
                     </span>
                 </div>
             <?php else : ?>
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                    <label class="form-check mb-0">
+                        <input
+                            type="checkbox"
+                            class="form-check-input"
+                            data-cb-generated-article-categories-select-all
+                            aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_SELECT_ALL'), ENT_QUOTES, 'UTF-8'); ?>"
+                        >
+                        <span class="form-check-label"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_SELECT_ALL'); ?></span>
+                    </label>
+                    <button
+                        type="submit"
+                        class="btn btn-sm btn-warning"
+                        data-cb-audit-ajax-task="about.repairGeneratedArticleCategories"
+                        data-cb-audit-ajax-field="form_ids"
+                        data-cb-audit-ajax-checkbox-selector="#cb-audit-generated-article-categories-table .cb-generated-article-category-checkbox"
+                        title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                        aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                        onclick="this.form.elements['task'].value='about.repairGeneratedArticleCategories';"
+                    >
+                        <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_REPAIR'); ?>
+                    </button>
+                </div>
                 <div class="table-responsive">
                     <table id="cb-audit-generated-article-categories-table" class="table table-sm table-striped align-middle">
                         <thead>
                         <tr>
-                            <th scope="col"><?php echo $auditRowNumberLabel; ?></th>
+                            <th scope="col">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    data-cb-generated-article-categories-select-all
+                                    aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_SELECT_ALL'), ENT_QUOTES, 'UTF-8'); ?>"
+                                >
+                                <span class="visually-hidden"><?php echo $auditRowNumberLabel; ?></span>
+                            </th>
                             <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ID'); ?></th>
                             <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_FIELD_SYNC_VIEW'); ?></th>
                             <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_DEFAULT_CATEGORY'); ?></th>
@@ -1206,7 +1241,16 @@ use Joomla\CMS\Router\Route;
                                 : Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
                             ?>
                             <tr>
-                                <td><?php echo $generatedArticleCategoryIssueRowNumber++; ?></td>
+                                <td>
+                                    <input
+                                        type="checkbox"
+                                        class="form-check-input cb-generated-article-category-checkbox"
+                                        name="form_ids[]"
+                                        value="<?php echo $formId; ?>"
+                                        aria-label="<?php echo htmlspecialchars(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_SELECT_FORM', $formName), ENT_QUOTES, 'UTF-8'); ?>"
+                                    >
+                                    <span class="ms-1"><?php echo $generatedArticleCategoryIssueRowNumber++; ?></span>
+                                </td>
                                 <td><?php echo $formId; ?></td>
                                 <td>
                                     <?php if ($formEditLink !== '') : ?>
