@@ -52,7 +52,7 @@ final class FormsDebugActionsTest extends TestCase
 
     public function testEditViewUsesGreenBugIconForEnabledDebugState(): void
     {
-        $layout = $this->read('admin/layouts/form/view_tab.php');
+        $layout = $this->read('admin/tmpl/form/edit.php');
         $script = $this->read('media/js/form-edit-init.js');
 
         self::assertStringContainsString(
