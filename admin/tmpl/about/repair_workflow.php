@@ -48,10 +48,11 @@ use Joomla\CMS\Language\Text;
                     $stepResult = (array) ($repairWorkflowStep['result'] ?? []);
                     $stepResultLevel = (string) ($stepResult['level'] ?? 'message');
                     $stepDescription = trim((string) ($stepPrecheck['description'] ?? ($repairWorkflowStepDescriptions[$stepId] ?? '')));
-                    $statusLabelKey = match ($stepStatus) {
-                        'done' => 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_DONE',
-                        'skipped' => 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_NOT_APPLIED',
-                        'not_required' => 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_NOT_REQUIRED',
+                    $statusLabelKey = match (true) {
+                        $stepStatus === 'done' && (string) ($repairWorkflowStep['decision'] ?? '') === 'diagnostic' => 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_CHECKED',
+                        $stepStatus === 'done' => 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_DONE',
+                        $stepStatus === 'skipped' => 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_NOT_APPLIED',
+                        $stepStatus === 'not_required' => 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_NOT_REQUIRED',
                         default => $stepIsCurrent
                             ? 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_CURRENT'
                             : 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_PENDING',
