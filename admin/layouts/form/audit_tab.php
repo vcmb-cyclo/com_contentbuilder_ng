@@ -24,6 +24,23 @@ $statusBadges = [
     FormAuditService::STATUS_WARNING => ['text-bg-warning', 'COM_CONTENTBUILDERNG_AUDIT_STATUS_WARNING'],
     FormAuditService::STATUS_ERROR => ['bg-danger', 'COM_CONTENTBUILDERNG_AUDIT_STATUS_ERROR'],
 ];
+$templateRepairs = [
+    'editable_template_empty' => [
+        'task' => 'form.repairEditableTemplate',
+        'tip' => 'COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_TIP',
+        'label' => 'COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR',
+    ],
+    'details_template_empty' => [
+        'task' => 'form.repairDetailsTemplate',
+        'tip' => 'COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR_TIP',
+        'label' => 'COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR',
+    ],
+    'templates_empty' => [
+        'task' => 'form.repairTemplates',
+        'tip' => 'COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIR_TIP',
+        'label' => 'COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR',
+    ],
+];
 ?>
 <div class="p-3" data-cb-form-audit-panel>
     <div class="alert alert-info">
@@ -57,17 +74,18 @@ $statusBadges = [
                     <span class="badge <?php echo $badgeClass; ?>"><?php echo Text::_($badgeKey); ?></span>
                     <div>
                         <?php echo htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
-                        <?php if ((string) ($check['code'] ?? '') === 'editable_template_empty' && $formId > 0) : ?>
+                        <?php $templateRepair = $templateRepairs[(string) ($check['code'] ?? '')] ?? null; ?>
+                        <?php if ($templateRepair !== null && $formId > 0) : ?>
                             <button
                                 type="button"
                                 class="btn btn-sm btn-warning ms-2"
                                 data-cb-form-audit-repair-button
-                                data-cb-form-audit-task="form.repairEditableTemplate"
+                                data-cb-form-audit-task="<?php echo htmlspecialchars($templateRepair['task'], ENT_QUOTES, 'UTF-8'); ?>"
                                 data-cb-form-audit-id="<?php echo $formId; ?>"
-                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
-                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                                title="<?php echo htmlspecialchars(Text::_($templateRepair['tip']), ENT_QUOTES, 'UTF-8'); ?>"
+                                aria-label="<?php echo htmlspecialchars(Text::_($templateRepair['label']), ENT_QUOTES, 'UTF-8'); ?>"
                             >
-                                <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'); ?>
+                                <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_($templateRepair['label']); ?>
                             </button>
                         <?php endif; ?>
                     </div>

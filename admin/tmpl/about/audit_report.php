@@ -654,7 +654,7 @@ use Joomla\CMS\Router\Route;
                                 <td><?php echo $formId; ?></td>
                                 <td>
                                     <?php if ($formEditLink !== '') : ?>
-                                        <a href="<?php echo htmlspecialchars($formEditLink, ENT_QUOTES, 'UTF-8'); ?>">
+                                        <a href="<?php echo htmlspecialchars($formEditLink, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                                             <?php echo htmlspecialchars($formNameDisplay, ENT_QUOTES, 'UTF-8'); ?>
                                         </a>
                                     <?php else : ?>
@@ -833,7 +833,7 @@ use Joomla\CMS\Router\Route;
                                 <td><?php echo $formId; ?></td>
                                 <td>
                                     <?php if ($formEditLink !== '') : ?>
-                                        <a href="<?php echo htmlspecialchars($formEditLink, ENT_QUOTES, 'UTF-8'); ?>">
+                                        <a href="<?php echo htmlspecialchars($formEditLink, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                                             <?php echo htmlspecialchars($formName, ENT_QUOTES, 'UTF-8'); ?>
                                         </a>
                                     <?php else : ?>
@@ -926,7 +926,7 @@ use Joomla\CMS\Router\Route;
                                 <td><?php echo $formId; ?></td>
                                 <td>
                                     <?php if ($formEditLink !== '') : ?>
-                                        <a href="<?php echo htmlspecialchars($formEditLink, ENT_QUOTES, 'UTF-8'); ?>">
+                                        <a href="<?php echo htmlspecialchars($formEditLink, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                                             <?php echo htmlspecialchars($formName, ENT_QUOTES, 'UTF-8'); ?>
                                         </a>
                                     <?php else : ?>
@@ -1005,7 +1005,7 @@ use Joomla\CMS\Router\Route;
                                     <td><?php echo $formAuditRowNumber++; ?></td>
                                     <td>
                                         <?php if ($formEditLink !== '') : ?>
-                                            <a href="<?php echo htmlspecialchars($formEditLink, ENT_QUOTES, 'UTF-8'); ?>">
+                                            <a href="<?php echo htmlspecialchars($formEditLink, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                                                 <?php echo htmlspecialchars($formName, ENT_QUOTES, 'UTF-8'); ?>
                                             </a>
                                         <?php else : ?>
@@ -1052,6 +1052,36 @@ use Joomla\CMS\Router\Route;
                                                                 data-cb-audit-ajax-field="form_id"
                                                                 data-cb-audit-ajax-value="<?php echo $formId; ?>"
                                                                 title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                                data-bs-toggle="tooltip"
+                                                                data-bs-placement="top"
+                                                            >
+                                                                <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'); ?>
+                                                            </button>
+                                                        <?php elseif ((string) ($formAuditCheck['code'] ?? '') === 'details_template_empty' && $formId > 0) : ?>
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-sm btn-warning ms-2"
+                                                                value="thoth"
+                                                                data-cb-audit-ajax-task="about.repairFormDetailsTemplate"
+                                                                data-cb-audit-ajax-field="form_id"
+                                                                data-cb-audit-ajax-value="<?php echo $formId; ?>"
+                                                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                                data-bs-toggle="tooltip"
+                                                                data-bs-placement="top"
+                                                            >
+                                                                <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR'); ?>
+                                                            </button>
+                                                        <?php elseif ((string) ($formAuditCheck['code'] ?? '') === 'templates_empty' && $formId > 0) : ?>
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-sm btn-warning ms-2"
+                                                                value="thoth"
+                                                                data-cb-audit-ajax-task="about.repairFormTemplates"
+                                                                data-cb-audit-ajax-field="form_id"
+                                                                data-cb-audit-ajax-value="<?php echo $formId; ?>"
+                                                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
                                                                 aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
                                                                 data-bs-toggle="tooltip"
                                                                 data-bs-placement="top"
@@ -1180,7 +1210,7 @@ use Joomla\CMS\Router\Route;
                                 <td><?php echo $formId; ?></td>
                                 <td>
                                     <?php if ($formEditLink !== '') : ?>
-                                        <a href="<?php echo htmlspecialchars($formEditLink, ENT_QUOTES, 'UTF-8'); ?>">
+                                        <a href="<?php echo htmlspecialchars($formEditLink, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                                             <?php echo htmlspecialchars($formName, ENT_QUOTES, 'UTF-8'); ?>
                                         </a>
                                     <?php else : ?>
@@ -1521,7 +1551,7 @@ use Joomla\CMS\Router\Route;
                                         <td><?php echo htmlspecialchars($recordDisplay, ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td>
                                             <?php if ($formLink !== '') : ?>
-                                                <a href="<?php echo htmlspecialchars($formLink, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($formDisplay, ENT_QUOTES, 'UTF-8'); ?></a>
+                                                <a href="<?php echo htmlspecialchars($formLink, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer"><?php echo htmlspecialchars($formDisplay, ENT_QUOTES, 'UTF-8'); ?></a>
                                             <?php else : ?>
                                                 <?php echo htmlspecialchars($formDisplay, ENT_QUOTES, 'UTF-8'); ?>
                                             <?php endif; ?>

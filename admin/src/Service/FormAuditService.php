@@ -112,7 +112,9 @@ final class FormAuditService
         $editable = array_values(array_filter($published, static fn(array $row): bool => (int) $row['editable'] === 1));
 
         $modified = trim((string) ($form['modified'] ?? ''));
-        [$groupPermissions, $ownerPermissions, $permissionChecks] = $this->auditFrontendPermissions($form);
+        [$groupPermissions, $ownerPermissions, $permissionChecks, $rawGroupPermissions, $rawOwnerPermissions] = $this->auditFrontendPermissions($form);
+        $hasFrontendViewPermission = $this->hasFrontendPermission($rawGroupPermissions, $rawOwnerPermissions, 'view');
+        $hasFrontendEditPermission = $this->hasFrontendPermission($rawGroupPermissions, $rawOwnerPermissions, 'edit');
         [$performanceInfo, $performanceChecks] = $this->auditPerformance($form, $published, $sourceNames);
 
         $info = [
@@ -154,7 +156,15 @@ final class FormAuditService
             $this->checkTheme((string) ($form['theme_plugin'] ?? '')),
             $this->checkSourceSync($elements, $sourceNames, $sourceAvailable, (string) $form['type'], (string) $form['reference_id']),
             $this->checkElementReferences($elements),
-            $this->checkTemplates($published, $sourceNames, (string) $form['type'], (string) $form['details_template'], (string) $form['editable_template']),
+            $this->checkTemplates(
+                $published,
+                $sourceNames,
+                (string) $form['type'],
+                (string) $form['details_template'],
+                (string) $form['editable_template'],
+                $hasFrontendViewPermission,
+                $hasFrontendEditPermission
+            ),
             $permissionChecks,
             $performanceChecks
         );
@@ -211,6 +221,8 @@ final class FormAuditService
                     'status' => self::STATUS_ERROR,
                     'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_FRONTEND_PERMISSIONS_INVALID'),
                 ]],
+                [],
+                [],
             ];
         }
 
@@ -281,6 +293,8 @@ final class FormAuditService
                 ? implode(', ', $grantedOwnerPermissions)
                 : Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_NONE'),
             $checks,
+            $permissions,
+            $ownerPermissions,
         ];
     }
 
@@ -721,18 +735,32 @@ final class FormAuditService
      * @param array<int|string,string> $sourceNames
      * @return array<int,array{status:string,message:string}>
      */
-    private function checkTemplates(array $published, array $sourceNames, string $sourceType, string $detailsTemplate, string $editableTemplate): array
-    {
+    private function checkTemplates(
+        array $published,
+        array $sourceNames,
+        string $sourceType,
+        string $detailsTemplate,
+        string $editableTemplate,
+        bool $hasFrontendViewPermission,
+        bool $hasFrontendEditPermission
+    ): array {
         $checks = [];
+        $detailsEmpty = $published !== [] && trim($detailsTemplate) === '' && $hasFrontendViewPermission;
+        $editableEmpty = $published !== [] && trim($editableTemplate) === '' && $hasFrontendEditPermission;
 
-        if ($published !== [] && trim($detailsTemplate) === '') {
+        if ($detailsEmpty && $editableEmpty) {
+            $checks[] = [
+                'status' => self::STATUS_WARNING,
+                'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_TEMPLATES_EMPTY'),
+                'code' => 'templates_empty',
+            ];
+        } elseif ($detailsEmpty) {
             $checks[] = [
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_DETAILS_TEMPLATE_EMPTY'),
+                'code' => 'details_template_empty',
             ];
-        }
-
-        if ($published !== [] && trim($editableTemplate) === '') {
+        } elseif ($editableEmpty) {
             $checks[] = [
                 'status' => self::STATUS_WARNING,
                 'message' => Text::_('COM_CONTENTBUILDERNG_AUDIT_CHECK_EDITABLE_TEMPLATE_EMPTY'),

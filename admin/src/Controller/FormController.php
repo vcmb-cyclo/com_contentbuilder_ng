@@ -480,9 +480,9 @@ class FormController extends BaseFormController
 
             $component = $this->getApp()->bootComponent('com_contentbuilderng');
             $formSupportService = $component->getContainer()->get(FormSupportService::class);
-            $formSupportService->regenerateEditableTemplate($formId, (int) $identity->id);
+            $formName = $formSupportService->regenerateEditableTemplate($formId, (int) $identity->id);
 
-            $message = Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIRED');
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIRED', $formName);
             if ($this->isAjaxCall()) {
                 $this->respondAjax(true, $message);
                 return;
@@ -491,6 +491,88 @@ class FormController extends BaseFormController
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
             $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=audit&tmpl=component&id=' . $formId, false));
+    }
+
+    public function repairDetailsTemplate(): void
+    {
+        $this->checkToken();
+
+        $formId = $this->input->post->getInt('id', $this->input->getInt('id', 0));
+
+        try {
+            $identity = $this->getApp()->getIdentity();
+            $formAsset = 'com_contentbuilderng.form.' . $formId;
+            if (
+                !$identity->authorise('core.manage', 'com_contentbuilderng')
+                && !$identity->authorise('core.edit', $formAsset)
+                && !$identity->authorise('core.edit', 'com_contentbuilderng')
+            ) {
+                throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+            }
+
+            $component = $this->getApp()->bootComponent('com_contentbuilderng');
+            $formSupportService = $component->getContainer()->get(FormSupportService::class);
+            $formName = $formSupportService->regenerateDetailsTemplate($formId, (int) $identity->id);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIRED', $formName);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=audit&tmpl=component&id=' . $formId, false));
+    }
+
+    public function repairTemplates(): void
+    {
+        $this->checkToken();
+
+        $formId = $this->input->post->getInt('id', $this->input->getInt('id', 0));
+
+        try {
+            $identity = $this->getApp()->getIdentity();
+            $formAsset = 'com_contentbuilderng.form.' . $formId;
+            if (
+                !$identity->authorise('core.manage', 'com_contentbuilderng')
+                && !$identity->authorise('core.edit', $formAsset)
+                && !$identity->authorise('core.edit', 'com_contentbuilderng')
+            ) {
+                throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+            }
+
+            $component = $this->getApp()->bootComponent('com_contentbuilderng');
+            $formSupportService = $component->getContainer()->get(FormSupportService::class);
+            $formName = $formSupportService->regenerateBothTemplates($formId, (int) $identity->id);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIRED', $formName);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIR_FAILED', $e->getMessage());
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;

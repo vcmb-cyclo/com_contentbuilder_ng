@@ -401,13 +401,13 @@ final class AboutController extends BaseController
 
         try {
             $formSupportService = $this->getComponent()->getContainer()->get(FormSupportService::class);
-            $formSupportService->regenerateEditableTemplate($formId, $this->getCurrentUserId());
+            $formName = $formSupportService->regenerateEditableTemplate($formId, $this->getCurrentUserId());
 
             $report = DatabaseAuditHelper::run();
             $app->setUserState('com_contentbuilderng.about.audit', $report);
             $this->getRepairWorkflowService()->logAuditReport($report);
 
-            $message = Text::_('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIRED');
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIRED', $formName);
             if ($this->isAjaxCall()) {
                 $this->respondAjax(true, $message);
                 return;
@@ -416,6 +416,76 @@ final class AboutController extends BaseController
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
             $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function repairFormDetailsTemplate(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $formId = $this->input->post->getInt('form_id', 0);
+
+        try {
+            $formSupportService = $this->getComponent()->getContainer()->get(FormSupportService::class);
+            $formName = $formSupportService->regenerateDetailsTemplate($formId, $this->getCurrentUserId());
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIRED', $formName);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function repairFormTemplates(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $formId = $this->input->post->getInt('form_id', 0);
+
+        try {
+            $formSupportService = $this->getComponent()->getContainer()->get(FormSupportService::class);
+            $formName = $formSupportService->regenerateBothTemplates($formId, $this->getCurrentUserId());
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIRED', $formName);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIR_FAILED', $e->getMessage());
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
