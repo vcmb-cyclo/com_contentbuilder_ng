@@ -342,6 +342,18 @@
         }, cbSaveAnimationDurationMs);
     }
 
+    function cbInitBootstrapTooltips(root) {
+        if (!window.bootstrap || typeof window.bootstrap.Tooltip !== 'function') {
+            return;
+        }
+
+        (root || document).querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+            if (!window.bootstrap.Tooltip.getInstance(el)) {
+                new window.bootstrap.Tooltip(el);
+            }
+        });
+    }
+
     function cbDismissTransientTooltips() {
         if (window.bootstrap && typeof window.bootstrap.Tooltip === 'function') {
             document.querySelectorAll('[data-bs-toggle="tooltip"], .hasTip, .editlinktip, .js-grid-item-action').forEach(function(el) {
@@ -2539,6 +2551,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        cbInitBootstrapTooltips();
         cbInitColumnToggle({
             storageKey:        cbElementsColumnsStateKey,
             toggleId:          'cb-elements-columns-toggle',

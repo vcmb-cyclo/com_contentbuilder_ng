@@ -559,9 +559,6 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         <div id="cb-form-tab-actions" class="cb-form-tab-actions" aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_VIEW'), ENT_QUOTES, 'UTF-8'); ?>">
             <?php if ($formId > 0) : ?>
                 <div class="d-inline-flex align-items-center gap-2">
-                    <span class="fw-semibold editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_PUBLISH_TIP'); ?>">
-                        <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED'); ?> :
-                    </span>
                     <?php
                     $publishedToggleHtml = HTMLHelper::_(
                         'jgrid.published',
@@ -571,8 +568,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         true,
                         'cbformstate'
                     );
+                    $publishedTooltip = htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_PUBLISHED'), ENT_QUOTES, 'UTF-8');
                     $publishedToggleHtml = preg_replace('/\saria-labelledby="[^"]*"/', '', (string) $publishedToggleHtml) ?? (string) $publishedToggleHtml;
                     $publishedToggleHtml = preg_replace('#<div role="tooltip"[^>]*>.*?</div>#s', '', (string) $publishedToggleHtml) ?? (string) $publishedToggleHtml;
+                    $publishedToggleHtml = preg_replace('/<a\b/', '<a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="' . $publishedTooltip . '"', (string) $publishedToggleHtml, 1) ?? (string) $publishedToggleHtml;
                     echo $publishedToggleHtml;
                     ?>
                     <input type="checkbox" name="cid[]" id="cbformstate0" value="<?php echo $formId; ?>" style="display:none" />

@@ -212,7 +212,12 @@ class HtmlView extends BaseHtmlView
             ->icon('fa-solid fa-trash text-danger')
             ->listCheck(true);
 
-        ToolbarHelper::preferences('com_contentbuilderng');
+        $configReturn = urlencode(base64_encode((string) Uri::getInstance()));
+        ToolbarHelper::link(
+            'index.php?option=com_config&view=component&component=com_contentbuilderng&return=' . $configReturn,
+            'JTOOLBAR_OPTIONS',
+            'options'
+        );
         ToolbarHelper::help(
             'COM_CONTENTBUILDERNG_HELP_STORAGES_TITLE',
             false,
