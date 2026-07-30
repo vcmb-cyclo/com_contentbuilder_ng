@@ -584,6 +584,48 @@ class FormController extends BaseFormController
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $formId . '&tab=tab12', false));
     }
 
+    public function repairEditableFieldItem(): void
+    {
+        $this->checkToken();
+
+        $formId = $this->input->post->getInt('id', $this->input->getInt('id', 0));
+        $fieldName = $this->input->post->getString('field_name', '');
+
+        try {
+            $identity = $this->getApp()->getIdentity();
+            $formAsset = 'com_contentbuilderng.form.' . $formId;
+            if (
+                !$identity->authorise('core.manage', 'com_contentbuilderng')
+                && !$identity->authorise('core.edit', $formAsset)
+                && !$identity->authorise('core.edit', 'com_contentbuilderng')
+            ) {
+                throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+            }
+
+            $component = $this->getApp()->bootComponent('com_contentbuilderng');
+            $formSupportService = $component->getContainer()->get(FormSupportService::class);
+            $formSupportService->replaceEditableFieldValueWithItem($formId, $fieldName, (int) $identity->id);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_ITEM_REPAIRED', $fieldName);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_ITEM_REPAIR_FAILED', $e->getMessage());
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $formId . '&tab=tab12', false));
+    }
+
     public function debug_on(): bool
     {
         return $this->setFormFlag('debug_mode', 1);
