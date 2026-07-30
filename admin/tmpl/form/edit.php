@@ -512,6 +512,61 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             $activeViewTab = 'tab0';
         }
         echo HTMLHelper::_('uitab.startTabSet', 'view-pane', ['active' => $activeViewTab]);
+        ?>
+        <div id="cb-form-tab-actions" class="cb-form-tab-actions" aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_VIEW'), ENT_QUOTES, 'UTF-8'); ?>">
+            <?php if ($formId > 0) : ?>
+                <div class="d-inline-flex align-items-center gap-2">
+                    <span class="fw-semibold editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_PUBLISH_TIP'); ?>">
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED'); ?> :
+                    </span>
+                    <?php
+                    $publishedToggleHtml = HTMLHelper::_(
+                        'jgrid.published',
+                        !empty($this->item->published) ? 1 : 0,
+                        0,
+                        'form.form',
+                        true,
+                        'cbformstate'
+                    );
+                    $publishedToggleHtml = preg_replace('/\saria-labelledby="[^"]*"/', '', (string) $publishedToggleHtml) ?? (string) $publishedToggleHtml;
+                    $publishedToggleHtml = preg_replace('#<div role="tooltip"[^>]*>.*?</div>#s', '', (string) $publishedToggleHtml) ?? (string) $publishedToggleHtml;
+                    echo $publishedToggleHtml;
+                    ?>
+                    <input type="checkbox" name="cid[]" id="cbformstate0" value="<?php echo $formId; ?>" style="display:none" />
+                </div>
+            <?php endif; ?>
+            <div class="d-inline-flex align-items-center gap-2">
+                <span class="fw-semibold editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_TIP'); ?>">
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE'); ?> :
+                </span>
+                <?php if ($formId > 0) : ?>
+                    <?php
+                    $debugEnabled = !empty($this->item->debug_mode);
+                    $debugStates = [
+                        1 => ['debug_off', 'COM_CONTENTBUILDERNG_DEBUG_MODE', '', '', false, 'publish', 'publish'],
+                        0 => ['debug_on',  'COM_CONTENTBUILDERNG_DEBUG_MODE', '', '', false, 'unpublish', 'unpublish'],
+                    ];
+                    $debugToggleHtml = HTMLHelper::_('jgrid.state', $debugStates, $debugEnabled ? 1 : 0, 0, 'form.', true, true, 'cbdebugstate');
+                    $debugToggleHtml = preg_replace('/\saria-labelledby="[^"]*"/', '', (string) $debugToggleHtml) ?? (string) $debugToggleHtml;
+                    $debugToggleHtml = preg_replace('#<div role="tooltip"[^>]*>.*?</div>#s', '', (string) $debugToggleHtml) ?? (string) $debugToggleHtml;
+                    if ($debugEnabled) {
+                        $debugToggleHtml = str_replace('icon-publish', 'fa fa-bug text-success', $debugToggleHtml);
+                    }
+                    echo $debugToggleHtml;
+                    ?>
+                    <input type="checkbox" name="cid[]" id="cbdebugstate0" value="<?php echo $formId; ?>" style="display:none" />
+                <?php else : ?>
+                    <input type="hidden" name="jform[debug_mode]" id="debug_mode" value="0" />
+                    <a href="#"
+                       class="tbody-icon"
+                       title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_TIP'); ?>"
+                       onclick="this.classList.toggle('active'); document.getElementById('debug_mode').value = this.classList.contains('active') ? '1' : '0'; return false;">
+                        <span class="icon-unpublish" aria-hidden="true"></span>
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php
         // Premier onglet
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', $viewTabLabel('fa-regular fa-window-maximize', 'COM_CONTENTBUILDERNG_VIEW', 'COM_CONTENTBUILDERNG_TAB_TIP_VIEW'));
         ?>
