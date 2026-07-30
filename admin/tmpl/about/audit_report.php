@@ -33,7 +33,6 @@ use Joomla\CMS\Router\Route;
                     </tr>
                     </thead>
                     <tbody>
-                    <?php $auditSummaryRowNumber = static fn(string $sectionId): int => $getAuditSectionNumber($sectionId); ?>
                     <tr class="<?php echo $hasAuditIssues ? 'table-warning' : ''; ?>">
                         <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('issues_total'); ?></td>
                         <th scope="row"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ISSUES_TOTAL'); ?></th>
@@ -179,6 +178,11 @@ use Joomla\CMS\Router\Route;
                         <th scope="row"><?php echo $renderAuditSummaryLink('generated_article_categories', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORY_ROWS')); ?></th>
                         <td><?php echo $generatedArticleCategoryRowCount; ?></td>
                     </tr>
+                    <tr class="<?php echo $hasDebugModeIssues ? 'table-warning' : ''; ?>">
+                        <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('debug_mode'); ?></td>
+                        <th scope="row"><?php echo $renderAuditSummaryLink('debug_mode', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE')); ?></th>
+                        <td><?php echo $debugModeIssueCount; ?></td>
+                    </tr>
                     <tr class="<?php echo $hasStaleLanguageFiles ? 'table-warning' : ''; ?>">
                         <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('stale_language_files'); ?></td>
                         <th scope="row"><?php echo $renderAuditSummaryLink('stale_language_files', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_LANGUAGE_FILES')); ?></th>
@@ -239,7 +243,7 @@ use Joomla\CMS\Router\Route;
 
             <div class="cb-audit-detail-sections">
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('duplicate_indexes'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 2;">
-                <h4 class="h6 mt-3<?php echo $hasDuplicateIndexIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('duplicate_indexes', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DUPLICATE_GROUPS'), $hasDuplicateIndexIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasDuplicateIndexIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('duplicate_indexes', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DUPLICATE_GROUPS'), $hasDuplicateIndexIssues); ?></h4>
                 <?php if (empty($duplicateIndexes)) : ?>
                     <div class="alert cb-audit-ok-alert">
                         <span class="cb-audit-section-title">
@@ -277,7 +281,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('plugin_duplicates'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 14;">
-                <h4 class="h6 mt-3<?php echo $hasPluginDuplicateIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('plugin_duplicates', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_PLUGIN_DUPLICATES'), $hasPluginDuplicateIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasPluginDuplicateIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('plugin_duplicates', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_PLUGIN_DUPLICATES'), $hasPluginDuplicateIssues); ?></h4>
                 <?php if (empty($pluginExtensionDuplicates)) : ?>
                     <div class="alert cb-audit-ok-alert">
                         <span class="cb-audit-section-title">
@@ -343,7 +347,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('historical_tables'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 4;">
-                <h4 class="h6 mt-3<?php echo $hasLegacyTableIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('historical_tables', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_HISTORICAL_TABLES'), $hasLegacyTableIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasLegacyTableIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('historical_tables', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_HISTORICAL_TABLES'), $hasLegacyTableIssues); ?></h4>
                 <?php if (empty($historicalTables)) : ?>
                     <div class="alert cb-audit-ok-alert">
                         <span class="cb-audit-section-title">
@@ -361,7 +365,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('historical_menu_entries'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 5;">
-                <h4 class="h6 mt-3<?php echo $hasLegacyMenuIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('historical_menu_entries', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_HISTORICAL_MENU_ENTRIES'), $hasLegacyMenuIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasLegacyMenuIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('historical_menu_entries', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_HISTORICAL_MENU_ENTRIES'), $hasLegacyMenuIssues); ?></h4>
                 <?php if (empty($historicalMenuEntries)) : ?>
                     <div class="alert cb-audit-ok-alert">
                         <span class="cb-audit-section-title">
@@ -399,7 +403,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('audit_columns'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 10;">
-                <h4 class="h6 mt-3<?php echo $hasMissingAuditColumnIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('audit_columns', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MISSING_AUDIT_COLUMNS'), $hasMissingAuditColumnIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasMissingAuditColumnIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('audit_columns', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MISSING_AUDIT_COLUMNS'), $hasMissingAuditColumnIssues); ?></h4>
                 <div class="alert alert-info py-1 px-2 small mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_INDEX_SCOPE_NOTE'); ?></div>
                 <?php if (empty($missingAuditColumns)) : ?>
                     <div class="alert cb-audit-ok-alert">
@@ -450,7 +454,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('form_audit_columns'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 12;">
-                <h4 class="h6 mt-3<?php echo $hasMissingFormAuditColumnIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('form_audit_columns', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MISSING_FORM_AUDIT_COLUMNS'), $hasMissingFormAuditColumnIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasMissingFormAuditColumnIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('form_audit_columns', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MISSING_FORM_AUDIT_COLUMNS'), $hasMissingFormAuditColumnIssues); ?></h4>
                 <?php if (empty($missingFormAuditColumns)) : ?>
                     <div class="alert cb-audit-ok-alert">
                         <span class="cb-audit-section-title">
@@ -490,7 +494,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('invalid_datetime_sort'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 13;">
-                <h4 class="h6 mt-3<?php echo $hasInvalidDatetimeSortIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('invalid_datetime_sort', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_INVALID_DATETIME_SORT'), $hasInvalidDatetimeSortIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasInvalidDatetimeSortIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('invalid_datetime_sort', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_INVALID_DATETIME_SORT'), $hasInvalidDatetimeSortIssues); ?></h4>
                 <?php if (empty($invalidDatetimeSortIssues)) : ?>
                     <div class="alert cb-audit-ok-alert">
                         <span class="cb-audit-section-title">
@@ -548,7 +552,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('storage_column_types'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 14;">
-                <h4 class="h6 mt-3<?php echo $hasStorageColumnTypeIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('storage_column_types', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_COLUMN_TYPES'), $hasStorageColumnTypeIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasStorageColumnTypeIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('storage_column_types', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_COLUMN_TYPES'), $hasStorageColumnTypeIssues); ?></h4>
                 <?php if (empty($storageColumnTypeIssues)) : ?>
                     <div class="alert cb-audit-ok-alert">
                         <span class="cb-audit-section-title">
@@ -598,7 +602,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('bf_field_sync'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 16;">
-                <h4 class="h6 mt-3<?php echo $hasBfFieldSyncIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('bf_field_sync', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_FIELD_SYNC'), $hasBfFieldSyncIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasBfFieldSyncIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('bf_field_sync', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_FIELD_SYNC'), $hasBfFieldSyncIssues); ?></h4>
             <?php if (empty($bfFieldSyncIssues)) : ?>
                 <div class="alert cb-audit-ok-alert">
                     <span class="cb-audit-section-title">
@@ -665,7 +669,7 @@ use Joomla\CMS\Router\Route;
                                     <?php if ($sourceExists) : ?>
                                         <?php echo htmlspecialchars($sourceDisplay, ENT_QUOTES, 'UTF-8'); ?>
                                     <?php else : ?>
-                                        <span class="text-warning"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_FIELD_SYNC_SOURCE_MISSING'); ?></span>
+                                        <span class="text-warning-emphasis"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_FIELD_SYNC_SOURCE_MISSING'); ?></span>
                                         <br>
                                         <small><?php echo htmlspecialchars($sourceDisplay, ENT_QUOTES, 'UTF-8'); ?></small>
                                     <?php endif; ?>
@@ -693,7 +697,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('menu_view_consistency'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 19;">
-                <h4 class="h6 mt-3<?php echo $hasMenuViewIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('menu_view_consistency', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MENU_VIEW_CONSISTENCY'), $hasMenuViewIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasMenuViewIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('menu_view_consistency', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MENU_VIEW_CONSISTENCY'), $hasMenuViewIssues); ?></h4>
             <?php if (empty($menuViewIssues)) : ?>
                 <div class="alert cb-audit-ok-alert">
                     <span class="cb-audit-section-title">
@@ -738,7 +742,7 @@ use Joomla\CMS\Router\Route;
                                 <td><?php echo $menuId; ?></td>
                                 <td>
                                     <?php if ($menuEditLink !== '') : ?>
-                                        <a href="<?php echo htmlspecialchars($menuEditLink, ENT_QUOTES, 'UTF-8'); ?>">
+                                        <a href="<?php echo htmlspecialchars($menuEditLink, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                                             <?php echo htmlspecialchars($menuTitle, ENT_QUOTES, 'UTF-8'); ?>
                                         </a>
                                     <?php else : ?>
@@ -771,7 +775,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('frontend_permission_consistency'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 20;">
-                <h4 class="h6 mt-3<?php echo $hasFrontendPermissionIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('frontend_permission_consistency', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FRONTEND_PERMISSION_CONSISTENCY'), $hasFrontendPermissionIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasFrontendPermissionIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('frontend_permission_consistency', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FRONTEND_PERMISSION_CONSISTENCY'), $hasFrontendPermissionIssues); ?></h4>
             <?php if (empty($frontendPermissionIssues)) : ?>
                 <div class="alert cb-audit-ok-alert">
                     <span class="cb-audit-section-title">
@@ -856,7 +860,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('element_reference_consistency'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 21;">
-                <h4 class="h6 mt-3<?php echo $hasElementReferenceIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('element_reference_consistency', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ELEMENT_REFERENCE_CONSISTENCY'), $hasElementReferenceIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasElementReferenceIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('element_reference_consistency', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ELEMENT_REFERENCE_CONSISTENCY'), $hasElementReferenceIssues); ?></h4>
             <?php if (empty($elementReferenceIssues)) : ?>
                 <div class="alert cb-audit-ok-alert">
                     <span class="cb-audit-section-title">
@@ -950,7 +954,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('form_audits'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 36;">
-                <h4 class="h6 mt-3<?php echo $hasFormAuditIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('form_audits', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FORM_AUDITS'), $hasFormAuditIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasFormAuditIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('form_audits', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FORM_AUDITS'), $hasFormAuditIssues); ?></h4>
                 <?php if ($formAudits === []) : ?>
                     <div class="alert cb-audit-ok-alert">
                         <span class="cb-audit-section-title">
@@ -1107,7 +1111,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('content_record_duplicates'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 21;">
-                <h4 class="h6 mt-3<?php echo $hasContentRecordDuplicateIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('content_record_duplicates', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES'), $hasContentRecordDuplicateIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasContentRecordDuplicateIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('content_record_duplicates', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES'), $hasContentRecordDuplicateIssues); ?></h4>
             <?php if (empty($contentRecordDuplicateIssues)) : ?>
                 <div class="alert cb-audit-ok-alert">
                     <span class="cb-audit-section-title">
@@ -1156,7 +1160,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('generated_article_categories'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 22;">
-                <h4 class="h6 mt-3<?php echo $hasGeneratedArticleCategoryIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('generated_article_categories', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES'), $hasGeneratedArticleCategoryIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasGeneratedArticleCategoryIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('generated_article_categories', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES'), $hasGeneratedArticleCategoryIssues); ?></h4>
             <?php if (empty($generatedArticleCategoryIssues)) : ?>
                 <div class="alert cb-audit-ok-alert">
                     <span class="cb-audit-section-title">
@@ -1170,7 +1174,7 @@ use Joomla\CMS\Router\Route;
                         <input
                             type="checkbox"
                             class="form-check-input"
-                            data-cb-generated-article-categories-select-all
+                            data-cb-select-all="generated-article-categories"
                             aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_SELECT_ALL'), ENT_QUOTES, 'UTF-8'); ?>"
                         >
                         <span class="form-check-label"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_SELECT_ALL'); ?></span>
@@ -1180,7 +1184,7 @@ use Joomla\CMS\Router\Route;
                         class="btn btn-sm btn-warning"
                         data-cb-audit-ajax-task="about.repairGeneratedArticleCategories"
                         data-cb-audit-ajax-field="form_ids"
-                        data-cb-audit-ajax-checkbox-selector="#cb-audit-generated-article-categories-table .cb-generated-article-category-checkbox"
+                        data-cb-audit-ajax-checkbox-selector="[data-cb-select-item=&quot;generated-article-categories&quot;]"
                         title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
                         aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
                         onclick="this.form.elements['task'].value='about.repairGeneratedArticleCategories';"
@@ -1196,7 +1200,7 @@ use Joomla\CMS\Router\Route;
                                 <input
                                     type="checkbox"
                                     class="form-check-input"
-                                    data-cb-generated-article-categories-select-all
+                                    data-cb-select-all="generated-article-categories"
                                     aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_SELECT_ALL'), ENT_QUOTES, 'UTF-8'); ?>"
                                 >
                                 <span class="visually-hidden"><?php echo $auditRowNumberLabel; ?></span>
@@ -1244,7 +1248,7 @@ use Joomla\CMS\Router\Route;
                                 <td>
                                     <input
                                         type="checkbox"
-                                        class="form-check-input cb-generated-article-category-checkbox"
+                                        class="form-check-input" data-cb-select-item="generated-article-categories"
                                         name="form_ids[]"
                                         value="<?php echo $formId; ?>"
                                         aria-label="<?php echo htmlspecialchars(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_SELECT_FORM', $formName), ENT_QUOTES, 'UTF-8'); ?>"
@@ -1273,7 +1277,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('stale_language_files'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 23;">
-                <h4 class="h6 mt-3<?php echo $hasStaleLanguageFiles ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('stale_language_files', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_LANGUAGE_FILES'), $hasStaleLanguageFiles); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasStaleLanguageFiles ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('stale_language_files', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_LANGUAGE_FILES'), $hasStaleLanguageFiles); ?></h4>
                 <?php if (empty($staleLanguageFiles)) : ?>
                     <div class="alert cb-audit-ok-alert">
                         <span class="cb-audit-section-title">
@@ -1294,8 +1298,127 @@ use Joomla\CMS\Router\Route;
                 <?php endif; ?>
             </div>
 
+            <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('debug_mode'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 26;">
+                <h4 class="h6 mt-3<?php echo $hasDebugModeIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('debug_mode', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE'), $hasDebugModeIssues); ?></h4>
+                <?php if (empty($debugModeIssues)) : ?>
+                    <div class="alert cb-audit-ok-alert">
+                        <span class="cb-audit-section-title">
+                            <span class="cb-audit-ok-check icon-check-circle" aria-hidden="true"></span>
+                            <span><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_OK'); ?></span>
+                        </span>
+                    </div>
+                <?php else : ?>
+                    <div class="alert alert-warning">
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_INTRO'); ?>
+                    </div>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                        <label class="form-check mb-0">
+                            <input
+                                type="checkbox"
+                                class="form-check-input"
+                                data-cb-select-all="debug-mode"
+                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_SELECT_ALL'), ENT_QUOTES, 'UTF-8'); ?>"
+                            >
+                            <span class="form-check-label"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_SELECT_ALL'); ?></span>
+                        </label>
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-warning"
+                            data-cb-audit-ajax-task="about.repairDebugMode"
+                            data-cb-audit-ajax-field="form_ids"
+                            data-cb-audit-ajax-checkbox-selector="[data-cb-select-item=&quot;debug-mode&quot;]"
+                            title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_REPAIR_SELECTED_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                            aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_REPAIR_SELECTED'), ENT_QUOTES, 'UTF-8'); ?>"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                        >
+                            <span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_REPAIR_SELECTED'); ?>
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="cb-audit-debug-mode-table" class="table table-sm table-striped align-middle">
+                            <thead>
+                            <tr>
+                                <th scope="col">
+                                    <input
+                                        type="checkbox"
+                                        class="form-check-input"
+                                        data-cb-select-all="debug-mode"
+                                        aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_SELECT_ALL'), ENT_QUOTES, 'UTF-8'); ?>"
+                                    >
+                                </th>
+                                <th scope="col"><?php echo $auditRowNumberLabel; ?></th>
+                                <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ID'); ?></th>
+                                <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_FIELD_SYNC_VIEW'); ?></th>
+                                <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_OPTIONS'); ?></th>
+                                <th scope="col" class="text-end"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ACTIONS'); ?></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php $debugModeRowNumber = 1; ?>
+                            <?php foreach ($debugModeIssues as $debugModeIssue) : ?>
+                                <?php if (!is_array($debugModeIssue)) { continue; } ?>
+                                <?php
+                                $debugFormId = (int) ($debugModeIssue['form_id'] ?? 0);
+                                if ($debugFormId <= 0) {
+                                    continue;
+                                }
+                                $debugFormName = trim((string) ($debugModeIssue['form_name'] ?? ''));
+                                $debugFormName = $debugFormName !== '' ? $debugFormName : ('#' . $debugFormId);
+                                $debugFormEditLink = Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $debugFormId, false);
+                                $debugOptionLabels = [];
+                                foreach ((array) ($debugModeIssue['options'] ?? []) as $debugOptionKey) {
+                                    $debugOptionLabels[] = Text::_((string) $debugOptionKey);
+                                }
+                                $debugOptions = $debugOptionLabels !== []
+                                    ? implode(', ', $debugOptionLabels)
+                                    : Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
+                                ?>
+                                <tr>
+                                    <td>
+                                        <input
+                                            type="checkbox"
+                                            class="form-check-input"
+                                            data-cb-select-item="debug-mode"
+                                            name="form_ids[]"
+                                            value="<?php echo $debugFormId; ?>"
+                                            aria-label="<?php echo htmlspecialchars(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_SELECT_ONE', $debugFormName), ENT_QUOTES, 'UTF-8'); ?>"
+                                        >
+                                    </td>
+                                    <td><?php echo $debugModeRowNumber++; ?></td>
+                                    <td><?php echo $debugFormId; ?></td>
+                                    <td>
+                                        <a href="<?php echo htmlspecialchars($debugFormEditLink, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
+                                            <?php echo htmlspecialchars($debugFormName, ENT_QUOTES, 'UTF-8'); ?>
+                                        </a>
+                                        <?php if ((int) ($debugModeIssue['published'] ?? 0) !== 1) : ?>
+                                            <span class="badge text-bg-secondary ms-1"><?php echo Text::_('JUNPUBLISHED'); ?></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($debugOptions, ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td class="text-end">
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-warning"
+                                            data-cb-audit-ajax-task="about.repairDebugMode"
+                                            data-cb-audit-ajax-field="form_id"
+                                            data-cb-audit-ajax-value="<?php echo $debugFormId; ?>"
+                                            title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                            aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                        ><span class="fa-solid fa-wrench" aria-hidden="true"></span></button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('stale_installer_temp'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 24;">
-                <h4 class="h6 mt-3<?php echo $hasStaleInstallerTempDirs ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('stale_installer_temp', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP'), $hasStaleInstallerTempDirs); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasStaleInstallerTempDirs ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('stale_installer_temp', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP'), $hasStaleInstallerTempDirs); ?></h4>
                 <?php if (empty($staleInstallerTempDirs)) : ?>
                     <div class="alert cb-audit-ok-alert">
                         <span class="cb-audit-section-title">
@@ -1304,19 +1427,72 @@ use Joomla\CMS\Router\Route;
                         </span>
                     </div>
                 <?php else : ?>
-                    <ol class="mb-0 ps-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                        <label class="form-check mb-0">
+                            <input
+                                type="checkbox"
+                                class="form-check-input"
+                                data-cb-select-all="stale-installer-temp"
+                                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_SELECT_ALL'), ENT_QUOTES, 'UTF-8'); ?>"
+                            >
+                            <span class="form-check-label"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_SELECT_ALL'); ?></span>
+                        </label>
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-danger"
+                            data-cb-audit-ajax-task="about.deleteStaleInstallerTemp"
+                            data-cb-audit-ajax-field="stale_installer_temp_paths"
+                            data-cb-audit-ajax-checkbox-selector="[data-cb-select-item=&quot;stale-installer-temp&quot;]"
+                            title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_SELECTED_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                            aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_SELECTED'), ENT_QUOTES, 'UTF-8'); ?>"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                        >
+                            <span class="fa-solid fa-trash me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_SELECTED'); ?>
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="cb-audit-stale-installer-temp-table" class="table table-sm table-striped align-middle">
+                            <thead>
+                            <tr>
+                                <th scope="col">
+                                    <input
+                                        type="checkbox"
+                                        class="form-check-input"
+                                        data-cb-select-all="stale-installer-temp"
+                                        aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_SELECT_ALL'), ENT_QUOTES, 'UTF-8'); ?>"
+                                    >
+                                </th>
+                                <th scope="col"><?php echo $auditRowNumberLabel; ?></th>
+                                <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_PATH'); ?></th>
+                                <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_MODIFIED'); ?></th>
+                                <th scope="col" class="text-end"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ACTIONS'); ?></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php $staleInstallerTempRowNumber = 1; ?>
                             <?php foreach ($staleInstallerTempDirs as $staleInstallerTempDir) : ?>
                                 <?php if (!is_array($staleInstallerTempDir)) { continue; } ?>
                                 <?php $staleInstallerTempPath = (string) ($staleInstallerTempDir['path'] ?? ''); ?>
-                                <li>
-                                    <code><?php echo htmlspecialchars($staleInstallerTempPath, ENT_QUOTES, 'UTF-8'); ?></code>
-                                    <?php if (!empty($staleInstallerTempDir['modified'])) : ?>
-                                        <span class="text-muted ms-1">(<?php echo htmlspecialchars((string) $staleInstallerTempDir['modified'], ENT_QUOTES, 'UTF-8'); ?>)</span>
-                                    <?php endif; ?>
-                                    <?php if ($staleInstallerTempPath !== '') : ?>
+                                <?php if ($staleInstallerTempPath === '') { continue; } ?>
+                                <tr>
+                                    <td>
+                                        <input
+                                            type="checkbox"
+                                            class="form-check-input"
+                                            data-cb-select-item="stale-installer-temp"
+                                            name="stale_installer_temp_paths[]"
+                                            value="<?php echo htmlspecialchars($staleInstallerTempPath, ENT_QUOTES, 'UTF-8'); ?>"
+                                            aria-label="<?php echo htmlspecialchars(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_SELECT_ONE', $staleInstallerTempPath), ENT_QUOTES, 'UTF-8'); ?>"
+                                        >
+                                    </td>
+                                    <td><?php echo $staleInstallerTempRowNumber++; ?></td>
+                                    <td><code><?php echo htmlspecialchars($staleInstallerTempPath, ENT_QUOTES, 'UTF-8'); ?></code></td>
+                                    <td><?php echo htmlspecialchars((string) ($staleInstallerTempDir['modified'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td class="text-end">
                                         <button
                                             type="button"
-                                            class="btn btn-sm btn-danger ms-2"
+                                            class="btn btn-sm btn-danger"
                                             data-cb-audit-ajax-task="about.deleteStaleInstallerTemp"
                                             data-cb-audit-ajax-field="stale_installer_temp_path"
                                             data-cb-audit-ajax-value="<?php echo htmlspecialchars($staleInstallerTempPath, ENT_QUOTES, 'UTF-8'); ?>"
@@ -1325,15 +1501,17 @@ use Joomla\CMS\Router\Route;
                                             data-bs-toggle="tooltip"
                                             data-bs-placement="top"
                                         ><span class="fa-solid fa-trash" aria-hidden="true"></span></button>
-                                    <?php endif; ?>
-                                </li>
-                        <?php endforeach; ?>
-                    </ol>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 <?php endif; ?>
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('table_encoding'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 6;">
-                <h4 class="h6 mt-3<?php echo $hasTableEncodingIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('table_encoding', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_TABLE_ENCODING_ISSUES') . ' (' . $tableEncodingIssueCount . ')', $hasTableEncodingIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasTableEncodingIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('table_encoding', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_TABLE_ENCODING_ISSUES') . ' (' . $tableEncodingIssueCount . ')', $hasTableEncodingIssues); ?></h4>
             <?php if (empty($tableEncodingIssues)) : ?>
                 <div class="alert cb-audit-ok-alert">
                     <span class="cb-audit-section-title">
@@ -1369,7 +1547,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('column_encoding'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 8;">
-                <h4 class="h6 mt-3<?php echo $hasColumnEncodingIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('column_encoding', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_COLUMN_ENCODING_ISSUES') . ' (' . $columnEncodingIssueCount . ')', $hasColumnEncodingIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasColumnEncodingIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('column_encoding', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_COLUMN_ENCODING_ISSUES') . ' (' . $columnEncodingIssueCount . ')', $hasColumnEncodingIssues); ?></h4>
             <?php if (empty($columnEncodingIssuesDisplayed)) : ?>
                 <div class="alert cb-audit-ok-alert">
                     <span class="cb-audit-section-title">
@@ -1422,7 +1600,7 @@ use Joomla\CMS\Router\Route;
             </div>
 
             <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('mixed_collations'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 9;">
-                <h4 class="h6 mt-3<?php echo $hasMixedCollationIssues ? ' text-warning' : ''; ?>"><?php echo $renderNumberedAuditTitle('mixed_collations', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MIXED_COLLATIONS') . ' (' . $mixedCollationIssueCount . ')', $hasMixedCollationIssues); ?></h4>
+                <h4 class="h6 mt-3<?php echo $hasMixedCollationIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('mixed_collations', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MIXED_COLLATIONS') . ' (' . $mixedCollationIssueCount . ')', $hasMixedCollationIssues); ?></h4>
             <p class="text-muted small mb-2">
                 <?php echo Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_EXPECTED_TARGET', $encodingTargetCharset, $encodingTargetCollation); ?>
             </p>

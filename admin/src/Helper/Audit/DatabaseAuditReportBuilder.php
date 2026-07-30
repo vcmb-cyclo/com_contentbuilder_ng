@@ -41,6 +41,7 @@ final class DatabaseAuditReportBuilder
      *   content_record_duplicate_issues:array<int,array<string,mixed>>,
      *   invalid_datetime_sort_issues:array<int,array<string,mixed>>,
      *   generated_article_category_issues:array<int,array<string,mixed>>,
+     *   debug_mode_issues:array<int,array<string,mixed>>,
      *   form_audits:array<int,array<string,mixed>>,
      *   cb_tables:array<string,mixed>,
      *   errors:array<int,string>
@@ -70,6 +71,7 @@ final class DatabaseAuditReportBuilder
         $invalidDatetimeSortIssues = (array) ($data['invalid_datetime_sort_issues'] ?? []);
         $storageColumnTypeIssues = (array) ($data['storage_column_type_issues'] ?? []);
         $generatedArticleCategoryIssues = (array) ($data['generated_article_category_issues'] ?? []);
+        $debugModeIssues = (array) ($data['debug_mode_issues'] ?? []);
         $formAudits = (array) ($data['form_audits'] ?? []);
         $staleLanguageFiles = (array) ($data['stale_language_files'] ?? []);
         $staleInstallerTempDirs = (array) ($data['stale_installer_temp_dirs'] ?? []);
@@ -186,6 +188,7 @@ final class DatabaseAuditReportBuilder
             + count($invalidDatetimeSortIssues)
             + count($storageColumnTypeIssues)
             + count($generatedArticleCategoryIssues)
+            + count($debugModeIssues)
             + count($staleLanguageFiles)
             + count($staleInstallerTempDirs)
             + $formAuditIssueForms;
@@ -217,6 +220,7 @@ final class DatabaseAuditReportBuilder
             'invalid_datetime_sort_issues' => $invalidDatetimeSortIssues,
             'storage_column_type_issues' => $storageColumnTypeIssues,
             'generated_article_category_issues' => $generatedArticleCategoryIssues,
+            'debug_mode_issues' => $debugModeIssues,
             'stale_language_files' => $staleLanguageFiles,
             'stale_installer_temp_dirs' => $staleInstallerTempDirs,
             'form_audits' => $formAudits,
@@ -248,6 +252,7 @@ final class DatabaseAuditReportBuilder
                 'invalid_datetime_sort_rows' => $invalidDatetimeSortRows,
                 'storage_column_type_issues' => count($storageColumnTypeIssues),
                 'generated_article_category_issues' => count($generatedArticleCategoryIssues),
+                'debug_mode_issues' => count($debugModeIssues),
                 'generated_article_category_rows' => $invalidGeneratedArticleCategoryRows,
                 'stale_language_files' => count($staleLanguageFiles),
                 'stale_installer_temp_dirs' => count($staleInstallerTempDirs),

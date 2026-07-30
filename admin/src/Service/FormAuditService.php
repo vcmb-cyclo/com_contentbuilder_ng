@@ -13,6 +13,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Service;
 
 \defined('_JEXEC') or die;
 
+use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceDiagnosticHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 use CB\Component\Contentbuilderng\Administrator\types\contentbuilderng_com_breezingformsng;
@@ -82,7 +83,14 @@ final class FormAuditService
         $sourceAvailable = false;
         try {
             $source = FormSourceFactory::getForm((string) $form['type'], (string) $form['reference_id']);
-            if (is_object($source) && method_exists($source, 'getElementNames')) {
+            // The type classes always return an instance, even when the storage
+            // row (or BF form) behind reference_id is gone; only "exists" tells
+            // the two apart. Without this check the element list below would be
+            // compared against an empty name map and every single field would be
+            // reported as an orphan reference, hiding the actual root cause.
+            $sourceResolved = is_object($source)
+                && (!property_exists($source, 'exists') || (bool) ($source->exists ?? false));
+            if ($sourceResolved && method_exists($source, 'getElementNames')) {
                 $sourceNames = (array) $source->getElementNames();
                 $sourceAvailable = true;
             }
@@ -561,7 +569,8 @@ final class FormAuditService
         if (!$sourceAvailable) {
             $checks[] = [
                 'status' => self::STATUS_ERROR,
-                'message' => Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_CHECK_SOURCE_UNAVAILABLE', $sourceType, $sourceReferenceId),
+                'message' => Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_CHECK_SOURCE_UNAVAILABLE', $sourceType, $sourceReferenceId)
+                    . ' ' . FormSourceDiagnosticHelper::describe($sourceType, $sourceReferenceId),
                 'reference' => 'CBNG-AUDIT-SOURCE-UNAVAILABLE',
             ];
 
@@ -831,6 +840,8 @@ final class FormAuditService
                     'status' => self::STATUS_ERROR,
                     'message' => Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_CHECK_EDITABLE_WITHOUT_ITEM', $name),
                     'reference' => 'CBNG-AUDIT-EDITABLE-FIELD-WITHOUT-ITEM',
+                    'code' => 'editable_field_without_item',
+                    'field' => $name,
                 ];
             }
 

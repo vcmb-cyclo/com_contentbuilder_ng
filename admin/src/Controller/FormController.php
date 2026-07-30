@@ -458,7 +458,7 @@ class FormController extends BaseFormController
             $this->setMessage($message, 'error');
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=audit&tmpl=component&id=' . $formId, false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $formId . '&tab=tab12', false));
     }
 
     public function repairEditableTemplate(): void
@@ -499,7 +499,7 @@ class FormController extends BaseFormController
             $this->setMessage($message, 'error');
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=audit&tmpl=component&id=' . $formId, false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $formId . '&tab=tab12', false));
     }
 
     public function repairDetailsTemplate(): void
@@ -540,7 +540,7 @@ class FormController extends BaseFormController
             $this->setMessage($message, 'error');
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=audit&tmpl=component&id=' . $formId, false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $formId . '&tab=tab12', false));
     }
 
     public function repairTemplates(): void
@@ -581,7 +581,7 @@ class FormController extends BaseFormController
             $this->setMessage($message, 'error');
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=audit&tmpl=component&id=' . $formId, false));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $formId . '&tab=tab12', false));
     }
 
     public function debug_on(): bool
@@ -950,6 +950,26 @@ class FormController extends BaseFormController
         }
     }
 
+    /**
+     * Label of a BreezingForms system field mapping, read before it is deleted
+     * so the confirmation message can name which field was removed.
+     */
+    private function getBfSystemFieldLabel(int $formId, int $elementId): string
+    {
+        $db = $this->getDatabase();
+        $query = $db->getQuery(true)
+            ->select($db->quoteName('label'))
+            ->from($db->quoteName('#__contentbuilderng_elements'))
+            ->where($db->quoteName('id') . ' = ' . $elementId)
+            ->where($db->quoteName('form_id') . ' = ' . $formId)
+            ->where($db->quoteName('reference_id') . ' < 0');
+        $db->setQuery($query, 0, 1);
+
+        $label = trim((string) $db->loadResult());
+
+        return $label !== '' ? $label : ('#' . $elementId);
+    }
+
     public function ajax_remove_bf_system_field(): void
     {
         $this->checkToken();
@@ -963,6 +983,7 @@ class FormController extends BaseFormController
             }
 
             $db          = $this->getDatabase();
+            $fieldLabel  = $this->getBfSystemFieldLabel($formId, $elementId);
             $deleteQuery = $db->getQuery(true)
                 ->delete($db->quoteName('#__contentbuilderng_elements'))
                 ->where($db->quoteName('id') . ' = ' . $elementId)
@@ -978,7 +999,7 @@ class FormController extends BaseFormController
             $table = $this->getElementsModelForListActions(true)->getTable('Elementoptions');
             $table->reorder('form_id = ' . $formId);
 
-            $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_DELETED'));
+            $this->respondAjax(true, Text::sprintf('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_DELETED', $fieldLabel));
         } catch (\Throwable $e) {
             $this->respondAjax(false, $e->getMessage());
         }
@@ -1001,6 +1022,7 @@ class FormController extends BaseFormController
             }
 
             $db = $this->getDatabase();
+            $fieldLabel = $this->getBfSystemFieldLabel($formId, $elementId);
             $deleteQuery = $db->getQuery(true)
                 ->delete($db->quoteName('#__contentbuilderng_elements'))
                 ->where($db->quoteName('id') . ' = ' . $elementId)
@@ -1012,7 +1034,7 @@ class FormController extends BaseFormController
             $table = $this->getElementsModelForListActions(true)->getTable('Elementoptions');
             $table->reorder('form_id = ' . $formId);
 
-            $this->setRedirect($this->getEditRedirectUrl($formId), Text::_('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_DELETED'));
+            $this->setRedirect($this->getEditRedirectUrl($formId), Text::sprintf('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_DELETED', $fieldLabel));
             return true;
         } catch (\Throwable $e) {
             $this->setRedirect($this->getEditRedirectUrl($formId), $e->getMessage(), 'warning');

@@ -98,6 +98,7 @@ $contentRecordDuplicateIssues = (array) ($auditReport['content_record_duplicate_
 $invalidDatetimeSortIssues = (array) ($auditReport['invalid_datetime_sort_issues'] ?? []);
 $storageColumnTypeIssues = (array) ($auditReport['storage_column_type_issues'] ?? []);
 $generatedArticleCategoryIssues = (array) ($auditReport['generated_article_category_issues'] ?? []);
+$debugModeIssues = (array) ($auditReport['debug_mode_issues'] ?? []);
 $formAudits = (array) ($auditReport['form_audits'] ?? []);
 $staleLanguageFiles = (array) ($auditReport['stale_language_files'] ?? []);
 $staleLanguageFilesCount = (int) ($auditSummary['stale_language_files'] ?? count($staleLanguageFiles));
@@ -306,6 +307,7 @@ $repairWorkflowStepLabels = [
     'element_reference_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ELEMENT_REFERENCE_CONSISTENCY'),
     'content_record_duplicates' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES'),
     'generated_article_categories' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES'),
+    'debug_mode' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE'),
     'stale_language_files' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_LANGUAGE_FILES'),
     'stale_installer_temp' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP'),
 ];
@@ -363,6 +365,8 @@ if ($generatedArticleCategoryRowCount === 0 && $generatedArticleCategoryIssues !
     }
 }
 $hasGeneratedArticleCategoryIssues = $generatedArticleCategoryIssueCount > 0 || $generatedArticleCategoryRowCount > 0;
+$debugModeIssueCount = (int) ($auditSummary['debug_mode_issues'] ?? count($debugModeIssues));
+$hasDebugModeIssues = $debugModeIssueCount > 0;
 $formAuditIssueForms = (int) ($auditSummary['form_audit_issue_forms'] ?? 0);
 $formAuditIssueChecks = (int) ($auditSummary['form_audit_issue_checks'] ?? 0);
 $hasFormAuditIssues = $formAuditIssueForms > 0 || $formAuditIssueChecks > 0;
@@ -434,46 +438,27 @@ $renderAuditTitle = static function (string $label, bool $hasIssues): string {
 
     return $safeLabel;
 };
-$auditSectionNumbers = [
-    'issues_total' => 1,
-    'duplicate_indexes' => 2,
-    'duplicate_indexes_to_drop' => 3,
-    'historical_tables' => 4,
-    'historical_menu_entries' => 5,
-    'table_encoding' => 6,
-    'packed_data' => 7,
-    'column_encoding' => 8,
-    'mixed_collations' => 9,
-    'audit_columns' => 10,
-    'audit_columns_total' => 11,
-    'form_audit_columns' => 12,
-    'form_audit_columns_total' => 13,
-    'invalid_datetime_sort' => 14,
-    'invalid_datetime_sort_rows' => 15,
-    'storage_column_types' => 16,
-    'plugin_duplicates' => 17,
-    'plugin_duplicate_rows' => 18,
-    'bf_field_sync' => 19,
-    'bf_field_sync_missing' => 20,
-    'bf_field_sync_orphan' => 21,
-    'menu_view_consistency' => 22,
-    'frontend_permission_consistency' => 23,
-    'element_reference_consistency' => 24,
-    'generated_article_categories' => 25,
-    'generated_article_category_rows' => 26,
-    'cb_table_stats' => 27,
-    'cb_tables_total' => 28,
-    'cb_ng_tables_expected' => 29,
-    'cb_ng_tables_missing' => 30,
-    'cb_storage_tables' => 31,
-    'cb_estimated_rows' => 32,
-    'cb_estimated_size' => 33,
-    'content_record_duplicates' => 34,
-    'content_record_duplicate_rows' => 35,
-    'form_audits' => 36,
+// The number shown in front of a section title is the row number of that
+// section in the summary table above it. Both are assigned here from the order
+// the summary rows are actually rendered, so the column stays sequential and
+// the titles stay in sync when rows are added, moved or removed.
+$auditSectionNumberStore = [];
+$auditSectionNumberAliases = [
+    // Sections that have no summary row of their own reuse the number of the
+    // first summary row that belongs to them.
+    'cb_table_stats' => 'cb_tables_total',
 ];
-$getAuditSectionNumber = static function (string $sectionId) use ($auditSectionNumbers): int {
-    return (int) ($auditSectionNumbers[$sectionId] ?? 0);
+$auditSummaryRowNumber = static function (string $sectionId) use (&$auditSectionNumberStore): int {
+    if (!isset($auditSectionNumberStore[$sectionId])) {
+        $auditSectionNumberStore[$sectionId] = count($auditSectionNumberStore) + 1;
+    }
+
+    return $auditSectionNumberStore[$sectionId];
+};
+$getAuditSectionNumber = static function (string $sectionId) use (&$auditSectionNumberStore, $auditSectionNumberAliases): int {
+    $sectionId = $auditSectionNumberAliases[$sectionId] ?? $sectionId;
+
+    return (int) ($auditSectionNumberStore[$sectionId] ?? 0);
 };
 $getAuditSectionHeadingId = static function (string $sectionId): string {
     return 'cb-audit-section-' . $sectionId;

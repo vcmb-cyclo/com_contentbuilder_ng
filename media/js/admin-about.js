@@ -167,22 +167,29 @@
             return;
         }
 
-        if (target.matches('[data-cb-generated-article-categories-select-all]')) {
-            document.querySelectorAll('.cb-generated-article-category-checkbox').forEach(function (checkbox) {
+        var group = target.dataset.cbSelectAll || target.dataset.cbSelectItem || '';
+
+        if (group === '') {
+            return;
+        }
+
+        var masterSelector = '[data-cb-select-all="' + group + '"]';
+        var itemSelector = '[data-cb-select-item="' + group + '"]';
+
+        if (target.matches(masterSelector)) {
+            document.querySelectorAll(itemSelector).forEach(function (checkbox) {
                 checkbox.checked = target.checked;
             });
         }
 
-        if (target.matches('.cb-generated-article-category-checkbox') || target.matches('[data-cb-generated-article-categories-select-all]')) {
-            var selectAllCheckboxes = document.querySelectorAll('[data-cb-generated-article-categories-select-all]');
-            var checkboxes = document.querySelectorAll('.cb-generated-article-category-checkbox');
-            var checkedCount = document.querySelectorAll('.cb-generated-article-category-checkbox:checked').length;
+        var masters = document.querySelectorAll(masterSelector);
+        var items = document.querySelectorAll(itemSelector);
+        var checkedCount = document.querySelectorAll(itemSelector + ':checked').length;
 
-            selectAllCheckboxes.forEach(function (selectAll) {
-                selectAll.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
-                selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
-            });
-        }
+        masters.forEach(function (master) {
+            master.checked = items.length > 0 && checkedCount === items.length;
+            master.indeterminate = checkedCount > 0 && checkedCount < items.length;
+        });
     });
 
     initializeTooltips();

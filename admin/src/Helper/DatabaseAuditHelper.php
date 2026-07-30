@@ -17,6 +17,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Helper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\BfFieldSyncAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\AuditTableSupportHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\ContentRecordDuplicateAuditHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\DebugModeAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\DatabaseAuditReportBuilder;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\DuplicateIndexAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\ElementReferenceAuditHelper;
@@ -266,6 +267,8 @@ final class DatabaseAuditHelper
         $errors = array_merge($errors, $storageColumnTypeErrors);
         [$generatedArticleCategoryIssues, $generatedArticleCategoryErrors] = GeneratedArticleCategoryAuditHelper::inspect($db);
         $errors = array_merge($errors, $generatedArticleCategoryErrors);
+        [$debugModeIssues, $debugModeErrors] = DebugModeAuditHelper::inspect($db);
+        $errors = array_merge($errors, $debugModeErrors);
         [$staleLanguageFiles, $staleLanguageErrors] = StaleLanguageFilesAuditHelper::inspect();
         $errors = array_merge($errors, $staleLanguageErrors);
         [$staleInstallerTempDirs, $staleInstallerTempErrors] = StaleInstallerTempAuditHelper::inspect();
@@ -340,6 +343,7 @@ final class DatabaseAuditHelper
             'invalid_datetime_sort_issues' => $invalidDatetimeSortIssues,
             'storage_column_type_issues' => $storageColumnTypeIssues,
             'generated_article_category_issues' => $generatedArticleCategoryIssues,
+            'debug_mode_issues' => $debugModeIssues,
             'stale_language_files' => $staleLanguageFiles,
             'stale_installer_temp_dirs' => $staleInstallerTempDirs,
             'form_audits' => $formAudits,
