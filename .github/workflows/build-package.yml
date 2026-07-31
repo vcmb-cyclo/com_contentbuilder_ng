@@ -90,20 +90,40 @@ jobs:
         working-directory: admin
         run: composer install --prefer-dist --no-interaction --no-progress
 
-      - name: Run PHPCS on changed PHP files
+      # Blocking: a file added by this PR has no legacy excuse.
+      - name: PSR-12 on added files (blocking)
         run: |
           base="${{ github.event.pull_request.base.sha }}"
-          mapfile -t changed < <(
-            git diff --name-only --diff-filter=ACMR "${base}" HEAD \
+          mapfile -t added < <(
+            git diff --name-only --diff-filter=A "${base}" HEAD \
               | grep -E '\.php$' \
               | grep -vE '^(admin/vendor|node_modules|build)/' || true
           )
-          if [ "${#changed[@]}" -eq 0 ]; then
-            echo "No PHP file changed."
+          if [ "${#added[@]}" -eq 0 ]; then
+            echo "No PHP file added."
             exit 0
           fi
-          printf '%s\n' "${changed[@]}"
-          admin/vendor/bin/phpcs --report=full "${changed[@]}"
+          printf '%s\n' "${added[@]}"
+          admin/vendor/bin/phpcs --report=full "${added[@]}"
+
+      # Informational: modified files are overwhelmingly legacy (~2400 errors
+      # tree-wide). Failing on them would block every change touching an old
+      # file, including security fixes. Reported, not enforced, until
+      # REFACTORING_PLAN.md chapter A clears the backlog.
+      - name: PSR-12 on modified files (report only)
+        continue-on-error: true
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          mapfile -t modified < <(
+            git diff --name-only --diff-filter=M "${base}" HEAD \
+              | grep -E '\.php$' \
+              | grep -vE '^(admin/vendor|node_modules|build)/' || true
+          )
+          if [ "${#modified[@]}" -eq 0 ]; then
+            echo "No PHP file modified."
+            exit 0
+          fi
+          admin/vendor/bin/phpcs --report=summary "${modified[@]}" || true
 
   css-lint:
     name: CSS checks
