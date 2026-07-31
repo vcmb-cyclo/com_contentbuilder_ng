@@ -27,6 +27,10 @@ $editablePrepareSnippetOptions = is_array($displayData['editablePrepareSnippetOp
 $prepareEffectOptions = is_array($displayData['prepareEffectOptions'] ?? null) ? $displayData['prepareEffectOptions'] : [];
 $templateAuditChecks = (array) ($displayData['templateAuditChecks'] ?? []);
 $templateAuditReferences = (array) ($displayData['templateAuditReferences'] ?? []);
+$editDisplayDefaults = [
+    'cb_show_top_bar' => true,
+    'cb_show_bottom_bar' => false,
+];
 ?>
 <?php echo LayoutHelper::render('form.template_audit_errors', [
     'auditChecks' => $templateAuditChecks,
@@ -44,9 +48,19 @@ $templateAuditReferences = (array) ($displayData['templateAuditReferences'] ?? [
 <div class="row gx-3 gy-1 mt-0 align-items-stretch mb-3" id="cb-form-edit-show-buttons-row">
     <div class="col-12 col-xl-4 d-flex" id="cb-form-edit-show-buttons">
         <div class="border rounded bg-body p-3 d-flex flex-column flex-grow-1" id="cb-form-edit-show-buttons-card">
-            <h4 class="h6 text-body-secondary mb-2">
-                <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_BUTTON_OPTIONS'); ?>
-            </h4>
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                <h4 class="h6 text-body-secondary mb-0">
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_BUTTON_OPTIONS'); ?>
+                </h4>
+                <button type="button" class="btn btn-secondary btn-sm" id="cb-reset-edit-display"
+                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_RESET_EDIT_DISPLAY_TOOLTIP'); ?>"
+                    aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_RESET_EDIT_DISPLAY_TOOLTIP'); ?>"
+                    data-defaults="<?php echo htmlspecialchars(json_encode($editDisplayDefaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8'); ?>"
+                    data-confirm="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_RESET_EDIT_DISPLAY_CONFIRM'), ENT_QUOTES, 'UTF-8'); ?>">
+                    <span class="fa-solid fa-rotate-left" aria-hidden="true"></span>
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_RESET'); ?>
+                </button>
+            </div>
             <div class="d-flex flex-wrap align-items-center gap-3">
                 <div>
                     <input type="hidden" name="jform[cb_show_top_bar]" id="cb-form-edit-show-top-bar-hidden" value="0" />
@@ -180,3 +194,34 @@ $templateAuditReferences = (array) ($displayData['templateAuditReferences'] ?? [
     );
     ?>
 <?php endif; ?>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const resetButton = document.getElementById("cb-reset-edit-display");
+
+    if (!resetButton) {
+        return;
+    }
+
+    resetButton.addEventListener("click", function () {
+        const confirmMessage = resetButton.getAttribute("data-confirm") || "";
+
+        if (confirmMessage && !window.confirm(confirmMessage)) {
+            return;
+        }
+
+        const defaults = JSON.parse(resetButton.getAttribute("data-defaults") || "{}");
+
+        Object.entries(defaults).forEach(function ([name, value]) {
+            const checkbox = document.getElementById(name);
+
+            if (!checkbox) {
+                return;
+            }
+
+            checkbox.checked = value;
+            checkbox.dispatchEvent(new Event("change", {bubbles: true}));
+        });
+    });
+});
+</script>

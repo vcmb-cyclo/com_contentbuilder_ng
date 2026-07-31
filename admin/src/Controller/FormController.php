@@ -274,6 +274,30 @@ class FormController extends BaseFormController
     // ==================================================================
     // Ces tâches agissent sur les éléments sélectionnés dans l'édition d'un form
     // Elles doivent utiliser Elements
+    private function resyncLockedTemplatesAfterElementChange(int $formId): array
+    {
+        if ($formId <= 0) {
+            return [];
+        }
+
+        try {
+            $component = $this->getApp()->bootComponent('com_contentbuilderng');
+            $service = $component->getContainer()->get(FormSupportService::class);
+            return $service->resyncLockedTemplates($formId, (int) $this->getApp()->getIdentity()->id);
+        } catch (\Throwable $e) {
+            return [['type' => 'warning', 'message' => $this->safeErrorMessage($e)]];
+        }
+    }
+
+    private function appendResyncMessages(string $message, array $resyncMessages): string
+    {
+        foreach ($resyncMessages as $resyncMessage) {
+            $message .= ' ' . (string) ($resyncMessage['message'] ?? '');
+        }
+
+        return trim($message);
+    }
+
     public function listorderup(): void
     {
         $this->checkToken();
@@ -285,6 +309,9 @@ class FormController extends BaseFormController
 
         $model = $this->getElementsModelForListActions();
         $model->move(-1); // ou utilise reorder si tu préfères
+        foreach ($this->resyncLockedTemplatesAfterElementChange($formId) as $resyncMessage) {
+            $this->getApp()->enqueueMessage((string) ($resyncMessage['message'] ?? ''), (string) ($resyncMessage['type'] ?? 'message'));
+        }
         $this->setRedirect($this->getEditRedirectUrl($formId));
     }
 
@@ -299,6 +326,9 @@ class FormController extends BaseFormController
 
         $model = $this->getElementsModelForListActions();
         $model->move(1);
+        foreach ($this->resyncLockedTemplatesAfterElementChange($formId) as $resyncMessage) {
+            $this->getApp()->enqueueMessage((string) ($resyncMessage['message'] ?? ''), (string) ($resyncMessage['type'] ?? 'message'));
+        }
         $this->setRedirect($this->getEditRedirectUrl($formId));
     }
 
@@ -337,6 +367,9 @@ class FormController extends BaseFormController
             $this->setMessage(Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED'), 'warning');
         } else {
             $this->setMessage(Text::_('JLIB_APPLICATION_SAVE_SUCCESS'));
+            foreach ($this->resyncLockedTemplatesAfterElementChange($formId) as $resyncMessage) {
+                $this->getApp()->enqueueMessage((string) ($resyncMessage['message'] ?? ''), (string) ($resyncMessage['type'] ?? 'message'));
+            }
         }
 
         $this->setRedirect($this->getEditRedirectUrl($formId));
@@ -774,14 +807,18 @@ class FormController extends BaseFormController
                 return false;
             }
 
+            $resyncMessages = $field === 'editable'
+                ? $this->resyncLockedTemplatesAfterElementChange($formId)
+                : [];
+
             if ($this->isAjaxCall()) {
-                $this->respondAjax(true, Text::_('JLIB_APPLICATION_SAVE_SUCCESS'));
+                $this->respondAjax(true, $this->appendResyncMessages(Text::_('JLIB_APPLICATION_SAVE_SUCCESS'), $resyncMessages));
                 return true;
             }
 
             $this->setRedirect(
                 $this->getEditRedirectUrl($formId),
-                Text::_('JLIB_APPLICATION_SAVE_SUCCESS')
+                $this->appendResyncMessages(Text::_('JLIB_APPLICATION_SAVE_SUCCESS'), $resyncMessages)
             );
             return true;
         } catch (\Throwable $e) {
@@ -1142,14 +1179,16 @@ class FormController extends BaseFormController
                 return false;
             }
 
+            $resyncMessages = $this->resyncLockedTemplatesAfterElementChange($formId);
+
             if ($this->isAjaxCall()) {
-                $this->respondAjax(true, Text::_($successMsgKey));
+                $this->respondAjax(true, $this->appendResyncMessages(Text::_($successMsgKey), $resyncMessages));
                 return true;
             }
 
             $this->setRedirect(
                 $this->getEditRedirectUrl($formId),
-                Text::_($successMsgKey)
+                $this->appendResyncMessages(Text::_($successMsgKey), $resyncMessages)
             );
 
             return true;

@@ -1358,6 +1358,10 @@ class FormModel extends AdminModel
                 continue;
             }
 
+            if ((string) ($jform[$column] ?? '') === $regenerated) {
+                continue;
+            }
+
             $jform[$column] = $regenerated;
             $app->enqueueMessage(
                 Text::sprintf('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_RESYNCED', $label),
