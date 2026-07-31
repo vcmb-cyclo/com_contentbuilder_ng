@@ -910,16 +910,6 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             $componentLayoutBase
         );
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab11', $viewTabLabel('fa-solid fa-bug', 'COM_CONTENTBUILDERNG_TAB_DEBUG', 'COM_CONTENTBUILDERNG_TAB_DEBUG_TIP'));
-        echo LayoutHelper::render(
-            'form.debug_tab',
-            [
-                'item' => $this->item,
-                'renderCheckbox' => $renderCheckbox,
-            ],
-            $componentLayoutBase
-        );
-        echo HTMLHelper::_('uitab.endTab');
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab6', $viewTabLabel('fa-solid fa-plug', 'COM_CONTENTBUILDERNG_API_TAB_TITLE', 'COM_CONTENTBUILDERNG_TAB_TIP_API'));
         echo LayoutHelper::render(
             'form.api_tab',
@@ -986,6 +976,16 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         );
 
         echo HTMLHelper::_('uitab.endTab');     // ferme tab8 (Permissions)
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab11', $viewTabLabel('fa-solid fa-bug', 'COM_CONTENTBUILDERNG_TAB_DEBUG', 'COM_CONTENTBUILDERNG_TAB_DEBUG_TIP'));
+        echo LayoutHelper::render(
+            'form.debug_tab',
+            [
+                'item' => $this->item,
+                'renderCheckbox' => $renderCheckbox,
+            ],
+            $componentLayoutBase
+        );
+        echo HTMLHelper::_('uitab.endTab');
         echo HTMLHelper::_('uitab.endTabSet');  // ferme view-pane
         ?>
 

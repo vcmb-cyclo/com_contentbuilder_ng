@@ -529,7 +529,7 @@ class DatatableService
      * Ajoute les colonnes manquantes dans la table data à partir de #__contentbuilderng_storage_fields
      * Idempotent : ajoute seulement ce qui manque.
      */
-    public function syncColumnsFromFields(int $storageId): void
+    public function syncColumnsFromFields(int $storageId): string
     {
         $this->lastSyncWarnings = [];
         $db = $this->db;
@@ -578,7 +578,7 @@ class DatatableService
         $fields = $db->loadAssocList() ?: [];
 
         if (!$fields) {
-            return;
+            return '#__' . $tableName;
         }
 
         // Colonnes existantes
@@ -620,5 +620,7 @@ class DatatableService
             $db->setQuery("ALTER TABLE $tableQN ADD " . $db->quoteName($field) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize));
             $db->execute();
         }
+
+        return '#__' . $tableName;
     }
 }
