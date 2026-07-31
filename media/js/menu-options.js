@@ -339,7 +339,13 @@
         });
     }
 
+    const previousContentbuilderngSetFormId = window.contentbuilderng_setFormId;
+
     window.contentbuilderng_setFormId = function (formId) {
+        if (typeof previousContentbuilderngSetFormId === 'function') {
+            previousContentbuilderngSetFormId(formId);
+        }
+
         updateDescriptions(formId);
     };
 
