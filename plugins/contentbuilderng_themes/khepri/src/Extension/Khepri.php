@@ -25,6 +25,7 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Event\GenericEvent as Event;
 use Joomla\Event\SubscriberInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilderng\Administrator\Helper\TemplateFieldOrderHelper;
 
 final class Khepri extends CMSPlugin implements SubscriberInterface
 {
@@ -217,7 +218,7 @@ final class Khepri extends CMSPlugin implements SubscriberInterface
 
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
 		$out = '<table class="table table-striped align-middle"><tbody>' . "\n";
-		$names = $form->getElementNames();
+		$names = TemplateFieldOrderHelper::getOrderedNames($db, $contentbuilderng_form_id, $form);
 		foreach ($names as $reference_id => $name) {
 			$query = $db->getQuery(true)
 				->select([$db->quoteName('id'), $db->quoteName('type')])
@@ -289,7 +290,7 @@ final class Khepri extends CMSPlugin implements SubscriberInterface
             return '';
         }
 		$out = '<table class="table table-striped align-middle"><tbody>' . "\n";
-		$names = $form->getElementNames();
+		$names = TemplateFieldOrderHelper::getOrderedNames($db, $contentbuilderng_form_id, $form);
 		$hidden = array();
 		foreach ($names as $reference_id => $name) {
 			$query = $db->getQuery(true)

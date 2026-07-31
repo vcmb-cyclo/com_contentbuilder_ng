@@ -25,6 +25,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Event\GenericEvent as Event;
 use Joomla\Event\SubscriberInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilderng\Administrator\Helper\TemplateFieldOrderHelper;
 
 final class Blank extends CMSPlugin implements SubscriberInterface
 {
@@ -215,7 +216,7 @@ final class Blank extends CMSPlugin implements SubscriberInterface
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 		$out = '<table border="0" width="100%" class="blanktable_content"><tbody>' . "\n";
-		$names = $form->getElementNames();
+		$names = TemplateFieldOrderHelper::getOrderedNames($db, $contentbuilderng_form_id, $form);
 		foreach ($names as $reference_id => $name) {
 			$query = $db->getQuery(true)
 				->select([$db->quoteName('id'), $db->quoteName('type')])
@@ -287,7 +288,7 @@ final class Blank extends CMSPlugin implements SubscriberInterface
             return '';
         }
         $out = '<table border="0" width="100%" class="blanktable_edit"><tbody>' . "\n";
-        $names = $form->getElementNames();
+		$names = TemplateFieldOrderHelper::getOrderedNames($db, $contentbuilderng_form_id, $form);
         $hidden = array();
 		foreach ($names as $reference_id => $name) {
 			$query = $db->getQuery(true)
