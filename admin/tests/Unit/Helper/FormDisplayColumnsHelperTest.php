@@ -34,6 +34,8 @@ final class FormDisplayColumnsHelperTest extends TestCase
             'debug_show_permissions' => 'TINYINT(1) NOT NULL DEFAULT 0',
             'debug_show_filters' => 'TINYINT(1) NOT NULL DEFAULT 0',
             'debug_show_cb_id' => 'TINYINT(1) NOT NULL DEFAULT 0',
+            'details_template_locked' => 'TINYINT(1) NOT NULL DEFAULT 0',
+            'editable_template_locked' => 'TINYINT(1) NOT NULL DEFAULT 0',
         ], FormDisplayColumnsHelper::requiredColumns());
     }
 
@@ -57,7 +59,7 @@ final class FormDisplayColumnsHelperTest extends TestCase
 
         self::assertSame(1, $summary['scanned']);
         self::assertSame(1, $summary['missing_tables']);
-        self::assertSame(14, $summary['missing_columns_total']);
+        self::assertSame(16, $summary['missing_columns_total']);
         self::assertCount(1, $summary['issues']);
         self::assertSame('#__contentbuilderng_forms', $summary['issues'][0]['table']);
         self::assertSame([
@@ -75,6 +77,8 @@ final class FormDisplayColumnsHelperTest extends TestCase
             'debug_show_permissions',
             'debug_show_filters',
             'debug_show_cb_id',
+            'details_template_locked',
+            'editable_template_locked',
         ], $summary['issues'][0]['missing']);
     }
 
@@ -102,13 +106,13 @@ final class FormDisplayColumnsHelperTest extends TestCase
         $db->method('setQuery')->willReturnCallback(static function (string $query) use (&$sql): void {
             $sql[] = $query;
         });
-        $db->expects(self::exactly(10))->method('execute');
+        $db->expects(self::exactly(12))->method('execute');
 
         $summary = FormDisplayColumnsHelper::repair($db);
 
         self::assertSame(1, $summary['scanned']);
         self::assertSame(1, $summary['issues']);
-        self::assertSame(10, $summary['repaired']);
+        self::assertSame(12, $summary['repaired']);
         self::assertSame(0, $summary['unchanged']);
         self::assertSame(0, $summary['errors']);
         self::assertSame('repaired', $summary['tables'][0]['status']);
@@ -123,6 +127,8 @@ final class FormDisplayColumnsHelperTest extends TestCase
             'debug_show_permissions',
             'debug_show_filters',
             'debug_show_cb_id',
+            'details_template_locked',
+            'editable_template_locked',
         ], $summary['tables'][0]['missing']);
         self::assertSame([
             'cb_show_details_bottom_bar',
@@ -135,8 +141,10 @@ final class FormDisplayColumnsHelperTest extends TestCase
             'debug_show_permissions',
             'debug_show_filters',
             'debug_show_cb_id',
+            'details_template_locked',
+            'editable_template_locked',
         ], $summary['tables'][0]['added']);
-        self::assertCount(10, $sql);
+        self::assertCount(12, $sql);
         self::assertTrue(
             \in_array(
                 'ALTER TABLE `#__contentbuilderng_forms` ADD `show_title_breadcrumb` TINYINT(1) NOT NULL DEFAULT 1',

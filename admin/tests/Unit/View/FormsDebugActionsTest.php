@@ -50,15 +50,20 @@ final class FormsDebugActionsTest extends TestCase
         );
     }
 
-    public function testEditViewUsesGreenBugIconForEnabledDebugState(): void
+    public function testEditViewMarksEnabledDebugStateWithADangerPill(): void
     {
         $layout = $this->read('admin/tmpl/form/edit.php');
         $script = $this->read('media/js/form-edit-init.js');
+        $style = $this->read('media/css/form-edit.css');
 
+        // An enabled debug mode must not read like the disabled one at a glance,
+        // so the active toggle gets the danger pill rather than a tinted icon.
         self::assertStringContainsString(
-            "str_replace('icon-publish', 'fa fa-bug text-success', \$debugToggleHtml)",
+            "str_replace('icon-publish', 'fa fa-bug', \$debugToggleHtml)",
             $layout
         );
+        self::assertStringContainsString('cb-debug-toggle is-active', $layout);
+        self::assertStringContainsString('.cb-debug-toggle.is-active{', $style);
         self::assertStringContainsString(
             "enabled && useDebugIcon ? 'fa-bug'",
             $script

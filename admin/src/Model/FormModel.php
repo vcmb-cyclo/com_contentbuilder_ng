@@ -1262,6 +1262,73 @@ class FormModel extends AdminModel
             $jform['editable_template'] = $formSupportService->createEditableSample($id, $formObj, $jform['theme_plugin']);
         }
 
+        // Locked templates are kept in sync with the source form on every save.
+        // The explicit "Create template" button wins when both are set for the
+        // same template: it already produced the sample above, so regenerating
+        // here would just repeat the same work.
+        $lockedTemplates = [
+            'details_template' => [
+                'locked' => !empty($jform['details_template_locked']),
+                'skip' => $createSample,
+                'label' => 'COM_CONTENTBUILDERNG_TAB_DETAILS_DISPLAY',
+                'generate' => static fn() => $formSupportService->createDetailsSample($id, $formObj, $jform['theme_plugin']),
+            ],
+            'editable_template' => [
+                'locked' => !empty($jform['editable_template_locked']),
+                'skip' => $createEditableSample,
+                'label' => 'COM_CONTENTBUILDERNG_TAB_EDIT_DISPLAY',
+                'generate' => static fn() => $formSupportService->createEditableSample($id, $formObj, $jform['theme_plugin']),
+            ],
+        ];
+
+        foreach ($lockedTemplates as $column => $lockedTemplate) {
+            if (!$lockedTemplate['locked'] || $lockedTemplate['skip']) {
+                continue;
+            }
+
+            $label = Text::_($lockedTemplate['label']);
+
+            if (!$formObj) {
+                $app->enqueueMessage(
+                    Text::sprintf(
+                        'COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_RESYNC_FAILED',
+                        $label,
+                        Text::sprintf(
+                            'COM_CONTENTBUILDERNG_SOURCE_NOT_RESOLVED',
+                            FormSourceDiagnosticHelper::describe((string) ($jform['type'] ?? ''), $jform['reference_id'] ?? 0)
+                        )
+                    ),
+                    'warning'
+                );
+                continue;
+            }
+
+            $regenerated = (string) $lockedTemplate['generate']();
+
+            // Never let a lock blank out a template the admin can no longer edit
+            // by hand: keep the stored one and say why.
+            if (trim($regenerated) === '') {
+                $app->enqueueMessage(
+                    Text::sprintf(
+                        'COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_RESYNC_FAILED',
+                        $label,
+                        Text::sprintf(
+                            'COM_CONTENTBUILDERNG_DETAILS_SAMPLE_EMPTY',
+                            (string) ($jform['theme_plugin'] ?? Text::_('COM_CONTENTBUILDERNG_NONE'))
+                        )
+                    ),
+                    'warning'
+                );
+                continue;
+            }
+
+            $jform[$column] = $regenerated;
+            $app->enqueueMessage(
+                Text::sprintf('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_RESYNCED', $label),
+                'message'
+            );
+        }
+
         $emailAdminHtml = !empty($jform['email_admin_html']);
         $emailAdminTemplate = !empty($jform['email_admin_create_sample']);
         if ($emailAdminTemplate) {

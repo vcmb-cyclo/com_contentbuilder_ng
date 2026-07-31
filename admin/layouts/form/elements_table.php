@@ -161,7 +161,8 @@ if ($debugModeEnabled) {
                 </span>
             </th>
             <th id="cb-form-view-elements-heading-published" data-cb-col="publish">
-                <span class="cb-elements-heading-label">
+                <span class="editlinktip hasTip cb-elements-heading-label"
+                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_PUBLISHED_TIP'); ?>">
                     <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_PUBLISH'), 'published') : Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_PUBLISH'); ?>
                 </span>
             </th>
