@@ -304,6 +304,7 @@ $repairWorkflowStepLabels = [
     'debug_mode' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE'),
     'stale_language_files' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_LANGUAGE_FILES'),
     'stale_installer_temp' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP'),
+    'upload_directory_protection' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_UPLOAD_DIRECTORY_PROTECTION'),
 ];
 $repairWorkflowStepDescriptions = [
     'duplicate_indexes' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DUPLICATE_GROUPS'),
@@ -320,6 +321,7 @@ $repairWorkflowStepDescriptions = [
     'element_reference_consistency' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_ELEMENT_REFERENCE_DESC'),
     'content_record_duplicates' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_CONTENT_RECORD_DUPLICATES_DESC'),
     'generated_article_categories' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_GENERATED_ARTICLE_CATEGORIES_DESC'),
+    'upload_directory_protection' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_UPLOAD_DIRECTORY_PROTECTION_DESC'),
 ];
 $phpLibrariesCount = count((array) $this->phpLibraries);
 $javascriptLibrariesCount = count((array) $this->javascriptLibraries);

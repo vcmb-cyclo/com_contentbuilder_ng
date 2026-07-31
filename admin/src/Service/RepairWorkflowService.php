@@ -17,6 +17,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Service;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\BfFieldSyncAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\ElementReferenceAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleInstallerTempAuditHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\UploadDirectoryProtectionAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleLanguageFilesAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\EncodingAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\GeneratedArticleCategoryAuditHelper;
@@ -53,6 +54,7 @@ class RepairWorkflowService
         'generated_article_categories',
         'stale_language_files',
         'stale_installer_temp',
+        'upload_directory_protection',
     ];
 
     public function __construct(
@@ -179,6 +181,7 @@ class RepairWorkflowService
             'content_record_duplicates'      => $this->buildContentRecordDuplicatesStepResult(ContentRecordDuplicateAuditHelper::repair($this->db)),
             'stale_language_files'           => $this->buildStaleLanguageFilesStepResult(StaleLanguageFilesAuditHelper::repair()),
             'stale_installer_temp'           => $this->buildStaleInstallerTempStepResult(StaleInstallerTempAuditHelper::repair()),
+            'upload_directory_protection'    => $this->buildUploadDirectoryProtectionStepResult(UploadDirectoryProtectionAuditHelper::repair($this->db)),
             default                          => throw new \RuntimeException('Unknown repair step: ' . $stepId),
         };
     }
@@ -694,8 +697,21 @@ class RepairWorkflowService
                 'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
             ];
+
+            [$unprotectedUploadDirs, $unprotectedUploadErrors] = UploadDirectoryProtectionAuditHelper::inspect($db);
+            $unprotectedUploadCount = count($unprotectedUploadDirs);
+            $prechecks['upload_directory_protection'] = [
+                'count' => $unprotectedUploadCount,
+                'description' => match (true) {
+                    $unprotectedUploadCount <= 0 => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_UPLOAD_PROTECTION_PRECHECK_NONE'),
+                    $unprotectedUploadCount === 1 => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_UPLOAD_PROTECTION_PRECHECK_ONE'),
+                    default => Text::sprintf('COM_CONTENTBUILDERNG_DB_REPAIR_UPLOAD_PROTECTION_PRECHECK_MANY', $unprotectedUploadCount),
+                },
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
+                'has_errors' => $unprotectedUploadErrors !== [],
+            ];
         } catch (\Throwable $e) {
-            foreach (['duplicate_indexes', 'historical_tables', 'historical_menu_entries', 'table_encoding', 'audit_columns', 'form_audit_columns', 'plugin_duplicates', 'bf_field_sync', 'menu_view_consistency', 'frontend_permission_consistency', 'element_reference_consistency', 'content_record_duplicates', 'generated_article_categories', 'stale_language_files', 'stale_installer_temp'] as $stepId) {
+            foreach (['duplicate_indexes', 'historical_tables', 'historical_menu_entries', 'table_encoding', 'audit_columns', 'form_audit_columns', 'plugin_duplicates', 'bf_field_sync', 'menu_view_consistency', 'frontend_permission_consistency', 'element_reference_consistency', 'content_record_duplicates', 'generated_article_categories', 'stale_language_files', 'stale_installer_temp', 'upload_directory_protection'] as $stepId) {
                 $prechecks[$stepId] = [
                     'count' => 1,
                     'description' => 'Pre-check unavailable for this step. You can still run the repair manually.',
@@ -1328,6 +1344,34 @@ class RepairWorkflowService
             'summary' => $scanned === 0
                 ? 'No stale Joomla installer temporary directory found.'
                 : sprintf('%d stale installer temporary directory(ies) found, %d removed, %d error(s).', $scanned, $repaired, $errors),
+            'lines'   => $lines,
+        ];
+    }
+
+    private function buildUploadDirectoryProtectionStepResult(array $summary): array
+    {
+        $lines = [];
+
+        foreach ((array) ($summary['protected'] ?? []) as $path) {
+            $lines[] = 'Protected: ' . $path;
+        }
+
+        foreach ((array) ($summary['warnings'] ?? []) as $warning) {
+            $warning = trim((string) $warning);
+            if ($warning !== '') {
+                $lines[] = 'Warning: ' . $warning;
+            }
+        }
+
+        $scanned  = (int) ($summary['scanned'] ?? 0);
+        $repaired = (int) ($summary['repaired'] ?? 0);
+        $errors   = (int) ($summary['errors'] ?? 0);
+
+        return [
+            'level'   => $errors > 0 ? 'warning' : 'message',
+            'summary' => $scanned === 0
+                ? Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_UPLOAD_PROTECTION_NONE')
+                : Text::sprintf('COM_CONTENTBUILDERNG_DB_REPAIR_UPLOAD_PROTECTION_SUMMARY', $scanned, $repaired, $errors),
             'lines'   => $lines,
         ];
     }
