@@ -33,10 +33,16 @@ class CbfilterField extends FormField
     protected function getInput()
     {
         $selectedFormId = (int) ($this->form?->getValue('form_id', 'params.settings', 0) ?? 0);
+        if ($selectedFormId <= 0) {
+            $selectedFormId = (int) ($this->form?->getValue('form_id', 'params', 0) ?? 0);
+        }
         if ($selectedFormId <= 0 && method_exists($this->form, 'getData')) {
             $data = $this->form->getData();
             if (is_object($data) && method_exists($data, 'get')) {
                 $selectedFormId = (int) $data->get('params.settings.form_id', 0);
+                if ($selectedFormId <= 0) {
+                    $selectedFormId = (int) $data->get('params.form_id', 0);
+                }
             }
         }
         if ($selectedFormId <= 0) {
@@ -48,18 +54,37 @@ class CbfilterField extends FormField
         $out .= '<div id="' . $wrapperId . '">';
         $db = $this->getDatabase();
 
+        $query = $db->getQuery(true)
+            ->select($db->quoteName(['form_id', 'label', 'reference_id']))
+            ->from($db->quoteName('#__contentbuilderng_elements'))
+            ->where($db->quoteName('published') . ' = 1')
+            ->order($db->quoteName('id') . ' ASC');
+        $db->setQuery($query);
+        $allElements = $db->loadAssocList();
+        $elementsByForm = [];
+
+        foreach ($allElements as $element) {
+            $formId = (string) ($element['form_id'] ?? '');
+            $referenceId = (string) ($element['reference_id'] ?? '');
+
+            if ($formId === '' || $referenceId === '') {
+                continue;
+            }
+
+            $elementsByForm[$formId][] = [
+                'label' => (string) ($element['label'] ?? ''),
+                'reference_id' => $referenceId,
+            ];
+        }
+
+        $elements = $elementsByForm[(string) $selectedFormId] ?? [];
+
         if ($selectedFormId > 0) {
-            $query = $db->getQuery(true)
-                ->select('*')
-                ->from($db->quoteName('#__contentbuilderng_elements'))
-                ->where($db->quoteName('published') . ' = 1')
-                ->where($db->quoteName('form_id') . ' = ' . (int) $selectedFormId);
-            $db->setQuery($query);
-            $elements = $db->loadAssocList();
 
             foreach ($elements as $element) {
-                $out .= '<div class="mb-2"><label class="w-15">' . htmlspecialchars($element['label'], ENT_QUOTES, 'UTF-8') . '</label> <input class="form-control w-25" style="display:inline-block;" value="" type="text" onchange="contentbuilderng_addValue(\'' . $element['reference_id'] . '\',this.value);" name="element_' . $element['reference_id'] . '" id="element_' . $element['reference_id'] . '"/>';
-                $out .= ' <label class="ms-2 me-1" for="element_' . $element['reference_id'] . '_order">Ordre</label><input class="form-control w-10" style="display: inline-block;" value="" type="number" min="1" step="1" onchange="contentbuilderng_addOrderValue(\'' . $element['reference_id'] . '\',this.value);" name="element_' . $element['reference_id'] . '_order" id="element_' . $element['reference_id'] . '_order"/></div>';
+                $referenceId = htmlspecialchars($element['reference_id'], ENT_QUOTES, 'UTF-8');
+                $out .= '<div class="mb-2"><label class="w-15">' . htmlspecialchars($element['label'], ENT_QUOTES, 'UTF-8') . '</label> <input class="form-control w-25" style="display:inline-block;" value="" type="text" onchange="contentbuilderng_addValue(\'' . $referenceId . '\',this.value);" name="element_' . $referenceId . '" id="element_' . $referenceId . '"/>';
+                $out .= ' <label class="ms-2 me-1" for="element_' . $referenceId . '_order">' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ORDER_LABEL'), ENT_QUOTES, 'UTF-8') . '</label><input class="form-control w-10" style="display: inline-block;" value="" type="number" min="1" step="1" onchange="contentbuilderng_addOrderValue(\'' . $referenceId . '\',this.value);" name="element_' . $referenceId . '_order" id="element_' . $referenceId . '_order"/></div>';
             }
         } else {
             $out .= '<br/><br/>' . Text::_('COM_CONTENTBUILDERNG_ADD_LIST_VIEW_SELECT_FORM_FIRST');
@@ -82,20 +107,88 @@ class CbfilterField extends FormField
 
                 var formField = contentbuilderng_findField([
                     "#jform_params_settings_form_id",
-                    "[name=\\"jform[params][settings][form_id]\\"]"
+                    "#jform_params_form_id",
+                    "[name=\\"jform[params][settings][form_id]\\"]",
+                    "[name=\\"jform[params][form_id]\\"]"
                 ]);
                 var hiddenFilterField = contentbuilderng_findField([
                     "#jform_params_settings_cb_list_filterhidden",
-                    "[name=\\"jform[params][settings][cb_list_filterhidden]\\"]"
+                    "#jform_params_cb_list_filterhidden",
+                    "[name=\\"jform[params][settings][cb_list_filterhidden]\\"]",
+                    "[name=\\"jform[params][cb_list_filterhidden]\\"]"
                 ]);
                 var hiddenOrderField = contentbuilderng_findField([
                     "#jform_params_settings_cb_list_orderhidden",
-                    "[name=\\"jform[params][settings][cb_list_orderhidden]\\"]"
+                    "#jform_params_cb_list_orderhidden",
+                    "[name=\\"jform[params][settings][cb_list_orderhidden]\\"]",
+                    "[name=\\"jform[params][cb_list_orderhidden]\\"]"
                 ]);
                 var currentFilterField = document.getElementById("' . $this->id . '");
                 var wrapper = document.getElementById("' . $wrapperId . '");
                 var form_id = formField ? formField.value : "";
                 var curr_form_id = "' . $selectedFormId . '";
+                var filterElements = ' . json_encode($elementsByForm, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';
+                var emptyFilterMessage = "' . addslashes(Text::_('COM_CONTENTBUILDERNG_ADD_LIST_VIEW_SELECT_FORM_FIRST')) . '";
+
+                if (typeof cb_value === "undefined") {
+                    var cb_value = {};
+                }
+                if (typeof cb_value_order === "undefined") {
+                    var cb_value_order = {};
+                }
+
+                function renderFilterFields(selectedFormId){
+                    if (!wrapper) {
+                        return;
+                    }
+
+                    wrapper.innerHTML = "";
+                    var elements = filterElements[String(selectedFormId)] || [];
+                    if (!elements.length) {
+                        wrapper.innerHTML = emptyFilterMessage;
+                        return;
+                    }
+
+                    elements.forEach(function(element){
+                        var referenceId = String(element.reference_id || "");
+                        var row = document.createElement("div");
+                        row.className = "mb-2";
+
+                        var label = document.createElement("label");
+                        label.className = "w-15";
+                        label.textContent = String(element.label || "");
+                        row.appendChild(label);
+
+                        var value = document.createElement("input");
+                        value.className = "form-control w-25";
+                        value.style.display = "inline-block";
+                        value.type = "text";
+                        value.name = "element_" + referenceId;
+                        value.id = "element_" + referenceId;
+                        value.value = cb_value[referenceId] || "";
+                        value.addEventListener("change", function(){ contentbuilderng_addValue(referenceId, this.value); });
+                        row.appendChild(value);
+
+                        var orderLabel = document.createElement("label");
+                        orderLabel.className = "ms-2 me-1";
+                        orderLabel.htmlFor = "element_" + referenceId + "_order";
+                        orderLabel.textContent = "' . addslashes(Text::_('COM_CONTENTBUILDERNG_ORDER_LABEL')) . '";
+                        row.appendChild(orderLabel);
+
+                        var order = document.createElement("input");
+                        order.className = "form-control w-10";
+                        order.style.display = "inline-block";
+                        order.type = "number";
+                        order.min = "1";
+                        order.step = "1";
+                        order.name = "element_" + referenceId + "_order";
+                        order.id = "element_" + referenceId + "_order";
+                        order.value = cb_value_order[referenceId] || "";
+                        order.addEventListener("change", function(){ contentbuilderng_addOrderValue(referenceId, this.value); });
+                        row.appendChild(order);
+                        wrapper.appendChild(row);
+                    });
+                }
                 var previousContentbuilderngSetFormId = window.contentbuilderng_setFormId;
 
                 if (currentFilterField && form_id !== "") {
@@ -148,15 +241,15 @@ class CbfilterField extends FormField
                     if (currentFilterField) {
                         currentFilterField.value = form_id;
                     }
-                    if (wrapper) {
-                        wrapper.innerHTML = "' . addslashes(Text::_('COM_CONTENTBUILDERNG_ADD_LIST_VIEW_SELECT_FORM_FIRST')) . '";
-                    }
                     if (hiddenFilterField) {
                         hiddenFilterField.value = "";
                     }
                     if (hiddenOrderField) {
                         hiddenOrderField.value = "";
                     }
+                    cb_value = {};
+                    cb_value_order = {};
+                    renderFilterFields(form_id);
                 };
                 //-->
                 </script>';

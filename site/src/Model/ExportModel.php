@@ -337,6 +337,7 @@ class ExportModel extends BaseDatabaseModel
                             ->where($db->quoteName('form_id') . ' = ' . (int) $this->_id)
                             ->where($db->quoteName('reference_id') . ' IN (' . implode(',', $ids) . ')')
                             ->where($db->quoteName('published') . ' = 1')
+                            ->where($db->quoteName('type') . ' <> ' . $db->quote('hidden'))
                             ->order($db->quoteName('ordering'));
                         $db->setQuery($query);
                         $rows = $this->getDatabase()->loadAssocList();

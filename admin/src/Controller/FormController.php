@@ -274,6 +274,46 @@ class FormController extends BaseFormController
     // ==================================================================
     // Ces tâches agissent sur les éléments sélectionnés dans l'édition d'un form
     // Elles doivent utiliser Elements
+    private function resyncLockedTemplatesAfterElementChange(int $formId): array
+    {
+        if ($formId <= 0) {
+            return [];
+        }
+
+        try {
+            $component = $this->getApp()->bootComponent('com_contentbuilderng');
+            $service = $component->getContainer()->get(FormSupportService::class);
+            return $service->resyncLockedTemplates($formId, (int) $this->getApp()->getIdentity()->id);
+        } catch (\Throwable $e) {
+            return [['type' => 'warning', 'message' => $this->safeErrorMessage($e)]];
+        }
+    }
+
+    /**
+     * Keep the Joomla message type returned by template resynchronization.
+     *
+     * @return array<int, array{type: string, message: string}>
+     */
+    private function buildResyncMessageBundle(string $successMessage, array $resyncMessages): array
+    {
+        return array_merge(
+            [['type' => 'message', 'message' => $successMessage]],
+            array_values(array_filter($resyncMessages, static fn($message): bool =>
+                is_array($message) && trim((string) ($message['message'] ?? '')) !== ''
+            ))
+        );
+    }
+
+    private function enqueueMessages(array $messages): void
+    {
+        foreach ($messages as $message) {
+            $this->getApp()->enqueueMessage(
+                (string) ($message['message'] ?? ''),
+                (string) ($message['type'] ?? 'message')
+            );
+        }
+    }
+
     public function listorderup(): void
     {
         $this->checkToken();
@@ -285,6 +325,9 @@ class FormController extends BaseFormController
 
         $model = $this->getElementsModelForListActions();
         $model->move(-1); // ou utilise reorder si tu préfères
+        foreach ($this->resyncLockedTemplatesAfterElementChange($formId) as $resyncMessage) {
+            $this->getApp()->enqueueMessage((string) ($resyncMessage['message'] ?? ''), (string) ($resyncMessage['type'] ?? 'message'));
+        }
         $this->setRedirect($this->getEditRedirectUrl($formId));
     }
 
@@ -299,6 +342,9 @@ class FormController extends BaseFormController
 
         $model = $this->getElementsModelForListActions();
         $model->move(1);
+        foreach ($this->resyncLockedTemplatesAfterElementChange($formId) as $resyncMessage) {
+            $this->getApp()->enqueueMessage((string) ($resyncMessage['message'] ?? ''), (string) ($resyncMessage['type'] ?? 'message'));
+        }
         $this->setRedirect($this->getEditRedirectUrl($formId));
     }
 
@@ -337,6 +383,9 @@ class FormController extends BaseFormController
             $this->setMessage(Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED'), 'warning');
         } else {
             $this->setMessage(Text::_('JLIB_APPLICATION_SAVE_SUCCESS'));
+            foreach ($this->resyncLockedTemplatesAfterElementChange($formId) as $resyncMessage) {
+                $this->getApp()->enqueueMessage((string) ($resyncMessage['message'] ?? ''), (string) ($resyncMessage['type'] ?? 'message'));
+            }
         }
 
         $this->setRedirect($this->getEditRedirectUrl($formId));
@@ -774,15 +823,18 @@ class FormController extends BaseFormController
                 return false;
             }
 
+            $resyncMessages = $field === 'editable'
+                ? $this->resyncLockedTemplatesAfterElementChange($formId)
+                : [];
+            $messages = $this->buildResyncMessageBundle(Text::_('JLIB_APPLICATION_SAVE_SUCCESS'), $resyncMessages);
+
             if ($this->isAjaxCall()) {
-                $this->respondAjax(true, Text::_('JLIB_APPLICATION_SAVE_SUCCESS'));
+                $this->respondAjaxMessages(true, $messages);
                 return true;
             }
 
-            $this->setRedirect(
-                $this->getEditRedirectUrl($formId),
-                Text::_('JLIB_APPLICATION_SAVE_SUCCESS')
-            );
+            $this->setRedirect($this->getEditRedirectUrl($formId), Text::_('JLIB_APPLICATION_SAVE_SUCCESS'), 'message');
+            $this->enqueueMessages(array_slice($messages, 1));
             return true;
         } catch (\Throwable $e) {
             $this->setMessage($this->safeErrorMessage($e), 'warning');
@@ -1142,15 +1194,16 @@ class FormController extends BaseFormController
                 return false;
             }
 
+            $resyncMessages = $this->resyncLockedTemplatesAfterElementChange($formId);
+            $messages = $this->buildResyncMessageBundle(Text::_($successMsgKey), $resyncMessages);
+
             if ($this->isAjaxCall()) {
-                $this->respondAjax(true, Text::_($successMsgKey));
+                $this->respondAjaxMessages(true, $messages);
                 return true;
             }
 
-            $this->setRedirect(
-                $this->getEditRedirectUrl($formId),
-                Text::_($successMsgKey)
-            );
+            $this->setRedirect($this->getEditRedirectUrl($formId), Text::_($successMsgKey), 'message');
+            $this->enqueueMessages(array_slice($messages, 1));
 
             return true;
         } catch (\Throwable $e) {
@@ -1311,7 +1364,16 @@ class FormController extends BaseFormController
 
     private function respondAjax(bool $success, string $message = ''): void
     {
-        echo new JsonResponse(['ok' => $success], $message, !$success);
+        $type = $success ? 'message' : 'error';
+        $messages = $message === '' ? [] : [['type' => $type, 'message' => $message]];
+        echo new JsonResponse(['ok' => $success, 'messages' => $messages], $message, !$success);
+        $this->getApp()->close();
+    }
+
+    private function respondAjaxMessages(bool $success, array $messages): void
+    {
+        $primaryMessage = (string) ($messages[0]['message'] ?? '');
+        echo new JsonResponse(['ok' => $success, 'messages' => $messages], $primaryMessage, !$success);
         $this->getApp()->close();
     }
 

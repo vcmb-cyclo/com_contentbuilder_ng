@@ -71,6 +71,18 @@ final class MenuParamHelperTest extends TestCase
         self::assertSame(7, MenuParamHelper::getMenuParam($params, 'missing', 7));
     }
 
+    public function testReadsLegacyRootMenuParamWhenSettingsGroupIsMissing(): void
+    {
+        $params = new class {
+            public function get(string $key, mixed $default = null): mixed
+            {
+                return $key === 'form_id' ? 17 : $default;
+            }
+        };
+
+        self::assertSame(17, MenuParamHelper::getMenuParam($params, 'form_id', 0));
+    }
+
     /**
      * @return array<string,array{0:mixed,1:int,2:int}>
      */

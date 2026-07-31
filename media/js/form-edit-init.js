@@ -825,6 +825,24 @@
                 });
             })
             .then(function(payload) {
+                if (payload && Array.isArray(payload.messages) && window.Joomla && typeof Joomla.renderMessages === 'function') {
+                    var messages = {};
+                    payload.messages.forEach(function(item) {
+                        if (!item || !item.message) {
+                            return;
+                        }
+
+                        var type = String(item.type || 'message');
+                        if (!messages[type]) {
+                            messages[type] = [];
+                        }
+                        messages[type].push(String(item.message));
+                    });
+
+                    if (Object.keys(messages).length > 0) {
+                        Joomla.renderMessages(messages);
+                    }
+                }
                 cbAnimateSaveButton();
                 if (typeof onSuccess === 'function') {
                     onSuccess(payload);

@@ -22,7 +22,7 @@ final class BackButtonMenuKeyMigrationTest extends TestCase
         self::assertStringNotContainsString('?string $legacyKey = null', $source);
         self::assertStringNotContainsString("get(\$legacyKey, null, 'raw')", $source);
         self::assertStringNotContainsString("getMenuParam(\$params, \$legacyKey, null)", $source);
-        self::assertStringNotContainsString('return $params->get($key, $default);', $source);
+        self::assertStringContainsString('return $params->get($key, $default);', $source);
     }
 
     public function testDispatcherOnlySeedsCanonicalBackButtonInputKey(): void
@@ -173,31 +173,25 @@ final class BackButtonMenuKeyMigrationTest extends TestCase
 
         self::assertStringContainsString("updateBooleanField('cb_show_details_back_button'", $source);
         self::assertStringNotContainsString("updateBooleanField('show_back_button'", $source);
-        // Direct params targeting (#jform_params_<field>) is legacy; every
-        // occurrence must go through the params.settings group instead.
-        self::assertSame(
-            substr_count($source, '#jform_params_'),
-            substr_count($source, '#jform_params_settings_'),
-            'menu-options.js must only target #jform_params_settings_* ids'
-        );
-        self::assertSame(
-            substr_count($source, '[name="jform[params]['),
-            substr_count($source, '[name="jform[params][settings]['),
-            'menu-options.js must only target jform[params][settings] names'
-        );
+        // Joomla saves newly created menu metadata at the params root, while
+        // previously normalized payloads use the params.settings group.
+        self::assertStringContainsString('#jform_params_settings_', $source);
+        self::assertStringContainsString('#jform_params_', $source);
+        self::assertStringContainsString('[name="jform[params][settings][', $source);
+        self::assertStringContainsString('[name="jform[params][', $source);
     }
 
-    public function testMenuFieldsReadOnlyFromParamsSettings(): void
+    public function testMenuFieldsReadRootAndSettingsParams(): void
     {
         $formsField = $this->read('site/src/Field/FormsField.php');
         $filterField = $this->read('site/src/Field/CbfilterField.php');
 
-        self::assertStringNotContainsString("getValue('form_id', 'params', 0)", $formsField);
-        self::assertStringNotContainsString("get('params.form_id', 0)", $formsField);
-        self::assertStringNotContainsString("getValue('form_id', 'params', 0)", $filterField);
-        self::assertStringNotContainsString("get('params.form_id', 0)", $filterField);
-        self::assertStringNotContainsString('#jform_params_form_id', $filterField);
-        self::assertStringNotContainsString('[name=\\"jform[params][form_id]\\"]', $filterField);
+        self::assertStringContainsString("getValue('form_id', 'params', 0)", $formsField);
+        self::assertStringContainsString("get('params.form_id', 0)", $formsField);
+        self::assertStringContainsString("getValue('form_id', 'params', 0)", $filterField);
+        self::assertStringContainsString("get('params.form_id', 0)", $filterField);
+        self::assertStringContainsString('#jform_params_form_id', $filterField);
+        self::assertStringContainsString('jform[params][form_id]', $filterField);
     }
 
     public function testPhaseSevenRuntimeLotUsesLocalDatabaseAndMailerAccessors(): void

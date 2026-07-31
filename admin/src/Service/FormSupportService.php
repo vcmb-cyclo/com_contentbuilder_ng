@@ -58,6 +58,94 @@ class FormSupportService
     }
 
     /**
+     * Regenerates locked templates after an element-level change.
+     *
+     * @return array<int, array{type: string, message: string}>
+     */
+    public function resyncLockedTemplates(int $formId, int $modifiedByUserId): array
+    {
+        $db = $this->db;
+        $query = $db->getQuery(true)
+            ->select($db->quoteName(['type', 'reference_id', 'theme_plugin', 'details_template', 'editable_template', 'details_template_locked', 'editable_template_locked']))
+            ->from($db->quoteName('#__contentbuilderng_forms'))
+            ->where($db->quoteName('id') . ' = :formId')
+            ->bind(':formId', $formId, ParameterType::INTEGER);
+        $db->setQuery($query, 0, 1);
+        $formRow = $db->loadAssoc();
+
+        if (!is_array($formRow)) {
+            return [];
+        }
+
+        $lockedTemplates = [];
+        if (!empty($formRow['details_template_locked'])) {
+            $lockedTemplates['details_template'] = [
+                'label' => 'COM_CONTENTBUILDERNG_TAB_DETAILS_DISPLAY',
+                'current' => (string) ($formRow['details_template'] ?? ''),
+                'generator' => 'createDetailsSample',
+            ];
+        }
+        if (!empty($formRow['editable_template_locked'])) {
+            $lockedTemplates['editable_template'] = [
+                'label' => 'COM_CONTENTBUILDERNG_TAB_EDIT_DISPLAY',
+                'current' => (string) ($formRow['editable_template'] ?? ''),
+                'generator' => 'createEditableSample',
+            ];
+        }
+        if ($lockedTemplates === []) {
+            return [];
+        }
+
+        try {
+            [$sourceForm, $themePlugin] = $this->resolveFormForTemplateRegeneration($formId);
+        } catch (\Throwable $e) {
+            return array_map(
+                static fn(array $template): array => [
+                    'type' => 'warning',
+                    'message' => Text::sprintf(
+                        'COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_RESYNC_FAILED',
+                        Text::_($template['label']),
+                        $e->getMessage()
+                    ),
+                ],
+                $lockedTemplates
+            );
+        }
+
+        $messages = [];
+        foreach ($lockedTemplates as $column => $template) {
+            try {
+                $regenerated = (string) $this->{$template['generator']}($formId, $sourceForm, $themePlugin);
+                if (trim($regenerated) === '') {
+                    throw new \RuntimeException(Text::sprintf('COM_CONTENTBUILDERNG_DETAILS_SAMPLE_EMPTY', $themePlugin));
+                }
+                if ($regenerated === $template['current']) {
+                    continue;
+                }
+                $this->saveRegeneratedTemplate($formId, $column, $regenerated, $modifiedByUserId);
+                $messages[] = [
+                    'type' => 'message',
+                    'message' => Text::sprintf(
+                        'COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_RESYNCED',
+                        Text::_($template['label'])
+                    ),
+                ];
+            } catch (\Throwable $e) {
+                $messages[] = [
+                    'type' => 'warning',
+                    'message' => Text::sprintf(
+                        'COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_RESYNC_FAILED',
+                        Text::_($template['label']),
+                        $e->getMessage()
+                    ),
+                ];
+            }
+        }
+
+        return $messages;
+    }
+
+    /**
      * Regenerates and saves the editable-template sample for a view, using its
      * currently configured theme plugin. Shared by the admin About audit repair
      * action and the per-form audit tab repair action, which only differ in how
@@ -68,6 +156,7 @@ class FormSupportService
      *
      * @return string the form's name (HTML-escaped), for use in a confirmation message
      */
+
     public function regenerateEditableTemplate(int $formId, int $modifiedByUserId): string
     {
         [$sourceForm, $themePlugin, $formName] = $this->resolveFormForTemplateRegeneration($formId);

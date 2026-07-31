@@ -51,12 +51,18 @@ class FormsField extends FormField
     private function getSelectedFormId(): int
     {
         $selectedFormId = (int) ($this->form?->getValue('form_id', 'params.settings', 0) ?? 0);
+        if ($selectedFormId <= 0) {
+            $selectedFormId = (int) ($this->form?->getValue('form_id', 'params', 0) ?? 0);
+        }
 
         if ($selectedFormId <= 0 && method_exists($this->form, 'getData')) {
             $data = $this->form->getData();
 
             if (is_object($data) && method_exists($data, 'get')) {
                 $selectedFormId = (int) $data->get('params.settings.form_id', 0);
+                if ($selectedFormId <= 0) {
+                    $selectedFormId = (int) $data->get('params.form_id', 0);
+                }
             }
         }
 
@@ -160,6 +166,19 @@ class FormsField extends FormField
             . ' onchange="if(typeof contentbuilderng_setFormId != \'undefined\') { contentbuilderng_setFormId(this.options[this.selectedIndex].value); }"'
             . ' class="' . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . '">';
 
+        if ((string) ($this->element['required'] ?? '') === 'true') {
+            $select = substr($select, 0, -1)
+                . ' required="required" aria-required="true"';
+
+            $validationMessage = trim((string) ($this->element['message'] ?? ''));
+            if ($validationMessage !== '') {
+                $select .= ' data-validation-text="'
+                    . htmlspecialchars(Text::_($validationMessage), ENT_QUOTES, 'UTF-8') . '"';
+            }
+
+            $select .= '>';
+        }
+
         foreach ($status as $form) {
             $value = (string) ($form->id ?? '');
             $selected = $value === (string) $this->value ? ' selected="selected"' : '';
@@ -207,6 +226,7 @@ class FormsField extends FormField
                 'noLabel' => $noLabel,
                 'defaultValueFormat' => $defaultValueFormat,
                 'initialFormId' => (string) $selectedFormId,
+                'menuRequiredText' => Text::_('COM_CONTENTBUILDERNG_MENU_REQUIRED'),
             ]
         );
 
