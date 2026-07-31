@@ -3,16 +3,53 @@
     <section name="component">
 
         <action
+            name="core.admin"
+            title="JACTION_ADMIN"
+            description="JACTION_ADMIN_COMPONENT_DESC"
+        />
+
+        <action
+            name="core.options"
+            title="JACTION_OPTIONS"
+            description="JACTION_OPTIONS_COMPONENT_DESC"
+        />
+
+        <action
             name="core.manage"
             title="JACTION_MANAGE"
             description="JACTION_MANAGE_COMPONENT_DESC"
         />
 
         <action
-            name="core.admin"
-            title="JACTION_ADMIN"
-            description="JACTION_ADMIN_COMPONENT_DESC"
+            name="core.create"
+            title="JACTION_CREATE"
+            description="JACTION_CREATE_COMPONENT_DESC"
         />
+
+        <action
+            name="core.delete"
+            title="JACTION_DELETE"
+            description="JACTION_DELETE_COMPONENT_DESC"
+        />
+
+        <action
+            name="core.edit"
+            title="JACTION_EDIT"
+            description="JACTION_EDIT_COMPONENT_DESC"
+        />
+
+        <action
+            name="core.edit.own"
+            title="JACTION_EDITOWN"
+            description="JACTION_EDITOWN_COMPONENT_DESC"
+        />
+
+        <action
+            name="core.edit.state"
+            title="JACTION_EDITSTATE"
+            description="JACTION_EDITSTATE_COMPONENT_DESC"
+        />
+
 		<action
 			name="contentbuilderng.manage"
 			title="COM_CONTENTBUILDERNG_ACTION_MANAGE"
@@ -24,6 +61,33 @@
 			title="COM_CONTENTBUILDERNG_ACTION_ADMIN"
 			description="COM_CONTENTBUILDERNG_ACTION_ADMIN_DESC"
 		/>
+
+    </section>
+
+    <!--
+        Per-form assets: FormController authorises core.edit against
+        "com_contentbuilderng.form.<id>". Declaring the section makes those
+        rules configurable instead of silently inheriting the root asset.
+    -->
+    <section name="form">
+
+        <action
+            name="core.delete"
+            title="JACTION_DELETE"
+            description="JACTION_DELETE_COMPONENT_DESC"
+        />
+
+        <action
+            name="core.edit"
+            title="JACTION_EDIT"
+            description="JACTION_EDIT_COMPONENT_DESC"
+        />
+
+        <action
+            name="core.edit.state"
+            title="JACTION_EDITSTATE"
+            description="JACTION_EDITSTATE_COMPONENT_DESC"
+        />
 
     </section>
 </access>
