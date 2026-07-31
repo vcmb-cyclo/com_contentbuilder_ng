@@ -2314,6 +2314,30 @@ var contentbuilderng = new function(){
         return $user->id;
     }
 
+    /**
+     * User id the delete must be restricted to, or null when the caller holds
+     * an unrestricted (group-granted) delete right.
+     *
+     * Owner-scoped deletes are otherwise only enforced by the session
+     * permission set; the row filter is the authoritative guard.
+     */
+    private function resolveDeleteOwnerRestriction(): ?int
+    {
+        $suffix = $this->frontend ? '_fe' : '';
+        $formId = (int) $this->_id;
+        $permissionService = PermissionService::createFromRuntimeContext();
+
+        if ($permissionService->hasGroupGrant('delete', null, $suffix)) {
+            return null;
+        }
+
+        $userId = (int) ($this->app->getIdentity()->id ?? 0);
+
+        // No group grant and no identity: nothing may be deleted. -1 never
+        // matches a real owner, so the row filter yields an empty set.
+        return $userId > 0 ? $userId : -1;
+    }
+
     function delete()
     {
         $items = $this->app->getInput()->get('cid', [], 'array');
@@ -2332,7 +2356,7 @@ var contentbuilderng = new function(){
                 $data->form_id = $this->_id;
                 if ($data->type && $data->reference_id) {
                     $data->form = FormSourceFactory::getForm($data->type, $data->reference_id);
-                    $res = $data->form->delete($items, $data->form_id);
+                    $res = $data->form->delete($items, $data->form_id, $this->resolveDeleteOwnerRestriction());
                     $cnt = count($items);
                     $new_items = array();
                     if ($res && $cnt) {

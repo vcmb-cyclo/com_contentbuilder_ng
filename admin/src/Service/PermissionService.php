@@ -17,6 +17,18 @@ use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
 
 class PermissionService
 {
+    /**
+     * Marks the form/record the stored permission set was computed for, so a
+     * later request cannot reuse it against a different target.
+     */
+    private const CONTEXT_KEY = '__cb_context';
+
+    /**
+     * Request-scoped marker telling checkPermissions() which form scope the
+     * permission set was just armed under.
+     */
+    private const SCOPE_INPUT_KEY = 'cb_permission_scope_form_id';
+
     public function __construct(
         private readonly CMSApplicationInterface $app,
         private readonly DatabaseInterface $db,
@@ -102,12 +114,120 @@ class PermissionService
         return array_map('intval', array_keys($effectiveGroupIds));
     }
 
+    /**
+     * Session key holding a computed permission set.
+     *
+     * Scoped by form id on purpose: a single unscoped key let a permission set
+     * computed for form A authorise an action targeting form B on a later
+     * request (the caller only had to skip setPermissions()).
+     */
+    private function permissionKey(int $formId, string $suffix): string
+    {
+        return 'com_contentbuilderng.permissions' . $suffix . '.' . $formId;
+    }
+
+    /**
+     * Scope checkPermissions() must look the stored set up under.
+     *
+     * Normally the request's form id, but direct-storage mode dispatches with
+     * id=0 and resolves the backing form from storage_id — so setPermissions()
+     * publishes the scope it actually used, and that wins.
+     */
+    private function requestScopeFormId(): int
+    {
+        $input = $this->getInput();
+        $published = (int) $input->getInt(self::SCOPE_INPUT_KEY, -1);
+
+        return $published >= 0 ? $published : (int) $input->getInt('id', 0);
+    }
+
+    /**
+     * Record ids the *current* request is acting on, normalised for comparison.
+     *
+     * @return list<int>
+     */
+    private function requestRecordIds(): array
+    {
+        $input = $this->getInput();
+
+        $ids = array_map('intval', (array) $input->get('cid', [], 'array'));
+        $ids = array_values(array_filter($ids, static fn(int $id): bool => $id > 0));
+
+        if ($ids === []) {
+            $single = (int) $input->getInt('record_id', 0);
+
+            if ($single > 0) {
+                $ids = [$single];
+            }
+        }
+
+        sort($ids);
+
+        return $ids;
+    }
+
+    /**
+     * @return list<int>
+     */
+    private static function normaliseRecordIds(mixed $recordId): array
+    {
+        $ids = is_array($recordId) ? $recordId : [$recordId];
+        $ids = array_map('intval', $ids);
+        $ids = array_values(array_filter($ids, static fn(int $id): bool => $id > 0));
+
+        sort($ids);
+
+        return $ids;
+    }
+
+    /**
+     * Refuses a permission set that was not computed for what this request is
+     * actually touching.
+     *
+     * Without this, a caller that reads the session without calling
+     * setPermissions() first (or that re-uses a set computed for another
+     * record) authorises an action against the wrong target — the record-level
+     * ownership branch below would validate the *previous* record id.
+     *
+     * @param array<mixed> $permissions
+     */
+    private function contextMatchesRequest(array $permissions, int $requestFormId): bool
+    {
+        $context = $permissions[self::CONTEXT_KEY] ?? null;
+
+        if (!is_array($context)) {
+            return false;
+        }
+
+        // Direct-storage mode dispatches without a form id; the key lookup has
+        // already scoped the set in that case.
+        if ($requestFormId > 0 && (int) ($context['form_id'] ?? -1) !== $requestFormId) {
+            return false;
+        }
+
+        // null means "any record of this scope" (signed admin storage preview).
+        if (!array_key_exists('record_ids', $context) || $context['record_ids'] === null) {
+            return true;
+        }
+
+        $requested = $this->requestRecordIds();
+
+        if ($requested === []) {
+            return true;
+        }
+
+        $granted = self::normaliseRecordIds($context['record_ids']);
+
+        // Every record this request targets must have been part of the set.
+        return array_diff($requested, $granted) === [];
+    }
+
     public function setPermissions($formId, $recordId = 0, string $suffix = ''): void
     {
         /** @var CMSApplication $app */
         $app = $this->getApp();
         $session = $app->getSession();
-        $key = 'com_contentbuilderng.permissions' . $suffix;
+        $key = $this->permissionKey((int) $formId, $suffix);
         $isAdminPreview = $this->isSignedAdminPreviewRequest((int) $formId) || $app->getInput()->getBool('cb_preview_ok', false);
         $formPublishedClause = $isAdminPreview ? '' : ' And published = 1';
 
@@ -223,6 +343,10 @@ class PermissionService
                 'verify_view' => false,
                 'verify_new' => false,
                 'verify_edit' => false,
+                self::CONTEXT_KEY => [
+                    'form_id'    => (int) $formId,
+                    'record_ids' => self::normaliseRecordIds($recordId),
+                ],
             ];
             $session->set($key, $permissions);
 
@@ -281,6 +405,12 @@ class PermissionService
             }
         }
 
+        $permissions[self::CONTEXT_KEY] = [
+            'form_id'    => (int) $formId,
+            'record_ids' => self::normaliseRecordIds($recordId),
+        ];
+
+        $this->getInput()->set(self::SCOPE_INPUT_KEY, (int) $formId);
         $session->set($key, $permissions);
     }
 
@@ -291,8 +421,14 @@ class PermissionService
         $app = $this->getApp();
         $session = $app->getSession();
         $currentSessionId = $session->getId();
-        $key = 'com_contentbuilderng.permissions' . $suffix;
+        $requestFormId = $this->requestScopeFormId();
+        $key = $this->permissionKey($requestFormId, $suffix);
         $permissions = $session->get($key, []);
+
+        if (!$this->contextMatchesRequest($permissions, $requestFormId)) {
+            return $this->deny($errorMsg, $auth);
+        }
+
         $publishedReturn = $permissions['published'] ?? false;
 
         if (!$publishedReturn) {
@@ -433,6 +569,52 @@ class PermissionService
         return $auth ? true : $allowed;
     }
 
+    /**
+     * Raw permission set stored for a form, for callers that need to inspect
+     * the "own" matrix rather than authorise a single action.
+     *
+     * Prefer authorize()/authorizeFe(); this exists because the list, details
+     * and edit templates render per-row controls from the matrix directly.
+     *
+     * @param int|null $formId Null resolves the scope from the current request,
+     *                         which is what callers almost always want (it also
+     *                         handles direct-storage mode, where the request
+     *                         carries storage_id instead of a form id).
+     *
+     * @return array<mixed>
+     */
+    public function getStoredPermissions(?int $formId = null, string $suffix = '_fe'): array
+    {
+        $formId ??= $this->requestScopeFormId();
+
+        return (array) $this->getApp()->getSession()->get($this->permissionKey($formId, $suffix), []);
+    }
+
+    /**
+     * True when the action is granted by one of the user's groups, i.e. it is
+     * NOT limited to records the user owns.
+     *
+     * Lets write paths add an owner filter in SQL instead of trusting the
+     * session set alone.
+     */
+    public function hasGroupGrant(string $action, ?int $formId = null, string $suffix = ''): bool
+    {
+        $permissions = $this->getStoredPermissions($formId, $suffix);
+        $groupIds = $this->getEffectiveGroupIds();
+
+        foreach ($permissions as $groupId => $groupActions) {
+            if (!is_array($groupActions)) {
+                continue;
+            }
+
+            if (!empty($groupActions[$action]) && in_array((int) $groupId, $groupIds, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function authorize($action): bool
     {
         return (bool) $this->checkPermissions($action, '', '', true);
@@ -451,7 +633,9 @@ class PermissionService
 
         $app = $this->getApp();
         $session = $app->getSession();
-        $key = 'com_contentbuilderng.permissions' . $suffix;
+        // Direct-storage preview dispatches with id=0, so the set is stored
+        // under the same scope checkPermissions() will look it up with.
+        $key = $this->permissionKey(0, $suffix);
 
         $permissions = [
             'published' => true,
@@ -478,6 +662,14 @@ class PermissionService
             ];
         }
 
+        // The signed preview covers the whole storage, so no record allow-list
+        // can be enumerated here: null marks the scope as record-agnostic.
+        $permissions[self::CONTEXT_KEY] = [
+            'form_id'    => 0,
+            'record_ids' => null,
+        ];
+
+        $this->getInput()->set(self::SCOPE_INPUT_KEY, 0);
         $session->set($key, $permissions);
     }
 

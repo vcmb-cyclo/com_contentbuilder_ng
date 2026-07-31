@@ -1796,11 +1796,33 @@ class contentbuilderng_com_breezingformsng
         return $record_id;
     }
 
-    function delete($items, $form_id)
+    /**
+     * @param int|null $restrictToUserId When set, only rows owned by that user
+     *                                   are deleted (owner-scoped permission).
+     */
+    function delete($items, $form_id, ?int $restrictToUserId = null)
     {
         $db = RuntimeContextHelper::getDatabase();
         ArrayHelper::toInteger($items);
         if (count($items)) {
+            // Defence in depth: an owner-scoped delete right must also be
+            // enforced by the row filter, not only by the session permission
+            // set. Narrow the id list to rows the user actually owns first, so
+            // the subrecord/file cleanup below cannot touch foreign records.
+            if ($restrictToUserId !== null) {
+                $ownedQuery = $db->getQuery(true)
+                    ->select($db->quoteName('id'))
+                    ->from($db->quoteName('#__facileforms_records'))
+                    ->where($db->quoteName('id') . ' IN (' . implode(',', $items) . ')')
+                    ->where($db->quoteName('user_id') . ' = ' . (int) $restrictToUserId);
+                $db->setQuery($ownedQuery);
+                $items = array_map('intval', (array) $db->loadColumn());
+
+                if ($items === []) {
+                    return true;
+                }
+            }
+
             $idList = implode(',', $items);
             $delRecords = $db->getQuery(true)
                 ->delete($db->quoteName('#__facileforms_records'))

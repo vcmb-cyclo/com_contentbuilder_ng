@@ -1141,7 +1141,11 @@ class contentbuilderng_com_contentbuilderng
         return $record_id;
     }
 
-    function delete($items, $form_id)
+    /**
+     * @param int|null $restrictToUserId When set, only rows owned by that user
+     *                                   are deleted (owner-scoped permission).
+     */
+    function delete($items, $form_id, ?int $restrictToUserId = null)
     {
         $db = RuntimeContextHelper::getDatabase();
         ArrayHelper::toInteger($items);
@@ -1152,6 +1156,19 @@ class contentbuilderng_com_contentbuilderng
         if ($tableName === '') {
             throw new \RuntimeException('Storage table name is empty for delete action.');
         }
+        // Defence in depth: when the caller only holds an owner-scoped delete
+        // right, narrow the id list to rows the user actually owns before any
+        // file cleanup or row deletion touches them.
+        if ($restrictToUserId !== null && count($items) && $this->hasSourceColumn('user_id')) {
+            $ownedQuery = $db->getQuery(true)
+                ->select($db->quoteName('id'))
+                ->from($db->quoteName($tableName))
+                ->where($db->quoteName('id') . ' IN (' . implode(',', $items) . ')')
+                ->where($db->quoteName('user_id') . ' = ' . (int) $restrictToUserId);
+            $db->setQuery($ownedQuery);
+            $items = array_map('intval', (array) $db->loadColumn());
+        }
+
         if (count($items)) {
             $refsQuery = $db->getQuery(true)
                 ->select($db->quoteName('reference_id'))
@@ -1198,6 +1215,11 @@ class contentbuilderng_com_contentbuilderng
             $deleteQuery = $db->getQuery(true)
                 ->delete($db->quoteName($tableName))
                 ->where($db->quoteName('id') . ' IN (' . implode(',', $items) . ')');
+
+            if ($restrictToUserId !== null && $this->hasSourceColumn('user_id')) {
+                $deleteQuery->where($db->quoteName('user_id') . ' = ' . (int) $restrictToUserId);
+            }
+
             $db->setQuery($deleteQuery);
             $db->execute();
         }

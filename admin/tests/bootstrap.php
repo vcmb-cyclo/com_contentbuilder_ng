@@ -144,6 +144,13 @@ namespace CB\Component\Contentbuilderng\Tests\Stubs {
             return isset($this->values[$key]) ? (string) $this->values[$key] : $default;
         }
 
+        public function get(string $key, mixed $default = null, string $filter = 'cmd'): mixed
+        {
+            $value = $this->values[$key] ?? $default;
+
+            return $filter === 'array' ? (array) $value : $value;
+        }
+
         public function set(string $key, mixed $value): void
         {
             $this->values[$key] = $value;

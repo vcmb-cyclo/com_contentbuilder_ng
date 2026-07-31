@@ -33,6 +33,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
 use CB\Component\Contentbuilderng\Site\Model\EditModel;
 use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 
 class HtmlView extends BaseHtmlView
 {
@@ -126,10 +127,18 @@ class HtmlView extends BaseHtmlView
         return $this->getComponent()->getContainer()->get(DatabaseInterface::class);
     }
 
+    /**
+     * @return array<mixed>
+     */
+    private function getStoredFrontendPermissions(): array
+    {
+        return PermissionService::createFromRuntimeContext()->getStoredPermissions(null, '_fe');
+    }
+
     private function isFrontendEditAllowedForNavigation(): bool
     {
         if ($this->frontendEditAllowedForNavigation === null) {
-            $permissions = (array) $this->getApp()->getSession()->get('com_contentbuilderng.permissions_fe', []);
+            $permissions = $this->getStoredFrontendPermissions();
             $user = $this->getApp()->getIdentity();
             $groups = method_exists($user, 'getAuthorisedGroups') ? (array) $user->getAuthorisedGroups() : [];
 
@@ -182,7 +191,7 @@ class HtmlView extends BaseHtmlView
             return $this->ownerEditNavigationEnabled;
         }
 
-        $ownerPermissionMatrix = (array) $this->getApp()->getSession()->get('com_contentbuilderng.permissions_fe', []);
+        $ownerPermissionMatrix = $this->getStoredFrontendPermissions();
         $ownerRuleSet = (array) ($ownerPermissionMatrix['own_fe'] ?? []);
 
         $this->ownerEditNavigationEnabled = $this->canUseEditPermissionBase($ownerPermissionMatrix)

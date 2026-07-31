@@ -102,7 +102,7 @@ $ownerUserId = $isAdminPreview && $previewActorId > 0
     ? $previewActorId
     : $currentUserId;
 $formInstance = $this->form ?? null;
-$ownerPermissionMatrix = (array) $app->getSession()->get('com_contentbuilderng.permissions_fe', []);
+$ownerPermissionMatrix = $permissionService->getStoredPermissions(null, '_fe');
 $ownerRuleSet = (array) ($ownerPermissionMatrix['own_fe'] ?? []);
 $hasOwnerViewRule = !empty($ownerRuleSet['view']);
 $hasOwnerEditRule = !empty($ownerRuleSet['edit']);
@@ -882,7 +882,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						NavigationLinkHelper::buildRouteLink($listPublishBaseParams + [
 							$directStorageMode ? 'storage_id' : 'id' => $directStorageMode ? $directStorageId : $this->form_id,
 							'list_publish' => $togglePublish,
-						], '&cid[]=' . (int) $row->colRecord . $previewQuery)
+						], '&cid[]=' . (int) $row->colRecord . $previewQuery . '&' . Session::getFormToken() . '=1')
 					);
 					$rowCanView = $view_allowed || $canAccessOwnedRecord('view', $row->colRecord);
 					$rowCanEdit = $edit_allowed || $canAccessOwnedRecord('edit', $row->colRecord);
@@ -1290,7 +1290,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						NavigationLinkHelper::buildRouteLink($listPublishBaseParams + [
 							$directStorageMode ? 'storage_id' : 'id' => $directStorageMode ? $directStorageId : $this->form_id,
 							'list_publish' => $togglePublish,
-						], '&cid[]=' . (int) $row->colRecord . $previewQuery)
+						], '&cid[]=' . (int) $row->colRecord . $previewQuery . '&' . Session::getFormToken() . '=1')
 					);
 					$select = '<input class="form-check-input" type="checkbox" name="cid[]" value="' . $row->colRecord . '"/>';
                     $rowCanView = $view_allowed || $canAccessOwnedRecord('view', $row->colRecord);
