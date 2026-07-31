@@ -173,17 +173,10 @@ class VerifyModel extends BaseDatabaseModel
 
         $_now = (new Date());
 
-        //$this->getDatabase()->setQuery("Select count(id) From #__contentbuilderng_verifications Where Timestampdiff(Second, `start_date`, '".strtotime($_now->toSQL())."') < 1 And ip = " . $this->getDatabase()->quote($_SERVER['REMOTE_ADDR']));
-        //$ver = $this->getDatabase()->loadResult();
-
-        //if($ver >= 5){
-        //    $this->getDatabase()->setQuery("Delete From #__contentbuilderng_verifications Where `verification_date` IS NULL And ip = " . $this->getDatabase()->quote($_SERVER['REMOTE_ADDR']));
-        //    $this->getDatabase()->execute();
-        //    throw new \RuntimeException('Penetration denied', 500);
-        //}
-
-        //$this->getDatabase()->setQuery("Delete From #__contentbuilderng_verifications Where Timestampdiff(Second, `start_date`, '".strtotime($_now->toSQL())."') > 86400 And `verification_date` IS NULL");
-        //$this->getDatabase()->execute();
+        // NOTE: rate limiting and stale-verification purging used to live here
+        // as commented-out raw SQL. Removed: it never ran, and it kept an
+        // unsafe query pattern in the tree. Reinstate as a Scheduler task
+        // (purge) plus a proper rate limiter if the behaviour is wanted back.
 
         $rec = null;
         $redirect_view = '';

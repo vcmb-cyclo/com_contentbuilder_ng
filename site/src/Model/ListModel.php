@@ -652,19 +652,6 @@ class ListModel extends BaseListModel
      * 
      */
 
-    private function buildOrderBy()
-    {
-        $orderby = '';
-        $filter_order     = $this->getState('formsd_filter_order');
-        $filter_order_Dir = $this->getState('formsd_filter_order_Dir') ? $this->getState('formsd_filter_order_Dir') : 'desc';
-
-        /* Error handling is never a bad thing*/
-        if (!empty($filter_order) && !empty($filter_order_Dir)) {
-            $orderby = ' ORDER BY ' . $filter_order . ' ' . $filter_order_Dir;
-        }
-
-        return $orderby;
-    }
 
 
     /**
