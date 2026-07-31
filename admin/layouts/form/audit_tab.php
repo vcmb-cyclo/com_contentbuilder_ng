@@ -14,11 +14,38 @@ use Joomla\CMS\Language\Text;
 
 /** @var array<string,mixed> $displayData */
 $audit = is_array($displayData['audit'] ?? null) ? $displayData['audit'] : [];
+$auditData = is_array($audit['data'] ?? null) ? $audit['data'] : [];
 $allChecks = array_values(array_filter(
     (array) ($audit['checks'] ?? []),
     static fn($check): bool => is_array($check)
 ));
 $formId = (int) (($audit['form']['id'] ?? 0));
+$published = !empty($auditData['published']);
+$debugMode = !empty($auditData['debug_mode']);
+
+$renderStateIcon = static function (bool $enabled, bool $debug, string $tooltip): string {
+    $iconClass = $debug
+        ? 'fa fa-bug' . ($enabled ? '' : ' text-muted')
+        : ($enabled ? 'icon-publish' : 'icon-unpublish');
+    $stateClass = $debug && $enabled ? ' cb-debug-toggle is-active' : '';
+
+    return '<span class="tbody-icon cb-audit-state-icon' . $stateClass . '"'
+        . ' data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="'
+        . htmlspecialchars($tooltip, ENT_QUOTES, 'UTF-8') . '" title="'
+        . htmlspecialchars($tooltip, ENT_QUOTES, 'UTF-8') . '">'
+        . '<span class="' . $iconClass . '" aria-hidden="true"></span>'
+        . '</span>';
+};
+$publishedIcon = $renderStateIcon(
+    $published,
+    false,
+    Text::_($published ? 'COM_CONTENTBUILDERNG_PUBLISHED' : 'COM_CONTENTBUILDERNG_UNPUBLISHED')
+);
+$debugIcon = $renderStateIcon(
+    $debugMode,
+    true,
+    Text::_($debugMode ? 'COM_CONTENTBUILDERNG_DEBUG_MODE_ENABLED' : 'COM_CONTENTBUILDERNG_DEBUG_MODE_DISABLED')
+);
 
 // reference_id findings get their own section: they are usually many at once and
 // share a single root cause, so mixing them into the general list buries the
@@ -75,7 +102,8 @@ $checkReferenceTooltips = [
 ];
 
 $renderCheck = static function (array $check) use ($statusBadges, $checkRepairs, $checkReferenceTooltips, $formId): string {
-    [$badgeClass, $badgeKey] = $statusBadges[(string) ($check['status'] ?? FormAuditService::STATUS_WARNING)]
+    $status = (string) ($check['status'] ?? FormAuditService::STATUS_WARNING);
+    [$badgeClass, $badgeKey] = $statusBadges[$status]
         ?? $statusBadges[FormAuditService::STATUS_WARNING];
     $checkReference = trim((string) ($check['reference'] ?? ''));
     $checkField = trim((string) ($check['field'] ?? ''));
@@ -85,9 +113,15 @@ $renderCheck = static function (array $check) use ($statusBadges, $checkRepairs,
         $repair = null;
     }
 
+    $statusHtml = $status === FormAuditService::STATUS_OK
+        ? '<span class="fa-solid fa-check text-success" aria-hidden="true" title="'
+            . htmlspecialchars(Text::_($badgeKey), ENT_QUOTES, 'UTF-8') . '"></span>'
+            . '<span class="visually-hidden">' . htmlspecialchars(Text::_($badgeKey), ENT_QUOTES, 'UTF-8') . '</span>'
+        : '<span class="badge ' . $badgeClass . '">' . Text::_($badgeKey) . '</span>';
+
     $html = '<li class="list-group-item d-flex align-items-start gap-2">'
-        . '<span class="badge ' . $badgeClass . '">' . Text::_($badgeKey) . '</span>'
-        . '<div>'
+        . $statusHtml
+        . '<div class="flex-grow-1 min-width-0">'
         . htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8');
 
     if ($checkReference !== '') {
@@ -99,9 +133,11 @@ $renderCheck = static function (array $check) use ($statusBadges, $checkRepairs,
             . '</small>';
     }
 
+    $html .= '</div>';
+
     if ($repair !== null && $formId > 0) {
         $label = Text::_($repair['label']);
-        $html .= '<button type="button" class="btn btn-sm btn-warning ms-2"'
+        $html .= '<button type="button" class="btn btn-sm btn-warning ms-auto flex-shrink-0"'
             . ' data-cb-form-audit-repair-button'
             . ' data-cb-form-audit-task="' . htmlspecialchars($repair['task'], ENT_QUOTES, 'UTF-8') . '"'
             . ' data-cb-form-audit-id="' . $formId . '"';
@@ -121,7 +157,7 @@ $renderCheck = static function (array $check) use ($statusBadges, $checkRepairs,
             . '</button>';
     }
 
-    return $html . '</div></li>';
+    return $html . '</li>';
 };
 ?>
 <div class="p-3" data-cb-form-audit-panel>
@@ -136,7 +172,14 @@ $renderCheck = static function (array $check) use ($statusBadges, $checkRepairs,
                 <?php foreach ($audit['info'] as $label => $value) : ?>
                     <tr>
                         <th scope="row" class="w-25"><?php echo htmlspecialchars((string) $label, ENT_QUOTES, 'UTF-8'); ?></th>
-                        <td><?php echo htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td>
+                            <?php echo htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'); ?>
+                            <?php if ((string) $label === Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_PUBLISHED')) : ?>
+                                <?php echo $publishedIcon; ?>
+                            <?php elseif ((string) $label === Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_DEBUG')) : ?>
+                                <?php echo $debugIcon; ?>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

@@ -63,6 +63,39 @@ $prepareEffectOptions = is_array($displayData['prepareEffectOptions'] ?? null) ?
             </div>
         </div>
     </div>
+    <?php if (empty($item->edit_by_type) || !$isBreezingFormsType) : ?>
+        <div class="col-12 col-xl-4 d-flex" id="cb-form-edit-create-sample-card-col">
+            <div class="border rounded bg-body p-3 d-flex flex-column flex-grow-1" id="cb-form-edit-create-sample-card">
+                <h4 class="h6 text-body-secondary mb-2">
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE'); ?>
+                </h4>
+                <input type="hidden" name="jform[create_editable_sample]" id="cb_create_editable_sample_flag" value="0" />
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1" id="create_editable_sample"
+                        title="<?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE_TIP'); ?>"
+                        aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE_TIP'); ?>"
+                        onclick="cbQueueEditableSampleGeneration(this);">
+                        <span class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></span>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE'); ?>
+                    </button>
+                    <?php if (is_callable($renderCheckbox) && !empty($displayData['canLockTemplate'])) : ?>
+                        <div class="form-check mb-0">
+                            <input type="hidden" name="jform[editable_template_locked]" value="0" />
+                            <?php echo $renderCheckbox('jform[editable_template_locked]', 'editable_template_locked', !empty($item->editable_template_locked)); ?>
+                            <label class="form-check-label" for="editable_template_locked">
+                                <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_TIP'); ?>">
+                                    <span class="fa-solid fa-lock me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED'); ?>
+                                </span>
+                            </label>
+                        </div>
+                    <?php endif; ?>
+                    <small id="cb_create_editable_sample_hint" class="text-success d-none">
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
+                    </small>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
 <input type="hidden" name="jform[edit_by_type]" id="cb-form-edit-by-type-hidden" value="0" />
 <?php if ($canEditByType) : ?>
@@ -101,30 +134,6 @@ $prepareEffectOptions = is_array($displayData['prepareEffectOptions'] ?? null) ?
                 </div>
             </div>
         </div>
-    </div>
-    <input type="hidden" name="jform[create_editable_sample]" id="cb_create_editable_sample_flag" value="0" />
-    <div class="d-flex flex-wrap align-items-center gap-2 mb-2" id="cb-form-edit-create-sample-field-group">
-        <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1" id="create_editable_sample"
-            title="<?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE_TIP'); ?>"
-            aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE_TIP'); ?>"
-            onclick="cbQueueEditableSampleGeneration(this);">
-            <span class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></span>
-            <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE'); ?>
-        </button>
-        <?php if (is_callable($renderCheckbox) && !empty($displayData['canLockTemplate'])) : ?>
-            <div class="form-check mb-0">
-                <input type="hidden" name="jform[editable_template_locked]" value="0" />
-                <?php echo $renderCheckbox('jform[editable_template_locked]', 'editable_template_locked', !empty($item->editable_template_locked)); ?>
-                <label class="form-check-label" for="editable_template_locked">
-                    <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_TIP'); ?>">
-                        <span class="fa-solid fa-lock me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED'); ?>
-                    </span>
-                </label>
-            </div>
-        <?php endif; ?>
-        <small id="cb_create_editable_sample_hint" class="text-success d-none">
-            <?php echo Text::_('COM_CONTENTBUILDERNG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
-        </small>
     </div>
     <br />
     <br />

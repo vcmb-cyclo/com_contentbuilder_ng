@@ -601,10 +601,14 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         true,
                         'cbformstate'
                     );
-                    $publishedTooltip = htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_PUBLISHED'), ENT_QUOTES, 'UTF-8');
+                    $publishedTooltip = htmlspecialchars(
+                        Text::_(!empty($this->item->published) ? 'COM_CONTENTBUILDERNG_PUBLISHED' : 'COM_CONTENTBUILDERNG_UNPUBLISHED'),
+                        ENT_QUOTES,
+                        'UTF-8'
+                    );
                     $publishedToggleHtml = preg_replace('/\saria-labelledby="[^"]*"/', '', (string) $publishedToggleHtml) ?? (string) $publishedToggleHtml;
                     $publishedToggleHtml = preg_replace('#<div role="tooltip"[^>]*>.*?</div>#s', '', (string) $publishedToggleHtml) ?? (string) $publishedToggleHtml;
-                    $publishedToggleHtml = preg_replace('/<a\b/', '<a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="' . $publishedTooltip . '"', (string) $publishedToggleHtml, 1) ?? (string) $publishedToggleHtml;
+                    $publishedToggleHtml = preg_replace('/<a\b/', '<a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="' . $publishedTooltip . '" title="' . $publishedTooltip . '"', (string) $publishedToggleHtml, 1) ?? (string) $publishedToggleHtml;
                     echo $publishedToggleHtml;
                     ?>
                     <input type="checkbox" name="cid[]" id="cbformstate0" value="<?php echo $formId; ?>" style="display:none" />
@@ -621,7 +625,12 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                     $debugToggleHtml = HTMLHelper::_('jgrid.state', $debugStates, $debugEnabled ? 1 : 0, 0, 'form.', true, true, 'cbdebugstate');
                     $debugToggleHtml = preg_replace('/\saria-labelledby="[^"]*"/', '', (string) $debugToggleHtml) ?? (string) $debugToggleHtml;
                     $debugToggleHtml = preg_replace('#<div role="tooltip"[^>]*>.*?</div>#s', '', (string) $debugToggleHtml) ?? (string) $debugToggleHtml;
-                    $debugToggleHtml = preg_replace('/<a\b/', '<a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_TIP'), ENT_QUOTES, 'UTF-8') . '"', (string) $debugToggleHtml, 1) ?? (string) $debugToggleHtml;
+                    $debugTooltip = htmlspecialchars(
+                        Text::_($debugEnabled ? 'COM_CONTENTBUILDERNG_DEBUG_MODE_ENABLED' : 'COM_CONTENTBUILDERNG_DEBUG_MODE_DISABLED'),
+                        ENT_QUOTES,
+                        'UTF-8'
+                    );
+                    $debugToggleHtml = preg_replace('/<a\b/', '<a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="' . $debugTooltip . '" title="' . $debugTooltip . '"', (string) $debugToggleHtml, 1) ?? (string) $debugToggleHtml;
                     $debugToggleHtml = str_replace('icon-unpublish', 'fa fa-bug text-muted', (string) $debugToggleHtml);
                     if ($debugEnabled) {
                         // Active debug mode is a state the admin must not miss: render it as a
@@ -644,8 +653,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                        class="tbody-icon"
                        data-bs-toggle="tooltip"
                        data-bs-placement="bottom"
-                       data-bs-title="<?php echo Text::_("COM_CONTENTBUILDERNG_DEBUG_MODE_TIP"); ?>"
-                       title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_TIP'); ?>"
+                       data-bs-title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_DISABLED'); ?>"
+                       title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_DISABLED'); ?>"
                        onclick="this.classList.toggle('active'); document.getElementById('debug_mode').value = this.classList.contains('active') ? '1' : '0'; return false;">
                         <span class="fa fa-bug text-muted" aria-hidden="true"></span>
                     </a>

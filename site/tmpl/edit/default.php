@@ -857,7 +857,7 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
         ?>
     <?php endif; ?>
     <?php if ($isAdminPreview): ?>
-        <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div class="alert alert-warning cbPreviewBanner d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
             <span>
                 <span class="icon-eye icon-fw" aria-hidden="true"></span>
                 <?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_CURRENT_FORM', $previewFormName); ?>

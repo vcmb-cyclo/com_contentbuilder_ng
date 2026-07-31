@@ -535,9 +535,11 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						<span class="fa-solid fa-circle-question" aria-hidden="true"></span>
 					</span>
 				<?php endif; ?>
-                <small class="d-block mt-1">
-                    <?php echo htmlspecialchars($previewFrontendPermissionHint, ENT_QUOTES, 'UTF-8'); ?>
-                </small>
+                <?php if (!$this->preview_list_access_configured): ?>
+                    <small class="d-block mt-1">
+                        <?php echo htmlspecialchars($previewFrontendPermissionHint, ENT_QUOTES, 'UTF-8'); ?>
+                    </small>
+                <?php endif; ?>
 			</span>
 			<a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
 				<span class="fa-solid fa-arrow-left me-1" aria-hidden="true"></span>

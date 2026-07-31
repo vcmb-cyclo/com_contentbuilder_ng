@@ -112,21 +112,21 @@ TXT;
                     <span class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></span>
                     <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE'); ?>
                 </button>
+                <?php if (is_callable($renderCheckbox) && !empty($displayData['canLockTemplate'])) : ?>
+                    <div class="form-check mb-0">
+                        <input type="hidden" name="jform[details_template_locked]" value="0" />
+                        <?php echo $renderCheckbox('jform[details_template_locked]', 'details_template_locked', !empty($item->details_template_locked)); ?>
+                        <label class="form-check-label" for="details_template_locked">
+                            <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_TIP'); ?>">
+                                <span class="fa-solid fa-lock me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED'); ?>
+                            </span>
+                        </label>
+                    </div>
+                <?php endif; ?>
                 <small id="cb_create_sample_hint" class="text-success d-none">
                     <?php echo Text::_('COM_CONTENTBUILDERNG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
                 </small>
             </div>
-            <?php if (is_callable($renderCheckbox) && !empty($displayData['canLockTemplate'])) : ?>
-                <div class="form-check mt-2">
-                    <input type="hidden" name="jform[details_template_locked]" value="0" />
-                    <?php echo $renderCheckbox('jform[details_template_locked]', 'details_template_locked', !empty($item->details_template_locked)); ?>
-                    <label class="form-check-label" for="details_template_locked">
-                        <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_TIP'); ?>">
-                            <span class="fa-solid fa-lock me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED'); ?>
-                        </span>
-                    </label>
-                </div>
-            <?php endif; ?>
         </div>
     </div>
 </div>

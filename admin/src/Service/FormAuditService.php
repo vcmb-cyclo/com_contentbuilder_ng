@@ -133,14 +133,6 @@ final class FormAuditService
         $info = [
             Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_ID') => (string) (int) $form['id'],
             Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_FORM') => trim((string) $form['name']) . ' (#' . (int) $form['id'] . ')',
-            Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_SOURCE') => (string) $form['type'] . ' / ' . (string) $form['reference_id'],
-            Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_ELEMENTS') => Text::sprintf(
-                'COM_CONTENTBUILDERNG_AUDIT_INFO_ELEMENTS_VALUE',
-                count($elements),
-                count($published),
-                count($editable)
-            ),
-            Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_RECORDS') => (string) $recordsTotal,
             Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_PUBLISHED') => (int) ($form['published'] ?? 0) === 1
                 ? Text::_('JYES')
                 : Text::_('JNO'),

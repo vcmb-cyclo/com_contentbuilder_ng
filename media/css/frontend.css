@@ -206,6 +206,14 @@ html[data-bs-theme="dark"] :is(.cbDetailsWrapper, .cbEditableWrapper) {
     outline: .1875rem solid currentColor;
     outline-offset: .125rem;
 }
+.cbPreviewBanner > span:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.cbPreviewBanner > :is(a, span:last-child) {
+    flex: 0 0 auto;
+    margin-inline-start: auto;
+}
 
 /* ── Fil d'Ariane du titre (liste > écran courant) ─────────────── */
 .cbPageBreadcrumb .cbPageBreadcrumbLink {
