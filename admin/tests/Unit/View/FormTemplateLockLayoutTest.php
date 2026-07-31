@@ -23,6 +23,14 @@ final class FormTemplateLockLayoutTest extends TestCase
             $detailsLayout
         );
         self::assertStringContainsString(
+            'class="col-12 col-xl-8 d-flex" id="cb-form-details-create-sample-card-col"',
+            $detailsLayout
+        );
+        self::assertStringContainsString(
+            'class="form-check mb-0 ms-xl-auto flex-shrink-0 text-nowrap"',
+            $detailsLayout
+        );
+        self::assertStringContainsString(
             "!empty(\$this->item->details_template_locked)",
             $formTemplate
         );
