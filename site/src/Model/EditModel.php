@@ -30,6 +30,8 @@ use Joomla\Filesystem\Folder;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Filesystem\File;
+use Joomla\CMS\Helper\MediaHelper;
+use Joomla\CMS\Filter\InputFilter;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Form\Form;
@@ -64,6 +66,45 @@ use CB\Component\Contentbuilderng\Site\Model\Edit\VisibilityTrait;
 
 class EditModel extends BaseDatabaseModel
 {
+    /**
+     * Applied when an upload field has no explicit allow-list configured.
+     *
+     * Historically an empty "allowed_file_extensions" meant "accept anything",
+     * which allowed .php uploads into the configured (often web-reachable)
+     * destination directory. Form designers can still widen this per field.
+     *
+     * @var list<string>
+     */
+    private const DEFAULT_ALLOWED_UPLOAD_EXTENSIONS = [
+        'pdf', 'txt', 'csv', 'rtf',
+        'doc', 'docx', 'odt', 'xls', 'xlsx', 'ods', 'ppt', 'pptx', 'odp',
+        // NB: svg is deliberately absent — it can carry script and is served
+        // inline when linked directly. Enable it per field if really needed.
+        'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tif', 'tiff',
+        'zip', 'gz', 'rar', '7z',
+        'mp3', 'mp4', 'ogg', 'webm', 'wav',
+    ];
+
+    /**
+     * True when any dot-separated segment of the name is a server-executable
+     * extension.
+     *
+     * Some server configurations execute "shell.php.pdf", so checking only the
+     * trailing extension is not enough.
+     */
+    private static function hasExecutableExtension(string $filename): bool
+    {
+        $segments = array_map('strtolower', array_slice(explode('.', $filename), 1));
+
+        if ($segments === []) {
+            return false;
+        }
+
+        $executables = array_merge(MediaHelper::EXECUTABLES, InputFilter::FORBIDDEN_FILE_EXTENSIONS);
+
+        return array_intersect($segments, $executables) !== [];
+    }
+
     private function getComponent(): ContentbuilderngComponent
     {
         $component = RuntimeContextHelper::getApplication()->bootComponent('com_contentbuilderng');
@@ -1174,12 +1215,34 @@ var contentbuilderng = new function(){
 
                                         // FILE EXT TEST
 
-                                        if ($dest != '' && isset($the_upload_fields[$id]['options']) && isset($the_upload_fields[$id]['options']->allowed_file_extensions) && $the_upload_fields[$id]['options']->allowed_file_extensions != '') {
+                                        if ($dest != '') {
 
-                                            $allowed = explode(',', str_replace(' ', '', strtolower($the_upload_fields[$id]['options']->allowed_file_extensions)));
+                                            $configuredExtensions = isset($the_upload_fields[$id]['options'])
+                                                && isset($the_upload_fields[$id]['options']->allowed_file_extensions)
+                                                ? (string) $the_upload_fields[$id]['options']->allowed_file_extensions
+                                                : '';
+
+                                            // Deny by default: an unconfigured field used to accept ANY
+                                            // extension, including .php, into a web-reachable directory.
+                                            $allowed = $configuredExtensions !== ''
+                                                ? array_values(array_filter(array_map(
+                                                    'trim',
+                                                    explode(',', strtolower($configuredExtensions))
+                                                )))
+                                                : self::DEFAULT_ALLOWED_UPLOAD_EXTENSIONS;
+
                                             $ext = strtolower(File::getExt($filename));
 
-                                            if (!in_array($ext, $allowed)) {
+                                            if (!in_array($ext, $allowed, true)) {
+                                                $msg = Text::_('COM_CONTENTBUILDERNG_FILE_EXTENSION_NOT_ALLOWED');
+                                            }
+
+                                            // Joomla's executable blacklist, applied to EVERY dot
+                                            // segment so "shell.php.pdf" is rejected too. Deliberately
+                                            // not MediaHelper::canUpload(): that also enforces
+                                            // com_media's own narrow extension policy, which would
+                                            // reject legitimate uploads (docx, zip, svg...).
+                                            if ($msg === '' && self::hasExecutableExtension($filename)) {
                                                 $msg = Text::_('COM_CONTENTBUILDERNG_FILE_EXTENSION_NOT_ALLOWED');
                                             }
                                         }
@@ -2314,6 +2377,30 @@ var contentbuilderng = new function(){
         return $user->id;
     }
 
+    /**
+     * User id the delete must be restricted to, or null when the caller holds
+     * an unrestricted (group-granted) delete right.
+     *
+     * Owner-scoped deletes are otherwise only enforced by the session
+     * permission set; the row filter is the authoritative guard.
+     */
+    private function resolveDeleteOwnerRestriction(): ?int
+    {
+        $suffix = $this->frontend ? '_fe' : '';
+        $formId = (int) $this->_id;
+        $permissionService = PermissionService::createFromRuntimeContext();
+
+        if ($permissionService->hasGroupGrant('delete', null, $suffix)) {
+            return null;
+        }
+
+        $userId = (int) ($this->app->getIdentity()->id ?? 0);
+
+        // No group grant and no identity: nothing may be deleted. -1 never
+        // matches a real owner, so the row filter yields an empty set.
+        return $userId > 0 ? $userId : -1;
+    }
+
     function delete()
     {
         $items = $this->app->getInput()->get('cid', [], 'array');
@@ -2332,7 +2419,7 @@ var contentbuilderng = new function(){
                 $data->form_id = $this->_id;
                 if ($data->type && $data->reference_id) {
                     $data->form = FormSourceFactory::getForm($data->type, $data->reference_id);
-                    $res = $data->form->delete($items, $data->form_id);
+                    $res = $data->form->delete($items, $data->form_id, $this->resolveDeleteOwnerRestriction());
                     $cnt = count($items);
                     $new_items = array();
                     if ($res && $cnt) {

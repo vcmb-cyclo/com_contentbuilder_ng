@@ -22,6 +22,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Controller;
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Access\Exception\NotAllowed;
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\FormController as BaseFormController;
@@ -38,8 +39,14 @@ use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
 
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\SafeErrorMessageTrait;
+
 class FormController extends BaseFormController
 {
+    use ComponentAccessTrait;
+    use SafeErrorMessageTrait;
+
     /**
      * Vues utilisées par les redirects du core
      */
@@ -115,7 +122,7 @@ class FormController extends BaseFormController
 
             return parent::edit($key, $urlVar);
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
             $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&task=forms.display', false));
             return false;
         }
@@ -132,7 +139,7 @@ class FormController extends BaseFormController
             $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=0', false));
             return true;
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
             $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&task=forms.display', false));
             return false;
         }
@@ -234,6 +241,13 @@ class FormController extends BaseFormController
         try {
             $jform = (array) $this->input->post->get('jform', [], 'array');
             $jform['id'] = (int) ($jform['id'] ?? $this->input->getInt('id', 0));
+
+            // This task does not go through parent::save(), so the core ACL
+            // gate (allowSave -> allowAdd/allowEdit) has to be applied here.
+            if (!$this->allowSave($jform, 'id')) {
+                throw new NotAllowed(Text::_('JLIB_APPLICATION_ERROR_SAVE_NOT_PERMITTED'), 403);
+            }
+
             $ok = $model->save($jform);
             $id = (int) $model->getState($model->getName() . '.id', 0);
 
@@ -249,7 +263,7 @@ class FormController extends BaseFormController
 
             return true;
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'error');
+            $this->setMessage($this->safeErrorMessage($e), 'error');
             $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&task=form.display&layout=edit&id=0', false));
             return false;
         }
@@ -262,6 +276,8 @@ class FormController extends BaseFormController
     // Elles doivent utiliser Elements
     public function listorderup(): void
     {
+        $this->checkToken();
+
         $formId = $this->resolveFormId();
         if (!$this->persistInlineElementSettings($formId)) {
             return;
@@ -274,6 +290,8 @@ class FormController extends BaseFormController
 
     public function listorderdown(): void
     {
+        $this->checkToken();
+
         $formId = $this->resolveFormId();
         if (!$this->persistInlineElementSettings($formId)) {
             return;
@@ -359,7 +377,7 @@ class FormController extends BaseFormController
         $value = $this->input->getInt('value') !== 0 ? 1 : 0;
 
         if (!in_array($field, self::ALLOWED_FLAGS, true)) {
-            throw new \InvalidArgumentException('Invalid flag: ' . $field);
+            throw new \InvalidArgumentException(Text::_('COM_CONTENTBUILDERNG_ERROR_INVALID_ELEMENT_FLAG'));
         }
 
         $this->elementsUpdate($field, $value);
@@ -449,7 +467,7 @@ class FormController extends BaseFormController
 
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -490,7 +508,7 @@ class FormController extends BaseFormController
 
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -531,7 +549,7 @@ class FormController extends BaseFormController
 
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -572,7 +590,7 @@ class FormController extends BaseFormController
 
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIR_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIR_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -614,7 +632,7 @@ class FormController extends BaseFormController
 
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_ITEM_REPAIR_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_ITEM_REPAIR_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -644,7 +662,7 @@ class FormController extends BaseFormController
         $value = $this->input->getInt('value') !== 0 ? 1 : 0;
 
         if (!in_array($field, ['debug_mode'], true)) {
-            throw new \InvalidArgumentException('Invalid form flag: ' . $field);
+            throw new \InvalidArgumentException(Text::_('COM_CONTENTBUILDERNG_ERROR_INVALID_FORM_FLAG'));
         }
 
         return $this->setFormFlag($field, $value);
@@ -691,9 +709,9 @@ class FormController extends BaseFormController
             );
             return true;
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
             } else {
                 $this->setRedirect($this->getEditRedirectUrl((int) ($formId ?? 0)));
             }
@@ -767,9 +785,9 @@ class FormController extends BaseFormController
             );
             return true;
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
             } else {
                 $this->setRedirect($this->getEditRedirectUrl((int) $formId));
             }
@@ -889,7 +907,7 @@ class FormController extends BaseFormController
             );
             return true;
         } catch (\Throwable $e) {
-            $this->setRedirect($this->getEditRedirectUrl($formId), $e->getMessage(), 'warning');
+            $this->setRedirect($this->getEditRedirectUrl($formId), $this->safeErrorMessage($e), 'warning');
             return false;
         }
     }
@@ -988,7 +1006,7 @@ class FormController extends BaseFormController
                 ['element_id' => $newElementId]
             );
         } catch (\Throwable $e) {
-            $this->respondAjax(false, $e->getMessage());
+            $this->respondAjax(false, $this->safeErrorMessage($e));
         }
     }
 
@@ -1043,7 +1061,7 @@ class FormController extends BaseFormController
 
             $this->respondAjax(true, Text::sprintf('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_DELETED', $fieldLabel));
         } catch (\Throwable $e) {
-            $this->respondAjax(false, $e->getMessage());
+            $this->respondAjax(false, $this->safeErrorMessage($e));
         }
     }
 
@@ -1079,7 +1097,7 @@ class FormController extends BaseFormController
             $this->setRedirect($this->getEditRedirectUrl($formId), Text::sprintf('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_DELETED', $fieldLabel));
             return true;
         } catch (\Throwable $e) {
-            $this->setRedirect($this->getEditRedirectUrl($formId), $e->getMessage(), 'warning');
+            $this->setRedirect($this->getEditRedirectUrl($formId), $this->safeErrorMessage($e), 'warning');
             return false;
         }
     }
@@ -1087,6 +1105,8 @@ class FormController extends BaseFormController
     // Passe par le modèle.
     private function elementsPublish(int $state, string $successMsgKey)
     {
+        $this->checkToken();
+
         try {
             $cids = $this->input->get('cid', [], 'array');
             ArrayHelper::toInteger($cids);
@@ -1134,9 +1154,9 @@ class FormController extends BaseFormController
 
             return true;
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
             } else {
                 $this->setRedirect($this->getEditRedirectUrl((int) ($formId ?? 0)));
             }
@@ -1195,13 +1215,13 @@ class FormController extends BaseFormController
 
             return true;
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
             } else {
                 $this->setRedirect(
                     $this->getEditRedirectUrl((int) ($formId ?? 0)),
-                    $e->getMessage(),
+                    $this->safeErrorMessage($e),
                     'warning'
                 );
             }

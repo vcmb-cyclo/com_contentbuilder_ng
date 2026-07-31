@@ -21,7 +21,7 @@ final class ElementLabelSortLayoutTest extends TestCase
             $style
         );
         self::assertStringContainsString(
-            '.cb-item-label-display,.cb-item-label-cell>.form-control{flex:1 1 14rem;',
+            '.cb-item-label-display{flex:0 1 auto;min-width:0;width:auto!important}.cb-item-label-cell>.form-control{flex:1 1 14rem;',
             $style
         );
         self::assertStringContainsString(

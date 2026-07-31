@@ -24,8 +24,14 @@ use Joomla\Input\Input;
 use CB\Component\Contentbuilderng\Administrator\Model\UserModel;
 use CB\Component\Contentbuilderng\Administrator\Model\UsersModel;
 
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\SafeErrorMessageTrait;
+
 class UsersController extends BaseController
 {
+    use ComponentAccessTrait;
+    use SafeErrorMessageTrait;
+
     private function getApp(): CMSApplicationInterface
     {
         return $this->app;
@@ -88,6 +94,8 @@ class UsersController extends BaseController
     }
     
     public function verified_view() {
+        $this->checkToken();
+
         try {
             $model = $this->getUserModelForListActions();
             $model->setListVerifiedView();
@@ -98,16 +106,18 @@ class UsersController extends BaseController
             }
         } catch (\Throwable $e) {
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
                 return;
             }
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
         }
 
         $this->renderUsersList();
     }
     
     public function not_verified_view() {
+        $this->checkToken();
+
         try {
             $model = $this->getUserModelForListActions();
             $model->setListNotVerifiedView();
@@ -118,16 +128,18 @@ class UsersController extends BaseController
             }
         } catch (\Throwable $e) {
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
                 return;
             }
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
         }
 
         $this->renderUsersList();
     }
     
     public function verified_new() {
+        $this->checkToken();
+
         try {
             $model = $this->getUserModelForListActions();
             $model->setListVerifiedNew();
@@ -138,16 +150,18 @@ class UsersController extends BaseController
             }
         } catch (\Throwable $e) {
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
                 return;
             }
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
         }
 
         $this->renderUsersList();
     }
     
     public function not_verified_new() {
+        $this->checkToken();
+
         try {
             $model = $this->getUserModelForListActions();
             $model->setListNotVerifiedNew();
@@ -158,16 +172,18 @@ class UsersController extends BaseController
             }
         } catch (\Throwable $e) {
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
                 return;
             }
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
         }
 
         $this->renderUsersList();
     }
     
     public function verified_edit() {
+        $this->checkToken();
+
         try {
             $model = $this->getUserModelForListActions();
             $model->setListVerifiedEdit();
@@ -178,16 +194,18 @@ class UsersController extends BaseController
             }
         } catch (\Throwable $e) {
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
                 return;
             }
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
         }
 
         $this->renderUsersList();
     }
     
     public function not_verified_edit() {
+        $this->checkToken();
+
         try {
             $model = $this->getUserModelForListActions();
             $model->setListNotVerifiedEdit();
@@ -198,10 +216,10 @@ class UsersController extends BaseController
             }
         } catch (\Throwable $e) {
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
                 return;
             }
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
         }
 
         $this->renderUsersList();
@@ -235,10 +253,10 @@ class UsersController extends BaseController
             }
         } catch (\Throwable $e) {
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
                 return;
             }
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
         }
 
         $this->setRedirect(Route::_($this->getUsersListLink($this->input->getInt('limitstart')), false), Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED'));
@@ -257,10 +275,10 @@ class UsersController extends BaseController
             }
         } catch (\Throwable $e) {
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
                 return;
             }
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
         }
 
         $this->setRedirect(Route::_($this->getUsersListLink($this->input->getInt('limitstart')), false), Text::_('COM_CONTENTBUILDERNG_UNPUBLISHED'));

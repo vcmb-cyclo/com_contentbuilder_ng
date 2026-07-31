@@ -25,6 +25,7 @@ use CB\Component\Contentbuilderng\Site\Model\EditModel;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use CB\Component\Contentbuilderng\Administrator\Service\DirectStorageFormProvisioningService;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
+use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 
 class ListController extends BaseController
@@ -50,11 +51,43 @@ class ListController extends BaseController
         return $component->getContainer()->get(DirectStorageFormProvisioningService::class);
     }
 
+    /**
+     * Recomputes the permission set for the form and the records this request
+     * actually targets.
+     *
+     * These list actions used to authorise straight off the session, i.e.
+     * against whatever form/record the *previous* page had armed — letting a
+     * user act on records they never had rights on.
+     */
+    private function armPermissionsForSelection(): void
+    {
+        $formId = (int) $this->input->getInt('id', 0);
+        $storageId = (int) $this->input->getInt('storage_id', 0);
+
+        // Direct-storage mode dispatches with storage_id and no form id; the
+        // permissions still have to be computed against the backing form, as
+        // display() does.
+        if ($formId <= 0 && $storageId > 0) {
+            $formId = (int) $this->getDirectStorageFormProvisioningService()->resolveOrCreateFormId($storageId);
+        }
+
+        $items = array_values(
+            array_filter(
+                array_map('intval', (array) $this->input->get('cid', [], 'array')),
+                static fn(int $id): bool => $id > 0
+            )
+        );
+
+        $this->getPermissionService()->setPermissions($formId, $items, '_fe');
+    }
+
     public function delete(): void
     {
         if (!$this->checkToken('post', false)) {
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
         }
+
+        $this->armPermissionsForSelection();
 
         $this->getPermissionService()->checkPermissions(
             'delete',
@@ -146,6 +179,8 @@ class ListController extends BaseController
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
         }
 
+        $this->armPermissionsForSelection();
+
         $this->getPermissionService()->checkPermissions(
             'state',
             Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_STATE_CHANGE_NOT_ALLOWED'),
@@ -221,6 +256,8 @@ class ListController extends BaseController
         if (!$this->checkToken('post', false)) {
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
         }
+
+        $this->armPermissionsForSelection();
 
         $this->getPermissionService()->checkPermissions(
             'publish',
@@ -316,7 +353,22 @@ class ListController extends BaseController
             // lié, pour que les permissions soient calculées comme pour un
             // formulaire classique (au lieu de dépendre d'un état de session laissé
             // par un précédent affichage Edit/Details/List).
-            $formId = $this->getDirectStorageFormProvisioningService()->resolveOrCreateFormId($storageId);
+            try {
+                $formId = $this->getDirectStorageFormProvisioningService()->resolveOrCreateFormId($storageId);
+            } catch (\Throwable $e) {
+                Logger::exception($e, [
+                    'context' => 'direct_storage_form_provisioning',
+                    'storage_id' => $storageId,
+                ]);
+
+                $noEditableFieldsMessage = Text::_('COM_CONTENTBUILDERNG_THEME_NO_EDITABLE_ELEMENTS');
+                $messageKey = $e->getMessage() === $noEditableFieldsMessage
+                    ? 'COM_CONTENTBUILDERNG_DIRECT_STORAGE_NO_EDITABLE_FIELDS'
+                    : 'COM_CONTENTBUILDERNG_DIRECT_STORAGE_PROVISIONING_ERROR';
+                $app->enqueueMessage(Text::_($messageKey), 'error');
+
+                return false;
+            }
         } elseif (!$formId) {
             // 2) sinon depuis les params du menu actif
             $menu = $app->getMenu()->getActive();

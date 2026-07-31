@@ -20,8 +20,12 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Language\Text;
 
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
+
 class DisplayController extends BaseController
 {
+    use ComponentAccessTrait;
+
     protected $default_view = 'storages';
 
     private function getApp(): CMSApplicationInterface

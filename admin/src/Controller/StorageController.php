@@ -36,8 +36,14 @@ use CB\Component\Contentbuilderng\Administrator\Helper\StorageSystemFieldHelper;
 use CB\Component\Contentbuilderng\Administrator\Model\StorageModel;
 use CB\Component\Contentbuilderng\Administrator\Model\StoragefieldsModel;
 
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\SafeErrorMessageTrait;
+
 class StorageController extends BaseFormController
 {
+    use ComponentAccessTrait;
+    use SafeErrorMessageTrait;
+
     /**
      * Vue item et vue liste utilisées par les redirects du core
      */
@@ -126,7 +132,7 @@ class StorageController extends BaseFormController
 
             return parent::edit($key, $urlVar);
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
             $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&task=storages.display', false));
             return false;
         }
@@ -298,7 +304,7 @@ class StorageController extends BaseFormController
                     Logger::exception($e);
                     $this->setRedirect(
                         $this->storageEditLink($id),
-                        $e->getMessage(),
+                        $this->safeErrorMessage($e),
                         'error'
                     );
 
@@ -316,7 +322,7 @@ class StorageController extends BaseFormController
                     Logger::exception($e);
                     $this->setRedirect(
                         $this->storageEditLink($id),
-                        $e->getMessage(),
+                        $this->safeErrorMessage($e),
                         'error'
                     );
 
@@ -501,7 +507,7 @@ class StorageController extends BaseFormController
             Logger::exception($e);
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&task=storages.display', false),
-                $e->getMessage(),
+                $this->safeErrorMessage($e),
                 'error'
             );
             return false;
@@ -623,7 +629,7 @@ class StorageController extends BaseFormController
 
             return true;
         } catch (\Throwable $e) {
-            $this->setRedirect($redirect, $e->getMessage(), 'warning');
+            $this->setRedirect($redirect, $this->safeErrorMessage($e), 'warning');
 
             return false;
         }
@@ -652,7 +658,7 @@ class StorageController extends BaseFormController
 
             return true;
         } catch (\Throwable $e) {
-            $this->setRedirect($redirect, $e->getMessage(), 'warning');
+            $this->setRedirect($redirect, $this->safeErrorMessage($e), 'warning');
 
             return false;
         }
@@ -742,7 +748,7 @@ class StorageController extends BaseFormController
             Logger::exception($e);
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&task=storages.display', false),
-                $e->getMessage(),
+                $this->safeErrorMessage($e),
                 'warning'
             );
 
@@ -852,7 +858,7 @@ class StorageController extends BaseFormController
         } catch (\Throwable $e) {
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&task=storage.display&layout=edit&id=' . max(0, $storageId), false),
-                $e->getMessage(),
+                $this->safeErrorMessage($e),
                 'error'
             );
 
@@ -897,7 +903,7 @@ class StorageController extends BaseFormController
         } catch (\Throwable $e) {
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&task=storage.display&layout=edit&id=' . $storageId, false),
-                $e->getMessage(),
+                $this->safeErrorMessage($e),
                 'error'
             );
 
@@ -998,7 +1004,7 @@ class StorageController extends BaseFormController
 
             return true;
         } catch (\Throwable $e) {
-            $this->setRedirect($redirect, $e->getMessage(), 'error');
+            $this->setRedirect($redirect, $this->safeErrorMessage($e), 'error');
 
             return false;
         }
@@ -1065,9 +1071,9 @@ class StorageController extends BaseFormController
 
             return true;
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
             if ($this->isAjaxCall()) {
-                $this->respondAjax(false, $e->getMessage());
+                $this->respondAjax(false, $this->safeErrorMessage($e));
             } else {
                 $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&task=storage.display', false));
             }
@@ -1133,7 +1139,7 @@ class StorageController extends BaseFormController
         } catch (\Throwable $e) {
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&task=storage.display&layout=edit&id=' . max(0, $storageId), false),
-                $e->getMessage(),
+                $this->safeErrorMessage($e),
                 'error'
             );
 
@@ -1199,7 +1205,7 @@ class StorageController extends BaseFormController
         } catch (\Throwable $e) {
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&task=storage.display&layout=edit&id=' . (int) $this->input->getInt('id', 0), false),
-                $e->getMessage(),
+                $this->safeErrorMessage($e),
                 'error'
             );
 
@@ -1251,7 +1257,7 @@ class StorageController extends BaseFormController
 
             $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_FIELD_ADDED'));
         } catch (\Throwable $e) {
-            $this->respondAjax(false, $e->getMessage());
+            $this->respondAjax(false, $this->safeErrorMessage($e));
         }
     }
 
@@ -1333,7 +1339,7 @@ class StorageController extends BaseFormController
                 'sql_type_definition' => StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize),
             ]);
         } catch (\Throwable $e) {
-            $this->respondAjax(false, $e->getMessage());
+            $this->respondAjax(false, $this->safeErrorMessage($e));
         }
     }
 }

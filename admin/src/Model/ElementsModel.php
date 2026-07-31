@@ -464,38 +464,6 @@ class ElementsModel extends ListModel
 
 
 
-    private function buildOrderBy()
-    {
-        $orderby = '';
-        $filter_order = $this->getState('elements_filter_order');
-        $filter_order_Dir = $this->getState('elements_filter_order_Dir');
-
-        /* Error handling is never a bad thing*/
-        if (!empty($filter_order) && !empty($filter_order_Dir)) {
-            $orderby = ' ORDER BY ' . $filter_order . ' ' . $filter_order_Dir . ' , ordering ';
-        } else {
-            $orderby = ' ORDER BY ordering ';
-        }
-
-        return $orderby;
-    }
-
-
-    function _buildQuery()
-    {
-        $filter_state = '';
-        if ($this->getState('elements_filter_state') == 'P' || $this->getState('elements_filter_state') == 'U') {
-            $published = 0;
-            if ($this->getState('elements_filter_state') == 'P') {
-                $published = 1;
-            }
-
-            $filter_state .= ' And published = ' . $published;
-        }
-
-        return "Select * From #__contentbuilderng_elements Where form_id = " . $this->formId . $filter_state . $this->buildOrderBy();
-    }
-
     // Deprecated compatibility path
     function getData(int $formId)
     {

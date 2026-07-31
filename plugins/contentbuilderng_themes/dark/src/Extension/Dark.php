@@ -23,6 +23,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\CMS\Event\GenericEvent as Event;
 use Joomla\Event\SubscriberInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
+use CB\Component\Contentbuilderng\Administrator\Helper\TemplateFieldOrderHelper;
 
 final class Dark extends CMSPlugin implements SubscriberInterface
 {
@@ -203,7 +204,7 @@ final class Dark extends CMSPlugin implements SubscriberInterface
         $elementTypes = $this->fetchElementTypes($db, $contentbuilderng_form_id, false);
 
         $out = '<ul class="list-group list-group-flush">' . "\n";
-        $names = $form->getElementNames();
+        $names = TemplateFieldOrderHelper::getOrderedNames($db, $contentbuilderng_form_id, $form);
 
         foreach ($names as $reference_id => $name) {
             $type = $elementTypes[$reference_id] ?? null;
@@ -255,7 +256,7 @@ final class Dark extends CMSPlugin implements SubscriberInterface
         }
 
         $out = "\n";
-        $names = $form->getElementNames();
+        $names = TemplateFieldOrderHelper::getOrderedNames($db, $contentbuilderng_form_id, $form);
         $hidden = [];
 
         foreach ($names as $reference_id => $name) {

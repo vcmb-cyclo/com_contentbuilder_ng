@@ -118,7 +118,7 @@ if ($previewActorLabel === '' && $previewActorId > 0) {
 $ownerUserId = $isAdminPreview && $previewActorId > 0
     ? $previewActorId
     : (int) ($currentUser->id ?? 0);
-$ownerPermissionMatrix = (array) $runtimeApp->getSession()->get('com_contentbuilderng.permissions_fe', []);
+$ownerPermissionMatrix = $permissionService->getStoredPermissions(null, '_fe');
 $ownerRuleSet = (array) ($ownerPermissionMatrix['own_fe'] ?? []);
 $formInstance = $this->form ?? null;
 $recordId = (string) $input->getCmd('record_id', 0);

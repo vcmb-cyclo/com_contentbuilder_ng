@@ -64,7 +64,9 @@ final class DebugPermissionHelper
     {
         $session = $app->getSession();
         $suffix = $frontend ? '_fe' : '';
-        $key = 'com_contentbuilderng.permissions' . $suffix;
+        // Must mirror PermissionService::permissionKey(): the set is scoped by
+        // form id so a set computed for one form cannot authorise another.
+        $key = 'com_contentbuilderng.permissions' . $suffix . '.' . $formId;
         $missing = "\0contentbuilderng-debug-permissions-missing\0";
         $currentPermissions = $session->get($key, $missing);
 

@@ -34,8 +34,14 @@ use Joomla\CMS\Response\JsonResponse;
 use Joomla\CMS\Router\Route;
 use Joomla\Database\DatabaseInterface;
 
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\SafeErrorMessageTrait;
+
 final class AboutController extends BaseController
 {
+    use ComponentAccessTrait;
+    use SafeErrorMessageTrait;
+
     protected $default_view = 'about';
 
     private const CONFIG_TRANSFER_SELECTION_STATE_KEY = 'com_contentbuilderng.configtransfer.selection';
@@ -210,7 +216,7 @@ final class AboutController extends BaseController
         } catch (\Throwable $e) {
             $result = [
                 'level' => 'error',
-                'summary' => Text::sprintf('COM_CONTENTBUILDERNG_PACKED_MIGRATION_FAILED', $e->getMessage()),
+                'summary' => Text::sprintf('COM_CONTENTBUILDERNG_PACKED_MIGRATION_FAILED', $this->safeErrorMessage($e)),
                 'lines' => [],
             ];
             $currentStep['status'] = 'done';
@@ -326,7 +332,7 @@ final class AboutController extends BaseController
 
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -382,7 +388,7 @@ final class AboutController extends BaseController
 
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_THEME_REPAIR_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -417,7 +423,7 @@ final class AboutController extends BaseController
 
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_EDITABLE_TEMPLATE_REPAIR_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -452,7 +458,7 @@ final class AboutController extends BaseController
 
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_DETAILS_TEMPLATE_REPAIR_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -487,7 +493,7 @@ final class AboutController extends BaseController
 
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIR_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIR_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -543,7 +549,7 @@ final class AboutController extends BaseController
 
             $this->setMessage($message, (int) ($summary['errors'] ?? 0) > 0 ? 'warning' : 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_REPAIR_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES_REPAIR_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -603,7 +609,7 @@ final class AboutController extends BaseController
 
             $this->setMessage($message, (int) ($summary['errors'] ?? 0) > 0 ? 'warning' : 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_REPAIR_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE_REPAIR_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -645,7 +651,7 @@ final class AboutController extends BaseController
                 try {
                     $deletedPaths[] = StaleInstallerTempAuditHelper::delete($path);
                 } catch (\Throwable $e) {
-                    $failures[] = $path . ' (' . $e->getMessage() . ')';
+                    $failures[] = $path . ' (' . $this->safeErrorMessage($e) . ')';
                 }
             }
 
@@ -674,7 +680,7 @@ final class AboutController extends BaseController
 
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
-            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_FAILED', $e->getMessage());
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP_DELETE_FAILED', $this->safeErrorMessage($e));
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
@@ -722,7 +728,7 @@ final class AboutController extends BaseController
                 $this->setMessage($message, $auditErrorCount > 0 ? 'error' : 'warning');
             }
         } catch (\Throwable $e) {
-            $this->setMessage(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FAILED', $e->getMessage()), 'error');
+            $this->setMessage(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FAILED', $this->safeErrorMessage($e)), 'error');
         }
 
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
@@ -749,7 +755,7 @@ final class AboutController extends BaseController
             $this->setMessage(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_LOG_LOADED', (string) ($logReport['file'] ?? '')), 'message');
         } catch (\Throwable $e) {
             $app->setUserState('com_contentbuilderng.about.log', []);
-            $this->setMessage(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_LOG_LOAD_FAILED', $e->getMessage()), 'error');
+            $this->setMessage(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_LOG_LOAD_FAILED', $this->safeErrorMessage($e)), 'error');
         }
 
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
@@ -822,7 +828,7 @@ final class AboutController extends BaseController
                 'generated_at' => $this->getJoomlaLocalDateTime(),
                 'summary' => [
                     'status' => 'error',
-                    'details' => [(string) $e->getMessage()],
+                    'details' => [(string) $this->safeErrorMessage($e)],
                 ],
             ]);
             Logger::error('Configuration export failed', [
@@ -830,9 +836,9 @@ final class AboutController extends BaseController
                 'form_ids' => $selectedFormIds,
                 'storage_ids' => $selectedStorageIds,
                 'include_storage_content' => $includeStorageContent ? 1 : 0,
-                'error' => $e->getMessage(),
+                'error' => $this->safeErrorMessage($e),
             ]);
-            $this->setMessage(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_EXPORT_CONFIGURATION_FAILED', $e->getMessage()), 'error');
+            $this->setMessage(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_EXPORT_CONFIGURATION_FAILED', $this->safeErrorMessage($e)), 'error');
             $this->setRedirect($this->buildConfigTransferRedirect('export'));
         }
     }
@@ -922,15 +928,15 @@ final class AboutController extends BaseController
                 'generated_at' => $this->getJoomlaLocalDateTime(),
                 'summary' => [
                     'status' => 'error',
-                    'details' => [(string) $e->getMessage()],
+                    'details' => [(string) $this->safeErrorMessage($e)],
                 ],
             ]);
             Logger::error('Configuration import failed', [
                 'mode' => $importMode,
                 'sections' => $selectedSections,
-                'error' => $e->getMessage(),
+                'error' => $this->safeErrorMessage($e),
             ]);
-            $this->setMessage(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_FAILED', $e->getMessage()), 'error');
+            $this->setMessage(Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION_FAILED', $this->safeErrorMessage($e)), 'error');
         }
 
         $this->setRedirect($this->buildConfigTransferRedirect('import'));

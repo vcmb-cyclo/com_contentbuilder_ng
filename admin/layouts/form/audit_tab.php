@@ -97,11 +97,7 @@ $checkRepairs = [
         'requires_field' => true,
     ],
 ];
-$checkReferenceTooltips = [
-    'CBNG-AUDIT-FIELD-MISSING-IN-EDIT' => 'COM_CONTENTBUILDERNG_AUDIT_REFERENCE_FIELD_MISSING_IN_EDIT_TIP',
-];
-
-$renderCheck = static function (array $check) use ($statusBadges, $checkRepairs, $checkReferenceTooltips, $formId): string {
+$renderCheck = static function (array $check) use ($statusBadges, $checkRepairs, $formId): string {
     $status = (string) ($check['status'] ?? FormAuditService::STATUS_WARNING);
     [$badgeClass, $badgeKey] = $statusBadges[$status]
         ?? $statusBadges[FormAuditService::STATUS_WARNING];
@@ -125,7 +121,7 @@ $renderCheck = static function (array $check) use ($statusBadges, $checkRepairs,
         . htmlspecialchars((string) ($check['message'] ?? ''), ENT_QUOTES, 'UTF-8');
 
     if ($checkReference !== '') {
-        $tipKey = $checkReferenceTooltips[$checkReference] ?? '';
+        $tipKey = 'COM_CONTENTBUILDERNG_AUDIT_REFERENCE_TIP';
         $html .= '<small class="d-block text-muted"'
             . ($tipKey !== '' ? ' title="' . htmlspecialchars(Text::_($tipKey), ENT_QUOTES, 'UTF-8') . '"' : '')
             . '>'

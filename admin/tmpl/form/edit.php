@@ -593,7 +593,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 || trim((string) ($this->item->email_template ?? '')) !== ''
         );
         $listStatesBadge = $neutralTabBadge(!empty((array) ($this->item->list_states ?? [])));
+        if ($listStatesBadge === '' && $this->form) {
+            $listStatesBadge = $neutralTabBadge(!empty((array) $this->form->getValue('list_states')));
+        }
         $listIntroBadge = $neutralTabBadge(trim((string) ($this->item->intro_text ?? '')) !== '');
+        if ($listIntroBadge === '' && $this->form) {
+            $listIntroBadge = $neutralTabBadge(trim((string) $this->form->getValue('intro_text')) !== '');
+        }
         if ($formId > 0 && $debugModeEnabled) {
             $allowedViewTabs[] = 'tab12';
             $allowedViewTabs[] = 'tab13';
@@ -872,6 +878,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             [
                 'item' => $this->item,
                 'form' => $this->form,
+                'templateAuditChecks' => $templateAuditChecks,
+                'templateAuditReferences' => $templateAuditReferences['details'],
                 'renderCheckbox' => $renderCheckbox,
                 'editablePrepareSnippetOptions' => $editablePrepareSnippetOptions,
                 'prepareEffectOptions' => $prepareEffectOptions,
@@ -889,6 +897,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             [
                 'item' => $this->item,
                 'form' => $this->form,
+                'templateAuditChecks' => $templateAuditChecks,
+                'templateAuditReferences' => $templateAuditReferences['edit'],
                 'renderCheckbox' => $renderCheckbox,
                 'canEditByType' => $canEditByType,
                 'isBreezingFormsType' => $isBreezingFormsType,
@@ -896,16 +906,6 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 'breezingFormsEditableToken' => $breezingFormsEditableToken,
                 'editablePrepareSnippetOptions' => $editablePrepareSnippetOptions,
                 'prepareEffectOptions' => $prepareEffectOptions,
-            ],
-            $componentLayoutBase
-        );
-        echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab11', $viewTabLabel('fa-solid fa-bug', 'COM_CONTENTBUILDERNG_TAB_DEBUG', 'COM_CONTENTBUILDERNG_TAB_DEBUG_TIP'));
-        echo LayoutHelper::render(
-            'form.debug_tab',
-            [
-                'item' => $this->item,
-                'renderCheckbox' => $renderCheckbox,
             ],
             $componentLayoutBase
         );
@@ -976,6 +976,16 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         );
 
         echo HTMLHelper::_('uitab.endTab');     // ferme tab8 (Permissions)
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab11', $viewTabLabel('fa-solid fa-bug', 'COM_CONTENTBUILDERNG_TAB_DEBUG', 'COM_CONTENTBUILDERNG_TAB_DEBUG_TIP'));
+        echo LayoutHelper::render(
+            'form.debug_tab',
+            [
+                'item' => $this->item,
+                'renderCheckbox' => $renderCheckbox,
+            ],
+            $componentLayoutBase
+        );
+        echo HTMLHelper::_('uitab.endTab');
         echo HTMLHelper::_('uitab.endTabSet');  // ferme view-pane
         ?>
 

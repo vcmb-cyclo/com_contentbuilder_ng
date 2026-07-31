@@ -22,8 +22,14 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use CB\Component\Contentbuilderng\Administrator\Service\DatatableService;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\SafeErrorMessageTrait;
+
 class DatatableController extends BaseController
 {
+    use ComponentAccessTrait;
+    use SafeErrorMessageTrait;
+
     private function getApp(): CMSApplicationInterface
     {
         $app = $this->app;
@@ -63,7 +69,11 @@ class DatatableController extends BaseController
         }
 
         if (!$storageId) {
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=storage', false), 'Missing storage_id', 'error');
+            $this->setRedirect(
+                Route::_('index.php?option=com_contentbuilderng&view=storage', false),
+                Text::_('COM_CONTENTBUILDERNG_ERROR_MISSING_STORAGE_ID'),
+                'error'
+            );
             return false;
         }
 
@@ -87,7 +97,7 @@ class DatatableController extends BaseController
         } catch (\Throwable $e) {
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),
-                $e->getMessage(),
+                $this->safeErrorMessage($e),
                 'error'
             );
             return false;
@@ -108,7 +118,7 @@ class DatatableController extends BaseController
         if (!$storageId) {
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&view=storage', false),
-                'Missing storage_id',
+                Text::_('COM_CONTENTBUILDERNG_ERROR_MISSING_STORAGE_ID'),
                 'error'
             );
             return false;
@@ -116,7 +126,7 @@ class DatatableController extends BaseController
 
         try {
             $service = $this->getDatatableService();
-            $service->syncColumnsFromFields($storageId);
+            $tableName = $service->syncColumnsFromFields($storageId);
 
             foreach ($service->getLastSyncWarnings() as $warning) {
                 $this->getApp()->enqueueMessage($warning, 'warning');
@@ -124,14 +134,14 @@ class DatatableController extends BaseController
 
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),
-                Text::_('COM_CONTENTBUILDERNG_DATATABLE_SYNCED'),
+                Text::sprintf('COM_CONTENTBUILDERNG_DATATABLE_SYNCED', $tableName),
                 'message'
             );
             return true;
         } catch (\Throwable $e) {
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),
-                $e->getMessage(),
+                $this->safeErrorMessage($e),
                 'error'
             );
             return false;

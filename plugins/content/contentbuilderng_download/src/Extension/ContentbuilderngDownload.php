@@ -24,6 +24,7 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\SubscriberInterface;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
+use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 final class ContentbuilderngDownload extends CMSPlugin implements SubscriberInterface
 {
     /**
@@ -151,7 +152,7 @@ final class ContentbuilderngDownload extends CMSPlugin implements SubscriberInte
             'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
         );
 
-        $ext = strtolower(array_pop(explode('.', $filename)));
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         if (array_key_exists($ext, $mime_types)) {
             return $mime_types[$ext];
         } elseif (function_exists('finfo_open')) {
@@ -230,7 +231,7 @@ final class ContentbuilderngDownload extends CMSPlugin implements SubscriberInte
         }
 
         if (!file_exists(JPATH_SITE .'/media/contentbuilderng/plugins/download/index.html'))
-            File::write(JPATH_SITE .'/media/contentbuilderng/plugins/image_scale/index.html', $def = '');
+            File::write(JPATH_SITE .'/media/contentbuilderng/plugins/download/index.html', $def = '');
 
         if (isset($article->id) || isset($article->cbrecord)) {
 
@@ -416,7 +417,12 @@ final class ContentbuilderngDownload extends CMSPlugin implements SubscriberInte
 
                                     if ($the_value) {
 
-                                        $exists = file_exists($the_value);
+                                        // The path comes from stored record data. Never touch (probe,
+                                        // stat or serve) anything outside the site root: without this
+                                        // containment check a crafted field value turns this plugin
+                                        // into an arbitrary file read primitive.
+                                        $exists = ContentbuilderngHelper::is_internal_path($the_value)
+                                            && is_file($the_value);
 
                                         if ($exists) {
 
@@ -448,14 +454,25 @@ final class ContentbuilderngDownload extends CMSPlugin implements SubscriberInte
                                                 // clean up before displaying
                                                 @ob_end_clean();
 
-                                                header('Content-Type: application/octet-stream; name="' . $download_name . '"');
-                                                header('Content-Disposition: inline; filename="' . $download_name . '"');
-                                                header('Content-Length: ' . @filesize($the_value));
+                                                // Strip anything that could break out of the quoted
+                                                // header value, and always offer the file as an
+                                                // attachment so it is never rendered inline.
+                                                $safeName = str_replace(['"', '\\', "\r", "\n"], '', $download_name);
+
+                                                $this->app->setHeader('Content-Type', 'application/octet-stream', true);
+                                                $this->app->setHeader('X-Content-Type-Options', 'nosniff', true);
+                                                $this->app->setHeader(
+                                                    'Content-Disposition',
+                                                    'attachment; filename="' . $safeName . '"; filename*=UTF-8\'\'' . rawurlencode($download_name),
+                                                    true
+                                                );
+                                                $this->app->setHeader('Content-Length', (string) filesize($the_value), true);
+                                                $this->app->sendHeaders();
 
                                                 // NOTE: if running IIS and CGI, raise the CGI timeout to serve large files
-                                                @$this->readfile_chunked($the_value);
+                                                $this->readfile_chunked($the_value);
 
-                                                exit;
+                                                $this->app->close();
                                             }
 
                                             $info_style_ = $info_style;

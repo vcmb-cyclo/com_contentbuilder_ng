@@ -199,33 +199,6 @@ class StoragesModel extends ListModel
         return true;
     }
 
-    /**
-     * @return string The query
-     */
-    /*
-    private function _buildQuery()
-    {
-        $where = '';
-
-        // PUBLISHED FILTER SELECTED?
-        $filter_state = '';
-        if ($this->getState('storages_filter_state') == 'P' || $this->getState('storages_filter_state') == 'U') {
-            $published = 0;
-            if ($this->getState('storages_filter_state') == 'P') {
-                $published = 1;
-            }
-
-            $and = ' And';
-
-            $filter_state .= ' published = ' . $published;
-        }
-
-        if ($filter_state != '') {
-            $where = ' Where ';
-        }
-
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilderng_storages ' . $where . $filter_state . $this->buildOrderBy();
-    }*/
 
 
     function saveOrder()
@@ -256,19 +229,4 @@ class StoragesModel extends ListModel
         $row->reorder('');
     }
 
-    /**
-     * Gets the currencies
-     * @return array List of products
-     */
-    /*    function getData()
-    {
-        // Lets load the data if it doesn't already exist
-        if (empty($this->_data)) {
-            $query = $this->_buildQuery();
-            $this->_data = $this->_getList($query, $this->getState('limitstart'), $this->getState('limit'));
-        }
-
-        return $this->_data;
-    }
-*/
 }

@@ -41,6 +41,15 @@ forbidden_patterns=(
     '^admin/vendor/bin/'
     '^admin/vendor/phpunit/'
     '^admin/vendor/sebastian/'
+    # Remaining require-dev trees: shipping a static analyser or its parser to
+    # production adds attack surface for no runtime benefit.
+    '^admin/vendor/phpstan/'
+    '^admin/vendor/nikic/'
+    '^admin/vendor/myclabs/'
+    '^admin/vendor/phar-io/'
+    '^admin/vendor/theseer/'
+    '^admin/vendor/staabm/'
+    '^admin/vendor/squizlabs/'
     '^admin/\.phpunit'
     '/\.git/'
     '^plugins/content/contentbuilderng_stats/'

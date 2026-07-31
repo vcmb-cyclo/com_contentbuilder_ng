@@ -25,7 +25,13 @@ $breezingFormsProvidedMessage = (string) ($displayData['breezingFormsProvidedMes
 $breezingFormsEditableToken = (string) ($displayData['breezingFormsEditableToken'] ?? '');
 $editablePrepareSnippetOptions = is_array($displayData['editablePrepareSnippetOptions'] ?? null) ? $displayData['editablePrepareSnippetOptions'] : [];
 $prepareEffectOptions = is_array($displayData['prepareEffectOptions'] ?? null) ? $displayData['prepareEffectOptions'] : [];
+$templateAuditChecks = (array) ($displayData['templateAuditChecks'] ?? []);
+$templateAuditReferences = (array) ($displayData['templateAuditReferences'] ?? []);
 ?>
+<?php echo LayoutHelper::render('form.template_audit_errors', [
+    'auditChecks' => $templateAuditChecks,
+    'references' => $templateAuditReferences,
+]); ?>
 <h3 id="cb-form-edit-display" class="mb-3">
     <?php echo Text::_('COM_CONTENTBUILDERNG_TAB_EDIT_DISPLAY'); ?>
 </h3>

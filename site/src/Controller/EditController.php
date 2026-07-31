@@ -182,7 +182,15 @@ class EditController extends BaseController
             $this->getPermissionService()->setStoragePreviewPermissions($storageId, $this->frontend ? '_fe' : '');
         } elseif (in_array($taskAction, ['delete', 'state', 'publish', 'language'], true)) {
             $items = $this->siteApp->getInput()->get('cid', [], 'array');
-            $this->getPermissionService()->setPermissions($this->siteApp->getInput()->getInt('id', 0), $items, $this->frontend ? '_fe' : '');
+            $formId = (int) $this->siteApp->getInput()->getInt('id', 0);
+
+            // Direct-storage mode dispatches with storage_id and no form id;
+            // permissions still have to be computed against the backing form.
+            if ($formId <= 0 && $storageId > 0) {
+                $formId = (int) $this->getDirectStorageFormProvisioningService()->resolveOrCreateFormId($storageId);
+            }
+
+            $this->getPermissionService()->setPermissions($formId, $items, $this->frontend ? '_fe' : '');
         } else {
             if (!$isDirectStorageMode && $this->siteApp->getInput()->getCmd('record_id', '')) {
                 $this->getPermissionService()->setPermissions($this->siteApp->getInput()->getInt('id', 0), $this->siteApp->getInput()->getCmd('record_id', ''), $this->frontend ? '_fe' : '');
@@ -371,6 +379,10 @@ class EditController extends BaseController
 
     public function state()
     {
+        if (!$this->checkToken('post', false)) {
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
+        }
+
         // Never bypassed for an admin-preview session: the preview permission
         // set does not grant state changes, so this still correctly denies a
         // preview link from changing record state.
@@ -409,6 +421,13 @@ class EditController extends BaseController
 
     public function publish()
     {
+        // "request" (not "post"): the per-row publish toggle is a GET link, so
+        // the token is carried in the query string. The list template appends
+        // it via Session::getFormToken().
+        if (!$this->checkToken('request', false)) {
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
+        }
+
         $storageId = (int) $this->siteApp->getInput()->getInt('storage_id', 0);
         $isDirectStorageMode = $storageId > 0 && $this->siteApp->getInput()->getInt('id', 0) <= 0;
         // Never bypassed for an admin-preview session: both gates below are
@@ -466,6 +485,10 @@ class EditController extends BaseController
 
     public function language()
     {
+        if (!$this->checkToken('post', false)) {
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
+        }
+
         // Never bypassed for an admin-preview session: the preview permission
         // set does not grant language changes, so this still correctly
         // denies a preview link from changing record language.

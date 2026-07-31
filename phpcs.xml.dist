@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<ruleset name="ContentBuilderNG">
+    <description>PSR-12 coding standard for ContentBuilder NG (Joomla 6 / PHP 8.3).</description>
+
+    <file>admin/src</file>
+    <file>admin/layouts</file>
+    <file>admin/services</file>
+    <file>site/src</file>
+    <file>site/layouts</file>
+    <file>plugins</file>
+    <file>script.php</file>
+
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/build/*</exclude-pattern>
+    <exclude-pattern>*/coverage/*</exclude-pattern>
+
+    <!--
+        Legacy surface inherited from ContentBuilder/BreezingForms, queued for
+        decomposition in REFACTORING_PLAN.md chapters D, E and F. Sniffing it
+        today yields thousands of findings and drowns new work. Remove entries
+        here as each file is refactored.
+
+        Top-level exclude-pattern on purpose: nesting these inside
+        <rule ref="PSR12"> alongside a bare <rule ref="PSR12"/> silently
+        re-includes everything.
+    -->
+    <exclude-pattern>admin/src/types/*</exclude-pattern>
+    <exclude-pattern>site/src/Model/EditModel.php</exclude-pattern>
+    <exclude-pattern>site/src/Model/ListModel.php</exclude-pattern>
+    <exclude-pattern>site/src/View/Details/HtmlView.php</exclude-pattern>
+    <exclude-pattern>admin/src/Model/VerifyModel.php</exclude-pattern>
+    <exclude-pattern>plugins/content/contentbuilderng_download/*</exclude-pattern>
+    <exclude-pattern>plugins/content/contentbuilderng_image_scale/*</exclude-pattern>
+    <exclude-pattern>plugins/contentbuilderng_themes/*</exclude-pattern>
+
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+
+    <rule ref="PSR12"/>
+</ruleset>

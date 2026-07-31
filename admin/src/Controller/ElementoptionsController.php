@@ -21,8 +21,12 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\AdminController;
 use CB\Component\Contentbuilderng\Administrator\Model\ElementoptionsModel;
 
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
+
 class ElementoptionsController extends AdminController
 {
+    use ComponentAccessTrait;
+
     private function getElementoptionsModelForSave(): ElementoptionsModel
     {
         $model = $this->getModel('Elementoptions', 'Administrator', ['ignore_request' => true])

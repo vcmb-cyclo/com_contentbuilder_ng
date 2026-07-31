@@ -203,7 +203,7 @@ if ($this->page_heading) {
                     ?>
 
                     <td class="align-top">
-                        <?php echo $row->tag; ?>
+                        <?php echo htmlspecialchars((string) $row->tag, ENT_QUOTES, 'UTF-8'); ?>
                     </td>
 
                     <?php
@@ -315,7 +315,7 @@ if ($this->page_heading) {
     <input type="hidden" name="limitstart" value="" />
     <input type="hidden" name="boxchecked" value="0" />
     <input type="hidden" name="view" id="view" value="publicforms" />
-    <input type="hidden" name="filter_order" value="<?php echo $this->lists['order']; ?>" />
-    <input type="hidden" name="filter_order_Dir" value="<?php echo $this->lists['order_Dir']; ?>" />
+    <input type="hidden" name="filter_order" value="<?php echo htmlspecialchars((string) $this->lists['order'], ENT_QUOTES, 'UTF-8'); ?>" />
+    <input type="hidden" name="filter_order_Dir" value="<?php echo htmlspecialchars((string) $this->lists['order_Dir'], ENT_QUOTES, 'UTF-8'); ?>" />
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

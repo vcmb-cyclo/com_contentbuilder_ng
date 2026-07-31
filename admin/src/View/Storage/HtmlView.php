@@ -361,20 +361,15 @@ class HtmlView extends BaseHtmlView
                 ->listCheck(false)
                 ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_DATATABLE_SYNC_TIP')]);
 
-            $revealCsvPanelJs = "var tabBtn=document.querySelector('[data-bs-target=\"#tab1\"], [aria-controls=\"tab1\"]');"
-                . "if(tabBtn){tabBtn.click();}"
-                . "var csvBtn=document.getElementById('csvToggleButton');"
-                . "var csvPanel=document.getElementById('csvUpload');"
-                . "if(csvBtn){"
-                . "if(csvPanel && (csvPanel.style.display==='none' || getComputedStyle(csvPanel).display==='none')){csvBtn.click();}"
-                . "if(csvPanel){csvPanel.scrollIntoView({behavior:'smooth', block:'center'});}"
-                . "}"
-                . "return false;";
-            $updateChildToolbar->link(Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV'), '#csvUploadHead')
+            $csvUpdateUrl = Route::_(
+                'index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $id
+                    . '&tabStartOffset=tab1&csv_import=1#csvUploadHead',
+                false
+            );
+            $updateChildToolbar->link(Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV'), $csvUpdateUrl)
                 ->icon('fa fa-file-excel')
                 ->attributes([
                     'title' => Text::_('COM_CONTENTBUILDERNG_STORAGE_CSV_TOGGLE_TOOLTIP'),
-                    'onclick' => $revealCsvPanelJs,
                 ]);
             }
         }
