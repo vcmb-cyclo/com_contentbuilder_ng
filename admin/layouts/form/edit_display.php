@@ -64,7 +64,7 @@ $prepareEffectOptions = is_array($displayData['prepareEffectOptions'] ?? null) ?
         </div>
     </div>
     <?php if (empty($item->edit_by_type) || !$isBreezingFormsType) : ?>
-        <div class="col-12 col-xl-4 d-flex" id="cb-form-edit-create-sample-card-col">
+        <div class="col-12 col-xl-8 d-flex" id="cb-form-edit-create-sample-card-col">
             <div class="border rounded bg-body p-3 d-flex flex-column flex-grow-1" id="cb-form-edit-create-sample-card">
                 <h4 class="h6 text-body-secondary mb-2">
                     <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE'); ?>
@@ -78,8 +78,8 @@ $prepareEffectOptions = is_array($displayData['prepareEffectOptions'] ?? null) ?
                         <span class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></span>
                         <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE'); ?>
                     </button>
-                    <?php if (is_callable($renderCheckbox) && !empty($displayData['canLockTemplate'])) : ?>
-                        <div class="form-check mb-0">
+                    <?php if (is_callable($renderCheckbox)) : ?>
+                        <div class="form-check mb-0 ms-xl-auto flex-shrink-0 text-nowrap">
                             <input type="hidden" name="jform[editable_template_locked]" value="0" />
                             <?php echo $renderCheckbox('jform[editable_template_locked]', 'editable_template_locked', !empty($item->editable_template_locked)); ?>
                             <label class="form-check-label" for="editable_template_locked">

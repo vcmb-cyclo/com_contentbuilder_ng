@@ -487,27 +487,6 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         $activeViewTab = trim((string) $app->getInput()->getCmd('tab', ''));
         $allowedViewTabs = ['tab0', 'tab1', 'tab2', 'tab3', 'tab5', 'tab6', 'tab7', 'tab8', 'tab9', 'tab10'];
         $debugModeEnabled = !empty($this->item->debug_mode);
-        // The Edit-template lock follows the frontend permission gate used by the
-        // audit: an editable screen needs either "edit" or "new". The Details
-        // lock remains available independently so an administrator can keep that
-        // template synchronized before exposing the screen on the frontend.
-        $frontendPermissionConfig = is_array($this->item->config ?? null) ? $this->item->config : [];
-        $frontendPermissionGranted = static function (string $action) use ($frontendPermissionConfig): bool {
-            $config = $frontendPermissionConfig;
-
-            if (!empty($config['own_fe'][$action])) {
-                return true;
-            }
-
-            foreach ((array) ($config['permissions_fe'] ?? []) as $groupPermissions) {
-                if (is_array($groupPermissions) && !empty($groupPermissions[$action])) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-        $canLockEditableTemplate = $frontendPermissionGranted('edit') || $frontendPermissionGranted('new');
         // At-a-glance state of the two template tabs, so an empty template is
         // visible without opening the tab.
         $templateAuditReferences = [
@@ -574,7 +553,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             trim((string) ($this->item->editable_template ?? '')) !== '',
             $hasTemplateAuditIssue($templateAuditReferences['edit']),
             'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY',
-            $canLockEditableTemplate && !empty($this->item->editable_template_locked)
+            !empty($this->item->editable_template_locked)
         );
         if ($formId > 0 && $debugModeEnabled) {
             $allowedViewTabs[] = 'tab12';
@@ -872,7 +851,6 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 'item' => $this->item,
                 'form' => $this->form,
                 'renderCheckbox' => $renderCheckbox,
-                'canLockTemplate' => $canLockEditableTemplate,
                 'canEditByType' => $canEditByType,
                 'isBreezingFormsType' => $isBreezingFormsType,
                 'breezingFormsProvidedMessage' => $breezingFormsProvidedMessage,
