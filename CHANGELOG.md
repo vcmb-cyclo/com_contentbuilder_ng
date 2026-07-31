@@ -1,5 +1,22 @@
 # Changelog
 
+## 6.1.7-RC101 — 2026-07-31
+
+### Added
+
+- Added optional Details and Edit template locking, with regeneration from the source form on save.
+- Added a versioned schema migration for the template-lock columns.
+
+### Changed
+
+- Refined the form audit, editor layout, preview permissions hint, publication and debug indicators.
+- Refused editable-template generation only when it is requested and no published field is editable.
+
+### Fixed
+
+- Kept a failed locked-template regeneration from interrupting an otherwise valid form save.
+- Returned a controlled validation error when explicit editable-template generation cannot be completed.
+
 ## 6.1.7-RC97
 
 ### CBStats 6.1.7-RC96-B05
