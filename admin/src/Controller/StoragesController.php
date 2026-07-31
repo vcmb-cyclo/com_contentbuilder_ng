@@ -30,8 +30,14 @@ use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Input\Input;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\SafeErrorMessageTrait;
+
 final class StoragesController extends AdminController
 {
+    use ComponentAccessTrait;
+    use SafeErrorMessageTrait;
+
     /**
      * Nom de la vue liste et item (convention Joomla 6).
      */
@@ -115,7 +121,7 @@ final class StoragesController extends AdminController
                 'message'
             );
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
         }
 
         $this->setRedirect(

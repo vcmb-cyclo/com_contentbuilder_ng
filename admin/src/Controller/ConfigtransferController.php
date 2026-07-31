@@ -19,8 +19,12 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
+
 final class ConfigtransferController extends BaseController
 {
+    use ComponentAccessTrait;
+
     protected $default_view = 'configtransfer';
 
     private function getApp(): CMSApplicationInterface

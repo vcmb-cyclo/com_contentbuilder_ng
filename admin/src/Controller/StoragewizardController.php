@@ -29,6 +29,8 @@ use CB\Component\Contentbuilderng\Administrator\Service\DirectStorageFormProvisi
 use CB\Component\Contentbuilderng\Administrator\Service\StorageWizardService;
 use CB\Component\Contentbuilderng\Administrator\Service\ExternalTableService;
 
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\SafeErrorMessageTrait;
 /**
  * "Assistant" wizard: guides the admin from a blank Storage through fields
  * (CSV import or manual, reusing the existing Storage edit screen), a
@@ -42,6 +44,9 @@ use CB\Component\Contentbuilderng\Administrator\Service\ExternalTableService;
  */
 final class StoragewizardController extends BaseController
 {
+    use ComponentAccessTrait;
+    use SafeErrorMessageTrait;
+
     protected $default_view = 'storagewizard';
 
     private function getApp(): AdministratorApplication
@@ -514,7 +519,7 @@ final class StoragewizardController extends BaseController
                 ->resolveOrCreateFormId($storageId, 'thoth', true);
         } catch (\Throwable $e) {
             Logger::exception($e);
-            $this->redirectToWizard($e->getMessage(), 'error');
+            $this->redirectToWizard($this->safeErrorMessage($e), 'error');
 
             return;
         }
@@ -591,7 +596,7 @@ final class StoragewizardController extends BaseController
             $menuItemId = $this->createMenuItem($storageId, $menutype, $title, $parentId);
         } catch (\Throwable $e) {
             Logger::exception($e);
-            $this->redirectToWizard($e->getMessage(), 'error');
+            $this->redirectToWizard($this->safeErrorMessage($e), 'error');
 
             return;
         }

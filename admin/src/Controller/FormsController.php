@@ -36,8 +36,14 @@ use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Component\Contentbuilderng\Administrator\Model\FormModel;
 
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\SafeErrorMessageTrait;
+
 final class FormsController extends AdminController
 {
+    use ComponentAccessTrait;
+    use SafeErrorMessageTrait;
+
     /**
      * Nom de la vue liste et item (convention Joomla 6).
      */
@@ -158,7 +164,7 @@ final class FormsController extends AdminController
                 'message'
             );
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
         }
 
         $this->setRedirect('index.php?option=com_contentbuilderng&task=forms.display');
@@ -200,7 +206,7 @@ final class FormsController extends AdminController
                 'message'
             );
         } catch (\Throwable $e) {
-            $this->setMessage($e->getMessage(), 'warning');
+            $this->setMessage($this->safeErrorMessage($e), 'warning');
         }
 
         $this->setRedirect(
@@ -248,7 +254,7 @@ final class FormsController extends AdminController
                     )
                 );
             } catch (\Throwable $e) {
-                $this->setMessage($e->getMessage(), 'warning');
+                $this->setMessage($this->safeErrorMessage($e), 'warning');
             }
         }
 

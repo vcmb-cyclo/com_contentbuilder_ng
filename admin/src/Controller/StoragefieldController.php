@@ -28,8 +28,14 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\Language\Text;
 use CB\Component\Contentbuilderng\Administrator\Service\StorageFieldService;
 
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
+use CB\Component\Contentbuilderng\Administrator\Controller\Traits\SafeErrorMessageTrait;
+
 class StoragefieldController extends BaseController
 {
+    use ComponentAccessTrait;
+    use SafeErrorMessageTrait;
+
     private function getApp(): CMSApplicationInterface
     {
         $app = $this->app;
@@ -65,7 +71,7 @@ class StoragefieldController extends BaseController
         if (!$storageId) {
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&view=storages', false),
-                'Missing storage_id',
+                Text::_('COM_CONTENTBUILDERNG_ERROR_MISSING_STORAGE_ID'),
                 'error'
             );
             return false;
@@ -106,7 +112,7 @@ class StoragefieldController extends BaseController
         } catch (\Throwable $e) {
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),
-                $e->getMessage(),
+                $this->safeErrorMessage($e),
                 'error'
             );
             return false;
