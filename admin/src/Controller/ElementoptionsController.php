@@ -19,6 +19,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Controller;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\AdminController;
+use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use CB\Component\Contentbuilderng\Administrator\Model\ElementoptionsModel;
 use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
 
@@ -56,6 +57,10 @@ class ElementoptionsController extends AdminController
             }
 
             $component = $this->app->bootComponent('com_contentbuilderng');
+            if (!$component instanceof ContentbuilderngComponent) {
+                throw new \RuntimeException('Unexpected component instance');
+            }
+
             $service = $component->getContainer()->get(FormSupportService::class);
 
             return $service->resyncLockedTemplates($formId, (int) $this->app->getIdentity()->id);
