@@ -18,6 +18,7 @@
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -128,7 +129,10 @@ $labels = array_merge($reserved_labels, $labels);
 $col = 1;
 foreach ($labels as $label) {
     $cell = [$col++, 1];
-    $worksheet1->setCellValue($cell, $label);
+    // Always write as an explicit string: a value starting with "=", "+", "-"
+    // or "@" would otherwise be stored as a formula and executed by the
+    // spreadsheet application opening the export (CSV/XLSX injection).
+    $worksheet1->setCellValueExplicit($cell, (string) $label, DataType::TYPE_STRING);
     $worksheet1->getStyle($cell)->getFont()->setBold(true);
 }
 
@@ -181,7 +185,7 @@ foreach ((array) ($this->data->items ?? []) as $item) {
                     ]
                 ]);
             }
-            $worksheet1->setCellValue([$i++, $row], $result[0]);
+            $worksheet1->setCellValueExplicit([$i++, $row], (string) $result[0], DataType::TYPE_STRING);
         }
         else {
             $i++;
@@ -203,7 +207,12 @@ foreach ((array) ($this->data->items ?? []) as $item) {
  
     // Les autres colonnes.
     foreach ((array) ($this->data->visible_cols ?? []) as $id) {
-        $worksheet1->setCellValue([$i++, $row], $item->{"col$id"});          
+        $value = $item->{"col$id"} ?? '';
+        $worksheet1->setCellValueExplicit(
+            [$i++, $row],
+            is_scalar($value) ? (string) $value : '',
+            DataType::TYPE_STRING
+        );
     }
 
     $row++; // Passer à la ligne suivante pour chaque item
