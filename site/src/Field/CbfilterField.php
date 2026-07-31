@@ -33,10 +33,16 @@ class CbfilterField extends FormField
     protected function getInput()
     {
         $selectedFormId = (int) ($this->form?->getValue('form_id', 'params.settings', 0) ?? 0);
+        if ($selectedFormId <= 0) {
+            $selectedFormId = (int) ($this->form?->getValue('form_id', 'params', 0) ?? 0);
+        }
         if ($selectedFormId <= 0 && method_exists($this->form, 'getData')) {
             $data = $this->form->getData();
             if (is_object($data) && method_exists($data, 'get')) {
                 $selectedFormId = (int) $data->get('params.settings.form_id', 0);
+                if ($selectedFormId <= 0) {
+                    $selectedFormId = (int) $data->get('params.form_id', 0);
+                }
             }
         }
         if ($selectedFormId <= 0) {
@@ -78,7 +84,7 @@ class CbfilterField extends FormField
             foreach ($elements as $element) {
                 $referenceId = htmlspecialchars($element['reference_id'], ENT_QUOTES, 'UTF-8');
                 $out .= '<div class="mb-2"><label class="w-15">' . htmlspecialchars($element['label'], ENT_QUOTES, 'UTF-8') . '</label> <input class="form-control w-25" style="display:inline-block;" value="" type="text" onchange="contentbuilderng_addValue(\'' . $referenceId . '\',this.value);" name="element_' . $referenceId . '" id="element_' . $referenceId . '"/>';
-                $out .= ' <label class="ms-2 me-1" for="element_' . $referenceId . '_order">Ordre</label><input class="form-control w-10" style="display: inline-block;" value="" type="number" min="1" step="1" onchange="contentbuilderng_addOrderValue(\'' . $referenceId . '\',this.value);" name="element_' . $referenceId . '_order" id="element_' . $referenceId . '_order"/></div>';
+                $out .= ' <label class="ms-2 me-1" for="element_' . $referenceId . '_order">' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ORDER_LABEL'), ENT_QUOTES, 'UTF-8') . '</label><input class="form-control w-10" style="display: inline-block;" value="" type="number" min="1" step="1" onchange="contentbuilderng_addOrderValue(\'' . $referenceId . '\',this.value);" name="element_' . $referenceId . '_order" id="element_' . $referenceId . '_order"/></div>';
             }
         } else {
             $out .= '<br/><br/>' . Text::_('COM_CONTENTBUILDERNG_ADD_LIST_VIEW_SELECT_FORM_FIRST');
@@ -101,15 +107,21 @@ class CbfilterField extends FormField
 
                 var formField = contentbuilderng_findField([
                     "#jform_params_settings_form_id",
-                    "[name=\\"jform[params][settings][form_id]\\"]"
+                    "#jform_params_form_id",
+                    "[name=\\"jform[params][settings][form_id]\\"]",
+                    "[name=\\"jform[params][form_id]\\"]"
                 ]);
                 var hiddenFilterField = contentbuilderng_findField([
                     "#jform_params_settings_cb_list_filterhidden",
-                    "[name=\\"jform[params][settings][cb_list_filterhidden]\\"]"
+                    "#jform_params_cb_list_filterhidden",
+                    "[name=\\"jform[params][settings][cb_list_filterhidden]\\"]",
+                    "[name=\\"jform[params][cb_list_filterhidden]\\"]"
                 ]);
                 var hiddenOrderField = contentbuilderng_findField([
                     "#jform_params_settings_cb_list_orderhidden",
-                    "[name=\\"jform[params][settings][cb_list_orderhidden]\\"]"
+                    "#jform_params_cb_list_orderhidden",
+                    "[name=\\"jform[params][settings][cb_list_orderhidden]\\"]",
+                    "[name=\\"jform[params][cb_list_orderhidden]\\"]"
                 ]);
                 var currentFilterField = document.getElementById("' . $this->id . '");
                 var wrapper = document.getElementById("' . $wrapperId . '");
@@ -160,7 +172,7 @@ class CbfilterField extends FormField
                         var orderLabel = document.createElement("label");
                         orderLabel.className = "ms-2 me-1";
                         orderLabel.htmlFor = "element_" + referenceId + "_order";
-                        orderLabel.textContent = "Ordre";
+                        orderLabel.textContent = "' . addslashes(Text::_('COM_CONTENTBUILDERNG_ORDER_LABEL')) . '";
                         row.appendChild(orderLabel);
 
                         var order = document.createElement("input");

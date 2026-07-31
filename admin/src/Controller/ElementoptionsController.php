@@ -20,6 +20,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\Controller\AdminController;
 use CB\Component\Contentbuilderng\Administrator\Model\ElementoptionsModel;
+use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
 
 use CB\Component\Contentbuilderng\Administrator\Controller\Traits\ComponentAccessTrait;
 
@@ -37,6 +38,36 @@ class ElementoptionsController extends AdminController
         }
 
         return $model;
+    }
+
+    /**
+     * Regenerate templates locked to the source form after an element change.
+     *
+     * @return array<int, array{type: string, message: string}>
+     */
+    private function resyncLockedTemplatesAfterSave(ElementoptionsModel $model): array
+    {
+        try {
+            $element = $model->getData();
+            $formId = (int) ($element->form_id ?? 0);
+
+            if ($formId <= 0) {
+                return [];
+            }
+
+            $component = $this->app->bootComponent('com_contentbuilderng');
+            $service = $component->getContainer()->get(FormSupportService::class);
+
+            return $service->resyncLockedTemplates($formId, (int) $this->app->getIdentity()->id);
+        } catch (\Throwable $e) {
+            return [[
+                'type' => 'warning',
+                'message' => Text::sprintf(
+                    'COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_RESYNC_UNAVAILABLE',
+                    $e->getMessage()
+                ),
+            ]];
+        }
     }
 
     function display($cachable = false, $urlparams = array())
@@ -57,8 +88,12 @@ class ElementoptionsController extends AdminController
 
         if ($id) {
             $msg = Text::_('COM_CONTENTBUILDERNG_SAVED');
+            $resyncMessages = $this->resyncLockedTemplatesAfterSave($model);
+            $msgType = 'message';
         } else {
             $msg = Text::_('COM_CONTENTBUILDERNG_ERROR');
+            $resyncMessages = [];
+            $msgType = 'error';
         }
 
 
@@ -70,6 +105,13 @@ class ElementoptionsController extends AdminController
 
         // Check the table in so it can be edited.... we are done with it anyway
         $link = Route::_('index.php?option=com_contentbuilderng&view=elementoptions&tabStartOffset=' . $this->input->getInt('tabStartOffset', 0) . '&tmpl=component&element_id=' . $this->input->getInt('element_id', 0) . '&id=' . $this->input->getInt('id', 0) . $type_change_url, false);
-        $this->setRedirect($link, $msg);
+        $this->setRedirect($link, $msg, $msgType);
+
+        foreach ($resyncMessages as $resyncMessage) {
+            $this->app->enqueueMessage(
+                (string) ($resyncMessage['message'] ?? ''),
+                (string) ($resyncMessage['type'] ?? 'message')
+            );
+        }
     }
 }

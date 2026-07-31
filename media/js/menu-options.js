@@ -12,6 +12,7 @@
     const noLabel = options.noLabel || 'No';
     const defaultValueFormat = options.defaultValueFormat || 'Default value: %s';
     const initialFormId = String(options.initialFormId || '');
+    const menuRequiredText = options.menuRequiredText || 'Please select a menu before saving this menu item.';
 
     function findField(selectors) {
         for (const selector of selectors) {
@@ -64,6 +65,7 @@
     function findDescription(fieldName) {
         const described = findField([
             `#jform_params_settings_${fieldName}-desc`,
+            `#jform_params_${fieldName}-desc`,
         ]);
         if (described) {
             return described;
@@ -71,6 +73,7 @@
 
         const input = findField([
             `[name="jform[params][settings][${fieldName}]"]`,
+            `[name="jform[params][${fieldName}]"]`,
         ]);
         const group = input ? input.closest('.control-group, .form-group, .mb-3') : null;
 
@@ -80,8 +83,23 @@
     function findInput(fieldName) {
         return findField([
             `#jform_params_settings_${fieldName}`,
+            `#jform_params_${fieldName}`,
             `[name="jform[params][settings][${fieldName}]"]`,
+            `[name="jform[params][${fieldName}]"]`,
         ]);
+    }
+
+    function configureMenuValidation() {
+        const menuField = findField([
+            '#jform_menutype',
+            '[name="jform[menutype]"]',
+        ]);
+
+        if (!menuField) {
+            return;
+        }
+
+        menuField.dataset.validationText = menuRequiredText;
     }
 
     function findBadgeAnchor(fieldName) {
@@ -351,6 +369,7 @@
 
     function init() {
         styleMenuSectionHeadings();
+        configureMenuValidation();
         initResetButtons();
         updateDescriptions(initialFormId);
     }

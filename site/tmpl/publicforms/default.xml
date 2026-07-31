@@ -5,7 +5,7 @@
         <config>
             <fields name="params" addfieldprefix="CB\Component\Contentbuilderng\Site\Field">
                 <fieldset name="settings" group="settings" label="COM_CONTENTBUILDERNG_MENU_ITEM_LIST">
-                    <field required="true" multiple="multiple" type="multiforms" label="COM_CONTENTBUILDERNG_SELECT_VIEWS" description="COM_CONTENTBUILDERNG_SELECT_VIEWS_DESC" name="forms" default="0"/>
+                    <field required="true" message="COM_CONTENTBUILDERNG_SELECT_VIEW_REQUIRED" multiple="multiple" type="multiforms" label="COM_CONTENTBUILDERNG_SELECT_VIEWS" description="COM_CONTENTBUILDERNG_SELECT_VIEWS_DESC" name="forms" default="0"/>
                     <field type="cbmenureset" label="" description="" name="cb_menu_reset" />
                     <field type="note" label="COM_CONTENTBUILDERNG_MENU_OPTIONS_LIST" class="cb-menu-section-heading" />
                     <field name="cb_controller" type="hidden" default="publicforms" />
