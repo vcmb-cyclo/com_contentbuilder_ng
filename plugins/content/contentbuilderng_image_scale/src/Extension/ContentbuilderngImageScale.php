@@ -453,6 +453,13 @@ final class ContentbuilderngImageScale extends CMSPlugin implements SubscriberIn
 
 											$the_value = str_replace(array('{CBSite}', '{cbsite}'), JPATH_SITE, trim($the_files[$fcnt]));
 
+											// The path comes from stored record data: refuse anything
+											// resolving outside the site root before probing or
+											// serving it (arbitrary file read otherwise).
+											if ($the_value !== '' && !ContentbuilderngHelper::is_internal_path($the_value)) {
+												continue;
+											}
+
 											if ($the_value && ($width || $height)) {
 
 												$image = @getimagesize($the_value);
