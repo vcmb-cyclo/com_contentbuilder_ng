@@ -49,6 +49,22 @@ final class VersionConsistencyTest extends TestCase
                 . '.zip',
             $downloadUrl
         );
+
+        $expectedChangelogUrl = 'https://raw.githubusercontent.com/vcmb-cyclo/com_contentbuilderng/main/'
+            . 'com_contentbuilderng_changelog.xml';
+
+        self::assertSame(
+            $expectedChangelogUrl,
+            $this->readValue($this->root . '/com_contentbuilderng.xml', '/extension/changelogurl')
+        );
+        self::assertSame(
+            $expectedChangelogUrl,
+            $this->readValue($this->root . '/com_contentbuilderng_update.xml', '/updates/update/changelogurl')
+        );
+        self::assertSame(
+            $installVersion,
+            $this->readValue($this->root . '/com_contentbuilderng_changelog.xml', '/changelogs/changelog[1]/version')
+        );
     }
 
     public function testInstallCreationDateIsToday(): void

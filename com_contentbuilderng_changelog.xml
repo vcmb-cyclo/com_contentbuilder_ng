@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<changelogs>
+	<changelog>
+		<element>com_contentbuilderng</element>
+		<type>component</type>
+		<version>6.1.7-RC101</version>
+		<addition>
+			<item>Added optional Details and Edit template locking, with regeneration from the source form on save.</item>
+			<item>Added a versioned schema migration for the template-lock columns.</item>
+		</addition>
+		<change>
+			<item>Refined the form audit, editor layout, preview permissions hint, publication and debug indicators.</item>
+			<item>Editable-template generation is refused only when it is requested and no published field is editable.</item>
+		</change>
+		<fix>
+			<item>A failed locked-template regeneration now preserves the existing template without interrupting an otherwise valid form save.</item>
+			<item>Explicit editable-template generation now returns a controlled validation error when it cannot be completed.</item>
+		</fix>
+	</changelog>
+</changelogs>
