@@ -487,8 +487,24 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         $activeViewTab = trim((string) $app->getInput()->getCmd('tab', ''));
         $allowedViewTabs = ['tab0', 'tab1', 'tab2', 'tab3', 'tab5', 'tab6', 'tab7', 'tab8', 'tab9', 'tab10'];
         $debugModeEnabled = !empty($this->item->debug_mode);
-        // At-a-glance state of the two template tabs, so an empty template is
-        // visible without opening the tab.
+        $frontendPermissionConfig = is_array($this->item->config ?? null) ? $this->item->config : [];
+        $hasFrontendPermission = static function (string $action) use ($frontendPermissionConfig): bool {
+            if (!empty($frontendPermissionConfig['own_fe'][$action])) {
+                return true;
+            }
+
+            foreach ((array) ($frontendPermissionConfig['permissions_fe'] ?? []) as $groupPermissions) {
+                if (is_array($groupPermissions) && !empty($groupPermissions[$action])) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+        $detailsTemplateRequired = $hasFrontendPermission('view');
+        $editableTemplateRequired = $hasFrontendPermission('edit') || $hasFrontendPermission('new');
+        // At-a-glance state of the two template tabs. An empty template is only
+        // surfaced when frontend permissions make the corresponding screen useful.
         $templateAuditReferences = [
             'details' => [
                 'CBNG-AUDIT-TEMPLATES-EMPTY',
@@ -521,7 +537,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
             return false;
         };
-        $templateStateBadge = static function (bool $filled, bool $inconsistent, string $emptyTipKey, bool $locked = false): string {
+        $templateStateBadge = static function (
+            bool $filled,
+            bool $inconsistent,
+            string $emptyTipKey,
+            bool $required,
+            bool $locked = false
+        ): string {
             // A locked template is regenerated on every save, so the empty/filled
             // dot says nothing useful about it — show the lock instead.
             if ($locked) {
@@ -530,6 +552,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 return ' <span class="cb-template-state is-locked ms-1" aria-hidden="true" title="'
                     . htmlspecialchars($lockTip, ENT_QUOTES, 'UTF-8') . '"></span>'
                     . '<span class="visually-hidden">' . htmlspecialchars($lockTip, ENT_QUOTES, 'UTF-8') . '</span>';
+            }
+
+            if (!$filled && !$inconsistent && !$required) {
+                return '';
             }
 
             $tip = Text::_($inconsistent
@@ -543,18 +569,31 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 . ' ms-1" aria-hidden="true" title="' . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '"></span>'
                 . '<span class="visually-hidden">' . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '</span>';
         };
+        $neutralTabBadge = static function (bool $hasContent): string {
+            return $hasContent
+                ? ' <span class="cb-template-state is-neutral ms-1" aria-hidden="true"></span>'
+                : '';
+        };
         $detailsTemplateBadge = $templateStateBadge(
             trim((string) ($this->item->details_template ?? '')) !== '',
             $hasTemplateAuditIssue($templateAuditReferences['details']),
             'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY',
+            $detailsTemplateRequired,
             !empty($this->item->details_template_locked)
         );
         $editableTemplateBadge = $templateStateBadge(
             trim((string) ($this->item->editable_template ?? '')) !== '',
             $hasTemplateAuditIssue($templateAuditReferences['edit']),
             'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY',
+            $editableTemplateRequired,
             !empty($this->item->editable_template_locked)
         );
+        $emailTemplateBadge = $neutralTabBadge(
+            trim((string) ($this->item->email_admin_template ?? '')) !== ''
+                || trim((string) ($this->item->email_template ?? '')) !== ''
+        );
+        $listStatesBadge = $neutralTabBadge(!empty((array) ($this->item->list_states ?? [])));
+        $listIntroBadge = $neutralTabBadge(trim((string) ($this->item->intro_text ?? '')) !== '');
         if ($formId > 0 && $debugModeEnabled) {
             $allowedViewTabs[] = 'tab12';
             $allowedViewTabs[] = 'tab13';
@@ -798,7 +837,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             $componentLayoutBase
         );
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', $viewTabLabel('fa-regular fa-file-lines', 'COM_CONTENTBUILDERNG_LIST_INTRO_TEXT', 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_INTRO_TEXT'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', $viewTabLabel('fa-regular fa-file-lines', 'COM_CONTENTBUILDERNG_LIST_INTRO_TEXT', 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_INTRO_TEXT', $listIntroBadge));
         ?>
         <?php
         echo LayoutHelper::render(
@@ -809,7 +848,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             $componentLayoutBase
         );
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', $viewTabLabel('fa-solid fa-list-check', 'COM_CONTENTBUILDERNG_LIST_STATES', 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', $viewTabLabel('fa-solid fa-list-check', 'COM_CONTENTBUILDERNG_LIST_STATES', 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES', $listStatesBadge));
         ?>
         <?php
         echo LayoutHelper::render(
@@ -900,7 +939,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         ?>
         <?php
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab7', $viewTabLabel('fa-regular fa-envelope', 'COM_CONTENTBUILDERNG_EMAIL_TEMPLATES', 'COM_CONTENTBUILDERNG_TAB_TIP_EMAIL_TEMPLATES'));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab7', $viewTabLabel('fa-regular fa-envelope', 'COM_CONTENTBUILDERNG_EMAIL_TEMPLATES', 'COM_CONTENTBUILDERNG_TAB_TIP_EMAIL_TEMPLATES', $emailTemplateBadge));
         ?>
         <?php
         echo LayoutHelper::render(

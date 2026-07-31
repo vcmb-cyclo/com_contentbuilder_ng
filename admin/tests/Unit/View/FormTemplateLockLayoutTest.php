@@ -60,4 +60,97 @@ final class FormTemplateLockLayoutTest extends TestCase
             $formTemplate
         );
     }
+
+    public function testTemplateLockBadgeTakesPriorityOverDotStates(): void
+    {
+        $root = \dirname(__DIR__, 4);
+        $formTemplate = (string) \file_get_contents($root . '/admin/tmpl/form/edit.php');
+        $badgeStart = \strpos($formTemplate, '$templateStateBadge = static function');
+        $lockBranch = \strpos($formTemplate, 'if ($locked)', $badgeStart ?: 0);
+        $dotBranch = \strpos($formTemplate, '$tip = Text::_($inconsistent', $badgeStart ?: 0);
+
+        self::assertNotFalse($badgeStart);
+        self::assertNotFalse($lockBranch);
+        self::assertNotFalse($dotBranch);
+        self::assertLessThan($dotBranch, $lockBranch);
+        self::assertStringContainsString(
+            'cb-template-state is-locked',
+            $formTemplate
+        );
+    }
+
+    public function testEmptyTemplateDotRequiresMatchingFrontendPermission(): void
+    {
+        $root = \dirname(__DIR__, 4);
+        $formTemplate = (string) \file_get_contents($root . '/admin/tmpl/form/edit.php');
+
+        self::assertStringContainsString(
+            "\$detailsTemplateRequired = \$hasFrontendPermission('view')",
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            "\$editableTemplateRequired = \$hasFrontendPermission('edit') || \$hasFrontendPermission('new')",
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            'if (!$filled && !$inconsistent && !$required)',
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            "'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY',\n            \$detailsTemplateRequired,",
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            "'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY',\n            \$editableTemplateRequired,",
+            $formTemplate
+        );
+    }
+
+    public function testContentOnlyTabsUseNeutralDotsOnlyWhenConfigured(): void
+    {
+        $root = \dirname(__DIR__, 4);
+        $formTemplate = (string) \file_get_contents($root . '/admin/tmpl/form/edit.php');
+        $style = (string) \file_get_contents($root . '/media/css/form-edit.css');
+
+        self::assertStringContainsString(
+            '$neutralTabBadge = static function (bool $hasContent): string',
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            "trim((string) (\$this->item->email_admin_template ?? '')) !== ''",
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            "|| trim((string) (\$this->item->email_template ?? '')) !== ''",
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            "'COM_CONTENTBUILDERNG_TAB_TIP_EMAIL_TEMPLATES', \$emailTemplateBadge",
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            "\$listStatesBadge = \$neutralTabBadge(!empty((array) (\$this->item->list_states ?? [])))",
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            "'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES', \$listStatesBadge",
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            "\$listIntroBadge = \$neutralTabBadge(trim((string) (\$this->item->intro_text ?? '')) !== '')",
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            "'COM_CONTENTBUILDERNG_TAB_TIP_LIST_INTRO_TEXT', \$listIntroBadge",
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            '.cb-template-state.is-empty{border:',
+            $style
+        );
+        self::assertStringContainsString(
+            '.cb-template-state.is-neutral{background:',
+            $style
+        );
+    }
 }
