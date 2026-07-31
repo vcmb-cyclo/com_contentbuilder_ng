@@ -1156,6 +1156,14 @@ class contentbuilderng_com_contentbuilderng
         if ($tableName === '') {
             throw new \RuntimeException('Storage table name is empty for delete action.');
         }
+
+        // An owner-scoped permission cannot be enforced for a source without
+        // an ownership column. Refuse the operation before upload cleanup or
+        // any metadata cleanup in the caller can take place.
+        if ($restrictToUserId !== null && !$this->hasSourceColumn('user_id')) {
+            return false;
+        }
+
         // Defence in depth: when the caller only holds an owner-scoped delete
         // right, narrow the id list to rows the user actually owns before any
         // file cleanup or row deletion touches them.
