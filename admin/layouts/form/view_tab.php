@@ -30,23 +30,23 @@ if (!is_object($item) || !is_callable($formatTypeDisplay)) {
 ?>
 <fieldset id="cb-form-view-general" class="mb-3">
     <div class="row g-3 align-items-end mb-2">
-        <div class="col-12 col-lg-3">
-            <label for="name">
+        <div class="col-12 col-lg-4 d-flex flex-wrap flex-lg-nowrap align-items-center gap-2">
+            <label for="name" class="mb-0 text-nowrap">
                 <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_VIEW_NAME_TIP'); ?>"><b><?php echo Text::_('COM_CONTENTBUILDERNG_NAME'); ?>:</b></span>
             </label>
-            <input class="form-control form-control-sm" type="text" name="jform[name]" id="name" size="32"
-                style="max-width: 280px;" maxlength="255"
+            <input class="form-control form-control-sm flex-grow-1 cb-form-view-inline-input" type="text" name="jform[name]" id="name" size="32"
+                maxlength="255"
                 value="<?php echo htmlspecialchars($item->name ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
         </div>
-        <div class="col-12 col-lg-3">
-            <label for="tag">
+        <div class="col-12 col-lg-4 d-flex flex-wrap flex-lg-nowrap align-items-center gap-2">
+            <label for="tag" class="mb-0 text-nowrap">
                 <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_VIEW_TAG_TIP'); ?>"><b><?php echo Text::_('COM_CONTENTBUILDERNG_TAG'); ?>:</b></span>
             </label>
-            <input class="form-control form-control-sm" type="text" name="jform[tag]" id="tag" size="32"
-                style="max-width: 280px;" maxlength="255"
+            <input class="form-control form-control-sm flex-grow-1 cb-form-view-inline-input" type="text" name="jform[tag]" id="tag" size="32"
+                maxlength="255"
                 value="<?php echo htmlspecialchars($item->tag ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
         </div>
-        <div class="col-12 col-lg-3">
+        <div class="col-12 col-lg-4">
             <div class="d-flex align-items-center gap-2 flex-nowrap">
                 <label for="theme_plugin" class="mb-0">
                     <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_THEME_PLUGIN_TIP'); ?>"><b><?php echo Text::_('COM_CONTENTBUILDERNG_THEME_PLUGIN'); ?>:</b></span>
@@ -81,8 +81,8 @@ if (!is_object($item) || !is_callable($formatTypeDisplay)) {
         </select>
     <?php else : ?>
         <div></div>
-        <div class="alert d-flex flex-wrap align-items-end gap-3">
-            <div class="d-flex flex-wrap align-items-center gap-2">
+        <div class="alert py-2 mb-2 d-flex flex-wrap align-items-center gap-3" id="cb-form-view-source">
+            <div class="d-flex flex-grow-1 flex-wrap align-items-center gap-2 cb-form-view-source-details">
                 <label<?php echo !$item->reference_id ? ' for="cb_form_reference_select"' : ''; ?>>
                     <b><?php echo Text::_('COM_CONTENTBUILDERNG_FORM_SOURCE'); ?>:</b>
                 </label>

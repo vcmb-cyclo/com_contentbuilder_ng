@@ -342,6 +342,18 @@
         }, cbSaveAnimationDurationMs);
     }
 
+    function cbInitBootstrapTooltips(root) {
+        if (!window.bootstrap || typeof window.bootstrap.Tooltip !== 'function') {
+            return;
+        }
+
+        (root || document).querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+            if (!window.bootstrap.Tooltip.getInstance(el)) {
+                new window.bootstrap.Tooltip(el);
+            }
+        });
+    }
+
     function cbDismissTransientTooltips() {
         if (window.bootstrap && typeof window.bootstrap.Tooltip === 'function') {
             document.querySelectorAll('[data-bs-toggle="tooltip"], .hasTip, .editlinktip, .js-grid-item-action').forEach(function(el) {
@@ -2458,6 +2470,15 @@
             return;
         }
 
+        var sourcePanel = document.getElementById('cb-form-view-source');
+        var columnsControl = typeof toggleButton.closest === 'function'
+            ? toggleButton.closest('.cb-elements-columns-pending') : null;
+        if (sourcePanel && columnsControl && columnsControl.parentElement !== sourcePanel) {
+            sourcePanel.appendChild(columnsControl);
+            columnsControl.classList.remove('mb-2');
+            columnsControl.classList.add('ms-auto', 'mb-0', 'flex-shrink-0');
+        }
+
         var defaultState = config.buildDefaultState(checkboxes);
         var totalCount = checkboxes.length;
 
@@ -2539,6 +2560,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        cbInitBootstrapTooltips();
         cbInitColumnToggle({
             storageKey:        cbElementsColumnsStateKey,
             toggleId:          'cb-elements-columns-toggle',

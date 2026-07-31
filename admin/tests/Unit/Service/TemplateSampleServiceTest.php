@@ -23,6 +23,14 @@ final class TemplateSampleServiceTest extends TestCase
         self::assertNull($service->createEmailSample(1, null));
     }
 
+    public function testRejectsEditableSampleWithoutEditableFields(): void
+    {
+        $service = new TemplateSampleService(new Application(), new TemplateSampleDatabase([]));
+
+        $this->expectException(\RuntimeException::class);
+        $service->createEditableSample(7, new \stdClass(), 'thoth');
+    }
+
     public function testBuildsPlainEmailSampleAndSkipsHiddenFields(): void
     {
         $service = new TemplateSampleService(
@@ -116,6 +124,11 @@ final class TemplateSampleDatabase implements DatabaseInterface
 
     public function execute(): void
     {
+    }
+
+    public function loadResult(): mixed
+    {
+        return 0;
     }
 
     public function loadAssoc(): ?array

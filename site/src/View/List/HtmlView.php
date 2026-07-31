@@ -16,6 +16,7 @@ namespace CB\Component\Contentbuilderng\Site\View\List;
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
 
+use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use Joomla\CMS\Application\SiteApplication;
 use Joomla\CMS\Toolbar\ToolbarHelper;
@@ -40,6 +41,7 @@ class HtmlView extends BaseHtmlView
     public int $debug_show_filters = 0;
     public int $debug_show_cb_id = 0;
     public int $direct_storage_read_only = 0;
+    public bool $preview_list_access_configured = false;
     public float $render_time_ms = 0;
 
     private function getApp(): SiteApplication
@@ -62,6 +64,14 @@ class HtmlView extends BaseHtmlView
         // Get data from the model
         $subject = $this->get('Data');
         $this->applyEmbeddedFieldFilter($subject, $app);
+        $this->preview_list_access_configured = !empty($subject->direct_storage_mode);
+        if (!$this->preview_list_access_configured) {
+            $config = PackedDataHelper::decodePackedData((string) ($subject->config ?? ''), [], true);
+            $permissionsFe = is_array($config) ? (array) ($config['permissions_fe'] ?? []) : [];
+            $guestGroupId = (int) $app->get('guest_usergroup', 9);
+            $this->preview_list_access_configured = !empty($permissionsFe[1]['listaccess'])
+                || ($guestGroupId > 0 && !empty($permissionsFe[$guestGroupId]['listaccess']));
+        }
         $themePlugin = (string) ($subject->theme_plugin ?? '');
         if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
             $themePlugin = 'thoth';

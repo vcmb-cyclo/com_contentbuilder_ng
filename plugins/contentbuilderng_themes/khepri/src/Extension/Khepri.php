@@ -281,11 +281,13 @@ final class Khepri extends CMSPlugin implements SubscriberInterface
 			->where('form_id = ' . (int) $contentbuilderng_form_id);
 		$db->setQuery($checkEditable);
 		$hasEditable = (int) $db->loadResult() > 0;
-		if (!$hasEditable) {
-			$msg = Text::_('COM_CONTENTBUILDERNG_THEME_NO_EDITABLE_ELEMENTS');
-			Factory::getApplication()->enqueueMessage($msg, 'warning');
-			Log::add($msg, Log::WARNING, 'com_contentbuilderng');
-		}
+        if (!$hasEditable) {
+            if ($event instanceof Event) {
+                $this->pushEventResult($event, '');
+                return;
+            }
+            return '';
+        }
 		$out = '<table class="table table-striped align-middle"><tbody>' . "\n";
 		$names = $form->getElementNames();
 		$hidden = array();

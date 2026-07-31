@@ -245,6 +245,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_elements`
 --
 -- -- Publish --
 --   published                       1 = view is active; 0 = disabled.
+--   details_template_locked          1 = regenerate the details template on every save.
+--   editable_template_locked         1 = regenerate the edit template on every save.
 --   debug_mode                      1 = enable view-specific frontend debugging.
 --   debug_show_bf_id                1 = show the BreezingForms record ID column.
 --   debug_enable_logs               1 = write a CBNG entry for frontend requests.
@@ -263,8 +265,10 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_forms`
     `tag`                                 varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `title`                               varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `details_template`                    longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `details_template_locked`             tinyint(1)   NOT NULL DEFAULT '0',
     `details_prepare`                     longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `editable_template`                   longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `editable_template_locked`            tinyint(1)   NOT NULL DEFAULT '0',
     `editable_prepare`                    longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `created`                             datetime     NULL DEFAULT CURRENT_TIMESTAMP,
     `modified`                            datetime     NULL DEFAULT NULL,

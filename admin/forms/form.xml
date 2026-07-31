@@ -455,6 +455,21 @@
       <option value="1">JYES</option>
     </field>
 
+    <!-- Keep the generated template in sync with the source form on every save -->
+    <field name="details_template_locked"
+           type="checkbox"
+           default="0"
+           filter="intval">
+      <option value="1">JYES</option>
+    </field>
+
+    <field name="editable_template_locked"
+           type="checkbox"
+           default="0"
+           filter="intval">
+      <option value="1">JYES</option>
+    </field>
+
     <field name="email_create_sample"
            type="checkbox"
            default="0"

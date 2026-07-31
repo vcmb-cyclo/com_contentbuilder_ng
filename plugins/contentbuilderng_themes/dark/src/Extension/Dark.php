@@ -251,10 +251,7 @@ final class Dark extends CMSPlugin implements SubscriberInterface
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $elementTypes = $this->fetchElementTypes($db, $contentbuilderng_form_id, true);
         if ($elementTypes === []) {
-            $msg = Text::_('COM_CONTENTBUILDERNG_THEME_NO_EDITABLE_ELEMENTS');
-            Factory::getApplication()->enqueueMessage($msg, 'warning');
-            Log::add($msg, Log::WARNING, 'com_contentbuilderng');
-            $elementTypes = $this->fetchElementTypes($db, $contentbuilderng_form_id, false);
+            return '';
         }
 
         $out = "\n";

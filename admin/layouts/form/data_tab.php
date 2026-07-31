@@ -51,14 +51,6 @@ $sourceTitle = trim((string) ($data['source_title'] ?? ''));
                     <?php echo (int) ($data['elements_editable'] ?? 0); ?> <?php echo Text::_('COM_CONTENTBUILDERNG_EDITABLE'); ?>)
                 </td>
             </tr>
-            <tr>
-                <th scope="row"><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_PUBLISHED'); ?></th>
-                <td><?php echo !empty($data['published']) ? Text::_('JYES') : Text::_('JNO'); ?></td>
-            </tr>
-            <tr>
-                <th scope="row"><?php echo Text::_('COM_CONTENTBUILDERNG_AUDIT_INFO_DEBUG'); ?></th>
-                <td><?php echo !empty($data['debug_mode']) ? Text::_('JYES') : Text::_('JNO'); ?></td>
-            </tr>
         </tbody>
     </table>
 </div>

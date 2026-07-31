@@ -343,7 +343,7 @@ if ($themeJs !== '') {
         ?>
     <?php endif; ?>
     <?php if ($isAdminPreview || $directStorageMode): ?>
-        <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div class="alert alert-warning cbPreviewBanner d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
             <span>
                 <span class="icon-eye icon-fw" aria-hidden="true"></span>
                 <?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW_MODE') . ' - ' . Text::sprintf($directStorageMode ? 'COM_CONTENTBUILDERNG_PREVIEW_CURRENT_STORAGE' : 'COM_CONTENTBUILDERNG_PREVIEW_CURRENT_FORM', $previewFormName); ?>

@@ -47,6 +47,8 @@ final class FormDisplayColumnsHelper
             'debug_show_permissions' => 'TINYINT(1) NOT NULL DEFAULT 0',
             'debug_show_filters' => 'TINYINT(1) NOT NULL DEFAULT 0',
             'debug_show_cb_id' => 'TINYINT(1) NOT NULL DEFAULT 0',
+            'details_template_locked' => 'TINYINT(1) NOT NULL DEFAULT 0',
+            'editable_template_locked' => 'TINYINT(1) NOT NULL DEFAULT 0',
         ];
     }
 
