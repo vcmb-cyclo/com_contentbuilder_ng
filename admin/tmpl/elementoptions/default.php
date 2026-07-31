@@ -208,16 +208,24 @@ $typeIconMap = [
             <button
                 type="button"
                 id="cb-elementoptions-reset"
-                class="btn btn-sm btn-secondary">
+                class="btn btn-sm btn-secondary"
+                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ELEMENTOPTIONS_RESET_CONFIRM'), ENT_QUOTES, 'UTF-8'); ?>"
+                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ELEMENTOPTIONS_RESET_CONFIRM'), ENT_QUOTES, 'UTF-8'); ?>">
                 <span class="fa-solid fa-rotate-left me-1" aria-hidden="true"></span>
                 <?php echo Text::_('COM_CONTENTBUILDERNG_RESET'); ?>
             </button>
             <script>
             document.getElementById('cb-elementoptions-reset').addEventListener('click', function() {
-                var select = document.getElementById('validations');
-                if (select) {
-                    Array.prototype.forEach.call(select.options, function(opt) { opt.selected = false; });
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                var form = document.getElementById('adminForm');
+                if (!form || !window.confirm(<?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_ELEMENTOPTIONS_RESET_CONFIRM'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>)) {
+                    return;
+                }
+
+                form.reset();
+
+                var typeSelect = document.getElementById('type_selection');
+                if (typeSelect) {
+                    typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
                 }
 
                 ['custom_validation_script', 'custom_init_script', 'custom_action_script'].forEach(function(name) {
@@ -226,26 +234,19 @@ $typeIconMap = [
                         && window.Joomla.editors.instances
                         ? window.Joomla.editors.instances[name]
                         : null;
+                    var field = document.getElementById(name);
+                    var initialValue = field ? field.value : '';
 
                     if (editor && typeof editor.setValue === 'function') {
-                        editor.setValue('');
+                        editor.setValue(initialValue);
                         return;
                     }
 
-                    var field = document.getElementById(name);
                     if (field) {
-                        field.value = '';
                         field.dispatchEvent(new Event('input', { bubbles: true }));
                         field.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 });
-
-                var validationMessage = document.getElementById('validation_message');
-                if (validationMessage) {
-                    validationMessage.value = '';
-                    validationMessage.dispatchEvent(new Event('input', { bubbles: true }));
-                    validationMessage.dispatchEvent(new Event('change', { bubbles: true }));
-                }
             });
             </script>
         </div>
