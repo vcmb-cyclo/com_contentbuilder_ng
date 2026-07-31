@@ -21,7 +21,6 @@ use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
-use Joomla\CMS\Router\Route;
 use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 
@@ -96,12 +95,6 @@ $typeIconMap = [
     'hidden' => 'fa-solid fa-eye-slash',
     'captcha' => 'fa-solid fa-shield-halved',
 ];
-$resetUrl = Route::_(
-    'index.php?option=com_contentbuilderng&view=elementoptions&tmpl=component&element_id='
-    . (int) ($this->element->id ?? 0)
-    . '&id=' . (int) ($this->element->form_id ?? 0),
-    false
-);
 ?>
 
 <form action="index.php" method="post" name="adminForm" id="adminForm">
@@ -224,12 +217,35 @@ $resetUrl = Route::_(
                 var select = document.getElementById('validations');
                 if (select) {
                     Array.prototype.forEach.call(select.options, function(opt) { opt.selected = false; });
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
                 }
+
                 ['custom_validation_script', 'custom_init_script', 'custom_action_script'].forEach(function(name) {
-                    if (Joomla && Joomla.editors && Joomla.editors.instances && Joomla.editors.instances[name]) {
-                        Joomla.editors.instances[name].setValue('');
+                    var editor = window.Joomla
+                        && window.Joomla.editors
+                        && window.Joomla.editors.instances
+                        ? window.Joomla.editors.instances[name]
+                        : null;
+
+                    if (editor && typeof editor.setValue === 'function') {
+                        editor.setValue('');
+                        return;
+                    }
+
+                    var field = document.getElementById(name);
+                    if (field) {
+                        field.value = '';
+                        field.dispatchEvent(new Event('input', { bubbles: true }));
+                        field.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 });
+
+                var validationMessage = document.getElementById('validation_message');
+                if (validationMessage) {
+                    validationMessage.value = '';
+                    validationMessage.dispatchEvent(new Event('input', { bubbles: true }));
+                    validationMessage.dispatchEvent(new Event('change', { bubbles: true }));
+                }
             });
             </script>
         </div>
