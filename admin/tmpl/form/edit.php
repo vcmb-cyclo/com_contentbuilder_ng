@@ -593,7 +593,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 || trim((string) ($this->item->email_template ?? '')) !== ''
         );
         $listStatesBadge = $neutralTabBadge(!empty((array) ($this->item->list_states ?? [])));
+        if ($listStatesBadge === '' && $this->form) {
+            $listStatesBadge = $neutralTabBadge(!empty((array) $this->form->getValue('list_states')));
+        }
         $listIntroBadge = $neutralTabBadge(trim((string) ($this->item->intro_text ?? '')) !== '');
+        if ($listIntroBadge === '' && $this->form) {
+            $listIntroBadge = $neutralTabBadge(trim((string) $this->form->getValue('intro_text')) !== '');
+        }
         if ($formId > 0 && $debugModeEnabled) {
             $allowedViewTabs[] = 'tab12';
             $allowedViewTabs[] = 'tab13';
@@ -872,6 +878,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             [
                 'item' => $this->item,
                 'form' => $this->form,
+                'templateAuditChecks' => $templateAuditChecks,
+                'templateAuditReferences' => $templateAuditReferences['details'],
                 'renderCheckbox' => $renderCheckbox,
                 'editablePrepareSnippetOptions' => $editablePrepareSnippetOptions,
                 'prepareEffectOptions' => $prepareEffectOptions,
@@ -889,6 +897,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             [
                 'item' => $this->item,
                 'form' => $this->form,
+                'templateAuditChecks' => $templateAuditChecks,
+                'templateAuditReferences' => $templateAuditReferences['edit'],
                 'renderCheckbox' => $renderCheckbox,
                 'canEditByType' => $canEditByType,
                 'isBreezingFormsType' => $isBreezingFormsType,

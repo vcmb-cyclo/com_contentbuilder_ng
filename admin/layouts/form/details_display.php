@@ -21,6 +21,8 @@ $form = $displayData['form'] ?? null;
 $renderCheckbox = $displayData['renderCheckbox'] ?? null;
 $editablePrepareSnippetOptions = is_array($displayData['editablePrepareSnippetOptions'] ?? null) ? $displayData['editablePrepareSnippetOptions'] : [];
 $prepareEffectOptions = is_array($displayData['prepareEffectOptions'] ?? null) ? $displayData['prepareEffectOptions'] : [];
+$templateAuditChecks = (array) ($displayData['templateAuditChecks'] ?? []);
+$templateAuditReferences = (array) ($displayData['templateAuditReferences'] ?? []);
 
 $detailsDefaults = [
     'cb_show_details_top_bar' => 1,
@@ -47,6 +49,10 @@ $items["COUNT"]["value"] = (is_numeric((string) $items["COUNT"]["value"]) && (fl
 $items["DATE_LABEL"]["label"] = (string) $items["DATE_LABEL"]["label"] . " (" . date("Y-m-d") . ")";
 TXT;
 ?>
+<?php echo LayoutHelper::render('form.template_audit_errors', [
+    'auditChecks' => $templateAuditChecks,
+    'references' => $templateAuditReferences,
+]); ?>
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
     <h3 id="cb-form-details-display" class="mb-0">
         <?php echo Text::_('COM_CONTENTBUILDERNG_TAB_DETAILS_DISPLAY'); ?>

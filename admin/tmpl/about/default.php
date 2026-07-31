@@ -195,7 +195,6 @@ foreach ($auditErrors as $auditError) {
 
     $warningDetail = '';
     $warningLinkUrl = '';
-    $warningLinkLabel = '';
     $warningStorageId = 0;
     $warningRepairAvailable = false;
     $storageTableNotFoundMatch = [];
@@ -223,10 +222,6 @@ foreach ($auditErrors as $auditError) {
                 'index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $storageIdLabel,
                 false
             );
-            $warningLinkLabel = Text::sprintf(
-                'COM_CONTENTBUILDERNG_ABOUT_AUDIT_WARNING_STORAGE_TABLE_NOT_FOUND_LINK',
-                $storageIdLabel
-            );
         }
     }
 
@@ -234,7 +229,6 @@ foreach ($auditErrors as $auditError) {
         'summary' => $warningText,
         'detail' => $warningDetail,
         'link_url' => $warningLinkUrl,
-        'link_label' => $warningLinkLabel,
         'storage_id' => $warningStorageId,
         'repair_available' => $warningRepairAvailable,
     ];

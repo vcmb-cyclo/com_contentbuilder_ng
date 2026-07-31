@@ -430,12 +430,22 @@ use Joomla\CMS\Router\Route;
                             <?php foreach ($missingAuditColumns as $missingAuditColumn) :
                                 $missingAuditColumnNames = (array) ($missingAuditColumn['missing'] ?? []);
                                 $missingAuditColumnIsId = in_array('id', $missingAuditColumnNames, true);
+                                $missingAuditColumnStorageId = (int) ($missingAuditColumn['storage_id'] ?? 0);
+                                $missingAuditColumnStorageName = (string) ($missingAuditColumn['storage_name'] ?? '');
                             ?>
                                 <tr class="<?php echo $missingAuditColumnIsId ? 'table-danger' : ''; ?>">
                                     <td><?php echo $missingAuditColumnRowNumber++; ?></td>
                                     <td><?php echo htmlspecialchars((string) ($missingAuditColumn['table'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
-                                    <td><?php echo (int) ($missingAuditColumn['storage_id'] ?? 0); ?></td>
-                                    <td><?php echo htmlspecialchars((string) ($missingAuditColumn['storage_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo $missingAuditColumnStorageId; ?></td>
+                                    <td>
+                                        <?php if ($missingAuditColumnStorageId > 0) : ?>
+                                            <a href="<?php echo htmlspecialchars(Route::_('index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $missingAuditColumnStorageId, false), ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
+                                                <?php echo htmlspecialchars($missingAuditColumnStorageName, ENT_QUOTES, 'UTF-8'); ?>
+                                            </a>
+                                        <?php else : ?>
+                                            <?php echo htmlspecialchars($missingAuditColumnStorageName, ENT_QUOTES, 'UTF-8'); ?>
+                                        <?php endif; ?>
+                                    </td>
                                     <td><?php echo Text::_((int) ($missingAuditColumn['bytable'] ?? 0) > 0 ? 'JYES' : 'JNO'); ?></td>
                                     <td>
                                         <?php echo htmlspecialchars(implode(', ', array_diff($missingAuditColumnNames, ['id'])), ENT_QUOTES, 'UTF-8'); ?>
@@ -1030,11 +1040,13 @@ use Joomla\CMS\Router\Route;
                                             <ul class="mb-0 ps-3">
                                                 <?php foreach ($formAuditChecks as $formAuditCheck) : ?>
                                                     <?php if ((string) ($formAuditCheck['status'] ?? '') === 'ok') { continue; } ?>
-                                                    <?php $formAuditReference = trim((string) ($formAuditCheck['reference'] ?? '')); ?>
+                                                        <?php $formAuditReference = trim((string) ($formAuditCheck['reference'] ?? '')); ?>
                                                     <li>
                                                         <?php echo htmlspecialchars((string) ($formAuditCheck['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
                                                         <?php if ($formAuditReference !== '') : ?>
-                                                            <small class="d-block text-muted"><?php echo htmlspecialchars(Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_REFERENCE', $formAuditReference), ENT_QUOTES, 'UTF-8'); ?></small>
+                                                            <small class="d-block text-muted" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_AUDIT_REFERENCE_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                <?php echo htmlspecialchars(Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_REFERENCE', $formAuditReference), ENT_QUOTES, 'UTF-8'); ?>
+                                                            </small>
                                                         <?php endif; ?>
                                                         <?php if ((string) ($formAuditCheck['code'] ?? '') === 'theme_empty' && $formId > 0) : ?>
                                                             <button
@@ -1818,30 +1830,42 @@ use Joomla\CMS\Router\Route;
                     <?php foreach ($auditWarnings as $auditWarning) : ?>
                         <div class="alert alert-warning cb-audit-warning-alert mb-0">
                             <div class="cb-audit-warning-content">
-                            <span class="cb-audit-warning-title"><?php echo htmlspecialchars((string) ($auditWarning['summary'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                            <?php
+                            $auditWarningSummary = htmlspecialchars((string) ($auditWarning['summary'] ?? ''), ENT_QUOTES, 'UTF-8');
+                            $auditWarningStorageId = (int) ($auditWarning['storage_id'] ?? 0);
+                            if ($auditWarningStorageId > 0 && !empty($auditWarning['link_url'])) {
+                                $auditWarningStoragePattern = '/\b[^\s]+\s+#' . $auditWarningStorageId . '\b/u';
+                                $auditWarningSummary = preg_replace_callback(
+                                    $auditWarningStoragePattern,
+                                    static fn(array $matches): string => '<a href="'
+                                        . htmlspecialchars((string) $auditWarning['link_url'], ENT_QUOTES, 'UTF-8')
+                                        . '" target="_blank" rel="noopener noreferrer">'
+                                        . $matches[0]
+                                        . '</a>',
+                                    $auditWarningSummary,
+                                    1
+                                ) ?? $auditWarningSummary;
+                            }
+                            ?>
+                            <span class="cb-audit-warning-title"><?php echo $auditWarningSummary; ?></span>
                             <?php if (!empty($auditWarning['detail']) || !empty($auditWarning['link_url'])) : ?>
                                 <span class="cb-audit-warning-help">
                                     <?php if (!empty($auditWarning['detail'])) : ?>
                                         <?php echo htmlspecialchars((string) $auditWarning['detail'], ENT_QUOTES, 'UTF-8'); ?>
                                     <?php endif; ?>
-                                    <?php if (!empty($auditWarning['link_url'])) : ?>
+                                    <?php if (!empty($auditWarning['repair_available']) && $auditWarningStorageId > 0) : ?>
                                         <?php if (!empty($auditWarning['detail'])) : ?><br><?php endif; ?>
-                                        <a class="cb-audit-warning-link" href="<?php echo htmlspecialchars((string) $auditWarning['link_url'], ENT_QUOTES, 'UTF-8'); ?>">
-                                            <?php echo htmlspecialchars((string) ($auditWarning['link_label'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
-                                        </a>
-                                        <?php if (!empty($auditWarning['repair_available']) && (int) ($auditWarning['storage_id'] ?? 0) > 0) : ?>
                                             <button
                                                 type="button"
                                                 class="btn btn-sm btn-warning ms-2"
                                                 data-cb-audit-ajax-task="about.repairMissingStorageTable"
                                                 data-cb-audit-ajax-field="repair_storage_id"
-                                                data-cb-audit-ajax-value="<?php echo (int) $auditWarning['storage_id']; ?>"
+                                                data-cb-audit-ajax-value="<?php echo $auditWarningStorageId; ?>"
                                                 title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
                                                 aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR'), ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-bs-toggle="tooltip"
                                                 data-bs-placement="top"
                                             ><span class="fa-solid fa-wrench me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STORAGE_TABLE_REPAIR'); ?></button>
-                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </span>
                             <?php endif; ?>
