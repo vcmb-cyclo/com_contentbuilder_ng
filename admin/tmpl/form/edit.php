@@ -487,9 +487,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         $activeViewTab = trim((string) $app->getInput()->getCmd('tab', ''));
         $allowedViewTabs = ['tab0', 'tab1', 'tab2', 'tab3', 'tab5', 'tab6', 'tab7', 'tab8', 'tab9', 'tab10'];
         $debugModeEnabled = !empty($this->item->debug_mode);
-        // A template only matters when the frontend can actually reach the view it
-        // renders, so the lock option follows the same permission gate the audit
-        // uses: details needs "view", edit needs "edit" or "new".
+        // The Edit-template lock follows the frontend permission gate used by the
+        // audit: an editable screen needs either "edit" or "new". The Details
+        // lock remains available independently so an administrator can keep that
+        // template synchronized before exposing the screen on the frontend.
         $frontendPermissionConfig = is_array($this->item->config ?? null) ? $this->item->config : [];
         $frontendPermissionGranted = static function (string $action) use ($frontendPermissionConfig): bool {
             $config = $frontendPermissionConfig;
@@ -506,7 +507,6 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
             return false;
         };
-        $canLockDetailsTemplate = $frontendPermissionGranted('view');
         $canLockEditableTemplate = $frontendPermissionGranted('edit') || $frontendPermissionGranted('new');
         // At-a-glance state of the two template tabs, so an empty template is
         // visible without opening the tab.
@@ -568,7 +568,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             trim((string) ($this->item->details_template ?? '')) !== '',
             $hasTemplateAuditIssue($templateAuditReferences['details']),
             'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY',
-            $canLockDetailsTemplate && !empty($this->item->details_template_locked)
+            !empty($this->item->details_template_locked)
         );
         $editableTemplateBadge = $templateStateBadge(
             trim((string) ($this->item->editable_template ?? '')) !== '',
@@ -855,7 +855,6 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 'item' => $this->item,
                 'form' => $this->form,
                 'renderCheckbox' => $renderCheckbox,
-                'canLockTemplate' => $canLockDetailsTemplate,
                 'editablePrepareSnippetOptions' => $editablePrepareSnippetOptions,
                 'prepareEffectOptions' => $prepareEffectOptions,
             ],

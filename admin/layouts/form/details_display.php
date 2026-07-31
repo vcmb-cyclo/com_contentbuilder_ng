@@ -112,7 +112,7 @@ TXT;
                     <span class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></span>
                     <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE'); ?>
                 </button>
-                <?php if (is_callable($renderCheckbox) && !empty($displayData['canLockTemplate'])) : ?>
+                <?php if (is_callable($renderCheckbox)) : ?>
                     <div class="form-check mb-0">
                         <input type="hidden" name="jform[details_template_locked]" value="0" />
                         <?php echo $renderCheckbox('jform[details_template_locked]', 'details_template_locked', !empty($item->details_template_locked)); ?>
