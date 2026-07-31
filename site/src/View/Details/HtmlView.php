@@ -352,7 +352,12 @@ class HtmlView extends BaseHtmlView
 			$dispatcher = $app->getDispatcher();
 		$dispatcher->dispatch(
 			'onContentPrepare',
-			new ContentPrepareEvent('onContentPrepare', ['com_content.article', &$table, &$registry, $limitstart])
+			new ContentPrepareEvent('onContentPrepare', [
+				'context' => 'com_content.article',
+				'subject' => $table,
+				'params'  => $registry,
+				'page'    => $limitstart,
+			])
 		);
 
 		// After title
