@@ -3,7 +3,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.7-RC104</version>
+		<version>6.1.7-RC105</version>
 		<addition>
 			<item>Added native DATE, DATETIME, INTEGER, DECIMAL and BOOLEAN controls and validation to direct Storage forms.</item>
 			<item>Added inline Storage field title, SQL type, size and required-state editing, backed by the 6.1.7.104 schema migration.</item>
