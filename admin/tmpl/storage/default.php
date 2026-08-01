@@ -1145,6 +1145,71 @@ function cbSubmitFieldRequiredUpdate(fieldId, required, onSuccess, onError) {
         });
 }
 
+function cbSubmitFieldTitleUpdate(fieldId, title, onSuccess, onError) {
+    var form = document.getElementById('adminForm') || document.adminForm;
+    var formData = new FormData(form);
+    formData.set('option', 'com_contentbuilderng');
+    formData.set('cb_ajax', '1');
+    formData.set('task', 'storage.ajax_update_field_title');
+    formData.set('field_id', String(fieldId));
+    formData.set('title', title);
+
+    fetch('index.php', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(function (response) { return response.json(); })
+        .then(function (payload) {
+            if (!payload.success) {
+                throw new Error(payload.message || '');
+            }
+            if (typeof onSuccess === 'function') {
+                onSuccess();
+            }
+        })
+        .catch(function (error) {
+            if (typeof onError === 'function') {
+                onError(error);
+            }
+        });
+}
+
+function initStorageFieldTitleInput() {
+    document.addEventListener('change', function (event) {
+        var input = event.target;
+        if (!input || !input.classList || !input.classList.contains('cb-storage-field-title-input')) {
+            return;
+        }
+
+        var previousValue = input.dataset.previousValue || '';
+        var nextValue = input.value.trim();
+        var fieldId = parseInt(input.dataset.fieldId || '0', 10);
+
+        if (nextValue === previousValue) {
+            input.value = nextValue;
+            return;
+        }
+
+        input.disabled = true;
+        cbSubmitFieldTitleUpdate(fieldId, nextValue, function () {
+            input.value = nextValue;
+            input.dataset.previousValue = nextValue;
+            var row = input.closest('tr');
+            var hiddenTitle = row ? row.querySelector('input[name="itemTitles[' + fieldId + ']"]') : null;
+            if (hiddenTitle) {
+                hiddenTitle.value = nextValue;
+            }
+            input.disabled = false;
+        }, function (error) {
+            input.value = previousValue;
+            input.disabled = false;
+            window.alert((error && error.message) || cbSaveFailedMessage);
+        });
+    });
+}
+
 function initStorageFieldRequiredToggle() {
     document.addEventListener('click', function (event) {
         var toggle = typeof event.target.closest === 'function'
@@ -1201,7 +1266,8 @@ function initStorageFieldTypeSelect() {
             if (sizeCell) {
                 if (supportsSize) {
                     sizeCell.innerHTML = '<input type="number" min="1" class="form-control form-control-sm cb-storage-field-size-input" '
-                        + 'data-field-id="' + fieldId + '" style="width:6rem;" value="' + defaultSize + '">';
+                        + 'data-field-id="' + fieldId + '" data-sql-type="' + sqlType + '" data-previous-value="' + defaultSize + '" '
+                        + 'style="width:6rem;" value="' + defaultSize + '">';
                 } else {
                     sizeCell.innerHTML = '&mdash;';
                 }
@@ -1226,7 +1292,8 @@ function initStorageFieldTypeSelect() {
 
         var sizeRow = sizeInputChanged.closest('tr');
         var typeSelect = sizeRow ? sizeRow.querySelector('.cb-storage-field-type-select') : null;
-        if (!typeSelect) {
+        var sizeSqlType = typeSelect ? typeSelect.value : (sizeInputChanged.dataset.sqlType || '');
+        if (!sizeSqlType) {
             return;
         }
 
@@ -1234,7 +1301,7 @@ function initStorageFieldTypeSelect() {
         var previousSize = sizeInputChanged.dataset.previousValue || sizeInputChanged.value;
         sizeInputChanged.disabled = true;
 
-        cbSubmitFieldTypeUpdate(sizeFieldId, typeSelect.value, sizeInputChanged.value, function () {
+        cbSubmitFieldTypeUpdate(sizeFieldId, sizeSqlType, sizeInputChanged.value, function () {
             sizeInputChanged.dataset.previousValue = sizeInputChanged.value;
             sizeInputChanged.disabled = false;
         }, function (error) {
@@ -1318,6 +1385,7 @@ function initStorageUi() {
     cbStorageInitColumnPicker();
     initStorageAjaxToggles();
     initStorageInlineAddField();
+    initStorageFieldTitleInput();
     initStorageFieldTypeSelect();
     initStorageFieldRequiredToggle();
     initStorageTabTooltips();

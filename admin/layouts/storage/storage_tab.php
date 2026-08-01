@@ -153,7 +153,8 @@ $storageFieldColumns = [
                     $id = (int) ($row->id ?? 0);
                     $rawName = (string) ($row->name ?? '');
                     $name = htmlspecialchars($rawName, ENT_QUOTES, 'UTF-8');
-                    $title = htmlspecialchars((string) ($row->title ?? ''), ENT_QUOTES, 'UTF-8');
+                    $rawTitle = (string) ($row->title ?? '');
+                    $title = htmlspecialchars($rawTitle, ENT_QUOTES, 'UTF-8');
                     $sqlType = StorageColumnTypeHelper::normalize((string) ($row->sql_type ?? StorageColumnTypeHelper::DEFAULT_TYPE));
                     $sqlTypeLabel = htmlspecialchars(StorageColumnTypeHelper::label($sqlType), ENT_QUOTES, 'UTF-8');
                     $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $row->field_size ?? null);
@@ -163,6 +164,8 @@ $storageFieldColumns = [
                     $published = ContentbuilderngHelper::listPublish('storage', $row, $i);
                     $isSystemField = StorageSystemFieldHelper::isSystemFieldName($rawName);
                     $rowSqlTypeEditable = $canEditSqlType && !$isSystemField;
+                    $rowSizeEditable = $rowSqlTypeEditable
+                        || (!$isSystemField && (int) ($item->bytable ?? 0) === 0 && $sqlType === 'varchar');
                     $required = !empty($row->required);
                     // Contrairement au type SQL, basculer le caractère obligatoire
                     // reste sûr même sur une table déjà peuplée (les valeurs NULL
@@ -187,7 +190,16 @@ $storageFieldColumns = [
                                 <span class="fa-solid fa-gear ms-1" aria-hidden="true" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_MANAGED_TIP'), ENT_QUOTES, 'UTF-8'); ?>"></span>
                             <?php endif; ?>
                         </td>
-                        <td data-cb-storage-col="title"><?php echo $title; ?></td>
+                        <td data-cb-storage-col="title">
+                            <input
+                                type="text"
+                                class="form-control form-control-sm cb-storage-field-title-input"
+                                data-field-id="<?php echo htmlspecialchars((string) $id, ENT_QUOTES, 'UTF-8'); ?>"
+                                data-previous-value="<?php echo htmlspecialchars($rawTitle, ENT_QUOTES, 'UTF-8'); ?>"
+                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_TITLE_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                value="<?php echo htmlspecialchars($rawTitle, ENT_QUOTES, 'UTF-8'); ?>"
+                            >
+                        </td>
                         <td data-cb-storage-col="sql_type">
                             <?php if ($rowSqlTypeEditable) : ?>
                                 <select class="form-select form-select-sm cb-storage-field-type-select" data-field-id="<?php echo $id; ?>" style="width:auto; max-width:12rem;" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
@@ -209,12 +221,14 @@ $storageFieldColumns = [
                             <?php endif; ?>
                         </td>
                         <td class="text-nowrap" data-cb-storage-col="field_size">
-                            <?php if ($rowSqlTypeEditable && StorageColumnTypeHelper::supportsSize($sqlType)) : ?>
+                            <?php if ($rowSizeEditable && StorageColumnTypeHelper::supportsSize($sqlType)) : ?>
                                 <input
                                     type="number"
                                     min="1"
                                     class="form-control form-control-sm cb-storage-field-size-input"
                                     data-field-id="<?php echo $id; ?>"
+                                    data-sql-type="<?php echo htmlspecialchars($sqlType, ENT_QUOTES, 'UTF-8'); ?>"
+                                    data-previous-value="<?php echo htmlspecialchars((string) (int) $fieldSize, ENT_QUOTES, 'UTF-8'); ?>"
                                     style="width:6rem;"
                                     title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
                                     value="<?php echo (int) $fieldSize; ?>"
