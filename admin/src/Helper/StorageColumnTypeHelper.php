@@ -15,6 +15,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Helper;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Language\Text;
+use Joomla\Database\DatabaseInterface;
 
 final class StorageColumnTypeHelper
 {
@@ -100,26 +101,71 @@ final class StorageColumnTypeHelper
         };
     }
 
-    public static function sqlDefinition(?string $type, mixed $size = null): string
+    public static function sqlDefinition(?string $type, mixed $size = null, bool $required = false): string
     {
         $normalizedType = self::normalize($type);
         $size = self::normalizeSize($normalizedType, $size ?? self::defaultSize($normalizedType));
 
         $charset = ' CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci';
+        $nullability = $required ? ' NOT NULL' : ' NULL';
 
         return match ($normalizedType) {
-            'varchar' => 'VARCHAR(' . ($size ?? 255) . ')' . $charset . ' NULL',
-            'int' => 'INT NULL',
-            'decimal' => 'DECIMAL(15,4) NULL',
-            'date' => 'DATE NULL',
-            'datetime' => 'DATETIME NULL',
-            'boolean' => 'TINYINT(1) NULL',
+            'varchar' => 'VARCHAR(' . ($size ?? 255) . ')' . $charset . $nullability,
+            'int' => 'INT' . $nullability,
+            'decimal' => 'DECIMAL(15,4)' . $nullability,
+            'date' => 'DATE' . $nullability,
+            'datetime' => 'DATETIME' . $nullability,
+            'boolean' => 'TINYINT(1)' . $nullability,
             default => match (true) {
-                $size !== null && $size > 16777215 => 'LONGTEXT' . $charset . ' NULL',
-                $size !== null && $size > 65535 => 'MEDIUMTEXT' . $charset . ' NULL',
-                default => 'TEXT' . $charset . ' NULL',
+                $size !== null && $size > 16777215 => 'LONGTEXT' . $charset . $nullability,
+                $size !== null && $size > 65535 => 'MEDIUMTEXT' . $charset . $nullability,
+                default => 'TEXT' . $charset . $nullability,
             },
         };
+    }
+
+    /**
+     * Type-appropriate "empty" literal used to backfill existing NULL rows
+     * before a column is promoted to NOT NULL — TEXT/BLOB columns cannot
+     * carry a literal DEFAULT in MySQL, so backfilling first (rather than
+     * relying on a DEFAULT clause) is the only approach that works
+     * uniformly across every supported SQL type.
+     */
+    public static function emptyValueLiteral(?string $type): string
+    {
+        return match (self::normalize($type)) {
+            'int', 'decimal', 'boolean' => '0',
+            'date' => "'1970-01-01'",
+            'datetime' => "'1970-01-01 00:00:00'",
+            default => "''",
+        };
+    }
+
+    /**
+     * Backfills any existing NULL value in $quotedColumn to the type's empty
+     * literal, then promotes the column to NOT NULL. Safe to call on a
+     * populated table: unlike a straight `MODIFY ... NOT NULL`, this never
+     * fails because of pre-existing NULLs.
+     */
+    public static function enforceRequired(
+        DatabaseInterface $db,
+        string $quotedTable,
+        string $quotedColumn,
+        ?string $type,
+        mixed $size
+    ): void {
+        $db->setQuery(
+            'UPDATE ' . $quotedTable
+            . ' SET ' . $quotedColumn . ' = ' . self::emptyValueLiteral($type)
+            . ' WHERE ' . $quotedColumn . ' IS NULL'
+        );
+        $db->execute();
+
+        $db->setQuery(
+            'ALTER TABLE ' . $quotedTable
+            . ' MODIFY ' . $quotedColumn . ' ' . self::sqlDefinition($type, $size, true)
+        );
+        $db->execute();
     }
 
     public static function physicalTypeMatches(?string $expectedType, mixed $columnDefinition): bool

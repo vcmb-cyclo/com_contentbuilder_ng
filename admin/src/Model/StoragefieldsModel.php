@@ -164,6 +164,7 @@ class StoragefieldsModel extends ListModel
             'title',
             'sql_type',
             'field_size',
+            'required',
             'is_group',
             'group_definition',
             'ordering',

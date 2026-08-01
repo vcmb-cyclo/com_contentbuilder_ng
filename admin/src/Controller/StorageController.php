@@ -1342,4 +1342,88 @@ class StorageController extends BaseFormController
             $this->respondAjax(false, $this->safeErrorMessage($e));
         }
     }
+
+    /**
+     * Task: storage.ajax_update_field_required — bascule le caractère
+     * obligatoire (NOT NULL) d'un champ existant depuis la grille. À la
+     * différence du changement de type SQL, ceci reste sûr même sur une
+     * table déjà peuplée : les valeurs NULL existantes sont comblées avant
+     * de poser la contrainte (StorageColumnTypeHelper::enforceRequired()),
+     * donc aucune restriction "table vide" n'est nécessaire ici. Réservé aux
+     * storages internes (!bytable) et jamais pour un champ système (son
+     * caractère obligatoire est fixe, cf. StorageSystemFieldHelper).
+     */
+    public function ajax_update_field_required(): void
+    {
+        $this->checkToken();
+
+        $storageId = (int) $this->input->getInt('id');
+        $fieldId = (int) $this->input->getInt('field_id', 0);
+        $required = $this->input->getBool('required', false);
+
+        try {
+            if ($storageId <= 0 || $fieldId <= 0) {
+                throw new \RuntimeException(Text::_('JERROR_NO_ITEMS_SELECTED'));
+            }
+
+            $db = $this->getDatabase();
+
+            $storageQuery = $db->getQuery(true)
+                ->select($db->quoteName(['name', 'bytable']))
+                ->from($db->quoteName('#__contentbuilderng_storages'))
+                ->where($db->quoteName('id') . ' = ' . $storageId);
+            $db->setQuery($storageQuery);
+            $storage = $db->loadAssoc();
+
+            if (!is_array($storage)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ERROR'));
+            }
+
+            if ((int) ($storage['bytable'] ?? 0) > 0) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_REQUIRED_FOREIGN_TABLE_HINT'));
+            }
+
+            $fieldQuery = $db->getQuery(true)
+                ->select($db->quoteName(['name', 'sql_type', 'field_size']))
+                ->from($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->where($db->quoteName('id') . ' = ' . $fieldId)
+                ->where($db->quoteName('storage_id') . ' = ' . $storageId);
+            $db->setQuery($fieldQuery);
+            $field = $db->loadAssoc();
+
+            $fieldName = is_array($field) ? (string) ($field['name'] ?? '') : '';
+
+            if ($fieldName === '' || StorageSystemFieldHelper::isSystemFieldName($fieldName)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_SELECT_REQUIRED'));
+            }
+
+            $sqlType = StorageColumnTypeHelper::normalize((string) ($field['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
+            $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $field['field_size'] ?? null);
+
+            $updateFieldQuery = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->set($db->quoteName('required') . ' = ' . (int) $required)
+                ->where($db->quoteName('id') . ' = ' . $fieldId)
+                ->where($db->quoteName('storage_id') . ' = ' . $storageId);
+            $db->setQuery($updateFieldQuery);
+            $db->execute();
+
+            $quotedTable = $db->quoteName('#__' . (string) $storage['name']);
+            $quotedColumn = $db->quoteName($fieldName);
+
+            if ($required) {
+                StorageColumnTypeHelper::enforceRequired($db, $quotedTable, $quotedColumn, $sqlType, $fieldSize);
+            } else {
+                $db->setQuery(
+                    'ALTER TABLE ' . $quotedTable
+                    . ' MODIFY ' . $quotedColumn . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize, false)
+                );
+                $db->execute();
+            }
+
+            $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_SAVED'));
+        } catch (\Throwable $e) {
+            $this->respondAjax(false, $this->safeErrorMessage($e));
+        }
+    }
 }

@@ -1106,6 +1106,74 @@ function cbSubmitFieldTypeUpdate(fieldId, sqlType, fieldSize, onSuccess, onError
         });
 }
 
+function cbSubmitFieldRequiredUpdate(fieldId, required, onSuccess, onError) {
+    var form = document.getElementById('adminForm') || document.adminForm;
+    var formData = new FormData(form);
+    formData.set('option', 'com_contentbuilderng');
+    formData.set('cb_ajax', '1');
+    formData.set('task', 'storage.ajax_update_field_required');
+    formData.set('field_id', String(fieldId));
+    formData.set('required', required ? '1' : '0');
+
+    fetch('index.php', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(function (response) { return response.json(); })
+        .then(function (payload) {
+            if (!payload.success) {
+                throw new Error(payload.message || '');
+            }
+            if (typeof onSuccess === 'function') {
+                onSuccess();
+            }
+        })
+        .catch(function (error) {
+            if (typeof onError === 'function') {
+                onError(error);
+            }
+        });
+}
+
+function initStorageFieldRequiredToggle() {
+    document.addEventListener('click', function (event) {
+        var toggle = typeof event.target.closest === 'function'
+            ? event.target.closest('.cb-storage-field-required-toggle')
+            : null;
+        if (!toggle) {
+            return;
+        }
+
+        event.preventDefault();
+
+        var fieldId = parseInt(toggle.dataset.fieldId || '0', 10);
+        var nextRequired = toggle.dataset.required !== '1';
+        var icon = toggle.querySelector('.cb-storage-field-required-icon');
+        var hiddenLabel = toggle.querySelector('.visually-hidden');
+
+        toggle.disabled = true;
+        cbSubmitFieldRequiredUpdate(fieldId, nextRequired, function () {
+            toggle.dataset.required = nextRequired ? '1' : '0';
+            var title = nextRequired ? toggle.dataset.yesTitle : toggle.dataset.noTitle;
+            toggle.setAttribute('title', title);
+            toggle.setAttribute('data-bs-original-title', title);
+            if (hiddenLabel) {
+                hiddenLabel.textContent = title;
+            }
+            if (icon) {
+                icon.className = 'cb-storage-field-required-icon '
+                    + (nextRequired ? 'fa-solid fa-asterisk text-danger' : 'fa-regular fa-circle text-muted');
+            }
+            toggle.disabled = false;
+        }, function (error) {
+            toggle.disabled = false;
+            window.alert((error && error.message) || cbSaveFailedMessage);
+        });
+    });
+}
+
 function initStorageFieldTypeSelect() {
     document.addEventListener('change', function (event) {
         var select = event.target;
@@ -1243,6 +1311,7 @@ function initStorageUi() {
     initStorageAjaxToggles();
     initStorageInlineAddField();
     initStorageFieldTypeSelect();
+    initStorageFieldRequiredToggle();
     initStorageTabTooltips();
     if (adminUi && typeof adminUi.persistJoomlaTabset === 'function') {
         // restoreFromStorage désactivé : l'onglet de départ est déterminé

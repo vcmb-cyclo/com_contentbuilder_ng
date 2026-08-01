@@ -87,7 +87,11 @@ final class UnescapedTemplateOutputTest extends TestCase
         'admin/layouts/form/prepare_editor.php' => 10,
         'admin/layouts/form/view_tab.php' => 3,
         'admin/layouts/storage/information_tab.php' => 2,
-        'admin/layouts/storage/storage_tab.php' => 28,
+        // +3 on 2026-08-01 for the required-field toggle button: a bare
+        // int $id (existing pattern throughout this file), a ternary of
+        // only literal '1'/'0' branches, and a fixed PHP-side CSS class
+        // string ($requiredIconClass, never user-controlled).
+        'admin/layouts/storage/storage_tab.php' => 31,
         'site/tmpl/details/default.php' => 16,
         'site/tmpl/details/print.php' => 8,
         'site/tmpl/edit/default.php' => 76,

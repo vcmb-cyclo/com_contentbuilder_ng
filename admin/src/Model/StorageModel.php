@@ -870,7 +870,7 @@ class StorageModel extends AdminModel
             if (!$bytable) {
                 // old name
                 $query = $db->getQuery(true)
-                    ->select($db->quoteName(['name', 'sql_type', 'field_size']))
+                    ->select($db->quoteName(['name', 'sql_type', 'field_size', 'required']))
                     ->from($db->quoteName('#__contentbuilderng_storage_fields'))
                     ->where($db->quoteName('id') . ' = ' . (int) $field_id);
                 $db->setQuery($query);
@@ -878,6 +878,7 @@ class StorageModel extends AdminModel
                 $old_name = (string) ($oldField['name'] ?? '');
                 $oldSqlType = StorageColumnTypeHelper::normalize((string) ($oldField['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
                 $oldFieldSize = StorageColumnTypeHelper::normalizeSize($oldSqlType, $oldField['field_size'] ?? null);
+                $oldRequired = !empty($oldField['required']);
 
                 // update storage_fields
                 $query = $db->getQuery(true)
@@ -899,7 +900,7 @@ class StorageModel extends AdminModel
                 // la table physique ne porte pas — la remontée fait échouer
                 // toute l'action de sauvegarde plutôt que de rester invisible.
                 if ($old_name !== '' && $old_name !== $name) {
-                    $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storageTable->name) . ' CHANGE ' . $db->quoteName($old_name) . ' ' . $db->quoteName($name) . ' ' . StorageColumnTypeHelper::sqlDefinition($oldSqlType, $oldFieldSize));
+                    $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storageTable->name) . ' CHANGE ' . $db->quoteName($old_name) . ' ' . $db->quoteName($name) . ' ' . StorageColumnTypeHelper::sqlDefinition($oldSqlType, $oldFieldSize, $oldRequired));
                     $db->execute();
                 }
             } else {
@@ -958,7 +959,7 @@ class StorageModel extends AdminModel
 
         // Liste des champs définis
         $query = $db->getQuery(true)
-            ->select($db->quoteName(['name', 'sql_type', 'field_size']))
+            ->select($db->quoteName(['name', 'sql_type', 'field_size', 'required']))
             ->from($db->quoteName('#__contentbuilderng_storage_fields'))
             ->where($db->quoteName('storage_id') . ' = ' . (int) $storageId);
         $db->setQuery($query);
@@ -986,13 +987,30 @@ class StorageModel extends AdminModel
 
             $sqlType = StorageColumnTypeHelper::normalize((string) ($field['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
             $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $field['field_size'] ?? null);
+            $required = !empty($field['required']);
 
             try {
+                // Toujours ajoutée nullable d'abord : la colonne n'existe pas
+                // encore, donc aucun backfill n'est possible avant qu'elle
+                // existe. Si le champ est obligatoire, enforceRequired()
+                // bascule ensuite en NOT NULL après avoir comblé les lignes
+                // existantes (backfill), ce qui fonctionne même sur une
+                // table déjà peuplée.
                 $db->setQuery(
                     'ALTER TABLE ' . $db->quoteName('#__' . $dataTableName)
                     . ' ADD ' . $db->quoteName($fieldname) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize)
                 );
                 $db->execute();
+
+                if ($required) {
+                    StorageColumnTypeHelper::enforceRequired(
+                        $db,
+                        $db->quoteName('#__' . $dataTableName),
+                        $db->quoteName($fieldname),
+                        $sqlType,
+                        $fieldSize
+                    );
+                }
             } catch (\Throwable $e) {
                 Logger::exception($e);
                 $failedFields[] = $fieldname;

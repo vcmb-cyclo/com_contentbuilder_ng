@@ -634,6 +634,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_storage_fields`
     `title`            varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `sql_type`         varchar(32)  COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'text',
     `field_size`       int          NULL DEFAULT NULL,
+    `required`         tinyint(1)   NOT NULL DEFAULT '0',
     `is_group`         tinyint(1)   NOT NULL DEFAULT '0',
     `group_definition` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `ordering`         int          NOT NULL DEFAULT '0',
