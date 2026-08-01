@@ -131,14 +131,10 @@ l’article :
 
 Le paramètre facultatif `itemid` applique les réglages d’un élément de menu
 ContentBuilder NG existant. `layout` sélectionne une mise en page de liste.
-`fields` conserve un sous-ensemble de champs séparés par des virgules, en
-utilisant leurs noms source, leurs identifiants de référence ou leurs libellés
-exacts ; il peut uniquement réduire les champs déjà visibles et autorisés dans
-la vue. `height` définit la hauteur minimale en pixels, `loading` accepte `lazy`
-ou `eager`, et `title` fournit le titre accessible du cadre :
+`fields` conserve les champs indiqués, séparés par `|`, en utilisant leurs noms source, leurs identifiants de référence ou leurs libellés exacts. L’ordre des sélecteurs détermine l’ordre des colonnes et ne peut que réduire les champs déjà visibles et autorisés dans la vue. `actions` fonctionne comme une liste blanche00a0: par exemple, `actions="search"` conserve la recherche et masque notamment l’action «00a0Éditer00a0». `height` définit la hauteur minimale en pixels, et `loading` accepte `lazy` ou `eager`. `title` définit le titre personnalisé visible00a0; s’il est omis, le titre CBNG est conservé, tandis que `title=""` masque le titre :
 
 ```text
-{CBList id=25 itemid=142 layout=cards fields="Nom,Email,Ville" height=700 title="Inscriptions"}
+{CBList id=25 itemid=142 layout=cards fields="Nom|Email|Ville" height=700 title="Inscriptions"}
 ```
 
 Le cadre intégré adapte automatiquement sa hauteur et conserve les ACL, les

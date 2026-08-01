@@ -57,7 +57,7 @@ $publish_allowed = $frontend ? $permissionService->authorizeFe('publish') : $per
 $rating_allowed = $frontend ? $permissionService->authorizeFe('rating') : $permissionService->authorize('rating');
 $wordwrapLabel = static function (string $label): string {
 	return (string) ContentbuilderngHelper::contentbuilderng_wordwrap($label, 20, "\n", true);
-};
+							};
 $getStateBadgeStyle = static function ($recordId, array $stateColors): string {
 	$color = strtoupper(trim((string) ($stateColors[$recordId] ?? '')));
 	$color = ltrim($color, '#');
@@ -76,7 +76,7 @@ $getStateBadgeStyle = static function ($recordId, array $stateColors): string {
 	// dark-mode table rules override the inline background with !important.
 	return 'background-color:#' . $color . ';color:' . $textColor . ';'
 		. '--cb-state-bg:#' . $color . ';--cb-state-fg:' . $textColor . ';';
-};
+							};
 
 $input = $app->getInput();
 $requestList = (array) $input->get('list', [], 'array');
@@ -95,10 +95,10 @@ $currentUser = $app->getIdentity();
 $currentSessionLabel = trim((string) ($currentUser->name ?? ''));
 if ($currentSessionLabel === '') {
     $currentSessionLabel = trim((string) ($currentUser->username ?? ''));
-}
+							}
 if ($currentSessionLabel === '') {
     $currentSessionLabel = Text::_('COM_CONTENTBUILDERNG_GUEST');
-}
+							}
 $currentUserId = (int) ($currentUser->id ?? 0);
 $ownerUserId = $isAdminPreview && $previewActorId > 0
     ? $previewActorId
@@ -132,7 +132,7 @@ $canAccessOwnedRecord = static function (string $action, $recordId) use (&$owner
     $ownerPermissionCache[$cacheKey] = (bool) $formInstance->isOwner($ownerUserId, $recordId);
 
     return $ownerPermissionCache[$cacheKey];
-};
+							};
 $showEditAction = !empty($this->edit_button) && $edit_allowed;
 if (!$showEditAction && !empty($this->edit_button) && $hasOwnerEditRule) {
     foreach ((array) $this->items as $item) {
@@ -141,26 +141,26 @@ if (!$showEditAction && !empty($this->edit_button) && $hasOwnerEditRule) {
             break;
         }
     }
-}
+							}
 $previewActorLabel = trim($previewActorName);
 if ($previewActorLabel === '' && $previewActorId > 0) {
     $previewActorLabel = '#' . $previewActorId;
-}
+							}
 $showPreviewSessionBadge = $isAdminPreview && $currentSessionLabel !== '' && $currentSessionLabel !== $previewActorLabel;
 $adminReturnContext = trim((string) $input->getCmd('cb_admin_return', ''));
 $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilderng&task=form.edit&id=' . (int) $input->getInt('id', 0);
 if ($adminReturnContext === 'forms') {
     $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilderng&view=forms';
-} elseif ($adminReturnContext === 'storages') {
+							} elseif ($adminReturnContext === 'storages') {
     $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilderng&view=storages';
-}
+							}
 $previewFormName = trim((string) ($this->form_name ?? ''));
 if ($previewFormName === '') {
     $previewFormName = trim((string) ($this->page_title ?? ''));
-}
+							}
 if ($previewFormName === '') {
     $previewFormName = Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
-}
+							}
 $previewFormName = htmlspecialchars($previewFormName, ENT_QUOTES, 'UTF-8');
 $previewConfigTabLabel = Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDERNG_FORM'));
 $previewFrontendPermissionHint = Text::sprintf(
@@ -171,7 +171,7 @@ $previewFrontendPermissionHint = Text::sprintf(
 $currentListLayout = trim((string) $input->getCmd('layout', 'default'));
 if ($currentListLayout === '') {
     $currentListLayout = 'default';
-}
+							}
 $currentListLayoutQuery = $currentListLayout !== 'default' ? '&layout=' . rawurlencode($currentListLayout) : '';
 $embeddedListContext = (string) $input->getCmd('cblist_embed', '');
 $isEmbeddedListRequest = EmbeddedListFieldFilterService::isEmbeddedRequest($embeddedListContext);
@@ -183,14 +183,15 @@ $embeddedListRawActions = $isEmbeddedListRequest
     : '';
 try {
     $cbListAllowedActions = EmbeddedListActionFilterService::parseActions($embeddedListRawActions);
-} catch (\InvalidArgumentException) {
+							} catch (\InvalidArgumentException) {
     // cblist_actions is plugin-generated and already validated before this
     // ever renders — this only fires for a hand-crafted request bypassing
     // the plugin. Fail open to "unrestricted" rather than a fatal error.
     $cbListAllowedActions = [];
-}
+							}
 $cbListActionAllowed = static fn(string $action): bool
     => EmbeddedListActionFilterService::isAllowed($action, $cbListAllowedActions);
+$showEditAction = $showEditAction && $cbListActionAllowed('edit');
 $embeddedListParams = EmbeddedListContextService::parameters(
     $embeddedListContext,
     $embeddedListFields,
@@ -204,8 +205,9 @@ $embeddedListQuery = EmbeddedListContextService::buildQuery(
 $embeddedListTitle = $isEmbeddedListRequest
     ? trim((string) $input->getString('cblist_title', ''))
     : '';
-$embeddedListTitleQuery = $embeddedListTitle !== ''
-    ? '&cblist_title=' . rawurlencode($embeddedListTitle)
+$embeddedListTitleProvided = $isEmbeddedListRequest && $input->getBool('cblist_title_set', false);
+$embeddedListTitleQuery = $embeddedListTitleProvided
+    ? '&cblist_title=' . rawurlencode($embeddedListTitle) . '&cblist_title_set=1'
     : '';
 $previewLayoutOptions = [
     'default' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_DEFAULT'),
@@ -218,7 +220,7 @@ $previewLayoutOptions = [
 ];
 if (!isset($previewLayoutOptions[$currentListLayout])) {
     $currentListLayout = 'default';
-}
+							}
 $previewLayoutSelectOptions = [];
 $directStorageMode = !empty($this->direct_storage_mode);
 $directStorageId = (int) ($this->direct_storage_id ?? 0);
@@ -233,10 +235,10 @@ if ($directStorageReadOnly) {
     $new_allowed = false;
     $state_allowed = false;
     $publish_allowed = false;
-}
+							}
 if ($directStorageMode && $directStorageId > 0 && $adminReturnContext !== 'storages') {
     $adminReturnUrl = Uri::root() . 'administrator/index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $directStorageId;
-}
+							}
 $listTarget = $directStorageMode
     ? ('storage_id=' . $directStorageId)
     : ('id=' . (int) $input->getInt('id', 0));
@@ -275,7 +277,7 @@ $formatListLastModification = static function ($value): string {
     }
 
     return HTMLHelper::_('date', $raw, Text::_('DATE_FORMAT_LC5'));
-};
+							};
 if ($isAdminPreview && !$directStorageMode) {
     $previewLayoutBaseParams = Uri::getInstance()->getQuery(true);
     // The router/dispatcher use a transient "controller"/"task" pair for SEF
@@ -302,11 +304,11 @@ if ($isAdminPreview && !$directStorageMode) {
     usort($previewLayoutSelectOptions, static function (array $a, array $b): int {
         return strcasecmp((string) ($a['label'] ?? ''), (string) ($b['label'] ?? ''));
     });
-}
+							}
 if ($directStorageMode) {
     $view_allowed = true;
     $publish_allowed = $directStoragePublishAllowed;
-}
+							}
 if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
     $previewQuery = PreviewLinkHelper::buildQuery(
         (int) $previewUntil,
@@ -316,13 +318,13 @@ if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
         (string) $previewSig,
         (string) $adminReturnContext
     );
-}
+							}
 $previewColorMode = PreviewColorModeHelper::resolve($input, $isAdminPreview || $directStorageMode);
 $previewQuery = PreviewColorModeHelper::appendQuery($previewQuery, $previewColorMode);
 
 if ($isAdminPreview) {
     $view_allowed = true;
-}
+							}
 
 // {CBList actions="..."} narrows what's rendered on top of ACL, never the
 // other way round: every flag below already carries its ACL/ownership
@@ -351,7 +353,7 @@ $wa->useStyle('com_contentbuilderng.frontend');
 $wa->useStyle('com_contentbuilderng.list');
 if (!empty($this->debug_mode)) {
 	$wa->useStyle('com_contentbuilderng.debug-panel');
-}
+							}
 $wa->useScript('com_contentbuilderng.contentbuilderng');
 PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
 
@@ -361,12 +363,12 @@ $___tableOrdering = "Joomla.tableOrdering = function";
 $themeCss = trim((string) ($this->theme_css ?? ''));
 if ($themeCss !== '') {
 	$wa->addInlineStyle($themeCss);
-}
+							}
 
 $themeJs = (string) ($this->theme_js ?? '');
 if (trim($themeJs) !== '') {
     $wa->addInlineScript($themeJs);
-}
+							}
 
 
 if (!empty($this->list_header_sticky)) {
@@ -446,10 +448,10 @@ if (!empty($this->list_header_sticky)) {
 	} else {
 		boot();
 	}
-})();
+							})();
 JS
 	);
-}
+							}
 $cbListConfig = [
 	'ratingCsrfTokenParam' => $ratingCsrfToken . '=1',
 	'text' => [
@@ -466,7 +468,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 </script>
 <script src="<?php echo htmlspecialchars(Uri::root(true) . '/media/com_contentbuilderng/js/list-init.js?' . $cbListInitScriptVersion, ENT_QUOTES, 'UTF-8'); ?>"></script>
 
-<?php if ($this->show_page_heading && $this->page_title): ?>
+<?php if ($this->show_page_heading && $this->page_title && !$embeddedListTitleProvided): ?>
 	<div class="cb-list-titlebar">
 		<h1 class="h3 cb-list-title">
 			<?php echo $this->page_title; ?>
@@ -611,7 +613,15 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 		<?php echo htmlspecialchars($this->embedded_list_error, ENT_QUOTES, 'UTF-8'); ?>
 	</div>
 <?php endif; ?>
-<?php echo ContentbuilderngHelper::sanitizeStoredHtml($this->intro_text); ?>
+<?php if ($embeddedListTitleProvided && $embeddedListTitle !== '') : ?>
+	<div class="cb-list-titlebar">
+		<h1 class="h3 cb-list-title">
+			<?php echo htmlspecialchars($embeddedListTitle, ENT_QUOTES, 'UTF-8'); ?>
+		</h1>
+	</div>
+<?php else : ?>
+	<?php echo ContentbuilderngHelper::sanitizeStoredHtml($this->intro_text); ?>
+<?php endif; ?>
 
 	<form action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=list.display&' . $listTarget . $currentListLayoutQuery . '&Itemid=' . (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . $embeddedListQuery . $embeddedListTitleQuery . $previewQuery); ?>"
 		method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm" class="cb-list-template-<?php echo htmlspecialchars($cbListTemplateVariant, ENT_QUOTES, 'UTF-8'); ?><?php echo !empty($this->list_header_sticky) && !$isCardsVariant && !$isTilesVariant ? ' cb-list-has-sticky-header' : ''; ?>">
@@ -939,14 +949,12 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 					$rowCanView = ($view_allowed || $canAccessOwnedRecord('view', $row->colRecord)) && $cbListActionAllowed('detail');
 					$rowCanEdit = ($edit_allowed || $canAccessOwnedRecord('edit', $row->colRecord)) && $cbListActionAllowed('edit');
 						$visibleFields = [];
-						foreach ($row as $key => $value) {
-							if (strpos((string) $key, 'col') !== 0) {
+						foreach ($this->visible_cols as $referenceId) {
+							$key = 'col' . $referenceId;
+							if (!isset($row->$key)) {
 								continue;
 							}
-							$referenceId = str_replace('col', '', $key);
-							if (!in_array($referenceId, $this->visible_cols)) {
-								continue;
-							}
+							$value = $row->$key;
 							$visibleFields[] = [
 							'reference_id' => $referenceId,
 							'label' => (string) ($this->labels[$referenceId] ?? $referenceId),
@@ -1559,9 +1567,10 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 					}
 					?>
 					<?php
-					foreach ($row as $key => $value) {
-						// filtering out disallowed columns
-						if (in_array(str_replace('col', '', $key), $this->visible_cols)) {
+					foreach ($this->visible_cols as $referenceId) {
+							$key = 'col' . $referenceId;
+						if (isset($row->$key)) {
+							$value = $row->$key;
 					?>
 							<td>
 								<?php
@@ -1627,7 +1636,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	<input type="hidden" name="cblist_embed" value="<?php echo EmbeddedListFieldFilterService::REQUEST_CONTEXT; ?>" />
 	<input type="hidden" name="cblist_fields" value="<?php echo htmlspecialchars($embeddedListFields, ENT_QUOTES, 'UTF-8'); ?>" />
 	<input type="hidden" name="cblist_actions" value="<?php echo htmlspecialchars($embeddedListRawActions, ENT_QUOTES, 'UTF-8'); ?>" />
-	<?php if ($embeddedListTitle !== '') : ?>
+	<?php if ($embeddedListTitleProvided) : ?>
 	<input type="hidden" name="cblist_title" value="<?php echo htmlspecialchars($embeddedListTitle, ENT_QUOTES, 'UTF-8'); ?>" />
 	<?php endif; ?>
 	<?php endif; ?>

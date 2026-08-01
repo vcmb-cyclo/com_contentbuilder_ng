@@ -27,7 +27,8 @@ final class EmbedOptionsService
      *     loading: 'eager'|'lazy',
      *     fields: list<string>,
      *     actions: list<string>,
-     *     title: string
+     *     title: string,
+     *     title_set: bool
      * }
      */
     public static function resolve(array $attributes): array
@@ -79,6 +80,7 @@ final class EmbedOptionsService
             'fields' => $fields,
             'actions' => $actions,
             'title' => trim((string) ($attributes['title'] ?? '')),
+            'title_set' => array_key_exists('title', $attributes),
         ];
     }
 

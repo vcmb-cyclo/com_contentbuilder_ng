@@ -112,7 +112,7 @@ view. `height` sets the minimum height in pixels, `loading` accepts `lazy` or
 `eager`, and `title` provides the accessible frame title:
 
 ```text
-{CBList id=25 itemid=142 layout=cards fields="Name,Email,Town" height=700 title="Registrations"}
+{CBList id=25 itemid=142 layout=cards fields="Name|Email|Town" height=700 title="Registrations"}
 ```
 
 The embedded frame resizes automatically and preserves the list ACLs, filters,

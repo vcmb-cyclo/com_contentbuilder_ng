@@ -43,6 +43,7 @@ final class CbListPluginTest extends TestCase
                 'fields' => ['Name', 'Email', 'Town'],
                 'actions' => ['search', 'detail', 'export'],
                 'title' => 'Registrations & payments',
+                'title_set' => true,
             ],
             EmbedOptionsService::resolve($attributes)
         );
@@ -60,6 +61,7 @@ final class CbListPluginTest extends TestCase
                 'fields' => [],
                 'actions' => [],
                 'title' => '',
+                'title_set' => false,
             ],
             EmbedOptionsService::resolve(['id' => '7'])
         );

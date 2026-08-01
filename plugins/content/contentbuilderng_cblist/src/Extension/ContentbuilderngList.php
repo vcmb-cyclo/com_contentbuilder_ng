@@ -88,8 +88,9 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
             'cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT,
         ];
 
-        if ($options['title'] !== '') {
+        if ($options['title_set']) {
             $query['cblist_title'] = $options['title'];
+            $query['cblist_title_set'] = 1;
         }
 
         if ($options['pagination'] !== null) {
@@ -106,7 +107,7 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
         }
 
         $url = Route::_('index.php?' . http_build_query($query), false);
-        $title = $options['title'] !== ''
+        $title = $options['title_set']
             ? $options['title']
             : Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_IFRAME_TITLE', $options['id']);
         $openLabel = Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_OPEN_LIST');

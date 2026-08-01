@@ -69,7 +69,11 @@ class HtmlView extends BaseHtmlView
         $embeddedTitle = EmbeddedListFieldFilterService::isEmbeddedRequest($app->getInput()->getCmd('cblist_embed', ''))
             ? trim((string) $app->getInput()->getString('cblist_title', ''))
             : '';
-        if ($embeddedTitle !== '') {
+        $embeddedTitleSet = EmbeddedListFieldFilterService::isEmbeddedRequest($app->getInput()->getCmd('cblist_embed', ''))
+            && $app->getInput()->getBool('cblist_title_set', false);
+        if ($embeddedTitleSet) {
+            $subject->page_title = $embeddedTitle;
+            $subject->show_page_heading = 0;
             $subject->intro_text = htmlspecialchars($embeddedTitle, ENT_QUOTES, 'UTF-8');
         }
         $this->applyEmbeddedFieldFilter($subject, $app);
@@ -253,11 +257,12 @@ class HtmlView extends BaseHtmlView
 
         $subject->show_id_column = 0;
         $subject->visible_cols = $filteredColumns;
-        $subject->labels = array_filter(
-            $labels,
-            static fn(int|string $referenceId): bool => isset($allowedReferences[(string) $referenceId]),
-            ARRAY_FILTER_USE_KEY
-        );
+        $subject->labels = [];
+        foreach ($filteredColumns as $referenceId) {
+            if (isset($allowedReferences[(string) $referenceId])) {
+                $subject->labels[$referenceId] = (string) ($labels[$referenceId] ?? $referenceId);
+            }
+        }
         $subject->linkable_elements = array_values(
             array_filter(
                 is_array($subject->linkable_elements ?? null) ? $subject->linkable_elements : [],
