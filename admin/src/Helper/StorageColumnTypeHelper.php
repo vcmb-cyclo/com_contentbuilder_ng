@@ -45,6 +45,23 @@ final class StorageColumnTypeHelper
         return in_array($type, self::TYPES, true) ? $type : self::DEFAULT_TYPE;
     }
 
+    public static function editableElementType(?string $type): string
+    {
+        return match (self::normalize($type)) {
+            'date' => 'calendar',
+            'datetime' => 'datetime',
+            'int' => 'number',
+            'decimal' => 'decimal',
+            'boolean' => 'boolean',
+            default => 'text',
+        };
+    }
+
+    public static function isStorageManagedEditableType(string $type): bool
+    {
+        return in_array($type, ['', 'text', 'calendar', 'datetime', 'number', 'decimal', 'boolean'], true);
+    }
+
     public static function label(?string $type): string
     {
         $type = self::normalize($type);
@@ -185,6 +202,74 @@ final class StorageColumnTypeHelper
             'boolean' => str_starts_with($physicalType, 'tinyint(1)') || $physicalType === 'boolean' || $physicalType === 'bool',
             default => str_starts_with($physicalType, 'text') || str_starts_with($physicalType, 'mediumtext') || str_starts_with($physicalType, 'longtext'),
         };
+    }
+
+    public static function physicalNullabilityMatches(bool $required, mixed $columnDefinition): bool
+    {
+        $physicalNullable = self::extractPhysicalNullable($columnDefinition);
+
+        // Some callers only provide a type string. In that case there is no
+        // reliable nullability information to compare and the type check
+        // remains authoritative.
+        return $physicalNullable === null || $physicalNullable === !$required;
+    }
+
+    public static function extractPhysicalNullable(mixed $columnDefinition): ?bool
+    {
+        if (is_object($columnDefinition)) {
+            $columnDefinition = get_object_vars($columnDefinition);
+        }
+
+        if (is_array($columnDefinition)) {
+            $rawNullable = null;
+            $hasNullable = false;
+
+            foreach (['Null', 'null', 'Nullable', 'nullable'] as $key) {
+                if (array_key_exists($key, $columnDefinition)) {
+                    $rawNullable = $columnDefinition[$key];
+                    $hasNullable = true;
+                    break;
+                }
+            }
+
+            if (!$hasNullable) {
+                return null;
+            }
+
+            if (is_bool($rawNullable)) {
+                return $rawNullable;
+            }
+
+            $normalizedNullable = strtoupper(trim((string) $rawNullable));
+
+            return match ($normalizedNullable) {
+                'YES', 'Y', 'TRUE', '1' => true,
+                'NO', 'N', 'FALSE', '0' => false,
+                default => null,
+            };
+        }
+
+        $definition = trim((string) $columnDefinition);
+        if (preg_match('/\bNOT\s+NULL\b/i', $definition)) {
+            return false;
+        }
+        if (preg_match('/\bNULL\b/i', $definition)) {
+            return true;
+        }
+
+        return null;
+    }
+
+    public static function describePhysicalDefinition(mixed $columnDefinition): string
+    {
+        $type = self::extractPhysicalType($columnDefinition);
+        $nullable = self::extractPhysicalNullable($columnDefinition);
+
+        if ($nullable === null) {
+            return $type;
+        }
+
+        return trim($type . ($nullable ? ' NULL' : ' NOT NULL'));
     }
 
     public static function extractPhysicalType(mixed $columnDefinition): string

@@ -82,4 +82,18 @@ final class StorageRegressionFixesTest extends TestCase
         self::assertStringContainsString('if ($removeMissing && $ids !== []) {', $supportSource);
         self::assertStringContainsString('if ($removeMissing) {', $supportSource);
     }
+
+    public function testStorageSynchronizationRefreshesOnlyManagedEditableTypes(): void
+    {
+        $supportSource = file_get_contents(\dirname(__DIR__, 3) . '/src/Service/FormSupportService.php');
+        $storageSource = file_get_contents(\dirname(__DIR__, 3) . '/src/types/com_contentbuilderng.php');
+
+        self::assertIsString($supportSource);
+        self::assertIsString($storageSource);
+        self::assertStringContainsString('shouldSynchronizeEditableElementTypes', $storageSource);
+        self::assertStringContainsString('StorageColumnTypeHelper::editableElementType(', $storageSource);
+        self::assertStringContainsString('$synchronizeEditableTypes = !$removeMissing', $supportSource);
+        self::assertStringContainsString('StorageColumnTypeHelper::isStorageManagedEditableType(', $supportSource);
+        self::assertStringContainsString("->set(\$db->quoteName('type')", $supportSource);
+    }
 }

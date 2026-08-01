@@ -5,16 +5,18 @@
 		<type>component</type>
 		<version>6.1.7-RC104</version>
 		<addition>
-			<item>Added optional Details and Edit template locking, with regeneration from the source form on save.</item>
-			<item>Added a versioned schema migration for the template-lock columns.</item>
+			<item>Added native DATE, DATETIME, INTEGER, DECIMAL and BOOLEAN controls and validation to direct Storage forms.</item>
+			<item>Added inline Storage field title, SQL type, size and required-state editing, backed by the 6.1.7.104 schema migration.</item>
+			<item>Added field and action allow-lists to embedded CBList views.</item>
 		</addition>
 		<change>
-			<item>Refined the form audit, editor layout, preview permissions hint, publication and debug indicators.</item>
-			<item>Editable-template generation is refused only when it is requested and no published field is editable.</item>
+			<item>Enabled the repository-wide PSR-12 quality gate and modernized CBStats with strict PHP types.</item>
+			<item>Direct Storage synchronization now preserves unpublished elements and refreshes native controls when SQL field types change.</item>
 		</change>
 		<fix>
-			<item>A failed locked-template regeneration now preserves the existing template without interrupting an otherwise valid form save.</item>
-			<item>Explicit editable-template generation now returns a controlled validation error when it cannot be completed.</item>
+			<item>Escaped free-text list and template output to prevent stored cross-site scripting.</item>
+			<item>Fixed Storage field creation, required-state display, row saving, sorting, system-field publication and schema-audit regressions.</item>
+			<item>Preserved CBList field and action context across navigation, saves and record actions, and hardened action permission checks.</item>
 		</fix>
 	</changelog>
 </changelogs>

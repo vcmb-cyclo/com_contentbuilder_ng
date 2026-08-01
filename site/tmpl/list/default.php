@@ -33,6 +33,7 @@ use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewColorModeHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 /** @var SiteApplication $app */
@@ -190,16 +191,16 @@ try {
 }
 $cbListActionAllowed = static fn(string $action): bool
     => EmbeddedListActionFilterService::isAllowed($action, $cbListAllowedActions);
-$embeddedListParams = ($embeddedListFields !== '' || $embeddedListRawActions !== '')
-    ? array_filter([
-        'cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT,
-        'cblist_fields' => $embeddedListFields,
-        'cblist_actions' => $embeddedListRawActions,
-    ], static fn(string $value): bool => $value !== '')
-    : [];
-$embeddedListQuery = $embeddedListParams !== []
-    ? '&' . http_build_query($embeddedListParams)
-    : '';
+$embeddedListParams = EmbeddedListContextService::parameters(
+    $embeddedListContext,
+    $embeddedListFields,
+    $embeddedListRawActions
+);
+$embeddedListQuery = EmbeddedListContextService::buildQuery(
+    $embeddedListContext,
+    $embeddedListFields,
+    $embeddedListRawActions
+);
 $previewLayoutOptions = [
     'default' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_DEFAULT'),
     'listone' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_LISTONE'),
@@ -1614,6 +1615,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	<?php if ($embeddedListParams !== []) : ?>
 	<input type="hidden" name="cblist_embed" value="<?php echo EmbeddedListFieldFilterService::REQUEST_CONTEXT; ?>" />
 	<input type="hidden" name="cblist_fields" value="<?php echo htmlspecialchars($embeddedListFields, ENT_QUOTES, 'UTF-8'); ?>" />
+	<input type="hidden" name="cblist_actions" value="<?php echo htmlspecialchars($embeddedListRawActions, ENT_QUOTES, 'UTF-8'); ?>" />
 	<?php endif; ?>
 	<?php if ($currentListLayout !== 'default') : ?>
 	<input type="hidden" name="layout" value="<?php echo htmlspecialchars($currentListLayout, ENT_QUOTES, 'UTF-8'); ?>" />

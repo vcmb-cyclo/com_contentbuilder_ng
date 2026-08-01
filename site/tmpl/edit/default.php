@@ -31,6 +31,7 @@ use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewColorModeHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 /** @var SiteApplication $app */
@@ -48,6 +49,9 @@ $isAdminPreview = $app->getInput()->getBool('cb_preview_ok', false);
 
 $embeddedListContext = (string) $app->getInput()->getCmd('cblist_embed', '');
 $isEmbeddedListRequest = EmbeddedListFieldFilterService::isEmbeddedRequest($embeddedListContext);
+$embeddedListFields = $isEmbeddedListRequest
+    ? trim((string) $app->getInput()->getString('cblist_fields', ''))
+    : '';
 $embeddedListRawActions = $isEmbeddedListRequest
     ? trim((string) $app->getInput()->getString('cblist_actions', ''))
     : '';
@@ -59,12 +63,16 @@ try {
 }
 $cbListActionAllowed = static fn(string $action): bool
     => EmbeddedListActionFilterService::isAllowed($action, $cbListAllowedActions);
-$embeddedListParams = $embeddedListRawActions !== ''
-    ? ['cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT, 'cblist_actions' => $embeddedListRawActions]
-    : [];
-$embeddedListQuery = $embeddedListParams !== []
-    ? '&' . http_build_query($embeddedListParams)
-    : '';
+$embeddedListParams = EmbeddedListContextService::parameters(
+    $embeddedListContext,
+    $embeddedListFields,
+    $embeddedListRawActions
+);
+$embeddedListQuery = EmbeddedListContextService::buildQuery(
+    $embeddedListContext,
+    $embeddedListFields,
+    $embeddedListRawActions
+);
 
 $new_allowed = $new_allowed && $cbListActionAllowed('new');
 $edit_allowed = $edit_allowed && $cbListActionAllowed('edit');
@@ -474,6 +482,9 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
     <?php if ($layout !== '') : ?>
         <input type="hidden" name="layout" value="<?php echo htmlspecialchars($layout, ENT_QUOTES, 'UTF-8'); ?>">
     <?php endif; ?>
+    <?php foreach ($embeddedListParams as $embeddedListName => $embeddedListValue) : ?>
+        <input type="hidden" name="<?php echo htmlspecialchars($embeddedListName, ENT_QUOTES, 'UTF-8'); ?>" value="<?php echo htmlspecialchars($embeddedListValue, ENT_QUOTES, 'UTF-8'); ?>">
+    <?php endforeach; ?>
     <?php echo $listHiddenFields; ?>
     <?php echo $previewHiddenFields; ?>
     <?php echo HTMLHelper::_('form.token'); ?>

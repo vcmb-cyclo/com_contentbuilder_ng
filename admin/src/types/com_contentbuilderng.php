@@ -860,22 +860,17 @@ class contentbuilderng_com_contentbuilderng
                 continue;
             }
 
-            $sqlType = StorageColumnTypeHelper::normalize($element['sql_type'] ?? null);
-
-            if ($sqlType === 'date') {
-                $types[(string) $element['id']] = 'calendar';
-            } elseif ($sqlType === 'datetime') {
-                $types[(string) $element['id']] = 'datetime';
-            } elseif ($sqlType === 'int') {
-                $types[(string) $element['id']] = 'number';
-            } elseif ($sqlType === 'decimal') {
-                $types[(string) $element['id']] = 'decimal';
-            } elseif ($sqlType === 'boolean') {
-                $types[(string) $element['id']] = 'boolean';
-            }
+            $types[(string) $element['id']] = StorageColumnTypeHelper::editableElementType(
+                $element['sql_type'] ?? null
+            );
         }
 
         return $types;
+    }
+
+    public function shouldSynchronizeEditableElementTypes(): bool
+    {
+        return true;
     }
 
     /**

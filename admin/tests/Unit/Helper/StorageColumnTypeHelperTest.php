@@ -31,6 +31,23 @@ final class StorageColumnTypeHelperTest extends TestCase
         self::assertSame('varchar', StorageColumnTypeHelper::normalize(' VARCHAR '));
     }
 
+    public function testMapsStorageTypesToNativeEditableControls(): void
+    {
+        self::assertSame('text', StorageColumnTypeHelper::editableElementType('text'));
+        self::assertSame('text', StorageColumnTypeHelper::editableElementType('varchar'));
+        self::assertSame('number', StorageColumnTypeHelper::editableElementType('int'));
+        self::assertSame('decimal', StorageColumnTypeHelper::editableElementType('decimal'));
+        self::assertSame('calendar', StorageColumnTypeHelper::editableElementType('date'));
+        self::assertSame('datetime', StorageColumnTypeHelper::editableElementType('datetime'));
+        self::assertSame('boolean', StorageColumnTypeHelper::editableElementType('boolean'));
+
+        foreach (['', 'text', 'number', 'decimal', 'calendar', 'datetime', 'boolean'] as $managedType) {
+            self::assertTrue(StorageColumnTypeHelper::isStorageManagedEditableType($managedType));
+        }
+
+        self::assertFalse(StorageColumnTypeHelper::isStorageManagedEditableType('upload'));
+    }
+
     /**
      * @return array<string,array{0:string,1:string}>
      */
@@ -86,5 +103,24 @@ final class StorageColumnTypeHelperTest extends TestCase
         self::assertSame('varchar(64)', StorageColumnTypeHelper::extractPhysicalType(['Type' => ' VARCHAR(64) NULL ']));
         self::assertSame('int(11)', StorageColumnTypeHelper::extractPhysicalType((object) ['type' => 'INT(11) unsigned']));
         self::assertSame('', StorageColumnTypeHelper::extractPhysicalType(''));
+    }
+
+    public function testMatchesPhysicalNullabilityFromMySqlDefinitions(): void
+    {
+        self::assertTrue(StorageColumnTypeHelper::physicalNullabilityMatches(true, ['Null' => 'NO']));
+        self::assertFalse(StorageColumnTypeHelper::physicalNullabilityMatches(true, ['Null' => 'YES']));
+        self::assertTrue(StorageColumnTypeHelper::physicalNullabilityMatches(false, (object) ['Null' => 'YES']));
+        self::assertFalse(StorageColumnTypeHelper::physicalNullabilityMatches(false, (object) ['Null' => 'NO']));
+        self::assertTrue(StorageColumnTypeHelper::physicalNullabilityMatches(true, 'INT NOT NULL'));
+        self::assertTrue(StorageColumnTypeHelper::physicalNullabilityMatches(false, 'INT NULL'));
+        self::assertTrue(StorageColumnTypeHelper::physicalNullabilityMatches(true, 'INT'));
+        self::assertSame('int(11) NOT NULL', StorageColumnTypeHelper::describePhysicalDefinition([
+            'Type' => 'INT(11)',
+            'Null' => 'NO',
+        ]));
+        self::assertSame('varchar(255) NULL', StorageColumnTypeHelper::describePhysicalDefinition((object) [
+            'Type' => 'VARCHAR(255)',
+            'Null' => 'YES',
+        ]));
     }
 }

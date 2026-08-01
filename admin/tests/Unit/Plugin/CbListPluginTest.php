@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CB\Component\Contentbuilderng\Tests\Unit\Plugin;
 
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 use CB\Plugin\Content\ContentbuilderngList\Service\EmbedOptionsService;
 use CB\Plugin\Content\ContentbuilderngList\Service\TagSyntaxService;
@@ -19,6 +20,8 @@ require_once \dirname(__DIR__, 4)
     . '/site/src/Service/EmbeddedListFieldFilterService.php';
 require_once \dirname(__DIR__, 4)
     . '/site/src/Service/EmbeddedListActionFilterService.php';
+require_once \dirname(__DIR__, 4)
+    . '/site/src/Service/EmbeddedListContextService.php';
 
 final class CbListPluginTest extends TestCase
 {
@@ -242,6 +245,43 @@ final class CbListPluginTest extends TestCase
         );
         self::assertFalse(EmbeddedListFieldFilterService::isEmbeddedRequest('1'));
         self::assertFalse(EmbeddedListFieldFilterService::isEmbeddedRequest(''));
+    }
+
+    public function testEmbeddedContextQueryPreservesFieldsAndActions(): void
+    {
+        self::assertSame(
+            '&cblist_embed=content-plugin&cblist_fields=Name%7CEmail&cblist_actions=detail%7Cedit',
+            EmbeddedListContextService::buildQuery(
+                EmbeddedListFieldFilterService::REQUEST_CONTEXT,
+                'Name|Email',
+                'detail|edit'
+            )
+        );
+        self::assertSame(
+            '',
+            EmbeddedListContextService::buildQuery('invalid-context', 'Name', 'detail')
+        );
+    }
+
+    public function testEmbeddedContextIsPreservedAcrossMutations(): void
+    {
+        $listController = \file_get_contents(self::ROOT . '/site/src/Controller/ListController.php');
+        $editController = \file_get_contents(self::ROOT . '/site/src/Controller/EditController.php');
+        $listTemplate = \file_get_contents(self::ROOT . '/site/tmpl/list/default.php');
+        $detailsTemplate = \file_get_contents(self::ROOT . '/site/tmpl/details/default.php');
+        $editTemplate = \file_get_contents(self::ROOT . '/site/tmpl/edit/default.php');
+
+        self::assertIsString($listController);
+        self::assertIsString($editController);
+        self::assertIsString($listTemplate);
+        self::assertIsString($detailsTemplate);
+        self::assertIsString($editTemplate);
+        self::assertStringContainsString('private function buildEmbeddedListQuery(): string', $listController);
+        self::assertStringContainsString('private function buildEmbeddedListQuery(): string', $editController);
+        self::assertStringContainsString('name="cblist_actions"', $listTemplate);
+        self::assertStringContainsString("getString('cblist_fields', '')", $editTemplate);
+        self::assertStringContainsString('foreach ($embeddedListParams as $embeddedListName', $detailsTemplate);
+        self::assertStringContainsString('foreach ($embeddedListParams as $embeddedListName', $editTemplate);
     }
 
     public function testPluginIsBundledAndInstalled(): void
