@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CB\Component\Contentbuilderng\Tests\Unit\Plugin;
 
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 use CB\Plugin\Content\ContentbuilderngList\Service\EmbedOptionsService;
 use CB\Plugin\Content\ContentbuilderngList\Service\TagSyntaxService;
@@ -16,6 +17,8 @@ require_once \dirname(__DIR__, 4)
     . '/plugins/content/contentbuilderng_cblist/src/Service/EmbedOptionsService.php';
 require_once \dirname(__DIR__, 4)
     . '/site/src/Service/EmbeddedListFieldFilterService.php';
+require_once \dirname(__DIR__, 4)
+    . '/site/src/Service/EmbeddedListActionFilterService.php';
 
 final class CbListPluginTest extends TestCase
 {
@@ -24,17 +27,17 @@ final class CbListPluginTest extends TestCase
     public function testTagAttributesAndOptionsAreResolved(): void
     {
         $attributes = TagSyntaxService::parseAttributes(
-            ' id=25 itemid=142 layout=cards fields="Name, Email, Town" height=700 loading=eager title="Registrations &amp; payments"'
+            ' id=25 layout=cards fields="Name|Email|Town" actions="search|detail|export" height=700 loading=eager title="Registrations &amp; payments"'
         );
 
         self::assertSame(
             [
                 'id' => 25,
-                'itemid' => 142,
                 'height' => 700,
                 'layout' => 'cards',
                 'loading' => 'eager',
                 'fields' => ['Name', 'Email', 'Town'],
+                'actions' => ['search', 'detail', 'export'],
                 'title' => 'Registrations & payments',
             ],
             EmbedOptionsService::resolve($attributes)
@@ -46,11 +49,11 @@ final class CbListPluginTest extends TestCase
         self::assertSame(
             [
                 'id' => 7,
-                'itemid' => 0,
                 'height' => 640,
                 'layout' => '',
                 'loading' => 'lazy',
                 'fields' => [],
+                'actions' => [],
                 'title' => '',
             ],
             EmbedOptionsService::resolve(['id' => '7'])
@@ -83,12 +86,16 @@ final class CbListPluginTest extends TestCase
             'missing id' => [[]],
             'non-positive id' => [['id' => '0']],
             'mixed id' => [['id' => '25foo']],
-            'invalid itemid' => [['id' => '25', 'itemid' => '-1']],
             'height too small' => [['id' => '25', 'height' => '239']],
             'height too large' => [['id' => '25', 'height' => '5001']],
             'invalid layout' => [['id' => '25', 'layout' => '../default']],
             'invalid loading' => [['id' => '25', 'loading' => 'automatic']],
-            'invalid field control character' => [['id' => '25', 'fields' => "Name,\x01Email"]],
+            'fields comma separator rejected' => [['id' => '25', 'fields' => 'Name,Email']],
+            'fields semicolon separator rejected' => [['id' => '25', 'fields' => 'Name;Email']],
+            'invalid field control character' => [['id' => '25', 'fields' => "Name|\x01Email"]],
+            'actions comma separator rejected' => [['id' => '25', 'actions' => 'search,export']],
+            'actions semicolon separator rejected' => [['id' => '25', 'actions' => 'search;export']],
+            'unknown action' => [['id' => '25', 'actions' => 'search|teleport']],
         ];
     }
 
@@ -114,7 +121,7 @@ final class CbListPluginTest extends TestCase
                     15 => 'town',
                     99 => 'hidden',
                 ],
-                'Nom, EMAIL, 15, hidden'
+                'Nom| EMAIL|15|hidden'
             )
         );
     }
@@ -127,9 +134,103 @@ final class CbListPluginTest extends TestCase
                 ['town', 'email', 'name'],
                 ['town' => 'Town', 'email' => 'Email', 'name' => 'Name'],
                 ['town' => 'town', 'email' => 'email', 'name' => 'name'],
-                'Name,Town'
+                'Name|Town'
             )
         );
+    }
+
+    public function testFieldSelectorsRejectCommaAndSemicolon(): void
+    {
+        foreach (['Name,Email', 'Name;Email'] as $rawSelectors) {
+            try {
+                EmbeddedListFieldFilterService::parseSelectors($rawSelectors);
+                self::fail('Expected InvalidArgumentException for: ' . $rawSelectors);
+            } catch (\InvalidArgumentException $exception) {
+                self::assertSame('fields', $exception->getMessage());
+            }
+        }
+    }
+
+    public function testActionSelectorsAreParsedAndDeduplicated(): void
+    {
+        self::assertSame(
+            ['search', 'detail', 'export'],
+            EmbeddedListActionFilterService::parseActions('Search|Detail|EXPORT|detail')
+        );
+        self::assertSame([], EmbeddedListActionFilterService::parseActions(''));
+    }
+
+    public function testActionSelectorsRejectCommaAndSemicolon(): void
+    {
+        foreach (['search,export', 'search;export'] as $rawActions) {
+            try {
+                EmbeddedListActionFilterService::parseActions($rawActions);
+                self::fail('Expected InvalidArgumentException for: ' . $rawActions);
+            } catch (\InvalidArgumentException $exception) {
+                self::assertSame('actions', $exception->getMessage());
+            }
+        }
+    }
+
+    public function testKnownActionsCoverTheExhaustiveVocabulary(): void
+    {
+        self::assertSame(
+            [
+                'search',
+                'state',
+                'publish',
+                'language',
+                'new',
+                'edit',
+                'delete',
+                'export',
+                'rating',
+                'detail',
+                'print',
+            ],
+            EmbeddedListActionFilterService::ACTIONS
+        );
+
+        foreach (EmbeddedListActionFilterService::ACTIONS as $action) {
+            self::assertTrue(EmbeddedListActionFilterService::isKnownAction($action));
+        }
+        self::assertFalse(EmbeddedListActionFilterService::isKnownAction('teleport'));
+    }
+
+    public function testIsAllowedIsUnrestrictedWhenAllowListIsEmpty(): void
+    {
+        self::assertTrue(EmbeddedListActionFilterService::isAllowed('delete', []));
+        self::assertTrue(EmbeddedListActionFilterService::isAllowed('anything', []));
+    }
+
+    public function testIsAllowedOnlyAllowsListedActions(): void
+    {
+        $allowed = ['search', 'detail'];
+
+        self::assertTrue(EmbeddedListActionFilterService::isAllowed('search', $allowed));
+        self::assertTrue(EmbeddedListActionFilterService::isAllowed('detail', $allowed));
+        self::assertFalse(EmbeddedListActionFilterService::isAllowed('delete', $allowed));
+        self::assertFalse(EmbeddedListActionFilterService::isAllowed('edit', $allowed));
+    }
+
+    public function testDebugStateReportsOnlyTheRequestedActions(): void
+    {
+        $state = EmbeddedListActionFilterService::debugState(
+            ['search', 'detail', 'delete'],
+            ['search', 'detail']
+        );
+
+        self::assertSame(
+            ['search' => true, 'detail' => true, 'delete' => false],
+            $state
+        );
+    }
+
+    public function testDebugStateIsUnrestrictedWhenAllowListIsEmpty(): void
+    {
+        $state = EmbeddedListActionFilterService::debugState(['search', 'delete'], []);
+
+        self::assertSame(['search' => true, 'delete' => true], $state);
     }
 
     public function testEmbeddedRequestRequiresExplicitPublicContext(): void
@@ -175,6 +276,10 @@ final class CbListPluginTest extends TestCase
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_XML_DESCRIPTION',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_LABEL',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_TEXT',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_FIELDS_LABEL',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_FIELDS_TEXT',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_LABEL',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_TEXT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_TAG',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_IFRAME_TITLE',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_OPEN_LIST',

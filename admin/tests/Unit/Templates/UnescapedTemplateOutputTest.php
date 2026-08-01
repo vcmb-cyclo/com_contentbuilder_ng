@@ -94,7 +94,11 @@ final class UnescapedTemplateOutputTest extends TestCase
         'site/tmpl/list/default.php' => 46,
         'site/tmpl/publicforms/default.php' => 20,
         'site/layouts/contentbuilderng/action_toolbar.php' => 2,
-        'site/layouts/contentbuilderng/debug_panel.php' => 18,
+        // +1 on 2026-08-01 for the cbListActions block's container/aria id
+        // line: $debugIdBase is 'cb-debug-form-' . max(0, $formId) plus an
+        // int record id, never raw user input, same safe pattern as every
+        // other $debugIdBase id/aria-labelledby pair already in this file.
+        'site/layouts/contentbuilderng/debug_panel.php' => 19,
         'site/layouts/contentbuilderng/list_pagination.php' => 6,
         'site/layouts/contentbuilderng/preview_color_mode.php' => 2,
     ];

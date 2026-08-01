@@ -67,17 +67,30 @@ final class EmbeddedListFieldFilterService
     }
 
     /**
+     * Splits on `|`, same convention as {CBStats hide="..."}. `,` and `;`
+     * are rejected rather than accepted as an alternate separator: a field
+     * label can itself legitimately contain a comma, which silently
+     * splitting on it would corrupt.
+     *
      * @return list<string>
      */
     public static function parseSelectors(string $rawSelectors): array
     {
-        $selectors = preg_split('/\s*,\s*/u', trim($rawSelectors)) ?: [];
-        $selectors = array_values(
-            array_filter(
-                array_map('trim', $selectors),
-                static fn(string $selector): bool => $selector !== ''
-            )
-        );
+        $rawSelectors = trim($rawSelectors);
+
+        if ($rawSelectors === '') {
+            return [];
+        }
+
+        if (str_contains($rawSelectors, ',') || str_contains($rawSelectors, ';')) {
+            throw new \InvalidArgumentException('fields');
+        }
+
+        $selectors = array_map('trim', explode('|', $rawSelectors));
+        $selectors = array_values(array_filter(
+            $selectors,
+            static fn(string $selector): bool => $selector !== ''
+        ));
 
         return array_values(array_unique($selectors));
     }

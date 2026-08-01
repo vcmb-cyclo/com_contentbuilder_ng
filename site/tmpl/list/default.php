@@ -32,6 +32,7 @@ use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewColorModeHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 /** @var SiteApplication $app */
@@ -172,11 +173,29 @@ if ($currentListLayout === '') {
 }
 $currentListLayoutQuery = $currentListLayout !== 'default' ? '&layout=' . rawurlencode($currentListLayout) : '';
 $embeddedListContext = (string) $input->getCmd('cblist_embed', '');
-$embeddedListFields = EmbeddedListFieldFilterService::isEmbeddedRequest($embeddedListContext)
+$isEmbeddedListRequest = EmbeddedListFieldFilterService::isEmbeddedRequest($embeddedListContext);
+$embeddedListFields = $isEmbeddedListRequest
     ? trim((string) $input->getString('cblist_fields', ''))
     : '';
-$embeddedListParams = $embeddedListFields !== ''
-    ? ['cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT, 'cblist_fields' => $embeddedListFields]
+$embeddedListRawActions = $isEmbeddedListRequest
+    ? trim((string) $input->getString('cblist_actions', ''))
+    : '';
+try {
+    $cbListAllowedActions = EmbeddedListActionFilterService::parseActions($embeddedListRawActions);
+} catch (\InvalidArgumentException) {
+    // cblist_actions is plugin-generated and already validated before this
+    // ever renders — this only fires for a hand-crafted request bypassing
+    // the plugin. Fail open to "unrestricted" rather than a fatal error.
+    $cbListAllowedActions = [];
+}
+$cbListActionAllowed = static fn(string $action): bool
+    => EmbeddedListActionFilterService::isAllowed($action, $cbListAllowedActions);
+$embeddedListParams = ($embeddedListFields !== '' || $embeddedListRawActions !== '')
+    ? array_filter([
+        'cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT,
+        'cblist_fields' => $embeddedListFields,
+        'cblist_actions' => $embeddedListRawActions,
+    ], static fn(string $value): bool => $value !== '')
     : [];
 $embeddedListQuery = $embeddedListParams !== []
     ? '&' . http_build_query($embeddedListParams)
@@ -297,6 +316,22 @@ $previewQuery = PreviewColorModeHelper::appendQuery($previewQuery, $previewColor
 if ($isAdminPreview) {
     $view_allowed = true;
 }
+
+// {CBList actions="..."} narrows what's rendered on top of ACL, never the
+// other way round: every flag below already carries its ACL/ownership
+// check (and, for direct storage or admin preview, the overrides above),
+// so ANDing the action allow-list here can only turn an allowed control
+// off, never turn a disallowed one on. Controls with no ACL dimension of
+// their own (the search box, the state/publish/language *filter*
+// dropdowns, which any viewer can use regardless of $state_allowed etc.)
+// have no existing flag to narrow here — those are gated inline where
+// they render, further down.
+$new_allowed = $new_allowed && $cbListActionAllowed('new');
+$delete_allowed = $delete_allowed && $cbListActionAllowed('delete');
+$state_allowed = $state_allowed && $cbListActionAllowed('state');
+$publish_allowed = $publish_allowed && $cbListActionAllowed('publish');
+$rating_allowed = $rating_allowed && $cbListActionAllowed('rating');
+$language_allowed = $language_allowed && $cbListActionAllowed('language');
 
 $document = $app->getDocument();
 $wa = $document->getWebAssetManager();
@@ -447,6 +482,10 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 			(int) ($this->form_id ?? 0),
 			$frontend
 		);
+		$debugCbListActions = EmbeddedListActionFilterService::debugState(
+			['search', 'state', 'publish', 'language', 'new', 'edit', 'delete', 'export', 'rating', 'detail'],
+			$cbListAllowedActions
+		);
 		$debugFilters = [
 			'search' => (string) ($state?->get('formsd_filter') ?? ''),
 			'state' => (int) ($state?->get('formsd_filter_state') ?? 0),
@@ -488,6 +527,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 			'formId' => (int) ($this->form_id ?? 0),
 			'showPermissions' => !empty($this->debug_show_permissions),
 			'permissions' => $debugPermissions,
+			'cbListActions' => $debugCbListActions,
 			'showFilters' => !empty($this->debug_show_filters),
 			'filters' => $debugFilters,
 			'showLogs' => !empty($this->debug_enable_logs) && !empty($this->debug_show_request_logs),
@@ -703,7 +743,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 								</select>
 							<?php endif; ?>
 
-							<?php if ($this->display_filter) : ?>
+							<?php if ($this->display_filter && $cbListActionAllowed('search')) : ?>
 									<div class="input-group input-group-sm cb-filter-search-group">
 									<label class="input-group-text" for="contentbuilderng_filter">
 										<?php echo Text::_('COM_CONTENTBUILDERNG_FILTER'); ?>
@@ -735,7 +775,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 									</div>
 								<?php endif; ?>
 
-							<?php if ($this->list_state && count($this->states)) : ?>
+							<?php if ($this->list_state && count($this->states) && $cbListActionAllowed('state')) : ?>
 								<select class="form-select form-select-sm cb-filter-select-state"
 									name="list_state_filter" id="list_state_filter"
 									title="<?php echo Text::_('COM_CONTENTBUILDERNG_STATE_FILTER'); ?>"
@@ -751,7 +791,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 								</select>
 							<?php endif; ?>
 
-							<?php if ($this->list_publish) : ?>
+							<?php if ($this->list_publish && $cbListActionAllowed('publish')) : ?>
 								<select class="form-select form-select-sm cb-filter-select-md"
 									name="list_publish_filter" id="list_publish_filter"
 									title="<?php echo Text::_('COM_CONTENTBUILDERNG_FILTER'); ?>: <?php echo Text::_('COM_CONTENTBUILDERNG_PUBLISH'); ?>"
@@ -767,7 +807,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 								</select>
 							<?php endif; ?>
 
-							<?php if ($this->list_language) : ?>
+							<?php if ($this->list_language && $cbListActionAllowed('language')) : ?>
 								<select class="form-select form-select-sm cb-filter-select-lang"
 									name="list_language_filter" id="list_language_filter"
 									title="<?php echo Text::_('COM_CONTENTBUILDERNG_FILTER'); ?>: <?php echo Text::_('COM_CONTENTBUILDERNG_LANGUAGE'); ?>"
@@ -785,7 +825,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						</div>
 
 						<!-- DROITE : actions + limitbox + excel -->
-						<?php if ($showNewButton || $delete_allowed || $this->show_records_per_page || ($this->export_xls && empty($this->invalid_list_setup))) : ?>
+						<?php if ($showNewButton || $delete_allowed || $this->show_records_per_page || ($this->export_xls && empty($this->invalid_list_setup) && $cbListActionAllowed('export'))) : ?>
 								<div class="d-flex align-items-center gap-2 ms-auto cb-list-toolbar-actions">
 
 										<?php if ($showNewButton) : ?>
@@ -841,7 +881,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 										</div>
 									<?php endif; ?>
 
-										<?php if ($this->export_xls && empty($this->invalid_list_setup)) : ?>
+										<?php if ($this->export_xls && empty($this->invalid_list_setup) && $cbListActionAllowed('export')) : ?>
 											<a class="btn btn-sm btn-outline-success align-self-center d-inline-flex align-items-center gap-1 rounded-pill"
 												href="<?php echo Route::_('index.php?' . http_build_query($exportQueryParams) . $previewQuery, false); ?>"
 												title="<?php echo Text::_('COM_CONTENTBUILDERNG_EXPORT_XLSX_TOOLTIP'); ?>">
@@ -884,8 +924,8 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 							'list_publish' => $togglePublish,
 						], '&cid[]=' . (int) $row->colRecord . $previewQuery . '&' . Session::getFormToken() . '=1')
 					);
-					$rowCanView = $view_allowed || $canAccessOwnedRecord('view', $row->colRecord);
-					$rowCanEdit = $edit_allowed || $canAccessOwnedRecord('edit', $row->colRecord);
+					$rowCanView = ($view_allowed || $canAccessOwnedRecord('view', $row->colRecord)) && $cbListActionAllowed('detail');
+					$rowCanEdit = ($edit_allowed || $canAccessOwnedRecord('edit', $row->colRecord)) && $cbListActionAllowed('edit');
 						$visibleFields = [];
 						foreach ($row as $key => $value) {
 							if (strpos((string) $key, 'col') !== 0) {
@@ -1028,7 +1068,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 								<?php if (!empty($this->debug_mode) && !empty($this->debug_show_cb_id)) : ?>
 									<span class="cb-list-card-badge"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_CB_ID_COLUMN'); ?> #<?php echo (int) ($this->cb_record_ids[$row->colRecord] ?? 0); ?></span>
 								<?php endif; ?>
-								<?php if ($this->list_state && ($hasStateControl || $hasStaticStateBadge)) : ?>
+								<?php if ($this->list_state && ($hasStateControl || $hasStaticStateBadge) && $cbListActionAllowed('state')) : ?>
 									<?php if ($hasStateControl && !$isTilesVariant) : ?>
 										<?php
 										$currentStateTitle = $this->state_titles[$row->colRecord] ?? '';
@@ -1071,10 +1111,10 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 										><?php echo isset($this->state_titles[$row->colRecord]) ? htmlspecialchars($this->state_titles[$row->colRecord], ENT_QUOTES, 'UTF-8') : ''; ?></span>
 									<?php endif; ?>
 								<?php endif; ?>
-								<?php if ($this->list_language) : ?>
+								<?php if ($this->list_language && $cbListActionAllowed('language')) : ?>
 									<span class="cb-list-card-badge"><?php echo htmlspecialchars((string) (isset($this->lang_codes[$row->colRecord]) && $this->lang_codes[$row->colRecord] ? $this->lang_codes[$row->colRecord] : '*'), ENT_QUOTES, 'UTF-8'); ?></span>
 								<?php endif; ?>
-								<?php if ($this->list_publish || $directStorageMode) : ?>
+								<?php if (($this->list_publish || $directStorageMode) && $cbListActionAllowed('publish')) : ?>
 									<span class="cb-list-card-badge" data-cb-publish-badge data-record-id="<?php echo (int) $row->colRecord; ?>">
 										<span class="<?php echo $isPublished ? 'fa-solid fa-check text-success' : 'fa-solid fa-circle-xmark text-danger'; ?>" aria-hidden="true" data-cb-publish-icon></span>
 										<span class="visually-hidden"><?php echo $isPublished ? Text::_('JPUBLISHED') : Text::_('JUNPUBLISHED'); ?></span>
@@ -1116,7 +1156,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 								</div>
 								<?php endif; ?>
 							<?php endif; ?>
-							<?php if ($this->list_rating) : ?>
+							<?php if ($this->list_rating && $cbListActionAllowed('rating')) : ?>
 								<div class="cb-list-card-field">
 									<div class="cb-list-card-label"><?php echo Text::_('COM_CONTENTBUILDERNG_PERM_RATING'); ?></div>
 									<div class="cb-list-card-value">
@@ -1136,7 +1176,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 									<span></span>
 								<?php endif; ?>
 
-								<?php if ($this->list_state && !$isTilesVariant && !$hasStateControl) : ?>
+								<?php if ($this->list_state && !$isTilesVariant && !$hasStateControl && $cbListActionAllowed('state')) : ?>
 									<div class="cb-list-card-state">
 										<?php if ($hasStaticStateBadge) : ?>
 											<span class="cb-list-card-badge" data-cb-state-badge data-record-id="<?php echo (int) $row->colRecord; ?>"<?php echo $stateBadgeStyle !== '' ? ' style="' . htmlspecialchars($stateBadgeStyle, ENT_QUOTES, 'UTF-8') . '"' : ''; ?>><?php echo htmlspecialchars((string) $this->state_titles[$row->colRecord], ENT_QUOTES, 'UTF-8'); ?></span>
@@ -1202,7 +1242,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 					<?php
 					}
 
-						if ($this->list_state) {
+						if ($this->list_state && $cbListActionAllowed('state')) {
 						?>
 							<th scope="col" class="table-light">
 								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDERNG_EDIT_STATE'), 'colState', $this->lists['order_Dir'], $this->lists['order']); ?>
@@ -1210,7 +1250,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						<?php
 						}
 
-						if ($this->list_publish || $directStorageMode) {
+						if (($this->list_publish || $directStorageMode) && $cbListActionAllowed('publish')) {
 						?>
 							<th scope="col" class="table-light">
 								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED'), 'colPublished', $this->lists['order_Dir'], $this->lists['order']); ?>
@@ -1218,7 +1258,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						<?php
 						}
 
-						if ($this->list_language) {
+						if ($this->list_language && $cbListActionAllowed('language')) {
 						?>
 							<th scope="col" class="table-light">
 								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDERNG_LANGUAGE'), 'colLanguage', $this->lists['order_Dir'], $this->lists['order']); ?>
@@ -1249,7 +1289,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 					<?php
 					}
 
-					if ($this->list_rating) {
+					if ($this->list_rating && $cbListActionAllowed('rating')) {
 					?>
 						<th scope="col" class="table-light">
 							<?php echo HTMLHelper::_('grid.sort', htmlspecialchars('COM_CONTENTBUILDERNG_RATING', ENT_QUOTES, 'UTF-8'), 'colRating', $this->lists['order_Dir'], $this->lists['order']); ?>
@@ -1293,8 +1333,8 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						], '&cid[]=' . (int) $row->colRecord . $previewQuery . '&' . Session::getFormToken() . '=1')
 					);
 					$select = '<input class="form-check-input" type="checkbox" name="cid[]" value="' . $row->colRecord . '"/>';
-                    $rowCanView = $view_allowed || $canAccessOwnedRecord('view', $row->colRecord);
-                    $rowCanEdit = $edit_allowed || $canAccessOwnedRecord('edit', $row->colRecord);
+                    $rowCanView = ($view_allowed || $canAccessOwnedRecord('view', $row->colRecord)) && $cbListActionAllowed('detail');
+                    $rowCanEdit = ($edit_allowed || $canAccessOwnedRecord('edit', $row->colRecord)) && $cbListActionAllowed('edit');
 				?>
 				<tr>
 					<?php if ($isBfLinked): ?>
@@ -1374,7 +1414,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 					}
 					?>
 					<?php
-					if ($this->list_state) {
+					if ($this->list_state && $cbListActionAllowed('state')) {
 						$stateCellStyle = $getStateBadgeStyle($row->colRecord, (array) ($this->state_colors ?? []));
 					?>
 						<td
@@ -1419,7 +1459,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 					}
 					?>
 						<?php
-						if ($this->list_publish || $directStorageMode) {
+						if (($this->list_publish || $directStorageMode) && $cbListActionAllowed('publish')) {
 						?>
 							<td class="text-center align-middle">
 								<?php
@@ -1447,7 +1487,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						}
 						?>
 					<?php
-					if ($this->list_language) {
+					if ($this->list_language && $cbListActionAllowed('language')) {
 					?>
 						<td>
 							<?php echo isset($this->lang_codes[$row->colRecord]) && $this->lang_codes[$row->colRecord] ? $this->lang_codes[$row->colRecord] : '*'; ?>
@@ -1496,7 +1536,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 					}
 					?>
 					<?php
-					if ($this->list_rating) {
+					if ($this->list_rating && $cbListActionAllowed('rating')) {
 					?>
 						<td>
 							<?php

@@ -86,8 +86,9 @@ view/create/edit, and introductory text.
 ## Debug mode
 
 When enabled on the view, a DEBUG badge appears. A collapsible panel can show
-identifiers, permissions, filters, and request logs. It is a diagnostic tool and
-should not remain enabled for the public.
+identifiers, permissions, filters, request logs, and the `{CBList actions="..."}`
+terms available on that screen along with their allowed/denied state. It is a
+diagnostic tool and should not remain enabled for the public.
 
 ## Common messages
 

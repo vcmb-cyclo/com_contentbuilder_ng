@@ -30,6 +30,20 @@
                     description="PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_TEXT"
                     class="alert alert-info w-100"
                 />
+                <field
+                    name="cblist_fields_note"
+                    type="note"
+                    label="PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_FIELDS_LABEL"
+                    description="PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_FIELDS_TEXT"
+                    class="alert alert-info w-100"
+                />
+                <field
+                    name="cblist_actions_note"
+                    type="note"
+                    label="PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_LABEL"
+                    description="PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_TEXT"
+                    class="alert alert-info w-100"
+                />
             </fieldset>
         </fields>
     </config>

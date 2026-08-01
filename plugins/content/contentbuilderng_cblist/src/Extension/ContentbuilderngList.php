@@ -75,14 +75,14 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
             'cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT,
         ];
 
-        if ($options['itemid'] > 0) {
-            $query['Itemid'] = $options['itemid'];
-        }
         if ($options['layout'] !== '') {
             $query['layout'] = $options['layout'];
         }
         if ($options['fields'] !== []) {
-            $query['cblist_fields'] = implode(',', $options['fields']);
+            $query['cblist_fields'] = implode('|', $options['fields']);
+        }
+        if ($options['actions'] !== []) {
+            $query['cblist_actions'] = implode('|', $options['actions']);
         }
 
         $url = Route::_('index.php?' . http_build_query($query), false);

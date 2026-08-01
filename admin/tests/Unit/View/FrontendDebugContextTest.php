@@ -46,6 +46,24 @@ final class FrontendDebugContextTest extends TestCase
         ];
     }
 
+    #[DataProvider('templateProvider')]
+    public function testFrontendTemplatesPassCbListActionsToDebugPanel(string $relativePath): void
+    {
+        $template = $this->read($relativePath);
+
+        self::assertStringContainsString('EmbeddedListActionFilterService::debugState(', $template);
+        self::assertStringContainsString("'cbListActions' => \$debugCbListActions,", $template);
+    }
+
+    public function testDebugPanelRendersCbListActionsAsDisabledCheckboxes(): void
+    {
+        $layout = $this->read('site/layouts/contentbuilderng/debug_panel.php');
+
+        self::assertStringContainsString("'COM_CONTENTBUILDERNG_DEBUG_CBLIST_ACTIONS'", $layout);
+        self::assertStringContainsString('foreach ($cbListActions as $action => $allowed)', $layout);
+        self::assertStringContainsString('disabled />', $layout);
+    }
+
     #[DataProvider('languageProvider')]
     public function testDebugContextTranslationsAreComplete(string $language): void
     {
@@ -59,6 +77,8 @@ final class FrontendDebugContextTest extends TestCase
             'COM_CONTENTBUILDERNG_DEBUG_CURRENT_ACCOUNT',
             'COM_CONTENTBUILDERNG_DEBUG_FORM_ID',
             'COM_CONTENTBUILDERNG_DEBUG_GUEST_ACCOUNT',
+            'COM_CONTENTBUILDERNG_DEBUG_CBLIST_ACTIONS',
+            'COM_CONTENTBUILDERNG_DEBUG_CBLIST_ACTIONS_HINT',
         ] as $key) {
             self::assertArrayHasKey($key, $translations, $language . ': ' . $key);
             self::assertNotSame('', $translations[$key], $language . ': ' . $key);
