@@ -30,13 +30,14 @@ final class CbListPluginTest extends TestCase
     public function testTagAttributesAndOptionsAreResolved(): void
     {
         $attributes = TagSyntaxService::parseAttributes(
-            ' id=25 layout=cards fields="Name|Email|Town" actions="search|detail|export" height=700 loading=eager title="Registrations &amp; payments"'
+            ' id=25 layout=cards pagination=25 fields="Name|Email|Town" actions="search|detail|export" height=700 loading=eager title="Registrations &amp; payments"'
         );
 
         self::assertSame(
             [
                 'id' => 25,
                 'height' => 700,
+                'pagination' => 25,
                 'layout' => 'cards',
                 'loading' => 'eager',
                 'fields' => ['Name', 'Email', 'Town'],
@@ -52,7 +53,8 @@ final class CbListPluginTest extends TestCase
         self::assertSame(
             [
                 'id' => 7,
-                'height' => 640,
+                'height' => 240,
+                'pagination' => null,
                 'layout' => '',
                 'loading' => 'lazy',
                 'fields' => [],
@@ -124,15 +126,28 @@ final class CbListPluginTest extends TestCase
                     15 => 'town',
                     99 => 'hidden',
                 ],
-                'Nom| EMAIL|15|hidden'
+                'Nom| EMAIL|15'
             )
         );
     }
 
-    public function testEmbeddedFieldFilterPreservesViewOrder(): void
+    public function testEmbeddedFieldFilterRejectsUnknownField(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('unknown_field:Missing');
+
+        EmbeddedListFieldFilterService::filter(
+            [11],
+            [11 => 'Identifier'],
+            [11 => 'id'],
+            'Missing'
+        );
+    }
+
+    public function testEmbeddedFieldFilterPreservesSelectorOrder(): void
     {
         self::assertSame(
-            ['town', 'name'],
+            ['name', 'town'],
             EmbeddedListFieldFilterService::filter(
                 ['town', 'email', 'name'],
                 ['town' => 'Town', 'email' => 'Email', 'name' => 'Name'],

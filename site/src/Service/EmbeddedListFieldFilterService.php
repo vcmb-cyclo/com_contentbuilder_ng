@@ -37,33 +37,42 @@ final class EmbeddedListFieldFilterService
             return array_values($visibleColumns);
         }
 
-        $normalizedSelectors = array_fill_keys(
-            array_map(self::normalize(...), $selectors),
-            true
-        );
+        $filteredColumns = [];
+        $selectedReferences = [];
 
-        return array_values(
-            array_filter(
-                $visibleColumns,
-                static function (int|string $referenceId) use ($labels, $names, $normalizedSelectors): bool {
-                    $candidates = [
-                        (string) $referenceId,
-                        (string) ($names[$referenceId] ?? ''),
-                        (string) ($labels[$referenceId] ?? ''),
-                    ];
+        foreach ($selectors as $selector) {
+            $normalizedSelector = self::normalize($selector);
+            $selectorMatched = false;
 
-                    foreach ($candidates as $candidate) {
-                        $normalized = self::normalize($candidate);
+            foreach ($visibleColumns as $referenceId) {
+                $referenceKey = (string) $referenceId;
 
-                        if ($normalized !== '' && isset($normalizedSelectors[$normalized])) {
-                            return true;
-                        }
-                    }
-
-                    return false;
+                if (isset($selectedReferences[$referenceKey])) {
+                    continue;
                 }
-            )
-        );
+
+                $candidates = [
+                    (string) $referenceId,
+                    (string) ($names[$referenceId] ?? ""),
+                    (string) ($labels[$referenceId] ?? ""),
+                ];
+
+                foreach ($candidates as $candidate) {
+                    if ($normalizedSelector !== "" && self::normalize($candidate) === $normalizedSelector) {
+                        $filteredColumns[] = $referenceId;
+                        $selectorMatched = true;
+                        $selectedReferences[$referenceKey] = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$selectorMatched) {
+                throw new \InvalidArgumentException('unknown_field:' . $selector);
+            }
+        }
+
+        return $filteredColumns;
     }
 
     /**

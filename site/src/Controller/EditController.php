@@ -512,11 +512,15 @@ class EditController extends BaseController
 
     private function buildEmbeddedListQuery(): string
     {
-        return EmbeddedListContextService::buildQuery(
+        $query = EmbeddedListContextService::buildQuery(
             (string) $this->input->getCmd('cblist_embed', ''),
             (string) $this->input->getString('cblist_fields', ''),
             (string) $this->input->getString('cblist_actions', '')
         );
+
+        $title = trim((string) $this->input->getString('cblist_title', ''));
+
+        return $title === '' ? $query : $query . '&cblist_title=' . rawurlencode($title);
     }
 
     private function buildListQuery(): string
