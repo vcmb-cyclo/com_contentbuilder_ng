@@ -13,7 +13,11 @@
 > étapes 3-4 restent entières (PHPStan est toujours au niveau 2, aucun garde
 > anti-régression de baseline). Chantier B fait entièrement, deux XSS
 > stockées publiques trouvées et corrigées au passage (non citées par
-> l'audit du 2026-07-31). Voir chaque chantier ci-dessous pour le détail.
+> l'audit du 2026-07-31). Chantier C : N+1 et group_concat faits (étapes
+> 3-5) ; la mise en cache de `ListModel::getData()` (étapes 1-2) est
+> reportée — décision explicite après lecture complète de la méthode,
+> voir le chantier C pour le détail des risques identifiés. Voir chaque
+> chantier ci-dessous pour le détail.
 
 ---
 
@@ -23,7 +27,7 @@
 |---|---|---:|---|---|
 | A | Outillage qualité (PHPCS, PHPStan 2→6) — **PHPCS fait, PHPStan à faire** | 11 – 16 j restants | Faible | — |
 | B | Échappement des sorties front — ✅ fait | — | Faible | A |
-| C | Cache et requêtes N+1 | 6 – 10 j | Moyen | A |
+| C | Cache et requêtes N+1 — **N+1 faits, cache reporté** | 4 – 7 j restants | Moyen | A |
 | D | Décomposition d'`EditModel::store()` | 25 – 30 j | **Élevé** | A, F |
 | E | Décomposition des autres god-methods | 15 – 20 j | Moyen | A, D |
 | F | `FormSourceInterface` | 8 – 12 j | Moyen | A |
@@ -230,49 +234,84 @@ chantier A).
 
 ---
 
-## C. Cache et requêtes N+1
+## C. Cache et requêtes N+1 — étapes 3-5 faites (2026-08-01), 1-2 reportées
 
 **Constat.** Deux usages du cache Joomla dans tout le composant. 248 sites de
 requête à l'intérieur de boucles.
 
 ### Étapes
 
-1. **Cacher le rendu de liste frontend** (`ListModel::getData()`, 501 lignes,
-   chemin le plus chaud) :
+1. ❌ **Reporté, décision explicite (2026-08-01).** « Cacher le rendu de
+   liste frontend » (`ListModel::getData()`, 501 lignes, chemin le plus
+   chaud) s'est avéré nettement plus risqué que l'esquisse du plan ne le
+   laissait supposer une fois la méthode lue en entier :
+   - **Effet de bord en écriture dans un chemin de lecture.** La fonction
+     "randomizer" (tri aléatoire périodique) exécute une `UPDATE` sur
+     `#__contentbuilderng_records.rand_date` directement dans `getData()`.
+     Un cache qui court-circuite l'appel empêcherait cette réinitialisation
+     de s'exécuter pendant toute la durée de vie de l'entrée en cache —
+     régression fonctionnelle silencieuse, pas juste un problème de fraîcheur.
+   - **La clé illustrée par le plan est incomplète.** Le contenu dépend, en
+     plus des groupes utilisateur, d'un état de filtre stocké en **session**
+     par utilisateur (mots-clés, catégorie d'article, plages calendaires,
+     filtres par champ avec une DSL `@range`/`@match`), du tri, de la
+     pagination, et d'une restriction « mes enregistrements » **par
+     utilisateur** (pas seulement par groupe). Une clé qui omet une de ces
+     dimensions est soit une fuite de données entre utilisateurs (le risque
+     déjà identifié par le plan), soit un retour de résultats obsolètes/
+     incorrects à un utilisateur ayant ses propres filtres actifs — deux
+     classes de bug qu'une implémentation précipitée peut introduire sans
+     qu'aucun test existant ne le révèle.
 
-   ```php
-   $cache = $container->get(CacheControllerFactoryInterface::class)
-       ->createCacheController('callback', ['defaultgroup' => 'com_contentbuilderng.list']);
+   Trois options exposées à l'utilisateur (cache restreint aux vues sans
+   filtre actif / cache complet fidèle au plan avec tests dédiés / report) —
+   **report choisi**. À reprendre avec un budget dédié, probablement avec
+   la même méthode que le chantier D : caractériser le comportement actuel
+   avant d'y toucher.
 
-   $data = $cache->get(
-       fn(): object => $this->getModel()->getData(),
-       [],
-       md5($formId . '|' . $userGroupsHash . '|' . $stateHash)
-   );
-   ```
+2. ❌ **Reporté avec l'étape 1** (l'invalidation n'a pas de sens sans le cache
+   qu'elle invaliderait).
 
-   > ⚠️ **La clé doit intégrer les groupes de l'utilisateur.** Sans cela le
-   > cache devient un vecteur de fuite d'ACL — un utilisateur servirait la vue
-   > d'un autre. C'est le principal risque de ce chantier.
+3. ✅ **N+1 résorbés — mais pas ceux cités.** Les lignes citées par l'audit
+   du 2026-07-31 avaient dérivé et ne correspondaient plus à un N+1 réel une
+   fois vérifiées (`getRecordMetadata()` par exemple n'est jamais appelé en
+   boucle sur plusieurs enregistrements — seulement une fois par vue détail/
+   édition). Retrouvé par balayage structurel (appel de requête à
+   l'intérieur d'un corps de boucle) plutôt qu'en se fiant aux numéros de
+   ligne : `synchRecords()` dans **les deux** fichiers `types/` faisait une
+   vérification d'existence par ligne avant insertion, alors que la requête
+   externe garantissait déjà l'absence de ligne de suivi pour chaque id
+   retourné — la vérification ne pouvait jamais être vraie. Remplacé par un
+   seul `INSERT IGNORE` multi-lignes (`IGNORE` plutôt qu'un `INSERT`
+   multi-lignes ordinaire : InnoDB exécute ce dernier de façon atomique,
+   donc une seule ligne perdant une course contre une requête concurrente
+   sur la clé unique `(type, reference_id, record_id)` aurait fait échouer
+   tout le lot, pas seulement la ligne en conflit).
 
-2. **Invalider** dans `FormModel::save()`, `StorageModel::save()` et à chaque
-   écriture d'enregistrement.
+   `admin/src/View/Storage/HtmlView.php:228,400`, également cité, ne
+   contient aucune requête en boucle nulle part dans le fichier actuel —
+   probablement déjà résolu avant cette passe, comme le motif CSP du
+   chantier B.
 
-3. **Résorber les N+1 les plus coûteux** — requêtes ensemblistes (`whereIn`)
-   puis réindexation en PHP :
+4. ✅ **`SET SESSION group_concat_max_len` sorti de la boucle implicite.**
+   `FormSourceFactory::getForm()` met en cache une instance par
+   `(type, referenceId)`, donc le constructeur de
+   `contentbuilderng_com_breezingformsng` s'exécute une fois par formulaire
+   distinct traité dans une requête — un écran touchant plusieurs
+   formulaires (rapport d'audit, export en masse) relançait ce `SET SESSION`
+   à chaque instanciation. Gardé par une variable statique, même motif que
+   `RatingHelper::getRating()`.
 
-   | Fichier | Lignes |
-   |---|---|
-   | `admin/src/types/com_breezingformsng.php` | 632, 678, 863 |
-   | `admin/src/types/com_contentbuilderng.php` | 108, 230 |
-   | `admin/src/View/Storage/HtmlView.php` | 228, 400 |
+5. ✅ **PhpSpreadsheet vérifié** — chargé uniquement via des références
+   pleinement qualifiées à l'intérieur de
+   `StorageModel::convertSpreadsheetFileToCsv()`, appelée seulement depuis
+   le chemin d'import CSV/Excel. Rien à corriger.
 
-4. **Sortir `SET SESSION group_concat_max_len`** de la boucle
-   (`com_breezingformsng.php:441`).
+**Livrable.** N+1 principaux résorbés. Liste frontend cachée : reporté,
+décision explicite documentée ci-dessus plutôt qu'une implémentation
+risquée sans tests dédiés.
 
-5. **Vérifier que PhpSpreadsheet n'est pas chargé** hors du chemin d'export.
-
-**Livrable.** Liste frontend cachée avec clé ACL-safe, N+1 principaux résorbés.
+694 tests, PHPStan clean, gate PSR-12 intact.
 
 ---
 
