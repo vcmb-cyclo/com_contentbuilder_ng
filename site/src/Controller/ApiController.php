@@ -71,9 +71,9 @@ class ApiController extends BaseController
     }
 
     public function __construct(
-        array $config = [], 
-        ?MVCFactoryInterface $factory = null, 
-        ?CMSWebApplicationInterface $app = null, 
+        array $config = [],
+        ?MVCFactoryInterface $factory = null,
+        ?CMSWebApplicationInterface $app = null,
         ?Input $input = null
     ) {
         parent::__construct($config, $factory, $app, $input);
@@ -413,7 +413,8 @@ class ApiController extends BaseController
         $fieldReferenceId = $this->input->getCmd('field_reference_id', '');
         $whereField = $this->input->getCmd('where_field', '');
         $apiFields = $this->getApiFieldPermissionService();
-        if (!$apiFields->isReferenceAllowed($formId, $fieldReferenceId)
+        if (
+            !$apiFields->isReferenceAllowed($formId, $fieldReferenceId)
             || ($whereField !== '' && !$apiFields->isReferenceAllowed($formId, $whereField))
         ) {
             throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_API_FIELD_NOT_ALLOWED'), 403);

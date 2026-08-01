@@ -11,7 +11,7 @@
 namespace CB\Component\Contentbuilderng\Site\Controller;
 
 // No direct access
-\defined( '_JEXEC' ) or die( 'Restricted access' );
+\defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\MVC\Controller\BaseController;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;

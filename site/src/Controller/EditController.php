@@ -155,9 +155,9 @@ class EditController extends BaseController
     }
 
     public function __construct(
-        array $config = [], 
-        ?MVCFactoryInterface $factory = null, 
-        ?CMSWebApplicationInterface $app = null, 
+        array $config = [],
+        ?MVCFactoryInterface $factory = null,
+        ?CMSWebApplicationInterface $app = null,
         ?Input $input = null
     ) {
         // IMPORTANT : on transmet factory/app/input à BaseController
@@ -169,7 +169,7 @@ class EditController extends BaseController
 
         $this->siteApp = $app;
         $this->frontend = $this->siteApp->isClient('site');
-       
+
         $this->siteApp->getInput()->set('cbIsNew', 0);
         $storageId = (int) $this->siteApp->getInput()->getInt('storage_id', 0);
         $isDirectStorageMode = $storageId > 0 && $this->siteApp->getInput()->getInt('id', 0) <= 0;
@@ -263,14 +263,12 @@ class EditController extends BaseController
 
         $type = 'message';
         if ($id && !$submission_failed) {
-
             $msg = Text::_('COM_CONTENTBUILDERNG_SAVED');
             $return = NavigationLinkHelper::decodeInternalReturn((string) $this->siteApp->getInput()->get('return', '', 'string'));
             if ($return !== '') {
                 $this->siteApp->enqueueMessage($msg, 'message');
                 $this->siteApp->redirect($return);
             }
-
         } else {
             $apply = true; // forcing to stay in form on errors
             $type = 'error';
@@ -289,7 +287,7 @@ class EditController extends BaseController
 
         if ($this->siteApp->getInput()->getString('cb_controller', '') == 'edit') {
             $link = Route::_('index.php?option=com_contentbuilderng&title=' . $this->siteApp->getInput()->get('title', '', 'string') . ($this->siteApp->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . $this->siteApp->getInput()->get('tmpl', '', 'string') : '') . ($this->siteApp->getInput()->get('layout', '', 'string') != '' ? '&layout=' . $this->siteApp->getInput()->get('layout', '', 'string') : '') . '&task=edit.display&return=' . NavigationLinkHelper::encodeInternalReturn((string) $this->siteApp->getInput()->get('return', '', 'string')) . '&Itemid=' . $this->siteApp->getInput()->getInt('Itemid', 0) . $previewQuery, false);
-        } else if ($apply) {
+        } elseif ($apply) {
             $link = Route::_('index.php?option=com_contentbuilderng&title=' . $this->siteApp->getInput()->get('title', '', 'string') . ($this->siteApp->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . $this->siteApp->getInput()->get('tmpl', '', 'string') : '') . ($this->siteApp->getInput()->get('layout', '', 'string') != '' ? '&layout=' . $this->siteApp->getInput()->get('layout', '', 'string') : '') . '&task=edit.display&return=' . NavigationLinkHelper::encodeInternalReturn((string) $this->siteApp->getInput()->get('return', '', 'string')) . '&backtolist=' . $this->siteApp->getInput()->getInt('backtolist', 0) . $idParam . '&record_id=' . $id . '&Itemid=' . $this->siteApp->getInput()->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . $previewQuery, false);
         } else {
             $link = Route::_('index.php?option=com_contentbuilderng&title=' . $this->siteApp->getInput()->get('title', '', 'string') . ($this->siteApp->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . $this->siteApp->getInput()->get('tmpl', '', 'string') : '') . ($this->siteApp->getInput()->get('layout', '', 'string') != '' ? '&layout=' . $this->siteApp->getInput()->get('layout', '', 'string') : '') . '&task=list.display' . $idParam . ($listQuery !== '' ? '&' . $listQuery : '') . '&Itemid=' . $this->siteApp->getInput()->getInt('Itemid', 0) . $previewQuery, false);
@@ -574,7 +572,7 @@ class EditController extends BaseController
 
     private function getPaginationStateKeyPrefix(): string
     {
-        
+
         $option = 'com_contentbuilderng';
 
         $formId = (int) $this->input->getInt('id', 0);

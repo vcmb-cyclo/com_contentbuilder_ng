@@ -404,8 +404,7 @@ final class StatsService
         ?string $locale = null,
         array $additions = [],
         array $titles = []
-    ): array
-    {
+    ): array {
         foreach ($additions as $label => $value) {
             $current = $values[$label] ?? 0;
             $value = (int) $value;
@@ -590,8 +589,7 @@ final class StatsService
         string $value,
         bool $ignoreEmptyDisplay = false,
         int $errorCode = self::CBSTATS_ERROR_INVALID_TITLES
-    ): array
-    {
+    ): array {
         $value = trim($value);
 
         if ($value === '') {

@@ -74,7 +74,8 @@ class DetailsModel extends ListModel
 
     public function __construct(
         array $config = [],
-        ?MVCFactoryInterface $factory = null) {
+        ?MVCFactoryInterface $factory = null
+    ) {
         // IMPORTANT : on transmet factory/app/input à ListModel
         parent::__construct($config, $factory);
 
@@ -317,7 +318,7 @@ class DetailsModel extends ListModel
         return $storage;
     }
 
-    private function _buildQuery()
+    private function buildQuery()
     {
         if ($this->isDirectStorageMode()) {
             return '';
@@ -346,7 +347,7 @@ class DetailsModel extends ListModel
      * Gets the currencies
      * @return array List of currencies
      */
-    function getData()
+    public function getData()
     {
         $app = $this->app;
 
@@ -399,7 +400,7 @@ class DetailsModel extends ListModel
 
         // Lets load the data if it doesn't already exist
         if (empty($this->_data)) {
-            $query = $this->_buildQuery();
+            $query = $this->buildQuery();
             $this->_data = $this->_getList($query, 0, 1);
             $prefixInTitle = $this->getMenuToggle('cb_prefix_in_title', (int) ($data->cb_prefix_in_title ?? 0));
 
@@ -420,7 +421,6 @@ class DetailsModel extends ListModel
                 $data->record_id = $this->_record_id;
 
                 if ($data->type && $data->reference_id) {
-
                     $data->form = \CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory::getForm($data->type, $data->reference_id);
                     $isAdminPreview = $app->getInput()->getBool('cb_preview_ok', false);
                     if ($isAdminPreview && method_exists($data->form, 'synchRecords')) {
@@ -451,7 +451,6 @@ class DetailsModel extends ListModel
                     }
 
                     if ($this->_latest) {
-
                         $rec = $data->form->getListRecords(
                             $ids,
                             '',
@@ -552,7 +551,6 @@ class DetailsModel extends ListModel
                     }
 
                     if (count($data->items)) {
-
                         $user = null;
 
                         if ($data->act_as_registration) {
@@ -568,23 +566,17 @@ class DetailsModel extends ListModel
 
                         $label = '';
                         foreach ($data->items as $rec) {
-
                             if ($rec->recElementId == $data->title_field) {
-
                                 if ($data->act_as_registration && $user !== null) {
-
                                     if ($data->registration_name_field == $rec->recElementId) {
                                         $rec->recValue = $user->name;
-                                    } else
-                                        if ($data->registration_username_field == $rec->recElementId) {
-                                            $rec->recValue = $user->username;
-                                        } else
-                                            if ($data->registration_email_field == $rec->recElementId) {
-                                                $rec->recValue = $user->email;
-                                            } else
-                                                if ($data->registration_email_repeat_field == $rec->recElementId) {
-                                                    $rec->recValue = $user->email;
-                                                }
+                                    } elseif ($data->registration_username_field == $rec->recElementId) {
+                                        $rec->recValue = $user->username;
+                                    } elseif ($data->registration_email_field == $rec->recElementId) {
+                                        $rec->recValue = $user->email;
+                                    } elseif ($data->registration_email_repeat_field == $rec->recElementId) {
+                                        $rec->recValue = $user->email;
+                                    }
                                 }
                                 $label = ContentbuilderngHelper::cbinternal($rec->recValue);
                                 break;
@@ -615,7 +607,7 @@ class DetailsModel extends ListModel
                                         }
                                         if (count($ex2) == 2) {
                                             $out = (trim($ex2[0]) ? Text::_('COM_CONTENTBUILDERNG_FROM') . ' ' . trim($val) : '') . ' ' . Text::_('COM_CONTENTBUILDERNG_TO') . ' ' . trim($val2);
-                                        } else if (count($ex2) > 0) {
+                                        } elseif (count($ex2) > 0) {
                                             $out = Text::_('COM_CONTENTBUILDERNG_FROM') . ' ' . trim($val);
                                         }
                                         if ($out) {
@@ -623,7 +615,7 @@ class DetailsModel extends ListModel
                                             $ordered_extra_title .= ' &raquo; ' . htmlspecialchars($data->labels[$order_key], ENT_QUOTES, 'UTF-8') . ': ' . htmlspecialchars($out, ENT_QUOTES, 'UTF-8');
                                         }
                                     }
-                                } else if ($is_match) {
+                                } elseif ($is_match) {
                                     $ex = explode('/', implode(', ', $this->_menu_filter[$order_key]));
                                     if (count($ex) == 2) {
                                         $ex2 = explode(';', trim($ex[1]));
@@ -667,7 +659,6 @@ class DetailsModel extends ListModel
                             $app->isClient('administrator')
                             && strpos($data->template, '[[hide-admin-title]]') !== false
                         ) {
-
                             $data->page_title = '';
                         }
 

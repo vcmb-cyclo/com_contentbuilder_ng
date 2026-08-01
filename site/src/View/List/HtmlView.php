@@ -55,7 +55,7 @@ class HtmlView extends BaseHtmlView
         return $app;
     }
 
-    function display($tpl = null)
+    public function display($tpl = null)
     {
         $debugRenderStart = microtime(true);
         $app = $this->getApp();

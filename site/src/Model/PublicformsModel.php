@@ -162,7 +162,7 @@ class PublicformsModel extends ListModel
     /*
      *
      * MAIN LIST AREA
-     * 
+     *
      */
 
     private function buildOrderBy()
@@ -186,7 +186,7 @@ class PublicformsModel extends ListModel
     /**
      * @return string The query
      */
-    private function _buildQuery()
+    private function buildQuery()
     {
 
         $filter_state = '';
@@ -203,42 +203,42 @@ class PublicformsModel extends ListModel
         return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilderng_forms Where ' . $in . ' published = 1 ' . $filter_state . $this->buildOrderBy();
     }
 
-    function getShowPageHeading()
+    public function getShowPageHeading()
     {
         return $this->_show_page_heading;
     }
 
-    function getShowPermissions()
+    public function getShowPermissions()
     {
         return $this->show_permissions;
     }
 
-    function getShowPermissionsNew()
+    public function getShowPermissionsNew()
     {
         return $this->show_permissions_new;
     }
 
-    function getShowPermissionsEdit()
+    public function getShowPermissionsEdit()
     {
         return $this->show_permissions_edit;
     }
 
-    function getShowIntrotext()
+    public function getShowIntrotext()
     {
         return $this->show_introtext;
     }
 
-    function getShowTags()
+    public function getShowTags()
     {
         return $this->show_tags;
     }
 
-    function getShowId()
+    public function getShowId()
     {
         return $this->show_id;
     }
 
-    function getPermissions()
+    public function getPermissions()
     {
         $perms = array();
         if ($this->show_permissions) {
@@ -255,7 +255,7 @@ class PublicformsModel extends ListModel
         return $perms;
     }
 
-    function getTags()
+    public function getTags()
     {
         $db = $this->getDatabase();
         $query = $db->getQuery(true)
@@ -271,11 +271,11 @@ class PublicformsModel extends ListModel
      * Gets the currencies
      * @return array List of products
      */
-    function getData()
+    public function getData()
     {
         // Lets load the data if it doesn't already exist
         if (empty($this->_data)) {
-            $query = $this->_buildQuery();
+            $query = $this->buildQuery();
             $this->_data = $this->_getList($query, $this->getState('limitstart'), $this->getState('limit'));
         }
 
@@ -283,17 +283,17 @@ class PublicformsModel extends ListModel
         return $this->items;
     }
 
-    function getTotal()
+    public function getTotal()
     {
         // Load the content if it doesn't already exist
         if (empty($this->_total)) {
-            $query = $this->_buildQuery();
+            $query = $this->buildQuery();
             $this->_total = $this->_getListCount($query);
         }
         return $this->_total;
     }
 
-    function getPagination()
+    public function getPagination()
     {
         // Load the content if it doesn't already exist
         if (empty($this->_pagination)) {
@@ -301,5 +301,4 @@ class PublicformsModel extends ListModel
         }
         return $this->_pagination;
     }
-
 }
