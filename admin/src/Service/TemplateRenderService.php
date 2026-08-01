@@ -1387,6 +1387,7 @@ class TemplateRenderService
             $elementHint = $element['hint'] ?? '';
             $isEditable = (int) ($element['editable'] ?? 1) === 1;
             $isSourceRequired = isset($sourceRequiredElements[(string) $elementReferenceId]);
+            $hasLabelMarker = str_contains($template, '{' . $key . ':label}');
 
             if ($isEditable) {
                 $this->addEditableItemMarkerWarnings((int) $contentbuilderngFormId, $template, (string) $key);
@@ -1557,6 +1558,16 @@ class TemplateRenderService
 
             if ($isSourceRequired && $isEditable && in_array($elementType, ['', 'text', 'number', 'boolean', 'textarea', 'select', 'calendar'], true)) {
                 $theItem = $this->markFirstEditableControlRequired((string) $theItem);
+
+                // Custom editable templates often contain a literal label
+                // instead of {field:label}; in that case $asterisk cannot be
+                // injected into the label, so keep the required state visible
+                // next to the generated control as a fallback.
+                if (!$hasLabelMarker) {
+                    $theItem = '<span class="cbRequired text-danger me-1" title="'
+                        . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_REQUIRED_VALUE'), ENT_QUOTES, 'UTF-8')
+                        . '" aria-hidden="true">*</span>' . $theItem;
+                }
             }
 
             if (!$isEditable && $elementType !== 'hidden' && $theItem !== '') {
