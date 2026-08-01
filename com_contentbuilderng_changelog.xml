@@ -3,7 +3,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.7-RC103</version>
+		<version>6.1.7-RC104</version>
 		<addition>
 			<item>Added optional Details and Edit template locking, with regeneration from the source form on save.</item>
 			<item>Added a versioned schema migration for the template-lock columns.</item>
