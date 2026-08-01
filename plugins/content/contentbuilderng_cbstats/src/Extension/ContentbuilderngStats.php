@@ -8,6 +8,8 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace CB\Plugin\Content\ContentbuilderngStats\Extension;
 
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
