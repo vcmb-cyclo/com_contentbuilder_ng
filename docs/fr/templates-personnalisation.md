@@ -126,7 +126,7 @@ un article Joomla, tout en isolant la requête du composant de celle de
 l’article :
 
 ```text
-{CBList id=25}
+{CBList id=15}
 ```
 
 Le paramètre facultatif `itemid` applique les réglages d’un élément de menu

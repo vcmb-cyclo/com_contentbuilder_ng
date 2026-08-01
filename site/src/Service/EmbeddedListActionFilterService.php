@@ -21,6 +21,7 @@ namespace CB\Component\Contentbuilderng\Site\Service;
  */
 final class EmbeddedListActionFilterService
 {
+    public const NONE = 'none';
     /**
      * The exhaustive, only-valid set of {CBList actions="..."} values.
      * Keep in sync with docs/en/frontend.md, docs/fr/frontend.md and the

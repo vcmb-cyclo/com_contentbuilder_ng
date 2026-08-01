@@ -101,7 +101,7 @@ The `CBList` content plugin embeds a complete interactive list view in a Joomla
 article while keeping the component request isolated from the article:
 
 ```text
-{CBList id=25}
+{CBList id=15}
 ```
 
 The optional `itemid` parameter applies the settings of an existing
