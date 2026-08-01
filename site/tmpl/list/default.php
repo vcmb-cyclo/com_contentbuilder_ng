@@ -201,6 +201,12 @@ $embeddedListQuery = EmbeddedListContextService::buildQuery(
     $embeddedListFields,
     $embeddedListRawActions
 );
+$embeddedListTitle = $isEmbeddedListRequest
+    ? trim((string) $input->getString('cblist_title', ''))
+    : '';
+$embeddedListTitleQuery = $embeddedListTitle !== ''
+    ? '&cblist_title=' . rawurlencode($embeddedListTitle)
+    : '';
 $previewLayoutOptions = [
     'default' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_DEFAULT'),
     'listone' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_LISTONE'),
@@ -607,7 +613,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 <?php endif; ?>
 <?php echo ContentbuilderngHelper::sanitizeStoredHtml($this->intro_text); ?>
 
-	<form action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=list.display&' . $listTarget . $currentListLayoutQuery . '&Itemid=' . (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . $embeddedListQuery . $previewQuery); ?>"
+	<form action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=list.display&' . $listTarget . $currentListLayoutQuery . '&Itemid=' . (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . $embeddedListQuery . $embeddedListTitleQuery . $previewQuery); ?>"
 		method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm" class="cb-list-template-<?php echo htmlspecialchars($cbListTemplateVariant, ENT_QUOTES, 'UTF-8'); ?><?php echo !empty($this->list_header_sticky) && !$isCardsVariant && !$isTilesVariant ? ' cb-list-has-sticky-header' : ''; ?>">
 	<?php
 	$showNewButton = ($new_allowed && !empty($this->new_button));
@@ -1621,6 +1627,9 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	<input type="hidden" name="cblist_embed" value="<?php echo EmbeddedListFieldFilterService::REQUEST_CONTEXT; ?>" />
 	<input type="hidden" name="cblist_fields" value="<?php echo htmlspecialchars($embeddedListFields, ENT_QUOTES, 'UTF-8'); ?>" />
 	<input type="hidden" name="cblist_actions" value="<?php echo htmlspecialchars($embeddedListRawActions, ENT_QUOTES, 'UTF-8'); ?>" />
+	<?php if ($embeddedListTitle !== '') : ?>
+	<input type="hidden" name="cblist_title" value="<?php echo htmlspecialchars($embeddedListTitle, ENT_QUOTES, 'UTF-8'); ?>" />
+	<?php endif; ?>
 	<?php endif; ?>
 	<?php if ($currentListLayout !== 'default') : ?>
 	<input type="hidden" name="layout" value="<?php echo htmlspecialchars($currentListLayout, ENT_QUOTES, 'UTF-8'); ?>" />

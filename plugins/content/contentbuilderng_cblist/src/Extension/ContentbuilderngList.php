@@ -46,6 +46,7 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
         $app = Factory::getApplication();
         if (
             !$app instanceof SiteApplication
+            || $app->getInput()->getCmd('option') === 'com_contentbuilderng'
             || EmbeddedListFieldFilterService::isEmbeddedRequest($app->getInput()->getCmd('cblist_embed', ''))
         ) {
             return;
