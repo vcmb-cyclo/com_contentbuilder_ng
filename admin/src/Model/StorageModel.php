@@ -17,7 +17,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-
 namespace CB\Component\Contentbuilderng\Administrator\Model;
 
 // No direct access
@@ -1151,8 +1150,8 @@ class StorageModel extends AdminModel
             $tmpFiles[] = $converted;
         }
 
-        @ini_set('auto_detect_line_endings', TRUE);
-        $retval = $this->csv_file_to_table($sourceFile, $data);
+        @ini_set('auto_detect_line_endings', true);
+        $retval = $this->csvFileToTable($sourceFile, $data);
 
         foreach ($tmpFiles as $tmpFile) {
             if (is_file($tmpFile)) {
@@ -1188,7 +1187,7 @@ class StorageModel extends AdminModel
     }
 
     /**
-     * Helper used by csv_file_to_table().
+     * Helper used by csvFileToTable().
      * Creates a storage field definition if missing and ensures the data table column exists.
      *
      * @param array<string,mixed> $data
@@ -1346,7 +1345,7 @@ class StorageModel extends AdminModel
                     if (!function_exists('iconv')) {
                         return [];
                     }
-                    $handle = $this->utf8_fopen_read($dest, $encoding);
+                    $handle = $this->utf8FopenRead($dest, $encoding);
                 } else {
                     $handle = fopen($dest, 'rb');
                 }
@@ -1394,7 +1393,7 @@ class StorageModel extends AdminModel
     /**
      * @return resource|false
      */
-    private function utf8_fopen_read(string $fileName, string $encoding)
+    private function utf8FopenRead(string $fileName, string $encoding)
     {
         $fc = iconv($encoding, 'UTF-8//TRANSLIT', file_get_contents($fileName));
         $handle = fopen("php://memory", "rw");
@@ -1418,7 +1417,7 @@ class StorageModel extends AdminModel
     }
 
 
-    private function csv_file_to_table(string $source_file, array $data, int $max_line_length = 1000000): int|string
+    private function csvFileToTable(string $source_file, array $data, int $max_line_length = 1000000): int|string
     {
         $options = CsvImportOptions::fromPostData($data);
 
@@ -1430,17 +1429,16 @@ class StorageModel extends AdminModel
             if (!function_exists('iconv')) {
                 return Text::_('COM_CONTENTBUILDERNG_CSV_IMPORT_REPAIR_NO_ICONV');
             }
-            $handle = $this->utf8_fopen_read("$source_file", $encoding);
+            $handle = $this->utf8FopenRead("$source_file", $encoding);
         } else {
             $handle = fopen("$source_file", "rb");
         }
 
-        if ($handle === FALSE) {
+        if ($handle === false) {
             return Text::_('COM_CONTENTBUILDERNG_FILE_NOT_FOUND');
         }
 
-        if ($handle !== FALSE) {
-
+        if ($handle !== false) {
             $last_update = (new Date())->toSql();
 
             $fieldnames = array();
@@ -1552,10 +1550,11 @@ class StorageModel extends AdminModel
                     . ' (' . implode(',', $fieldnames) . ")\nVALUES";
                 $publishedValue = $options->published;
 
-                while (($data = fgetcsv($handle, $max_line_length, $options->delimiter, '"')) !== FALSE) {
+                while (($data = fgetcsv($handle, $max_line_length, $options->delimiter, '"')) !== false) {
                     $rowReadCount++;
-                    while (count($data) < count($columns))
-                        array_push($data, NULL);
+                    while (count($data) < count($columns)) {
+                        array_push($data, null);
+                    }
 
                     $isEmptyRow = true;
                     foreach ($data as $value) {
@@ -1573,7 +1572,7 @@ class StorageModel extends AdminModel
                         ? $data
                         : array_map(static fn ($colIndex) => $data[$colIndex] ?? null, $includedColumnIndexes);
 
-                    $query = "$insert_query_prefix (" . join(", ", $this->quote_all_array($rowValues)) . ")";
+                    $query = "$insert_query_prefix (" . join(", ", $this->quoteAllArray($rowValues)) . ")";
                     $this->getDatabase()->setQuery($query);
                     $this->getDatabase()->execute();
                     $db = $this->getDatabase();
@@ -1612,29 +1611,31 @@ class StorageModel extends AdminModel
         return $this->storageId;
     }
 
-    private function quote_all_array(array $values): array
+    private function quoteAllArray(array $values): array
     {
-        foreach ($values as $key => $value)
-            if (is_array($value))
-                $values[$key] = $this->quote_all_array($value);
-            else
-                $values[$key] = $this->quote_all($value);
+        foreach ($values as $key => $value) {
+            if (is_array($value)) {
+                $values[$key] = $this->quoteAllArray($value);
+            } else {
+                $values[$key] = $this->quoteAll($value);
+            }
+        }
         return $values;
     }
 
-    private function quote_all(mixed $value): string
+    private function quoteAll(mixed $value): string
     {
-        if (is_null($value))
+        if (is_null($value)) {
             return "''";
+        }
 
         $value = $this->getDatabase()->quote($value);
         return $value;
     }
 
     // Give the database tables list.
-    function getDbTables()
+    public function getDbTables()
     {
         return $this->getComponent()->getContainer()->get(ExternalTableService::class)->getSelectableTables();
     }
-
 }

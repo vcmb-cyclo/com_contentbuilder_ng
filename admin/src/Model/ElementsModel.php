@@ -16,7 +16,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-
 namespace CB\Component\Contentbuilderng\Administrator\Model;
 
 \defined('_JEXEC') or die;
@@ -93,7 +92,7 @@ class ElementsModel extends ListModel
     }
 
 
-    
+
     public function setFormId(int $formid): void
     {
         $this->formId = $formid;
@@ -151,7 +150,7 @@ class ElementsModel extends ListModel
             $formId = (int) ($jform['id'] ?? 0);
         }
 
-        $this->formId = $formId;        
+        $this->formId = $formId;
         $this->setState('form.id', $formId);
         $this->formId = $formId;
 
@@ -465,7 +464,7 @@ class ElementsModel extends ListModel
 
 
     // Deprecated compatibility path
-    function getData(int $formId)
+    public function getData(int $formId)
     {
         $this->formId = $formId;
         $db = $this->getDatabase();
@@ -485,7 +484,7 @@ class ElementsModel extends ListModel
     }
 
     // Deprecated path: unused?
-    function getAllElements(int $formId)
+    public function getAllElements(int $formId)
     {
         $this->formId = $formId;
         $db = $this->getDatabase();

@@ -17,7 +17,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-
 namespace CB\Component\Contentbuilderng\Administrator\Model;
 
 // No direct access
@@ -340,7 +339,7 @@ class FormModel extends AdminModel
     }
 
 
-    function setListEditable()
+    public function setListEditable()
     {
         $formId = $this->getCurrentFormId();
         if ($formId <= 0) {
@@ -361,7 +360,7 @@ class FormModel extends AdminModel
         }
     }
 
-    function setListListInclude()
+    public function setListListInclude()
     {
         $formId = $this->getCurrentFormId();
         if ($formId <= 0) {
@@ -381,7 +380,7 @@ class FormModel extends AdminModel
         }
     }
 
-    function setListSearchInclude()
+    public function setListSearchInclude()
     {
         $formId = (int) $this->getState($this->getName() . '.id');
         if ($formId <= 0) {
@@ -401,7 +400,7 @@ class FormModel extends AdminModel
         }
     }
 
-    function setListNotLinkable()
+    public function setListNotLinkable()
     {
         $formId = $this->getCurrentFormId();
         if ($formId <= 0) {
@@ -421,7 +420,7 @@ class FormModel extends AdminModel
         }
     }
 
-    function setListNotEditable()
+    public function setListNotEditable()
     {
         $formId = $this->getCurrentFormId();
         if ($formId <= 0) {
@@ -441,7 +440,7 @@ class FormModel extends AdminModel
         }
     }
 
-    function setListNoListInclude()
+    public function setListNoListInclude()
     {
         $formId = $this->getCurrentFormId();
         if ($formId <= 0) {
@@ -461,7 +460,7 @@ class FormModel extends AdminModel
         }
     }
 
-    function setListNoSearchInclude()
+    public function setListNoSearchInclude()
     {
         $formId = $this->getCurrentFormId();
         if ($formId <= 0) {
@@ -481,7 +480,7 @@ class FormModel extends AdminModel
         }
     }
 
-    function getListStatesActionPlugins()
+    public function getListStatesActionPlugins()
     {
         $db = $this->getDatabase();
         $query = $db->getQuery(true)
@@ -494,7 +493,7 @@ class FormModel extends AdminModel
         return $res;
     }
 
-    function getThemePlugins()
+    public function getThemePlugins()
     {
         $db = $this->getDatabase();
         $themes = [];
@@ -531,7 +530,7 @@ class FormModel extends AdminModel
         return $themes;
     }
 
-    function getVerificationPlugins()
+    public function getVerificationPlugins()
     {
         $db = $this->getDatabase();
         $query = $db->getQuery(true)
@@ -1804,8 +1803,9 @@ class FormModel extends AdminModel
         $cids = array_values((array) $cids);
         ArrayHelper::toInteger($cids);
 
-        if (!count($cids))
+        if (!count($cids)) {
             return false;
+        }
 
         $db = $this->getDatabase();
         $table = $this->getTable('Form', '');

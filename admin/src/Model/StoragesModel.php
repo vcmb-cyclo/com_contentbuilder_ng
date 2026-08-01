@@ -201,7 +201,7 @@ class StoragesModel extends ListModel
 
 
 
-    function saveOrder()
+    public function saveOrder()
     {
         $input = $this->getApp()->getInput();
         $items = $input->post->get('cid', [], 'array');
@@ -228,5 +228,4 @@ class StoragesModel extends ListModel
 
         $row->reorder('');
     }
-
 }

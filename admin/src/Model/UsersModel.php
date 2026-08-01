@@ -55,7 +55,7 @@ class UsersModel extends ListModel
         array $config = [],
         ?MVCFactoryInterface $factory = null
     ) {
-        
+
         if (empty($config['filter_fields'])) {
             $config['filter_fields'] = [
                 // #__users
@@ -64,10 +64,10 @@ class UsersModel extends ListModel
                 'u.username',
                 'u.email',
                 // #__contentbuilderng_users (alias a)
-                'a.verified_view', 
-                'a.verified_new', 
+                'a.verified_view',
+                'a.verified_new',
                 'a.verified_edit',
-                'a.records', 
+                'a.records',
                 'a.published'
             ];
         }
