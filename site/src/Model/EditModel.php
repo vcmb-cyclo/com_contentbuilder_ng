@@ -1529,6 +1529,36 @@ var contentbuilderng = new function(){
                         );
                     }
 
+                    $decimalElementIds = method_exists($data->form, 'getDecimalElementIds')
+                        ? (array) $data->form->getDecimalElementIds()
+                        : [];
+
+                    foreach ($decimalElementIds as $decimalElementId) {
+                        $decimalElementId = (string) $decimalElementId;
+                        $decimalValue = $values[$decimalElementId] ?? null;
+
+                        if ($decimalValue === null || (is_scalar($decimalValue) && trim((string) $decimalValue) === '')) {
+                            continue;
+                        }
+
+                        if (
+                            is_scalar($decimalValue)
+                            && preg_match('/^[+-]?(?:\d{1,11}(?:\.\d{1,4})?|\.\d{1,4})$/D', trim((string) $decimalValue))
+                        ) {
+                            continue;
+                        }
+
+                        $decimalField = $allEditableFields[$decimalElementId] ?? [
+                            'label' => $names[$decimalElementId] ?? '',
+                            'name' => $names[$decimalElementId] ?? '',
+                        ];
+                        $this->app->getInput()->set('cb_submission_failed', 1);
+                        $this->enqueueFieldValidationMessage(
+                            $decimalField,
+                            Text::_('COM_CONTENTBUILDERNG_STORAGE_DECIMAL_VALUE')
+                        );
+                    }
+
                     $booleanElementIds = method_exists($data->form, 'getBooleanElementIds')
                         ? (array) $data->form->getBooleanElementIds()
                         : [];

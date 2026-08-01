@@ -1469,6 +1469,10 @@ class TemplateRenderService
                     $numberValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
                     $theItem = '<div class="cbFormField cbNumberField"><input class="form-control form-control-sm" type="number" step="1" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" value="' . htmlspecialchars($numberValue, ENT_QUOTES, 'UTF-8') . '"/></div>';
                     break;
+                case 'decimal':
+                    $decimalValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
+                    $theItem = '<div class="cbFormField cbDecimalField"><input class="form-control form-control-sm" type="number" step="0.0001" min="-99999999999.9999" max="99999999999.9999" inputmode="decimal" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" value="' . htmlspecialchars($decimalValue, ENT_QUOTES, 'UTF-8') . '"/></div>';
+                    break;
                 case 'boolean':
                     $booleanValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
                     $theItem = '<div class="cbFormField cbBooleanField"><select class="form-select form-select-sm" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '">'
@@ -1582,7 +1586,7 @@ class TemplateRenderService
                     break;
             }
 
-            if ($isSourceRequired && $isEditable && in_array($elementType, ['', 'text', 'number', 'boolean', 'textarea', 'select', 'calendar', 'datetime'], true)) {
+            if ($isSourceRequired && $isEditable && in_array($elementType, ['', 'text', 'number', 'decimal', 'boolean', 'textarea', 'select', 'calendar', 'datetime'], true)) {
                 $theItem = $this->markFirstEditableControlRequired((string) $theItem);
 
                 // Custom editable templates often contain a literal label

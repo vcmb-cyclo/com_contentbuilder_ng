@@ -868,6 +868,8 @@ class contentbuilderng_com_contentbuilderng
                 $types[(string) $element['id']] = 'datetime';
             } elseif ($sqlType === 'int') {
                 $types[(string) $element['id']] = 'number';
+            } elseif ($sqlType === 'decimal') {
+                $types[(string) $element['id']] = 'decimal';
             } elseif ($sqlType === 'boolean') {
                 $types[(string) $element['id']] = 'boolean';
             }
@@ -906,6 +908,25 @@ class contentbuilderng_com_contentbuilderng
             if (
                 empty($element['is_group'])
                 && StorageColumnTypeHelper::normalize($element['sql_type'] ?? null) === 'int'
+            ) {
+                $ids[] = (string) $element['id'];
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @return array<int|string>
+     */
+    public function getDecimalElementIds(): array
+    {
+        $ids = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (
+                empty($element['is_group'])
+                && StorageColumnTypeHelper::normalize($element['sql_type'] ?? null) === 'decimal'
             ) {
                 $ids[] = (string) $element['id'];
             }
