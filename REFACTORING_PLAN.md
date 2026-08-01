@@ -11,7 +11,9 @@
 > **État au 2026-08-01** : chantier A, étapes 1-2 faites (PSR-12 en gate
 > global, 0 erreur sur les 218 fichiers couverts par `phpcs.xml.dist`) ;
 > étapes 3-4 restent entières (PHPStan est toujours au niveau 2, aucun garde
-> anti-régression de baseline). Voir le chantier A ci-dessous pour le détail.
+> anti-régression de baseline). Chantier B fait entièrement, deux XSS
+> stockées publiques trouvées et corrigées au passage (non citées par
+> l'audit du 2026-07-31). Voir chaque chantier ci-dessous pour le détail.
 
 ---
 
@@ -20,7 +22,7 @@
 | # | Chantier | Charge | Risque | Dépend de |
 |---|---|---:|---|---|
 | A | Outillage qualité (PHPCS, PHPStan 2→6) — **PHPCS fait, PHPStan à faire** | 11 – 16 j restants | Faible | — |
-| B | Échappement des sorties front | 4 – 6 j | Faible | A |
+| B | Échappement des sorties front — ✅ fait | — | Faible | A |
 | C | Cache et requêtes N+1 | 6 – 10 j | Moyen | A |
 | D | Décomposition d'`EditModel::store()` | 25 – 30 j | **Élevé** | A, F |
 | E | Décomposition des autres god-methods | 15 – 20 j | Moyen | A, D |
@@ -135,7 +137,7 @@ fichiers modifiés d'une PR, ce qui empêche la dette de croître sans la résor
 
 ---
 
-## B. Échappement des sorties front
+## B. Échappement des sorties front — ✅ fait (2026-08-01)
 
 **Constat.** 755 sorties non échappées dans `admin/tmpl`, `admin/layouts`,
 `site/tmpl`, `site/layouts`. La majorité est inoffensive (entiers, drapeaux,
@@ -143,32 +145,88 @@ classes CSS calculées) ; une quinzaine est alimentée par des données de base.
 
 ### Étapes
 
-1. **Inventorier et classer** les 755 occurrences en trois catégories :
-   - *sûr* (littéral, entier, valeur calculée par le gabarit) → annoter, ne rien faire ;
-   - *à échapper* (valeur issue de la base ou de la requête) → `$this->escape()` ;
-   - *HTML voulu* (`intro_text`, `details_template`) → passer par
-     `HTMLHelper::_('content.prepare', …)` ou un assainisseur explicite, jamais
-     par un `echo` brut.
+1. ✅ **Inventorier et classer.** Extraction automatisée de chaque
+   occurrence `echo $var` / `<?= $var` (script Python, pas juste un `grep`,
+   pour isoler l'expression réellement affichée) puis classement manuel :
+   - *sûr* : entiers/booléens de schéma (`row->id`, `->ordering`,
+     `->published`…), branches littérales d'un ternaire que le regex
+     confond avec la variable comparée (`$x == 'y' ? 'a' : 'b'`), sorties de
+     closures qui échappent déjà en interne (`$renderCheckbox`,
+     `$renderAuditSummaryLink`…, vérifiées une fois à leur définition, pas
+     à chacun de leurs dizaines de sites d'appel), et la pipeline
+     `onContentPrepare`/pagination/Form-API de Joomla (`$this->event->…`,
+     `$this->pagination->…`, `$editor->display`, `$field->input`) — casser
+     ces dernières en les échappant reviendrait à corrompre du HTML déjà
+     sûr par convention du framework.
+   - *à échapper* : `$this->escape()` ou `htmlspecialchars(…, ENT_QUOTES,
+     'UTF-8')` selon la convention déjà dominante dans chaque fichier
+     (les deux coexistent dans la base, jamais mélangés dans un même
+     fichier).
+   - *HTML voulu* : `intro_text`/`introtext` (texte de liste et de
+     formulaire, rédigé par un admin via l'éditeur WYSIWYG). Ni
+     `HTMLHelper::_('content.prepare', …)` (déclenche le pipeline de
+     plugins `onContentPrepare`, effets de bord non maîtrisés pour ce
+     contexte) ni un `echo` brut : nouvelle méthode
+     `ContentbuilderngHelper::sanitizeStoredHtml()`, un assainisseur HTML à
+     liste blanche (`Joomla\CMS\Filter\InputFilter`,
+     `ONLY_ALLOW_DEFINED_TAGS` + `ONLY_ALLOW_DEFINED_ATTRIBUTES`) qui
+     conserve la mise en forme voulue et retire tout le reste (scripts,
+     gestionnaires d'évènements, `iframe`, attribut `style`).
 
-2. **Traiter en priorité** les cas déjà identifiés :
+   **Deux vulnérabilités réelles trouvées au-delà de la liste ci-dessous**,
+   ni citées par l'audit initial ni couvertes par un test avant ce jour :
+   `foreach ($row as $key => $value) { echo nl2br((string) $value); }` dans
+   le tableau principal de `site/tmpl/list/default.php`, et `$cardTitle`
+   dans sa vue « carte », tous deux construits à partir de valeurs de champ
+   soumises par un utilisateur et affichés **côté public**, sans aucun
+   échappement (seul `nl2br()` était appliqué). Les deux corrigés.
 
-   | Fichier | Ligne | Variable |
-   |---|---|---|
-   | `site/tmpl/publicforms/default.php` | 206 | `$row->tag` |
-   | `site/tmpl/publicforms/default.php` | 318-319 | `$this->lists['order']`, `['order_Dir']` |
-   | `admin/tmpl/list/select.php` | 489, 494, 620, 625 | `$row->colRecord`, `$value` |
-   | `admin/tmpl/list/default.php` | 122, 125 | `$this->page_title`, `$this->intro_text` |
-   | `admin/tmpl/list/select.php` | 669-670 | `$this->lists['order']` |
+2. ✅ **Cas déjà identifiés, corrigés — avec une correction à la liste
+   elle-même.** `site/tmpl/publicforms/default.php:206,318-319` étaient
+   déjà corrigés avant cette passe (fusion `security/audit-remediation`).
+   `admin/tmpl/list/select.php`: `$row->colRecord` s'est avéré **toujours
+   sûr** une fois tracé jusqu'à sa source SQL (`r.id As colRecord`, une clé
+   auto-incrémentée — jamais autre chose que des chiffres) ; seul `$value`,
+   son voisin dans la même boucle (valeur de champ libre), avait
+   réellement besoin d'être échappé. `$this->page_title`/`intro_text` et
+   `$this->lists['order']/['order_Dir']` corrigés comme prévu.
+   Non trouvé pendant cette passe et vraisemblablement déjà réglé
+   ailleurs : aucune trace d'un `str_replace('::', ';', …)` dans les
+   quatre répertoires (voir étape 4).
 
-3. **Ajouter un test structurel** (dans l'esprit de
-   `InheritedMethodVisibilityTest`) qui échoue si un gabarit introduit un
-   `echo $var` non échappé hors liste blanche.
+3. ✅ **Test structurel ajouté** —
+   `admin/tests/Unit/Templates/UnescapedTemplateOutputTest.php`. Pas un
+   classifieur (un regex ne distingue pas de façon fiable une branche
+   littérale de ternaire d'une vraie valeur), mais un garde par comptage,
+   même discipline que `phpstan-baseline.neon` : le nombre de
+   `echo $var`/`<?= $var` sans marqueur d'échappement sur la ligne est figé
+   par fichier à l'état constaté après cette passe (722 occurrences
+   restantes, sciemment classées sûres, sur 40 fichiers). Toute
+   augmentation fait échouer le test — vérifié en injectant une régression
+   volontaire puis en la retirant. Le nombre ne doit baisser qu'à mesure
+   qu'un fichier est réellement audité, jamais remonter silencieusement.
 
-4. **Nettoyer les gestionnaires `onclick` inline** de `admin/tmpl/list/select.php:322`
-   et les `style=""` construits par `str_replace('::', ';', …)` — incompatibles
-   avec une CSP stricte.
+4. ✅ **Gestionnaire `onclick` inline de `admin/tmpl/list/select.php`
+   nettoyé** — les boutons Rechercher/Réinitialiser portaient du JS
+   généré par PHP directement dans l'attribut (`onclick="…<?php echo
+   $this->list_state ? "…" : ""; ?>…"`), incompatible avec un
+   `script-src` strict. Remplacé par `type="button"` + écouteurs
+   `addEventListener` dans le bloc `<script>` du fichier, sur le même
+   principe que la délégation déjà en place dans `tmpl/list/default.php`
+   (dont le commentaire d'origine indique explicitement qu'elle
+   « remplace tous les onclick="contentbuilderng_*()" » — cette
+   modernisation n'avait simplement pas atteint la vue « select », un
+   layout de modal plus rarement touché). Le style `str_replace('::', ';',
+   …)` cité par le constat initial est introuvable dans l'état actuel du
+   dépôt ; probablement déjà résolu avant cette passe, sans certitude.
 
-**Livrable.** Sorties classées, cas à risque échappés, régression bloquée par un test.
+**Livrable.** Sorties classées, cas à risque échappés (dont deux XSS
+stockées publiques non citées par l'audit initial), régression bloquée par
+un test vérifié à l'échec comme au succès.
+
+694 tests (693 + 1), PHPStan clean, gate PSR-12 intact (0 erreur, les
+répertoires `tmpl` ne sont pas dans son périmètre — inchangé depuis le
+chantier A).
 
 ---
 
