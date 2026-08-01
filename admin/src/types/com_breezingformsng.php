@@ -438,8 +438,20 @@ class contentbuilderng_com_breezingformsng
     {
         $db = RuntimeContextHelper::getDatabase();
 
-        $db->setQuery("SET SESSION group_concat_max_len = 9999999");
-        $db->execute();
+        // FormSourceFactory::getForm() caches instances per (type,
+        // referenceId), so this constructor still runs once per distinct
+        // form processed in a request — a page listing many
+        // com_breezingformsng forms (audit tooling, bulk exports) re-ran
+        // this SET SESSION once per form even though it only needs setting
+        // once per connection. A static guard makes it run at most once
+        // per request regardless of how many forms are instantiated.
+        static $sessionConfigured = false;
+
+        if (!$sessionConfigured) {
+            $db->setQuery("SET SESSION group_concat_max_len = 9999999");
+            $db->execute();
+            $sessionConfigured = true;
+        }
 
         $formQuery = $db->getQuery(true)
             ->select('*')
