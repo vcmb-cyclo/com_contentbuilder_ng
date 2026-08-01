@@ -139,6 +139,7 @@ ContentBuilder NG existant. `layout` sélectionne une mise en page de liste.
 
 Le cadre intégré adapte automatiquement sa hauteur et conserve les ACL, les
 filtres, la pagination et les actions sur les enregistrements.
+Le tri initial accepte plusieurs champs avec une direction correspondante. Les valeurs sont séparées par `|` et doivent avoir le même nombre d’éléments : `sort="Nom|Prenom" dir="asc|desc"`. Une direction en trop, manquante ou inconnue est refusée.
 
 CBStats insère dans les contenus Joomla des statistiques dynamiques provenant
 d'une vue ContentBuilder NG. Sa syntaxe générale est :

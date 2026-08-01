@@ -32,6 +32,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PublishedRecordVisibilityHelper;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
 use CB\Component\Contentbuilderng\Administrator\Service\RuntimeUtilityService;
 use CB\Component\Contentbuilderng\Administrator\Service\ListSupportService;
@@ -1047,11 +1048,30 @@ class ListModel extends BaseListModel
                     if ($direction !== 'asc' && $direction !== 'desc') {
                         $direction = 'asc';
                     }
+                    $embeddedSort = '';
+                    $embeddedDirection = '';
+                    $isEmbeddedList = EmbeddedListFieldFilterService::isEmbeddedRequest($app->getInput()->getCmd('cblist_embed', ''));
+                    if ($isEmbeddedList) {
+                        $embeddedSort = trim((string) $app->getInput()->getString('cblist_sort', ''));
+                        $embeddedDirection = strtolower(trim((string) $app->getInput()->getCmd('cblist_dir', 'asc')));
+                    }
 
                     // Guard against ordering by a column that is not part of the SELECT.
                     $knownOrderKeys = ['colRecord', 'colState', 'colPublished', 'colLanguage', 'colRating', 'colArticleId', 'colAuthor'];
                     if ($ordering !== '' && !isset($order_types[$ordering]) && !in_array($ordering, $knownOrderKeys, true)) {
                         $ordering = '';
+                    }
+                    if ($isEmbeddedList && $embeddedSort !== '' && !isset($list['ordering']) && !isset($list['fullordering'])) {
+                        $sortColumns = EmbeddedListFieldFilterService::filter(array_keys($data->labels), $data->labels, [], $embeddedSort);
+                        $sortDirections = explode('|', $embeddedDirection);
+                        $sortOrdering = [];
+                        $sortDirectionValues = [];
+                        foreach ($sortColumns as $index => $sortColumn) {
+                            $sortOrdering[] = 'col' . $sortColumn;
+                            $sortDirectionValues[] = $sortDirections[$index];
+                        }
+                        $ordering = implode('|', $sortOrdering);
+                        $direction = implode('|', $sortDirectionValues);
                     }
 
                     $isAdminPreview = $app->getInput()->getBool('cb_preview_ok', false);

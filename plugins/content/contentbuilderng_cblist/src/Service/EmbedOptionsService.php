@@ -27,12 +27,19 @@ final class EmbedOptionsService
      *     loading: 'eager'|'lazy',
      *     fields: list<string>,
      *     actions: list<string>,
+     *     sort: string,
+     *     sort_direction: 'asc'|'desc',
      *     title: string,
      *     title_set: bool
      * }
      */
     public static function resolve(array $attributes): array
     {
+        $allowedKeys = ['id', 'height', 'pagination', 'layout', 'loading', 'fields', 'actions', 'title', 'sort', 'dir'];
+        $unknownKeys = array_values(array_diff(array_keys($attributes), $allowedKeys));
+        if ($unknownKeys !== []) {
+            throw new \InvalidArgumentException('option_unknown:' . $unknownKeys[0]);
+        }
         $id = self::positiveInteger($attributes['id'] ?? '');
 
         if ($id === null) {
@@ -70,6 +77,16 @@ final class EmbedOptionsService
 
         $fields = self::fieldSelectors((string) ($attributes['fields'] ?? ''));
         $actions = self::actionSelectors((string) ($attributes['actions'] ?? ''));
+        $sort = trim((string) ($attributes['sort'] ?? ''));
+        $sortSelectors = self::fieldSelectors($sort);
+        if ($sort !== "" && $sortSelectors === []) {
+            throw new \InvalidArgumentException('sort');
+        }
+        $sortDirection = strtolower(trim((string) ($attributes['dir'] ?? 'asc')));
+        $sortDirections = self::fieldSelectors($sortDirection);
+        if ($sortDirections === [] || array_diff($sortDirections, ['asc', 'desc']) !== [] || ($sort !== "" && count($sortDirections) !== count($sortSelectors))) {
+            throw new \InvalidArgumentException('dir');
+        }
 
         return [
             'id' => $id,
@@ -79,6 +96,8 @@ final class EmbedOptionsService
             'loading' => $loading,
             'fields' => $fields,
             'actions' => $actions,
+            'sort' => $sort,
+            'sort_direction' => $sortDirection,
             'title' => trim((string) ($attributes['title'] ?? '')),
             'title_set' => array_key_exists('title', $attributes),
         ];

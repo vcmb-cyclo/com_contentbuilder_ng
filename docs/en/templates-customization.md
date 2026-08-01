@@ -117,6 +117,7 @@ view. `height` sets the minimum height in pixels, `loading` accepts `lazy` or
 
 The embedded frame resizes automatically and preserves the list ACLs, filters,
 pagination and record actions.
+The initial sort accepts multiple fields with one matching direction per field. Values are separated by `|` and must have the same number of items: `sort="Name|FirstName" dir="asc|desc"`. Extra, missing or unknown directions are rejected.
 
 CBStats inserts dynamic statistics from a ContentBuilder NG view into Joomla
 content. Its general syntax is:

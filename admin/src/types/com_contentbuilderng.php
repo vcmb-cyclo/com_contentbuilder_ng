@@ -607,6 +607,24 @@ class contentbuilderng_com_contentbuilderng
         //////////////////
 
         /// CASTING FOR BEING ABLE TO SORT THE WAY DEDIRED
+        $multiOrderClause = "";
+        $multiOrderKeys = $order === "" ? [] : explode('|', $order);
+        if (count($multiOrderKeys) > 1) {
+            $multiOrderDirections = $order_Dir === "" ? [] : explode('|', strtolower((string) $order_Dir));
+            $multiOrderParts = [];
+            foreach ($multiOrderKeys as $index => $multiOrderKey) {
+                if (!isset($order_types[$multiOrderKey]) && !in_array($multiOrderKey, ['colRecord', 'colState', 'colPublished', 'colLanguage', 'colRating', 'colArticleId', 'colAuthor', 'colLastModification'], true)) {
+                    $multiOrderParts = [];
+                    break;
+                }
+                $directionValue = ($multiOrderDirections[$index] ?? 'asc') === 'desc' ? 'DESC' : 'ASC';
+                $multiOrderParts[] = '`' . $multiOrderKey . '` ' . $directionValue;
+            }
+            if ($multiOrderParts !== [] && count($multiOrderParts) === count($multiOrderKeys)) {
+                $multiOrderClause = implode(', ', $multiOrderParts);
+                $order = '';
+            }
+        }
         if (isset($order_types[$order])) {
             switch ($order_types[$order]) {
                 case 'CHAR':
@@ -773,9 +791,11 @@ class contentbuilderng_com_contentbuilderng
         $initialOrder3 = $init_order_by3 == -1 || $init_order_by3 == 0 ? 'colRecord' : $init_order_by3;
         $orderDirection = $order_Dir ? (strtolower($order_Dir) == 'asc' ? 'asc' : 'desc') : 'asc';
 
-        $orderClause = ($order
-            ? " Order By " . ($order == 'colRating' && $form !== null && $form->rating_slots == 1 ? 'colRatingCount' : $order) . " "
-            : ' Order By ' . $initialOrder1 . ' ' . $orderDirection . ', ' . $initialOrder2 . ' ' . $orderDirection . ', ' . $initialOrder3 . ' ' . $orderDirection . ' ') . " " . ($order ? $orderDirection : '');
+        $orderClause = $multiOrderClause !== ""
+            ? " Order By " . $multiOrderClause
+            : ($order
+                ? " Order By " . ($order == 'colRating' && $form !== null && $form->rating_slots == 1 ? 'colRatingCount' : $order) . " " . $orderDirection
+                : " Order By " . $initialOrder1 . " " . $orderDirection . ", " . $initialOrder2 . " " . $orderDirection . ", " . $initialOrder3 . " " . $orderDirection);
 
         $db->setQuery("
             Select

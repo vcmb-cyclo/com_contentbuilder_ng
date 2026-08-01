@@ -72,6 +72,9 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
                 str_starts_with($error, 'action_unknown:') => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_ACTION', substr($error, 15)),
                 str_starts_with($error, 'layout_unknown:') => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_LAYOUT', substr($error, 15)),
                 str_starts_with($error, 'view_unknown:') => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_VIEW', substr($error, 14)),
+                str_starts_with($error, 'option_unknown:') => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_OPTION', substr($error, 15)),
+                $error === 'dir' => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_OPTION_VALUE', 'dir'),
+                $error === 'sort' => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_OPTION_VALUE', 'sort'),
                 default => Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_TAG'),
             };
 
@@ -104,6 +107,10 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
         }
         if ($options['actions'] !== []) {
             $query['cblist_actions'] = implode('|', $options['actions']);
+        }
+        if ($options['sort'] !== '') {
+            $query['cblist_sort'] = $options['sort'];
+            $query['cblist_dir'] = $options['sort_direction'];
         }
 
         $url = Route::_('index.php?' . http_build_query($query), false);
