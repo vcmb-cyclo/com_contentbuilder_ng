@@ -1,7 +1,5 @@
 <?php
 
-namespace CB\Plugin\ContentbuilderngVerify\Passthrough\Extension;
-
 /**
  * @version     6.0
  * @package     ContentBuilderNG
@@ -14,8 +12,10 @@ namespace CB\Plugin\ContentbuilderngVerify\Passthrough\Extension;
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+namespace CB\Plugin\ContentbuilderngVerify\Passthrough\Extension;
+
 // No direct access
-\defined('_JEXEC') or die ('Restricted access');
+\defined('_JEXEC') or die('Restricted access');
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Event\GenericEvent as Event;
 use Joomla\Event\SubscriberInterface;
@@ -36,9 +36,9 @@ final class Passthrough extends CMSPlugin implements SubscriberInterface
     /**
      * Will be called in the content element (article or record)
      * If the return is not empty, it will render the returned value.
-     * 
+     *
      * By that things like coupon codes may be implemented.
-     * 
+     *
      * @param string $link the link that points to the verifier
      * @param string $plugin_settings The raw query string with the plugin options
      * @return string empty for nothing (default) or a string to render instead of the default
@@ -54,10 +54,10 @@ final class Passthrough extends CMSPlugin implements SubscriberInterface
 
     /**
      * Will always be called by the verifier
-     * 
+     *
      * @param type $return_url
      * @param type $options
-     * @return string empty if everything is ok, else a message describing the problem 
+     * @return string empty if everything is ok, else a message describing the problem
      */
     public function onSetup(Event $event): string
     {
@@ -70,9 +70,9 @@ final class Passthrough extends CMSPlugin implements SubscriberInterface
 
     /**
      * Will be called on forward, right after setup IF there is no verification yet
-     * 
+     *
      * @param string $return_url
-     * @param array $options 
+     * @param array $options
      */
     public function onForward(Event $event): string
     {
@@ -84,7 +84,7 @@ final class Passthrough extends CMSPlugin implements SubscriberInterface
 
     /**
      * Will be called on verification
-     * 
+     *
      * @param string $return_url
      * @param array $options
      * @return mixed boolean false on errors or an array with optional verification data (msg[string], is_test[0/1], data [array])

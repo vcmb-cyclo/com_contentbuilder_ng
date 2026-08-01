@@ -1,7 +1,5 @@
 <?php
 
-namespace CB\Plugin\Content\ContentbuilderngVerify\Extension;
-
 /**
  * @version     6.0
  * @package     ContentBuilderNG No Verify
@@ -9,9 +7,11 @@ namespace CB\Plugin\Content\ContentbuilderngVerify\Extension;
  * @license     Released under the terms of the GNU General Public License
  **/
 
+namespace CB\Plugin\Content\ContentbuilderngVerify\Extension;
+
 /** ensure this file is being included by a parent file */
 
-\defined('_JEXEC') or die ('Direct Access to this location is not allowed.');
+\defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Factory;
@@ -21,7 +21,6 @@ use Joomla\CMS\Plugin\PluginHelper;
 
 final class ContentbuilderngVerify extends CMSPlugin implements SubscriberInterface
 {
-
     /**
      * Application object.
      *
@@ -44,7 +43,7 @@ final class ContentbuilderngVerify extends CMSPlugin implements SubscriberInterf
         return ['onContentPrepare' => 'onContentPrepare'];
     }
 
-    function getValueByLanguage($value)
+    public function getValueByLanguage($value)
     {
 
         $firstval = '';
@@ -71,7 +70,7 @@ final class ContentbuilderngVerify extends CMSPlugin implements SubscriberInterf
         return $value;
     }
 
-    function onContentPrepare($context = '', $article = null, $params = null, $limitstart = 0)
+    public function onContentPrepare($context = '', $article = null, $params = null, $limitstart = 0)
     {
         if ($context instanceof \Joomla\Event\EventInterface) {
             $event = $context;
@@ -81,18 +80,16 @@ final class ContentbuilderngVerify extends CMSPlugin implements SubscriberInterf
             $limitstart = (int) ($event->getArgument('page') ?? $event->getArgument('limitstart') ?? $limitstart);
         }
 
-        if (!$article || !isset ($article->text)) {
+        if (!$article || !isset($article->text)) {
             return true;
         }
 
         $matches = array();
         preg_match_all("/\{CBVerify([^}]*)\}/i", $article->text, $matches);
 
-        if (isset ($matches[0]) && is_array($matches[0]) && isset ($matches[1]) && is_array($matches[1])) {
-
+        if (isset($matches[0]) && is_array($matches[0]) && isset($matches[1]) && is_array($matches[1])) {
             $i = 0;
             foreach ($matches[1] as $match) {
-
                 $return_admin = '';
                 $return_site = '';
                 $plugin = '';
@@ -111,7 +108,6 @@ final class ContentbuilderngVerify extends CMSPlugin implements SubscriberInterf
                 foreach ($options as $option) {
                     $keyval = explode(':', trim($option), 2);
                     if (count($keyval) == 2) {
-
                         $value = trim($keyval[1]);
                         switch (strtolower(trim($keyval[0]))) {
                             case 'plugin':
@@ -164,7 +160,6 @@ final class ContentbuilderngVerify extends CMSPlugin implements SubscriberInterf
                 }
 
                 if ($plugin && $verification_name && $verify_view) {
-
                     $plugin_settings = 'return-site=' . ($return_site ? base64_encode($return_site) : '') . '&return-admin=' . ($return_admin ? base64_encode($return_admin) : '') . '&client=' . ($this->app->isClient('site') ? 0 : 1) . '&plugin=' . $plugin . '&verification_msg=' . urlencode($verification_msg) . '&verification_name=' . urlencode($verification_name) . '&verify_view=' . $verify_view . '&verify_levels=' . $verify_levels . '&require_view=' . $require_view . '&plugin_options=' . base64_encode($this->buildStr($plugin_options));
 
                     $verificationSessionKey = 'com_contentbuilderng.verify.' . $plugin . $verification_name;
@@ -182,7 +177,6 @@ final class ContentbuilderngVerify extends CMSPlugin implements SubscriberInterf
                     } else {
                         $article->text = str_replace($matches[0][$i], '<a class="cb_verification_link" href="' . $link . '">' . ($image && $image != 'none' ? '<img class="cb_verification_image" border="0" ' . ($image_width ? 'width="' . $image_width . '" ' : '') . '' . ($image_height ? 'height="' . $image_height . '" ' : '') . 'src="' . $image . '" alt="' . $desc . '" title="' . $desc . '"/>' : $desc) . '</a>', $article->text);
                     }
-
                 } else {
                     $article->text = str_replace($matches[0][$i], '<span style="color:red;">WARNING: Verify plugin requires the options "plugin", "verification-name" and "verify-view". Please update your content template.</span>', $article->text);
                 }

@@ -1,7 +1,5 @@
 <?php
 
-namespace CB\Plugin\ContentbuilderngListaction\Untrash\Extension;
-
 /**
  * @package     ContentBuilderNG
  * @author      Markus Bopp
@@ -13,8 +11,10 @@ namespace CB\Plugin\ContentbuilderngListaction\Untrash\Extension;
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+namespace CB\Plugin\ContentbuilderngListaction\Untrash\Extension;
+
 // No direct access
-\defined('_JEXEC') or die ('Restricted access');
+\defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
@@ -54,7 +54,6 @@ final class Untrash extends CMSPlugin implements SubscriberInterface
         $lang->load('plg_contentbuilderng_listaction_untrash', JPATH_ADMINISTRATOR);
 
         foreach ($record_ids as $record_id) {
-
             $db->setQuery(
                 'UPDATE ' . $db->quoteName('#__content') . ' AS ' . $db->quoteName('content')
                 . ', ' . $db->quoteName('#__contentbuilderng_records') . ' AS ' . $db->quoteName('record')
@@ -83,7 +82,7 @@ final class Untrash extends CMSPlugin implements SubscriberInterface
      * @param int $form_id use it to find the record for the appropriate view
      * @param array $record_ids an array of record_id. Please note that the record_ids may be _non_numeric_
      * @param type $previous_errors error messages thrown by onBeforeAction
-     * @return type 
+     * @return type
      */
     public function onAfterAction(Event $event): string
     {
@@ -92,12 +91,12 @@ final class Untrash extends CMSPlugin implements SubscriberInterface
 
     /**
      * This event will be triggered on article creation and update.
-     * 
+     *
      * It gives you the chance to force the article to stay into previously set states
-     * 
+     *
      * @param int $form_id
      * @param mixed $record_id
-     * @param int $article_id 
+     * @param int $article_id
      * @return string message
      */
     public function onAfterArticleCreation(Event $event): string

@@ -1,7 +1,5 @@
 <?php
 
-namespace CB\Plugin\Content\ContentbuilderngPermissionObserver\Extension;
-
 /**
  * @version 6.0
  * @package ContentBuilder NG Permission observer
@@ -10,8 +8,10 @@ namespace CB\Plugin\Content\ContentbuilderngPermissionObserver\Extension;
  * @license Released under the terms of the GNU General Public License
  **/
 
+namespace CB\Plugin\Content\ContentbuilderngPermissionObserver\Extension;
+
 /** ensure this file is being included by a parent file */
-\defined('_JEXEC') or die ('Direct Access to this location is not allowed.');
+\defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
@@ -29,7 +29,7 @@ final class ContentbuilderngPermissionObserver extends CMSPlugin implements Subs
 
 
 
-    function onContentPrepare($context = '', $article = null, $params = null, $limitstart = 0)
+    public function onContentPrepare($context = '', $article = null, $params = null, $limitstart = 0)
     {
         if ($context instanceof \Joomla\Event\EventInterface) {
             $event = $context;
@@ -39,8 +39,7 @@ final class ContentbuilderngPermissionObserver extends CMSPlugin implements Subs
             $limitstart = (int) ($event->getArgument('page') ?? $event->getArgument('limitstart') ?? $limitstart);
         }
 
-        if (isset ($article->id) && $article->id) {
-
+        if (isset($article->id) && $article->id) {
             $frontend = true;
             if (Factory::getApplication()->isClient('administrator')) {
                 $frontend = false;
@@ -75,7 +74,6 @@ final class ContentbuilderngPermissionObserver extends CMSPlugin implements Subs
             }
 
             if ($form && !(Factory::getApplication()->getInput()->get('option', '', 'string') == 'com_contentbuilderng' && Factory::getApplication()->getInput()->get('controller', '', 'string') == 'edit')) {
-
                 Factory::getApplication()->getLanguage()->load('com_contentbuilderng');
                 (PermissionService::createFromRuntimeContext())->setPermissions($data['form_id'], $data['record_id'], $frontend ? '_fe' : '');
 
