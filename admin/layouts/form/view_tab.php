@@ -71,7 +71,8 @@ if (!is_object($item) || !is_callable($formatTypeDisplay)) {
                 <?php if (trim((string) $type) === '') {
                     continue;
                 } ?>
-                <?php $typeValue = (string) $type; $typeDisplay = $formatTypeDisplay($typeValue); ?>
+                <?php $typeValue = (string) $type;
+                $typeDisplay = $formatTypeDisplay($typeValue); ?>
                 <option value="<?php echo htmlspecialchars($typeValue, ENT_QUOTES, 'UTF-8'); ?>"
                     data-full="<?php echo htmlspecialchars((string) ($typeDisplay['full'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
                     title="<?php echo htmlspecialchars((string) ($typeDisplay['full'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">

@@ -20,7 +20,7 @@ use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView a
 
 class RawView extends BaseHtmlView
 {
-    function display($tpl = null)
+    public function display($tpl = null)
     {
         // Get data from the model
         $data = $this->get('Data');

@@ -132,7 +132,8 @@ Ce menu affiche plusieurs vues sélectionnées avec, selon les options :
 ## Mode Debug
 
 Lorsqu'il est activé sur la vue, un badge DEBUG est affiché. Un panneau repliable peut
-présenter les identifiants, permissions, filtres et logs de la requête.
+présenter les identifiants, permissions, filtres et logs de la requête, ainsi que les
+termes `{CBList actions="..."}` disponibles sur l'écran et leur état autorisé/refusé.
 
 Il s'agit d'un outil de diagnostic, pas d'une fonction destinée au public.
 

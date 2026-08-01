@@ -45,7 +45,7 @@ class ListTable extends Table
      *
      * @param object Database connector object
      */
-    function __construct(DatabaseDriver $db)
+    public function __construct(DatabaseDriver $db)
     {
         parent::__construct('#__contentbuilderng_forms', 'id', $db);
 

@@ -34,7 +34,7 @@ final class FrontendListEditActionTest extends TestCase
             $template
         );
         self::assertStringContainsString(
-            "\$rowCanEdit = \$edit_allowed || \$canAccessOwnedRecord('edit', \$row->colRecord);",
+            "\$rowCanEdit = (\$edit_allowed || \$canAccessOwnedRecord('edit', \$row->colRecord)) && \$cbListActionAllowed('edit');",
             $template
         );
         self::assertStringContainsString(

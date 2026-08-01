@@ -39,4 +39,49 @@
     <arg value="sp"/>
 
     <rule ref="PSR12"/>
+
+    <!--
+        Permanent, not legacy debt: Joomla routes a controller task to the
+        method whose name matches the "task" URL segment literally
+        (task=user.verified_view -> UsersController::verified_view()).
+        Renaming these to camelCase breaks routing for every bookmarked link
+        and third-party integration unless paired with routing aliases, which
+        is out of scope for a style pass. Scoped to controllers only: the
+        same convention elsewhere in the codebase is real debt and stays
+        flagged.
+    -->
+    <rule ref="PSR1.Methods.CamelCapsMethodName">
+        <exclude-pattern>admin/src/Controller/*</exclude-pattern>
+        <exclude-pattern>site/src/Controller/*</exclude-pattern>
+
+        <!--
+            ContentbuilderngHelper::is_internal_path() and
+            ::contentbuilderng_wordwrap() are invoked by string method name
+            through TemplateRenderService::callContentbuilderngHelper()
+            ($helperClass::$method(...)), not just by direct ::name() calls.
+            A rename here is invisible to grep-for-callers and to PHPStan,
+            and is_internal_path() is a security-relevant path-containment
+            check (see REFACTORING_PLAN.md chapter F) — silently breaking it
+            via a missed string literal is a worse outcome than the naming
+            warning. Renaming these belongs in chapter F, alongside removing
+            the dynamic dispatch itself, not in a mechanical style pass.
+        -->
+        <exclude-pattern>admin/src/Helper/ContentbuilderngHelper.php</exclude-pattern>
+    </rule>
+
+    <!--
+        script.php's install/update class is instantiated by Joomla's
+        installer via a fixed name convention: "<element>InstallerScript"
+        in the global namespace, resolved by class_exists() against that
+        literal string — there is no autoloading path or manifest hook that
+        would let a namespaced or PascalCase class be found instead.
+        Renaming or namespacing it breaks install/update, it doesn't fix a
+        style issue.
+    -->
+    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
+        <exclude-pattern>script.php</exclude-pattern>
+    </rule>
+    <rule ref="Squiz.Classes.ValidClassName">
+        <exclude-pattern>script.php</exclude-pattern>
+    </rule>
 </ruleset>

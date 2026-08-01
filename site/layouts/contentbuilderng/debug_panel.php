@@ -17,6 +17,7 @@ use Joomla\CMS\Language\Text;
 
 $displayData = is_array($displayData ?? null) ? $displayData : [];
 $permissions = is_array($displayData['permissions'] ?? null) ? $displayData['permissions'] : [];
+$cbListActions = is_array($displayData['cbListActions'] ?? null) ? $displayData['cbListActions'] : [];
 $filters = is_array($displayData['filters'] ?? null) ? $displayData['filters'] : [];
 $logs = is_array($displayData['logs'] ?? null) ? $displayData['logs'] : [];
 $warnings = is_array($displayData['warnings'] ?? null) ? $displayData['warnings'] : [];
@@ -109,6 +110,24 @@ $wa->useStyle('com_contentbuilderng.debug-panel');
         </div>
     <?php endif; ?>
 
+    <?php if ($showPermissions && $cbListActions !== []) : ?>
+        <h3 id="<?php echo $debugIdBase; ?>-cblist-actions-heading" class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_CBLIST_ACTIONS'); ?></h3>
+        <p id="<?php echo $debugIdBase; ?>-cblist-actions-hint" class="text-muted small mb-1"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_CBLIST_ACTIONS_HINT'); ?></p>
+        <div id="<?php echo $debugIdBase; ?>-cblist-actions" class="cb-debug-permissions" aria-labelledby="<?php echo $debugIdBase; ?>-cblist-actions-heading">
+            <?php foreach ($cbListActions as $action => $allowed) : ?>
+                <?php $actionId = $debugIdBase . '-cblist-action-' . preg_replace('/[^a-z0-9_-]+/i', '-', (string) $action); ?>
+                <div id="<?php echo htmlspecialchars($actionId . '-item', ENT_QUOTES, 'UTF-8'); ?>" class="form-check cb-debug-permission">
+                    <input class="form-check-input" type="checkbox"
+                        id="<?php echo htmlspecialchars($actionId, ENT_QUOTES, 'UTF-8'); ?>"
+                        <?php echo !empty($allowed) ? ' checked' : ''; ?> disabled />
+                    <label class="form-check-label" for="<?php echo htmlspecialchars($actionId, ENT_QUOTES, 'UTF-8'); ?>">
+                        <code><?php echo htmlspecialchars((string) $action, ENT_QUOTES, 'UTF-8'); ?></code>
+                    </label>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
     <?php if ($showFilters) : ?>
         <h3 id="<?php echo $debugIdBase; ?>-filters-heading" class="h6 mt-3"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_FILTERS'); ?></h3>
         <dl id="<?php echo $debugIdBase; ?>-filters" class="row mb-0" aria-labelledby="<?php echo $debugIdBase; ?>-filters-heading">
@@ -149,7 +168,8 @@ $wa->useStyle('com_contentbuilderng.debug-panel');
                 <tbody>
                     <?php $fieldsWithValidation = []; ?>
                     <?php foreach ($fields as $i => $field) : ?>
-                        <?php $rowEditable = !empty($field['editable']); $rowPublished = !empty($field['published']); ?>
+                        <?php $rowEditable = !empty($field['editable']);
+                        $rowPublished = !empty($field['published']); ?>
                         <?php
                         $validationNames = array_values(array_unique(array_filter(array_map(
                             'trim',

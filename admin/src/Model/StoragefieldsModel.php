@@ -66,6 +66,8 @@ class StoragefieldsModel extends ListModel
             'name',
             'title',
             'sql_type',
+            'field_size',
+            'required',
             'group_definition',
             'published',
             'ordering'
@@ -78,6 +80,22 @@ class StoragefieldsModel extends ListModel
     {
         $this->storageId = $storageId;
         $this->setState('storage.id', $storageId);
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    public function getFieldNames(): array
+    {
+        $db = $this->getDatabase();
+        $query = $db->getQuery(true)
+            ->select($db->quoteName('name'))
+            ->from($db->quoteName('#__contentbuilderng_storage_fields'))
+            ->where($db->quoteName('storage_id') . ' = ' . (int) $this->getState('storage.id', $this->storageId));
+
+        $db->setQuery($query);
+
+        return array_map('strval', $db->loadColumn());
     }
 
     /**
@@ -164,6 +182,7 @@ class StoragefieldsModel extends ListModel
             'title',
             'sql_type',
             'field_size',
+            'required',
             'is_group',
             'group_definition',
             'ordering',

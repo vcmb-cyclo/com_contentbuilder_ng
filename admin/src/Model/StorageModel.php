@@ -17,7 +17,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-
 namespace CB\Component\Contentbuilderng\Administrator\Model;
 
 // No direct access
@@ -251,6 +250,7 @@ class StorageModel extends AdminModel
         $fieldtitle = trim((string) ($jform['fieldtitle'] ?? ''));
         $sqlType = StorageColumnTypeHelper::normalize((string) ($jform['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
         $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $jform['field_size'] ?? null);
+        $required   = !empty($jform['required']);
         $isGroup    = (int) ($jform['is_group'] ?? 0);
         $groupDef   = (string) ($jform['group_definition'] ?? '');
 
@@ -284,7 +284,7 @@ class StorageModel extends AdminModel
         // Insert field
         $query = $db->getQuery(true)
             ->insert($db->quoteName('#__contentbuilderng_storage_fields'))
-            ->columns($db->quoteName(['ordering', 'storage_id', 'name', 'title', 'sql_type', 'field_size', 'is_group', 'group_definition']))
+            ->columns($db->quoteName(['ordering', 'storage_id', 'name', 'title', 'sql_type', 'field_size', 'required', 'is_group', 'group_definition']))
             ->values(
                 (int) $max . ', '
                 . (int) $storageId . ', '
@@ -292,23 +292,70 @@ class StorageModel extends AdminModel
                 . $db->quote($newfieldtitle) . ', '
                 . $db->quote($sqlType) . ', '
                 . ($fieldSize === null ? 'NULL' : (int) $fieldSize) . ', '
+                . (int) $required . ', '
                 . (int) $isGroup . ', '
                 . $db->quote($groupDef)
             );
-        $db->setQuery($query);
-        $db->execute();
-
-        // Assurer l’existence de la table data puis ajouter la colonne
-        // (si ta table data existe toujours, tu peux garder juste l’ALTER)
+        // Assurer l’existence de la table data puis ajouter la colonne avant
+        // de persister ses métadonnées. MySQL valide ainsi tout le DDL sans
+        // laisser de définition orpheline si le type ou la contrainte échoue.
         if (!empty($storage->name)) {
+            $quotedTable = $db->quoteName('#__' . $storage->name);
+            $quotedColumn = $db->quoteName($newfieldname);
+            $columnAdded = false;
+
             try {
-                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storage->name) . ' ADD ' . $db->quoteName($newfieldname) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize));
+                $db->setQuery(
+                    'ALTER TABLE ' . $quotedTable
+                    . ' ADD ' . $quotedColumn . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize)
+                );
                 $db->execute();
+                $columnAdded = true;
+
+                if ($required) {
+                    StorageColumnTypeHelper::enforceRequired(
+                        $db,
+                        $quotedTable,
+                        $quotedColumn,
+                        $sqlType,
+                        $fieldSize
+                    );
+                }
             } catch (\Throwable $e) {
-                // Si la colonne existe déjà ou table absente, on log et on renvoie false
                 Logger::exception($e);
+
+                if ($columnAdded) {
+                    try {
+                        $db->setQuery('ALTER TABLE ' . $quotedTable . ' DROP COLUMN ' . $quotedColumn);
+                        $db->execute();
+                    } catch (\Throwable $cleanupException) {
+                        Logger::exception($cleanupException);
+                    }
+                }
+
                 return false;
             }
+        }
+
+        try {
+            $db->setQuery($query);
+            $db->execute();
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+
+            if (!empty($storage->name)) {
+                try {
+                    $db->setQuery(
+                        'ALTER TABLE ' . $db->quoteName('#__' . $storage->name)
+                        . ' DROP COLUMN ' . $db->quoteName($newfieldname)
+                    );
+                    $db->execute();
+                } catch (\Throwable $cleanupException) {
+                    Logger::exception($cleanupException);
+                }
+            }
+
+            return false;
         }
 
         // Optionnel: vider le champ dans la session / form
@@ -871,7 +918,7 @@ class StorageModel extends AdminModel
             if (!$bytable) {
                 // old name
                 $query = $db->getQuery(true)
-                    ->select($db->quoteName(['name', 'sql_type', 'field_size']))
+                    ->select($db->quoteName(['name', 'sql_type', 'field_size', 'required']))
                     ->from($db->quoteName('#__contentbuilderng_storage_fields'))
                     ->where($db->quoteName('id') . ' = ' . (int) $field_id);
                 $db->setQuery($query);
@@ -879,6 +926,7 @@ class StorageModel extends AdminModel
                 $old_name = (string) ($oldField['name'] ?? '');
                 $oldSqlType = StorageColumnTypeHelper::normalize((string) ($oldField['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
                 $oldFieldSize = StorageColumnTypeHelper::normalizeSize($oldSqlType, $oldField['field_size'] ?? null);
+                $oldRequired = !empty($oldField['required']);
 
                 // update storage_fields
                 $query = $db->getQuery(true)
@@ -900,7 +948,7 @@ class StorageModel extends AdminModel
                 // la table physique ne porte pas — la remontée fait échouer
                 // toute l'action de sauvegarde plutôt que de rester invisible.
                 if ($old_name !== '' && $old_name !== $name) {
-                    $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storageTable->name) . ' CHANGE ' . $db->quoteName($old_name) . ' ' . $db->quoteName($name) . ' ' . StorageColumnTypeHelper::sqlDefinition($oldSqlType, $oldFieldSize));
+                    $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storageTable->name) . ' CHANGE ' . $db->quoteName($old_name) . ' ' . $db->quoteName($name) . ' ' . StorageColumnTypeHelper::sqlDefinition($oldSqlType, $oldFieldSize, $oldRequired));
                     $db->execute();
                 }
             } else {
@@ -959,7 +1007,7 @@ class StorageModel extends AdminModel
 
         // Liste des champs définis
         $query = $db->getQuery(true)
-            ->select($db->quoteName(['name', 'sql_type', 'field_size']))
+            ->select($db->quoteName(['name', 'sql_type', 'field_size', 'required']))
             ->from($db->quoteName('#__contentbuilderng_storage_fields'))
             ->where($db->quoteName('storage_id') . ' = ' . (int) $storageId);
         $db->setQuery($query);
@@ -987,13 +1035,30 @@ class StorageModel extends AdminModel
 
             $sqlType = StorageColumnTypeHelper::normalize((string) ($field['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
             $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $field['field_size'] ?? null);
+            $required = !empty($field['required']);
 
             try {
+                // Toujours ajoutée nullable d'abord : la colonne n'existe pas
+                // encore, donc aucun backfill n'est possible avant qu'elle
+                // existe. Si le champ est obligatoire, enforceRequired()
+                // bascule ensuite en NOT NULL après avoir comblé les lignes
+                // existantes (backfill), ce qui fonctionne même sur une
+                // table déjà peuplée.
                 $db->setQuery(
                     'ALTER TABLE ' . $db->quoteName('#__' . $dataTableName)
                     . ' ADD ' . $db->quoteName($fieldname) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize)
                 );
                 $db->execute();
+
+                if ($required) {
+                    StorageColumnTypeHelper::enforceRequired(
+                        $db,
+                        $db->quoteName('#__' . $dataTableName),
+                        $db->quoteName($fieldname),
+                        $sqlType,
+                        $fieldSize
+                    );
+                }
             } catch (\Throwable $e) {
                 Logger::exception($e);
                 $failedFields[] = $fieldname;
@@ -1151,8 +1216,8 @@ class StorageModel extends AdminModel
             $tmpFiles[] = $converted;
         }
 
-        @ini_set('auto_detect_line_endings', TRUE);
-        $retval = $this->csv_file_to_table($sourceFile, $data);
+        @ini_set('auto_detect_line_endings', true);
+        $retval = $this->csvFileToTable($sourceFile, $data);
 
         foreach ($tmpFiles as $tmpFile) {
             if (is_file($tmpFile)) {
@@ -1188,7 +1253,7 @@ class StorageModel extends AdminModel
     }
 
     /**
-     * Helper used by csv_file_to_table().
+     * Helper used by csvFileToTable().
      * Creates a storage field definition if missing and ensures the data table column exists.
      *
      * @param array<string,mixed> $data
@@ -1346,7 +1411,7 @@ class StorageModel extends AdminModel
                     if (!function_exists('iconv')) {
                         return [];
                     }
-                    $handle = $this->utf8_fopen_read($dest, $encoding);
+                    $handle = $this->utf8FopenRead($dest, $encoding);
                 } else {
                     $handle = fopen($dest, 'rb');
                 }
@@ -1394,7 +1459,7 @@ class StorageModel extends AdminModel
     /**
      * @return resource|false
      */
-    private function utf8_fopen_read(string $fileName, string $encoding)
+    private function utf8FopenRead(string $fileName, string $encoding)
     {
         $fc = iconv($encoding, 'UTF-8//TRANSLIT', file_get_contents($fileName));
         $handle = fopen("php://memory", "rw");
@@ -1418,7 +1483,7 @@ class StorageModel extends AdminModel
     }
 
 
-    private function csv_file_to_table(string $source_file, array $data, int $max_line_length = 1000000): int|string
+    private function csvFileToTable(string $source_file, array $data, int $max_line_length = 1000000): int|string
     {
         $options = CsvImportOptions::fromPostData($data);
 
@@ -1430,17 +1495,16 @@ class StorageModel extends AdminModel
             if (!function_exists('iconv')) {
                 return Text::_('COM_CONTENTBUILDERNG_CSV_IMPORT_REPAIR_NO_ICONV');
             }
-            $handle = $this->utf8_fopen_read("$source_file", $encoding);
+            $handle = $this->utf8FopenRead("$source_file", $encoding);
         } else {
             $handle = fopen("$source_file", "rb");
         }
 
-        if ($handle === FALSE) {
+        if ($handle === false) {
             return Text::_('COM_CONTENTBUILDERNG_FILE_NOT_FOUND');
         }
 
-        if ($handle !== FALSE) {
-
+        if ($handle !== false) {
             $last_update = (new Date())->toSql();
 
             $fieldnames = array();
@@ -1475,6 +1539,11 @@ class StorageModel extends AdminModel
             foreach ($columns as $index => $column) {
                 if (!$importAllColumns && !isset($selectedColumnIndexes[$index])) {
                     continue;
+                }
+
+                if ($column === '') {
+                    fclose($handle);
+                    return Text::sprintf('COM_CONTENTBUILDERNG_CSV_IMPORT_EMPTY_COLUMN_HEADER', $index + 1);
                 }
 
                 $normalizedColumn = $this->normalizeFieldIdentifier($column);
@@ -1552,10 +1621,11 @@ class StorageModel extends AdminModel
                     . ' (' . implode(',', $fieldnames) . ")\nVALUES";
                 $publishedValue = $options->published;
 
-                while (($data = fgetcsv($handle, $max_line_length, $options->delimiter, '"')) !== FALSE) {
+                while (($data = fgetcsv($handle, $max_line_length, $options->delimiter, '"')) !== false) {
                     $rowReadCount++;
-                    while (count($data) < count($columns))
-                        array_push($data, NULL);
+                    while (count($data) < count($columns)) {
+                        array_push($data, null);
+                    }
 
                     $isEmptyRow = true;
                     foreach ($data as $value) {
@@ -1573,7 +1643,7 @@ class StorageModel extends AdminModel
                         ? $data
                         : array_map(static fn ($colIndex) => $data[$colIndex] ?? null, $includedColumnIndexes);
 
-                    $query = "$insert_query_prefix (" . join(", ", $this->quote_all_array($rowValues)) . ")";
+                    $query = "$insert_query_prefix (" . join(", ", $this->quoteAllArray($rowValues)) . ")";
                     $this->getDatabase()->setQuery($query);
                     $this->getDatabase()->execute();
                     $db = $this->getDatabase();
@@ -1612,29 +1682,31 @@ class StorageModel extends AdminModel
         return $this->storageId;
     }
 
-    private function quote_all_array(array $values): array
+    private function quoteAllArray(array $values): array
     {
-        foreach ($values as $key => $value)
-            if (is_array($value))
-                $values[$key] = $this->quote_all_array($value);
-            else
-                $values[$key] = $this->quote_all($value);
+        foreach ($values as $key => $value) {
+            if (is_array($value)) {
+                $values[$key] = $this->quoteAllArray($value);
+            } else {
+                $values[$key] = $this->quoteAll($value);
+            }
+        }
         return $values;
     }
 
-    private function quote_all(mixed $value): string
+    private function quoteAll(mixed $value): string
     {
-        if (is_null($value))
+        if (is_null($value)) {
             return "''";
+        }
 
         $value = $this->getDatabase()->quote($value);
         return $value;
     }
 
     // Give the database tables list.
-    function getDbTables()
+    public function getDbTables()
     {
         return $this->getComponent()->getContainer()->get(ExternalTableService::class)->getSelectableTables();
     }
-
 }

@@ -1,7 +1,5 @@
 <?php
 
-namespace CB\Plugin\Content\ContentbuilderngStats\Extension;
-
 /**
  * @package     ContentBuilderNG Stats
  * @copyright   Copyright © 2026 XDA+GIL
@@ -9,6 +7,10 @@ namespace CB\Plugin\Content\ContentbuilderngStats\Extension;
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
+
+declare(strict_types=1);
+
+namespace CB\Plugin\Content\ContentbuilderngStats\Extension;
 
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
@@ -514,8 +516,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $add,
         string $titles,
         array $ranges = []
-    ): array
-    {
+    ): array {
         $field = (array) ($payload['field'] ?? []);
         $additions = $field === [] ? [] : StatsService::parseFieldStatsAdditions($add);
         $titleMappings = $field === [] ? [] : StatsService::parseFieldStatsTitles($titles);
@@ -558,8 +559,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $headers,
         bool $exportManual = false,
         array $hideOptions = ['total' => false, 'values' => false, 'graph' => false]
-    ): string
-    {
+    ): string {
         $field = (array) ($payload['field'] ?? []);
 
         if ($fieldStats === []) {
@@ -621,8 +621,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $headers,
         bool $exportManual = false,
         array $hideOptions = ['total' => false, 'values' => false, 'graph' => false]
-    ): string
-    {
+    ): string {
         if ($fieldStats === []) {
             return '<span class="cbstats-pie-empty">'
                 . htmlspecialchars(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_NO_DATA'), ENT_QUOTES, 'UTF-8')
@@ -680,8 +679,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $headers,
         bool $exportManual = false,
         array $hideOptions = ['total' => false, 'values' => false, 'graph' => false]
-    ): string
-    {
+    ): string {
         if ($fieldStats === []) {
             return '<span class="cbstats-bar-empty">'
                 . htmlspecialchars(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_NO_DATA'), ENT_QUOTES, 'UTF-8')
@@ -818,8 +816,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $headers,
         bool $exportManual,
         array $hideOptions
-    ): string
-    {
+    ): string {
         $html = '';
 
         if (!$hideOptions['values']) {
@@ -969,8 +966,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $background,
         string $headers,
         array $hideOptions = ['total' => false, 'values' => false, 'graph' => false]
-    ): string
-    {
+    ): string {
         $this->loadManualExportAssets();
         $total = array_sum(array_column($fieldStats, 'value'));
         $labels = implode(' ; ', array_column($fieldStats, 'label'));
@@ -1090,5 +1086,4 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
 
         return $wa;
     }
-
 }

@@ -26,8 +26,7 @@ final class FieldValidationService
     public function __construct(
         private readonly DatabaseInterface $db,
         private readonly bool $validationsEnabled = true
-    )
-    {
+    ) {
     }
 
     public function areValidationsEnabled(): bool

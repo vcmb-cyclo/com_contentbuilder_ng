@@ -1,7 +1,5 @@
 <?php
 
-namespace CB\Plugin\Content\ContentbuilderngRating\Extension;
-
 /**
  * @version     6.0
  * @package     ContentBuilderNG Rating
@@ -9,6 +7,7 @@ namespace CB\Plugin\Content\ContentbuilderngRating\Extension;
  * @license     Released under the terms of the GNU General Public License
  **/
 
+namespace CB\Plugin\Content\ContentbuilderngRating\Extension;
 
 /** ensure this file is being included by a parent file */
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
@@ -27,13 +26,12 @@ use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 
 final class ContentbuilderngRating extends CMSPlugin implements SubscriberInterface
 {
-
     public static function getSubscribedEvents(): array
     {
         return ['onContentPrepare' => 'onContentPrepare'];
     }
 
-    function onContentPrepare($context = '', $article = null, $params = null, $limitstart = 0, $is_list = false, $form = null, $item = null)
+    public function onContentPrepare($context = '', $article = null, $params = null, $limitstart = 0, $is_list = false, $form = null, $item = null)
     {
         if ($context instanceof \Joomla\Event\EventInterface) {
             $event = $context;
@@ -46,7 +44,7 @@ final class ContentbuilderngRating extends CMSPlugin implements SubscriberInterf
         $protect = false;
 
         $plugin = PluginHelper::getPlugin('content', 'contentbuilderng_rating');
-        $pluginParams = (new Registry)->loadString($plugin->params);
+        $pluginParams = (new Registry())->loadString($plugin->params);
 
         $lang = Factory::getApplication()->getLanguage();
         $lang->load('plg_content_contentbuilderng_rating', JPATH_ADMINISTRATOR);
@@ -65,7 +63,6 @@ final class ContentbuilderngRating extends CMSPlugin implements SubscriberInterf
 
         // if this content plugin has been called from within list context
         if ($is_list) {
-
             if (!trim($article->text)) {
                 return true;
             }
@@ -76,22 +73,23 @@ final class ContentbuilderngRating extends CMSPlugin implements SubscriberInterf
             $article->cbrecord->record_id = $item->colRecord;
         }
 
-        if (!is_dir(JPATH_SITE .'/media/contentbuilderng')) {
-            Folder::create(JPATH_SITE .'/media/contentbuilderng');
+        if (!is_dir(JPATH_SITE . '/media/contentbuilderng')) {
+            Folder::create(JPATH_SITE . '/media/contentbuilderng');
         }
 
-        if (!file_exists(JPATH_SITE .'/media/contentbuilderng/index.html'))
-            File::write(JPATH_SITE .'/media/contentbuilderng/index.html', $def = '');
-
-        if (!is_dir(JPATH_SITE .'/media/contentbuilderng/plugins')) {
-            Folder::create(JPATH_SITE .'/media/contentbuilderng/plugins');
+        if (!file_exists(JPATH_SITE . '/media/contentbuilderng/index.html')) {
+            File::write(JPATH_SITE . '/media/contentbuilderng/index.html', $def = '');
         }
 
-        if (!file_exists(JPATH_SITE .'/media/contentbuilderng/plugins/index.html'))
-            File::write(JPATH_SITE .'/media/contentbuilderng/plugins/index.html', $def = '');
+        if (!is_dir(JPATH_SITE . '/media/contentbuilderng/plugins')) {
+            Folder::create(JPATH_SITE . '/media/contentbuilderng/plugins');
+        }
+
+        if (!file_exists(JPATH_SITE . '/media/contentbuilderng/plugins/index.html')) {
+            File::write(JPATH_SITE . '/media/contentbuilderng/plugins/index.html', $def = '');
+        }
 
         if (isset($article->id) || isset($article->cbrecord)) {
-
             $db = Factory::getContainer()->get(DatabaseInterface::class);
 
             $matches = array();
@@ -99,7 +97,6 @@ final class ContentbuilderngRating extends CMSPlugin implements SubscriberInterf
             preg_match_all("/\{CBRating([^}]*)\}/i", $article->text, $matches);
 
             if (isset($matches[0]) && is_array($matches[0]) && isset($matches[1]) && is_array($matches[1])) {
-
                 $form_id = 0;
                 $record_id = 0;
 
@@ -109,7 +106,6 @@ final class ContentbuilderngRating extends CMSPlugin implements SubscriberInterf
                 }
 
                 if (isset($article->id) && $article->id && !isset($article->cbrecord)) {
-
                     // try to obtain the record id if if this is just an article
                     $ratingQuery = $db->getQuery(true)
                         ->select([
@@ -141,19 +137,15 @@ final class ContentbuilderngRating extends CMSPlugin implements SubscriberInterf
                     }
 
                     if ($form) {
-
                         $form_id = $data['form_id'];
                         $record_id = $data['record_id'];
                         $rating_slots = $data['rating_slots'];
                     }
-
-                } else if (isset($article->cbrecord) && isset($article->cbrecord->id) && $article->cbrecord->id) {
-
+                } elseif (isset($article->cbrecord) && isset($article->cbrecord->id) && $article->cbrecord->id) {
                     $form = $article->cbrecord->form;
                     $form_id = $article->cbrecord->id;
                     $record_id = $article->cbrecord->record_id;
                     $rating_slots = $article->cbrecord->rating_slots;
-
                 }
 
                 $rating = 0;
@@ -175,7 +167,6 @@ final class ContentbuilderngRating extends CMSPlugin implements SubscriberInterf
                 $rating_allowed = true;
 
                 if (!$is_list) {
-
                     (PermissionService::createFromRuntimeContext())->setPermissions($form_id, $record_id, $frontend ? '_fe' : '');
 
                     if ($frontend) {
@@ -191,12 +182,10 @@ final class ContentbuilderngRating extends CMSPlugin implements SubscriberInterf
 
                 $i = 0;
                 foreach ($matches[1] as $match) {
-
                     $options = explode(';', trim($match));
                     foreach ($options as $option) {
                         $keyval = explode(':', trim($option), 2);
                         if (count($keyval) == 2) {
-
                             $value = trim($keyval[1]);
                             switch (strtolower(trim($keyval[0]))) {
                                 default:

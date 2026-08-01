@@ -45,9 +45,9 @@ final class StoragesController extends AdminController
     protected $view_item = 'storage';
 
     public function __construct(
-        array $config = [], 
-        ?MVCFactoryInterface $factory = null, 
-        ?CMSWebApplicationInterface $app = null, 
+        array $config = [],
+        ?MVCFactoryInterface $factory = null,
+        ?CMSWebApplicationInterface $app = null,
         ?Input $input = null
     ) {
         // IMPORTANT : on transmet factory/app/input à BaseController
@@ -55,7 +55,6 @@ final class StoragesController extends AdminController
 
         // Register Extra tasks
         $this->registerTask('add', 'edit');
-        
     }
 
     /**

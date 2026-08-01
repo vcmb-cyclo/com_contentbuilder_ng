@@ -119,10 +119,10 @@ if ($themeJs !== '') {
 
 <?php if ($this->page_title): ?>
     <h1 class="display-6 mb-4">
-        <?php echo $this->page_title; ?>
+        <?php echo $this->escape($this->page_title); ?>
     </h1>
 <?php endif; ?>
-<?php echo $this->intro_text; ?>
+<?php echo ContentbuilderngHelper::sanitizeStoredHtml($this->intro_text); ?>
 <div class="row g-2 justify-content-md-end align-items-center mb-3">
     <?php
     if ($this->export_xls):
@@ -192,7 +192,7 @@ if ($themeJs !== '') {
                                     foreach ($this->states as $state) {
                                         ?>
                                         <option value="<?php echo $state['id'] ?>">
-                                            <?php echo $state['title'] ?>
+                                            <?php echo $this->escape($state['title']) ?>
                                         </option>
                                         <?php
                                     }
@@ -530,12 +530,12 @@ if ($themeJs !== '') {
                             if (($view_allowed || $this->own_only)) {
                                 ?>
                                 <a href="<?php echo $link; ?>">
-                                    <?php echo $row->colRecord; ?>
+                                    <?php echo $this->escape($row->colRecord); ?>
                                 </a>
                                 <?php
                             } else {
                                 ?>
-                                <?php echo $row->colRecord; ?>
+                                <?php echo $this->escape($row->colRecord); ?>
                                 <?php
                             }
                             ?>
@@ -599,12 +599,12 @@ if ($themeJs !== '') {
                             if (($view_allowed || $this->own_only)) {
                                 ?>
                                 <a href="<?php echo $link; ?>">
-                                    <?php echo $row->colArticleId; ?>
+                                    <?php echo $this->escape($row->colArticleId); ?>
                                 </a>
                                 <?php
                             } else {
                                 ?>
-                                <?php echo $row->colArticleId; ?>
+                                <?php echo $this->escape($row->colArticleId); ?>
                                 <?php
                             }
                             ?>
@@ -661,12 +661,12 @@ if ($themeJs !== '') {
                                 if (in_array(str_replace('col', '', $key), $this->linkable_elements) && ($view_allowed || $this->own_only)) {
                                     ?>
                                     <a href="<?php echo $link; ?>">
-                                        <?php echo $value; ?>
+                                        <?php echo $this->escape($value); ?>
                                     </a>
                                     <?php
                                 } else {
                                     ?>
-                                    <?php echo $value; ?>
+                                    <?php echo $this->escape($value); ?>
                                     <?php
                                 }
                                 ?>

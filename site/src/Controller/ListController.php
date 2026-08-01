@@ -11,7 +11,7 @@
 namespace CB\Component\Contentbuilderng\Site\Controller;
 
 // No direct access
-\defined( '_JEXEC' ) or die( 'Restricted access' );
+\defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Application\SiteApplication;
@@ -22,6 +22,7 @@ use Joomla\Database\DatabaseInterface;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
 use CB\Component\Contentbuilderng\Site\Model\EditModel;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use CB\Component\Contentbuilderng\Administrator\Service\DirectStorageFormProvisioningService;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
@@ -113,6 +114,7 @@ class ListController extends BaseController
                 . '&list[ordering]=' . $state['ordering']
                 . '&list[direction]=' . $state['direction']
                 . $previewQuery
+                . $this->buildEmbeddedListQuery()
                 . '&Itemid=' . $this->input->getInt('Itemid', 0),
                 false
             );
@@ -166,6 +168,7 @@ class ListController extends BaseController
             . '&list[ordering]=' . $state['ordering']
             . '&list[direction]=' . $state['direction']
             . $previewQuery
+            . $this->buildEmbeddedListQuery()
             . '&Itemid=' . $this->input->getInt('Itemid', 0),
             false
         );
@@ -221,6 +224,7 @@ class ListController extends BaseController
                 . '&list[ordering]=' . $state['ordering']
                 . '&list[direction]=' . $state['direction']
                 . $previewQuery
+                . $this->buildEmbeddedListQuery()
                 . '&Itemid=' . $this->input->getInt('Itemid', 0),
                 false
             );
@@ -245,6 +249,7 @@ class ListController extends BaseController
             . '&list[ordering]=' . $state['ordering']
             . '&list[direction]=' . $state['direction']
             . $previewQuery
+            . $this->buildEmbeddedListQuery()
             . '&Itemid=' . $this->input->getInt('Itemid', 0),
             false
         );
@@ -299,6 +304,7 @@ class ListController extends BaseController
                 . '&list[ordering]=' . $state['ordering']
                 . '&list[direction]=' . $state['direction']
                 . $previewQuery
+                . $this->buildEmbeddedListQuery()
                 . '&Itemid=' . $this->input->getInt('Itemid', 0),
                 false
             );
@@ -327,6 +333,7 @@ class ListController extends BaseController
             . '&list[ordering]=' . $state['ordering']
             . '&list[direction]=' . $state['direction']
             . $previewQuery
+            . $this->buildEmbeddedListQuery()
             . '&Itemid=' . $this->input->getInt('Itemid', 0),
             false
         );
@@ -604,6 +611,15 @@ class ListController extends BaseController
         }
 
         return (int) $published === 1;
+    }
+
+    private function buildEmbeddedListQuery(): string
+    {
+        return EmbeddedListContextService::buildQuery(
+            (string) $this->input->getCmd('cblist_embed', ''),
+            (string) $this->input->getString('cblist_fields', ''),
+            (string) $this->input->getString('cblist_actions', '')
+        );
     }
 
     private function buildPreviewQuery(): string

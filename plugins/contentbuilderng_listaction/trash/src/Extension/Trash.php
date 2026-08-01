@@ -1,7 +1,5 @@
 <?php
 
-namespace CB\Plugin\ContentbuilderngListaction\Trash\Extension;
-
 /**
  * @version     6.0
  * @package     ContentBuilderNG
@@ -14,8 +12,10 @@ namespace CB\Plugin\ContentbuilderngListaction\Trash\Extension;
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+namespace CB\Plugin\ContentbuilderngListaction\Trash\Extension;
+
 // No direct access
-\defined('_JEXEC') or die ('Restricted access');
+\defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
@@ -90,7 +90,7 @@ final class Trash extends CMSPlugin implements SubscriberInterface
      * @param int $form_id use it to find the record for the appropriate view
      * @param array $record_ids an array of record_id. Please note that the record_ids may be _non_numeric_
      * @param type $previous_errors error messages thrown by onBeforeAction
-     * @return type 
+     * @return type
      */
     public function onAfterAction(Event $event): string
     {
@@ -99,14 +99,14 @@ final class Trash extends CMSPlugin implements SubscriberInterface
 
     /**
      * This event will be triggered on article creation and update.
-     * 
+     *
      * It gives you the chance to force the article to stay into previously set states
-     * 
+     *
      * In this case we delete the newly created article if there is a trashed state assigned to this record.
-     * 
+     *
      * @param int $form_id
      * @param mixed $record_id
-     * @param int $article_id 
+     * @param int $article_id
      * @return string message
      */
     public function onAfterArticleCreation(Event $event): string

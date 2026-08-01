@@ -1,7 +1,5 @@
 <?php
 
-namespace CB\Plugin\ContentbuilderngVerify\Paypal\Extension;
-
 /**
  * @version     6.0
  * @package     ContentBuilderNG
@@ -13,6 +11,8 @@ namespace CB\Plugin\ContentbuilderngVerify\Paypal\Extension;
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
+
+namespace CB\Plugin\ContentbuilderngVerify\Paypal\Extension;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -47,7 +47,7 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
         parent::__construct($subject, $config);
 
         $plugin = PluginHelper::getPlugin('contentbuilderng_verify', 'paypal');
-        $pluginParams = (new Registry)->loadString($plugin->params);
+        $pluginParams = (new Registry())->loadString($plugin->params);
 
         if ($pluginParams->def('test', 0)) {
             $this->test = true;
@@ -73,9 +73,9 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
     /**
      * Will be called in the content element (article or record)
      * If the return is not empty, it will render the returned value.
-     * 
+     *
      * By that things like coupon codes may be implemented.
-     * 
+     *
      * @param string $link the link that points to the verifier
      * @param string $plugin_settings A query string with the plugin options
      * @return string empty for nothing (default) or a string to render instead of the default
@@ -91,10 +91,10 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
 
     /**
      * Will always be called by the verifier
-     * 
+     *
      * @param type $return_url
      * @param type $options
-     * @return string empty if everything is ok, else a message describing the problem 
+     * @return string empty if everything is ok, else a message describing the problem
      */
     public function onSetup(Event $event): string
     {
@@ -103,7 +103,6 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
         $options = isset($args[1]) && is_array($args[1]) ? $args[1] : [];
 
         if (isset($options['plugin_options']) && isset($options['plugin_options']['amount']) && is_numeric($options['plugin_options']['amount'])) {
-
             $this->amount = $options['plugin_options']['amount'];
             $this->name = $options['verification_name'];
             $this->locale = isset($options['plugin_options']['locale']) && $options['plugin_options']['locale'] ? strtoupper($options['plugin_options']['locale']) : 'EN';
@@ -112,7 +111,6 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
             $this->ipn = isset($options['plugin_options']['use-ipn']) && $options['plugin_options']['use-ipn'] == 'true' ? true : false;
             $this->item_number = isset($options['plugin_options']['item-number']) && $options['plugin_options']['item-number'] ? $options['plugin_options']['item-number'] : 1;
             $this->cancel_url = htmlspecialchars(isset($options['plugin_options']['cancel-url']) && $options['plugin_options']['cancel-url'] ? $options['plugin_options']['cancel-url'] : str_replace('&verify=1', '', $return_url), ENT_QUOTES, 'UTF-8');
-
         } else {
             return Text::_('PLG_CONTENTBUILDERNG_VERIFY_PAYPAL_AMOUNT_REQUIRED');
         }
@@ -121,9 +119,9 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
 
     /**
      * Will be called on forward, right after setup IF there is no verification yet
-     * 
+     *
      * @param string $return_url
-     * @param array $options 
+     * @param array $options
      */
     public function onForward(Event $event): void
     {
@@ -172,10 +170,10 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
 
     /**
      * Will be called on verification
-     * 
+     *
      * @param string $return_url
      * @param array $options
-     * @return mixed boolean false on errors or an array with the payment data 
+     * @return mixed boolean false on errors or an array with the payment data
      */
     public function onVerify(Event $event)
     {
@@ -208,7 +206,7 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
         if (function_exists('curl_init')) {
             $ch = curl_init();
 
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_URL, $paypal . '/cgi-bin/webscr');
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $req);
@@ -218,7 +216,6 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
             $res = ob_get_contents();
             curl_close($ch);
             ob_end_clean();
-
         } else {
             // try fsockopen
             $fp = fsockopen($paypal, 80, $errno, $errstr, 30);
@@ -229,7 +226,7 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
                 $line = fgets($fp, 1024);
                 if (strcmp($line, "\r\n") == 0) {
                     $headerdone = true;
-                } else if ($headerdone) {
+                } elseif ($headerdone) {
                     $res .= $line;
                 }
             }
@@ -240,7 +237,6 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
         $keyarray = array();
 
         if (strcmp($lines[0], "SUCCESS") == 0) {
-
             for ($i = 1; $i < count($lines); $i++) {
                 if ($lines[$i] != "") {
                     list($key, $val) = explode("=", $lines[$i]);
@@ -249,11 +245,8 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
             }
 
             if ($keyarray['mc_gross'] != (floatval($this->amount) + floatval($this->tax)) || $keyarray['mc_currency'] != strtoupper($this->curreny)) {
-
                 return false;
-
             } else {
-
                 return array(
                     'tx' => $tx_token,
                     'msg' => '',
@@ -270,9 +263,9 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
      *
      * @param string $return_url
      * @param array $options
-     * @return mixed boolean false on error, else an array with information about the payment 
+     * @return mixed boolean false on error, else an array with information about the payment
      */
-    function verifyIpn($return_url, $options)
+    public function verifyIpn($return_url, $options)
     {
 
         $return = false;
@@ -306,7 +299,7 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
         if (function_exists('curl_init')) {
             $ch = curl_init();
             $pointer = $ch;
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_URL, $paypal . '/cgi-bin/webscr');
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $req);
@@ -314,7 +307,6 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
             ob_start();
             curl_exec($ch);
             $res = ob_get_contents();
-
         } else {
             // try fsockopen
             $fp = fsockopen($paypal, 80, $errno, $errstr, 30);
@@ -325,7 +317,7 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
                 $line = fgets($fp, 1024);
                 if (strcmp($line, "\r\n") == 0) {
                     $headerdone = true;
-                } else if ($headerdone) {
+                } elseif ($headerdone) {
                     $res .= $line;
                 }
             }
@@ -334,17 +326,13 @@ final class Paypal extends CMSPlugin implements SubscriberInterface
         $lines = explode("\n", $res);
 
         if (strcmp($lines[0], "VERIFIED") == 0) {
-
             foreach ($postback as $key => $value) {
                 $keyarray[$key] = $value;
             }
 
             if ($keyarray['mc_gross'] != (floatval($this->amount) + floatval($this->tax)) || $keyarray['mc_currency'] != strtoupper($this->curreny)) {
-
                 // not good
-
             } else {
-
                 $return = array(
                     'tx' => $tx_token,
                     'exit' => true,

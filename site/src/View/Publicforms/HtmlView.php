@@ -5,7 +5,7 @@
  * @author      Markus Bopp
  * @author      XDA+GIL
  * @link        https://breezingforms-ng.vcmb.fr
- * @copyright   Copyright © 2026 XDA+GIL 
+ * @copyright   Copyright © 2026 XDA+GIL
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
@@ -22,7 +22,7 @@ use CB\Component\Contentbuilderng\Site\Model\PublicformsModel;
 
 class HtmlView extends BaseHtmlView
 {
-    function display($tpl = null)
+    public function display($tpl = null)
     {
         /** @var PublicformsModel $model */
         $model = $this->getModel();

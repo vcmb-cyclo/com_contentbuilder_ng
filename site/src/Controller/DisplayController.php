@@ -5,9 +5,10 @@
  * @author      Xavier DANO / XDA+GIL
  * @link        https://breezingforms-ng.vcmb.fr
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
- * 
+ *
  * Custom dispatcher to Controllers.
 */
+
 namespace CB\Component\Contentbuilderng\Site\Controller;
 
 \defined('_JEXEC') or die;

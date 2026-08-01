@@ -11,14 +11,13 @@
 namespace CB\Component\Contentbuilderng\Site\Controller;
 
 // No direct access
-\defined( '_JEXEC' ) or die( 'Restricted access' );
+\defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\MVC\Controller\BaseController;
 
 class PublicformsController extends BaseController
 {
-
-    function display($cachable = false, $urlparams = [])
+    public function display($cachable = false, $urlparams = [])
     {
         $this->input->set('tmpl', $this->input->getWord('tmpl', null));
         $this->input->set('layout', $this->input->getWord('layout', null));

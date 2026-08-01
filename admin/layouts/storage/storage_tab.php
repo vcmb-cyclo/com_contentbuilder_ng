@@ -24,6 +24,7 @@ $storageId = (int) ($displayData['storageId'] ?? 0);
 $addFieldTooltip = (string) ($displayData['addFieldTooltip'] ?? '');
 $sortLink = $displayData['sortLink'] ?? null;
 $fields = is_iterable($displayData['fields'] ?? null) ? $displayData['fields'] : [];
+$fieldNames = is_array($displayData['fieldNames'] ?? null) ? $displayData['fieldNames'] : [];
 $fieldsCount = (int) ($displayData['fieldsCount'] ?? 0);
 $recordsCount = $displayData['recordsCount'] ?? null;
 $pagination = $displayData['pagination'] ?? null;
@@ -38,10 +39,7 @@ $canEditSqlType = !$item->bytable && $recordsCount !== null && (int) $recordsCou
 // (StorageModel::syncStorageDataTableOrBytable()) mais pas encore exposées
 // comme field géré : preview en lecture seule, toujours en fin de liste
 // (peu importe le tri courant), sur la dernière page seulement.
-$existingFieldNames = [];
-foreach ($fields as $fieldRow) {
-    $existingFieldNames[(string) ($fieldRow->name ?? '')] = true;
-}
+$existingFieldNames = array_fill_keys(array_map('strval', $fieldNames), true);
 $pendingSystemFields = array_diff_key(StorageSystemFieldHelper::definitions(), $existingFieldNames);
 $isLastPage = !$pagination || ((int) $pagination->pagesCurrent >= (int) $pagination->pagesTotal);
 $showPendingSystemFields = $storageId > 0 && $isLastPage && !empty($pendingSystemFields);
@@ -51,6 +49,7 @@ $storageFieldColumns = [
     'title' => Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE'),
     'sql_type' => Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE'),
     'field_size' => Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE'),
+    'required' => Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_REQUIRED'),
     'group' => Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'),
     'order' => Text::_('COM_CONTENTBUILDERNG_ORDERBY'),
     'publish' => Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED'),
@@ -119,7 +118,7 @@ $storageFieldColumns = [
                             <input class="form-check-input" type="checkbox" name="checkall-toggle" value="" onclick="Joomla.checkAll(this);" aria-label="<?php echo htmlspecialchars(Text::_('JGLOBAL_CHECK_ALL'), ENT_QUOTES, 'UTF-8'); ?>">
                         </th>
                         <th width="60" class="text-nowrap" data-cb-storage-col="id">
-                            <?php echo Text::_('COM_CONTENTBUILDERNG_ID'); ?>
+                            <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_ID'), 'id') : Text::_('COM_CONTENTBUILDERNG_ID'); ?>
                         </th>
                         <th data-cb-storage-col="name" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_NAME_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                             <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_NAME'), 'name') : Text::_('COM_CONTENTBUILDERNG_NAME'); ?>
@@ -131,7 +130,10 @@ $storageFieldColumns = [
                             <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE'), 'sql_type') : Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE'); ?>
                         </th>
                         <th width="90" data-cb-storage-col="field_size" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
-                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE'); ?>
+                            <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE'), 'field_size') : Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE'); ?>
+                        </th>
+                        <th width="50" class="text-center" data-cb-storage-col="required" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_REQUIRED_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
+                            <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_REQUIRED'), 'required') : Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_REQUIRED'); ?>
                         </th>
                         <th data-cb-storage-col="group" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                             <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'), 'group_definition') : Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'); ?>
@@ -151,7 +153,8 @@ $storageFieldColumns = [
                     $id = (int) ($row->id ?? 0);
                     $rawName = (string) ($row->name ?? '');
                     $name = htmlspecialchars($rawName, ENT_QUOTES, 'UTF-8');
-                    $title = htmlspecialchars((string) ($row->title ?? ''), ENT_QUOTES, 'UTF-8');
+                    $rawTitle = (string) ($row->title ?? '');
+                    $title = htmlspecialchars($rawTitle, ENT_QUOTES, 'UTF-8');
                     $sqlType = StorageColumnTypeHelper::normalize((string) ($row->sql_type ?? StorageColumnTypeHelper::DEFAULT_TYPE));
                     $sqlTypeLabel = htmlspecialchars(StorageColumnTypeHelper::label($sqlType), ENT_QUOTES, 'UTF-8');
                     $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $row->field_size ?? null);
@@ -161,7 +164,23 @@ $storageFieldColumns = [
                     $published = ContentbuilderngHelper::listPublish('storage', $row, $i);
                     $isSystemField = StorageSystemFieldHelper::isSystemFieldName($rawName);
                     $rowSqlTypeEditable = $canEditSqlType && !$isSystemField;
-                ?>
+                    $rowSizeEditable = $rowSqlTypeEditable
+                        || (!$isSystemField && (int) ($item->bytable ?? 0) === 0 && $sqlType === 'varchar');
+                    $required = !empty($row->required);
+                    // Contrairement au type SQL, basculer le caractère obligatoire
+                    // reste sûr même sur une table déjà peuplée (les valeurs NULL
+                    // existantes sont comblées avant de poser la contrainte, cf.
+                    // StorageColumnTypeHelper::enforceRequired()) : aucune
+                    // restriction "table vide" n'est donc nécessaire ici, à la
+                    // différence de $rowSqlTypeEditable.
+                    $rowRequiredEditable = !$isSystemField && (int) ($item->bytable ?? 0) === 0;
+                    $requiredIconClass = $required ? 'fa-solid fa-asterisk text-danger' : 'fa-regular fa-circle text-muted';
+                    $requiredTipText = Text::_(
+                        $required
+                            ? 'COM_CONTENTBUILDERNG_STORAGE_FIELD_REQUIRED_YES_TIP'
+                            : 'COM_CONTENTBUILDERNG_STORAGE_FIELD_REQUIRED_NO_TIP'
+                    );
+                    ?>
                     <tr class="row<?php echo $i % 2; ?>" data-cb-row-id="<?php echo $id; ?>" data-cb-item-label="<?php echo $title !== '' ? $title : $name; ?>">
                         <td class="text-center" data-cb-storage-col="check"><?php echo $checked; ?></td>
                         <td class="text-nowrap" data-cb-storage-col="id"><?php echo $id; ?></td>
@@ -171,7 +190,16 @@ $storageFieldColumns = [
                                 <span class="fa-solid fa-gear ms-1" aria-hidden="true" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_MANAGED_TIP'), ENT_QUOTES, 'UTF-8'); ?>"></span>
                             <?php endif; ?>
                         </td>
-                        <td data-cb-storage-col="title"><?php echo $title; ?></td>
+                        <td data-cb-storage-col="title">
+                            <input
+                                type="text"
+                                class="form-control form-control-sm cb-storage-field-title-input"
+                                data-field-id="<?php echo htmlspecialchars((string) $id, ENT_QUOTES, 'UTF-8'); ?>"
+                                data-previous-value="<?php echo htmlspecialchars($rawTitle, ENT_QUOTES, 'UTF-8'); ?>"
+                                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_TITLE_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                value="<?php echo htmlspecialchars($rawTitle, ENT_QUOTES, 'UTF-8'); ?>"
+                            >
+                        </td>
                         <td data-cb-storage-col="sql_type">
                             <?php if ($rowSqlTypeEditable) : ?>
                                 <select class="form-select form-select-sm cb-storage-field-type-select" data-field-id="<?php echo $id; ?>" style="width:auto; max-width:12rem;" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
@@ -193,12 +221,14 @@ $storageFieldColumns = [
                             <?php endif; ?>
                         </td>
                         <td class="text-nowrap" data-cb-storage-col="field_size">
-                            <?php if ($rowSqlTypeEditable && StorageColumnTypeHelper::supportsSize($sqlType)) : ?>
+                            <?php if ($rowSizeEditable && StorageColumnTypeHelper::supportsSize($sqlType)) : ?>
                                 <input
                                     type="number"
                                     min="1"
                                     class="form-control form-control-sm cb-storage-field-size-input"
                                     data-field-id="<?php echo $id; ?>"
+                                    data-sql-type="<?php echo htmlspecialchars($sqlType, ENT_QUOTES, 'UTF-8'); ?>"
+                                    data-previous-value="<?php echo htmlspecialchars((string) (int) $fieldSize, ENT_QUOTES, 'UTF-8'); ?>"
                                     style="width:6rem;"
                                     title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
                                     value="<?php echo (int) $fieldSize; ?>"
@@ -207,6 +237,25 @@ $storageFieldColumns = [
                                 <?php echo (int) $fieldSize; ?>
                             <?php else : ?>
                                 &mdash;
+                            <?php endif; ?>
+                        </td>
+                        <td class="text-center" data-cb-storage-col="required">
+                            <?php if ($rowRequiredEditable) : ?>
+                                <button type="button"
+                                    class="btn btn-sm btn-link p-0 cb-storage-field-required-toggle"
+                                    data-field-id="<?php echo $id; ?>"
+                                    data-required="<?php echo $required ? '1' : '0'; ?>"
+                                    data-yes-title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_REQUIRED_YES_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                    data-no-title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_REQUIRED_NO_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                                    title="<?php echo htmlspecialchars($requiredTipText, ENT_QUOTES, 'UTF-8'); ?>"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top">
+                                    <span class="cb-storage-field-required-icon <?php echo $requiredIconClass; ?>" aria-hidden="true"></span>
+                                    <span class="visually-hidden"><?php echo htmlspecialchars($requiredTipText, ENT_QUOTES, 'UTF-8'); ?></span>
+                                </button>
+                            <?php else : ?>
+                                <span class="<?php echo $requiredIconClass; ?>" title="<?php echo htmlspecialchars($requiredTipText, ENT_QUOTES, 'UTF-8'); ?>" data-bs-toggle="tooltip" data-bs-placement="top" aria-hidden="true"></span>
+                                <span class="visually-hidden"><?php echo htmlspecialchars($requiredTipText, ENT_QUOTES, 'UTF-8'); ?></span>
                             <?php endif; ?>
                         </td>
                         <td data-cb-storage-col="group">
@@ -304,6 +353,7 @@ $storageFieldColumns = [
                                 <?php echo htmlspecialchars(StorageColumnTypeHelper::label((string) $pendingFieldDefinition['sql_type']), ENT_QUOTES, 'UTF-8'); ?>
                             </td>
                             <td class="text-nowrap" data-cb-storage-col="field_size">—</td>
+                            <td class="text-center" data-cb-storage-col="required">—</td>
                             <td data-cb-storage-col="group">—</td>
                             <td class="cb-order-col" data-cb-storage-col="order">—</td>
                             <td class="text-center" data-cb-storage-col="publish">

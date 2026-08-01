@@ -32,6 +32,8 @@ class HtmlView extends BaseHtmlView
 {
     public $form;
     public $fields;
+    /** @var array<int,string> */
+    public array $storageFieldNames = [];
     public $tables;
     public array $tableModes = [];
     public array $tableSourceTypes = [];
@@ -84,7 +86,7 @@ class HtmlView extends BaseHtmlView
 
     #[\Override]
     public function display($tpl = null): void
-    {         
+    {
         if ($this->getLayout() === 'help') {
             parent::display($tpl);
             return;
@@ -102,7 +104,7 @@ class HtmlView extends BaseHtmlView
         Text::script('COM_CONTENTBUILDERNG_CONFIRM_DELETE_ONE');
         Text::script('COM_CONTENTBUILDERNG_CONFIRM_DELETE_MANY');
 
-		if (!$this->frontend) {
+        if (!$this->frontend) {
             $wa->addInlineStyle(
                 '.icon-logo_left{
                     background-image:url(' . Uri::root(true) . '/media/com_contentbuilderng/images/logo_left.png);
@@ -118,8 +120,8 @@ class HtmlView extends BaseHtmlView
                    anchor; the Preview button already has its own eye icon for that. */
                 #toolbar-link::before{content:none;}'
             );
-        }    
-            
+        }
+
         // Formulaire JForm
         $this->form = $this->getModel()->getForm();
 
@@ -171,6 +173,7 @@ class HtmlView extends BaseHtmlView
 
                 // Charge les items
                 $this->fields     = $fieldsModel->getItems();
+                $this->storageFieldNames = $fieldsModel->getFieldNames();
                 $this->pagination = $fieldsModel->getPagination();
                 $this->state      = $fieldsModel->getState();
                 $this->ordering   = ($this->state && $this->state->get('list.ordering') === 'ordering');
@@ -345,28 +348,28 @@ class HtmlView extends BaseHtmlView
             // fichier" (panneau CSV/XLS existant sur l'onglet Stockage de
             // données) sous un seul bouton "Mise à jour", plutôt que deux
             // entrées séparées dans la barre d'outils.
-            $updateDropdown = $toolbar->dropdownButton('storage-update-group');
-            $updateDropdown->text('COM_CONTENTBUILDERNG_STORAGE_UPDATE_GROUP');
-            $updateDropdown->toggleSplit(false);
-            $updateDropdown->icon('fa fa-sync');
-            $updateDropdown->buttonClass('btn btn-action');
-            $updateDropdown->listCheck(false);
-            $updateDropdown->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_GROUP_TIP')]);
+                $updateDropdown = $toolbar->dropdownButton('storage-update-group');
+                $updateDropdown->text('COM_CONTENTBUILDERNG_STORAGE_UPDATE_GROUP');
+                $updateDropdown->toggleSplit(false);
+                $updateDropdown->icon('fa fa-sync');
+                $updateDropdown->buttonClass('btn btn-action');
+                $updateDropdown->listCheck(false);
+                $updateDropdown->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_GROUP_TIP')]);
 
-            $updateChildToolbar = $updateDropdown->getChildToolbar();
-            $updateChildToolbar->standardButton('datatable.sync')
+                $updateChildToolbar = $updateDropdown->getChildToolbar();
+                $updateChildToolbar->standardButton('datatable.sync')
                 ->task('datatable.sync')
                 ->text('COM_CONTENTBUILDERNG_DATATABLE_SYNC')
                 ->icon('fa fa-sync')
                 ->listCheck(false)
                 ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_DATATABLE_SYNC_TIP')]);
 
-            $csvUpdateUrl = Route::_(
-                'index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $id
+                $csvUpdateUrl = Route::_(
+                    'index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $id
                     . '&tabStartOffset=tab1&csv_import=1#csvUploadHead',
-                false
-            );
-            $updateChildToolbar->link(Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV'), $csvUpdateUrl)
+                    false
+                );
+                $updateChildToolbar->link(Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV'), $csvUpdateUrl)
                 ->icon('fa fa-file-excel')
                 ->attributes([
                     'title' => Text::_('COM_CONTENTBUILDERNG_STORAGE_CSV_TOGGLE_TOOLTIP'),

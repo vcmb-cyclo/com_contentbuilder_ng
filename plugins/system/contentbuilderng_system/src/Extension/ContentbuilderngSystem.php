@@ -1,7 +1,5 @@
 <?php
 
-namespace CB\Plugin\System\ContentbuilderngSystem\Extension;
-
 /**
  * @version     6.0
  * @package     ContentBuilderNG
@@ -13,6 +11,8 @@ namespace CB\Plugin\System\ContentbuilderngSystem\Extension;
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
+
+namespace CB\Plugin\System\ContentbuilderngSystem\Extension;
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -132,7 +132,7 @@ final class ContentbuilderngSystem extends CMSPlugin implements SubscriberInterf
         ];
     }
 
-    function onBeforeRender()
+    public function onBeforeRender()
     {
         $pluginParams = $this->params;
         //        CBCompat::getPluginParams($this, 'system', 'contentbuilderng_system');
@@ -142,7 +142,7 @@ final class ContentbuilderngSystem extends CMSPlugin implements SubscriberInterf
         }
     }
 
-    function onAfterDispatch()
+    public function onAfterDispatch()
     {
         if (!$this->bootstrapContentbuilder()) {
             return;
@@ -152,7 +152,6 @@ final class ContentbuilderngSystem extends CMSPlugin implements SubscriberInterf
         $app = $this->app;
         $option = $app->getInput()->getCmd('option', '');
         if ($option === 'com_kunena' || $option === 'com_contentbuilderng') {
-
             $pluginParams = $this->params;
 
             if (intval($pluginParams->get('is_auto_groups', 0)) == 1 && count($pluginParams->get('auto_groups', array()))) {
@@ -319,8 +318,12 @@ final class ContentbuilderngSystem extends CMSPlugin implements SubscriberInterf
                         $css = is_array($results_css) ? implode('', $results_css) : (string) $results_css;
                         $js  = is_array($results_js)  ? implode('', $results_js)  : (string) $results_js;
 
-                        if ($css !== '') $wa->addInlineStyle($css);
-                        if ($js !== '')  $wa->addInlineScript($js);
+                        if ($css !== '') {
+                            $wa->addInlineStyle($css);
+                        }
+                        if ($js !== '') {
+                            $wa->addInlineScript($js);
+                        }
                     }
                 }
             }
@@ -367,7 +370,7 @@ final class ContentbuilderngSystem extends CMSPlugin implements SubscriberInterf
         }
     }
 
-    function onAfterRoute()
+    public function onAfterRoute()
     {
         if (!$this->bootstrapContentbuilder()) {
             return;
@@ -437,7 +440,6 @@ final class ContentbuilderngSystem extends CMSPlugin implements SubscriberInterf
         $option = $app->getInput()->getCmd('option', '');
 
         if ($option === 'com_content') {
-
             $pluginParams = $this->params;
 
             if ($pluginParams->def('nocache', 1)) {
@@ -447,7 +449,6 @@ final class ContentbuilderngSystem extends CMSPlugin implements SubscriberInterf
         }
 
         if ($isSyncMutationRequest) {
-
             // Multi-table UPDATE (MySQL-specific syntax): DDL-style raw string with quoted identifiers.
             $db = $this->db;
             $db->setQuery(
@@ -486,12 +487,12 @@ final class ContentbuilderngSystem extends CMSPlugin implements SubscriberInterf
         }
     }
 
-    function onAfterInitialise()
+    public function onAfterInitialise()
     {
         $this->onAfterInitialize();
     }
 
-    function onAfterInitialize()
+    public function onAfterInitialize()
     {
         if (!$this->bootstrapContentbuilder()) {
             return;

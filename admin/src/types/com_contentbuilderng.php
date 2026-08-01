@@ -23,6 +23,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\PhpTemplateHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\StorageColumnTypeHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\StorageSystemFieldHelper;
 
 class contentbuilderng_com_contentbuilderng
 {
@@ -97,29 +98,36 @@ class contentbuilderng_com_contentbuilderng
 
         $reference_ids = $db->loadColumn();
 
-        if (is_array($reference_ids)) {
+        // The outer query already selected only ids with no tracking row
+        // (NOT IN the subquery above), so a per-row existence re-check
+        // before inserting was always a no-op — every iteration hit the
+        // insert branch. One set-based multi-row INSERT replaces what was
+        // 2N queries (N existence checks + N inserts) with 1.
+        //
+        // IGNORE, not a plain INSERT: a multi-row INSERT is atomic in
+        // InnoDB — one row losing a race against a concurrent request to
+        // the (type, reference_id, record_id) unique key would abort the
+        // whole statement and silently drop every other row in this batch
+        // too. IGNORE degrades a duplicate-key violation to a per-row
+        // skip instead, matching the original loop's actual behaviour
+        // (each row synced independently of its neighbours).
+        if (is_array($reference_ids) && $reference_ids !== []) {
+            $rows = [];
+
             foreach ($reference_ids as $reference_id) {
-                $checkQuery = $db->getQuery(true)
-                    ->select($db->quoteName('id'))
-                    ->from($db->quoteName('#__contentbuilderng_records'))
-                    ->where($db->quoteName('type') . ' = ' . $db->quote('com_contentbuilderng'))
-                    ->where($db->quoteName('reference_id') . ' = ' . (int) $this->properties->id)
-                    ->where($db->quoteName('record_id') . ' = ' . (int) $reference_id);
-                $db->setQuery($checkQuery);
-                $res = $db->loadResult();
-                if (!$res) {
-                    $insertQuery = $db->getQuery(true)
-                        ->insert($db->quoteName('#__contentbuilderng_records'))
-                        ->columns($db->quoteName(['type', 'record_id', 'reference_id']))
-                        ->values(implode(',', [
-                            $db->quote('com_contentbuilderng'),
-                            (int) $reference_id,
-                            (int) $this->properties->id,
-                        ]));
-                    $db->setQuery($insertQuery);
-                    $db->execute();
-                }
+                $rows[] = '(' . implode(',', [
+                    $db->quote('com_contentbuilderng'),
+                    (int) $reference_id,
+                    (int) $this->properties->id,
+                ]) . ')';
             }
+
+            $db->setQuery(
+                'INSERT IGNORE INTO ' . $db->quoteName('#__contentbuilderng_records')
+                . ' (' . $db->quoteName('type') . ', ' . $db->quoteName('record_id') . ', ' . $db->quoteName('reference_id') . ')'
+                . ' VALUES ' . implode(',', $rows)
+            );
+            $db->execute();
         }
     }
 
@@ -836,6 +844,154 @@ class contentbuilderng_com_contentbuilderng
         return $elements;
     }
 
+    /**
+     * Exposes native editable controls derived from the Storage SQL types.
+     * TemplateRenderService uses this mapping even when an already-provisioned
+     * direct-storage form still has the generic "text" element type.
+     *
+     * @return array<int|string,string>
+     */
+    public function getEditableElementTypes(): array
+    {
+        $types = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (!empty($element['is_group'])) {
+                continue;
+            }
+
+            $types[(string) $element['id']] = StorageColumnTypeHelper::editableElementType(
+                $element['sql_type'] ?? null
+            );
+        }
+
+        return $types;
+    }
+
+    /**
+     * @return array<int|string,int>
+     */
+    public function getVarcharElementSizes(): array
+    {
+        $sizes = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (
+                empty($element['is_group'])
+                && StorageColumnTypeHelper::normalize($element['sql_type'] ?? null) === 'varchar'
+            ) {
+                $sizes[(string) $element['id']] = StorageColumnTypeHelper::normalizeSize(
+                    'varchar',
+                    $element['field_size'] ?? null
+                ) ?? 255;
+            }
+        }
+
+        return $sizes;
+    }
+
+    public function shouldSynchronizeEditableElementTypes(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @return array<int|string>
+     */
+    public function getRequiredElementIds(): array
+    {
+        $ids = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (
+                !empty($element['required'])
+                && !StorageSystemFieldHelper::isSystemFieldName((string) ($element['name'] ?? ''))
+            ) {
+                $ids[] = (string) $element['id'];
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @return array<int|string>
+     */
+    public function getIntegerElementIds(): array
+    {
+        $ids = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (
+                empty($element['is_group'])
+                && StorageColumnTypeHelper::normalize($element['sql_type'] ?? null) === 'int'
+            ) {
+                $ids[] = (string) $element['id'];
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @return array<int|string>
+     */
+    public function getDecimalElementIds(): array
+    {
+        $ids = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (
+                empty($element['is_group'])
+                && StorageColumnTypeHelper::normalize($element['sql_type'] ?? null) === 'decimal'
+            ) {
+                $ids[] = (string) $element['id'];
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @return array<int|string>
+     */
+    public function getBooleanElementIds(): array
+    {
+        $ids = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (
+                empty($element['is_group'])
+                && StorageColumnTypeHelper::normalize($element['sql_type'] ?? null) === 'boolean'
+            ) {
+                $ids[] = (string) $element['id'];
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @return array<int|string,string>
+     */
+    public function getTemporalElementTypes(): array
+    {
+        $types = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (!empty($element['is_group'])) {
+                continue;
+            }
+
+            $sqlType = StorageColumnTypeHelper::normalize($element['sql_type'] ?? null);
+            if (in_array($sqlType, ['date', 'datetime'], true)) {
+                $types[(string) $element['id']] = $sqlType;
+            }
+        }
+
+        return $types;
+    }
+
     public function getPageTitle()
     {
         return $this->properties->title;
@@ -1090,10 +1246,10 @@ class contentbuilderng_com_contentbuilderng
                 $columns[] = (string) $keys['name'];
                 $placeholders[] = ':fieldValue' . $i;
                 $fieldValue = (string) $keys['value'];
-                $isEmptyDate = $fieldValue === ''
-                    && in_array($sqlTypeById[$id] ?? '', ['date', 'datetime'], true);
-                $bindValues[$i] = $isEmptyDate ? null : $fieldValue;
-                $query->bind(':fieldValue' . $i, $bindValues[$i], $isEmptyDate ? ParameterType::NULL : ParameterType::STRING);
+                $isEmptyTypedValue = $fieldValue === ''
+                    && in_array($sqlTypeById[$id] ?? '', ['date', 'datetime', 'int', 'decimal', 'boolean'], true);
+                $bindValues[$i] = $isEmptyTypedValue ? null : $fieldValue;
+                $query->bind(':fieldValue' . $i, $bindValues[$i], $isEmptyTypedValue ? ParameterType::NULL : ParameterType::STRING);
                 $i++;
             }
 
@@ -1126,11 +1282,11 @@ class contentbuilderng_com_contentbuilderng
             $i = 0;
             foreach ($names as $id => $keys) {
                 $fieldValue = (string) $keys['value'];
-                $isEmptyDate = $fieldValue === ''
-                    && in_array($sqlTypeById[$id] ?? '', ['date', 'datetime'], true);
-                $bindValues[$i] = $isEmptyDate ? null : $fieldValue;
+                $isEmptyTypedValue = $fieldValue === ''
+                    && in_array($sqlTypeById[$id] ?? '', ['date', 'datetime', 'int', 'decimal', 'boolean'], true);
+                $bindValues[$i] = $isEmptyTypedValue ? null : $fieldValue;
                 $query->set($db->quoteName((string) $keys['name']) . ' = :fieldValue' . $i);
-                $query->bind(':fieldValue' . $i, $bindValues[$i], $isEmptyDate ? ParameterType::NULL : ParameterType::STRING);
+                $query->bind(':fieldValue' . $i, $bindValues[$i], $isEmptyTypedValue ? ParameterType::NULL : ParameterType::STRING);
                 $i++;
             }
 

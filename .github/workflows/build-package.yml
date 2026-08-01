@@ -65,19 +65,13 @@ jobs:
         run: composer audit --locked --no-interaction
 
   code-style:
-    name: PSR-12 (changed files)
+    name: PSR-12
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # The legacy surface still carries ~2400 PSR-12 errors, so the standard is
-    # enforced on what a change touches rather than on the whole tree. This
-    # stops the debt growing; clearing it is tracked separately.
-    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
       - name: Setup PHP 8.3
         uses: shivammathur/setup-php@v2
@@ -90,43 +84,17 @@ jobs:
         working-directory: admin
         run: composer install --prefer-dist --no-interaction --no-progress
 
-      # Blocking: a file added by this PR has no legacy excuse.
-      - name: PSR-12 on added files (blocking)
-        run: |
-          base="${{ github.event.pull_request.base.sha }}"
-          mapfile -t added < <(
-            git diff --name-only --diff-filter=A "${base}" HEAD \
-              | grep -E '\.php$' \
-              | grep -vE '^(admin/vendor|node_modules|build)/' || true
-          )
-          if [ "${#added[@]}" -eq 0 ]; then
-            echo "No PHP file added."
-            exit 0
-          fi
-          printf '%s\n' "${added[@]}"
-          # -n: errors block, warnings do not. PHPCS exits non-zero on
-          # warnings too, and PSR-12 warns on things like a 121-character
-          # line — not worth failing a security fix over.
-          admin/vendor/bin/phpcs -n --report=full "${added[@]}"
-
-      # Informational: modified files are overwhelmingly legacy (~2400 errors
-      # tree-wide). Failing on them would block every change touching an old
-      # file, including security fixes. Reported, not enforced, until
-      # REFACTORING_PLAN.md chapter A clears the backlog.
-      - name: PSR-12 on modified files (report only)
-        continue-on-error: true
-        run: |
-          base="${{ github.event.pull_request.base.sha }}"
-          mapfile -t modified < <(
-            git diff --name-only --diff-filter=M "${base}" HEAD \
-              | grep -E '\.php$' \
-              | grep -vE '^(admin/vendor|node_modules|build)/' || true
-          )
-          if [ "${#modified[@]}" -eq 0 ]; then
-            echo "No PHP file modified."
-            exit 0
-          fi
-          admin/vendor/bin/phpcs --report=summary "${modified[@]}" || true
+      # Global gate: REFACTORING_PLAN.md chapter A cleared every file listed
+      # in phpcs.xml.dist down to 0 errors (verified 2026-08-01). Files still
+      # excluded there (EditModel.php and its chapter-D siblings, the legacy
+      # types/ sources, three plugins) are skipped by the ruleset itself, not
+      # by this job — narrow that list as each one is cleared instead of
+      # loosening this gate.
+      #
+      # -n: errors block, warnings do not. PSR-12 warns on things like a
+      # 121-character line, which isn't worth failing a build over.
+      - name: PSR-12 (blocking)
+        run: admin/vendor/bin/phpcs -n --report=full
 
   css-lint:
     name: CSS checks
@@ -251,7 +219,7 @@ jobs:
 
   package:
     name: Build and smoke-test package
-    needs: [lint, css-lint, unit-tests, phpstan]
+    needs: [lint, code-style, css-lint, unit-tests, phpstan]
     runs-on: ubuntu-latest
     timeout-minutes: 20
 

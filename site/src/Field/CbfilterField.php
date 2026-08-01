@@ -80,7 +80,6 @@ class CbfilterField extends FormField
         $elements = $elementsByForm[(string) $selectedFormId] ?? [];
 
         if ($selectedFormId > 0) {
-
             foreach ($elements as $element) {
                 $referenceId = htmlspecialchars($element['reference_id'], ENT_QUOTES, 'UTF-8');
                 $out .= '<div class="mb-2"><label class="w-15">' . htmlspecialchars($element['label'], ENT_QUOTES, 'UTF-8') . '</label> <input class="form-control w-25" style="display:inline-block;" value="" type="text" onchange="contentbuilderng_addValue(\'' . $referenceId . '\',this.value);" name="element_' . $referenceId . '" id="element_' . $referenceId . '"/>';

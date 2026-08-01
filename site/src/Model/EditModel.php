@@ -49,6 +49,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Administrator\Contract\FormElementAfterValidationInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
+use CB\Component\Contentbuilderng\Administrator\Helper\StorageColumnTypeHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\ArticleService;
 use CB\Component\Contentbuilderng\Administrator\Service\RuntimeUtilityService;
 use CB\Component\Contentbuilderng\Administrator\Service\ListSupportService;
@@ -1473,6 +1474,188 @@ var contentbuilderng = new function(){
                                 }
                             }
                         }
+                    }
+
+                    $requiredElementIds = method_exists($data->form, 'getRequiredElementIds')
+                        ? (array) $data->form->getRequiredElementIds()
+                        : [];
+                    $allEditableFields = $the_upload_fields + $the_fields + $the_html_fields;
+                    $isExistingRecord = $this->app->getInput()->getInt('record_id', 0) > 0;
+
+                    foreach ($requiredElementIds as $requiredElementId) {
+                        $requiredElementId = (string) $requiredElementId;
+
+                        // Sparse edit submissions intentionally omit fields
+                        // that are not rendered or not editable. Their stored
+                        // value must remain untouched instead of being treated
+                        // as an empty required value.
+                        if (!array_key_exists($requiredElementId, $values) && $isExistingRecord) {
+                            continue;
+                        }
+
+                        $requiredValue = $values[$requiredElementId] ?? null;
+                        $hasRequiredValue = is_array($requiredValue)
+                            ? array_filter($requiredValue, static fn($value) => $value !== null && trim((string) $value) !== '' && $value !== 'cbGroupMark') !== []
+                            : $requiredValue !== null && trim((string) $requiredValue) !== '';
+
+                        if ($hasRequiredValue) {
+                            continue;
+                        }
+
+                        $requiredField = $allEditableFields[$requiredElementId] ?? [
+                            'label' => $names[$requiredElementId] ?? '',
+                            'name' => $names[$requiredElementId] ?? '',
+                        ];
+                        $this->app->getInput()->set('cb_submission_failed', 1);
+                        $this->enqueueFieldValidationMessage(
+                            $requiredField,
+                            Text::_('COM_CONTENTBUILDERNG_STORAGE_REQUIRED_VALUE')
+                        );
+                    }
+
+                    $varcharElementSizes = method_exists($data->form, 'getVarcharElementSizes')
+                        ? (array) $data->form->getVarcharElementSizes()
+                        : [];
+
+                    foreach ($varcharElementSizes as $varcharElementId => $varcharMaximumLength) {
+                        $varcharElementId = (string) $varcharElementId;
+
+                        if (!array_key_exists($varcharElementId, $values)) {
+                            continue;
+                        }
+
+                        $varcharValue = $values[$varcharElementId];
+                        $varcharLength = is_scalar($varcharValue)
+                            ? (function_exists('mb_strlen')
+                                ? mb_strlen((string) $varcharValue, 'UTF-8')
+                                : strlen((string) $varcharValue))
+                            : PHP_INT_MAX;
+
+                        if ($varcharLength <= (int) $varcharMaximumLength) {
+                            continue;
+                        }
+
+                        $varcharField = $allEditableFields[$varcharElementId] ?? [
+                            'label' => $names[$varcharElementId] ?? '',
+                            'name' => $names[$varcharElementId] ?? '',
+                        ];
+                        $this->app->getInput()->set('cb_submission_failed', 1);
+                        $this->enqueueFieldValidationMessage(
+                            $varcharField,
+                            Text::sprintf(
+                                'COM_CONTENTBUILDERNG_STORAGE_VARCHAR_LENGTH',
+                                (int) $varcharMaximumLength
+                            )
+                        );
+                    }
+
+                    $integerElementIds = method_exists($data->form, 'getIntegerElementIds')
+                        ? (array) $data->form->getIntegerElementIds()
+                        : [];
+
+                    foreach ($integerElementIds as $integerElementId) {
+                        $integerElementId = (string) $integerElementId;
+                        $integerValue = $values[$integerElementId] ?? null;
+
+                        if ($integerValue === null || (is_scalar($integerValue) && trim((string) $integerValue) === '')) {
+                            continue;
+                        }
+
+                        if (StorageColumnTypeHelper::isValidIntegerValue($integerValue)) {
+                            continue;
+                        }
+
+                        $integerField = $allEditableFields[$integerElementId] ?? [
+                            'label' => $names[$integerElementId] ?? '',
+                            'name' => $names[$integerElementId] ?? '',
+                        ];
+                        $this->app->getInput()->set('cb_submission_failed', 1);
+                        $this->enqueueFieldValidationMessage(
+                            $integerField,
+                            Text::_('COM_CONTENTBUILDERNG_STORAGE_INTEGER_VALUE')
+                        );
+                    }
+
+                    $decimalElementIds = method_exists($data->form, 'getDecimalElementIds')
+                        ? (array) $data->form->getDecimalElementIds()
+                        : [];
+
+                    foreach ($decimalElementIds as $decimalElementId) {
+                        $decimalElementId = (string) $decimalElementId;
+                        $decimalValue = $values[$decimalElementId] ?? null;
+
+                        if ($decimalValue === null || (is_scalar($decimalValue) && trim((string) $decimalValue) === '')) {
+                            continue;
+                        }
+
+                        if (
+                            is_scalar($decimalValue)
+                            && preg_match('/^[+-]?(?:\d{1,11}(?:\.\d{1,4})?|\.\d{1,4})$/D', trim((string) $decimalValue))
+                        ) {
+                            continue;
+                        }
+
+                        $decimalField = $allEditableFields[$decimalElementId] ?? [
+                            'label' => $names[$decimalElementId] ?? '',
+                            'name' => $names[$decimalElementId] ?? '',
+                        ];
+                        $this->app->getInput()->set('cb_submission_failed', 1);
+                        $this->enqueueFieldValidationMessage(
+                            $decimalField,
+                            Text::_('COM_CONTENTBUILDERNG_STORAGE_DECIMAL_VALUE')
+                        );
+                    }
+
+                    $booleanElementIds = method_exists($data->form, 'getBooleanElementIds')
+                        ? (array) $data->form->getBooleanElementIds()
+                        : [];
+
+                    foreach ($booleanElementIds as $booleanElementId) {
+                        $booleanElementId = (string) $booleanElementId;
+                        $booleanValue = $values[$booleanElementId] ?? null;
+
+                        if ($booleanValue === null || $booleanValue === '' || $booleanValue === 0 || $booleanValue === 1 || $booleanValue === '0' || $booleanValue === '1') {
+                            continue;
+                        }
+
+                        $booleanField = $allEditableFields[$booleanElementId] ?? [
+                            'label' => $names[$booleanElementId] ?? '',
+                            'name' => $names[$booleanElementId] ?? '',
+                        ];
+                        $this->app->getInput()->set('cb_submission_failed', 1);
+                        $this->enqueueFieldValidationMessage(
+                            $booleanField,
+                            Text::_('COM_CONTENTBUILDERNG_STORAGE_BOOLEAN_VALUE')
+                        );
+                    }
+
+                    $temporalElementTypes = method_exists($data->form, 'getTemporalElementTypes')
+                        ? (array) $data->form->getTemporalElementTypes()
+                        : [];
+
+                    foreach ($temporalElementTypes as $temporalElementId => $temporalType) {
+                        $temporalElementId = (string) $temporalElementId;
+                        $temporalValue = trim((string) ($values[$temporalElementId] ?? ''));
+
+                        if ($temporalValue === '') {
+                            continue;
+                        }
+
+                        if (StorageColumnTypeHelper::isValidTemporalValue($temporalValue, $temporalType)) {
+                            continue;
+                        }
+
+                        $temporalField = $allEditableFields[$temporalElementId] ?? [
+                            'label' => $names[$temporalElementId] ?? '',
+                            'name' => $names[$temporalElementId] ?? '',
+                        ];
+                        $this->app->getInput()->set('cb_submission_failed', 1);
+                        $this->enqueueFieldValidationMessage(
+                            $temporalField,
+                            Text::_($temporalType === 'datetime'
+                                ? 'COM_CONTENTBUILDERNG_STORAGE_DATETIME_VALUE'
+                                : 'COM_CONTENTBUILDERNG_STORAGE_DATE_VALUE')
+                        );
                     }
 
                     $dispatcher = $this->app->getDispatcher();

@@ -75,7 +75,7 @@ class ElementoptionsController extends AdminController
         }
     }
 
-    function display($cachable = false, $urlparams = array())
+    public function display($cachable = false, $urlparams = array())
     {
         $this->input->set('tmpl', $this->input->getWord('tmpl', null));
         $this->input->set('layout', $this->input->getWord('layout', null));
@@ -84,7 +84,7 @@ class ElementoptionsController extends AdminController
         parent::display();
     }
 
-    function save()
+    public function save()
     {
         $this->checkToken();
 

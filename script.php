@@ -454,7 +454,7 @@ class com_contentbuilderngInstallerScript
                 // Normalize legacy menu title keys (COM_CONTENTBUILDER -> COM_CONTENTBUILDERNG)
                 $this->repairLegacyMenuTitleKeys();
             }
-            
+
             // Normalize storages ordering (your original behavior, update only)
             if ($type === 'update') {
                 $this->normalizeStoragesOrdering();
@@ -723,7 +723,6 @@ class com_contentbuilderngInstallerScript
 
         $this->applyJoomlaTimezoneForLogging();
         $this->rotateSharedLogIfNeeded($logPath);
-
     }
 
     private function applyJoomlaTimezoneForLogging(): void
@@ -2300,5 +2299,4 @@ class com_contentbuilderngInstallerScript
             $this->log("[OK] Deduplicated {$targetElement} component rows: kept extension_id {$keepId}, removed " . count($removeIds) . " duplicate(s).");
         });
     }
-
 }

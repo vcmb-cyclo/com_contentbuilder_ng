@@ -71,7 +71,8 @@ $buildPageLink = static function (int $start) use ($params): string {
                     <span aria-hidden="true">&lt;</span>
                 </a>
             </li>
-            <?php for ($p = 1; $p <= $pagPages; $p++) : $startForPage = ($p - 1) * $pagLimit; ?>
+            <?php for ($p = 1; $p <= $pagPages; $p++) :
+                $startForPage = ($p - 1) * $pagLimit; ?>
                 <li class="page-item<?php echo $p === $pagCurrent ? ' active' : ''; ?>">
                     <a class="page-link" href="<?php echo $buildPageLink($startForPage); ?>"><?php echo $p; ?></a>
                 </li>

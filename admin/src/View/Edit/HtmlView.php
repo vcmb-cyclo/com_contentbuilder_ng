@@ -5,7 +5,7 @@
  * @author      Markus Bopp
  * @author      XDA+GIL
  * @link        https://breezingforms-ng.vcmb.fr
- * @copyright   Copyright © 2026 XDA+GIL 
+ * @copyright   Copyright © 2026 XDA+GIL
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
@@ -31,11 +31,11 @@ use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView a
 
 class HtmlView extends BaseHtmlView
 {
-	protected $sectioncategories;
-	protected $lists;
-	protected $row;
-	protected $article_settings;
-	protected $article_options;
+    protected $sectioncategories;
+    protected $lists;
+    protected $row;
+    protected $article_settings;
+    protected $article_options;
     private bool $frontend;
     private array $breezingFormsRenderCache = [];
 
@@ -258,248 +258,250 @@ class HtmlView extends BaseHtmlView
         }
     }
 
-	function display($tpl = null)
-	{
-		// Get data from the model
+    public function display($tpl = null)
+    {
+        // Get data from the model
         $app = $this->getApp();
         $this->frontend = $app->isClient('site');
-		//HTMLHelper::_('bootstrap.tooltip');
+        //HTMLHelper::_('bootstrap.tooltip');
 
-		// Get data from the model
-		/** @var EditModel $model */
-		$model = $this->getModel();
-		$subject = (is_object($model) && method_exists($model, 'getData')) ? $model->getData() : null;
-		if (!is_object($subject)) {
-			$subject = (object) [
-				'edit_by_type' => false,
-				'form_id' => 0,
-				'record_id' => 0,
-				'page_title' => '',
-				'template' => '',
-				'theme_plugin' => '',
-				'show_page_heading' => false,
-				'back_button' => false,
-				'latest' => false,
-				'limited_options' => false,
-				'frontend' => $this->frontend,
-				'create_articles' => false,
-				'id' => 0,
-				'created' => null,
-				'created_by' => null,
-				'modified' => null,
-				'modified_by' => null,
-				'save_button_title' => '',
-				'apply_button_title' => '',
-			];
-		}
+        // Get data from the model
+        /** @var EditModel $model */
+        $model = $this->getModel();
+        $subject = (is_object($model) && method_exists($model, 'getData')) ? $model->getData() : null;
+        if (!is_object($subject)) {
+            $subject = (object) [
+                'edit_by_type' => false,
+                'form_id' => 0,
+                'record_id' => 0,
+                'page_title' => '',
+                'template' => '',
+                'theme_plugin' => '',
+                'show_page_heading' => false,
+                'back_button' => false,
+                'latest' => false,
+                'limited_options' => false,
+                'frontend' => $this->frontend,
+                'create_articles' => false,
+                'id' => 0,
+                'created' => null,
+                'created_by' => null,
+                'modified' => null,
+                'modified_by' => null,
+                'save_button_title' => '',
+                'apply_button_title' => '',
+            ];
+        }
 
-		$event = new \stdClass();
-		$event->afterDisplayTitle = '';
-		$event->beforeDisplayContent = '';
-		$event->afterDisplayContent = '';
+        $event = new \stdClass();
+        $event->afterDisplayTitle = '';
+        $event->beforeDisplayContent = '';
+        $event->afterDisplayContent = '';
 
-		$table2 = new \stdClass();
-		$table2->toc = '';
+        $table2 = new \stdClass();
+        $table2->toc = '';
 
-		if ($subject->edit_by_type) {
+        if ($subject->edit_by_type) {
+                $db = $this->getDatabase();
+                $formIdValue = (int) $subject->form_id;
+                $recordIdValue = (string) $subject->record_id;
+                $query = $db->getQuery(true)
+                    ->select('articles.' . $db->quoteName('article_id'))
+                    ->from($db->quoteName('#__contentbuilderng_articles', 'articles'))
+                    ->join('INNER', $db->quoteName('#__content', 'content'), 'content.id = articles.article_id')
+                    ->where('(content.state = 1 OR content.state = 0)')
+                    ->where('articles.form_id = :formId')
+                    ->where('articles.record_id = :recordId')
+                    ->bind(':formId', $formIdValue, ParameterType::INTEGER)
+                    ->bind(':recordId', $recordIdValue);
+                $db->setQuery($query);
+                $article = $db->loadResult();
 
-				$db = $this->getDatabase();
-				$formIdValue = (int) $subject->form_id;
-				$recordIdValue = (string) $subject->record_id;
-				$query = $db->getQuery(true)
-					->select('articles.' . $db->quoteName('article_id'))
-					->from($db->quoteName('#__contentbuilderng_articles', 'articles'))
-					->join('INNER', $db->quoteName('#__content', 'content'), 'content.id = articles.article_id')
-					->where('(content.state = 1 OR content.state = 0)')
-					->where('articles.form_id = :formId')
-					->where('articles.record_id = :recordId')
-					->bind(':formId', $formIdValue, ParameterType::INTEGER)
-					->bind(':recordId', $recordIdValue);
-				$db->setQuery($query);
-				$article = $db->loadResult();
+                $table = new \Joomla\CMS\Table\Content($db);
 
-				$table = new \Joomla\CMS\Table\Content($db);
+            $isNew = true;
+            if ($article > 0) {
+                $table->load($article);
+                $isNew = false;
+            }
 
-			$isNew = true;
-			if ($article > 0) {
-				$table->load($article);
-				$isNew = false;
-			}
+            $table->cbrecord = $subject;
+            $table->text = $table->cbrecord->template;
 
-			$table->cbrecord = $subject;
-			$table->text = $table->cbrecord->template;
+                $alias = $table->alias ? $this->toUnicodeSlug((string) $table->alias) : $this->toUnicodeSlug((string) $subject->page_title);
+            if (trim(str_replace('-', '', $alias)) == '') {
+                $datenow = (new Date());
+                $alias = $datenow->format("%Y-%m-%d-%H-%M-%S");
+            }
 
-				$alias = $table->alias ? $this->toUnicodeSlug((string) $table->alias) : $this->toUnicodeSlug((string) $subject->page_title);
-			if (trim(str_replace('-', '', $alias)) == '') {
-				$datenow = (new Date());
-				$alias = $datenow->format("%Y-%m-%d-%H-%M-%S");
-			}
+            // we pass the slug with a flag in the end, and see in the end if the slug has been used in the output
+            $table->slug = ($article > 0 ? $article : 0) . ':' . $alias . ':contentbuilderng_slug_used';
 
-			// we pass the slug with a flag in the end, and see in the end if the slug has been used in the output
-			$table->slug = ($article > 0 ? $article : 0) . ':' . $alias . ':contentbuilderng_slug_used';
+            $registry = new Registry();
+            $registry->loadString($table->attribs ?? '');
 
-			$registry = new Registry;
-			$registry->loadString($table->attribs ?? '');
+            // seems to be a joomla bug. if sef urls is enabled, "start" is used for paging in articles, else "limitstart" will be used
+            $limitstart = $app->getInput()->getInt('limitstart', 0);
+            $start = $app->getInput()->getInt('start', 0);
+            $page = $limitstart ? $limitstart : $start;
+            $hasBfShortcode = $this->hasBreezingFormsPlaceholder((string) ($table->text ?? ''));
 
-			// seems to be a joomla bug. if sef urls is enabled, "start" is used for paging in articles, else "limitstart" will be used
-			$limitstart = $app->getInput()->getInt('limitstart', 0);
-			$start = $app->getInput()->getInt('start', 0);
-			$page = $limitstart ? $limitstart : $start;
-			$hasBfShortcode = $this->hasBreezingFormsPlaceholder((string) ($table->text ?? ''));
+            $dispatcher = $this->getDispatcher();
+            PluginHelper::importPlugin('content');
 
-			$dispatcher = $this->getDispatcher();
-			PluginHelper::importPlugin('content');
+            $this->dispatchContentPrepare($dispatcher, $table, $registry, $page);
 
-			$this->dispatchContentPrepare($dispatcher, $table, $registry, $page);
+            if ($hasBfShortcode && $this->hasBreezingFormsPlaceholder((string) ($table->text ?? ''))) {
+                $table->text = $this->renderBreezingFormsShortcodes((string) ($table->text ?? ''));
+            }
+            $subject->template = $table->text;
 
-			if ($hasBfShortcode && $this->hasBreezingFormsPlaceholder((string) ($table->text ?? ''))) {
-				$table->text = $this->renderBreezingFormsShortcodes((string) ($table->text ?? ''));
-			}
-			$subject->template = $table->text;
+            $eventResult = $dispatcher->dispatch(
+                'onContentAfterTitle',
+                new \Joomla\CMS\Event\Content\AfterTitleEvent('onContentAfterTitle', [
+                    'context' => 'com_content.article',
+                    'subject' => $table,
+                    'params'  => $registry,
+                    'page'    => $limitstart ? $limitstart : $start,
+                ])
+            );
+            $results = $eventResult->getArgument('result') ?: [];
+            $event->afterDisplayTitle = trim(implode("\n", $results));
 
-			$eventResult = $dispatcher->dispatch(
-				'onContentAfterTitle',
-				new \Joomla\CMS\Event\Content\AfterTitleEvent('onContentAfterTitle', [
-					'context' => 'com_content.article',
-					'subject' => $table,
-					'params'  => $registry,
-					'page'    => $limitstart ? $limitstart : $start,
-				])
-			);
-			$results = $eventResult->getArgument('result') ?: [];
-			$event->afterDisplayTitle = trim(implode("\n", $results));
+            $eventResult = $dispatcher->dispatch(
+                'onContentBeforeDisplay',
+                new \Joomla\CMS\Event\Content\BeforeDisplayEvent('onContentBeforeDisplay', [
+                    'context' => 'com_content.article',
+                    'subject' => $table,
+                    'params'  => $registry,
+                    'page'    => $limitstart ? $limitstart : $start,
+                ])
+            );
+            $results = $eventResult->getArgument('result') ?: [];
+            $event->beforeDisplayContent = trim(implode("\n", $results));
 
-			$eventResult = $dispatcher->dispatch(
-				'onContentBeforeDisplay',
-				new \Joomla\CMS\Event\Content\BeforeDisplayEvent('onContentBeforeDisplay', [
-					'context' => 'com_content.article',
-					'subject' => $table,
-					'params'  => $registry,
-					'page'    => $limitstart ? $limitstart : $start,
-				])
-			);
-			$results = $eventResult->getArgument('result') ?: [];
-			$event->beforeDisplayContent = trim(implode("\n", $results));
+            $eventResult = $dispatcher->dispatch(
+                'onContentAfterDisplay',
+                new \Joomla\CMS\Event\Content\AfterDisplayEvent('onContentAfterDisplay', [
+                    'context' => 'com_content.article',
+                    'subject' => $table,
+                    'params'  => $registry,
+                    'page'    => $limitstart ? $limitstart : $start,
+                ])
+            );
+            $results = $eventResult->getArgument('result') ?: [];
 
-			$eventResult = $dispatcher->dispatch(
-				'onContentAfterDisplay',
-				new \Joomla\CMS\Event\Content\AfterDisplayEvent('onContentAfterDisplay', [
-					'context' => 'com_content.article',
-					'subject' => $table,
-					'params'  => $registry,
-					'page'    => $limitstart ? $limitstart : $start,
-				])
-			);
-			$results = $eventResult->getArgument('result') ?: [];
+            // if the slug has been used, we would like to stay in COM_CONTENTBUILDERNG, so we re-arrange the resulting url a little
+            if (strstr($subject->template, 'contentbuilderng_slug_used') !== false) {
+                $matches = array(array(), array());
+                preg_match_all("/\\\"([^\"]*contentbuilderng_slug_used[^\"]*)\\\"/i", $subject->template, $matches);
 
-			// if the slug has been used, we would like to stay in COM_CONTENTBUILDERNG, so we re-arrange the resulting url a little
-			if (strstr($subject->template, 'contentbuilderng_slug_used') !== false) {
+                foreach ($matches[1] as $match) {
+                    $sub = '';
+                    $parameters = explode('?', $match);
+                    if (count($parameters) == 2) {
+                        $parameters[1] = str_replace('&amp;', '&', $parameters[1]);
+                        $parameter = explode('&', $parameters[1]);
+                        foreach ($parameter as $par) {
+                            $keyval = explode('=', $par);
+                            if ($keyval[0] != '' && $keyval[0] != 'option' && $keyval[0] != 'id' && $keyval[0] != 'record_id' && $keyval[0] != 'view' && $keyval[0] != 'catid' && $keyval[0] != 'Itemid' && $keyval[0] != 'lang') {
+                                $sub .= '&' . $keyval[0] . '=' . (isset($keyval[1]) ? $keyval[1] : '');
+                            }
+                        }
+                    }
+                    $subject->template = str_replace($match, Route::_('index.php?option=com_contentbuilderng&view=details&id=' . $app->getInput()->getInt('id') . '&record_id=' . $app->getInput()->getCmd('record_id', '') . '&Itemid=' . $app->getInput()->getInt('Itemid', 0) . $sub), $subject->template);
+                }
+            }
 
-				$matches = array(array(), array());
-				preg_match_all("/\\\"([^\"]*contentbuilderng_slug_used[^\"]*)\\\"/i", $subject->template, $matches);
+            // the same for the case a toc has been created
+            if (isset($table->toc) && strstr($table->toc, 'contentbuilderng_slug_used') !== false) {
+                preg_match_all("/\\\"([^\"]*contentbuilderng_slug_used[^\"]*)\\\"/i", $table->toc, $matches);
 
-				foreach ($matches[1] as $match) {
-					$sub = '';
-					$parameters = explode('?', $match);
-					if (count($parameters) == 2) {
-						$parameters[1] = str_replace('&amp;', '&', $parameters[1]);
-						$parameter = explode('&', $parameters[1]);
-						foreach ($parameter as $par) {
-							$keyval = explode('=', $par);
-							if ($keyval[0] != '' && $keyval[0] != 'option' && $keyval[0] != 'id' && $keyval[0] != 'record_id' && $keyval[0] != 'view' && $keyval[0] != 'catid' && $keyval[0] != 'Itemid' && $keyval[0] != 'lang') {
-								$sub .= '&' . $keyval[0] . '=' . (isset($keyval[1]) ? $keyval[1] : '');
-							}
-						}
-					}
-					$subject->template = str_replace($match, Route::_('index.php?option=com_contentbuilderng&view=details&id=' . $app->getInput()->getInt('id') . '&record_id=' . $app->getInput()->getCmd('record_id', '') . '&Itemid=' . $app->getInput()->getInt('Itemid', 0) . $sub), $subject->template);
-				}
-			}
+                foreach ($matches[1] as $match) {
+                    $sub = '';
+                    $parameters = explode('?', $match);
+                    if (count($parameters) == 2) {
+                        $parameters[1] = str_replace('&amp;', '&', $parameters[1]);
+                        $parameter = explode('&', $parameters[1]);
+                        foreach ($parameter as $par) {
+                            $keyval = explode('=', $par);
+                            if ($keyval[0] != '' && $keyval[0] != 'option' && $keyval[0] != 'id' && $keyval[0] != 'record_id' && $keyval[0] != 'view' && $keyval[0] != 'catid' && $keyval[0] != 'Itemid' && $keyval[0] != 'lang') {
+                                $sub .= '&' . $keyval[0] . '=' . (isset($keyval[1]) ? $keyval[1] : '');
+                            }
+                        }
+                    }
+                    $table->toc = str_replace($match, Route::_('index.php?option=com_contentbuilderng&view=details&id=' . $app->getInput()->getInt('id') . '&record_id=' . $app->getInput()->getCmd('record_id', '') . '&Itemid=' . $app->getInput()->getInt('Itemid', 0) . $sub), $table->toc);
+                }
+            }
 
-			// the same for the case a toc has been created
-			if (isset($table->toc) && strstr($table->toc, 'contentbuilderng_slug_used') !== false) {
+            if (!isset($table->toc)) {
+                $table2->toc = '';
+            }
 
-				preg_match_all("/\\\"([^\"]*contentbuilderng_slug_used[^\"]*)\\\"/i", $table->toc, $matches);
+            $pattern = '#<hr\s+id=("|\')system-readmore("|\')\s*\/*>#i';
+            $subject->template = preg_replace($pattern, '', $subject->template);
+        }
 
-				foreach ($matches[1] as $match) {
-					$sub = '';
-					$parameters = explode('?', $match);
-					if (count($parameters) == 2) {
-						$parameters[1] = str_replace('&amp;', '&', $parameters[1]);
-						$parameter = explode('&', $parameters[1]);
-						foreach ($parameter as $par) {
-							$keyval = explode('=', $par);
-							if ($keyval[0] != '' && $keyval[0] != 'option' && $keyval[0] != 'id' && $keyval[0] != 'record_id' && $keyval[0] != 'view' && $keyval[0] != 'catid' && $keyval[0] != 'Itemid' && $keyval[0] != 'lang') {
-								$sub .= '&' . $keyval[0] . '=' . (isset($keyval[1]) ? $keyval[1] : '');
-							}
-						}
-					}
-					$table->toc = str_replace($match, Route::_('index.php?option=com_contentbuilderng&view=details&id=' . $app->getInput()->getInt('id') . '&record_id=' . $app->getInput()->getCmd('record_id', '') . '&Itemid=' . $app->getInput()->getInt('Itemid', 0) . $sub), $table->toc);
-				}
-			}
+        if (!$this->frontend) {
+            ToolbarHelper::title($subject->page_title, 'logo_left');
+        }
 
-			if (!isset($table->toc)) {
-				$table2->toc = '';
-			}
-
-			$pattern = '#<hr\s+id=("|\')system-readmore("|\')\s*\/*>#i';
-			$subject->template = preg_replace($pattern, '', $subject->template);
-		}
-
-		if (!$this->frontend) {
-			ToolbarHelper::title($subject->page_title, 'logo_left');
-		}
-
-				$themePlugin = trim((string) ($subject->theme_plugin ?? ''));
-				if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
-					$themePlugin = 'thoth';
-					PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin);
-				}
-		$dispatcher = $this->getDispatcher();
+                $themePlugin = trim((string) ($subject->theme_plugin ?? ''));
+        if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
+            $themePlugin = 'thoth';
+            PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin);
+        }
+        $dispatcher = $this->getDispatcher();
         $eventResult = $dispatcher->dispatch('onEditableTemplateCss', new \Joomla\CMS\Event\GenericEvent('onEditableTemplateCss', ['theme' => $themePlugin]));
         $results = $eventResult->getArgument('result') ?: [];
-		$theme_css = implode('', $results);
-		$this->theme_css = $theme_css;
+        $theme_css = implode('', $results);
+        $this->theme_css = $theme_css;
 
-			$dispatcher = $this->getDispatcher();
+            $dispatcher = $this->getDispatcher();
         $eventResult = $dispatcher->dispatch('onEditableTemplateJavascript', new \Joomla\CMS\Event\GenericEvent('onEditableTemplateJavascript', ['theme' => $themePlugin]));
         $results = $eventResult->getArgument('result') ?: [];
-		$theme_js = implode('', $results);
-		$this->theme_js = $theme_js;
+        $theme_js = implode('', $results);
+        $this->theme_js = $theme_js;
 
-		$this->toc = $table2->toc;
-		$this->event = $event;
-		$this->show_page_heading = $subject->show_page_heading;
-		$this->back_button = $subject->back_button;
-		$this->latest = $subject->latest;
+        $this->toc = $table2->toc;
+        $this->event = $event;
+        $this->show_page_heading = $subject->show_page_heading;
+        $this->back_button = $subject->back_button;
+        $this->latest = $subject->latest;
 
-		$this->limited_options = $subject->limited_options;
-		$this->edit_by_type = $subject->edit_by_type;
-		$this->frontend = $subject->frontend;
+        $this->limited_options = $subject->limited_options;
+        $this->edit_by_type = $subject->edit_by_type;
+        $this->frontend = $subject->frontend;
 
-		if (isset($subject->sectioncategories))
-			$this->sectioncategories = $subject->sectioncategories;
+        if (isset($subject->sectioncategories)) {
+            $this->sectioncategories = $subject->sectioncategories;
+        }
 
-		if (isset($subject->lists))
-			$this->lists = $subject->lists; // special for 1.5
-		if (isset($subject->row))
-			$this->row = $subject->row; // special for 1.5
-		if (isset($subject->article_settings))
-			$this->article_settings = $subject->article_settings;
-		if (isset($subject->article_options))
-			$this->article_options = $subject->article_options;
-		$this->create_articles = $subject->create_articles;
-		$this->record_id = $subject->record_id;
-		$this->id = $subject->id;
-		$this->tpl = $subject->template;
-		$this->page_title = $subject->page_title;
-		$this->created = $subject->created;
-		$this->created_by = $subject->created_by;
-		$this->modified = $subject->modified;
-		$this->modified_by = $subject->modified_by;
+        if (isset($subject->lists)) {
+            $this->lists = $subject->lists; // special for 1.5
+        }
+        if (isset($subject->row)) {
+            $this->row = $subject->row; // special for 1.5
+        }
+        if (isset($subject->article_settings)) {
+            $this->article_settings = $subject->article_settings;
+        }
+        if (isset($subject->article_options)) {
+            $this->article_options = $subject->article_options;
+        }
+        $this->create_articles = $subject->create_articles;
+        $this->record_id = $subject->record_id;
+        $this->id = $subject->id;
+        $this->tpl = $subject->template;
+        $this->page_title = $subject->page_title;
+        $this->created = $subject->created;
+        $this->created_by = $subject->created_by;
+        $this->modified = $subject->modified;
+        $this->modified_by = $subject->modified_by;
 
-		$this->save_button_title = $subject->save_button_title;
-		$this->apply_button_title = $subject->apply_button_title;
+        $this->save_button_title = $subject->save_button_title;
+        $this->apply_button_title = $subject->apply_button_title;
 
-		parent::display($tpl);
-	}
+        parent::display($tpl);
+    }
 }

@@ -88,7 +88,6 @@ class UserModel extends BaseDatabaseModel
 
         $input = $this->getInput();
         $this->setIds($input->getInt('joomla_userid', 0), $input->getInt('form_id', 0));
-        
     }
 
     /*
@@ -103,19 +102,19 @@ class UserModel extends BaseDatabaseModel
         $this->_data = null;
     }
 
-    private function _buildQuery(){
+    private function buildQuery()
+    {
         return 'Select users.*, contentbuilderng_users.limit_edit, contentbuilderng_users.limit_add, contentbuilderng_users.id As cb_id, contentbuilderng_users.form_id, contentbuilderng_users.verification_date_edit, contentbuilderng_users.verification_date_new, contentbuilderng_users.verification_date_view, contentbuilderng_users.verified_view, contentbuilderng_users.verified_new, contentbuilderng_users.verified_edit, contentbuilderng_users.records, contentbuilderng_users.published From #__users As users Left Join #__contentbuilderng_users As contentbuilderng_users On ( users.id = contentbuilderng_users.userid And contentbuilderng_users.form_id = ' . $this->getCurrentFormId() . ' ) Where users.id = ' . $this->_id;
-                
     }
-    
-    function setListVerifiedView()
+
+    public function setListVerifiedView()
     {
         $items = $this->getSelectedUserIds();
         if (count($items)) {
             foreach ($items as $cid) {
                 $this->ensureContentbuilderngUserRow($this->getCurrentFormId(), (int) $cid);
             }
-            
+
             $db = $this->getDatabase();
             $query = $db->getQuery(true)
                 ->update($db->quoteName('#__contentbuilderng_users'))
@@ -126,16 +125,15 @@ class UserModel extends BaseDatabaseModel
             $db->execute();
         }
     }
-    
-    function setListNotVerifiedView()
+
+    public function setListNotVerifiedView()
     {
         $items = $this->getSelectedUserIds();
         if (count($items)) {
-            
             foreach ($items as $cid) {
                 $this->ensureContentbuilderngUserRow($this->getCurrentFormId(), (int) $cid);
             }
-            
+
             $db = $this->getDatabase();
             $query = $db->getQuery(true)
                 ->update($db->quoteName('#__contentbuilderng_users'))
@@ -147,14 +145,14 @@ class UserModel extends BaseDatabaseModel
         }
     }
 
-    function setListVerifiedNew()
+    public function setListVerifiedNew()
     {
         $items = $this->getSelectedUserIds();
         if (count($items)) {
             foreach ($items as $cid) {
                 $this->ensureContentbuilderngUserRow($this->getCurrentFormId(), (int) $cid);
             }
-            
+
             $db = $this->getDatabase();
             $query = $db->getQuery(true)
                 ->update($db->quoteName('#__contentbuilderng_users'))
@@ -165,16 +163,15 @@ class UserModel extends BaseDatabaseModel
             $db->execute();
         }
     }
-    
-    function setListNotVerifiedNew()
+
+    public function setListNotVerifiedNew()
     {
         $items = $this->getSelectedUserIds();
         if (count($items)) {
-            
             foreach ($items as $cid) {
                 $this->ensureContentbuilderngUserRow($this->getCurrentFormId(), (int) $cid);
             }
-            
+
             $db = $this->getDatabase();
             $query = $db->getQuery(true)
                 ->update($db->quoteName('#__contentbuilderng_users'))
@@ -185,15 +182,15 @@ class UserModel extends BaseDatabaseModel
             $db->execute();
         }
     }
-    
-    function setListVerifiedEdit()
+
+    public function setListVerifiedEdit()
     {
         $items = $this->getSelectedUserIds();
         if (count($items)) {
             foreach ($items as $cid) {
                 $this->ensureContentbuilderngUserRow($this->getCurrentFormId(), (int) $cid);
             }
-            
+
             $db = $this->getDatabase();
             $query = $db->getQuery(true)
                 ->update($db->quoteName('#__contentbuilderng_users'))
@@ -204,16 +201,15 @@ class UserModel extends BaseDatabaseModel
             $db->execute();
         }
     }
-    
-    function setListNotVerifiedEdit()
+
+    public function setListNotVerifiedEdit()
     {
         $items = $this->getSelectedUserIds();
         if (count($items)) {
-            
             foreach ($items as $cid) {
                 $this->ensureContentbuilderngUserRow($this->getCurrentFormId(), (int) $cid);
             }
-            
+
             $db = $this->getDatabase();
             $query = $db->getQuery(true)
                 ->update($db->quoteName('#__contentbuilderng_users'))
@@ -224,26 +220,25 @@ class UserModel extends BaseDatabaseModel
             $db->execute();
         }
     }
-    
-    function getData()
+
+    public function getData()
     {
         // Lets load the data if it doesn't already exist
-        if (empty( $this->_data ))
-        {
-            $query = $this->_buildQuery();
+        if (empty($this->_data)) {
+            $query = $this->buildQuery();
             $this->getDatabase()->setQuery($query);
             $this->_data = $this->getDatabase()->loadObject();
-            
-            if($this->_data->published === null){
+
+            if ($this->_data->published === null) {
                 $this->_data->published = 1;
             }
-            
+
             return $this->_data;
         }
         return null;
     }
-    
-    function store()
+
+    public function store()
     {
         $insert = 0;
         $input = $this->getInput();
@@ -256,7 +251,7 @@ class UserModel extends BaseDatabaseModel
             ->where($db->quoteName('form_id') . ' = ' . (int)$formId)
             ->where($db->quoteName('userid') . ' = ' . (int)$joomlaUserId);
         $db->setQuery($query);
-        if(!$db->loadResult() && $formId && $joomlaUserId){
+        if (!$db->loadResult() && $formId && $joomlaUserId) {
             $query = $db->getQuery(true)
                 ->insert($db->quoteName('#__contentbuilderng_users'))
                 ->columns([$db->quoteName('form_id'), $db->quoteName('userid'), $db->quoteName('published')])
@@ -265,25 +260,25 @@ class UserModel extends BaseDatabaseModel
             $this->getDatabase()->execute();
             $insert = $this->getDatabase()->insertid();
         }
-        
+
         $data = $input->post->getArray();
-        
-        if(!$insert){
+
+        if (!$insert) {
             $data['id'] = intval($data['cb_id']);
-        }else{
+        } else {
             $data['id'] = $insert;
         }
-        
+
         $data['userid'] = $data['joomla_userid'];
-        
-        
-        $data['verified_view'] = $input->getInt('verified_view',0);
-        $data['verified_new'] = $input->getInt('verified_new',0);
-        $data['verified_edit'] = $input->getInt('verified_edit',0);
-        $data['published'] = $input->getInt('published',0);
-        
+
+
+        $data['verified_view'] = $input->getInt('verified_view', 0);
+        $data['verified_new'] = $input->getInt('verified_new', 0);
+        $data['verified_edit'] = $input->getInt('verified_edit', 0);
+        $data['published'] = $input->getInt('published', 0);
+
         $row = $this->getTable('Cbuser');
-        
+
         if (!$row->bind($data)) {
             return false;
         }
@@ -291,13 +286,13 @@ class UserModel extends BaseDatabaseModel
         if (!$row->check()) {
             return false;
         }
-        
+
         $storeRes = $row->store();
 
         if (!$storeRes) {
             return false;
         }
-        
+
         return true;
     }
 }

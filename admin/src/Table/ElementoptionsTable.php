@@ -36,23 +36,23 @@ class ElementoptionsTable extends Table
     public $reference_id = null;
 
     public $type = '';
-    
+
     public $change_type = '';
 
     public $options = null;
 
     public $custom_init_script = '';
-    
+
     public $custom_action_script = '';
-    
+
     public $custom_validation_script = '';
-    
+
     public $validation_message = '';
-    
+
     public $default_value = '';
-    
+
     public $hint = '';
-    
+
     /**
      * @var string
      */
@@ -83,13 +83,14 @@ class ElementoptionsTable extends Table
     public $wordwrap = 0;
 
     public $order_type = '';
-    
+
     /**
      * Constructor
      *
      * @param object Database connector object
      */
-    function __construct( DatabaseDriver $db ) {
+    public function __construct(DatabaseDriver $db)
+    {
         parent::__construct('#__contentbuilderng_elements', 'id', $db);
 
 

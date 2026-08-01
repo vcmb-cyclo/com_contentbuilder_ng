@@ -59,7 +59,7 @@ $isBytable = (int) ($item->bytable ?? 0) !== 0;
                         $indexColumns = implode(', ', (array) ($index['columns'] ?? []));
                         $indexUnique = !empty($index['unique']);
                         $indexIsPrimary = !empty($index['primary']);
-                    ?>
+                        ?>
                         <tr class="<?php echo $indexIsPrimary ? 'text-muted' : ''; ?>" title="<?php echo $indexIsPrimary ? htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_INDEX_PRIMARY_TIP'), ENT_QUOTES, 'UTF-8') : ''; ?>">
                             <td>
                                 <?php echo htmlspecialchars($indexIsPrimary ? Text::_('COM_CONTENTBUILDERNG_STORAGE_INDEX_PRIMARY_LABEL') : $indexName, ENT_QUOTES, 'UTF-8'); ?>

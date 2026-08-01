@@ -93,7 +93,6 @@ class DatatableController extends BaseController
                 );
             }
             return true;
-
         } catch (\Throwable $e) {
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),

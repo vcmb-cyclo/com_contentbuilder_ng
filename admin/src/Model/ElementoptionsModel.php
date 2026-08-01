@@ -96,7 +96,7 @@ class ElementoptionsModel extends BaseDatabaseModel
         $this->_data = null;
     }
 
-    private function _buildQuery()
+    private function buildQuery()
     {
         $db = $this->getDatabase();
         return $db->getQuery(true)
@@ -105,7 +105,7 @@ class ElementoptionsModel extends BaseDatabaseModel
             ->where($db->quoteName('id') . ' = ' . (int)$this->_element_id);
     }
 
-    function getData()
+    public function getData()
     {
         // Lets load the data if it doesn't already exist.
         // Store false when no row exists to avoid re-querying and null warnings downstream.
@@ -131,7 +131,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                 return null;
             }
 
-            $query = $this->_buildQuery();
+            $query = $this->buildQuery();
             $this->getDatabase()->setQuery($query);
             $row = $this->getDatabase()->loadObject();
 
@@ -153,12 +153,12 @@ class ElementoptionsModel extends BaseDatabaseModel
         return is_object($this->_data) ? $this->_data : null;
     }
 
-    function getValidationRules(): array
+    public function getValidationRules(): array
     {
         return $this->getComponent()->getContainer()->get(FieldValidationService::class)->getAvailableValidationNames();
     }
 
-    function getGroupDefinition()
+    public function getGroupDefinition()
     {
         if ($this->_data === null) {
             $this->getData();
@@ -189,7 +189,7 @@ class ElementoptionsModel extends BaseDatabaseModel
         return array();
     }
 
-    function store()
+    public function store()
     {
         $input = $this->getInput();
         $itemWrapper = trim((string) $input->post->get('item_wrapper', '', 'raw'));
@@ -219,7 +219,6 @@ class ElementoptionsModel extends BaseDatabaseModel
         $db = $this->getDatabase();
         switch ($type) {
             case in_array($input->getCmd('field_type', ''), $formSupportService->getFormElementsPlugins()):
-
                 $hint = $input->post->get('hint', '', 'html');
 
                 \Joomla\CMS\Plugin\PluginHelper::importPlugin('contentbuilderng_form_elements', $input->getCmd('field_type', ''));
@@ -427,7 +426,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                     if (isset($upl_ex[1])) {
                         $tokens = '|' . $upl_ex[1];
                     }
-                } else if ($opt_upload_directory !== '' && !is_dir($opt_upload_directory)) {
+                } elseif ($opt_upload_directory !== '' && !is_dir($opt_upload_directory)) {
                     $upload_directory = $opt_upload_directory;
                     Folder::create($upload_directory);
                     File::write($upload_directory . '/index.html', '');
@@ -436,7 +435,7 @@ class ElementoptionsModel extends BaseDatabaseModel
                     if (isset($upl_ex2[1])) {
                         $tokens = '|' . $upl_ex2[1];
                     }
-                } else if ($opt_upload_directory !== '') {
+                } elseif ($opt_upload_directory !== '') {
                     $upload_directory = $opt_upload_directory;
                     $is_relative = $is_opt_relative ? 1 : 0;
                     $tmp_upload_directory = $tmp_opt_upload_directory;
@@ -450,14 +449,11 @@ class ElementoptionsModel extends BaseDatabaseModel
                 }
 
                 if ($protect && is_dir($upload_directory)) {
-
-                    File::write($pathService->makeSafeFolder($upload_directory) .'/.htaccess', $def = 'deny from all');
-
-                } else if (!$protect && is_dir($upload_directory)) {
-                    if (file_exists($pathService->makeSafeFolder($upload_directory) .'/.htaccess')) {
-                        File::delete($pathService->makeSafeFolder($upload_directory) .'/.htaccess');
+                    File::write($pathService->makeSafeFolder($upload_directory) . '/.htaccess', $def = 'deny from all');
+                } elseif (!$protect && is_dir($upload_directory)) {
+                    if (file_exists($pathService->makeSafeFolder($upload_directory) . '/.htaccess')) {
+                        File::delete($pathService->makeSafeFolder($upload_directory) . '/.htaccess');
                     }
-
                 }
 
                 $default_value = $input->get('default_value', '', 'string');
@@ -561,7 +557,7 @@ class ElementoptionsModel extends BaseDatabaseModel
 
         if (empty($pks)) {
             throw new \RuntimeException(
-              Text::_('JLIB_DATABASE_ERROR_NO_ROWS_SELECTED')
+                Text::_('JLIB_DATABASE_ERROR_NO_ROWS_SELECTED')
             );
         }
 
@@ -601,7 +597,7 @@ class ElementoptionsModel extends BaseDatabaseModel
 
         if (empty($pks)) {
             throw new \RuntimeException(
-              Text::_('JLIB_DATABASE_ERROR_NO_ROWS_SELECTED')
+                Text::_('JLIB_DATABASE_ERROR_NO_ROWS_SELECTED')
             );
         }
 

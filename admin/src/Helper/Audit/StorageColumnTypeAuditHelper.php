@@ -97,7 +97,7 @@ final class StorageColumnTypeAuditHelper
             try {
                 $db->setQuery(
                     $db->getQuery(true)
-                        ->select($db->quoteName(['id', 'name', 'title', 'sql_type', 'field_size']))
+                        ->select($db->quoteName(['id', 'name', 'title', 'sql_type', 'field_size', 'required']))
                         ->from($db->quoteName('#__contentbuilderng_storage_fields'))
                         ->where($db->quoteName('storage_id') . ' = ' . (int) $storageId)
                         ->order($db->quoteName('ordering') . ' ASC')
@@ -119,7 +119,13 @@ final class StorageColumnTypeAuditHelper
                 $expectedSize = StorageColumnTypeHelper::normalizeSize($expectedType, $field['field_size'] ?? null);
                 $physicalDefinition = $physicalColumnsLower[$fieldName];
 
-                if (StorageColumnTypeHelper::physicalTypeMatches($expectedType, $physicalDefinition)) {
+                if (
+                    StorageColumnTypeHelper::physicalTypeMatches($expectedType, $physicalDefinition)
+                    && StorageColumnTypeHelper::physicalNullabilityMatches(
+                        !empty($field['required']),
+                        $physicalDefinition
+                    )
+                ) {
                     continue;
                 }
 
@@ -132,8 +138,8 @@ final class StorageColumnTypeAuditHelper
                     'column' => $fieldName,
                     'expected_type' => $expectedType,
                     'expected_label' => StorageColumnTypeHelper::label($expectedType),
-                    'expected_sql' => StorageColumnTypeHelper::sqlDefinition($expectedType, $expectedSize),
-                    'physical_type' => StorageColumnTypeHelper::extractPhysicalType($physicalDefinition),
+                    'expected_sql' => StorageColumnTypeHelper::sqlDefinition($expectedType, $expectedSize, !empty($field['required'])),
+                    'physical_type' => StorageColumnTypeHelper::describePhysicalDefinition($physicalDefinition),
                 ];
             }
         }

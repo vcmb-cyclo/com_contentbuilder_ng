@@ -291,7 +291,6 @@ final class InstallerService
         } else {
             $this->log("[OK] Purged {$totalRemoved} stale ContentBuilder language file(s) before installation.");
         }
-
     }
 
     public function removeObsoleteLanguageFiles(): void

@@ -34,7 +34,6 @@ use CB\Component\Contentbuilderng\Administrator\Helper\FormDisplayColumnsHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\FormAuditService;
 final class DatabaseAuditHelper
 {
-
     /**
      * @return array{
      *   generated_at:string,

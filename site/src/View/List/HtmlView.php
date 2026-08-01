@@ -55,7 +55,7 @@ class HtmlView extends BaseHtmlView
         return $app;
     }
 
-    function display($tpl = null)
+    public function display($tpl = null)
     {
         $debugRenderStart = microtime(true);
         $app = $this->getApp();
@@ -220,12 +220,21 @@ class HtmlView extends BaseHtmlView
         $names = is_object($form) && method_exists($form, 'getElementNames')
             ? (array) $form->getElementNames()
             : [];
-        $filteredColumns = EmbeddedListFieldFilterService::filter(
-            $visibleColumns,
-            $labels,
-            $names,
-            $rawSelectors
-        );
+
+        try {
+            $filteredColumns = EmbeddedListFieldFilterService::filter(
+                $visibleColumns,
+                $labels,
+                $names,
+                $rawSelectors
+            );
+        } catch (\InvalidArgumentException) {
+            // cblist_fields is plugin-generated and already validated with
+            // the same rule before this ever renders — this only fires for
+            // a hand-crafted request bypassing the plugin. Fail open to
+            // "no filter" rather than a fatal error.
+            return;
+        }
         $allowedReferences = array_fill_keys(
             array_map(static fn(int|string $referenceId): string => (string) $referenceId, $filteredColumns),
             true

@@ -16,7 +16,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-
 namespace CB\Component\Contentbuilderng\Administrator\Controller;
 
 \defined('_JEXEC') or die;
@@ -108,7 +107,6 @@ class StoragefieldController extends BaseController
                 'message'
             );
             return true;
-
         } catch (\Throwable $e) {
             $this->setRedirect(
                 Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $storageId, false),

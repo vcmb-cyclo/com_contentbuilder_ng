@@ -32,6 +32,70 @@ final class StorageColumnTypeHelperTest extends TestCase
     }
 
     /**
+     * @return array<string,array{0:mixed,1:bool}>
+     */
+    public static function integerValueProvider(): array
+    {
+        return [
+            'minimum' => ['-2147483648', true],
+            'maximum' => ['2147483647', true],
+            'leading zeroes' => ['+000000001', true],
+            'negative overflow' => ['-2147483649', false],
+            'positive overflow' => ['2147483648', false],
+            'decimal' => ['1.0', false],
+            'non numeric' => ['integer', false],
+            'array' => [[], false],
+        ];
+    }
+
+    #[DataProvider('integerValueProvider')]
+    public function testValidatesSignedMySqlIntegerRange(mixed $value, bool $expected): void
+    {
+        self::assertSame($expected, StorageColumnTypeHelper::isValidIntegerValue($value));
+    }
+
+    /**
+     * @return array<string,array{0:mixed,1:string,2:bool}>
+     */
+    public static function temporalValueProvider(): array
+    {
+        return [
+            'minimum date' => ['1000-01-01', 'date', true],
+            'maximum date' => ['9999-12-31', 'date', true],
+            'date below MySQL range' => ['0999-12-31', 'date', false],
+            'invalid leap day' => ['2025-02-29', 'date', false],
+            'minimum datetime' => ['1000-01-01 00:00:00', 'datetime', true],
+            'maximum datetime' => ['9999-12-31 23:59:59', 'datetime', true],
+            'datetime below MySQL range' => ['0000-01-01 00:00:00', 'datetime', false],
+            'invalid datetime format' => ['2026-08-01T12:00:00', 'datetime', false],
+            'unsupported type' => ['2026-08-01', 'text', false],
+        ];
+    }
+
+    #[DataProvider('temporalValueProvider')]
+    public function testValidatesMySqlTemporalRange(mixed $value, string $type, bool $expected): void
+    {
+        self::assertSame($expected, StorageColumnTypeHelper::isValidTemporalValue($value, $type));
+    }
+
+    public function testMapsStorageTypesToNativeEditableControls(): void
+    {
+        self::assertSame('text', StorageColumnTypeHelper::editableElementType('text'));
+        self::assertSame('text', StorageColumnTypeHelper::editableElementType('varchar'));
+        self::assertSame('number', StorageColumnTypeHelper::editableElementType('int'));
+        self::assertSame('decimal', StorageColumnTypeHelper::editableElementType('decimal'));
+        self::assertSame('calendar', StorageColumnTypeHelper::editableElementType('date'));
+        self::assertSame('datetime', StorageColumnTypeHelper::editableElementType('datetime'));
+        self::assertSame('boolean', StorageColumnTypeHelper::editableElementType('boolean'));
+
+        foreach (['', 'text', 'number', 'decimal', 'calendar', 'datetime', 'boolean'] as $managedType) {
+            self::assertTrue(StorageColumnTypeHelper::isStorageManagedEditableType($managedType));
+        }
+
+        self::assertFalse(StorageColumnTypeHelper::isStorageManagedEditableType('upload'));
+    }
+
+    /**
      * @return array<string,array{0:string,1:string}>
      */
     public static function sqlDefinitionProvider(): array
@@ -86,5 +150,24 @@ final class StorageColumnTypeHelperTest extends TestCase
         self::assertSame('varchar(64)', StorageColumnTypeHelper::extractPhysicalType(['Type' => ' VARCHAR(64) NULL ']));
         self::assertSame('int(11)', StorageColumnTypeHelper::extractPhysicalType((object) ['type' => 'INT(11) unsigned']));
         self::assertSame('', StorageColumnTypeHelper::extractPhysicalType(''));
+    }
+
+    public function testMatchesPhysicalNullabilityFromMySqlDefinitions(): void
+    {
+        self::assertTrue(StorageColumnTypeHelper::physicalNullabilityMatches(true, ['Null' => 'NO']));
+        self::assertFalse(StorageColumnTypeHelper::physicalNullabilityMatches(true, ['Null' => 'YES']));
+        self::assertTrue(StorageColumnTypeHelper::physicalNullabilityMatches(false, (object) ['Null' => 'YES']));
+        self::assertFalse(StorageColumnTypeHelper::physicalNullabilityMatches(false, (object) ['Null' => 'NO']));
+        self::assertTrue(StorageColumnTypeHelper::physicalNullabilityMatches(true, 'INT NOT NULL'));
+        self::assertTrue(StorageColumnTypeHelper::physicalNullabilityMatches(false, 'INT NULL'));
+        self::assertTrue(StorageColumnTypeHelper::physicalNullabilityMatches(true, 'INT'));
+        self::assertSame('int(11) NOT NULL', StorageColumnTypeHelper::describePhysicalDefinition([
+            'Type' => 'INT(11)',
+            'Null' => 'NO',
+        ]));
+        self::assertSame('varchar(255) NULL', StorageColumnTypeHelper::describePhysicalDefinition((object) [
+            'Type' => 'VARCHAR(255)',
+            'Null' => 'YES',
+        ]));
     }
 }

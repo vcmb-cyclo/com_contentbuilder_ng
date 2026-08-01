@@ -35,6 +35,10 @@ class StorageFieldsTable extends Table
 
     public $sql_type = 'text';
 
+    public $field_size = null;
+
+    public $required = 0;
+
     public $is_group = 0;
 
     public $group_definition = "Label 1;value1\nLabel 2;value2\nLabel 3;value3";
@@ -48,7 +52,7 @@ class StorageFieldsTable extends Table
      *
      * @param object Database connector object
      */
-    function __construct(DatabaseDriver $db)
+    public function __construct(DatabaseDriver $db)
     {
         parent::__construct('#__contentbuilderng_storage_fields', 'id', $db);
 

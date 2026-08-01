@@ -67,9 +67,9 @@ final class FormsController extends AdminController
     }
 
     public function __construct(
-        array $config = [], 
-        ?MVCFactoryInterface $factory = null, 
-        ?CMSWebApplicationInterface $app = null, 
+        array $config = [],
+        ?MVCFactoryInterface $factory = null,
+        ?CMSWebApplicationInterface $app = null,
         ?Input $input = null
     ) {
         // IMPORTANT : on transmet factory/app/input à BaseController
@@ -99,7 +99,7 @@ final class FormsController extends AdminController
         }
     }
 
-    
+
     /**
      * Method to get a model object, loading it if required.
      *
@@ -210,8 +210,11 @@ final class FormsController extends AdminController
         }
 
         $this->setRedirect(
-            Route::_('index.php?option=com_contentbuilderng&task=forms.display&limitstart=' . $this->input->getInt('limitstart'),
-            false));
+            Route::_(
+                'index.php?option=com_contentbuilderng&task=forms.display&limitstart=' . $this->input->getInt('limitstart'),
+                false
+            )
+        );
     }
 
     public function debug_on(): void
@@ -265,6 +268,4 @@ final class FormsController extends AdminController
             )
         );
     }
-
-
 }

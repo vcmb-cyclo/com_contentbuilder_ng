@@ -6,6 +6,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Service;
 
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\StorageColumnTypeHelper;
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
@@ -317,7 +318,7 @@ class FormSupportService
         $db->execute();
     }
 
-    public function synchElements($formId, $form): array
+    public function synchElements($formId, $form, bool $removeMissing = true): array
     {
         $report = [
             'added' => [],
@@ -334,6 +335,9 @@ class FormSupportService
         $ids = [];
         $elements = (array) $form->getElementLabels();
         $editableTypes = method_exists($form, 'getEditableElementTypes') ? (array) $form->getEditableElementTypes() : [];
+        $synchronizeEditableTypes = !$removeMissing
+            && method_exists($form, 'shouldSynchronizeEditableElementTypes')
+            && $form->shouldSynchronizeEditableElementTypes();
 
         $query = $db->getQuery(true)
             ->select([$db->quoteName('reference_id'), $db->quoteName('label')])
@@ -399,12 +403,29 @@ class FormSupportService
                 $db->setQuery($insertQuery);
                 $db->execute();
                 $report['added'][] = trim((string) $title) !== '' ? trim((string) $title) : (string) $referenceId;
+            } elseif ($synchronizeEditableTypes) {
+                $currentType = (string) ($assoc['type'] ?? '');
+                $expectedType = (string) ($editableTypes[(string) $referenceId] ?? 'text');
+
+                if (
+                    $currentType !== $expectedType
+                    && StorageColumnTypeHelper::isStorageManagedEditableType($currentType)
+                ) {
+                    $elementId = (int) ($assoc['id'] ?? 0);
+                    $updateTypeQuery = $db->getQuery(true)
+                        ->update($db->quoteName('#__contentbuilderng_elements'))
+                        ->set($db->quoteName('type') . ' = ' . $db->quote($expectedType))
+                        ->where($db->quoteName('id') . ' = ' . $elementId)
+                        ->where($db->quoteName('form_id') . ' = ' . (int) $formId);
+                    $db->setQuery($updateTypeQuery);
+                    $db->execute();
+                }
             }
 
             unset($existingByReference[(string) $referenceId]);
         }
 
-        if ($ids !== []) {
+        if ($removeMissing && $ids !== []) {
             $deleteQuery = $db->getQuery(true)
                 ->delete($db->quoteName('#__contentbuilderng_elements'))
                 ->where($db->quoteName('form_id') . ' = ' . (int) $formId)
@@ -413,10 +434,12 @@ class FormSupportService
             $db->execute();
         }
 
-        foreach ($existingByReference as $removedRow) {
-            $removedLabel = trim((string) ($removedRow['label'] ?? ''));
-            $removedRef = (string) ($removedRow['reference_id'] ?? '');
-            $report['removed'][] = $removedLabel !== '' ? $removedLabel : $removedRef;
+        if ($removeMissing) {
+            foreach ($existingByReference as $removedRow) {
+                $removedLabel = trim((string) ($removedRow['label'] ?? ''));
+                $removedRef = (string) ($removedRow['reference_id'] ?? '');
+                $report['removed'][] = $removedLabel !== '' ? $removedLabel : $removedRef;
+            }
         }
 
         $report['added_count'] = count($report['added']);

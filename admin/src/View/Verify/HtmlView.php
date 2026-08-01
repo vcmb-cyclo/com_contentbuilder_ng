@@ -20,7 +20,7 @@ use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView a
 
 class HtmlView extends BaseHtmlView
 {
-    function display($tpl = null)
+    public function display($tpl = null)
     {
 
         parent::display($tpl);

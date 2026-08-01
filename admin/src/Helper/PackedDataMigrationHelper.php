@@ -404,7 +404,7 @@ final class PackedDataMigrationHelper
                     : $id;
                 $formName = trim((string) ($row['form_name'] ?? ($row['name'] ?? '')));
                 $formTitle = trim((string) ($row['form_title'] ?? ($row['title'] ?? '')));
-                $formLabel = $formName !== '' ? $formName : ($formTitle !== '' ? $formTitle : '#'.$formId);
+                $formLabel = $formName !== '' ? $formName : ($formTitle !== '' ? $formTitle : '#' . $formId);
                 $recordLabel = $target['table'] === '#__contentbuilderng_elements'
                     ? trim((string) ($row['label'] ?? ''))
                     : trim((string) ($row['name'] ?? ''));

@@ -189,7 +189,7 @@ class HtmlView extends BaseHtmlView
             'JTOOLBAR_OPTIONS',
             'options'
         );
-        
+
         ToolbarHelper::help(
             'COM_CONTENTBUILDERNG_HELP_ABOUT_TITLE',
             false,

@@ -30,6 +30,9 @@ use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewColorModeHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 /** @var SiteApplication $app */
 $app = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication();
@@ -43,6 +46,39 @@ $rating_allowed = $frontend ? $permissionService->authorizeFe('rating') : $permi
 $view_allowed = $frontend ? $permissionService->authorizeFe('view') : $permissionService->authorize('view');
 $fullarticle_allowed = $frontend ? $permissionService->authorizeFe('fullarticle') : $permissionService->authorize('fullarticle');
 $isAdminPreview = $app->getInput()->getBool('cb_preview_ok', false);
+
+$embeddedListContext = (string) $app->getInput()->getCmd('cblist_embed', '');
+$isEmbeddedListRequest = EmbeddedListFieldFilterService::isEmbeddedRequest($embeddedListContext);
+$embeddedListFields = $isEmbeddedListRequest
+    ? trim((string) $app->getInput()->getString('cblist_fields', ''))
+    : '';
+$embeddedListRawActions = $isEmbeddedListRequest
+    ? trim((string) $app->getInput()->getString('cblist_actions', ''))
+    : '';
+try {
+    $cbListAllowedActions = EmbeddedListActionFilterService::parseActions($embeddedListRawActions);
+} catch (\InvalidArgumentException) {
+    // See list/default.php's identical guard.
+    $cbListAllowedActions = [];
+}
+$cbListActionAllowed = static fn(string $action): bool
+    => EmbeddedListActionFilterService::isAllowed($action, $cbListAllowedActions);
+$embeddedListParams = EmbeddedListContextService::parameters(
+    $embeddedListContext,
+    $embeddedListFields,
+    $embeddedListRawActions
+);
+$embeddedListQuery = EmbeddedListContextService::buildQuery(
+    $embeddedListContext,
+    $embeddedListFields,
+    $embeddedListRawActions
+);
+
+$new_allowed = $new_allowed && $cbListActionAllowed('new');
+$edit_allowed = $edit_allowed && $cbListActionAllowed('edit');
+$delete_allowed = $delete_allowed && $cbListActionAllowed('delete');
+$state_allowed = $state_allowed && $cbListActionAllowed('state');
+$rating_allowed = $rating_allowed && $cbListActionAllowed('rating');
 $getStateBadgeStyle = static function ($recordId, array $stateColors): string {
     $color = strtoupper(trim((string) ($stateColors[$recordId] ?? '')));
     $color = ltrim($color, '#');
@@ -81,6 +117,23 @@ $layout = $input->getString('layout', '');
 $tmpl = $input->getString('tmpl', '');
 $id = $input->getInt('id', 0);
 $recordId = $input->getCmd('record_id', 0);
+
+// This form is shared by both the create-new-record flow (no record_id) and
+// the edit-existing-record flow (record_id > 0) — the embedded-navigation
+// firewall (same principle as details/default.php: hiding a link doesn't
+// stop a hand-typed URL) must check the action matching whichever flow this
+// request actually is, not a single hardcoded action.
+if (
+    $isEmbeddedListRequest
+    && !$cbListActionAllowed(in_array((string) $recordId, ['', '0'], true) ? 'new' : 'edit')
+) {
+    echo '<div class="alert alert-warning" role="alert">'
+        . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_CBLIST_ACTION_NOT_ENABLED'), ENT_QUOTES, 'UTF-8')
+        . '</div>';
+
+    return;
+}
+
 $itemId = $input->getInt('Itemid', 0);
 $list = (array) $input->get('list', [], 'array');
 $listState = NavigationLinkHelper::resolveListState(
@@ -206,6 +259,7 @@ $detailsHref = Route::_(
         . ($tmpl !== '' ? '&tmpl=' . $tmpl : '')
         . '&Itemid=' . $itemId
         . ($listQuery !== '' ? '&' . $listQuery : '')
+        . $embeddedListQuery
         . $previewQuery
 );
 
@@ -216,6 +270,7 @@ $listHref = Route::_(
         . ($listQuery !== '' ? '&' . $listQuery : '')
         . ($tmpl !== '' ? '&tmpl=' . $tmpl : '')
         . '&Itemid=' . $itemId
+        . $embeddedListQuery
         . $previewQuery
 );
 
@@ -427,6 +482,9 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
     <?php if ($layout !== '') : ?>
         <input type="hidden" name="layout" value="<?php echo htmlspecialchars($layout, ENT_QUOTES, 'UTF-8'); ?>">
     <?php endif; ?>
+    <?php foreach ($embeddedListParams as $embeddedListName => $embeddedListValue) : ?>
+        <input type="hidden" name="<?php echo htmlspecialchars($embeddedListName, ENT_QUOTES, 'UTF-8'); ?>" value="<?php echo htmlspecialchars($embeddedListValue, ENT_QUOTES, 'UTF-8'); ?>">
+    <?php endforeach; ?>
     <?php echo $listHiddenFields; ?>
     <?php echo $previewHiddenFields; ?>
     <?php echo HTMLHelper::_('form.token'); ?>
@@ -806,6 +864,10 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
             (int) $id,
             $frontend
         );
+        $debugCbListActions = EmbeddedListActionFilterService::debugState(
+            ['new', 'edit', 'delete', 'state', 'rating'],
+            $cbListAllowedActions
+        );
         $debugFilters = [
             'record_id' => $recordId,
             'ordering' => $listState['ordering'] ?? '',
@@ -845,6 +907,7 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
             'cbRecordId' => (int) ($this->cb_record_id ?? 0),
             'showPermissions' => !empty($this->debug_show_permissions),
             'permissions' => $debugPermissions,
+            'cbListActions' => $debugCbListActions,
             'showFilters' => !empty($this->debug_show_filters),
             'filters' => $debugFilters,
             'showLogs' => !empty($this->debug_enable_logs) && !empty($this->debug_show_request_logs),
@@ -986,14 +1049,14 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
         <?php
         if (!$this->edit_by_type) {
         ?>
-            <form class="form-horizontal mt-5 mb-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') != '' ? '&layout=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') : '') . '&id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0) . '&record_id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getCmd('record_id',  '') . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') : '') . '&Itemid=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
+            <form class="form-horizontal mt-5 mb-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') != '' ? '&layout=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') : '') . '&id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0) . '&record_id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getCmd('record_id',  '') . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') : '') . '&Itemid=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . $embeddedListQuery); ?>" method="post" enctype="multipart/form-data">
             <?php
         }
             ?>
             <?php
             if ($this->edit_by_type) {
             ?>
-                <form class="mt-5 mb-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') != '' ? '&layout=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') : '') . '&id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0) . '&record_id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getCmd('record_id',  '') . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') : '') . '&Itemid=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
+                <form class="mt-5 mb-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') != '' ? '&layout=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') : '') . '&id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0) . '&record_id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getCmd('record_id',  '') . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') : '') . '&Itemid=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . $embeddedListQuery); ?>" method="post" enctype="multipart/form-data">
                 <?php
             }
                 ?>
@@ -1178,7 +1241,7 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
     } else {
         if ($this->edit_by_type) {
         ?>
-            <form class="mt-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') != '' ? '&layout=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') : '') . '&id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0) . '&record_id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getCmd('record_id',  '') . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') : '') . '&Itemid=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
+            <form class="mt-5" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') != '' ? '&layout=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') : '') . '&id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0) . '&record_id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getCmd('record_id',  '') . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') : '') . '&Itemid=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . $embeddedListQuery); ?>" method="post" enctype="multipart/form-data">
                 <?php
                 if (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') != '') {
                 ?>
@@ -1214,7 +1277,7 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
         <?php
         } else {
         ?>
-            <form class="form-horizontal" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') != '' ? '&layout=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') : '') . '&id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0) . '&record_id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getCmd('record_id',  '') . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') : '') . '&Itemid=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '')); ?>" method="post" enctype="multipart/form-data">
+            <form class="form-horizontal" name="adminForm" id="adminForm" onsubmit="return false;" action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=edit.display' . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') != '' ? '&layout=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('layout', '', 'string') : '') . '&id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0) . '&record_id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getCmd('record_id',  '') . (\CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') != '' ? '&tmpl=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->get('tmpl', '', 'string') : '') . '&Itemid=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . ($listQuery !== '' ? '&' . $listQuery : '') . $embeddedListQuery); ?>" method="post" enctype="multipart/form-data">
                 <?php echo $this->event->beforeDisplayContent; ?>
                 <?php echo $this->toc ?>
                 <?php echo $stateControlHtml; ?>

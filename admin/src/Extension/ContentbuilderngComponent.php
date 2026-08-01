@@ -75,5 +75,4 @@ class ContentbuilderngComponent extends MVCComponent implements BootableExtensio
 
         return $this->container;
     }
-
 }

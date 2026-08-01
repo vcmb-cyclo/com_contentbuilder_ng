@@ -6,6 +6,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Service;
 
 use CB\Component\Contentbuilderng\Administrator\Helper\TemplatePrepareHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\StorageColumnTypeHelper;
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\Event\Content\ContentPrepareEvent;
@@ -68,6 +69,35 @@ class TemplateRenderService
         }
 
         return (int) ($this->getApp()->getIdentity()->id ?? 0);
+    }
+
+    private function markFirstEditableControlRequired(string $html): string
+    {
+        $marked = false;
+
+        return (string) preg_replace_callback(
+            '/<(input|textarea|select)\b[^>]*>/i',
+            static function (array $match) use (&$marked): string {
+                $tag = $match[0];
+
+                if ($marked || preg_match('/\btype\s*=\s*([\'\"])hidden\1/i', $tag)) {
+                    return $tag;
+                }
+
+                $marked = true;
+                $tag = rtrim($tag, '>');
+
+                if (stripos($tag, ' required') === false) {
+                    $tag .= ' required="required"';
+                }
+                if (stripos($tag, ' aria-required=') === false) {
+                    $tag .= ' aria-required="true"';
+                }
+
+                return $tag . '>';
+            },
+            $html
+        );
     }
 
     private function getCurrentUsername(): string
@@ -1260,10 +1290,35 @@ class TemplateRenderService
             }
         }
 
+        if ($this->getInput()->getBool('cb_preview_ok', false) && $this->getInput()->getInt('storage_id', 0) > 0) {
+            $missingEditableFields = '';
+
+            foreach (array_keys($items) as $fieldName) {
+                $fieldName = (string) $fieldName;
+                $hasTemplateMarker = str_contains($template, '{' . $fieldName . ':item}')
+                    || str_contains($template, '{' . $fieldName . ':value}');
+
+                if (!$hasTemplateMarker) {
+                    $missingEditableFields .= '<div class="mb-3"><div class="form-label">{'
+                        . $fieldName . ':label}</div><div>{' . $fieldName . ':item}</div></div>';
+                }
+            }
+
+            if ($missingEditableFields !== '') {
+                $template .= '<div class="cbDirectStoragePreviewFields">' . $missingEditableFields . '</div>';
+            }
+        }
+
         $template = $this->removeUnknownTemplateMarkers((int) $contentbuilderngFormId, $template, array_keys($items));
         $this->addUnclosedHideIfEmptyWarnings((int) $contentbuilderngFormId, $template);
 
         $sourceEditableTypes = method_exists($form, 'getEditableElementTypes') ? (array) $form->getEditableElementTypes() : [];
+        $sourceRequiredElements = method_exists($form, 'getRequiredElementIds')
+            ? array_fill_keys(array_map('strval', (array) $form->getRequiredElementIds()), true)
+            : [];
+        $sourceVarcharSizes = method_exists($form, 'getVarcharElementSizes')
+            ? (array) $form->getVarcharElementSizes()
+            : [];
         $item = null;
         if ($execPrepare) {
             $editablePrepare = $result['editable_prepare'] ?? '';
@@ -1354,6 +1409,8 @@ class TemplateRenderService
             $elementCustomInit = $element['custom_init_script'] ?? '';
             $elementHint = $element['hint'] ?? '';
             $isEditable = (int) ($element['editable'] ?? 1) === 1;
+            $isSourceRequired = isset($sourceRequiredElements[(string) $elementReferenceId]);
+            $hasLabelMarker = str_contains($template, '{' . $key . ':label}');
 
             if ($isEditable) {
                 $this->addEditableItemMarkerWarnings((int) $contentbuilderngFormId, $template, (string) $key);
@@ -1363,13 +1420,21 @@ class TemplateRenderService
                 $elementType = (string) $sourceEditableTypes[(string) $elementReferenceId];
             }
 
-            if ($elementType == 'captcha' || trim($element['validations'] ?? '') != '' || trim($element['custom_validation_script'] ?? '') != '') {
+            if ($isSourceRequired || $elementType == 'captcha' || trim($element['validations'] ?? '') != '' || trim($element['custom_validation_script'] ?? '') != '') {
                 $asterisk = ' <span class="cbRequired" style="color:red;">*</span>';
             }
 
             $options = $this->decodePackedData($elementOptions, null, false);
             if (!is_object($options)) {
                 $options = new \stdClass();
+            }
+
+            $sourceVarcharSize = (int) ($sourceVarcharSizes[(string) $elementReferenceId] ?? 0);
+            if ($elementType === 'text' && $sourceVarcharSize > 0) {
+                $configuredMaximumLength = (int) ($options->maxlength ?? 0);
+                $options->maxlength = $configuredMaximumLength > 0
+                    ? min($configuredMaximumLength, $sourceVarcharSize)
+                    : $sourceVarcharSize;
             }
 
             $normalizeScalarValue = static function ($value): string {
@@ -1411,6 +1476,22 @@ class TemplateRenderService
                     $textStyleAttribute = $textStyle !== '' ? 'style="' . $textStyle . '" ' : '';
                     $textClass = 'form-control form-control-sm' . ($textPresentation['class'] !== '' ? ' ' . $textPresentation['class'] : '');
                     $theItem = '<div class="cbFormField cbTextField"><input class="' . $textClass . '" ' . $autocomplete . '' . ($options->readonly ? 'readonly="readonly" ' : '') . $textStyleAttribute . ($options->maxlength ? 'maxlength="' . (int) $options->maxlength . '" ' : '') . 'type="' . (isset($element['force_password']) || $options->password ? 'password' : 'text') . '" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" value="' . htmlspecialchars($textPresentation['value'], ENT_QUOTES, 'UTF-8') . '"/></div>';
+                    break;
+                case 'number':
+                    $numberValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
+                    $theItem = '<div class="cbFormField cbNumberField"><input class="form-control form-control-sm" type="number" step="1" min="' . StorageColumnTypeHelper::INT_MIN . '" max="' . StorageColumnTypeHelper::INT_MAX . '" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" value="' . htmlspecialchars($numberValue, ENT_QUOTES, 'UTF-8') . '"/></div>';
+                    break;
+                case 'decimal':
+                    $decimalValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
+                    $theItem = '<div class="cbFormField cbDecimalField"><input class="form-control form-control-sm" type="number" step="0.0001" min="-99999999999.9999" max="99999999999.9999" inputmode="decimal" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" value="' . htmlspecialchars($decimalValue, ENT_QUOTES, 'UTF-8') . '"/></div>';
+                    break;
+                case 'boolean':
+                    $booleanValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
+                    $theItem = '<div class="cbFormField cbBooleanField"><select class="form-select form-select-sm" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '">'
+                        . '<option value="">' . htmlspecialchars(Text::_('JSELECT'), ENT_QUOTES, 'UTF-8') . '</option>'
+                        . '<option value="0"' . ($booleanValue === '0' ? ' selected="selected"' : '') . '>' . htmlspecialchars(Text::_('JNO'), ENT_QUOTES, 'UTF-8') . '</option>'
+                        . '<option value="1"' . ($booleanValue === '1' ? ' selected="selected"' : '') . '>' . htmlspecialchars(Text::_('JYES'), ENT_QUOTES, 'UTF-8') . '</option>'
+                        . '</select></div>';
                     break;
                 case 'textarea':
                     $options->width = $options->width ?? '';
@@ -1499,15 +1580,36 @@ class TemplateRenderService
                     $options->transfer_format = $options->transfer_format ?? 'YYYY-mm-dd';
                     $calval = htmlspecialchars($normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value'])), ENT_QUOTES, 'UTF-8');
                     $calval = $this->callContentbuilderngHelper('convertDate', $calval, $options->transfer_format, $options->format);
-                    $calAttr = ['class' => 'cb_' . $item['id'], 'showTime' => true, 'timeFormat' => '24', 'singleHeader' => false, 'todayBtn' => true, 'weekNumbers' => true, 'minYear' => '', 'maxYear' => '', 'firstDay' => '1'];
+                    $calAttr = ['class' => 'cb_' . $item['id'], 'showTime' => true, 'timeFormat' => '24', 'singleHeader' => false, 'todayBtn' => true, 'weekNumbers' => true, 'minYear' => 1000, 'maxYear' => 9999, 'firstDay' => '1'];
                     $theItem = '<div class="cbFormField cbCalendarField">' . "\n" . '<div id="field-calendar_cb_' . $item['id'] . '">' . "\n" . '<div class="input-group">' . "\n";
                     $theItem .= HTMLHelper::_('calendar', $calval, 'cb_' . $item['id'], 'cb_' . $item['id'], $options->format, $calAttr);
+                    $theItem .= "</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>";
+                    break;
+                case 'datetime':
+                    $dateTimeValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
+                    $dateTimeAttr = ['class' => 'cb_' . $item['id'], 'showTime' => true, 'timeFormat' => '24', 'singleHeader' => false, 'todayBtn' => true, 'weekNumbers' => true, 'minYear' => 1000, 'maxYear' => 9999, 'firstDay' => '1'];
+                    $theItem = '<div class="cbFormField cbDateTimeField">' . "\n" . '<div id="field-calendar-cb_' . $item['id'] . '">' . "\n" . '<div class="input-group">' . "\n";
+                    $theItem .= HTMLHelper::_('calendar', $dateTimeValue, 'cb_' . $item['id'], 'cb_' . $item['id'], '%Y-%m-%d %H:%M:%S', $dateTimeAttr);
                     $theItem .= "</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>";
                     break;
                 case 'hidden':
                     $hiddenValue = $normalizeScalarValue($failedValues !== null && $elementReferenceId !== '' && isset($failedValues[$elementReferenceId]) ? $failedValues[$elementReferenceId] : ($hasRecords ? $item['value'] : $element['default_value']));
                     $theItem = '<input type="hidden" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" value="' . htmlspecialchars($hiddenValue, ENT_QUOTES, 'UTF-8') . '"/>';
                     break;
+            }
+
+            if ($isSourceRequired && $isEditable && in_array($elementType, ['', 'text', 'number', 'decimal', 'boolean', 'textarea', 'select', 'calendar', 'datetime'], true)) {
+                $theItem = $this->markFirstEditableControlRequired((string) $theItem);
+
+                // Custom editable templates often contain a literal label
+                // instead of {field:label}; in that case $asterisk cannot be
+                // injected into the label, so keep the required state visible
+                // next to the generated control as a fallback.
+                if (!$hasLabelMarker) {
+                    $theItem = '<span class="cbRequired text-danger me-1" title="'
+                        . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_REQUIRED_VALUE'), ENT_QUOTES, 'UTF-8')
+                        . '" aria-hidden="true">*</span>' . $theItem;
+                }
             }
 
             if (!$isEditable && $elementType !== 'hidden' && $theItem !== '') {

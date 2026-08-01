@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @copyright	Copyright © 2005 - 2011 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright © 2005 - 2011 Open Source Matters, Inc. All rights reserved.
  * @copyright   Copyright © 2026 XDA+GIL
  * @link        https://breezingforms-ng.vcmb.fr
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
   */
 
 namespace CB\Component\Contentbuilderng\Administrator\Model\CategoryFields;
@@ -21,8 +21,8 @@ class FormFieldCategoryEditCb extends ListField
     /**
      * A flexible category list that respects access controls
      *
-     * @var		string
-     * @since	1.6
+     * @var     string
+     * @since   1.6
      */
     public $type = 'CategoryEditCb';
 
@@ -36,8 +36,8 @@ class FormFieldCategoryEditCb extends ListField
      * either category assignment or parent category assignment in edit screens.
      * Use the parent element to indicate that the field will be used for assigning parent categories.
      *
-     * @return	array	The field option objects.
-     * @since	1.6
+     * @return  array   The field option objects.
+     * @since   1.6
      */
     protected function getOptions($startcat = 1)
     {
@@ -80,7 +80,7 @@ class FormFieldCategoryEditCb extends ListField
             $options[$i]->text = str_repeat('- ', $options[$i]->level) . $options[$i]->text;
         }
 
-        if (isset ($row) && !isset ($options[0])) {
+        if (isset($row) && !isset($options[0])) {
             if ($row->parent_id == '1') {
                 $parent = new \stdClass();
                 $parent->text = Text::_('JGLOBAL_ROOT_PARENT');

@@ -26,8 +26,7 @@ class ArticleService
         FormResolverService $formResolverService,
         DatabaseInterface $db,
         CacheControllerFactoryInterface $cacheControllerFactory
-    )
-    {
+    ) {
         $this->formResolverService = $formResolverService;
         $this->templateRenderService = $templateRenderService;
         $this->textUtilityService = new TextUtilityService();
@@ -285,20 +284,20 @@ class ArticleService
             if ($form['article_record_impact_publish'] && isset($config['publish_up']) && $config['publish_up'] != $publishUp) {
                 $___now = $_now->toSql();
                 $publishUpConfig = $config['publish_up'] ?? null;
-                
+
                 $query = $db->getQuery(true)
                     ->update($db->quoteName('#__contentbuilderng_records'));
-                
+
                 if ($publishUpConfig && strtotime($publishUpConfig) >= strtotime($___now)) {
                     $query->set($db->quoteName('published') . ' = 0')
                         ->set($db->quoteName('is_future') . ' = 1');
                 }
-                
+
                 $query->set($db->quoteName('publish_up') . ' = ' . ($publishUpConfig ? $db->quote($publishUpConfig) : 'NULL'))
                     ->where($db->quoteName('type') . ' = ' . $db->quote($form['type']))
                     ->where($db->quoteName('reference_id') . ' = ' . $db->quote($form['reference_id']))
                     ->where($db->quoteName('record_id') . ' = ' . $db->quote($recordId));
-                
+
                 $db->setQuery($query);
                 $db->execute();
             }
@@ -308,19 +307,19 @@ class ArticleService
             if ($form['article_record_impact_publish'] && isset($config['publish_down']) && $config['publish_down'] != $publishDown) {
                 $___now = $_now->toSql();
                 $publishDownConfig = $config['publish_down'] ?? null;
-                
+
                 $query = $db->getQuery(true)
                     ->update($db->quoteName('#__contentbuilderng_records'));
-                
+
                 if ($publishDownConfig && strtotime($publishDownConfig) <= strtotime($___now)) {
                     $query->set($db->quoteName('published') . ' = 0');
                 }
-                
+
                 $query->set($db->quoteName('publish_down') . ' = ' . ($publishDownConfig ? $db->quote($publishDownConfig) : 'NULL'))
                     ->where($db->quoteName('type') . ' = ' . $db->quote($form['type']))
                     ->where($db->quoteName('reference_id') . ' = ' . $db->quote($form['reference_id']))
                     ->where($db->quoteName('record_id') . ' = ' . $db->quote($recordId));
-                
+
                 $db->setQuery($query);
                 $db->execute();
             }

@@ -64,10 +64,11 @@ class DetailsController extends BaseController
     }
 
     public function __construct(
-        array $config = [], 
-        ?MVCFactoryInterface $factory = null, 
-        ?CMSWebApplicationInterface $app = null, 
-        ?Input $input = null) {
+        array $config = [],
+        ?MVCFactoryInterface $factory = null,
+        ?CMSWebApplicationInterface $app = null,
+        ?Input $input = null
+    ) {
 
             // IMPORTANT : on transmet factory/app/input à BaseController
         parent::__construct($config, $factory, $app, $input);
@@ -80,7 +81,6 @@ class DetailsController extends BaseController
         $this->frontend = $this->siteApp->isClient('site');
 
         if ($this->frontend && $this->siteApp->getInput()->getInt('Itemid', 0)) {
-
             // try menu item
             $menu = $this->siteApp->getMenu();
             $item = $menu->getActive();
@@ -176,7 +176,7 @@ class DetailsController extends BaseController
         }
     }
 
-    function display($cachable = false, $urlparams = array())
+    public function display($cachable = false, $urlparams = array())
     {
         $this->input->set('view', 'details');
         $storageId = $this->input->getInt('storage_id', 0);

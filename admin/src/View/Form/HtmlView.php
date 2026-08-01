@@ -293,17 +293,17 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::cancel('form.cancel', 'JTOOLBAR_CLOSE');
 
         if ($formId > 0) {
-        $previewUntil = time() + 600;
-        $previewActorId = (int) ($identity->id ?? 0);
-        $previewActorName = trim((string) ($identity->name ?? ''));
+            $previewUntil = time() + 600;
+            $previewActorId = (int) ($identity->id ?? 0);
+            $previewActorName = trim((string) ($identity->name ?? ''));
             if ($previewActorName === '') {
                 $previewActorName = trim((string) ($identity->username ?? ''));
             }
-        if ($previewActorName === '') {
-            $previewActorName = 'administrator';
-        }
-        $previewUserId = (int) ($identity->id ?? 0);
-        $previewPayload = PreviewLinkHelper::buildPayload((string) $formId, $previewUntil, $previewActorId, $previewActorName, $previewUserId);
+            if ($previewActorName === '') {
+                $previewActorName = 'administrator';
+            }
+            $previewUserId = (int) ($identity->id ?? 0);
+            $previewPayload = PreviewLinkHelper::buildPayload((string) $formId, $previewUntil, $previewActorId, $previewActorName, $previewUserId);
             $previewSig = hash_hmac('sha256', $previewPayload, (string) $app->get('secret'));
             $previewUrl = Route::link(
                 'site',
@@ -464,5 +464,4 @@ class HtmlView extends BaseHtmlView
 
         return (int) $registry->get('settings.form_id', $registry->get('form_id', 0));
     }
-
 }

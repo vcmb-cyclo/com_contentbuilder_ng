@@ -63,7 +63,7 @@ $listStates = is_array($item->list_states ?? null) ? $item->list_states : [];
         $stateColorInputId = 'list_state_color_' . (int) $state['id'];
         $stateColorPickerId = 'list_state_color_picker_' . (int) $state['id'];
         $stateNativePickerValue = preg_match('/^[0-9A-F]{6}$/', $previewHex) ? '#' . $previewHex : '#FFFFFF';
-    ?>
+        ?>
         <tr class="<?php echo 'row' . $k; ?>">
             <td>
                 <?php echo is_callable($renderCheckbox) ? $renderCheckbox('jform[list_states][' . $state['id'] . '][published]', 'list_state_published_' . $state['id'], (bool) $state['published']) : ''; ?>
@@ -109,7 +109,7 @@ $listStates = is_array($item->list_states ?? null) ? $item->list_states : [];
                 </select>
             </td>
         </tr>
-    <?php
+        <?php
         $k = 1 - $k;
     }
     ?>

@@ -22,6 +22,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Controller;
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Access\Exception\NotAllowed;
 use Joomla\CMS\MVC\Controller\FormController as BaseFormController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Application\CMSApplicationInterface;
@@ -69,6 +70,16 @@ class StorageController extends BaseFormController
     private function closeApp(): void
     {
         $this->getApp()->close();
+    }
+
+    /**
+     * @throws NotAllowed
+     */
+    private function assertStorageEditAccess(): void
+    {
+        if (!$this->getApp()->getIdentity()->authorise('core.edit', 'com_contentbuilderng')) {
+            throw new NotAllowed(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
     }
 
     /**
@@ -389,11 +400,11 @@ class StorageController extends BaseFormController
             Logger::info('Controller got model class', ['class' => get_class($model)]);
             $saved = $model->save($data);
             if (!$saved) {
-	                $this->setRedirect(
-	                    $this->storageEditLink((int) ($data['id'] ?? 0)),
-	                    Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED'),
-	                    'error'
-	                );
+                    $this->setRedirect(
+                        $this->storageEditLink((int) ($data['id'] ?? 0)),
+                        Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED'),
+                        'error'
+                    );
                 return false;
             }
 
@@ -453,12 +464,12 @@ class StorageController extends BaseFormController
             $model->ensureDataTable($id, empty($data['id']), null);
 
             // (C) Import file (CSV/Excel)
-	            $ok = $model->storeCsv($file, (int) $id);
-	            if (!$ok) {
-	                $error = trim((string) $model->getError());
-	                if ($error === '') {
-	                    $error = Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED');
-	                }
+                $ok = $model->storeCsv($file, (int) $id);
+            if (!$ok) {
+                $error = trim((string) $model->getError());
+                if ($error === '') {
+                    $error = Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED');
+                }
                 $this->setRedirect(
                     $this->storageEditLink((int) $id),
                     $error,
@@ -979,6 +990,27 @@ class StorageController extends BaseFormController
                 throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_SELECT_REQUIRED'));
             }
 
+            $existingQuery = $db->getQuery(true)
+                ->select($db->quoteName('id'))
+                ->from($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->where($db->quoteName('storage_id') . ' = ' . $storageId)
+                ->where($db->quoteName('name') . ' = ' . $db->quote($fieldName));
+            $db->setQuery($existingQuery);
+            $existingId = (int) $db->loadResult();
+
+            if ($existingId > 0) {
+                $update = $db->getQuery(true)
+                    ->update($db->quoteName('#__contentbuilderng_storage_fields'))
+                    ->set($db->quoteName('published') . ' = 1')
+                    ->where($db->quoteName('id') . ' = ' . $existingId);
+                $db->setQuery($update);
+                $db->execute();
+
+                $this->setRedirect($redirect, Text::_('COM_CONTENTBUILDERNG_PUBLISHED'));
+
+                return true;
+            }
+
             $orderingQuery = $db->getQuery(true)
                 ->select('COALESCE(MAX(' . $db->quoteName('ordering') . '), 0) + 1')
                 ->from($db->quoteName('#__contentbuilderng_storage_fields'))
@@ -988,12 +1020,13 @@ class StorageController extends BaseFormController
 
             $insert = $db->getQuery(true)
                 ->insert($db->quoteName('#__contentbuilderng_storage_fields'))
-                ->columns($db->quoteName(['storage_id', 'name', 'title', 'sql_type', 'ordering', 'published']))
+                ->columns($db->quoteName(['storage_id', 'name', 'title', 'sql_type', 'required', 'ordering', 'published']))
                 ->values(implode(',', [
                     $storageId,
                     $db->quote($fieldName),
                     $db->quote((string) $definition['label']),
                     $db->quote((string) $definition['sql_type']),
+                    (int) $definition['required'],
                     $ordering,
                     1,
                 ]));
@@ -1043,9 +1076,9 @@ class StorageController extends BaseFormController
             if (!$model) {
                 throw new \RuntimeException('StoragefieldsModel introuvable');
             }
-	            $model->setStorageId($storageId);
-	            if (!$model->publish($cids, $state)) {
-	                $error = Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED');
+                $model->setStorageId($storageId);
+            if (!$model->publish($cids, $state)) {
+                $error = Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED');
                 $this->setMessage($error, 'error');
                 if ($this->isAjaxCall()) {
                     $this->respondAjax(false, $error);
@@ -1271,6 +1304,7 @@ class StorageController extends BaseFormController
     public function ajax_update_field_type(): void
     {
         $this->checkToken();
+        $this->assertStorageEditAccess();
 
         $storageId = (int) $this->input->getInt('id');
         $fieldId = (int) $this->input->getInt('field_id', 0);
@@ -1299,26 +1333,37 @@ class StorageController extends BaseFormController
                 throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE_CREATE_ONLY_HINT'));
             }
 
-            $countQuery = $db->getQuery(true)
-                ->select('COUNT(*)')
-                ->from($db->quoteName('#__' . (string) $storage['name']));
-            $db->setQuery($countQuery);
-
-            if ((int) $db->loadResult() > 0) {
-                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE_CREATE_ONLY_HINT'));
-            }
-
             $fieldQuery = $db->getQuery(true)
-                ->select($db->quoteName('name'))
+                ->select($db->quoteName(['name', 'sql_type', 'required']))
                 ->from($db->quoteName('#__contentbuilderng_storage_fields'))
                 ->where($db->quoteName('id') . ' = ' . $fieldId)
                 ->where($db->quoteName('storage_id') . ' = ' . $storageId);
             $db->setQuery($fieldQuery);
-            $fieldName = (string) $db->loadResult();
+            $field = $db->loadAssoc();
+            $fieldName = is_array($field) ? (string) ($field['name'] ?? '') : '';
 
             if ($fieldName === '' || StorageSystemFieldHelper::isSystemFieldName($fieldName)) {
                 throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_SELECT_REQUIRED'));
             }
+
+            $currentSqlType = StorageColumnTypeHelper::normalize((string) ($field['sql_type'] ?? ''));
+            if ($currentSqlType !== $sqlType) {
+                $countQuery = $db->getQuery(true)
+                    ->select('COUNT(*)')
+                    ->from($db->quoteName('#__' . (string) $storage['name']));
+                $db->setQuery($countQuery);
+
+                if ((int) $db->loadResult() > 0) {
+                    throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SQL_TYPE_CREATE_ONLY_HINT'));
+                }
+            }
+
+            $db->setQuery(
+                'ALTER TABLE ' . $db->quoteName('#__' . (string) $storage['name'])
+                . ' MODIFY ' . $db->quoteName($fieldName) . ' '
+                . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize, !empty($field['required']))
+            );
+            $db->execute();
 
             $updateFieldQuery = $db->getQuery(true)
                 ->update($db->quoteName('#__contentbuilderng_storage_fields'))
@@ -1329,15 +1374,130 @@ class StorageController extends BaseFormController
             $db->setQuery($updateFieldQuery);
             $db->execute();
 
-            $db->setQuery(
-                'ALTER TABLE ' . $db->quoteName('#__' . (string) $storage['name'])
-                . ' MODIFY ' . $db->quoteName($fieldName) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize)
-            );
+            $this->respondAjaxData(true, Text::_('COM_CONTENTBUILDERNG_SAVED'), [
+                'sql_type_definition' => StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize, !empty($field['required'])),
+            ]);
+        } catch (\Throwable $e) {
+            $this->respondAjax(false, $this->safeErrorMessage($e));
+        }
+    }
+
+    /**
+     * Task: storage.ajax_update_field_required — bascule le caractère
+     * obligatoire (NOT NULL) d'un champ existant depuis la grille. À la
+     * différence du changement de type SQL, ceci reste sûr même sur une
+     * table déjà peuplée : les valeurs NULL existantes sont comblées avant
+     * de poser la contrainte (StorageColumnTypeHelper::enforceRequired()),
+     * donc aucune restriction "table vide" n'est nécessaire ici. Réservé aux
+     * storages internes (!bytable) et jamais pour un champ système (son
+     * caractère obligatoire est fixe, cf. StorageSystemFieldHelper).
+     */
+    public function ajax_update_field_required(): void
+    {
+        $this->checkToken();
+        $this->assertStorageEditAccess();
+
+        $storageId = (int) $this->input->getInt('id');
+        $fieldId = (int) $this->input->getInt('field_id', 0);
+        $required = $this->input->getBool('required', false);
+
+        try {
+            if ($storageId <= 0 || $fieldId <= 0) {
+                throw new \RuntimeException(Text::_('JERROR_NO_ITEMS_SELECTED'));
+            }
+
+            $db = $this->getDatabase();
+
+            $storageQuery = $db->getQuery(true)
+                ->select($db->quoteName(['name', 'bytable']))
+                ->from($db->quoteName('#__contentbuilderng_storages'))
+                ->where($db->quoteName('id') . ' = ' . $storageId);
+            $db->setQuery($storageQuery);
+            $storage = $db->loadAssoc();
+
+            if (!is_array($storage)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ERROR'));
+            }
+
+            if ((int) ($storage['bytable'] ?? 0) > 0) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_REQUIRED_FOREIGN_TABLE_HINT'));
+            }
+
+            $fieldQuery = $db->getQuery(true)
+                ->select($db->quoteName(['name', 'sql_type', 'field_size']))
+                ->from($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->where($db->quoteName('id') . ' = ' . $fieldId)
+                ->where($db->quoteName('storage_id') . ' = ' . $storageId);
+            $db->setQuery($fieldQuery);
+            $field = $db->loadAssoc();
+
+            $fieldName = is_array($field) ? (string) ($field['name'] ?? '') : '';
+
+            if ($fieldName === '' || StorageSystemFieldHelper::isSystemFieldName($fieldName)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_SELECT_REQUIRED'));
+            }
+
+            $sqlType = StorageColumnTypeHelper::normalize((string) ($field['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
+            $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $field['field_size'] ?? null);
+
+            $quotedTable = $db->quoteName('#__' . (string) $storage['name']);
+            $quotedColumn = $db->quoteName($fieldName);
+
+            if ($required) {
+                StorageColumnTypeHelper::enforceRequired($db, $quotedTable, $quotedColumn, $sqlType, $fieldSize);
+            } else {
+                $db->setQuery(
+                    'ALTER TABLE ' . $quotedTable
+                    . ' MODIFY ' . $quotedColumn . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize, false)
+                );
+                $db->execute();
+            }
+
+            // Persist the metadata only after the physical DDL succeeds. If
+            // MySQL rejects the ALTER, the declared required state remains
+            // aligned with the actual column nullability.
+            $updateFieldQuery = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->set($db->quoteName('required') . ' = ' . (int) $required)
+                ->where($db->quoteName('id') . ' = ' . $fieldId)
+                ->where($db->quoteName('storage_id') . ' = ' . $storageId);
+            $db->setQuery($updateFieldQuery);
             $db->execute();
 
-            $this->respondAjaxData(true, Text::_('COM_CONTENTBUILDERNG_SAVED'), [
-                'sql_type_definition' => StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize),
-            ]);
+            $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_SAVED'));
+        } catch (\Throwable $e) {
+            $this->respondAjax(false, $this->safeErrorMessage($e));
+        }
+    }
+
+    /**
+     * Updates the display title of a storage field without touching the
+     * physical data table.
+     */
+    public function ajax_update_field_title(): void
+    {
+        $this->checkToken();
+        $this->assertStorageEditAccess();
+
+        $storageId = (int) $this->input->getInt('id');
+        $fieldId = (int) $this->input->getInt('field_id', 0);
+        $title = trim($this->input->getString('title', ''));
+
+        try {
+            if ($storageId <= 0 || $fieldId <= 0) {
+                throw new \RuntimeException(Text::_('JERROR_NO_ITEMS_SELECTED'));
+            }
+
+            $db = $this->getDatabase();
+            $query = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->set($db->quoteName('title') . ' = ' . $db->quote($title))
+                ->where($db->quoteName('id') . ' = ' . $fieldId)
+                ->where($db->quoteName('storage_id') . ' = ' . $storageId);
+            $db->setQuery($query);
+            $db->execute();
+
+            $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_SAVED'));
         } catch (\Throwable $e) {
             $this->respondAjax(false, $this->safeErrorMessage($e));
         }

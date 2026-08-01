@@ -11,7 +11,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-
 namespace CB\Component\Contentbuilderng\Administrator\Helper;
 
 // No direct access
@@ -19,15 +18,16 @@ namespace CB\Component\Contentbuilderng\Administrator\Helper;
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Filter\InputFilter;
 
 /**
  * includes a scands chars fix from user jajusain
- * 
+ *
  * POST:
  * http://crosstec.de/en/forums/37-contentbuilder-general-forum/63712-scands-bug.html?limit=6&start=12#63770
  *
  * @param type $path
- * @return boolean 
+ * @return boolean
  */
 
 
@@ -35,8 +35,9 @@ if (!function_exists('mb_wordwrap')) {
     function mb_wordwrap($str, $width = 74, $break = "\r\n")
     {
         // Return short or empty strings untouched
-        if (empty($str) || mb_strlen($str, 'UTF-8') <= $width)
+        if (empty($str) || mb_strlen($str, 'UTF-8') <= $width) {
             return $str;
+        }
 
         $br_width  = mb_strlen($break, 'UTF-8');
         $str_width = mb_strlen($str, 'UTF-8');
@@ -92,7 +93,6 @@ if (!function_exists('mb_wordwrap')) {
 
 class ContentbuilderngHelper
 {
-
     public static function contentbuilderng_wordwrap($str, $width = 75, $break = "\n", $cut = false, $charset = null)
     {
         if (function_exists('mb_strlen')) {
@@ -102,7 +102,7 @@ class ContentbuilderngHelper
         }
     }
 
-    private static function is_url($url = FALSE)
+    private static function is_url($url = false)
     {
         $info = parse_url($url);
         return ((isset($info['scheme']) && $info['scheme'] == 'http') || (isset($info['scheme']) && $info['scheme'] == 'https') || (isset($info['scheme']) && $info['scheme'] == 'ftp')) && isset($info['host']) && $info['host'] != "";
@@ -179,23 +179,35 @@ class ContentbuilderngHelper
 
         //      the upper limit on address lengths should normally be considered to be 256
         //              (http://www.rfc-editor.org/errata_search.php?rfc=3696)
-        if (strlen($email) > 256)       return false;   //      Too long
+        if (strlen($email) > 256) {
+            return false;   //      Too long
+        }
 
         //      Contemporary email addresses consist of a "local part" separated from
         //      a "domain part" (a fully-qualified domain name) by an at-sign ("@").
         //              (http://tools.ietf.org/html/rfc3696#section-3)
         $index = strrpos($email, '@');
 
-        if ($index === false)           return false;   //      No at-sign
-        if ($index === 0)               return false;   //      No local part
-        if ($index > 64)                return false;   //      Local part too long
+        if ($index === false) {
+            return false;   //      No at-sign
+        }
+        if ($index === 0) {
+            return false;   //      No local part
+        }
+        if ($index > 64) {
+            return false;   //      Local part too long
+        }
 
         $localPart              = substr($email, 0, $index);
         $domain                 = substr($email, $index + 1);
         $domainLength   = strlen($domain);
 
-        if ($domainLength === 0)        return false;   //      No domain part
-        if ($domainLength > 255)        return false;   //      Domain part too long
+        if ($domainLength === 0) {
+            return false;   //      No domain part
+        }
+        if ($domainLength > 255) {
+            return false;   //      Domain part too long
+        }
 
         //      Let's check the local part for RFC compliance...
         //
@@ -215,7 +227,9 @@ class ContentbuilderngHelper
             //
             //      A zero-length element implies a period at the beginning or end of the
             //      local part, or two periods together. Either way it's not allowed.
-            if ($localElement === '')                                                                               return false;   //      Dots in wrong place
+            if ($localElement === '') {
+                return false;   //      Dots in wrong place
+            }
 
             //      Each dot-delimited component can be an atom or a quoted string
             //      (because of the obs-local-part provision)
@@ -228,8 +242,12 @@ class ContentbuilderngHelper
                 //              (http://tools.ietf.org/html/rfc2822#section-3.2.5)
                 $groupCount     = preg_match_all('/(?:^"|"$|\\\\\\\\|\\\\")|(\\\\|")/', $localElement, $matches);
                 array_multisort($matches[1], SORT_DESC);
-                if ($matches[1][0] !== '')                                                                      return false;   //      Unescaped quote or backslash character inside quoted string
-                if (preg_match('/^"\\\\*"$/', $localElement) > 0)                       return false;   //      "" and "\" are slipping through - note: must tidy this up
+                if ($matches[1][0] !== '') {
+                    return false;   //      Unescaped quote or backslash character inside quoted string
+                }
+                if (preg_match('/^"\\\\*"$/', $localElement) > 0) {
+                    return false;   //      "" and "\" are slipping through - note: must tidy this up
+                }
             } else {
                 //      Unquoted string tests:
                 //
@@ -241,10 +259,13 @@ class ContentbuilderngHelper
                 //
                 $stripped = '';
                 //      Any excluded characters? i.e. <space>, @, [, ], \, ", <comma>
-                if (preg_match('/[ @\\[\\]\\\\",]/', $localElement) > 0)
+                if (preg_match('/[ @\\[\\]\\\\",]/', $localElement) > 0) {
                     //      Check all excluded characters are escaped
                     $stripped = preg_replace('/\\\\[ @\\[\\]\\\\",]/', '', $localElement);
-                if (preg_match('/[ @\\[\\]\\\\",]/', $stripped) > 0)    return false;   //      Unquoted excluded characters
+                }
+                if (preg_match('/[ @\\[\\]\\\\",]/', $stripped) > 0) {
+                    return false;   //      Unquoted excluded characters
+                }
             }
         }
 
@@ -268,15 +289,21 @@ class ContentbuilderngHelper
                     return true;
                 } else {
                     //      Assume it's an attempt at a mixed address (IPv6 + IPv4)
-                    if ($addressLiteral[$index - 1] !== ':')                        return false;   //      Character preceding IPv4 address must be ':'
-                    if (substr($addressLiteral, 0, 5) !== 'IPv6:')          return false;   //      RFC5321 section 4.1.3
+                    if ($addressLiteral[$index - 1] !== ':') {
+                        return false;   //      Character preceding IPv4 address must be ':'
+                    }
+                    if (substr($addressLiteral, 0, 5) !== 'IPv6:') {
+                        return false;   //      RFC5321 section 4.1.3
+                    }
 
                     $IPv6 = substr($addressLiteral, 5, ($index === 7) ? 2 : $index - 6);
                     $groupMax = 6;
                 }
             } else {
                 //      It must be an attempt at pure IPv6
-                if (substr($addressLiteral, 0, 5) !== 'IPv6:')                  return false;   //      RFC5321 section 4.1.3
+                if (substr($addressLiteral, 0, 5) !== 'IPv6:') {
+                    return false;   //      RFC5321 section 4.1.3
+                }
                 $IPv6 = substr($addressLiteral, 5);
                 $groupMax = 8;
             }
@@ -286,16 +313,24 @@ class ContentbuilderngHelper
 
             if ($index === false) {
                 //      We need exactly the right number of groups
-                if ($groupCount !== $groupMax)                                                  return false;   //      RFC5321 section 4.1.3
+                if ($groupCount !== $groupMax) {
+                    return false;   //      RFC5321 section 4.1.3
+                }
             } else {
-                if ($index !== strrpos($IPv6, '::'))                                             return false;   //      More than one '::'
+                if ($index !== strrpos($IPv6, '::')) {
+                    return false;   //      More than one '::'
+                }
                 $groupMax = ($index === 0 || $index === (strlen($IPv6) - 2)) ? $groupMax : $groupMax - 1;
-                if ($groupCount > $groupMax)                                                    return false;   //      Too many IPv6 groups in address
+                if ($groupCount > $groupMax) {
+                    return false;   //      Too many IPv6 groups in address
+                }
             }
 
             //      Check for unmatched characters
             array_multisort($matchesIP[1], SORT_DESC);
-            if ($matchesIP[1][0] !== '')                                                            return false;   //      Illegal characters in address
+            if ($matchesIP[1][0] !== '') {
+                return false;   //      Illegal characters in address
+            }
 
             //      It's a valid IPv6 address, so...
             return true;
@@ -323,15 +358,23 @@ class ContentbuilderngHelper
             $groupCount     = preg_match_all('/(?:[0-9a-zA-Z][0-9a-zA-Z-]{0,61}[0-9a-zA-Z]|[a-zA-Z])(?:\\.|$)|(.)/', $domain, $matches);
             $level          = count($matches[0]);
 
-            if ($level == 1)                                                                                        return false;   //      Mail host can't be a TLD
+            if ($level == 1) {
+                return false;   //      Mail host can't be a TLD
+            }
 
             $TLD = $matches[0][$level - 1];
-            if (substr($TLD, strlen($TLD) - 1, 1) === '.')                          return false;   //      TLD can't end in a dot
-            if (preg_match('/^[0-9]+$/', $TLD) > 0)                                         return false;   //      TLD can't be all-numeric
+            if (substr($TLD, strlen($TLD) - 1, 1) === '.') {
+                return false;   //      TLD can't end in a dot
+            }
+            if (preg_match('/^[0-9]+$/', $TLD) > 0) {
+                return false;   //      TLD can't be all-numeric
+            }
 
             //      Check for unmatched characters
             array_multisort($matches[1], SORT_DESC);
-            if ($matches[1][0] !== '')                                                                      return false;   //      Illegal characters in domain, or label longer than 63 characters
+            if ($matches[1][0] !== '') {
+                return false;   //      Illegal characters in domain, or label longer than 63 characters
+            }
 
             //      Check DNS?
             if ($checkDNS && function_exists('checkdnsrr')) {
@@ -351,7 +394,6 @@ class ContentbuilderngHelper
         $format = $format = str_replace('%', '', $format);
 
         if (strlen($value) >= 4 && strlen($format)) {
-
             // find separator. Remove all other characters from $format
             $separator_only = str_replace(array('m', 'd', 'y'), '', strtolower($format));
             $separator = $separator_only[0]; // separator is first character
@@ -360,7 +402,6 @@ class ContentbuilderngHelper
             $separator2 = $separator_only2[0]; // separator is first character
 
             if ($separator && strlen($separator_only) == 2) {
-
                 $value_exploded  = explode($separator2, $value);
                 $format_exploded = explode($separator, $format);
 
@@ -410,7 +451,6 @@ class ContentbuilderngHelper
         $srcFormat = str_replace('%', '', $srcFormat);
 
         if (strlen($value) >= 4 && strlen($format)) {
-
             // find separator. Remove all other characters from $format
             $separator_only = str_replace(array('m', 'd', 'y'), '', strtolower($format));
             $separator = $separator_only[0]; // separator is first character
@@ -422,7 +462,6 @@ class ContentbuilderngHelper
             $separator3 = $separator_only2[0]; // separator is first character
 
             if ($separator && strlen($separator_only) == 2) {
-
                 $value_exploded  = explode($separator2, $value);
                 $format_exploded = explode($separator, $format);
                 $srcformat_exploded = explode($separator3, $srcFormat);
@@ -479,9 +518,9 @@ class ContentbuilderngHelper
                     $yearlen = strlen(intval($value_exploded[$srcyearindex]));
                     if ($yearlen == 3) {
                         $value_exploded[$srcyearindex] = '0' . intval($value_exploded[$srcyearindex]);
-                    } else if ($yearlen == 2) {
+                    } elseif ($yearlen == 2) {
                         $value_exploded[$srcyearindex] = '00' . intval($value_exploded[$srcyearindex]);
-                    } else if ($yearlen == 1) {
+                    } elseif ($yearlen == 1) {
                         $value_exploded[$srcyearindex] = '000' . intval($value_exploded[$srcyearindex]);
                     }
                 }
@@ -561,7 +600,7 @@ class ContentbuilderngHelper
         );
     }
 
-    public static function listEditable($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark',  $prefix = '')
+    public static function listEditable($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark', $prefix = '')
     {
         return self::renderBooleanStateToggle(
             !empty($row->editable),
@@ -574,7 +613,7 @@ class ContentbuilderngHelper
         );
     }
 
-    public static function listApiAllowed($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark',  $prefix = '')
+    public static function listApiAllowed($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark', $prefix = '')
     {
         return self::renderBooleanStateToggle(
             !empty($row->api_allowed),
@@ -587,7 +626,7 @@ class ContentbuilderngHelper
         );
     }
 
-    public static function listVerifiedView($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark',  $prefix = '')
+    public static function listVerifiedView($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark', $prefix = '')
     {
         return self::renderBooleanStateToggle(
             !empty($row->verified_view),
@@ -600,7 +639,7 @@ class ContentbuilderngHelper
         );
     }
 
-    public static function listVerifiedNew($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark',  $prefix = '')
+    public static function listVerifiedNew($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark', $prefix = '')
     {
         return self::renderBooleanStateToggle(
             !empty($row->verified_new),
@@ -613,7 +652,7 @@ class ContentbuilderngHelper
         );
     }
 
-    public static function listVerifiedEdit($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark',  $prefix = '')
+    public static function listVerifiedEdit($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark', $prefix = '')
     {
         return self::renderBooleanStateToggle(
             !empty($row->verified_edit),
@@ -626,7 +665,7 @@ class ContentbuilderngHelper
         );
     }
 
-    public static function listPublish($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark',  $prefix = '')
+    public static function listPublish($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark', $prefix = '')
     {
         $states = [
             1 => ['unpublish', 'JPUBLISHED', 'JLIB_HTML_UNPUBLISH_ITEM', 'JPUBLISHED', false, 'publish', 'publish'],
@@ -699,5 +738,40 @@ class ContentbuilderngHelper
         ];
 
         return HTMLHelper::_('jgrid.state', $states, $value ? 1 : 0, $i, $prefix, true, true, 'cb');
+    }
+
+    /**
+     * Renders admin-authored rich text (form intro/list intro fields edited
+     * through a WYSIWYG editor) as HTML while stripping anything not on the
+     * allow-list below — scripts, event handlers, iframes, forms, style
+     * attributes. Unlike htmlspecialchars() this keeps the formatting the
+     * editor intentionally produced; unlike echoing raw, a field an admin
+     * pastes third-party markup into cannot inject script.
+     */
+    public static function sanitizeStoredHtml(?string $html): string
+    {
+        $html = (string) $html;
+
+        if (trim($html) === '') {
+            return '';
+        }
+
+        static $filter = null;
+
+        if ($filter === null) {
+            $filter = new InputFilter(
+                [
+                    'p', 'br', 'b', 'strong', 'i', 'em', 'u', 's', 'sub', 'sup',
+                    'ul', 'ol', 'li', 'a', 'span', 'div', 'blockquote', 'pre', 'code',
+                    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'img',
+                    'table', 'thead', 'tbody', 'tr', 'th', 'td',
+                ],
+                ['href', 'title', 'target', 'rel', 'src', 'alt', 'width', 'height', 'class'],
+                InputFilter::ONLY_ALLOW_DEFINED_TAGS,
+                InputFilter::ONLY_ALLOW_DEFINED_ATTRIBUTES
+            );
+        }
+
+        return $filter->clean($html, 'html');
     }
 }

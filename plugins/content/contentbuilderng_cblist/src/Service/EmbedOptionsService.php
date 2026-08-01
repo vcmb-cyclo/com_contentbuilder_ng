@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace CB\Plugin\Content\ContentbuilderngList\Service;
 
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
+
 \defined('_JEXEC') or die;
 
 final class EmbedOptionsService
@@ -17,11 +20,11 @@ final class EmbedOptionsService
      *
      * @return array{
      *     id: int,
-     *     itemid: int,
      *     height: int,
      *     layout: string,
      *     loading: 'eager'|'lazy',
      *     fields: list<string>,
+     *     actions: list<string>,
      *     title: string
      * }
      */
@@ -31,14 +34,6 @@ final class EmbedOptionsService
 
         if ($id === null) {
             throw new \InvalidArgumentException('id');
-        }
-
-        $itemId = 0;
-        if (isset($attributes['itemid']) && trim($attributes['itemid']) !== '') {
-            $itemId = self::positiveInteger($attributes['itemid']) ?? 0;
-            if ($itemId < 1) {
-                throw new \InvalidArgumentException('itemid');
-            }
         }
 
         $height = self::DEFAULT_HEIGHT;
@@ -60,14 +55,15 @@ final class EmbedOptionsService
         }
 
         $fields = self::fieldSelectors((string) ($attributes['fields'] ?? ''));
+        $actions = self::actionSelectors((string) ($attributes['actions'] ?? ''));
 
         return [
             'id' => $id,
-            'itemid' => $itemId,
             'height' => $height,
             'layout' => $layout,
             'loading' => $loading,
             'fields' => $fields,
+            'actions' => $actions,
             'title' => trim((string) ($attributes['title'] ?? '')),
         ];
     }
@@ -75,16 +71,25 @@ final class EmbedOptionsService
     /**
      * @return list<string>
      */
+    private static function actionSelectors(string $value): array
+    {
+        $actions = EmbeddedListActionFilterService::parseActions($value);
+
+        foreach ($actions as $action) {
+            if (!EmbeddedListActionFilterService::isKnownAction($action)) {
+                throw new \InvalidArgumentException('actions');
+            }
+        }
+
+        return $actions;
+    }
+
+    /**
+     * @return list<string>
+     */
     private static function fieldSelectors(string $value): array
     {
-        $selectors = preg_split('/\s*,\s*/u', trim($value)) ?: [];
-        $selectors = array_values(
-            array_filter(
-                array_map('trim', $selectors),
-                static fn(string $selector): bool => $selector !== ''
-            )
-        );
-        $selectors = array_values(array_unique($selectors));
+        $selectors = EmbeddedListFieldFilterService::parseSelectors($value);
 
         if (count($selectors) > 100) {
             throw new \InvalidArgumentException('fields');

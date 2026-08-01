@@ -9,6 +9,7 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
+
 // administrator/services/provider.php
 
 \defined('_JEXEC') or die;

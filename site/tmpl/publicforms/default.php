@@ -223,7 +223,7 @@ if ($this->page_heading) {
                     }
                     ?>
                     <td>
-                        <?php echo $introtext; ?>
+                        <?php echo \CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper::sanitizeStoredHtml($introtext); ?>
                     </td>
                     <?php
                 }

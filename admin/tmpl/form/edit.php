@@ -1017,9 +1017,9 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
     <input type="hidden" name="slideStartOffset"
         value="<?php echo htmlspecialchars((string) $session->get('slideStartOffset', 'permtab1', 'com_contentbuilderng'), ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="jform[email_users]"
-        value="<?php echo $session->get('email_users', 'none', 'com_contentbuilderng'); ?>" />
+        value="<?php echo htmlspecialchars((string) $session->get('email_users', 'none', 'com_contentbuilderng'), ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="jform[email_admins]"
-        value="<?php echo $session->get('email_admins', '', 'com_contentbuilderng'); ?>" />
+        value="<?php echo htmlspecialchars((string) $session->get('email_admins', '', 'com_contentbuilderng'), ENT_QUOTES, 'UTF-8'); ?>" />
 
     <?php echo HTMLHelper::_('form.token'); ?>
 

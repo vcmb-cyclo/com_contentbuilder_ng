@@ -56,7 +56,7 @@ class ExportModel extends BaseDatabaseModel
     protected ?array $_data = null;
     private SiteApplication $app;
 
-    function  __construct($config)
+    public function __construct($config)
     {
         parent::__construct($config);
 
@@ -167,7 +167,7 @@ class ExportModel extends BaseDatabaseModel
         $app->getSession()->set($option . 'formsd_id', $this->_id);
     }
 
-    function setId($id)
+    public function setId($id)
     {
         // Set id and wipe data
         $this->_id      = $id;
@@ -183,7 +183,7 @@ class ExportModel extends BaseDatabaseModel
     /**
      * @return string The query
      */
-    private function _buildQuery()
+    private function buildQuery()
     {
         return 'Select * From #__contentbuilderng_forms Where id = ' . intval($this->_id) . ' And published = 1';
     }
@@ -192,13 +192,13 @@ class ExportModel extends BaseDatabaseModel
      * Gets the currencies
      * @return array List of products
      */
-    function getData()
+    public function getData()
     {
         $app = $this->app;
 
         // Lets load the data if it doesn't already exist
         if (empty($this->_data)) {
-            $query = $this->_buildQuery();
+            $query = $this->buildQuery();
             $this->_data = $this->_getList($query, 0, 1);
 
             if (!count($this->_data)) {
@@ -233,7 +233,6 @@ class ExportModel extends BaseDatabaseModel
 
                         && $data->allow_external_filter
                     ) {
-
                         $orders = array();
                         $filters = array();
                         $filters_from = array();
@@ -291,7 +290,7 @@ class ExportModel extends BaseDatabaseModel
                                     }
                                     if (count($ex2) == 2) {
                                         $out = (trim($ex2[0]) ? Text::_('COM_CONTENTBUILDERNG_FROM') . ' ' . trim($val) : '') . ' ' . Text::_('COM_CONTENTBUILDERNG_TO') . ' ' . trim($val2);
-                                    } else if (count($ex2) > 0) {
+                                    } elseif (count($ex2) > 0) {
                                         $out = Text::_('COM_CONTENTBUILDERNG_FROM2') . ' ' . trim($val);
                                     }
                                     if ($out) {
@@ -299,7 +298,7 @@ class ExportModel extends BaseDatabaseModel
                                         $ordered_extra_title .= ' &raquo; ' . htmlspecialchars($data->labels[$order_key], ENT_QUOTES, 'UTF-8') . ': ' . htmlspecialchars($out, ENT_QUOTES, 'UTF-8');
                                     }
                                 }
-                            } else if ($is_match) {
+                            } elseif ($is_match) {
                                 $ex = explode('/', implode(', ', $this->_menu_filter[$order_key]));
                                 if (count($ex) == 2) {
                                     $ex2 = explode(';', trim($ex[1]));

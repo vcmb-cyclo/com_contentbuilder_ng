@@ -30,6 +30,8 @@ use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewColorModeHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 $frontend = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->isClient('site');
@@ -85,15 +87,46 @@ $listOrdering = (string) $listState['ordering'];
 $listDirection = (string) $listState['direction'];
 $listQuery = NavigationLinkHelper::buildListQuery($listStart, $listLimit, $listOrdering, $listDirection);
 $embeddedListContext = (string) $input->getCmd('cblist_embed', '');
-$embeddedListFields = EmbeddedListFieldFilterService::isEmbeddedRequest($embeddedListContext)
+$isEmbeddedListRequest = EmbeddedListFieldFilterService::isEmbeddedRequest($embeddedListContext);
+$embeddedListFields = $isEmbeddedListRequest
     ? trim((string) $input->getString('cblist_fields', ''))
     : '';
-$embeddedListParams = $embeddedListFields !== ''
-    ? ['cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT, 'cblist_fields' => $embeddedListFields]
-    : [];
-$embeddedListQuery = $embeddedListParams !== []
-    ? '&' . http_build_query($embeddedListParams)
+$embeddedListRawActions = $isEmbeddedListRequest
+    ? trim((string) $input->getString('cblist_actions', ''))
     : '';
+try {
+    $cbListAllowedActions = EmbeddedListActionFilterService::parseActions($embeddedListRawActions);
+} catch (\InvalidArgumentException) {
+    // See list/default.php's identical guard: cblist_actions is plugin-
+    // generated and pre-validated; only a hand-crafted request reaches
+    // this branch. Fail open to "unrestricted" rather than a fatal error.
+    $cbListAllowedActions = [];
+}
+$cbListActionAllowed = static fn(string $action): bool
+    => EmbeddedListActionFilterService::isAllowed($action, $cbListAllowedActions);
+$embeddedListParams = EmbeddedListContextService::parameters(
+    $embeddedListContext,
+    $embeddedListFields,
+    $embeddedListRawActions
+);
+$embeddedListQuery = EmbeddedListContextService::buildQuery(
+    $embeddedListContext,
+    $embeddedListFields,
+    $embeddedListRawActions
+);
+
+// {CBList actions="..."} is also an embedded-navigation firewall, not just
+// a rendering filter: reaching this page requires 'detail' even if the
+// visitor typed the URL directly rather than following a list link (the
+// list already hides the link, but that alone doesn't stop a crafted URL
+// carrying the same embedded context).
+if ($isEmbeddedListRequest && !$cbListActionAllowed('detail')) {
+    echo '<div class="alert alert-warning" role="alert">'
+        . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_CBLIST_ACTION_NOT_ENABLED'), ENT_QUOTES, 'UTF-8')
+        . '</div>';
+
+    return;
+}
 $previewQuery = '';
 $previewHiddenFields = '';
 $previewEnabled = $input->getBool('cb_preview', false);
@@ -128,12 +161,14 @@ $ownerEditAllowed = !$directStorageReadOnly
     && is_object($formInstance)
     && method_exists($formInstance, 'isOwner')
     && $formInstance->isOwner($ownerUserId, $recordId);
-$canEditRecord = !$directStorageReadOnly && ($edit_allowed || $ownerEditAllowed);
+$canEditRecord = !$directStorageReadOnly && ($edit_allowed || $ownerEditAllowed) && $cbListActionAllowed('edit');
+$delete_allowed = $delete_allowed && $cbListActionAllowed('delete');
+$rating_allowed = $rating_allowed && $cbListActionAllowed('rating');
 $showPreviewSessionBadge = $isAdminPreview && $currentSessionLabel !== '' && $currentSessionLabel !== $previewActorLabel;
 $showTopBar = $detailsTopBarToggle === 1;
 $directStorageUnpublished = !empty($this->direct_storage_unpublished);
-$showStateDisplay = (int) ($this->list_state ?? 0) === 1 && $recordId !== '' && $recordId !== '0';
-$showRatingDisplay = (int) ($this->list_rating ?? 0) === 1 && (int) ($this->rating_slots ?? 0) > 0 && $recordId !== '' && $recordId !== '0';
+$showStateDisplay = (int) ($this->list_state ?? 0) === 1 && $recordId !== '' && $recordId !== '0' && $cbListActionAllowed('state');
+$showRatingDisplay = (int) ($this->list_rating ?? 0) === 1 && (int) ($this->rating_slots ?? 0) > 0 && $recordId !== '' && $recordId !== '0' && $cbListActionAllowed('rating');
 $currentStateTitle = trim((string) (($this->state_titles ?? [])[$recordId] ?? ''));
 $currentStateBadgeStyle = $getStateBadgeStyle($recordId, (array) ($this->state_colors ?? []));
 $adminReturnContext = trim((string) $input->getCmd('cb_admin_return', ''));
@@ -262,6 +297,9 @@ if ($themeJs !== '') {
     <?php if ($input->getString('layout', '') !== '') : ?>
         <input type="hidden" name="layout" value="<?php echo htmlspecialchars($input->getString('layout', ''), ENT_QUOTES, 'UTF-8'); ?>">
     <?php endif; ?>
+    <?php foreach ($embeddedListParams as $embeddedListName => $embeddedListValue) : ?>
+        <input type="hidden" name="<?php echo htmlspecialchars($embeddedListName, ENT_QUOTES, 'UTF-8'); ?>" value="<?php echo htmlspecialchars($embeddedListValue, ENT_QUOTES, 'UTF-8'); ?>">
+    <?php endforeach; ?>
     <?php echo $previewHiddenFields; ?>
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
@@ -290,6 +328,10 @@ if ($themeJs !== '') {
             Factory::getApplication(),
             (int) $input->getInt('id', 0),
             $frontend
+        );
+        $debugCbListActions = EmbeddedListActionFilterService::debugState(
+            ['detail', 'edit', 'delete', 'state', 'rating', 'print'],
+            $cbListAllowedActions
         );
         $debugFilters = [
             'record_id' => $recordId,
@@ -331,6 +373,7 @@ if ($themeJs !== '') {
             'cbRecordId' => (int) ($this->cb_record_id ?? 0),
             'showPermissions' => !empty($this->debug_show_permissions),
             'permissions' => $debugPermissions,
+            'cbListActions' => $debugCbListActions,
             'showFilters' => !empty($this->debug_show_filters),
             'filters' => $debugFilters,
             'showLogs' => !empty($this->debug_enable_logs) && !empty($this->debug_show_request_logs),
@@ -466,7 +509,7 @@ if ($themeJs !== '') {
         ($detailsBackButtonToggle === 1 && $this->show_back_button)
         || $delete_allowed
         || $canEditRecord
-        || ($showTopBar && ($this->print_button || $prevRecordId > 0 || $nextRecordId > 0 || $showCloseButton))
+        || ($showTopBar && (($this->print_button && $cbListActionAllowed('print')) || $prevRecordId > 0 || $nextRecordId > 0 || $showCloseButton))
     );
     $showAuditTrail = $showAuthorToggle === 1;
 
@@ -518,7 +561,7 @@ if ($themeJs !== '') {
     <?php
     ob_start();
     ?>
-    <?php if ($showTopBar && $this->print_button): ?>
+    <?php if ($showTopBar && $this->print_button && $cbListActionAllowed('print')): ?>
         <a
             class="d-none d-sm-inline-flex align-items-center gap-1 btn btn-sm btn-outline-secondary cbButton cbPrintButton"
             href="<?php echo $printLink; ?>"

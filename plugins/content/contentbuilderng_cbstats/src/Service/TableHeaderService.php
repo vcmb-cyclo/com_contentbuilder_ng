@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CB\Plugin\Content\ContentbuilderngStats\Service;
 
 \defined('_JEXEC') or die('Direct Access to this location is not allowed.');
