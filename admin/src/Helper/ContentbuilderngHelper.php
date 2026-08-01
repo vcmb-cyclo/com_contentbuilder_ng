@@ -18,6 +18,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Helper;
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Filter\InputFilter;
 
 /**
  * includes a scands chars fix from user jajusain
@@ -737,5 +738,40 @@ class ContentbuilderngHelper
         ];
 
         return HTMLHelper::_('jgrid.state', $states, $value ? 1 : 0, $i, $prefix, true, true, 'cb');
+    }
+
+    /**
+     * Renders admin-authored rich text (form intro/list intro fields edited
+     * through a WYSIWYG editor) as HTML while stripping anything not on the
+     * allow-list below — scripts, event handlers, iframes, forms, style
+     * attributes. Unlike htmlspecialchars() this keeps the formatting the
+     * editor intentionally produced; unlike echoing raw, a field an admin
+     * pastes third-party markup into cannot inject script.
+     */
+    public static function sanitizeStoredHtml(?string $html): string
+    {
+        $html = (string) $html;
+
+        if (trim($html) === '') {
+            return '';
+        }
+
+        static $filter = null;
+
+        if ($filter === null) {
+            $filter = new InputFilter(
+                [
+                    'p', 'br', 'b', 'strong', 'i', 'em', 'u', 's', 'sub', 'sup',
+                    'ul', 'ol', 'li', 'a', 'span', 'div', 'blockquote', 'pre', 'code',
+                    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'img',
+                    'table', 'thead', 'tbody', 'tr', 'th', 'td',
+                ],
+                ['href', 'title', 'target', 'rel', 'src', 'alt', 'width', 'height', 'class'],
+                InputFilter::ONLY_ALLOW_DEFINED_TAGS,
+                InputFilter::ONLY_ALLOW_DEFINED_ATTRIBUTES
+            );
+        }
+
+        return $filter->clean($html, 'html');
     }
 }

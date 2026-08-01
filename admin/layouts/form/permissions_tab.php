@@ -348,7 +348,7 @@ echo HTMLHelper::_('uitab.addTab', 'perm-pane', 'permtab2', $usersTabLabel);
                             <?php echo $permOptionLabel('verification_days_' . $permSuffix, 'COM_CONTENTBUILDERNG_PERM_VERIFICATION_DAYS', 'COM_CONTENTBUILDERNG_PERM_VERIFICATION_DAYS_TIP'); ?>
                             <input class="form-control form-control-sm" id="verification_days_<?php echo $permSuffix; ?>"
                                 name="jform[verification_days_<?php echo $permSuffix; ?>]" type="text"
-                                value="<?php echo $item->{'verification_days_' . $permSuffix}; ?>" />
+                                value="<?php echo htmlspecialchars($item->{'verification_days_' . $permSuffix} ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                         </div>
                         <div class="cb-perm-users-field cb-perm-users-field-grow">
                             <?php echo $permOptionLabel('verification_url_' . $permSuffix, 'COM_CONTENTBUILDERNG_PERM_VERIFICATION_URL', 'COM_CONTENTBUILDERNG_PERM_VERIFICATION_URL_TIP'); ?>

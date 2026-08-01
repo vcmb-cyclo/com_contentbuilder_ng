@@ -169,7 +169,7 @@ SELECT
                             foreach ($this->states as $state) {
                                 ?>
                                 <option value="<?php echo $state['id'] ?>">
-                                    <?php echo $state['title'] ?>
+                                    <?php echo $this->escape($state['title']) ?>
                                 </option>
                                 <?php
                             }
@@ -315,11 +315,10 @@ SELECT
                             <?php
                         }
                         ?>
-                        <button class="btn btn-sm btn-primary cbButton cbSearchButton" onclick="document.adminForm.submit();">
+                        <button class="btn btn-sm btn-primary cbButton cbSearchButton" type="button">
                             <?php echo Text::_('COM_CONTENTBUILDERNG_SEARCH') ?>
                         </button>
-                        <button class="btn btn-sm btn-outline-secondary cbButton cbResetButton"
-                            onclick="document.getElementById('contentbuilderng_filter').value='';<?php echo $this->list_state && count($this->states) ?"if(document.getElementById('list_state_filter')) document.getElementById('list_state_filter').selectedIndex=0;" :""; ?><?php echo $this->list_publish ?"if(document.getElementById('list_publish_filter')) document.getElementById('list_publish_filter').selectedIndex=0;" :""; ?>document.adminForm.submit();">
+                        <button class="btn btn-sm btn-outline-secondary cbButton cbResetButton" type="button">
                             <?php echo Text::_('COM_CONTENTBUILDERNG_RESET') ?>
                         </button>
                     </td>
@@ -486,12 +485,12 @@ SELECT
                             if (($view_allowed || $this->own_only)) {
                                 ?>
                                 <a href=" <?php echo $link; ?>">
-                                    <?php echo $row->colRecord; ?>
+                                    <?php echo $this->escape($row->colRecord); ?>
                                 </a>
                                 <?php
                             } else {
                                 ?>
-                                <?php echo $row->colRecord; ?>
+                                <?php echo $this->escape($row->colRecord); ?>
                                 <?php
                             }
                             ?>
@@ -530,7 +529,7 @@ SELECT
                     if ($this->list_state) {
                         ?>
                         <td
-                            style="background-color: #<?php echo isset($this->state_colors[$row->colRecord]) ? $this->state_colors[$row->colRecord] : 'FFFFFF'; ?>;">
+                            style="background-color: #<?php echo isset($this->state_colors[$row->colRecord]) ? $this->escape($this->state_colors[$row->colRecord]) : 'FFFFFF'; ?>;">
                             <?php echo isset($this->state_titles[$row->colRecord]) ? htmlspecialchars($this->state_titles[$row->colRecord], ENT_QUOTES, 'UTF-8') : ''; ?>
                         </td>
                         <?php
@@ -549,7 +548,7 @@ SELECT
                     if ($this->list_language) {
                         ?>
                         <td>
-                            <?php echo isset($this->lang_codes[$row->colRecord]) && $this->lang_codes[$row->colRecord] ? $this->lang_codes[$row->colRecord] : '*'; ?>
+                            <?php echo isset($this->lang_codes[$row->colRecord]) && $this->lang_codes[$row->colRecord] ? $this->escape($this->lang_codes[$row->colRecord]) : '*'; ?>
                         </td>
                         <?php
                     }
@@ -562,12 +561,12 @@ SELECT
                             if (($view_allowed || $this->own_only)) {
                                 ?>
                                 <a href="<?php echo $link; ?>">
-                                    <?php echo $row->colArticleId; ?>
+                                    <?php echo $this->escape($row->colArticleId); ?>
                                 </a>
                                 <?php
                             } else {
                                 ?>
-                                <?php echo $row->colArticleId; ?>
+                                <?php echo $this->escape($row->colArticleId); ?>
                                 <?php
                             }
                             ?>
@@ -617,12 +616,12 @@ SELECT
                                 if (in_array(str_replace('col', '', $key), $this->linkable_elements) && ($view_allowed || $this->own_only)) {
                                     ?>
                                     <a href="<?php echo $link; ?>">
-                                        <?php echo $value; ?>
+                                        <?php echo $this->escape($value); ?>
                                     </a>
                                     <?php
                                 } else {
                                     ?>
-                                    <?php echo $value; ?>
+                                    <?php echo $this->escape($value); ?>
                                     <?php
                                 }
                                 ?>
@@ -666,7 +665,7 @@ SELECT
     <input type="hidden" name="Itemid" value="<?php echo \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0); ?>" />
     <input type="hidden" name="limitstart" value="" />
     <input type="hidden" name="id" value="<?php echo \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0) ?>" />
-    <input type="hidden" name="filter_order" value="<?php echo $this->lists['order']; ?>" />
-    <input type="hidden" name="filter_order_Dir" value="<?php echo $this->lists['order_Dir']; ?>" />
+    <input type="hidden" name="filter_order" value="<?php echo $this->escape($this->lists['order']); ?>" />
+    <input type="hidden" name="filter_order_Dir" value="<?php echo $this->escape($this->lists['order_Dir']); ?>" />
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

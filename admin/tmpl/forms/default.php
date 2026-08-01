@@ -421,12 +421,12 @@ if (formsTable && formsTable.tBodies.length) {
                         </td>
                         <td>
                             <a href="<?php echo $link; ?>">
-                                <?php echo $row->name; ?>
+                                <?php echo htmlspecialchars((string) $row->name, ENT_QUOTES, 'UTF-8'); ?>
                             </a>
                         </td>
                         <td>
                             <a href="<?php echo $link; ?>">
-                                <?php echo $row->tag; ?>
+                                <?php echo htmlspecialchars((string) $row->tag, ENT_QUOTES, 'UTF-8'); ?>
                             </a>
                         </td>
                         <td>

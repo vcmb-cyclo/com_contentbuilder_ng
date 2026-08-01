@@ -559,7 +559,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 			: Text::_($directStorageMode ? 'COM_CONTENTBUILDERNG_PREVIEW_NO_STORAGE_FIELDS' : 'COM_CONTENTBUILDERNG_PREVIEW_NO_LIST_FIELDS'); ?>
 	</div>
 <?php endif; ?>
-<?php echo $this->intro_text; ?>
+<?php echo ContentbuilderngHelper::sanitizeStoredHtml($this->intro_text); ?>
 
 	<form action="<?php echo Route::_('index.php?option=com_contentbuilderng&task=list.display&' . $listTarget . $currentListLayoutQuery . '&Itemid=' . (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('Itemid', 0) . $embeddedListQuery . $previewQuery); ?>"
 		method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm" class="cb-list-template-<?php echo htmlspecialchars($cbListTemplateVariant, ENT_QUOTES, 'UTF-8'); ?><?php echo !empty($this->list_header_sticky) && !$isCardsVariant && !$isTilesVariant ? ' cb-list-has-sticky-header' : ''; ?>">
@@ -984,9 +984,9 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 								<div class="cb-list-card-header-main">
 									<h2 class="cb-list-card-title">
 										<?php if (($primaryField['linkable'] ?? false) && $rowCanView) : ?>
-											<a href="<?php echo $link; ?>"><?php echo $cardTitle; ?></a>
+											<a href="<?php echo $link; ?>"><?php echo htmlspecialchars((string) $cardTitle, ENT_QUOTES, 'UTF-8'); ?></a>
 									<?php else : ?>
-										<?php echo $cardTitle; ?>
+										<?php echo htmlspecialchars((string) $cardTitle, ENT_QUOTES, 'UTF-8'); ?>
 									<?php endif; ?>
 								</h2>
 								<p class="cb-list-card-subtitle"><?php echo htmlspecialchars($cardSubtitle, ENT_QUOTES, 'UTF-8'); ?></p>
@@ -1088,9 +1088,9 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 									<div class="cb-list-card-label"><?php echo htmlspecialchars((string) $field['label'], ENT_QUOTES, 'UTF-8'); ?></div>
 									<div class="cb-list-card-value">
 										<?php if ($field['linkable']) : ?>
-											<a href="<?php echo $link; ?>"><?php echo $field['value']; ?></a>
+											<a href="<?php echo $link; ?>"><?php echo nl2br(htmlspecialchars((string) $field['value'], ENT_QUOTES, 'UTF-8')); ?></a>
 										<?php else : ?>
-											<?php echo $field['value']; ?>
+											<?php echo nl2br(htmlspecialchars((string) $field['value'], ENT_QUOTES, 'UTF-8')); ?>
 										<?php endif; ?>
 									</div>
 								</div>
@@ -1516,12 +1516,12 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 								if (in_array(str_replace('col', '', $key), $this->linkable_elements) && $rowCanView) {
 								?>
 									<a href="<?php echo $link; ?>">
-										<?php echo nl2br((string) $value); ?>
+										<?php echo nl2br(htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8')); ?>
 									</a>
 								<?php
 								} else {
 								?>
-									<?php echo nl2br((string) $value); ?>
+									<?php echo nl2br(htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8')); ?>
 								<?php
 								}
 								?>
