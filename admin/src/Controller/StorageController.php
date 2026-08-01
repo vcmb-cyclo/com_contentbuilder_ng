@@ -979,6 +979,27 @@ class StorageController extends BaseFormController
                 throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_SELECT_REQUIRED'));
             }
 
+            $existingQuery = $db->getQuery(true)
+                ->select($db->quoteName('id'))
+                ->from($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->where($db->quoteName('storage_id') . ' = ' . $storageId)
+                ->where($db->quoteName('name') . ' = ' . $db->quote($fieldName));
+            $db->setQuery($existingQuery);
+            $existingId = (int) $db->loadResult();
+
+            if ($existingId > 0) {
+                $update = $db->getQuery(true)
+                    ->update($db->quoteName('#__contentbuilderng_storage_fields'))
+                    ->set($db->quoteName('published') . ' = 1')
+                    ->where($db->quoteName('id') . ' = ' . $existingId);
+                $db->setQuery($update);
+                $db->execute();
+
+                $this->setRedirect($redirect, Text::_('COM_CONTENTBUILDERNG_PUBLISHED'));
+
+                return true;
+            }
+
             $orderingQuery = $db->getQuery(true)
                 ->select('COALESCE(MAX(' . $db->quoteName('ordering') . '), 0) + 1')
                 ->from($db->quoteName('#__contentbuilderng_storage_fields'))
@@ -988,12 +1009,13 @@ class StorageController extends BaseFormController
 
             $insert = $db->getQuery(true)
                 ->insert($db->quoteName('#__contentbuilderng_storage_fields'))
-                ->columns($db->quoteName(['storage_id', 'name', 'title', 'sql_type', 'ordering', 'published']))
+                ->columns($db->quoteName(['storage_id', 'name', 'title', 'sql_type', 'required', 'ordering', 'published']))
                 ->values(implode(',', [
                     $storageId,
                     $db->quote($fieldName),
                     $db->quote((string) $definition['label']),
                     $db->quote((string) $definition['sql_type']),
+                    (int) $definition['required'],
                     $ordering,
                     1,
                 ]));

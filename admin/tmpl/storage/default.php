@@ -275,7 +275,9 @@ const cbSaveFailedMessage = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG
 const cbFieldNamePlaceholder = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_NAME'), JSON_UNESCAPED_UNICODE); ?>;
 const cbFieldTitlePlaceholder = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE'), JSON_UNESCAPED_UNICODE); ?>;
 const cbFieldGroupLabel = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'), JSON_UNESCAPED_UNICODE); ?>;
+const cbFieldRequiredLabel = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_REQUIRED'), JSON_UNESCAPED_UNICODE); ?>;
 const cbFieldConfirmLabel = <?php echo json_encode(Text::_('JSAVE'), JSON_UNESCAPED_UNICODE); ?>;
+const cbStorageEditUrl = <?php echo json_encode('index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $storageId . '&tabStartOffset=tab0#tab0', JSON_UNESCAPED_SLASHES); ?>;
 let cbAjaxBusy = false;
 let cbSaveButtonTimer = null;
 let cbStorageDirtyState = false;
@@ -981,7 +983,11 @@ function initStorageInlineAddField() {
             '<td data-cb-storage-col="title"><input type="text" class="form-control form-control-sm" name="jform[fieldtitle]" placeholder="' + cbFieldTitlePlaceholder + '"></td>' +
             '<td data-cb-storage-col="sql_type"><select class="form-select form-select-sm" name="jform[sql_type]" style="width:auto; max-width:12rem;">' + buildTypeOptionsHtml() + '</select></td>' +
             '<td class="text-nowrap" data-cb-storage-col="field_size"></td>' +
-            '<td class="text-center" data-cb-storage-col="required">&mdash;</td>' +
+            '<td class="text-center" data-cb-storage-col="required">' +
+                '<div class="form-check form-switch d-inline-block">' +
+                    '<input class="form-check-input cb-storage-field-new-required" type="checkbox" role="switch" name="jform[required]" value="1" title="' + cbFieldRequiredLabel + '" aria-label="' + cbFieldRequiredLabel + '">' +
+                '</div>' +
+            '</td>' +
             '<td data-cb-storage-col="group">' +
                 '<div class="form-check form-switch mb-1">' +
                     '<input class="form-check-input cb-storage-field-new-is-group" type="checkbox" role="switch" id="cb-storage-field-new-is-group">' +
@@ -1051,6 +1057,7 @@ function initStorageInlineAddField() {
         formData.set('cb_ajax', '1');
         formData.set('task', 'storage.ajax_addfield');
         formData.set('jform[fieldname]', nameInput.value);
+        formData.set('jform[required]', row.querySelector('.cb-storage-field-new-required').checked ? '1' : '0');
 
         fetch('index.php', {
             method: 'POST',
@@ -1064,7 +1071,7 @@ function initStorageInlineAddField() {
                     throw new Error(payload.message || '');
                 }
                 cbStorageBypassDirtyBeforeUnload();
-                window.location.reload();
+                window.location.assign(cbStorageEditUrl);
             })
             .catch(function (error) {
                 confirmButton.disabled = false;
@@ -1376,6 +1383,7 @@ echo LayoutHelper::render('storage.storage_tab', [
     'addFieldTooltip' => $addFieldTooltip,
     'sortLink' => $sortLink,
     'fields' => $fields,
+    'fieldNames' => $this->storageFieldNames,
     'fieldsCount' => $fieldsCount,
     'recordsCount' => $recordsCount,
     'pagination' => $this->pagination,

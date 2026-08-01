@@ -24,6 +24,7 @@ $storageId = (int) ($displayData['storageId'] ?? 0);
 $addFieldTooltip = (string) ($displayData['addFieldTooltip'] ?? '');
 $sortLink = $displayData['sortLink'] ?? null;
 $fields = is_iterable($displayData['fields'] ?? null) ? $displayData['fields'] : [];
+$fieldNames = is_array($displayData['fieldNames'] ?? null) ? $displayData['fieldNames'] : [];
 $fieldsCount = (int) ($displayData['fieldsCount'] ?? 0);
 $recordsCount = $displayData['recordsCount'] ?? null;
 $pagination = $displayData['pagination'] ?? null;
@@ -38,10 +39,7 @@ $canEditSqlType = !$item->bytable && $recordsCount !== null && (int) $recordsCou
 // (StorageModel::syncStorageDataTableOrBytable()) mais pas encore exposées
 // comme field géré : preview en lecture seule, toujours en fin de liste
 // (peu importe le tri courant), sur la dernière page seulement.
-$existingFieldNames = [];
-foreach ($fields as $fieldRow) {
-    $existingFieldNames[(string) ($fieldRow->name ?? '')] = true;
-}
+$existingFieldNames = array_fill_keys(array_map('strval', $fieldNames), true);
 $pendingSystemFields = array_diff_key(StorageSystemFieldHelper::definitions(), $existingFieldNames);
 $isLastPage = !$pagination || ((int) $pagination->pagesCurrent >= (int) $pagination->pagesTotal);
 $showPendingSystemFields = $storageId > 0 && $isLastPage && !empty($pendingSystemFields);

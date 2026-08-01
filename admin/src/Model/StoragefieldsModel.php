@@ -83,6 +83,22 @@ class StoragefieldsModel extends ListModel
     }
 
     /**
+     * @return array<int,string>
+     */
+    public function getFieldNames(): array
+    {
+        $db = $this->getDatabase();
+        $query = $db->getQuery(true)
+            ->select($db->quoteName('name'))
+            ->from($db->quoteName('#__contentbuilderng_storage_fields'))
+            ->where($db->quoteName('storage_id') . ' = ' . (int) $this->getState('storage.id', $this->storageId));
+
+        $db->setQuery($query);
+
+        return array_map('strval', $db->loadColumn());
+    }
+
+    /**
      * {@inheritDoc}
      */
     #[\Override]

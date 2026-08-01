@@ -32,6 +32,8 @@ class HtmlView extends BaseHtmlView
 {
     public $form;
     public $fields;
+    /** @var array<int,string> */
+    public array $storageFieldNames = [];
     public $tables;
     public array $tableModes = [];
     public array $tableSourceTypes = [];
@@ -171,6 +173,7 @@ class HtmlView extends BaseHtmlView
 
                 // Charge les items
                 $this->fields     = $fieldsModel->getItems();
+                $this->storageFieldNames = $fieldsModel->getFieldNames();
                 $this->pagination = $fieldsModel->getPagination();
                 $this->state      = $fieldsModel->getState();
                 $this->ordering   = ($this->state && $this->state->get('list.ordering') === 'ordering');

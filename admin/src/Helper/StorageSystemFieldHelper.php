@@ -27,7 +27,7 @@ use Joomla\CMS\Language\Text;
 final class StorageSystemFieldHelper
 {
     /**
-     * @return array<string,array{label:string,sql_type:string}>
+     * @return array<string,array{label:string,sql_type:string,required:bool}>
      */
     public static function definitions(): array
     {
@@ -35,30 +35,37 @@ final class StorageSystemFieldHelper
             'id' => [
                 'label' => Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_ID'),
                 'sql_type' => 'int',
+                'required' => true,
             ],
             'user_id' => [
                 'label' => Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_USER_ID'),
                 'sql_type' => 'int',
+                'required' => true,
             ],
             'created' => [
                 'label' => Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_CREATED'),
                 'sql_type' => 'datetime',
+                'required' => true,
             ],
             'created_by' => [
                 'label' => Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_CREATED_BY'),
                 'sql_type' => 'varchar',
+                'required' => true,
             ],
             'modified_user_id' => [
                 'label' => Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_MODIFIED_USER_ID'),
                 'sql_type' => 'int',
+                'required' => true,
             ],
             'modified' => [
                 'label' => Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_MODIFIED'),
                 'sql_type' => 'datetime',
+                'required' => false,
             ],
             'modified_by' => [
                 'label' => Text::_('COM_CONTENTBUILDERNG_STORAGE_SYSTEM_FIELD_MODIFIED_BY'),
                 'sql_type' => 'varchar',
+                'required' => true,
             ],
         ];
     }

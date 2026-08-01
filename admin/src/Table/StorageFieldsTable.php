@@ -35,6 +35,10 @@ class StorageFieldsTable extends Table
 
     public $sql_type = 'text';
 
+    public $field_size = null;
+
+    public $required = 0;
+
     public $is_group = 0;
 
     public $group_definition = "Label 1;value1\nLabel 2;value2\nLabel 3;value3";

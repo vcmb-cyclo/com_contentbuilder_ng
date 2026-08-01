@@ -250,6 +250,7 @@ class StorageModel extends AdminModel
         $fieldtitle = trim((string) ($jform['fieldtitle'] ?? ''));
         $sqlType = StorageColumnTypeHelper::normalize((string) ($jform['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
         $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $jform['field_size'] ?? null);
+        $required   = !empty($jform['required']);
         $isGroup    = (int) ($jform['is_group'] ?? 0);
         $groupDef   = (string) ($jform['group_definition'] ?? '');
 
@@ -283,7 +284,7 @@ class StorageModel extends AdminModel
         // Insert field
         $query = $db->getQuery(true)
             ->insert($db->quoteName('#__contentbuilderng_storage_fields'))
-            ->columns($db->quoteName(['ordering', 'storage_id', 'name', 'title', 'sql_type', 'field_size', 'is_group', 'group_definition']))
+            ->columns($db->quoteName(['ordering', 'storage_id', 'name', 'title', 'sql_type', 'field_size', 'required', 'is_group', 'group_definition']))
             ->values(
                 (int) $max . ', '
                 . (int) $storageId . ', '
@@ -291,6 +292,7 @@ class StorageModel extends AdminModel
                 . $db->quote($newfieldtitle) . ', '
                 . $db->quote($sqlType) . ', '
                 . ($fieldSize === null ? 'NULL' : (int) $fieldSize) . ', '
+                . (int) $required . ', '
                 . (int) $isGroup . ', '
                 . $db->quote($groupDef)
             );
@@ -303,6 +305,9 @@ class StorageModel extends AdminModel
             try {
                 $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storage->name) . ' ADD ' . $db->quoteName($newfieldname) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize));
                 $db->execute();
+                if ($required) {
+                    StorageColumnTypeHelper::enforceRequired($db, '#__' . $storage->name, $newfieldname, $sqlType, $fieldSize);
+                }
             } catch (\Throwable $e) {
                 // Si la colonne existe déjà ou table absente, on log et on renvoie false
                 Logger::exception($e);
