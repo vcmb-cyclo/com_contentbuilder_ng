@@ -36,7 +36,7 @@ class HtmlView extends BaseHtmlView
         return $app;
     }
 
-    function display($tpl = null)
+    public function display($tpl = null)
     {
         /** @var UserModel $model */
         $model = $this->getModel();
