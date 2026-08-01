@@ -49,6 +49,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Administrator\Contract\FormElementAfterValidationInterface;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
+use CB\Component\Contentbuilderng\Administrator\Helper\StorageColumnTypeHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\ArticleService;
 use CB\Component\Contentbuilderng\Administrator\Service\RuntimeUtilityService;
 use CB\Component\Contentbuilderng\Administrator\Service\ListSupportService;
@@ -1479,6 +1480,7 @@ var contentbuilderng = new function(){
                         ? (array) $data->form->getRequiredElementIds()
                         : [];
                     $allEditableFields = $the_upload_fields + $the_fields + $the_html_fields;
+                    $isExistingRecord = $this->app->getInput()->getInt('record_id', 0) > 0;
 
                     foreach ($requiredElementIds as $requiredElementId) {
                         $requiredElementId = (string) $requiredElementId;
@@ -1487,7 +1489,7 @@ var contentbuilderng = new function(){
                         // that are not rendered or not editable. Their stored
                         // value must remain untouched instead of being treated
                         // as an empty required value.
-                        if (!array_key_exists($requiredElementId, $values)) {
+                        if (!array_key_exists($requiredElementId, $values) && $isExistingRecord) {
                             continue;
                         }
 
@@ -1511,6 +1513,42 @@ var contentbuilderng = new function(){
                         );
                     }
 
+                    $varcharElementSizes = method_exists($data->form, 'getVarcharElementSizes')
+                        ? (array) $data->form->getVarcharElementSizes()
+                        : [];
+
+                    foreach ($varcharElementSizes as $varcharElementId => $varcharMaximumLength) {
+                        $varcharElementId = (string) $varcharElementId;
+
+                        if (!array_key_exists($varcharElementId, $values)) {
+                            continue;
+                        }
+
+                        $varcharValue = $values[$varcharElementId];
+                        $varcharLength = is_scalar($varcharValue)
+                            ? (function_exists('mb_strlen')
+                                ? mb_strlen((string) $varcharValue, 'UTF-8')
+                                : strlen((string) $varcharValue))
+                            : PHP_INT_MAX;
+
+                        if ($varcharLength <= (int) $varcharMaximumLength) {
+                            continue;
+                        }
+
+                        $varcharField = $allEditableFields[$varcharElementId] ?? [
+                            'label' => $names[$varcharElementId] ?? '',
+                            'name' => $names[$varcharElementId] ?? '',
+                        ];
+                        $this->app->getInput()->set('cb_submission_failed', 1);
+                        $this->enqueueFieldValidationMessage(
+                            $varcharField,
+                            Text::sprintf(
+                                'COM_CONTENTBUILDERNG_STORAGE_VARCHAR_LENGTH',
+                                (int) $varcharMaximumLength
+                            )
+                        );
+                    }
+
                     $integerElementIds = method_exists($data->form, 'getIntegerElementIds')
                         ? (array) $data->form->getIntegerElementIds()
                         : [];
@@ -1523,7 +1561,7 @@ var contentbuilderng = new function(){
                             continue;
                         }
 
-                        if (is_scalar($integerValue) && preg_match('/^[+-]?\d+$/D', trim((string) $integerValue))) {
+                        if (StorageColumnTypeHelper::isValidIntegerValue($integerValue)) {
                             continue;
                         }
 
@@ -1603,14 +1641,7 @@ var contentbuilderng = new function(){
                             continue;
                         }
 
-                        $temporalFormat = $temporalType === 'datetime' ? 'Y-m-d H:i:s' : 'Y-m-d';
-                        $parsedTemporalValue = \DateTimeImmutable::createFromFormat('!' . $temporalFormat, $temporalValue);
-                        $temporalErrors = \DateTimeImmutable::getLastErrors();
-                        $isValidTemporalValue = $parsedTemporalValue instanceof \DateTimeImmutable
-                            && ($temporalErrors === false || ($temporalErrors['warning_count'] === 0 && $temporalErrors['error_count'] === 0))
-                            && $parsedTemporalValue->format($temporalFormat) === $temporalValue;
-
-                        if ($isValidTemporalValue) {
+                        if (StorageColumnTypeHelper::isValidTemporalValue($temporalValue, $temporalType)) {
                             continue;
                         }
 

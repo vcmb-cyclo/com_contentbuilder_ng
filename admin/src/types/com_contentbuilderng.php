@@ -868,6 +868,28 @@ class contentbuilderng_com_contentbuilderng
         return $types;
     }
 
+    /**
+     * @return array<int|string,int>
+     */
+    public function getVarcharElementSizes(): array
+    {
+        $sizes = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (
+                empty($element['is_group'])
+                && StorageColumnTypeHelper::normalize($element['sql_type'] ?? null) === 'varchar'
+            ) {
+                $sizes[(string) $element['id']] = StorageColumnTypeHelper::normalizeSize(
+                    'varchar',
+                    $element['field_size'] ?? null
+                ) ?? 255;
+            }
+        }
+
+        return $sizes;
+    }
+
     public function shouldSynchronizeEditableElementTypes(): bool
     {
         return true;

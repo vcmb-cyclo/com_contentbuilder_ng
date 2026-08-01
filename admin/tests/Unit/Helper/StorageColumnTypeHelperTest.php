@@ -31,6 +31,53 @@ final class StorageColumnTypeHelperTest extends TestCase
         self::assertSame('varchar', StorageColumnTypeHelper::normalize(' VARCHAR '));
     }
 
+    /**
+     * @return array<string,array{0:mixed,1:bool}>
+     */
+    public static function integerValueProvider(): array
+    {
+        return [
+            'minimum' => ['-2147483648', true],
+            'maximum' => ['2147483647', true],
+            'leading zeroes' => ['+000000001', true],
+            'negative overflow' => ['-2147483649', false],
+            'positive overflow' => ['2147483648', false],
+            'decimal' => ['1.0', false],
+            'non numeric' => ['integer', false],
+            'array' => [[], false],
+        ];
+    }
+
+    #[DataProvider('integerValueProvider')]
+    public function testValidatesSignedMySqlIntegerRange(mixed $value, bool $expected): void
+    {
+        self::assertSame($expected, StorageColumnTypeHelper::isValidIntegerValue($value));
+    }
+
+    /**
+     * @return array<string,array{0:mixed,1:string,2:bool}>
+     */
+    public static function temporalValueProvider(): array
+    {
+        return [
+            'minimum date' => ['1000-01-01', 'date', true],
+            'maximum date' => ['9999-12-31', 'date', true],
+            'date below MySQL range' => ['0999-12-31', 'date', false],
+            'invalid leap day' => ['2025-02-29', 'date', false],
+            'minimum datetime' => ['1000-01-01 00:00:00', 'datetime', true],
+            'maximum datetime' => ['9999-12-31 23:59:59', 'datetime', true],
+            'datetime below MySQL range' => ['0000-01-01 00:00:00', 'datetime', false],
+            'invalid datetime format' => ['2026-08-01T12:00:00', 'datetime', false],
+            'unsupported type' => ['2026-08-01', 'text', false],
+        ];
+    }
+
+    #[DataProvider('temporalValueProvider')]
+    public function testValidatesMySqlTemporalRange(mixed $value, string $type, bool $expected): void
+    {
+        self::assertSame($expected, StorageColumnTypeHelper::isValidTemporalValue($value, $type));
+    }
+
     public function testMapsStorageTypesToNativeEditableControls(): void
     {
         self::assertSame('text', StorageColumnTypeHelper::editableElementType('text'));

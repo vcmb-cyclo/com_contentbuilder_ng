@@ -20,6 +20,10 @@ use Joomla\Database\DatabaseInterface;
 final class StorageColumnTypeHelper
 {
     public const DEFAULT_TYPE = 'text';
+    public const INT_MIN = -2147483648;
+    public const INT_MAX = 2147483647;
+    public const DATE_MIN = '1000-01-01';
+    public const DATE_MAX = '9999-12-31';
     private const TYPES = ['text', 'varchar', 'int', 'decimal', 'date', 'datetime', 'boolean'];
 
     /**
@@ -139,6 +143,56 @@ final class StorageColumnTypeHelper
                 default => 'TEXT' . $charset . $nullability,
             },
         };
+    }
+
+    public static function isValidIntegerValue(mixed $value): bool
+    {
+        if (!is_scalar($value)) {
+            return false;
+        }
+
+        $value = trim((string) $value);
+        if (!preg_match('/^[+-]?\d+$/D', $value)) {
+            return false;
+        }
+
+        $negative = str_starts_with($value, '-');
+        $digits = ltrim($value, '+-0');
+        $digits = $digits === '' ? '0' : $digits;
+        $limit = $negative ? '2147483648' : '2147483647';
+
+        return strlen($digits) < strlen($limit)
+            || (strlen($digits) === strlen($limit) && strcmp($digits, $limit) <= 0);
+    }
+
+    public static function isValidTemporalValue(mixed $value, ?string $type): bool
+    {
+        if (!is_scalar($value)) {
+            return false;
+        }
+
+        $type = self::normalize($type);
+        if (!in_array($type, ['date', 'datetime'], true)) {
+            return false;
+        }
+
+        $value = trim((string) $value);
+        $format = $type === 'datetime' ? 'Y-m-d H:i:s' : 'Y-m-d';
+        $parsedValue = \DateTimeImmutable::createFromFormat('!' . $format, $value);
+        $errors = \DateTimeImmutable::getLastErrors();
+
+        if (
+            !$parsedValue instanceof \DateTimeImmutable
+            || ($errors !== false && ($errors['warning_count'] !== 0 || $errors['error_count'] !== 0))
+            || $parsedValue->format($format) !== $value
+        ) {
+            return false;
+        }
+
+        $minimum = self::DATE_MIN . ($type === 'datetime' ? ' 00:00:00' : '');
+        $maximum = self::DATE_MAX . ($type === 'datetime' ? ' 23:59:59' : '');
+
+        return strcmp($value, $minimum) >= 0 && strcmp($value, $maximum) <= 0;
     }
 
     /**

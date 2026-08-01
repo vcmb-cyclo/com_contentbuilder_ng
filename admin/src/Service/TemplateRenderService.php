@@ -6,6 +6,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Service;
 
 use CB\Component\Contentbuilderng\Administrator\Helper\TemplatePrepareHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\StorageColumnTypeHelper;
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\Event\Content\ContentPrepareEvent;
@@ -1315,6 +1316,9 @@ class TemplateRenderService
         $sourceRequiredElements = method_exists($form, 'getRequiredElementIds')
             ? array_fill_keys(array_map('strval', (array) $form->getRequiredElementIds()), true)
             : [];
+        $sourceVarcharSizes = method_exists($form, 'getVarcharElementSizes')
+            ? (array) $form->getVarcharElementSizes()
+            : [];
         $item = null;
         if ($execPrepare) {
             $editablePrepare = $result['editable_prepare'] ?? '';
@@ -1425,6 +1429,14 @@ class TemplateRenderService
                 $options = new \stdClass();
             }
 
+            $sourceVarcharSize = (int) ($sourceVarcharSizes[(string) $elementReferenceId] ?? 0);
+            if ($elementType === 'text' && $sourceVarcharSize > 0) {
+                $configuredMaximumLength = (int) ($options->maxlength ?? 0);
+                $options->maxlength = $configuredMaximumLength > 0
+                    ? min($configuredMaximumLength, $sourceVarcharSize)
+                    : $sourceVarcharSize;
+            }
+
             $normalizeScalarValue = static function ($value): string {
                 if (is_array($value)) {
                     $value = array_values(array_filter($value, static fn($v) => $v !== null && $v !== '' && $v !== 'cbGroupMark'));
@@ -1467,7 +1479,7 @@ class TemplateRenderService
                     break;
                 case 'number':
                     $numberValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
-                    $theItem = '<div class="cbFormField cbNumberField"><input class="form-control form-control-sm" type="number" step="1" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" value="' . htmlspecialchars($numberValue, ENT_QUOTES, 'UTF-8') . '"/></div>';
+                    $theItem = '<div class="cbFormField cbNumberField"><input class="form-control form-control-sm" type="number" step="1" min="' . StorageColumnTypeHelper::INT_MIN . '" max="' . StorageColumnTypeHelper::INT_MAX . '" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" value="' . htmlspecialchars($numberValue, ENT_QUOTES, 'UTF-8') . '"/></div>';
                     break;
                 case 'decimal':
                     $decimalValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
@@ -1568,14 +1580,14 @@ class TemplateRenderService
                     $options->transfer_format = $options->transfer_format ?? 'YYYY-mm-dd';
                     $calval = htmlspecialchars($normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value'])), ENT_QUOTES, 'UTF-8');
                     $calval = $this->callContentbuilderngHelper('convertDate', $calval, $options->transfer_format, $options->format);
-                    $calAttr = ['class' => 'cb_' . $item['id'], 'showTime' => true, 'timeFormat' => '24', 'singleHeader' => false, 'todayBtn' => true, 'weekNumbers' => true, 'minYear' => '', 'maxYear' => '', 'firstDay' => '1'];
+                    $calAttr = ['class' => 'cb_' . $item['id'], 'showTime' => true, 'timeFormat' => '24', 'singleHeader' => false, 'todayBtn' => true, 'weekNumbers' => true, 'minYear' => 1000, 'maxYear' => 9999, 'firstDay' => '1'];
                     $theItem = '<div class="cbFormField cbCalendarField">' . "\n" . '<div id="field-calendar_cb_' . $item['id'] . '">' . "\n" . '<div class="input-group">' . "\n";
                     $theItem .= HTMLHelper::_('calendar', $calval, 'cb_' . $item['id'], 'cb_' . $item['id'], $options->format, $calAttr);
                     $theItem .= "</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>";
                     break;
                 case 'datetime':
                     $dateTimeValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
-                    $dateTimeAttr = ['class' => 'cb_' . $item['id'], 'showTime' => true, 'timeFormat' => '24', 'singleHeader' => false, 'todayBtn' => true, 'weekNumbers' => true, 'minYear' => '', 'maxYear' => '', 'firstDay' => '1'];
+                    $dateTimeAttr = ['class' => 'cb_' . $item['id'], 'showTime' => true, 'timeFormat' => '24', 'singleHeader' => false, 'todayBtn' => true, 'weekNumbers' => true, 'minYear' => 1000, 'maxYear' => 9999, 'firstDay' => '1'];
                     $theItem = '<div class="cbFormField cbDateTimeField">' . "\n" . '<div id="field-calendar-cb_' . $item['id'] . '">' . "\n" . '<div class="input-group">' . "\n";
                     $theItem .= HTMLHelper::_('calendar', $dateTimeValue, 'cb_' . $item['id'], 'cb_' . $item['id'], '%Y-%m-%d %H:%M:%S', $dateTimeAttr);
                     $theItem .= "</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>";

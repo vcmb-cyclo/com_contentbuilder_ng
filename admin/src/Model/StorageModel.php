@@ -296,23 +296,66 @@ class StorageModel extends AdminModel
                 . (int) $isGroup . ', '
                 . $db->quote($groupDef)
             );
-        $db->setQuery($query);
-        $db->execute();
-
-        // Assurer l’existence de la table data puis ajouter la colonne
-        // (si ta table data existe toujours, tu peux garder juste l’ALTER)
+        // Assurer l’existence de la table data puis ajouter la colonne avant
+        // de persister ses métadonnées. MySQL valide ainsi tout le DDL sans
+        // laisser de définition orpheline si le type ou la contrainte échoue.
         if (!empty($storage->name)) {
+            $quotedTable = $db->quoteName('#__' . $storage->name);
+            $quotedColumn = $db->quoteName($newfieldname);
+            $columnAdded = false;
+
             try {
-                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $storage->name) . ' ADD ' . $db->quoteName($newfieldname) . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize));
+                $db->setQuery(
+                    'ALTER TABLE ' . $quotedTable
+                    . ' ADD ' . $quotedColumn . ' ' . StorageColumnTypeHelper::sqlDefinition($sqlType, $fieldSize)
+                );
                 $db->execute();
+                $columnAdded = true;
+
                 if ($required) {
-                    StorageColumnTypeHelper::enforceRequired($db, '#__' . $storage->name, $newfieldname, $sqlType, $fieldSize);
+                    StorageColumnTypeHelper::enforceRequired(
+                        $db,
+                        $quotedTable,
+                        $quotedColumn,
+                        $sqlType,
+                        $fieldSize
+                    );
                 }
             } catch (\Throwable $e) {
-                // Si la colonne existe déjà ou table absente, on log et on renvoie false
                 Logger::exception($e);
+
+                if ($columnAdded) {
+                    try {
+                        $db->setQuery('ALTER TABLE ' . $quotedTable . ' DROP COLUMN ' . $quotedColumn);
+                        $db->execute();
+                    } catch (\Throwable $cleanupException) {
+                        Logger::exception($cleanupException);
+                    }
+                }
+
                 return false;
             }
+        }
+
+        try {
+            $db->setQuery($query);
+            $db->execute();
+        } catch (\Throwable $e) {
+            Logger::exception($e);
+
+            if (!empty($storage->name)) {
+                try {
+                    $db->setQuery(
+                        'ALTER TABLE ' . $db->quoteName('#__' . $storage->name)
+                        . ' DROP COLUMN ' . $db->quoteName($newfieldname)
+                    );
+                    $db->execute();
+                } catch (\Throwable $cleanupException) {
+                    Logger::exception($cleanupException);
+                }
+            }
+
+            return false;
         }
 
         // Optionnel: vider le champ dans la session / form
