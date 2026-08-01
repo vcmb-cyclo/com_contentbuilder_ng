@@ -19,6 +19,7 @@ namespace CB\Component\Contentbuilderng\Site\View\List;
 use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use Joomla\CMS\Application\SiteApplication;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Uri\Uri;
@@ -43,6 +44,7 @@ class HtmlView extends BaseHtmlView
     public int $direct_storage_read_only = 0;
     public bool $preview_list_access_configured = false;
     public float $render_time_ms = 0;
+    public string $embedded_list_error = '';
 
     private function getApp(): SiteApplication
     {
@@ -60,9 +62,16 @@ class HtmlView extends BaseHtmlView
         $debugRenderStart = microtime(true);
         $app = $this->getApp();
         $this->frontend = $app->isClient('site');
+        $this->embedded_list_error = '';
 
         // Get data from the model
         $subject = $this->get('Data');
+        $embeddedTitle = EmbeddedListFieldFilterService::isEmbeddedRequest($app->getInput()->getCmd('cblist_embed', ''))
+            ? trim((string) $app->getInput()->getString('cblist_title', ''))
+            : '';
+        if ($embeddedTitle !== '') {
+            $subject->intro_text = htmlspecialchars($embeddedTitle, ENT_QUOTES, 'UTF-8');
+        }
         $this->applyEmbeddedFieldFilter($subject, $app);
         $this->preview_list_access_configured = !empty($subject->direct_storage_mode);
         if (!$this->preview_list_access_configured) {
@@ -228,11 +237,13 @@ class HtmlView extends BaseHtmlView
                 $names,
                 $rawSelectors
             );
-        } catch (\InvalidArgumentException) {
-            // cblist_fields is plugin-generated and already validated with
-            // the same rule before this ever renders — this only fires for
-            // a hand-crafted request bypassing the plugin. Fail open to
-            // "no filter" rather than a fatal error.
+        } catch (\InvalidArgumentException $exception) {
+            $error = $exception->getMessage();
+            $subject->embedded_list_error = str_starts_with($error, 'unknown_field:')
+                ? Text::sprintf('COM_CONTENTBUILDERNG_CBLIST_UNKNOWN_FIELD', substr($error, 14))
+                : Text::_('COM_CONTENTBUILDERNG_CBLIST_INVALID_FIELDS');
+            // The plugin validates syntax before rendering; this branch reports
+            // an unknown field from the current view in the embedded screen.
             return;
         }
         $allowedReferences = array_fill_keys(
@@ -240,6 +251,7 @@ class HtmlView extends BaseHtmlView
             true
         );
 
+        $subject->show_id_column = 0;
         $subject->visible_cols = $filteredColumns;
         $subject->labels = array_filter(
             $labels,

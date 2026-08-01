@@ -11,9 +11,10 @@ use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 final class EmbedOptionsService
 {
-    private const DEFAULT_HEIGHT = 640;
+    private const DEFAULT_HEIGHT = 240;
     private const MIN_HEIGHT = 240;
     private const MAX_HEIGHT = 5000;
+    private const LAYOUTS = ['default', 'cards', 'listone', 'listtwo', 'listthree', 'listcard', 'listcompact', 'listtiles'];
 
     /**
      * @param array<string, string> $attributes
@@ -21,6 +22,7 @@ final class EmbedOptionsService
      * @return array{
      *     id: int,
      *     height: int,
+     *     pagination: int|null,
      *     layout: string,
      *     loading: 'eager'|'lazy',
      *     fields: list<string>,
@@ -44,9 +46,20 @@ final class EmbedOptionsService
             }
         }
 
+        $pagination = null;
+        if (isset($attributes['pagination']) && trim($attributes['pagination']) !== '') {
+            $pagination = self::positiveInteger($attributes['pagination']);
+            if ($pagination === null || $pagination > 5000) {
+                throw new \InvalidArgumentException('pagination');
+            }
+        }
+
         $layout = trim((string) ($attributes['layout'] ?? ''));
         if ($layout !== '' && preg_match('/^[A-Za-z0-9_-]+$/D', $layout) !== 1) {
             throw new \InvalidArgumentException('layout');
+        }
+        if ($layout !== '' && !in_array($layout, self::LAYOUTS, true)) {
+            throw new \InvalidArgumentException('layout_unknown:' . $layout);
         }
 
         $loading = strtolower(trim((string) ($attributes['loading'] ?? 'lazy')));
@@ -60,6 +73,7 @@ final class EmbedOptionsService
         return [
             'id' => $id,
             'height' => $height,
+            'pagination' => $pagination,
             'layout' => $layout,
             'loading' => $loading,
             'fields' => $fields,
@@ -77,7 +91,7 @@ final class EmbedOptionsService
 
         foreach ($actions as $action) {
             if (!EmbeddedListActionFilterService::isKnownAction($action)) {
-                throw new \InvalidArgumentException('actions');
+                throw new \InvalidArgumentException('action_unknown:' . $action);
             }
         }
 

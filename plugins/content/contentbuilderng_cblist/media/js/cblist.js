@@ -13,9 +13,9 @@
                 return;
             }
 
-            const minimum = Number.parseInt(frame.dataset.cblistMinHeight || '640', 10);
+            const minimum = Number.parseInt(frame.dataset.cblistMinHeight || '240', 10);
             const height = Math.max(
-                Number.isFinite(minimum) ? minimum : 640,
+                Number.isFinite(minimum) ? minimum : 240,
                 body.scrollHeight,
                 body.offsetHeight,
                 root.scrollHeight,

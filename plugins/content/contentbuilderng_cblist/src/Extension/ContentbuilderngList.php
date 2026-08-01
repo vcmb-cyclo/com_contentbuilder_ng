@@ -15,6 +15,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\WebAsset\WebAssetManager;
+use Joomla\Database\DatabaseInterface;
 use Joomla\Event\EventInterface;
 use Joomla\Event\SubscriberInterface;
 
@@ -45,7 +46,7 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
         $app = Factory::getApplication();
         if (
             !$app instanceof SiteApplication
-            || $app->getInput()->getCmd('option') === 'com_contentbuilderng'
+            || EmbeddedListFieldFilterService::isEmbeddedRequest($app->getInput()->getCmd('cblist_embed', ''))
         ) {
             return;
         }
@@ -61,9 +62,20 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
     {
         try {
             $options = EmbedOptionsService::resolve(TagSyntaxService::parseAttributes($rawAttributes));
-        } catch (\InvalidArgumentException) {
+            if (!$this->viewExists($options['id'])) {
+                throw new \InvalidArgumentException('view_unknown:' . $options['id']);
+            }
+        } catch (\InvalidArgumentException $exception) {
+            $error = $exception->getMessage();
+            $message = match (true) {
+                str_starts_with($error, 'action_unknown:') => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_ACTION', substr($error, 15)),
+                str_starts_with($error, 'layout_unknown:') => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_LAYOUT', substr($error, 15)),
+                str_starts_with($error, 'view_unknown:') => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_VIEW', substr($error, 14)),
+                default => Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_TAG'),
+            };
+
             return '<div class="alert alert-warning" role="alert">'
-                . htmlspecialchars(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_TAG'), ENT_QUOTES, 'UTF-8')
+                . htmlspecialchars($message, ENT_QUOTES, 'UTF-8')
                 . '</div>';
         }
 
@@ -75,6 +87,13 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
             'cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT,
         ];
 
+        if ($options['title'] !== '') {
+            $query['cblist_title'] = $options['title'];
+        }
+
+        if ($options['pagination'] !== null) {
+            $query['list'] = ['limit' => $options['pagination']];
+        }
         if ($options['layout'] !== '') {
             $query['layout'] = $options['layout'];
         }
@@ -108,6 +127,18 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
             . htmlspecialchars($openLabel, ENT_QUOTES, 'UTF-8')
             . '</a></p></noscript>'
             . '</div>';
+    }
+
+    private function viewExists(int $id): bool
+    {
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $query = $db->getQuery(true)
+            ->select('COUNT(*)')
+            ->from($db->quoteName('#__contentbuilderng_forms'))
+            ->where($db->quoteName('id') . ' = ' . $id);
+        $db->setQuery($query);
+
+        return (int) $db->loadResult() === 1;
     }
 
     private function loadAssets(SiteApplication $app): void
