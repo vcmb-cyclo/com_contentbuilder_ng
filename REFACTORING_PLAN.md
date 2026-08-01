@@ -16,8 +16,10 @@
 > l'audit du 2026-07-31). Chantier C : N+1 et group_concat faits (étapes
 > 3-5) ; la mise en cache de `ListModel::getData()` (étapes 1-2) est
 > reportée — décision explicite après lecture complète de la méthode,
-> voir le chantier C pour le détail des risques identifiés. Voir chaque
-> chantier ci-dessous pour le détail.
+> voir le chantier C pour le détail des risques identifiés. Chantier D :
+> caractérisation structurelle (pas comportementale) des deux points de
+> vigilance ajoutée ; la décomposition elle-même n'a pas commencé. Voir
+> chaque chantier ci-dessous pour le détail.
 
 ---
 
@@ -28,7 +30,7 @@
 | A | Outillage qualité (PHPCS, PHPStan 2→6) — **PHPCS fait, PHPStan à faire** | 11 – 16 j restants | Faible | — |
 | B | Échappement des sorties front — ✅ fait | — | Faible | A |
 | C | Cache et requêtes N+1 — **N+1 faits, cache reporté** | 4 – 7 j restants | Moyen | A |
-| D | Décomposition d'`EditModel::store()` | 25 – 30 j | **Élevé** | A, F |
+| D | Décomposition d'`EditModel::store()` — **caractérisation structurelle faite, comportementale et découpage à faire** | 25 – 30 j restants | **Élevé** | A, F |
 | E | Décomposition des autres god-methods | 15 – 20 j | Moyen | A, D |
 | F | `FormSourceInterface` | 8 – 12 j | Moyen | A |
 | G | Refonte du modèle de permission | 10 – 15 j | Moyen | F |
@@ -317,20 +319,45 @@ risquée sans tests dédiés.
 
 ## D. Décomposition d'`EditModel::store()`
 
-**Constat.** 1 305 lignes. Assure à elle seule : validation CSRF, résolution du
-formulaire, traitement des téléversements, validation de champs, appels de
-plugins, insertion en base, génération d'articles, notifications e-mail,
-gestion d'état de liste. **Aucun test ne la couvre.**
+**Constat.** 1 327 lignes à ce jour (1 305 au 2026-07-31). Assure à elle seule :
+validation CSRF, résolution du formulaire, traitement des téléversements,
+validation de champs, appels de plugins, insertion en base, génération
+d'articles, notifications e-mail, gestion d'état de liste. **Aucun test ne
+la couvre.**
 
 C'est le chantier le plus risqué du plan : c'est le cœur de la soumission
 d'enregistrement, et toute régression est silencieuse et coûteuse.
 
 ### Méthode — refactoring sous filet, jamais de réécriture
 
-1. **Écrire d'abord des tests de caractérisation.** Avant de toucher une ligne :
-   capturer le comportement actuel (y compris les bizarreries) sur les cas
-   nominal, upload, validation en échec, quota atteint, article généré,
-   notification. Ces tests documentent l'existant, pas l'idéal.
+1. 🟡 **Écrire d'abord des tests de caractérisation — partiellement fait
+   (2026-08-01).** Avant de toucher une ligne : capturer le comportement
+   actuel (y compris les bizarreries) sur les cas nominal, upload,
+   validation en échec, quota atteint, article généré, notification. Ces
+   tests documentent l'existant, pas l'idéal.
+
+   Ce qui est réellement livré est une **caractérisation structurelle**,
+   pas comportementale : `admin/tests/Unit/Model/EditModelStoreInvariantsTest.php`
+   fige par assertion sur le texte source (même esprit que
+   `EditSparseSubmissionTest.php`, déjà présent dans le projet pour ce
+   même fichier) les deux points de vigilance ci-dessous — vérification
+   du jeton CSRF en tout premier, ordre écriture-disque → validation →
+   suppression sur échec, contrat exact des paramètres de
+   `customValidate()`/`customAction()`. Chaque assertion a été vérifiée à
+   l'échec en injectant la régression correspondante avant d'être commitée.
+
+   Ce n'est **pas** la caractérisation comportementale que cette étape
+   appelle de ses vœux (instancier `EditModel`, appeler `store()`, vérifier
+   les effets sur les cas nominal/upload/échec de validation/quota/article/
+   notification). Le bouchon `Database` existant
+   (`admin/tests/bootstrap.php`) ne sait répondre qu'à une seule requête
+   spécifique (`#__usergroups`) ; `store()` en émet une douzaine de
+   différentes sur quatre tables, et appelle en plus
+   `PluginHelper::importPlugin()`, un mailer et le système de fichiers —
+   aucun bouchon pour ces trois-là n'existe. Construire ce harnais est un
+   chantier à part entière, pas un raccourci à prendre à la légère : une
+   version bâclée donnerait une fausse confiance, pire que l'absence de
+   test actuelle. Reste à faire, avec un budget dédié.
 
 2. **Extraire par couches, une par commit**, en gardant la signature publique
    de `store()` intacte à chaque étape :
@@ -385,13 +412,18 @@ d'enregistrement, et toute régression est silencieuse et coûteuse.
 
 ### Points de vigilance
 
-- `customValidate()` / `customAction()` (`EditModel.php:742,749`) contiennent
-  des `eval()` dont le code injecté accède aux variables locales de la méthode
-  appelante. Toute extraction change la portée visible : à traiter en dernier,
-  ou à figer explicitement le contrat des variables exposées.
+- `customValidate()` / `customAction()` (`EditModel.php:783,790` — les
+  lignes 742,749 citées par l'audit du 2026-07-31 ont dérivé) contiennent
+  des `eval()` dont le code injecté accède aux variables locales de la
+  méthode appelante. Toute extraction change la portée visible : à traiter
+  en dernier, ou à figer explicitement le contrat des variables exposées.
+  ✅ Contrat figé par test depuis le 2026-08-01
+  (`EditModelStoreInvariantsTest::testCustomValidateAndCustomActionKeepTheirExactParameterContract`).
 - Le traitement des téléversements écrit sur disque **avant** la validation des
   champs, puis supprime en cas d'échec. Cet ordre doit être préservé ou
   explicitement changé, jamais changé par accident.
+  ✅ Ordre figé par test depuis le 2026-08-01
+  (`EditModelStoreInvariantsTest::testUploadWritesHappenBeforeValidationWhichCanDeleteThem`).
 
 **Livrable.** 6 services testés, `store()` réduite à une façade, couverture du
 chemin de soumission.
