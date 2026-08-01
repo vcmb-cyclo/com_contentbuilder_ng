@@ -23,6 +23,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\PhpTemplateHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\StorageColumnTypeHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\StorageSystemFieldHelper;
 
 class contentbuilderng_com_contentbuilderng
 {
@@ -841,6 +842,72 @@ class contentbuilderng_com_contentbuilderng
             }
         }
         return $elements;
+    }
+
+    /**
+     * Exposes native editable controls derived from the Storage SQL types.
+     * TemplateRenderService uses this mapping even when an already-provisioned
+     * direct-storage form still has the generic "text" element type.
+     *
+     * @return array<int|string,string>
+     */
+    public function getEditableElementTypes(): array
+    {
+        $types = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (!empty($element['is_group'])) {
+                continue;
+            }
+
+            $sqlType = StorageColumnTypeHelper::normalize($element['sql_type'] ?? null);
+
+            if ($sqlType === 'date') {
+                $types[(string) $element['id']] = 'calendar';
+            } elseif ($sqlType === 'int') {
+                $types[(string) $element['id']] = 'number';
+            }
+        }
+
+        return $types;
+    }
+
+    /**
+     * @return array<int|string>
+     */
+    public function getRequiredElementIds(): array
+    {
+        $ids = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (
+                !empty($element['required'])
+                && !StorageSystemFieldHelper::isSystemFieldName((string) ($element['name'] ?? ''))
+            ) {
+                $ids[] = (string) $element['id'];
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @return array<int|string>
+     */
+    public function getIntegerElementIds(): array
+    {
+        $ids = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (
+                empty($element['is_group'])
+                && StorageColumnTypeHelper::normalize($element['sql_type'] ?? null) === 'int'
+            ) {
+                $ids[] = (string) $element['id'];
+            }
+        }
+
+        return $ids;
     }
 
     public function getPageTitle()

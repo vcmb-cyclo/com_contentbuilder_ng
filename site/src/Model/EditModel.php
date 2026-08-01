@@ -1475,6 +1475,60 @@ var contentbuilderng = new function(){
                         }
                     }
 
+                    $requiredElementIds = method_exists($data->form, 'getRequiredElementIds')
+                        ? (array) $data->form->getRequiredElementIds()
+                        : [];
+                    $allEditableFields = $the_upload_fields + $the_fields + $the_html_fields;
+
+                    foreach ($requiredElementIds as $requiredElementId) {
+                        $requiredElementId = (string) $requiredElementId;
+                        $requiredValue = $values[$requiredElementId] ?? null;
+                        $hasRequiredValue = is_array($requiredValue)
+                            ? array_filter($requiredValue, static fn($value) => $value !== null && trim((string) $value) !== '' && $value !== 'cbGroupMark') !== []
+                            : $requiredValue !== null && trim((string) $requiredValue) !== '';
+
+                        if ($hasRequiredValue) {
+                            continue;
+                        }
+
+                        $requiredField = $allEditableFields[$requiredElementId] ?? [
+                            'label' => $names[$requiredElementId] ?? '',
+                            'name' => $names[$requiredElementId] ?? '',
+                        ];
+                        $this->app->getInput()->set('cb_submission_failed', 1);
+                        $this->enqueueFieldValidationMessage(
+                            $requiredField,
+                            Text::_('COM_CONTENTBUILDERNG_STORAGE_REQUIRED_VALUE')
+                        );
+                    }
+
+                    $integerElementIds = method_exists($data->form, 'getIntegerElementIds')
+                        ? (array) $data->form->getIntegerElementIds()
+                        : [];
+
+                    foreach ($integerElementIds as $integerElementId) {
+                        $integerElementId = (string) $integerElementId;
+                        $integerValue = $values[$integerElementId] ?? null;
+
+                        if ($integerValue === null || (is_scalar($integerValue) && trim((string) $integerValue) === '')) {
+                            continue;
+                        }
+
+                        if (is_scalar($integerValue) && preg_match('/^[+-]?\d+$/D', trim((string) $integerValue))) {
+                            continue;
+                        }
+
+                        $integerField = $allEditableFields[$integerElementId] ?? [
+                            'label' => $names[$integerElementId] ?? '',
+                            'name' => $names[$integerElementId] ?? '',
+                        ];
+                        $this->app->getInput()->set('cb_submission_failed', 1);
+                        $this->enqueueFieldValidationMessage(
+                            $integerField,
+                            Text::_('COM_CONTENTBUILDERNG_STORAGE_INTEGER_VALUE')
+                        );
+                    }
+
                     $dispatcher = $this->app->getDispatcher();
                     $submit_before_result = $dispatcher->dispatch('onBeforeSubmit', new \Joomla\CMS\Event\GenericEvent('onBeforeSubmit', array($this->app->getInput()->getCmd('record_id', 0), $data->form, $values)));
 
