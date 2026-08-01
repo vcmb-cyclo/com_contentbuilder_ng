@@ -22,6 +22,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Controller;
 \defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Access\Exception\NotAllowed;
 use Joomla\CMS\MVC\Controller\FormController as BaseFormController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Application\CMSApplicationInterface;
@@ -69,6 +70,16 @@ class StorageController extends BaseFormController
     private function closeApp(): void
     {
         $this->getApp()->close();
+    }
+
+    /**
+     * @throws NotAllowed
+     */
+    private function assertStorageEditAccess(): void
+    {
+        if (!$this->getApp()->getIdentity()->authorise('core.edit', 'com_contentbuilderng')) {
+            throw new NotAllowed(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
     }
 
     /**
@@ -1293,6 +1304,7 @@ class StorageController extends BaseFormController
     public function ajax_update_field_type(): void
     {
         $this->checkToken();
+        $this->assertStorageEditAccess();
 
         $storageId = (int) $this->input->getInt('id');
         $fieldId = (int) $this->input->getInt('field_id', 0);
@@ -1383,6 +1395,7 @@ class StorageController extends BaseFormController
     public function ajax_update_field_required(): void
     {
         $this->checkToken();
+        $this->assertStorageEditAccess();
 
         $storageId = (int) $this->input->getInt('id');
         $fieldId = (int) $this->input->getInt('field_id', 0);
@@ -1427,14 +1440,6 @@ class StorageController extends BaseFormController
             $sqlType = StorageColumnTypeHelper::normalize((string) ($field['sql_type'] ?? StorageColumnTypeHelper::DEFAULT_TYPE));
             $fieldSize = StorageColumnTypeHelper::normalizeSize($sqlType, $field['field_size'] ?? null);
 
-            $updateFieldQuery = $db->getQuery(true)
-                ->update($db->quoteName('#__contentbuilderng_storage_fields'))
-                ->set($db->quoteName('required') . ' = ' . (int) $required)
-                ->where($db->quoteName('id') . ' = ' . $fieldId)
-                ->where($db->quoteName('storage_id') . ' = ' . $storageId);
-            $db->setQuery($updateFieldQuery);
-            $db->execute();
-
             $quotedTable = $db->quoteName('#__' . (string) $storage['name']);
             $quotedColumn = $db->quoteName($fieldName);
 
@@ -1447,6 +1452,17 @@ class StorageController extends BaseFormController
                 );
                 $db->execute();
             }
+
+            // Persist the metadata only after the physical DDL succeeds. If
+            // MySQL rejects the ALTER, the declared required state remains
+            // aligned with the actual column nullability.
+            $updateFieldQuery = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->set($db->quoteName('required') . ' = ' . (int) $required)
+                ->where($db->quoteName('id') . ' = ' . $fieldId)
+                ->where($db->quoteName('storage_id') . ' = ' . $storageId);
+            $db->setQuery($updateFieldQuery);
+            $db->execute();
 
             $this->respondAjax(true, Text::_('COM_CONTENTBUILDERNG_SAVED'));
         } catch (\Throwable $e) {
@@ -1461,6 +1477,7 @@ class StorageController extends BaseFormController
     public function ajax_update_field_title(): void
     {
         $this->checkToken();
+        $this->assertStorageEditAccess();
 
         $storageId = (int) $this->input->getInt('id');
         $fieldId = (int) $this->input->getInt('field_id', 0);

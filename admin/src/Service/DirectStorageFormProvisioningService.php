@@ -233,7 +233,10 @@ final class DirectStorageFormProvisioningService
         $this->db->setQuery($existingReferencesQuery);
         $existingReferences = array_map('strval', $this->db->loadColumn() ?: []);
 
-        $this->formSupportService->synchElements($formId, $form);
+        // Runtime provisioning is additive: a temporarily unpublished
+        // Storage field must not delete its form element and lose customized
+        // options before it is published again.
+        $this->formSupportService->synchElements($formId, $form, false);
 
         // synchElements() leaves new elements non-editable (editable=0) by
         // design for the manual admin flow (fields are reviewed before being

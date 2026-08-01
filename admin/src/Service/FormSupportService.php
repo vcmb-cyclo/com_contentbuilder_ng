@@ -317,7 +317,7 @@ class FormSupportService
         $db->execute();
     }
 
-    public function synchElements($formId, $form): array
+    public function synchElements($formId, $form, bool $removeMissing = true): array
     {
         $report = [
             'added' => [],
@@ -404,7 +404,7 @@ class FormSupportService
             unset($existingByReference[(string) $referenceId]);
         }
 
-        if ($ids !== []) {
+        if ($removeMissing && $ids !== []) {
             $deleteQuery = $db->getQuery(true)
                 ->delete($db->quoteName('#__contentbuilderng_elements'))
                 ->where($db->quoteName('form_id') . ' = ' . (int) $formId)
@@ -413,10 +413,12 @@ class FormSupportService
             $db->execute();
         }
 
-        foreach ($existingByReference as $removedRow) {
-            $removedLabel = trim((string) ($removedRow['label'] ?? ''));
-            $removedRef = (string) ($removedRow['reference_id'] ?? '');
-            $report['removed'][] = $removedLabel !== '' ? $removedLabel : $removedRef;
+        if ($removeMissing) {
+            foreach ($existingByReference as $removedRow) {
+                $removedLabel = trim((string) ($removedRow['label'] ?? ''));
+                $removedRef = (string) ($removedRow['reference_id'] ?? '');
+                $report['removed'][] = $removedLabel !== '' ? $removedLabel : $removedRef;
+            }
         }
 
         $report['added_count'] = count($report['added']);

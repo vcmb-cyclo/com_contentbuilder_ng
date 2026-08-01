@@ -1482,6 +1482,15 @@ var contentbuilderng = new function(){
 
                     foreach ($requiredElementIds as $requiredElementId) {
                         $requiredElementId = (string) $requiredElementId;
+
+                        // Sparse edit submissions intentionally omit fields
+                        // that are not rendered or not editable. Their stored
+                        // value must remain untouched instead of being treated
+                        // as an empty required value.
+                        if (!array_key_exists($requiredElementId, $values)) {
+                            continue;
+                        }
+
                         $requiredValue = $values[$requiredElementId] ?? null;
                         $hasRequiredValue = is_array($requiredValue)
                             ? array_filter($requiredValue, static fn($value) => $value !== null && trim((string) $value) !== '' && $value !== 'cbGroupMark') !== []
