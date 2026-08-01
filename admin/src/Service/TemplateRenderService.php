@@ -1289,6 +1289,25 @@ class TemplateRenderService
             }
         }
 
+        if ($this->getInput()->getBool('cb_preview_ok', false) && $this->getInput()->getInt('storage_id', 0) > 0) {
+            $missingEditableFields = '';
+
+            foreach (array_keys($items) as $fieldName) {
+                $fieldName = (string) $fieldName;
+                $hasTemplateMarker = str_contains($template, '{' . $fieldName . ':item}')
+                    || str_contains($template, '{' . $fieldName . ':value}');
+
+                if (!$hasTemplateMarker) {
+                    $missingEditableFields .= '<div class="mb-3"><div class="form-label">{'
+                        . $fieldName . ':label}</div><div>{' . $fieldName . ':item}</div></div>';
+                }
+            }
+
+            if ($missingEditableFields !== '') {
+                $template .= '<div class="cbDirectStoragePreviewFields">' . $missingEditableFields . '</div>';
+            }
+        }
+
         $template = $this->removeUnknownTemplateMarkers((int) $contentbuilderngFormId, $template, array_keys($items));
         $this->addUnclosedHideIfEmptyWarnings((int) $contentbuilderngFormId, $template);
 
@@ -1550,13 +1569,20 @@ class TemplateRenderService
                     $theItem .= HTMLHelper::_('calendar', $calval, 'cb_' . $item['id'], 'cb_' . $item['id'], $options->format, $calAttr);
                     $theItem .= "</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>";
                     break;
+                case 'datetime':
+                    $dateTimeValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
+                    $dateTimeAttr = ['class' => 'cb_' . $item['id'], 'showTime' => true, 'timeFormat' => '24', 'singleHeader' => false, 'todayBtn' => true, 'weekNumbers' => true, 'minYear' => '', 'maxYear' => '', 'firstDay' => '1'];
+                    $theItem = '<div class="cbFormField cbDateTimeField">' . "\n" . '<div id="field-calendar-cb_' . $item['id'] . '">' . "\n" . '<div class="input-group">' . "\n";
+                    $theItem .= HTMLHelper::_('calendar', $dateTimeValue, 'cb_' . $item['id'], 'cb_' . $item['id'], '%Y-%m-%d %H:%M:%S', $dateTimeAttr);
+                    $theItem .= "</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>";
+                    break;
                 case 'hidden':
                     $hiddenValue = $normalizeScalarValue($failedValues !== null && $elementReferenceId !== '' && isset($failedValues[$elementReferenceId]) ? $failedValues[$elementReferenceId] : ($hasRecords ? $item['value'] : $element['default_value']));
                     $theItem = '<input type="hidden" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" value="' . htmlspecialchars($hiddenValue, ENT_QUOTES, 'UTF-8') . '"/>';
                     break;
             }
 
-            if ($isSourceRequired && $isEditable && in_array($elementType, ['', 'text', 'number', 'boolean', 'textarea', 'select', 'calendar'], true)) {
+            if ($isSourceRequired && $isEditable && in_array($elementType, ['', 'text', 'number', 'boolean', 'textarea', 'select', 'calendar', 'datetime'], true)) {
                 $theItem = $this->markFirstEditableControlRequired((string) $theItem);
 
                 // Custom editable templates often contain a literal label

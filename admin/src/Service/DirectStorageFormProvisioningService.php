@@ -220,15 +220,18 @@ final class DirectStorageFormProvisioningService
         $editableTemplate = trim((string) ($row['editable_template'] ?? ''));
         $detailsTemplate = trim((string) ($row['details_template'] ?? ''));
 
-        if ($editableTemplate !== '' && $detailsTemplate !== '') {
-            return;
-        }
-
         $form = FormSourceFactory::getForm(self::TYPE, $storageId);
 
         if (!is_object($form)) {
             return;
         }
+
+        $existingReferencesQuery = $this->db->getQuery(true)
+            ->select($this->db->quoteName('reference_id'))
+            ->from($this->db->quoteName('#__contentbuilderng_elements'))
+            ->where($this->db->quoteName('form_id') . ' = ' . $formId);
+        $this->db->setQuery($existingReferencesQuery);
+        $existingReferences = array_map('strval', $this->db->loadColumn() ?: []);
 
         $this->formSupportService->synchElements($formId, $form);
 
@@ -242,10 +245,22 @@ final class DirectStorageFormProvisioningService
             ->set($this->db->quoteName('editable') . ' = 1')
             ->where($this->db->quoteName('form_id') . ' = :formId')
             ->bind(':formId', $formIdForElements, ParameterType::INTEGER);
+
+        if ($existingReferences !== []) {
+            $elementsUpdate->where(
+                $this->db->quoteName('reference_id') . ' NOT IN ('
+                . implode(',', array_map([$this->db, 'quote'], $existingReferences)) . ')'
+            );
+        }
+
         $this->db->setQuery($elementsUpdate);
         $this->db->execute();
 
         $this->enableSearchForTextAndDateFields($formId, $storageId);
+
+        if ($editableTemplate !== '' && $detailsTemplate !== '') {
+            return;
+        }
 
         $update = $this->db->getQuery(true)->update($this->db->quoteName('#__contentbuilderng_forms'));
 

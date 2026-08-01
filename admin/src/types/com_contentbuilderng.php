@@ -864,6 +864,8 @@ class contentbuilderng_com_contentbuilderng
 
             if ($sqlType === 'date') {
                 $types[(string) $element['id']] = 'calendar';
+            } elseif ($sqlType === 'datetime') {
+                $types[(string) $element['id']] = 'datetime';
             } elseif ($sqlType === 'int') {
                 $types[(string) $element['id']] = 'number';
             } elseif ($sqlType === 'boolean') {
@@ -929,6 +931,27 @@ class contentbuilderng_com_contentbuilderng
         }
 
         return $ids;
+    }
+
+    /**
+     * @return array<int|string,string>
+     */
+    public function getTemporalElementTypes(): array
+    {
+        $types = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (!empty($element['is_group'])) {
+                continue;
+            }
+
+            $sqlType = StorageColumnTypeHelper::normalize($element['sql_type'] ?? null);
+            if (in_array($sqlType, ['date', 'datetime'], true)) {
+                $types[(string) $element['id']] = $sqlType;
+            }
+        }
+
+        return $types;
     }
 
     public function getPageTitle()

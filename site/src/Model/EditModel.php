@@ -1552,6 +1552,42 @@ var contentbuilderng = new function(){
                         );
                     }
 
+                    $temporalElementTypes = method_exists($data->form, 'getTemporalElementTypes')
+                        ? (array) $data->form->getTemporalElementTypes()
+                        : [];
+
+                    foreach ($temporalElementTypes as $temporalElementId => $temporalType) {
+                        $temporalElementId = (string) $temporalElementId;
+                        $temporalValue = trim((string) ($values[$temporalElementId] ?? ''));
+
+                        if ($temporalValue === '') {
+                            continue;
+                        }
+
+                        $temporalFormat = $temporalType === 'datetime' ? 'Y-m-d H:i:s' : 'Y-m-d';
+                        $parsedTemporalValue = \DateTimeImmutable::createFromFormat('!' . $temporalFormat, $temporalValue);
+                        $temporalErrors = \DateTimeImmutable::getLastErrors();
+                        $isValidTemporalValue = $parsedTemporalValue instanceof \DateTimeImmutable
+                            && ($temporalErrors === false || ($temporalErrors['warning_count'] === 0 && $temporalErrors['error_count'] === 0))
+                            && $parsedTemporalValue->format($temporalFormat) === $temporalValue;
+
+                        if ($isValidTemporalValue) {
+                            continue;
+                        }
+
+                        $temporalField = $allEditableFields[$temporalElementId] ?? [
+                            'label' => $names[$temporalElementId] ?? '',
+                            'name' => $names[$temporalElementId] ?? '',
+                        ];
+                        $this->app->getInput()->set('cb_submission_failed', 1);
+                        $this->enqueueFieldValidationMessage(
+                            $temporalField,
+                            Text::_($temporalType === 'datetime'
+                                ? 'COM_CONTENTBUILDERNG_STORAGE_DATETIME_VALUE'
+                                : 'COM_CONTENTBUILDERNG_STORAGE_DATE_VALUE')
+                        );
+                    }
+
                     $dispatcher = $this->app->getDispatcher();
                     $submit_before_result = $dispatcher->dispatch('onBeforeSubmit', new \Joomla\CMS\Event\GenericEvent('onBeforeSubmit', array($this->app->getInput()->getCmd('record_id', 0), $data->form, $values)));
 
