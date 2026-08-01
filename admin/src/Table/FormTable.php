@@ -32,7 +32,7 @@ class FormTable extends Table
      * @var int
      */
     public $id = 0;
-    
+
     public $type = '';
     public $reference_id = 0;
     public $name = '';
@@ -191,7 +191,7 @@ class FormTable extends Table
      *
      * @param object Database connector object
      */
-    function __construct(DatabaseDriver $db)
+    public function __construct(DatabaseDriver $db)
     {
         parent::__construct('#__contentbuilderng_forms', 'id', $db);
 

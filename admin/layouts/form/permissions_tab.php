@@ -383,7 +383,7 @@ echo HTMLHelper::_('uitab.addTab', 'perm-pane', 'permtab2', $usersTabLabel);
                     'registration_password_repeat_field' => 'COM_CONTENTBUILDERNG_PERM_ACT_AS_REGISTRATION_PASSWORD_REPEAT_FIELD',
                 ];
                 foreach ($registrationFields as $fieldName => $labelKey) :
-                ?>
+                    ?>
                     <div class="cb-perm-users-field">
                         <?php echo $permOptionLabel($fieldName, $labelKey, 'COM_CONTENTBUILDERNG_PERM_ACT_AS_REGISTRATION_FIELDS_TIP'); ?>
                         <select class="form-select form-select-sm" name="jform[<?php echo $fieldName; ?>]" id="<?php echo $fieldName; ?>">

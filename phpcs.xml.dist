@@ -68,4 +68,20 @@
         -->
         <exclude-pattern>admin/src/Helper/ContentbuilderngHelper.php</exclude-pattern>
     </rule>
+
+    <!--
+        script.php's install/update class is instantiated by Joomla's
+        installer via a fixed name convention: "<element>InstallerScript"
+        in the global namespace, resolved by class_exists() against that
+        literal string — there is no autoloading path or manifest hook that
+        would let a namespaced or PascalCase class be found instead.
+        Renaming or namespacing it breaks install/update, it doesn't fix a
+        style issue.
+    -->
+    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
+        <exclude-pattern>script.php</exclude-pattern>
+    </rule>
+    <rule ref="Squiz.Classes.ValidClassName">
+        <exclude-pattern>script.php</exclude-pattern>
+    </rule>
 </ruleset>

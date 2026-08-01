@@ -30,7 +30,7 @@ $usingForms = is_array($usingFormsData) ? $usingFormsData : [];
             if ($usingFormLabel === '') {
                 $usingFormLabel = '#' . $usingFormId;
             }
-        ?>
+            ?>
             <li class="mb-1">
                 <a href="<?php echo htmlspecialchars(Route::_('index.php?option=com_contentbuilderng&view=form&layout=edit&id=' . $usingFormId, false), ENT_QUOTES, 'UTF-8'); ?>"
                     target="_blank"

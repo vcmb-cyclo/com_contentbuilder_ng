@@ -161,7 +161,7 @@ $storageFieldColumns = [
                     $published = ContentbuilderngHelper::listPublish('storage', $row, $i);
                     $isSystemField = StorageSystemFieldHelper::isSystemFieldName($rawName);
                     $rowSqlTypeEditable = $canEditSqlType && !$isSystemField;
-                ?>
+                    ?>
                     <tr class="row<?php echo $i % 2; ?>" data-cb-row-id="<?php echo $id; ?>" data-cb-item-label="<?php echo $title !== '' ? $title : $name; ?>">
                         <td class="text-center" data-cb-storage-col="check"><?php echo $checked; ?></td>
                         <td class="text-nowrap" data-cb-storage-col="id"><?php echo $id; ?></td>

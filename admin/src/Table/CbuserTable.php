@@ -31,16 +31,17 @@ class CbuserTable extends Table
     public $verification_date_edit = null;
     public $limit_add = 0;
     public $limit_edit = 0;
-    
+
     /**
      * Constructor
      *
      * @param object Database connector object
      */
-    function __construct( DatabaseDriver $db ) {
+    public function __construct(DatabaseDriver $db)
+    {
         parent::__construct('#__contentbuilderng_users', 'id', $db);
 
         // Joomla attend un champ "state" pour publish/unpublish au lieu de "published"
-        $this->setColumnAlias('state', 'published');       
+        $this->setColumnAlias('state', 'published');
     }
 }

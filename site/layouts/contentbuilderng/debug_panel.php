@@ -149,7 +149,8 @@ $wa->useStyle('com_contentbuilderng.debug-panel');
                 <tbody>
                     <?php $fieldsWithValidation = []; ?>
                     <?php foreach ($fields as $i => $field) : ?>
-                        <?php $rowEditable = !empty($field['editable']); $rowPublished = !empty($field['published']); ?>
+                        <?php $rowEditable = !empty($field['editable']);
+                        $rowPublished = !empty($field['published']); ?>
                         <?php
                         $validationNames = array_values(array_unique(array_filter(array_map(
                             'trim',

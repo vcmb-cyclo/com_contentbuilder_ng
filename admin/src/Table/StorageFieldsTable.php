@@ -48,7 +48,7 @@ class StorageFieldsTable extends Table
      *
      * @param object Database connector object
      */
-    function __construct(DatabaseDriver $db)
+    public function __construct(DatabaseDriver $db)
     {
         parent::__construct('#__contentbuilderng_storage_fields', 'id', $db);
 

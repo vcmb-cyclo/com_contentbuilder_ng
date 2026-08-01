@@ -193,7 +193,7 @@ if ($debugModeEnabled) {
                 $editable = '<span class="text-muted" title="' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_EDIT_DISABLED'), ENT_QUOTES, 'UTF-8') . '"><span class="icon-unpublish" aria-hidden="true"></span></span>';
             }
             $isModifiedElement = is_callable($isModifiedElementSettings) ? (bool) $isModifiedElementSettings($row) : false;
-        ?>
+            ?>
             <tr id="cb-row-<?php echo (int) $row->id; ?>" class="<?php echo 'row' . $k; ?>" data-cb-row-id="<?php echo (int) $row->id; ?>">
                 <td class="align-top" data-cb-col="id">
                     <?php echo $row->id; ?>
@@ -331,7 +331,7 @@ if ($debugModeEnabled) {
                         class="text_area cb-order-input-field" />
                 </td>
             </tr>
-        <?php
+            <?php
             $k = 1 - $k;
         }
         ?>
