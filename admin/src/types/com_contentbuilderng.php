@@ -97,29 +97,36 @@ class contentbuilderng_com_contentbuilderng
 
         $reference_ids = $db->loadColumn();
 
-        if (is_array($reference_ids)) {
+        // The outer query already selected only ids with no tracking row
+        // (NOT IN the subquery above), so a per-row existence re-check
+        // before inserting was always a no-op — every iteration hit the
+        // insert branch. One set-based multi-row INSERT replaces what was
+        // 2N queries (N existence checks + N inserts) with 1.
+        //
+        // IGNORE, not a plain INSERT: a multi-row INSERT is atomic in
+        // InnoDB — one row losing a race against a concurrent request to
+        // the (type, reference_id, record_id) unique key would abort the
+        // whole statement and silently drop every other row in this batch
+        // too. IGNORE degrades a duplicate-key violation to a per-row
+        // skip instead, matching the original loop's actual behaviour
+        // (each row synced independently of its neighbours).
+        if (is_array($reference_ids) && $reference_ids !== []) {
+            $rows = [];
+
             foreach ($reference_ids as $reference_id) {
-                $checkQuery = $db->getQuery(true)
-                    ->select($db->quoteName('id'))
-                    ->from($db->quoteName('#__contentbuilderng_records'))
-                    ->where($db->quoteName('type') . ' = ' . $db->quote('com_contentbuilderng'))
-                    ->where($db->quoteName('reference_id') . ' = ' . (int) $this->properties->id)
-                    ->where($db->quoteName('record_id') . ' = ' . (int) $reference_id);
-                $db->setQuery($checkQuery);
-                $res = $db->loadResult();
-                if (!$res) {
-                    $insertQuery = $db->getQuery(true)
-                        ->insert($db->quoteName('#__contentbuilderng_records'))
-                        ->columns($db->quoteName(['type', 'record_id', 'reference_id']))
-                        ->values(implode(',', [
-                            $db->quote('com_contentbuilderng'),
-                            (int) $reference_id,
-                            (int) $this->properties->id,
-                        ]));
-                    $db->setQuery($insertQuery);
-                    $db->execute();
-                }
+                $rows[] = '(' . implode(',', [
+                    $db->quote('com_contentbuilderng'),
+                    (int) $reference_id,
+                    (int) $this->properties->id,
+                ]) . ')';
             }
+
+            $db->setQuery(
+                'INSERT IGNORE INTO ' . $db->quoteName('#__contentbuilderng_records')
+                . ' (' . $db->quoteName('type') . ', ' . $db->quoteName('record_id') . ', ' . $db->quoteName('reference_id') . ')'
+                . ' VALUES ' . implode(',', $rows)
+            );
+            $db->execute();
         }
     }
 

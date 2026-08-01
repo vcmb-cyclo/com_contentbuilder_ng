@@ -515,34 +515,40 @@ class contentbuilderng_com_breezingformsng
 
         $records = $db->loadAssocList() ?: [];
 
+        // The outer query already LEFT JOINs #__contentbuilderng_records and
+        // filters on cr.record_id IS NULL, so a per-row existence re-check
+        // before inserting was always a no-op. One set-based INSERT ...
+        // IGNORE replaces what was 2N queries (N existence checks + N
+        // inserts) with 1 — IGNORE rather than a plain multi-row INSERT
+        // because InnoDB aborts the whole statement (dropping every row in
+        // the batch, not just the offending one) if a single row loses a
+        // race against a concurrent request to the unique key on
+        // (type, reference_id, record_id).
         if ($records) {
+            $rows = [];
+
             foreach ($records as $record) {
                 $reference_id = (int) ($record['record_id'] ?? 0);
                 if ($reference_id < 1) {
                     continue;
                 }
 
-                $checkQuery = $db->getQuery(true)
-                    ->select($db->quoteName('id'))
-                    ->from($db->quoteName('#__contentbuilderng_records'))
-                    ->where($db->quoteName('type') . ' = ' . $db->quote('com_breezingformsng'))
-                    ->where($db->quoteName('reference_id') . ' = ' . $formId)
-                    ->where($db->quoteName('record_id') . ' = ' . $reference_id);
-                $db->setQuery($checkQuery);
-                $res = $db->loadResult();
-                if (!$res) {
-                    $insertQuery = $db->getQuery(true)
-                        ->insert($db->quoteName('#__contentbuilderng_records'))
-                        ->columns($db->quoteName(['type', 'record_id', 'reference_id', 'published']))
-                        ->values(implode(',', [
-                            $db->quote('com_breezingformsng'),
-                            $reference_id,
-                            $formId,
-                            !empty($record['auto_publish']) ? 1 : 0,
-                        ]));
-                    $db->setQuery($insertQuery);
-                    $db->execute();
-                }
+                $rows[] = '(' . implode(',', [
+                    $db->quote('com_breezingformsng'),
+                    $reference_id,
+                    $formId,
+                    !empty($record['auto_publish']) ? 1 : 0,
+                ]) . ')';
+            }
+
+            if ($rows !== []) {
+                $db->setQuery(
+                    'INSERT IGNORE INTO ' . $db->quoteName('#__contentbuilderng_records')
+                    . ' (' . $db->quoteName('type') . ', ' . $db->quoteName('record_id') . ', '
+                    . $db->quoteName('reference_id') . ', ' . $db->quoteName('published') . ')'
+                    . ' VALUES ' . implode(',', $rows)
+                );
+                $db->execute();
             }
         }
     }
