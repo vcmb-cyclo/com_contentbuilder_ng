@@ -1449,6 +1449,14 @@ class TemplateRenderService
                     $numberValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
                     $theItem = '<div class="cbFormField cbNumberField"><input class="form-control form-control-sm" type="number" step="1" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '" value="' . htmlspecialchars($numberValue, ENT_QUOTES, 'UTF-8') . '"/></div>';
                     break;
+                case 'boolean':
+                    $booleanValue = $normalizeScalarValue($failedValues !== null && isset($failedValues[$element['reference_id']]) ? $failedValues[$element['reference_id']] : ($hasRecords ? $item['value'] : $element['default_value']));
+                    $theItem = '<div class="cbFormField cbBooleanField"><select class="form-select form-select-sm" id="cb_' . $item['id'] . '" name="cb_' . $item['id'] . '">'
+                        . '<option value="">' . htmlspecialchars(Text::_('JSELECT'), ENT_QUOTES, 'UTF-8') . '</option>'
+                        . '<option value="0"' . ($booleanValue === '0' ? ' selected="selected"' : '') . '>' . htmlspecialchars(Text::_('JNO'), ENT_QUOTES, 'UTF-8') . '</option>'
+                        . '<option value="1"' . ($booleanValue === '1' ? ' selected="selected"' : '') . '>' . htmlspecialchars(Text::_('JYES'), ENT_QUOTES, 'UTF-8') . '</option>'
+                        . '</select></div>';
+                    break;
                 case 'textarea':
                     $options->width = $options->width ?? '';
                     $options->height = $options->height ?? '';
@@ -1547,7 +1555,7 @@ class TemplateRenderService
                     break;
             }
 
-            if ($isSourceRequired && $isEditable && in_array($elementType, ['', 'text', 'number', 'textarea', 'select', 'calendar'], true)) {
+            if ($isSourceRequired && $isEditable && in_array($elementType, ['', 'text', 'number', 'boolean', 'textarea', 'select', 'calendar'], true)) {
                 $theItem = $this->markFirstEditableControlRequired((string) $theItem);
             }
 

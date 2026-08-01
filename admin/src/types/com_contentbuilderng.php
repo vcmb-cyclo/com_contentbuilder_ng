@@ -866,6 +866,8 @@ class contentbuilderng_com_contentbuilderng
                 $types[(string) $element['id']] = 'calendar';
             } elseif ($sqlType === 'int') {
                 $types[(string) $element['id']] = 'number';
+            } elseif ($sqlType === 'boolean') {
+                $types[(string) $element['id']] = 'boolean';
             }
         }
 
@@ -902,6 +904,25 @@ class contentbuilderng_com_contentbuilderng
             if (
                 empty($element['is_group'])
                 && StorageColumnTypeHelper::normalize($element['sql_type'] ?? null) === 'int'
+            ) {
+                $ids[] = (string) $element['id'];
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @return array<int|string>
+     */
+    public function getBooleanElementIds(): array
+    {
+        $ids = [];
+
+        foreach ((array) $this->elements as $element) {
+            if (
+                empty($element['is_group'])
+                && StorageColumnTypeHelper::normalize($element['sql_type'] ?? null) === 'boolean'
             ) {
                 $ids[] = (string) $element['id'];
             }
@@ -1164,10 +1185,10 @@ class contentbuilderng_com_contentbuilderng
                 $columns[] = (string) $keys['name'];
                 $placeholders[] = ':fieldValue' . $i;
                 $fieldValue = (string) $keys['value'];
-                $isEmptyDate = $fieldValue === ''
-                    && in_array($sqlTypeById[$id] ?? '', ['date', 'datetime'], true);
-                $bindValues[$i] = $isEmptyDate ? null : $fieldValue;
-                $query->bind(':fieldValue' . $i, $bindValues[$i], $isEmptyDate ? ParameterType::NULL : ParameterType::STRING);
+                $isEmptyTypedValue = $fieldValue === ''
+                    && in_array($sqlTypeById[$id] ?? '', ['date', 'datetime', 'int', 'decimal', 'boolean'], true);
+                $bindValues[$i] = $isEmptyTypedValue ? null : $fieldValue;
+                $query->bind(':fieldValue' . $i, $bindValues[$i], $isEmptyTypedValue ? ParameterType::NULL : ParameterType::STRING);
                 $i++;
             }
 
@@ -1200,11 +1221,11 @@ class contentbuilderng_com_contentbuilderng
             $i = 0;
             foreach ($names as $id => $keys) {
                 $fieldValue = (string) $keys['value'];
-                $isEmptyDate = $fieldValue === ''
-                    && in_array($sqlTypeById[$id] ?? '', ['date', 'datetime'], true);
-                $bindValues[$i] = $isEmptyDate ? null : $fieldValue;
+                $isEmptyTypedValue = $fieldValue === ''
+                    && in_array($sqlTypeById[$id] ?? '', ['date', 'datetime', 'int', 'decimal', 'boolean'], true);
+                $bindValues[$i] = $isEmptyTypedValue ? null : $fieldValue;
                 $query->set($db->quoteName((string) $keys['name']) . ' = :fieldValue' . $i);
-                $query->bind(':fieldValue' . $i, $bindValues[$i], $isEmptyDate ? ParameterType::NULL : ParameterType::STRING);
+                $query->bind(':fieldValue' . $i, $bindValues[$i], $isEmptyTypedValue ? ParameterType::NULL : ParameterType::STRING);
                 $i++;
             }
 

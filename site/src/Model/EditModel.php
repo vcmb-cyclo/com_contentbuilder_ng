@@ -1529,6 +1529,29 @@ var contentbuilderng = new function(){
                         );
                     }
 
+                    $booleanElementIds = method_exists($data->form, 'getBooleanElementIds')
+                        ? (array) $data->form->getBooleanElementIds()
+                        : [];
+
+                    foreach ($booleanElementIds as $booleanElementId) {
+                        $booleanElementId = (string) $booleanElementId;
+                        $booleanValue = $values[$booleanElementId] ?? null;
+
+                        if ($booleanValue === null || $booleanValue === '' || $booleanValue === 0 || $booleanValue === 1 || $booleanValue === '0' || $booleanValue === '1') {
+                            continue;
+                        }
+
+                        $booleanField = $allEditableFields[$booleanElementId] ?? [
+                            'label' => $names[$booleanElementId] ?? '',
+                            'name' => $names[$booleanElementId] ?? '',
+                        ];
+                        $this->app->getInput()->set('cb_submission_failed', 1);
+                        $this->enqueueFieldValidationMessage(
+                            $booleanField,
+                            Text::_('COM_CONTENTBUILDERNG_STORAGE_BOOLEAN_VALUE')
+                        );
+                    }
+
                     $dispatcher = $this->app->getDispatcher();
                     $submit_before_result = $dispatcher->dispatch('onBeforeSubmit', new \Joomla\CMS\Event\GenericEvent('onBeforeSubmit', array($this->app->getInput()->getCmd('record_id', 0), $data->form, $values)));
 
