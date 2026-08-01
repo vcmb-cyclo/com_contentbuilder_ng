@@ -106,6 +106,40 @@ if ($themeJs !== '') {
         }
 
     }
+    // Search/reset buttons used to carry their behaviour as inline
+    // onclick="..." attributes, including PHP-generated JS fragments —
+    // incompatible with a strict script-src CSP. Bound here instead, same
+    // as the delegated handlers already used in tmpl/list/default.php.
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchButton = document.querySelector('.cbSearchButton');
+        if (searchButton) {
+            searchButton.addEventListener('click', function () {
+                document.adminForm.submit();
+            });
+        }
+
+        const resetButton = document.querySelector('.cbResetButton');
+        if (resetButton) {
+            resetButton.addEventListener('click', function () {
+                const filterInput = document.getElementById('contentbuilderng_filter');
+                if (filterInput) {
+                    filterInput.value = '';
+                }
+
+                const stateFilter = document.getElementById('list_state_filter');
+                if (stateFilter) {
+                    stateFilter.selectedIndex = 0;
+                }
+
+                const publishFilter = document.getElementById('list_publish_filter');
+                if (publishFilter) {
+                    publishFilter.selectedIndex = 0;
+                }
+
+                document.adminForm.submit();
+            });
+        }
+    });
     //-->
 </script>
 SELECT
@@ -268,7 +302,7 @@ SELECT
                                 foreach ($this->states as $state) {
                                     ?>
                                     <option value="<?php echo $state['id'] ?>" <?php echo $this->lists['filter_state'] == $state['id'] ? ' selected="selected"' : ''; ?>>
-                                        <?php echo $state['title'] ?>
+                                        <?php echo $this->escape($state['title']) ?>
                                     </option>
                                     <?php
                                 }
