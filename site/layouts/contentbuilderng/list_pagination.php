@@ -49,6 +49,12 @@ $params['list'] = [
     'direction' => $lists['order_Dir'] ?? null,
     'start' => 0,
 ];
+$embeddedSort = trim((string) $input->getString('cblist_sort', ''));
+$embeddedDir = trim((string) $input->getString('cblist_dir', ''));
+if (EmbeddedListFieldFilterService::isEmbeddedRequest($input->getCmd('cblist_embed', '')) && $embeddedSort !== '') {
+    $params['cblist_sort'] = $embeddedSort;
+    $params['cblist_dir'] = $embeddedDir;
+}
 
 $buildPageLink = static function (int $start) use ($params): string {
     $params['list']['start'] = max(0, $start);

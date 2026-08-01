@@ -182,6 +182,8 @@ $embeddedListFields = $isEmbeddedListRequest
 $embeddedListRawActions = $isEmbeddedListRequest
     ? trim((string) $input->getString('cblist_actions', ''))
     : '';
+$embeddedListSort = $isEmbeddedListRequest ? trim((string) $input->getString('cblist_sort', '')) : '';
+$embeddedListDir = $isEmbeddedListRequest ? trim((string) $input->getString('cblist_dir', '')) : '';
 try {
     $cbListAllowedActions = EmbeddedListActionFilterService::parseActions($embeddedListRawActions);
 							} catch (\InvalidArgumentException) {
@@ -1639,6 +1641,8 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	<?php if ($embeddedListParams !== []) : ?>
 	<input type="hidden" name="cblist_embed" value="<?php echo EmbeddedListFieldFilterService::REQUEST_CONTEXT; ?>" />
 	<input type="hidden" name="cblist_fields" value="<?php echo htmlspecialchars($embeddedListFields, ENT_QUOTES, 'UTF-8'); ?>" />
+	<input type="hidden" name="cblist_sort" value="<?php echo htmlspecialchars($embeddedListSort, ENT_QUOTES, 'UTF-8'); ?>" />
+	<input type="hidden" name="cblist_dir" value="<?php echo htmlspecialchars($embeddedListDir, ENT_QUOTES, 'UTF-8'); ?>" />
 	<input type="hidden" name="cblist_actions" value="<?php echo htmlspecialchars($embeddedListRawActions, ENT_QUOTES, 'UTF-8'); ?>" />
 	<?php if ($embeddedListTitleProvided) : ?>
 	<input type="hidden" name="cblist_title" value="<?php echo htmlspecialchars($embeddedListTitle, ENT_QUOTES, 'UTF-8'); ?>" />
