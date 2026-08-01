@@ -53,5 +53,19 @@
     <rule ref="PSR1.Methods.CamelCapsMethodName">
         <exclude-pattern>admin/src/Controller/*</exclude-pattern>
         <exclude-pattern>site/src/Controller/*</exclude-pattern>
+
+        <!--
+            ContentbuilderngHelper::is_internal_path() and
+            ::contentbuilderng_wordwrap() are invoked by string method name
+            through TemplateRenderService::callContentbuilderngHelper()
+            ($helperClass::$method(...)), not just by direct ::name() calls.
+            A rename here is invisible to grep-for-callers and to PHPStan,
+            and is_internal_path() is a security-relevant path-containment
+            check (see REFACTORING_PLAN.md chapter F) — silently breaking it
+            via a missed string literal is a worse outcome than the naming
+            warning. Renaming these belongs in chapter F, alongside removing
+            the dynamic dispatch itself, not in a mechanical style pass.
+        -->
+        <exclude-pattern>admin/src/Helper/ContentbuilderngHelper.php</exclude-pattern>
     </rule>
 </ruleset>

@@ -201,7 +201,7 @@ final class RatingHelper
                                 onclick="cbRate('<?php echo $rating_link . '&rate=' . $x; ?>','cbRatingMsg<?php echo $record_id; ?>');">
                             </div>
                             <?php
-                } else if ($rating_slots == 2) {
+                } elseif ($rating_slots == 2) {
                     ?>
                                 <div class="cbRatingUpDown">
                                     <div class="cbRatingOptionStart">
@@ -247,7 +247,7 @@ final class RatingHelper
                     ?>
                             <div class="cbVotingStarButton is-readonly" id="cbVotingStarButton_<?php echo $x; ?>"></div>
                             <?php
-                } else if ($rating_slots == 2) {
+                } elseif ($rating_slots == 2) {
                     ?>
                                 <div class="cbRatingUpDown">
                                     <div class="cbRatingOptionStart">

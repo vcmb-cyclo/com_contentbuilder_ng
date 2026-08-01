@@ -152,7 +152,7 @@ final class FormSourceFactory
                 if (is_object($previewForm)) {
                     $form = $previewForm;
                 }
-            } catch (\ArgumentCountError|\TypeError $e) {
+            } catch (\ArgumentCountError | \TypeError $e) {
                 // Type class does not support an unpublished flag; keep initial instance.
             }
         }
