@@ -7,6 +7,11 @@
 > Base de référence : 86 000 lignes de source (hors `admin/vendor`,
 > `node_modules`), 1 524 méthodes, 689 tests unitaires, PHPStan niveau 2 avec
 > baseline de 1 639 lignes, 2 377 erreurs PSR-12.
+>
+> **État au 2026-08-01** : chantier A, étapes 1-2 faites (PSR-12 en gate
+> global, 0 erreur sur les 218 fichiers couverts par `phpcs.xml.dist`) ;
+> étapes 3-4 restent entières (PHPStan est toujours au niveau 2, aucun garde
+> anti-régression de baseline). Voir le chantier A ci-dessous pour le détail.
 
 ---
 
@@ -14,7 +19,7 @@
 
 | # | Chantier | Charge | Risque | Dépend de |
 |---|---|---:|---|---|
-| A | Outillage qualité (PHPCS, PHPStan 2→6) | 10 – 15 j | Faible | — |
+| A | Outillage qualité (PHPCS, PHPStan 2→6) — **PHPCS fait, PHPStan à faire** | 11 – 16 j restants | Faible | — |
 | B | Échappement des sorties front | 4 – 6 j | Faible | A |
 | C | Cache et requêtes N+1 | 6 – 10 j | Moyen | A |
 | D | Décomposition d'`EditModel::store()` | 25 – 30 j | **Élevé** | A, F |
@@ -57,22 +62,58 @@ fichiers modifiés d'une PR, ce qui empêche la dette de croître sans la résor
 
 ### Étapes
 
-1. **Passe `phpcbf` par lots** — 2 262 violations auto-corrigeables.
-   Découper par répertoire pour garder des diffs relisibles, un commit par lot,
-   sans mélanger avec du changement fonctionnel :
+1. ✅ **Fait (2026-08-01). Passe `phpcbf` par lots** — 2 262 violations
+   auto-corrigeables. Découpé par répertoire, un commit par lot, sans mélange
+   avec du changement fonctionnel :
 
    ```
    admin/src/Controller  →  admin/src/Service  →  admin/src/Helper
    →  admin/src/Model    →  admin/src/View     →  site/src  →  plugins
+   →  (reliquat : script.php, admin/layouts, admin/services,
+       admin/src/Table, admin/src/Extension, admin/src/Contract,
+       admin/src/Dto, site/layouts — hors de la liste initiale ci-dessus,
+       repérés en vérifiant que l'arbre était bien propre avant de basculer
+       le gate)
    ```
 
-   Après chaque lot : `phpunit` + `phpstan`. Retirer le répertoire traité de
-   la liste `exclude-pattern` de `phpcs.xml.dist`.
+   Après chaque lot : `phpunit` + `phpstan`, verts à chaque fois (693 tests).
+   Deux catégories d'erreurs n'étaient pas mécaniquement sûres à corriger et
+   ont été traitées au cas par cas plutôt qu'en aveugle :
+   - **Visibilité manquante** (`Squiz.Scope.MethodScope.Missing`, ~90
+     occurrences) : toujours `public` explicite sur du déjà-implicitement-
+     public (Table/View::display, __construct, getData…) — comportement
+     inchangé par construction.
+   - **Noms en snake_case** (`PSR1.Methods.CamelCapsMethodName`,
+     `PSR2.Methods.MethodDeclaration.Underscore`) : renommés seulement quand
+     chaque appelant était vérifié `private` + local au même fichier
+     (`_buildQuery` → `buildQuery` dans 5 Models ; 4 méthodes de
+     `StorageModel`). Exclus du sniff, documenté en commentaire dans
+     `phpcs.xml.dist`, dans les cas où le renommage était invisible à grep
+     et à PHPStan : tâches de contrôleur routées par nom littéral
+     (`UsersController::verified_view` etc.), méthodes de
+     `ContentbuilderngHelper` appelées par nom de méthode dynamique
+     (`$helperClass::$method(...)`), et la classe d'installation de
+     `script.php` résolue par Joomla via `class_exists()` sur un nom fixe.
 
-2. **Basculer le job CI en gate global** une fois `phpcbf` passé partout, en
-   supprimant le filtrage sur les fichiers modifiés.
+   Restent exclus de `phpcs.xml.dist` (dette réelle, pas traitée) :
+   `admin/src/types/*`, `site/src/Model/EditModel.php`,
+   `site/src/Model/ListModel.php`, `site/src/View/Details/HtmlView.php`,
+   `admin/src/Model/VerifyModel.php`, et les plugins `download`,
+   `image_scale`, `contentbuilderng_themes`. `EditModel.php` en particulier
+   est la cible du chantier D ci-dessous, qui exige des tests de
+   caractérisation *avant* la première ligne touchée — passer `phpcbf`
+   dessus maintenant aurait anticipé sur cette méthode sans le filet qu'elle
+   impose.
 
-3. **PHPStan : monter le niveau un cran à la fois.** À chaque cran, regénérer
+2. ✅ **Fait (2026-08-01). Basculé le job CI en gate global**, `phpcbf` étant
+   passé partout ailleurs. `phpcs -n --report=full` (sans argument, piloté
+   entièrement par `phpcs.xml.dist`) tourne maintenant sur PR et sur push,
+   bloque sur erreur, tolère les avertissements (longueur de ligne). Le job
+   `code-style` est désormais une dépendance du job `package`, ce qu'il
+   n'était pas avant faute de pouvoir tourner de façon inconditionnelle.
+
+3. **PHPStan : monter le niveau un cran à la fois — pas commencé.** À chaque
+   cran, regénérer
    la baseline puis la résorber, ne jamais l'agrandir :
 
    | Niveau | Ce qu'il ajoute | Charge estimée |
@@ -85,11 +126,12 @@ fichiers modifiés d'une PR, ce qui empêche la dette de croître sans la résor
    S'arrêter à 6. Les niveaux 7-8 exigent une couverture de typage que le
    code legacy (`types/`, `EditModel`) ne pourra pas offrir avant D et F.
 
-4. **Ajouter un garde anti-régression de baseline** en CI : échouer si le
-   nombre de lignes de `phpstan-baseline.neon` augmente.
+4. **Ajouter un garde anti-régression de baseline — pas commencé.** En CI :
+   échouer si le nombre de lignes de `phpstan-baseline.neon` augmente.
 
-**Livrable.** PSR-12 vérifié en gate global, PHPStan niveau 6, baseline
-strictement décroissante.
+**Livrable.** PSR-12 vérifié en gate global ✅ (2026-08-01), PHPStan niveau 6
+❌, baseline strictement décroissante ❌. Charge restante : 11 – 16 j
+(étapes 3-4 seules).
 
 ---
 
