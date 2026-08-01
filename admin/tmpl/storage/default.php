@@ -981,6 +981,7 @@ function initStorageInlineAddField() {
             '<td data-cb-storage-col="title"><input type="text" class="form-control form-control-sm" name="jform[fieldtitle]" placeholder="' + cbFieldTitlePlaceholder + '"></td>' +
             '<td data-cb-storage-col="sql_type"><select class="form-select form-select-sm" name="jform[sql_type]" style="width:auto; max-width:12rem;">' + buildTypeOptionsHtml() + '</select></td>' +
             '<td class="text-nowrap" data-cb-storage-col="field_size"></td>' +
+            '<td class="text-center" data-cb-storage-col="required">&mdash;</td>' +
             '<td data-cb-storage-col="group">' +
                 '<div class="form-check form-switch mb-1">' +
                     '<input class="form-check-input cb-storage-field-new-is-group" type="checkbox" role="switch" id="cb-storage-field-new-is-group">' +

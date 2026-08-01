@@ -1493,6 +1493,11 @@ class StorageModel extends AdminModel
                     continue;
                 }
 
+                if ($column === '') {
+                    fclose($handle);
+                    return Text::sprintf('COM_CONTENTBUILDERNG_CSV_IMPORT_EMPTY_COLUMN_HEADER', $index + 1);
+                }
+
                 $normalizedColumn = $this->normalizeFieldIdentifier($column);
                 $normalizedKey = strtolower($normalizedColumn);
                 if ($normalizedKey !== '' && isset($normalizedColumns[$normalizedKey])) {
