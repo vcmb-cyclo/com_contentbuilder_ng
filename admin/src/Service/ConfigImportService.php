@@ -728,7 +728,7 @@ class ConfigImportService
             'details_prepare'     => 'COM_CONTENTBUILDERNG_IMPORT_TRACKED_FIELD_DETAILS_PREPARE',
             'editable_template'   => 'COM_CONTENTBUILDERNG_IMPORT_TRACKED_FIELD_EDITABLE_TEMPLATE',
             'editable_prepare'    => 'COM_CONTENTBUILDERNG_IMPORT_TRACKED_FIELD_EDITABLE_PREPARE',
-            'email_admin_template'=> 'COM_CONTENTBUILDERNG_IMPORT_TRACKED_FIELD_EMAIL_ADMIN_TEMPLATE',
+            'email_admin_template' => 'COM_CONTENTBUILDERNG_IMPORT_TRACKED_FIELD_EMAIL_ADMIN_TEMPLATE',
             'email_template'      => 'COM_CONTENTBUILDERNG_IMPORT_TRACKED_FIELD_EMAIL_TEMPLATE',
         ];
     }

@@ -59,7 +59,7 @@ class FormResolverService
                         $form = $previewForm;
                         break;
                     }
-                } catch (\ArgumentCountError|\TypeError $e) {
+                } catch (\ArgumentCountError | \TypeError $e) {
                 } catch (\Throwable $e) {
                     Logger::exception($e);
                     throw $e;
