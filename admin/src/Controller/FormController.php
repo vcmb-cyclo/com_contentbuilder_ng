@@ -299,8 +299,7 @@ class FormController extends BaseFormController
         return array_merge(
             [['type' => 'message', 'message' => $successMessage]],
             array_values(array_filter($resyncMessages, static fn($message): bool =>
-                is_array($message) && trim((string) ($message['message'] ?? '')) !== ''
-            ))
+                is_array($message) && trim((string) ($message['message'] ?? '')) !== ''))
         );
     }
 
@@ -396,7 +395,7 @@ class FormController extends BaseFormController
     // ==================================================================
     // Ces tâches agissent sur les éléments sélectionnés dans l'édition d'un form
     // Elles doivent utiliser ElementoptionsModel
- 
+
     protected function postSaveHook(BaseDatabaseModel $model, $validData = [])
     {
         $elementsModel = $this->getElementsModelForListActions(true);

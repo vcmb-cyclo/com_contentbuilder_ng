@@ -207,10 +207,12 @@ final class StoragewizardController extends BaseController
 
         $source = trim((string) $this->input->post->getCmd('storage_source', ''));
 
-        if (!in_array($source, [
+        if (
+            !in_array($source, [
             StorageWizardService::STORAGE_SOURCE_INTERNAL,
             StorageWizardService::CREATION_MODE_EXISTING_TABLE,
-        ], true)) {
+            ], true)
+        ) {
             $this->redirectToWizard(Text::_('COM_CONTENTBUILDERNG_WIZARD_CREATION_MODE_REQUIRED'), 'error');
 
             return;
@@ -241,10 +243,12 @@ final class StoragewizardController extends BaseController
 
         $mode = trim((string) $this->input->post->getCmd('creation_mode', ''));
 
-        if (!in_array($mode, [
+        if (
+            !in_array($mode, [
             StorageWizardService::CREATION_MODE_MANUAL,
             StorageWizardService::CREATION_MODE_FILE,
-        ], true)) {
+            ], true)
+        ) {
             $this->redirectToWizard(Text::_('COM_CONTENTBUILDERNG_WIZARD_INITIALIZATION_MODE_REQUIRED'), 'error');
 
             return;

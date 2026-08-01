@@ -389,11 +389,11 @@ class StorageController extends BaseFormController
             Logger::info('Controller got model class', ['class' => get_class($model)]);
             $saved = $model->save($data);
             if (!$saved) {
-	                $this->setRedirect(
-	                    $this->storageEditLink((int) ($data['id'] ?? 0)),
-	                    Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED'),
-	                    'error'
-	                );
+                    $this->setRedirect(
+                        $this->storageEditLink((int) ($data['id'] ?? 0)),
+                        Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED'),
+                        'error'
+                    );
                 return false;
             }
 
@@ -453,12 +453,12 @@ class StorageController extends BaseFormController
             $model->ensureDataTable($id, empty($data['id']), null);
 
             // (C) Import file (CSV/Excel)
-	            $ok = $model->storeCsv($file, (int) $id);
-	            if (!$ok) {
-	                $error = trim((string) $model->getError());
-	                if ($error === '') {
-	                    $error = Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED');
-	                }
+                $ok = $model->storeCsv($file, (int) $id);
+            if (!$ok) {
+                $error = trim((string) $model->getError());
+                if ($error === '') {
+                    $error = Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED');
+                }
                 $this->setRedirect(
                     $this->storageEditLink((int) $id),
                     $error,
@@ -1043,9 +1043,9 @@ class StorageController extends BaseFormController
             if (!$model) {
                 throw new \RuntimeException('StoragefieldsModel introuvable');
             }
-	            $model->setStorageId($storageId);
-	            if (!$model->publish($cids, $state)) {
-	                $error = Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED');
+                $model->setStorageId($storageId);
+            if (!$model->publish($cids, $state)) {
+                $error = Text::_('COM_CONTENTBUILDERNG_SAVE_FAILED');
                 $this->setMessage($error, 'error');
                 if ($this->isAjaxCall()) {
                     $this->respondAjax(false, $error);

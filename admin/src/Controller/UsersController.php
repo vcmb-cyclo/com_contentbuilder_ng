@@ -11,7 +11,7 @@
 namespace CB\Component\Contentbuilderng\Administrator\Controller;
 
 // No direct access
-\defined( '_JEXEC' ) or die( 'Restricted access' );
+\defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
@@ -81,19 +81,20 @@ class UsersController extends BaseController
     }
 
     public function __construct(
-        array $config = [], 
-        ?MVCFactoryInterface $factory = null, 
-        ?CMSWebApplicationInterface $app = null, 
+        array $config = [],
+        ?MVCFactoryInterface $factory = null,
+        ?CMSWebApplicationInterface $app = null,
         ?Input $input = null
     ) {
         // IMPORTANT : on transmet factory/app/input à BaseController
         parent::__construct($config, $factory, $app, $input);
-        
+
         // Register Extra tasks
-        $this->registerTask( 'add', 'edit' );
+        $this->registerTask('add', 'edit');
     }
-    
-    public function verified_view() {
+
+    public function verified_view()
+    {
         $this->checkToken();
 
         try {
@@ -114,8 +115,9 @@ class UsersController extends BaseController
 
         $this->renderUsersList();
     }
-    
-    public function not_verified_view() {
+
+    public function not_verified_view()
+    {
         $this->checkToken();
 
         try {
@@ -136,8 +138,9 @@ class UsersController extends BaseController
 
         $this->renderUsersList();
     }
-    
-    public function verified_new() {
+
+    public function verified_new()
+    {
         $this->checkToken();
 
         try {
@@ -158,8 +161,9 @@ class UsersController extends BaseController
 
         $this->renderUsersList();
     }
-    
-    public function not_verified_new() {
+
+    public function not_verified_new()
+    {
         $this->checkToken();
 
         try {
@@ -180,8 +184,9 @@ class UsersController extends BaseController
 
         $this->renderUsersList();
     }
-    
-    public function verified_edit() {
+
+    public function verified_edit()
+    {
         $this->checkToken();
 
         try {
@@ -202,8 +207,9 @@ class UsersController extends BaseController
 
         $this->renderUsersList();
     }
-    
-    public function not_verified_edit() {
+
+    public function not_verified_edit()
+    {
         $this->checkToken();
 
         try {
@@ -224,7 +230,7 @@ class UsersController extends BaseController
 
         $this->renderUsersList();
     }
-    
+
     public function edit()
     {
         $this->input->set('view', 'User');
@@ -240,7 +246,8 @@ class UsersController extends BaseController
         $this->save(true);
     }
 
-    public function publish() {
+    public function publish()
+    {
         $this->checkToken();
 
         try {
@@ -261,8 +268,9 @@ class UsersController extends BaseController
 
         $this->setRedirect(Route::_($this->getUsersListLink($this->input->getInt('limitstart')), false), Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED'));
     }
-    
-    public function unpublish() {
+
+    public function unpublish()
+    {
         $this->checkToken();
 
         try {
@@ -283,25 +291,25 @@ class UsersController extends BaseController
 
         $this->setRedirect(Route::_($this->getUsersListLink($this->input->getInt('limitstart')), false), Text::_('COM_CONTENTBUILDERNG_UNPUBLISHED'));
     }
-    
+
     public function save($keep_task = false)
     {
         $this->checkToken();
 
         $model = $this->getUserModelForSave();
         $id = $model->store();
-        
+
         if ($id) {
-            $msg = Text::_( 'COM_CONTENTBUILDERNG_SAVED' );
+            $msg = Text::_('COM_CONTENTBUILDERNG_SAVED');
         } else {
-            $msg = Text::_( 'COM_CONTENTBUILDERNG_ERROR' );
+            $msg = Text::_('COM_CONTENTBUILDERNG_ERROR');
         }
 
         $limit = 0;
         $additionalParams = '';
-        if($keep_task){
-            if($id){
-                $additionalParams = '&task=User.edit&joomla_userid='.$id;
+        if ($keep_task) {
+            if ($id) {
+                $additionalParams = '&task=User.edit&joomla_userid=' . $id;
                 $limit = $this->input->getInt('limitstart');
             }
         }
@@ -313,7 +321,7 @@ class UsersController extends BaseController
 
     public function cancel()
     {
-        $msg = Text::_( 'COM_CONTENTBUILDERNG_CANCELLED' );
+        $msg = Text::_('COM_CONTENTBUILDERNG_CANCELLED');
         $this->setRedirect(Route::_($this->getUsersListLink(0), false), $msg);
     }
 
