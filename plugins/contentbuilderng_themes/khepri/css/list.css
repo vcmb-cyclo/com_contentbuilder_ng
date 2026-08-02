@@ -1,54 +1,115 @@
+/* Khepri theme — list view styles */
+
 .cb-list-titlebar{
-    margin:0 0 .55rem;
-    padding:.42rem .55rem;
-    border:1px solid #b7c4d0;
-    border-radius:.22rem;
-    background:linear-gradient(180deg,#f7f9fb 0,#e5ecf4 100%);
+    margin:0 0 .75rem;
+    padding:.85rem 1.1rem;
+    border:1px solid #dfe4ea;
+    border-radius:.5rem;
+    background:#ffffff;
+    box-shadow:0 1px 3px rgba(23,43,77,.06);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.75rem;
 }
 .cb-list-title{
     margin:0!important;
-    color:#1f3d5b;
-    font:700 1.06rem/1.2 "Trebuchet MS",Tahoma,Arial,sans-serif;
+    color:#16324a;
+    font:600 1.15rem/1.25 "Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    letter-spacing:.01em;
 }
 .cb-list-title::after{
     content:"";
     display:block;
-    width:3rem;
-    height:2px;
-    margin-top:.32rem;
-    background:#7b98b6;
+    width:2.4rem;
+    height:3px;
+    margin-top:.4rem;
+    border-radius:2px;
+    background:linear-gradient(90deg,#2e7dd1,#5aa9e6);
 }
 .cb-list-actions .btn{
-    border-radius:.2rem;
+    border-radius:.4rem;
     font-weight:600;
+    padding:.42rem .95rem;
+    box-shadow:none;
+    transition:transform .12s ease,box-shadow .12s ease;
+}
+.cb-list-actions .btn:hover{
+    transform:translateY(-1px);
+    box-shadow:0 3px 8px rgba(23,43,77,.12);
 }
 .cb-list-panel{
-    border:1px solid #bec9d4;
-    border-radius:.22rem;
-    padding:.48rem .54rem;
-    background:#f8fbfd;
+    border:1px solid #e2e6ec;
+    border-radius:.5rem;
+    padding:.85rem 1rem;
+    background:#fafcfe;
+    box-shadow:0 1px 2px rgba(23,43,77,.04);
 }
 .cb-list-table{
-    border:1px solid #c6d1dc;
+    border:1px solid #e2e6ec;
+    border-radius:.5rem;
+    overflow:hidden;
     background:#fff;
+    box-shadow:0 1px 4px rgba(23,43,77,.05);
 }
 .cb-list-table thead th{
-    background:linear-gradient(180deg,#e7edf3 0,#d5dee8 100%);
-    border-color:#bfcbd7;
-    color:#1f3d5b;
+    background:#f4f7fb;
+    border-color:#e5e9ef;
+    color:#2c4257;
+    font-weight:600;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+    font-size:.72rem;
+    padding:.7rem .75rem;
 }
 .cb-list-table tbody td{
-    border-color:#d4dde6;
+    border-color:#eef1f5;
+    padding:.65rem .75rem;
+    color:#2c3e50;
+    vertical-align:middle;
+}
+.cb-list-table tbody tr{
+    transition:background-color .12s ease;
+}
+.cb-list-table tbody tr:hover{
+    background-color:#f6faff;
+}
+.cb-list-table tbody tr:nth-of-type(odd){
+    background-color:#fbfdff;
+}
+.cb-list-table a{
+    color:#2e7dd1;
+    text-decoration:none;
+    font-weight:600;
+}
+.cb-list-table a:hover{
+    color:#1c5da3;
+    text-decoration:underline;
+}
+.cb-list-table .fa-star,
+.cb-list-table .fas.fa-star,
+.cb-list-table i.fa-star{
+    color:#f0b429;
+}
+.cb-list-table select.form-select{
+    border-radius:.35rem;
+    font-weight:600;
+    box-shadow:none;
 }
 .cb-list-filters .form-control,
 .cb-list-filters .form-select{
-    border-color:#bfcbd7;
-    border-radius:.2rem;
+    border-color:#dde3ea;
+    border-radius:.35rem;
+}
+.cb-list-filters .form-select:focus,
+.cb-list-filters .form-control:focus{
+    border-color:#5aa9e6;
+    box-shadow:0 0 0 .15rem rgba(90,169,230,.25);
 }
 .cb-list-filters .form-select:disabled,
 .cb-list-filters .form-control:disabled{
     color:var(--bs-secondary-color,#6c757d);
-    background-color:var(--bs-secondary-bg,#e9ecef);
-    border-color:var(--bs-border-color,#dee2e6);
+    background-color:var(--bs-secondary-bg,#eef1f5);
+    border-color:var(--bs-border-color,#dde3ea);
     opacity:1;
 }
