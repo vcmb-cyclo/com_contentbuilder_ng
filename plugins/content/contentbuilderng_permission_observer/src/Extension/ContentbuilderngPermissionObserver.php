@@ -74,7 +74,13 @@ final class ContentbuilderngPermissionObserver extends CMSPlugin implements Subs
             }
 
             if ($form && !(Factory::getApplication()->getInput()->get('option', '', 'string') == 'com_contentbuilderng' && Factory::getApplication()->getInput()->get('controller', '', 'string') == 'edit')) {
-                Factory::getApplication()->getLanguage()->load('com_contentbuilderng');
+                // com_contentbuilderng's language files are extension-scoped only
+                // (no copy under the global site/administrator language
+                // directory), so load('com_contentbuilderng') with no explicit
+                // base path looks in the wrong place and silently fails,
+                // rendering the permission message below as its raw key.
+                $componentBasePath = ($frontend ? JPATH_SITE : JPATH_ADMINISTRATOR) . '/components/com_contentbuilderng';
+                Factory::getApplication()->getLanguage()->load('com_contentbuilderng', $componentBasePath);
                 (PermissionService::createFromRuntimeContext())->setPermissions($data['form_id'], $data['record_id'], $frontend ? '_fe' : '');
 
                 if (Factory::getApplication()->getInput()->getCmd('view') == 'article') {
