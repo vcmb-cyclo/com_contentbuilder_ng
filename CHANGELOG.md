@@ -1,5 +1,29 @@
 # Changelog
 
+## 6.1.8 — 2026-08-02
+
+### Added
+
+- Added native DATE, DATETIME, INTEGER, DECIMAL and BOOLEAN controls and validation to direct Storage forms, with inline field title, SQL type, size and required-state editing.
+- Added `fields=` and `actions=` allow-lists to the `{CBList}` embed tag, restricting which columns and controls (search, state, publish, language, new, edit, delete, export, rating, detail, print) are shown, on top of ACL.
+- Added multi-column initial sorting to `{CBList}` via `sort=`/`dir=`, with the same `|`-separated syntax as `{CBStats}`.
+- Added a theme switcher to the admin preview banner, alongside the existing layout and colour-mode controls.
+- Added a "CBList actions" section to the frontend debug panel, listing which `{CBList actions="..."}` terms apply on each screen and whether each is currently allowed.
+
+### Changed
+
+- Enabled the repository-wide PSR-12 quality gate and modernized CBStats with strict PHP types.
+- Direct Storage synchronization now preserves unpublished elements and refreshes native controls when SQL field types change.
+- Removed the unused `itemid=` parameter from `{CBList}`.
+
+### Fixed
+
+- Escaped free-text list and template output to prevent stored cross-site scripting.
+- Fixed Storage field creation, required-state display, row saving, sorting, system-field publication and schema-audit regressions.
+- Preserved CBList field and action context across navigation, saves and record actions, and hardened action permission checks.
+- Fixed a fatal error on front-end list views caused by a missing import in the pagination layout.
+- Fixed embedded `{CBList sort="..."}` views losing or inverting their order when paging through results, and returning a server error instead of falling back to the view's own order when `sort=` named an unknown column.
+
 ## 6.1.7-RC101 — 2026-07-31
 
 ### Added
