@@ -24,16 +24,8 @@ if (\count($themes) < 2) {
     return;
 }
 
-$storedUri = clone Uri::getInstance();
-$storedUri->delVar(PreviewThemeHelper::QUERY_PARAM);
-
-$options = [[
-    'url' => $storedUri->toString(),
-    'label' => $storedTheme !== ''
-        ? Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_THEME_STORED_NAMED', $storedTheme)
-        : Text::_('COM_CONTENTBUILDERNG_PREVIEW_THEME_STORED'),
-    'selected' => $currentTheme === PreviewThemeHelper::NONE ? 'selected' : '',
-]];
+$effectiveTheme = $currentTheme !== PreviewThemeHelper::NONE ? $currentTheme : $storedTheme;
+$options = [];
 
 foreach ($themes as $theme) {
     $theme = trim((string) $theme);
@@ -43,12 +35,21 @@ foreach ($themes as $theme) {
     }
 
     $uri = clone Uri::getInstance();
-    $uri->setVar(PreviewThemeHelper::QUERY_PARAM, $theme);
+
+    // Picking the view's own theme means "no override at all", so the
+    // parameter is dropped rather than set to the stored value.
+    if ($theme === $storedTheme) {
+        $uri->delVar(PreviewThemeHelper::QUERY_PARAM);
+    } else {
+        $uri->setVar(PreviewThemeHelper::QUERY_PARAM, $theme);
+    }
 
     $options[] = [
         'url' => $uri->toString(),
-        'label' => $theme,
-        'selected' => $currentTheme === $theme ? 'selected' : '',
+        'label' => $theme === $storedTheme
+            ? Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_THEME_CONFIGURED', $theme)
+            : $theme,
+        'selected' => $theme === $effectiveTheme ? 'selected' : '',
     ];
 }
 
