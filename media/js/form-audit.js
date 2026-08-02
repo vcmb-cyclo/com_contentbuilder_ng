@@ -9,11 +9,25 @@
         return fallback;
     }
 
+    function scrollMessagesIntoView() {
+        // The Audit tab sits deep in a long tabbed edit form; Joomla's own
+        // renderMessages() only injects into #system-message-container, it
+        // never scrolls to it, so a repair result following an AJAX click
+        // down the page rendered off-screen above the current scroll
+        // position and went unnoticed.
+        var messageContainer = document.getElementById('system-message-container');
+
+        if (messageContainer && typeof messageContainer.scrollIntoView === 'function') {
+            messageContainer.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+    }
+
     function renderMessage(type, message) {
         if (window.Joomla && typeof window.Joomla.renderMessages === 'function') {
             var messages = {};
             messages[type] = [message];
             window.Joomla.renderMessages(messages);
+            scrollMessagesIntoView();
             return;
         }
 

@@ -122,6 +122,24 @@ final class ContentbuilderngSystem extends CMSPlugin implements SubscriberInterf
         return class_exists(FormSourceFactory::class);
     }
 
+    /**
+     * com_contentbuilderng's language files are extension-scoped only (no
+     * copy under the global site/administrator language directory), so
+     * Language::load('com_contentbuilderng') with no explicit base path
+     * looks in the wrong place and silently fails: the plugin's messages
+     * then render as their raw language keys. Normal requests to the
+     * component itself don't hit this, since Joomla's own
+     * ComponentDispatcher already retries with the extension-scoped path —
+     * but this plugin can fire outside that dispatch (e.g. blocking a
+     * com_content submission), where no such retry happens.
+     */
+    private function loadComponentLanguage(): void
+    {
+        $basePath = ($this->app->isClient('site') ? JPATH_SITE : JPATH_ADMINISTRATOR)
+            . '/components/com_contentbuilderng';
+        $this->app->getLanguage()->load('com_contentbuilderng', $basePath);
+    }
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -344,7 +362,7 @@ final class ContentbuilderngSystem extends CMSPlugin implements SubscriberInterf
 
             // if somebody tries to submit an article through the built-in joomla content submit
             if ($pluginParams->def('disable_new_articles', 0) && trim($app->getInput()->getCmd('option', '')) == 'com_content' && (trim($app->getInput()->getCmd('task', '')) == 'new' || trim($app->getInput()->getCmd('task', '')) == 'article.add' || (trim($app->getInput()->getCmd('view', '')) == 'article' && trim($app->getInput()->getCmd('layout', '')) == 'form') || (trim($app->getInput()->getCmd('view', '')) == 'form' && trim($app->getInput()->getCmd('layout', '')) == 'edit') && $a_id <= 0)) {
-                $this->app->getLanguage()->load('com_contentbuilderng');
+                $this->loadComponentLanguage();
                 $this->app->enqueueMessage(Text::_('COM_CONTENTBUILDERNG_PERMISSIONS_NEW_NOT_ALLOWED'), 'error');
                 $this->app->redirect('index.php');
             }
@@ -612,8 +630,7 @@ final class ContentbuilderngSystem extends CMSPlugin implements SubscriberInterf
         $list = $this->db->loadAssocList();
 
         if (isset($list[0])) {
-            $lang = $this->app->getLanguage();
-            $lang->load('com_contentbuilderng', JPATH_ADMINISTRATOR);
+            $this->loadComponentLanguage();
         }
 
         $now = (new Date())->toSql();
