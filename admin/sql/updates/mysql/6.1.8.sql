@@ -1,0 +1,6 @@
+-- Marqueur de version 6.1.8 : aucune modification de schéma.
+-- Le schéma est inchangé depuis 6.1.7.104 (ajout de la colonne `required`
+-- sur `#__contentbuilderng_storage_fields`) ; ce fichier ne sert qu'à
+-- enregistrer 6.1.8 dans #__schemas, sans quoi la version stockée resterait
+-- en retard sur celle du manifeste et le contrôle Base de données de Joomla
+-- signalerait un écart.
