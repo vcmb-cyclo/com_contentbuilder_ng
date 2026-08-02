@@ -3,12 +3,14 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.8.1</version>
+		<version>6.1.9</version>
 		<addition>
 			<item>Added native DATE, DATETIME, INTEGER, DECIMAL and BOOLEAN controls and validation to direct Storage forms.</item>
 			<item>Added inline Storage field title, SQL type, size and required-state editing, backed by the 6.1.7.104 schema migration.</item>
 			<item>Added field and action allow-lists to embedded CBList views.</item>
+			<item>Added multi-column initial sorting to embedded CBList views via sort=/dir=.</item>
 			<item>Added a theme switcher to the admin preview banner, alongside the existing layout and colour-mode controls.</item>
+			<item>Added a CBList actions section to the frontend debug panel, listing which terms apply on each screen and whether each is currently allowed.</item>
 		</addition>
 		<change>
 			<item>Enabled the repository-wide PSR-12 quality gate and modernized CBStats with strict PHP types.</item>
@@ -18,6 +20,11 @@
 			<item>Escaped free-text list and template output to prevent stored cross-site scripting.</item>
 			<item>Fixed Storage field creation, required-state display, row saving, sorting, system-field publication and schema-audit regressions.</item>
 			<item>Preserved CBList field and action context across navigation, saves and record actions, and hardened action permission checks.</item>
+			<item>Fixed a fatal error on front-end list views caused by a missing import in the pagination layout.</item>
+			<item>Fixed embedded CBList views losing or inverting their sort= order when paging through results.</item>
+			<item>Fixed upgrading from a version that predates the field_size column aborting during the 6.1.7.104 schema migration.</item>
+			<item>Fixed some permission-denied messages rendering as untranslated raw keys on the front end.</item>
+			<item>Fixed the admin Audit panel's repair result message not scrolling into view.</item>
 		</fix>
 	</changelog>
 </changelogs>

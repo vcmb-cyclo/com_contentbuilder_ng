@@ -1,5 +1,13 @@
 # Changelog
 
+## 6.1.9 — 2026-08-02
+
+### Fixed
+
+- Fixed upgrading from a version that predates the `field_size` column aborting with "Unknown column 'field_size'" during the 6.1.7.104 schema migration.
+- Fixed `COM_CONTENTBUILDERNG_PERMISSIONS_NEW_NOT_ALLOWED` and the equivalent view-permission message rendering as raw untranslated keys on the front end, when raised by the system and permission-observer plugins outside the component's own dispatch.
+- Fixed the admin Audit panel's repair result message not scrolling into view when triggered from deep in a long edit form.
+
 ## 6.1.8 — 2026-08-02
 
 ### Added
