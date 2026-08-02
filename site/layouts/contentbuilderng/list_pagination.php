@@ -16,6 +16,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Uri\Uri;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 $pagination = $displayData['pagination'] ?? null;
 $lists = (array) ($displayData['lists'] ?? []);
