@@ -80,6 +80,24 @@ final class PreviewThemeHelperTest extends TestCase
         self::assertSame('', PreviewThemeHelper::appendHiddenField('', ''));
     }
 
+    public function testMutationRedirectsPropagateTheme(): void
+    {
+        foreach (['EditController.php', 'ListController.php'] as $controller) {
+            $source = file_get_contents(
+                \dirname(__DIR__, 4) . '/site/src/Controller/' . $controller
+            );
+            self::assertIsString($source);
+            self::assertStringContainsString(
+                'PreviewThemeHelper::resolve($this->input, true)',
+                $source
+            );
+            self::assertStringContainsString(
+                'PreviewThemeHelper::appendQuery($query, $theme)',
+                $source
+            );
+        }
+    }
+
     private function setAvailableThemes(?array $themes): void
     {
         $property = new \ReflectionProperty(PreviewThemeHelper::class, 'availableThemes');

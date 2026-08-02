@@ -36,6 +36,14 @@ final class VersionConsistencyTest extends TestCase
         );
         self::assertSame($installVersion, $updateVersion);
 
+        $assetManifest = json_decode(
+            (string) file_get_contents($this->root . '/media/joomla.asset.json'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+        self::assertSame($installVersion, $assetManifest['version'] ?? null);
+
         $downloadUrl = $this->readValue(
             $this->root . '/com_contentbuilderng_update.xml',
             '/updates/update/downloads/downloadurl'

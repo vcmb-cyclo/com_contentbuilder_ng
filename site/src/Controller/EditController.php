@@ -34,6 +34,7 @@ use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewColorModeHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
+use CB\Component\Contentbuilderng\Site\Helper\PreviewThemeHelper;
 use CB\Component\Contentbuilderng\Site\Model\EditModel;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
 
@@ -636,8 +637,10 @@ class EditController extends BaseController
 
         $query = PreviewLinkHelper::buildQuery($until, $actorId, $actorName, $userId, $sig, $adminReturn);
         $colorMode = PreviewColorModeHelper::resolve($this->input, true);
+        $query = PreviewColorModeHelper::appendQuery($query, $colorMode);
+        $theme = PreviewThemeHelper::resolve($this->input, true);
 
-        return PreviewColorModeHelper::appendQuery($query, $colorMode);
+        return PreviewThemeHelper::appendQuery($query, $theme);
     }
 
     private function isAjaxCall(): bool
