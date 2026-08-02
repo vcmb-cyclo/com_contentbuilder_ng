@@ -1053,7 +1053,10 @@ class ListModel extends BaseListModel
                     $isEmbeddedList = EmbeddedListFieldFilterService::isEmbeddedRequest($app->getInput()->getCmd('cblist_embed', ''));
                     if ($isEmbeddedList) {
                         $embeddedSort = trim((string) $app->getInput()->getString('cblist_sort', ''));
-                        $embeddedDirection = strtolower(trim((string) $app->getInput()->getCmd('cblist_dir', 'asc')));
+                        // getCmd() strips '|', which would collapse the
+                        // per-column directions of a multi-column sort into a
+                        // single meaningless token ("asc|desc" -> "ascdesc").
+                        $embeddedDirection = strtolower(trim((string) $app->getInput()->getString('cblist_dir', 'asc')));
                     }
 
                     // Guard against ordering by a column that is not part of the SELECT.
@@ -1061,14 +1064,25 @@ class ListModel extends BaseListModel
                     if ($ordering !== '' && !isset($order_types[$ordering]) && !in_array($ordering, $knownOrderKeys, true)) {
                         $ordering = '';
                     }
-                    if ($isEmbeddedList && $embeddedSort !== '' && !isset($list['ordering']) && !isset($list['fullordering'])) {
+                    // Presence is not intent: the pagination links serialise
+                    // list[ordering] even when no column sort is active, and
+                    // isset() is true for that empty string. Testing isset()
+                    // here discarded the {CBList sort="..."} order on every
+                    // page change, so only a non-empty value counts as the
+                    // visitor having chosen a column to sort on.
+                    $requestedOrdering = trim((string) ($list['ordering'] ?? ''));
+                    $requestedFullordering = trim((string) ($list['fullordering'] ?? ''));
+                    if ($isEmbeddedList && $embeddedSort !== '' && $requestedOrdering === '' && $requestedFullordering === '') {
                         $sortColumns = EmbeddedListFieldFilterService::filter(array_keys($data->labels), $data->labels, [], $embeddedSort);
                         $sortDirections = explode('|', $embeddedDirection);
                         $sortOrdering = [];
                         $sortDirectionValues = [];
                         foreach ($sortColumns as $index => $sortColumn) {
+                            $sortDirection = strtolower(trim((string) ($sortDirections[$index] ?? '')));
                             $sortOrdering[] = 'col' . $sortColumn;
-                            $sortDirectionValues[] = $sortDirections[$index];
+                            // A sort= listing more columns than dir= gives
+                            // directions for leaves the extra ones ascending.
+                            $sortDirectionValues[] = $sortDirection === 'desc' ? 'desc' : 'asc';
                         }
                         $ordering = implode('|', $sortOrdering);
                         $direction = implode('|', $sortDirectionValues);
