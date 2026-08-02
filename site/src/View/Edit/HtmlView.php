@@ -32,6 +32,7 @@ use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
 use CB\Component\Contentbuilderng\Site\Model\EditModel;
 use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
+use CB\Component\Contentbuilderng\Site\Helper\PreviewThemeHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 
 class HtmlView extends BaseHtmlView
@@ -65,6 +66,8 @@ class HtmlView extends BaseHtmlView
     public $next_record_id = 0;
     public int $prev_record_start = 0;
     public int $next_record_start = 0;
+    public string $preview_theme = '';
+    public string $stored_theme = '';
     public int $cb_show_author = 1;
     public int $show_title_breadcrumb = 1;
     public int $cb_show_top_bar = 1;
@@ -804,7 +807,12 @@ class HtmlView extends BaseHtmlView
                 $this->applyEditByTypeRendering();
 
                 if ($this->theme_css === '' && $this->theme_js === '' && property_exists($this->item, 'theme_plugin')) {
-                    $themePlugin = (string) ($this->item->theme_plugin ?? '');
+                    $this->stored_theme = (string) ($this->item->theme_plugin ?? '');
+                    $this->preview_theme = PreviewThemeHelper::resolve(
+                        $app->getInput(),
+                        $app->getInput()->getBool('cb_preview_ok', false)
+                    );
+                    $themePlugin = PreviewThemeHelper::apply($this->stored_theme, $this->preview_theme);
                     $fallbackTheme = false;
                     if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
                         $themePlugin = 'thoth';

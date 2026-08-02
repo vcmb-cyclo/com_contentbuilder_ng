@@ -21,6 +21,7 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\Database\DatabaseInterface;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
+use CB\Component\Contentbuilderng\Site\Helper\PreviewThemeHelper;
 use CB\Component\Contentbuilderng\Site\Model\EditModel;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
@@ -643,6 +644,9 @@ class ListController extends BaseController
         $userId = (int) $this->input->getInt('cb_preview_user_id', 0);
         $adminReturn = trim((string) $this->input->getCmd('cb_admin_return', ''));
 
-        return PreviewLinkHelper::buildQuery($until, $actorId, $actorName, $userId, $sig, $adminReturn);
+        $query = PreviewLinkHelper::buildQuery($until, $actorId, $actorName, $userId, $sig, $adminReturn);
+        $theme = PreviewThemeHelper::resolve($this->input, true);
+
+        return PreviewThemeHelper::appendQuery($query, $theme);
     }
 }

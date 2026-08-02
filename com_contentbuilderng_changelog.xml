@@ -3,11 +3,12 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.7-RC105</version>
+		<version>6.1.7-RC106</version>
 		<addition>
 			<item>Added native DATE, DATETIME, INTEGER, DECIMAL and BOOLEAN controls and validation to direct Storage forms.</item>
 			<item>Added inline Storage field title, SQL type, size and required-state editing, backed by the 6.1.7.104 schema migration.</item>
 			<item>Added field and action allow-lists to embedded CBList views.</item>
+			<item>Added a theme switcher to the admin preview banner, alongside the existing layout and colour-mode controls.</item>
 		</addition>
 		<change>
 			<item>Enabled the repository-wide PSR-12 quality gate and modernized CBStats with strict PHP types.</item>

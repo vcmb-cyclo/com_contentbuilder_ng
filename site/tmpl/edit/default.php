@@ -30,6 +30,7 @@ use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewColorModeHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
+use CB\Component\Contentbuilderng\Site\Helper\PreviewThemeHelper;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
@@ -235,6 +236,9 @@ if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
 $previewColorMode = PreviewColorModeHelper::resolve($input, $isAdminPreview);
 $previewQuery = PreviewColorModeHelper::appendQuery($previewQuery, $previewColorMode);
 $previewHiddenFields = PreviewColorModeHelper::appendHiddenField($previewHiddenFields, $previewColorMode);
+$previewTheme = (string) ($this->preview_theme ?? '');
+$previewQuery = PreviewThemeHelper::appendQuery($previewQuery, $previewTheme);
+$previewHiddenFields = PreviewThemeHelper::appendHiddenField($previewHiddenFields, $previewTheme);
 
 $directStorageId = $adminReturnDirectStorageId;
 if ($directStorageId > 0) {
@@ -925,6 +929,7 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
                 <span class="icon-eye icon-fw" aria-hidden="true"></span>
                 <?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW_MODE') . ' - ' . Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_CURRENT_FORM', $previewFormName); ?>
                 <?php echo LayoutHelper::render('contentbuilderng.preview_color_mode', ['mode' => $previewColorMode]); ?>
+                <?php echo LayoutHelper::render('contentbuilderng.preview_theme', ['theme' => $previewTheme, 'storedTheme' => (string) ($this->stored_theme ?? ''), 'themes' => PreviewThemeHelper::availableThemes()]); ?>
                 <?php if ($previewActorLabel !== ''): ?>
                     <span class="badge text-bg-secondary ms-2"><?php echo Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_ACTOR_BADGE', htmlspecialchars($previewActorLabel, ENT_QUOTES, 'UTF-8')); ?><?php echo $previewActorId > 0 ? ' (#' . (int) $previewActorId . ')' : ''; ?></span>
                 <?php endif; ?>
