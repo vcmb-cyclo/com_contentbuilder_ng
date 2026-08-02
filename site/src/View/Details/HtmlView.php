@@ -34,10 +34,13 @@ use Joomla\Database\ParameterType;
 use Joomla\Registry\Registry;
 use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
 use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
+use CB\Component\Contentbuilderng\Site\Helper\PreviewThemeHelper;
 
 class HtmlView extends BaseHtmlView
 {
     private bool $frontend = false;
+    public string $preview_theme = '';
+    public string $stored_theme = '';
     protected $state;
     protected $item;
     protected $form;
@@ -454,7 +457,12 @@ class HtmlView extends BaseHtmlView
 		$pattern = '#<hr\s+id=("|\')system-readmore("|\')\s*\/*>#i';
 		$subject->template = preg_replace($pattern, '', $subject->template);
 
-			$themePlugin = (string) ($subject->theme_plugin ?? '');
+			$this->stored_theme = (string) ($subject->theme_plugin ?? '');
+			$this->preview_theme = PreviewThemeHelper::resolve(
+				$app->getInput(),
+				$app->getInput()->getBool('cb_preview_ok', false)
+			);
+			$themePlugin = PreviewThemeHelper::apply($this->stored_theme, $this->preview_theme);
 			$fallbackTheme = false;
 			if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
 				$themePlugin = 'thoth';

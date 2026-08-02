@@ -24,6 +24,7 @@ use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Uri\Uri;
 use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
+use CB\Component\Contentbuilderng\Site\Helper\PreviewThemeHelper;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 class HtmlView extends BaseHtmlView
@@ -45,6 +46,8 @@ class HtmlView extends BaseHtmlView
     public bool $preview_list_access_configured = false;
     public float $render_time_ms = 0;
     public string $embedded_list_error = '';
+    public string $preview_theme = '';
+    public string $stored_theme = '';
 
     private function getApp(): SiteApplication
     {
@@ -85,7 +88,12 @@ class HtmlView extends BaseHtmlView
             $this->preview_list_access_configured = !empty($permissionsFe[1]['listaccess'])
                 || ($guestGroupId > 0 && !empty($permissionsFe[$guestGroupId]['listaccess']));
         }
-        $themePlugin = (string) ($subject->theme_plugin ?? '');
+        $this->stored_theme = (string) ($subject->theme_plugin ?? '');
+        $this->preview_theme = PreviewThemeHelper::resolve(
+            $app->getInput(),
+            $app->getInput()->getBool('cb_preview_ok', false)
+        );
+        $themePlugin = PreviewThemeHelper::apply($this->stored_theme, $this->preview_theme);
         if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
             $themePlugin = 'thoth';
             PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin);

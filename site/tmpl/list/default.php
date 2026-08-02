@@ -32,6 +32,7 @@ use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewColorModeHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
+use CB\Component\Contentbuilderng\Site\Helper\PreviewThemeHelper;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
@@ -321,6 +322,8 @@ if ($previewEnabled && $previewUntil > 0 && $previewSig !== '') {
 							}
 $previewColorMode = PreviewColorModeHelper::resolve($input, $isAdminPreview || $directStorageMode);
 $previewQuery = PreviewColorModeHelper::appendQuery($previewQuery, $previewColorMode);
+$previewTheme = (string) ($this->preview_theme ?? '');
+$previewQuery = PreviewThemeHelper::appendQuery($previewQuery, $previewTheme);
 
 if ($isAdminPreview) {
     $view_allowed = true;
@@ -572,6 +575,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						</span>
 					<?php endif; ?>
 					<?php echo LayoutHelper::render('contentbuilderng.preview_color_mode', ['mode' => $previewColorMode]); ?>
+					<?php echo LayoutHelper::render('contentbuilderng.preview_theme', ['theme' => $previewTheme, 'storedTheme' => (string) ($this->stored_theme ?? ''), 'themes' => PreviewThemeHelper::availableThemes()]); ?>
 					<?php echo ' - ' . Text::sprintf($directStorageMode ? 'COM_CONTENTBUILDERNG_PREVIEW_CURRENT_STORAGE' : 'COM_CONTENTBUILDERNG_PREVIEW_CURRENT_FORM', $previewFormName); ?>
 	                <?php if ($previewActorLabel !== ''): ?>
 	                    <span class="badge text-bg-secondary ms-2"><?php echo Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_ACTOR_BADGE', htmlspecialchars($previewActorLabel, ENT_QUOTES, 'UTF-8')); ?><?php echo $previewActorId > 0 ? ' (#' . (int) $previewActorId . ')' : ''; ?></span>
