@@ -46,10 +46,18 @@ $params['id'] = $input->getInt('id', 0);
 $params['Itemid'] = $input->getInt('Itemid', 0);
 $params['list'] = [
     'limit' => $pagLimit,
-    'ordering' => $lists['order'] ?? null,
-    'direction' => $lists['order_Dir'] ?? null,
     'start' => 0,
 ];
+
+// Only carry an ordering the visitor actually chose. http_build_query()
+// keeps empty strings, and an empty list[ordering]= reads downstream as a
+// deliberate ordering, which would override the {CBList sort="..."} order.
+$listOrdering = trim((string) ($lists['order'] ?? ''));
+$listDirection = trim((string) ($lists['order_Dir'] ?? ''));
+if ($listOrdering !== '') {
+    $params['list']['ordering'] = $listOrdering;
+    $params['list']['direction'] = $listDirection;
+}
 $embeddedSort = trim((string) $input->getString('cblist_sort', ''));
 $embeddedDir = trim((string) $input->getString('cblist_dir', ''));
 if (EmbeddedListFieldFilterService::isEmbeddedRequest($input->getCmd('cblist_embed', '')) && $embeddedSort !== '') {
