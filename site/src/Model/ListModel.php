@@ -1078,32 +1078,39 @@ class ListModel extends BaseListModel
                         : trim((string) ($list['fullordering'] ?? ''));
                     if ($isEmbeddedList && $embeddedSort !== '' && $requestedOrdering === '' && $requestedFullordering === '') {
                         try {
-                            $sortColumns = EmbeddedListFieldFilterService::filter(
+                            $elementNames = is_object($data->form) && method_exists($data->form, 'getElementNames')
+                                ? (array) $data->form->getElementNames()
+                                : [];
+                            $sortMatch = EmbeddedListFieldFilterService::matchSelectors(
                                 array_keys($data->labels),
-                                $data->labels,
-                                [],
+                                $elementNames,
                                 $embeddedSort
                             );
-                            $sortDirections = explode('|', $embeddedDirection);
-                            $sortOrdering = [];
-                            $sortDirectionValues = [];
-                            foreach ($sortColumns as $index => $sortColumn) {
-                                $sortDirection = strtolower(trim((string) ($sortDirections[$index] ?? '')));
-                                $sortOrdering[] = 'col' . $sortColumn;
-                                // A sort= listing more columns than dir= gives
-                                // directions for leaves the extra ones ascending.
-                                $sortDirectionValues[] = $sortDirection === 'desc' ? 'desc' : 'asc';
+
+                            if ($sortMatch['unknown'] !== []) {
+                                foreach ($sortMatch['unknown'] as $unknownSortField) {
+                                    $data->embedded_list_validation_errors[] = [
+                                        'parameter' => 'sort',
+                                        'value' => $unknownSortField,
+                                    ];
+                                }
+                            } else {
+                                $sortDirections = explode('|', $embeddedDirection);
+                                $sortOrdering = [];
+                                $sortDirectionValues = [];
+                                foreach ($sortMatch['columns'] as $index => $sortColumn) {
+                                    $sortDirection = strtolower(trim((string) ($sortDirections[$index] ?? '')));
+                                    $sortOrdering[] = 'col' . $sortColumn;
+                                    $sortDirectionValues[] = $sortDirection === 'desc' ? 'desc' : 'asc';
+                                }
+                                $ordering = implode('|', $sortOrdering);
+                                $direction = implode('|', $sortDirectionValues);
                             }
-                            $ordering = implode('|', $sortOrdering);
-                            $direction = implode('|', $sortDirectionValues);
                         } catch (\InvalidArgumentException) {
-                            // sort= names a column this view does not expose —
-                            // a typo in the article's tag reaches here just as
-                            // easily as a hand-crafted URL, and the plugin
-                            // cannot catch it because it does not know the
-                            // form's labels. Degrade to the view's own order
-                            // like every other embedded parameter does, rather
-                            // than failing the whole page.
+                            $data->embedded_list_validation_errors[] = [
+                                'parameter' => 'sort',
+                                'value' => $embeddedSort,
+                            ];
                         }
                     }
 

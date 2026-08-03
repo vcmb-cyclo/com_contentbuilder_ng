@@ -30,21 +30,21 @@ final class CbListPluginTest extends TestCase
     public function testTagAttributesAndOptionsAreResolved(): void
     {
         $attributes = TagSyntaxService::parseAttributes(
-            ' id=25 layout=cards pagination=25 fields="Name|Email|Town" actions="search|detail|export" height=700 loading=eager title="Registrations &amp; payments"'
+            ' id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 actions="detail|edit|export" layout=cards height=700 loading=lazy'
         );
 
         self::assertSame(
             [
-                'id' => 25,
+                'id' => 15,
                 'height' => 700,
                 'pagination' => 25,
-                'layout' => 'cards',
-                'loading' => 'eager',
-                'fields' => ['Name', 'Email', 'Town'],
-                'actions' => ['search', 'detail', 'export'],
-                'sort' => '',
-                'sort_direction' => 'asc',
-                'title' => 'Registrations & payments',
+                'layout' => 'listcard',
+                'loading' => 'lazy',
+                'fields' => ['Nom', 'Prenom', 'Email'],
+                'actions' => ['detail', 'edit', 'export'],
+                'sort' => 'Nom|Prenom',
+                'sort_direction' => 'asc|asc',
+                'title' => 'Liste des inscrits',
                 'title_set' => true,
             ],
             EmbedOptionsService::resolve($attributes)
@@ -71,9 +71,110 @@ final class CbListPluginTest extends TestCase
         );
     }
 
+    public function testEmptyTitleExplicitlyHidesTheVisibleTitle(): void
+    {
+        $options = EmbedOptionsService::resolve(
+            TagSyntaxService::parseAttributes('id=15 title=""')
+        );
+
+        self::assertTrue($options['title_set']);
+        self::assertSame('', $options['title']);
+
+        $extension = file_get_contents(
+            self::ROOT . '/plugins/content/contentbuilderng_cblist/src/Extension/ContentbuilderngList.php'
+        );
+        self::assertIsString($extension);
+        self::assertStringContainsString(
+            "\$options['title_set'] && \$options['title'] !== ''",
+            $extension,
+            'An empty visible title must retain the translated accessible iframe fallback.'
+        );
+
+        $template = file_get_contents(self::ROOT . '/site/tmpl/list/default.php');
+        self::assertIsString($template);
+        self::assertStringContainsString('if ($embeddedListTitleProvided) :', $template);
+        self::assertStringContainsString('if ($embeddedListTitle !== \'\') :', $template);
+    }
+
+    public function testHideTitleKeywordIsAnAliasForAnEmptyTitle(): void
+    {
+        foreach (['hide', 'HIDE', ' Hide '] as $value) {
+            $options = EmbedOptionsService::resolve(['id' => '15', 'title' => $value]);
+
+            self::assertTrue($options['title_set']);
+            self::assertSame('', $options['title']);
+        }
+    }
+
+    public function testEveryInvalidParameterIsReportedWithItsValue(): void
+    {
+        self::assertSame(
+            [
+                [
+                    'code' => 'unknown_option',
+                    'parameter' => 'headers',
+                    'value' => 'Noms',
+                    'detail' => '',
+                ],
+                [
+                    'code' => 'invalid_value',
+                    'parameter' => 'pagination',
+                    'value' => '0',
+                    'detail' => 'pagination',
+                ],
+                [
+                    'code' => 'invalid_value',
+                    'parameter' => 'loading',
+                    'value' => 'automatic',
+                    'detail' => 'loading',
+                ],
+                [
+                    'code' => 'unknown_action',
+                    'parameter' => 'actions',
+                    'value' => 'teleport',
+                    'detail' => 'actions',
+                ],
+                [
+                    'code' => 'invalid_value',
+                    'parameter' => 'dir',
+                    'value' => 'asce',
+                    'detail' => 'dir',
+                ],
+            ],
+            EmbedOptionsService::validationErrors([
+                'id' => '15',
+                'headers' => 'Noms',
+                'pagination' => '0',
+                'loading' => 'automatic',
+                'actions' => 'teleport',
+                'dir' => 'asce',
+            ])
+        );
+    }
+
+    public function testSingleSortDirectionAppliesToEverySortField(): void
+    {
+        self::assertSame(
+            'asc|asc|asc',
+            EmbedOptionsService::resolve([
+                'id' => '15',
+                'sort' => 'Field 1|Field 2| Field 3',
+                'dir' => 'asc',
+            ])['sort_direction']
+        );
+        self::assertSame(
+            'desc|desc|desc',
+            EmbedOptionsService::resolve([
+                'id' => '15',
+                'sort' => 'Field 1|Field 2|Field 3',
+                'dir' => 'desc',
+            ])['sort_direction']
+        );
+    }
+
     public function testTagPatternAllowsClosingBraceInsideQuotedTitle(): void
     {
-        $tag = '{CBList id=25 title="Registrations } archived"}';
+        $tag = '{CBList id=15 title="Registrations } archived"}';
 
         self::assertSame(1, preg_match(TagSyntaxService::TAG_PATTERN, $tag, $matches));
         self::assertSame($tag, $matches[0]);
@@ -97,16 +198,21 @@ final class CbListPluginTest extends TestCase
             'missing id' => [[]],
             'non-positive id' => [['id' => '0']],
             'mixed id' => [['id' => '25foo']],
-            'height too small' => [['id' => '25', 'height' => '239']],
-            'height too large' => [['id' => '25', 'height' => '5001']],
-            'invalid layout' => [['id' => '25', 'layout' => '../default']],
-            'invalid loading' => [['id' => '25', 'loading' => 'automatic']],
-            'fields comma separator rejected' => [['id' => '25', 'fields' => 'Name,Email']],
-            'fields semicolon separator rejected' => [['id' => '25', 'fields' => 'Name;Email']],
-            'invalid field control character' => [['id' => '25', 'fields' => "Name|\x01Email"]],
-            'actions comma separator rejected' => [['id' => '25', 'actions' => 'search,export']],
-            'actions semicolon separator rejected' => [['id' => '25', 'actions' => 'search;export']],
-            'unknown action' => [['id' => '25', 'actions' => 'search|teleport']],
+            'height too small' => [['id' => '15', 'height' => '239']],
+            'height too large' => [['id' => '15', 'height' => '5001']],
+            'invalid layout' => [['id' => '15', 'layout' => '../default']],
+            'invalid loading' => [['id' => '15', 'loading' => 'automatic']],
+            'fields comma separator rejected' => [['id' => '15', 'fields' => 'Name,Email']],
+            'fields semicolon separator rejected' => [['id' => '15', 'fields' => 'Name;Email']],
+            'invalid field control character' => [['id' => '15', 'fields' => "Name|\x01Email"]],
+            'actions comma separator rejected' => [['id' => '15', 'actions' => 'search,export']],
+            'actions semicolon separator rejected' => [['id' => '15', 'actions' => 'search;export']],
+            'unknown action' => [['id' => '15', 'actions' => 'search|teleport']],
+            'sort direction count mismatch' => [[
+                'id' => '15',
+                'sort' => 'Field 1|Field 2|Field 3',
+                'dir' => 'asc|desc',
+            ]],
         ];
     }
 
@@ -117,14 +223,6 @@ final class CbListPluginTest extends TestCase
             EmbeddedListFieldFilterService::filter(
                 [11, 12, 13, 14, 15],
                 [
-                    11 => 'Identifier',
-                    12 => 'Nom',
-                    13 => 'Téléphone',
-                    14 => 'Courriel',
-                    15 => 'Ville',
-                    99 => 'Champ masqué',
-                ],
-                [
                     11 => 'id',
                     12 => 'name',
                     13 => 'phone',
@@ -132,7 +230,7 @@ final class CbListPluginTest extends TestCase
                     15 => 'town',
                     99 => 'hidden',
                 ],
-                'Nom| EMAIL|15'
+                'name|email|15'
             )
         );
     }
@@ -144,9 +242,23 @@ final class CbListPluginTest extends TestCase
 
         EmbeddedListFieldFilterService::filter(
             [11],
-            [11 => 'Identifier'],
             [11 => 'id'],
             'Missing'
+        );
+    }
+
+    public function testEmbeddedFieldMatchingKeepsOnlyRequestedValidColumnsAndReportsEveryUnknownOne(): void
+    {
+        self::assertSame(
+            [
+                'columns' => [12, 14],
+                'unknown' => ['Prénom', 'prenom', 'EMAIL', 'Courriels'],
+            ],
+            EmbeddedListFieldFilterService::matchSelectors(
+                [11, 12, 13, 14],
+                [11 => 'Id', 12 => 'Prenom', 13 => 'Telephone', 14 => 'Email'],
+                'Prenom|Prénom|prenom|Email|EMAIL|Courriels'
+            )
         );
     }
 
@@ -156,9 +268,8 @@ final class CbListPluginTest extends TestCase
             ['name', 'town'],
             EmbeddedListFieldFilterService::filter(
                 ['town', 'email', 'name'],
-                ['town' => 'Town', 'email' => 'Email', 'name' => 'Name'],
                 ['town' => 'town', 'email' => 'email', 'name' => 'name'],
-                'Name|Town'
+                'name|town'
             )
         );
     }
@@ -291,15 +402,59 @@ final class CbListPluginTest extends TestCase
         $listTemplate = \file_get_contents(self::ROOT . '/site/tmpl/list/default.php');
         $detailsTemplate = \file_get_contents(self::ROOT . '/site/tmpl/details/default.php');
         $editTemplate = \file_get_contents(self::ROOT . '/site/tmpl/edit/default.php');
+        $extension = \file_get_contents(
+            self::ROOT . '/plugins/content/contentbuilderng_cblist/src/Extension/ContentbuilderngList.php'
+        );
 
         self::assertIsString($listController);
         self::assertIsString($editController);
         self::assertIsString($listTemplate);
         self::assertIsString($detailsTemplate);
         self::assertIsString($editTemplate);
+        self::assertIsString($extension);
         self::assertStringContainsString('private function buildEmbeddedListQuery(): string', $listController);
         self::assertStringContainsString('private function buildEmbeddedListQuery(): string', $editController);
         self::assertStringContainsString('name="cblist_actions"', $listTemplate);
+        self::assertStringContainsString('foreach ($this->embedded_list_errors as $embeddedListError)', $listTemplate);
+        self::assertStringContainsString(
+            'if ($this->embedded_list_errors !== []) { return; }',
+            $listTemplate,
+            'An invalid embedded CBList must render its errors without rendering the list below them.'
+        );
+        self::assertStringContainsString('data-cblist-errors-only', $listTemplate);
+        self::assertStringContainsString('target="_blank" rel="noopener noreferrer"', $listTemplate);
+
+        $helpService = \file_get_contents(
+            self::ROOT . '/site/src/Service/EmbeddedListHelpService.php'
+        );
+        self::assertIsString($helpService);
+        self::assertStringContainsString('task=cblisthelp.display', $helpService);
+        self::assertStringNotContainsString("authorise('core.manage', 'com_plugins')", $helpService);
+        self::assertStringNotContainsString('administrator/index.php', $helpService);
+        self::assertStringContainsString('EmbeddedListHelpService::syntaxUrl()', $extension);
+
+        $publicHelpView = \file_get_contents(
+            self::ROOT . '/site/src/View/Cblisthelp/HtmlView.php'
+        );
+        $publicHelpTemplate = \file_get_contents(
+            self::ROOT . '/site/tmpl/cblisthelp/default.php'
+        );
+        self::assertIsString($publicHelpView);
+        self::assertIsString($publicHelpTemplate);
+        self::assertStringContainsString('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_TEXT', $publicHelpView);
+        self::assertStringContainsString('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_FIELDS_TEXT', $publicHelpView);
+        self::assertStringContainsString('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_TEXT', $publicHelpView);
+        self::assertStringContainsString('foreach ($this->sections as $section)', $publicHelpTemplate);
+
+        $embedScript = \file_get_contents(
+            self::ROOT . '/plugins/content/contentbuilderng_cblist/media/js/cblist.js'
+        );
+        self::assertIsString($embedScript);
+        self::assertStringContainsString(
+            "document.querySelector('[data-cblist-errors-only]')",
+            $embedScript,
+            'An error-only iframe must shrink to its message instead of keeping the configured minimum height.'
+        );
         self::assertStringContainsString("getString('cblist_fields', '')", $editTemplate);
         self::assertStringContainsString('foreach ($embeddedListParams as $embeddedListName', $detailsTemplate);
         self::assertStringContainsString('foreach ($embeddedListParams as $embeddedListName', $editTemplate);
@@ -341,13 +496,122 @@ final class CbListPluginTest extends TestCase
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_FIELDS_TEXT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_LABEL',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_TEXT',
-                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_TAG',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_VALIDATION_INTRO',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_SYNTAX_HELP',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EMPTY_VALUE',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_OPTION',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_OPTION_VALUE',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_ACTION',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_VIEW',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_ID',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_HEIGHT',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_PAGINATION',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LAYOUT',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LOADING',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_FIELDS',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_ACTIONS',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_SORT',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_DIR',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_DIR_COUNT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_IFRAME_TITLE',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_OPEN_LIST',
             ] as $key
         ) {
             self::assertArrayHasKey($key, $translations, $language . ': ' . $key);
             self::assertNotSame('', $translations[$key], $language . ': ' . $key);
+        }
+    }
+
+    #[DataProvider('languageProvider')]
+    public function testAllErrorMessagesAreCompleteAndKeepMatchingPlaceholders(string $language): void
+    {
+        $pluginTranslations = \parse_ini_file(
+            self::ROOT
+            . '/plugins/content/contentbuilderng_cblist/language/'
+            . $language
+            . '/plg_content_contentbuilderng_cblist.ini'
+        );
+        $siteTranslations = \parse_ini_file(
+            self::ROOT . '/site/language/' . $language . '/com_contentbuilderng.ini'
+        );
+        self::assertIsArray($pluginTranslations);
+        self::assertIsArray($siteTranslations);
+
+        $expectedPlaceholders = [
+            'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_OPTION' => 2,
+            'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_OPTION_VALUE' => 3,
+            'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_ACTION' => 1,
+            'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_VIEW' => 1,
+            'COM_CONTENTBUILDERNG_CBLIST_UNKNOWN_FIELD' => 1,
+            'COM_CONTENTBUILDERNG_CBLIST_UNKNOWN_SORT_FIELD' => 1,
+        ];
+
+        foreach ($expectedPlaceholders as $key => $expectedCount) {
+            $translations = str_starts_with($key, 'PLG_') ? $pluginTranslations : $siteTranslations;
+            self::assertArrayHasKey($key, $translations, $language . ': ' . $key);
+            preg_match_all('/%(?:\d+\$)?[sd]/', (string) $translations[$key], $matches);
+            self::assertCount($expectedCount, $matches[0], $language . ': ' . $key);
+        }
+
+        foreach (
+            [
+                'COM_CONTENTBUILDERNG_CBLIST_VALIDATION_INTRO',
+                'COM_CONTENTBUILDERNG_CBLIST_SYNTAX_HELP',
+                'COM_CONTENTBUILDERNG_CBLIST_INVALID_FIELDS',
+            ] as $key
+        ) {
+            self::assertArrayHasKey($key, $siteTranslations, $language . ': ' . $key);
+            self::assertNotSame('', $siteTranslations[$key], $language . ': ' . $key);
+        }
+
+        $allErrorText = implode(' ', array_merge($pluginTranslations, $siteTranslations));
+        foreach (
+            [
+                'configured view ordering is used instead',
+                'tri configuré dans la vue est utilisé',
+                'konfigurierte Sortierung verwendet',
+            ] as $obsoleteWording
+        ) {
+            self::assertStringNotContainsString($obsoleteWording, $allErrorText, $language);
+        }
+    }
+
+    #[DataProvider('languageProvider')]
+    public function testTranslatedHelpExamplesUseValidSyntax(string $language): void
+    {
+        $translations = \parse_ini_file(
+            self::ROOT
+            . '/plugins/content/contentbuilderng_cblist/language/'
+            . $language
+            . '/plg_content_contentbuilderng_cblist.ini'
+        );
+        self::assertIsArray($translations);
+
+        $help = implode('', [
+            $translations['PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_TEXT'],
+            $translations['PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_FIELDS_TEXT'],
+            $translations['PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_TEXT'],
+        ]);
+        self::assertStringNotContainsString('{CBList id=25', $help, $language);
+        self::assertStringContainsString('Thoth', $help, $language . ': missing default theme explanation');
+
+        $actionsHelp = $translations['PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_TEXT'];
+        self::assertStringContainsString('<ul>', $actionsHelp, $language . ': actions must be displayed vertically');
+        foreach (EmbeddedListActionFilterService::ACTIONS as $action) {
+            self::assertStringContainsString('<code>' . $action . '</code>', $actionsHelp, $language);
+        }
+
+        preg_match_all(TagSyntaxService::TAG_PATTERN, $help, $matches);
+        self::assertNotEmpty($matches[1], $language . ': no documented CBList example found');
+
+        foreach ($matches[1] as $rawAttributes) {
+            self::assertSame(
+                15,
+                EmbedOptionsService::resolve(
+                    TagSyntaxService::parseAttributes((string) $rawAttributes)
+                )['id'],
+                $language . ': invalid documented CBList example'
+            );
         }
     }
 

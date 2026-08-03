@@ -13,6 +13,22 @@
                 return;
             }
 
+            const errorsOnly = document.querySelector('[data-cblist-errors-only]');
+            if (errorsOnly) {
+                const bodyStyle = document.defaultView?.getComputedStyle(body);
+                const bottomMargin = Number.parseFloat(bodyStyle?.marginBottom || '0');
+                const height = Math.max(
+                    1,
+                    Math.ceil(errorsOnly.getBoundingClientRect().bottom + bottomMargin)
+                );
+
+                if (Math.abs(frame.getBoundingClientRect().height - height) > 1) {
+                    frame.style.height = `${height}px`;
+                }
+
+                return;
+            }
+
             const minimum = Number.parseInt(frame.dataset.cblistMinHeight || '240', 10);
             const height = Math.max(
                 Number.isFinite(minimum) ? minimum : 240,

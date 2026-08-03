@@ -32,6 +32,13 @@
 - New admin UI should follow native Joomla behavior when applicable.
 - Preserve a non-AJAX fallback when practical.
 
+## CBList examples
+- Use ContentBuilder NG view ID `15` as the default placeholder in CBList
+  documentation, descriptions, examples, tests and AI-generated instructions,
+  unless a specific scenario explicitly requires another ID.
+- Quote values containing `|` or spaces, for example
+  `fields="Nom|Prenom|Email"` and `sort="Nom|Prenom"`.
+
 ## Translations
 - Update `en-GB`, `fr-FR`, and `de-DE` together for every translation change.
 - Keep wording aligned across languages.

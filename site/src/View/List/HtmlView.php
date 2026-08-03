@@ -26,6 +26,7 @@ use Joomla\CMS\Uri\Uri;
 use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewThemeHelper;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListHelpService;
 
 class HtmlView extends BaseHtmlView
 {
@@ -45,7 +46,9 @@ class HtmlView extends BaseHtmlView
     public int $direct_storage_read_only = 0;
     public bool $preview_list_access_configured = false;
     public float $render_time_ms = 0;
-    public string $embedded_list_error = '';
+    /** @var list<string> */
+    public array $embedded_list_errors = [];
+    public string $embedded_list_help_url = '';
     public string $preview_theme = '';
     public string $stored_theme = '';
 
@@ -65,7 +68,7 @@ class HtmlView extends BaseHtmlView
         $debugRenderStart = microtime(true);
         $app = $this->getApp();
         $this->frontend = $app->isClient('site');
-        $this->embedded_list_error = '';
+        $this->embedded_list_errors = [];
 
         // Get data from the model
         $subject = $this->get('Data');
@@ -80,6 +83,23 @@ class HtmlView extends BaseHtmlView
             $subject->intro_text = htmlspecialchars($embeddedTitle, ENT_QUOTES, 'UTF-8');
         }
         $this->applyEmbeddedFieldFilter($subject, $app);
+        foreach ((array) ($subject->embedded_list_validation_errors ?? []) as $validationError) {
+            if (!is_array($validationError)) {
+                continue;
+            }
+
+            $parameter = (string) ($validationError['parameter'] ?? '');
+            $value = (string) ($validationError['value'] ?? '');
+            if ($parameter === 'sort') {
+                $this->embedded_list_errors[] = Text::sprintf(
+                    'COM_CONTENTBUILDERNG_CBLIST_UNKNOWN_SORT_FIELD',
+                    $value
+                );
+            }
+        }
+        if ($this->embedded_list_errors !== []) {
+            $this->embedded_list_help_url = EmbeddedListHelpService::syntaxUrl();
+        }
         $this->preview_list_access_configured = !empty($subject->direct_storage_mode);
         if (!$this->preview_list_access_configured) {
             $config = PackedDataHelper::decodePackedData((string) ($subject->config ?? ''), [], true);
@@ -243,21 +263,28 @@ class HtmlView extends BaseHtmlView
             : [];
 
         try {
-            $filteredColumns = EmbeddedListFieldFilterService::filter(
+            $match = EmbeddedListFieldFilterService::matchSelectors(
                 $visibleColumns,
-                $labels,
                 $names,
                 $rawSelectors
             );
-        } catch (\InvalidArgumentException $exception) {
-            $error = $exception->getMessage();
-            $subject->embedded_list_error = str_starts_with($error, 'unknown_field:')
-                ? Text::sprintf('COM_CONTENTBUILDERNG_CBLIST_UNKNOWN_FIELD', substr($error, 14))
-                : Text::_('COM_CONTENTBUILDERNG_CBLIST_INVALID_FIELDS');
-            // The plugin validates syntax before rendering; this branch reports
-            // an unknown field from the current view in the embedded screen.
+        } catch (\InvalidArgumentException) {
+            $this->embedded_list_errors[] = Text::_('COM_CONTENTBUILDERNG_CBLIST_INVALID_FIELDS');
+            $subject->show_id_column = 0;
+            $subject->visible_cols = [];
+            $subject->labels = [];
+            $subject->linkable_elements = [];
             return;
         }
+
+        foreach ($match['unknown'] as $unknownSelector) {
+            $this->embedded_list_errors[] = Text::sprintf(
+                'COM_CONTENTBUILDERNG_CBLIST_UNKNOWN_FIELD',
+                $unknownSelector
+            );
+        }
+
+        $filteredColumns = $match['columns'];
         $allowedReferences = array_fill_keys(
             array_map(static fn(int|string $referenceId): string => (string) $referenceId, $filteredColumns),
             true

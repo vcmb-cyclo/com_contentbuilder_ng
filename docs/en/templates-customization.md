@@ -97,27 +97,54 @@ Bundled content plugins include:
 
 ### Embedding a list view with CBList
 
-The `CBList` content plugin embeds a complete interactive list view in a Joomla
-article while keeping the component request isolated from the article:
+The `CBList` content plugin embeds a complete interactive ContentBuilder NG
+list view in a Joomla article. The view keeps its ACL permissions, filters,
+pagination and record actions.
+
+Simple example - displays view 15 with its configured fields, title, sorting,
+pagination, actions, layout and theme, without any CBList override:
 
 ```text
 {CBList id=15}
 ```
 
-The optional `itemid` parameter applies the settings of an existing
-ContentBuilder NG menu item. `layout` selects a list layout. `fields` keeps a
-comma-separated subset of fields using their source names, reference IDs or
-exact labels; it can only reduce the fields already visible and allowed by the
-view. `height` sets the minimum height in pixels, `loading` accepts `lazy` or
-`eager`, and `title` provides the accessible frame title:
+Realistic example with the principal options:
 
 ```text
-{CBList id=25 itemid=142 layout=cards fields="Name|Email|Town" height=700 title="Registrations"}
+{CBList id=15 fields="Nom|Prenom|Email" title="Registration list" sort="Nom|Prenom" dir="asc" pagination=25 actions="detail|edit|export" layout=cards height=700 loading=lazy}
 ```
 
-The embedded frame resizes automatically and preserves the list ACLs, filters,
-pagination and record actions.
-The initial sort accepts multiple fields with one matching direction per field. Values are separated by `|` and must have the same number of items: `sort="Name|FirstName" dir="asc|desc"`. Extra, missing or unknown directions are rejected.
+For `fields` and `sort`, use only exact, case-sensitive source element names
+or exact reference IDs. Display labels and accent or case variants are invalid:
+if the source name is `Prenom`, `Prénom` and `prenom` are rejected.
+
+`id` identifies the ContentBuilder NG view and is required; project examples use
+view `15`. `fields` filters and orders the displayed columns. `title` replaces
+the visible view title; omit it to keep the configured title, or use the clearer
+`title=hide` to hide it completely. `title=""` remains equivalent. `sort`
+defines the initial order, and one `dir="asc"` or `dir="desc"`
+applies to every sorted field. Use one `|`-separated direction per field only
+when mixing directions. `pagination` sets the number of records per page.
+`actions` selects the available controls on top of ACL. `layout`, `height` and
+`loading` control the presentation and iframe loading.
+
+- `layout=cards` displays records as cards instead of the standard table. It is
+  the readable alias of the `listcard` layout. Omitting `layout` keeps the
+  view's normal list layout.
+- `height=700` sets the iframe's initial minimum height to 700 pixels. The frame
+  can still grow automatically when the list needs more room.
+- `loading=lazy` is the default and waits until the list approaches the visible
+  part of the page before loading it. Use `loading=eager` to load it immediately.
+- CBList uses the theme configured in the ContentBuilder NG view. **Thoth** is
+  the default and fallback theme; there is no `theme=` option in the CBList tag.
+
+CBList and CBStats can be used together in the same article, for example a
+summary chart followed by its detailed registration list:
+
+```text
+{CBStats id=15 field=Ville output=bar}
+{CBList id=15 fields="Nom|Prenom|Email" title="Registration list" sort="Nom|Prenom" dir="asc"}
+```
 
 CBStats inserts dynamic statistics from a ContentBuilder NG view into Joomla
 content. Its general syntax is:

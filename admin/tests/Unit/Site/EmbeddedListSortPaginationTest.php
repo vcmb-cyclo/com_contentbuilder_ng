@@ -59,27 +59,28 @@ final class EmbeddedListSortPaginationTest extends TestCase
         );
     }
 
-    public function testUnknownSortColumnDegradesInsteadOfFailingThePage(): void
+    public function testUnknownSortColumnIsReportedWithoutFailingThePage(): void
     {
         $source = $this->read(self::MODEL);
 
-        $message = 'A sort= naming a column the view does not expose must degrade to the view\'s own '
-            . 'order, like every other embedded parameter. The plugin cannot validate the column '
-            . 'name (it does not know the form labels), so a typo in an article reached this and '
-            . 'returned HTTP 500.';
+        $message = 'A sort= naming a column the view does not expose must be reported clearly without '
+            . 'rendering the invalid embedded list.';
 
         $guard = strpos($source, "\$requestedOrdering === '' && \$requestedFullordering === ''");
         self::assertNotFalse($guard, $message);
 
         $try = strpos($source, 'try {', $guard);
-        $filter = strpos($source, 'EmbeddedListFieldFilterService::filter(', $guard);
+        $filter = strpos($source, 'EmbeddedListFieldFilterService::matchSelectors(', $guard);
         $catch = strpos($source, 'catch (\InvalidArgumentException)', $guard);
+        $report = strpos($source, '$data->embedded_list_validation_errors[]', $guard);
 
         self::assertNotFalse($try, $message);
         self::assertNotFalse($filter, $message);
         self::assertNotFalse($catch, $message);
+        self::assertNotFalse($report, $message);
         self::assertLessThan($filter, $try, $message);
         self::assertLessThan($catch, $filter, $message);
+        self::assertLessThan($report, $filter, $message);
     }
 
     public function testDirectionIsReadWithoutStrippingTheSeparator(): void

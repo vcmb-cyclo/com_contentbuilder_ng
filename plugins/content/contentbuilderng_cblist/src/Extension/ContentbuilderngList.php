@@ -7,6 +7,7 @@ namespace CB\Plugin\Content\ContentbuilderngList\Extension;
 \defined('_JEXEC') or die;
 
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListHelpService;
 use CB\Plugin\Content\ContentbuilderngList\Service\EmbedOptionsService;
 use CB\Plugin\Content\ContentbuilderngList\Service\TagSyntaxService;
 use Joomla\CMS\Application\SiteApplication;
@@ -61,26 +62,21 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
 
     private function renderTag(string $rawAttributes, SiteApplication $app): string
     {
-        try {
-            $options = EmbedOptionsService::resolve(TagSyntaxService::parseAttributes($rawAttributes));
-            if (!$this->viewExists($options['id'])) {
-                throw new \InvalidArgumentException('view_unknown:' . $options['id']);
-            }
-        } catch (\InvalidArgumentException $exception) {
-            $error = $exception->getMessage();
-            $message = match (true) {
-                str_starts_with($error, 'action_unknown:') => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_ACTION', substr($error, 15)),
-                str_starts_with($error, 'layout_unknown:') => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_LAYOUT', substr($error, 15)),
-                str_starts_with($error, 'view_unknown:') => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_VIEW', substr($error, 14)),
-                str_starts_with($error, 'option_unknown:') => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_OPTION', substr($error, 15)),
-                $error === 'dir' => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_OPTION_VALUE', 'dir'),
-                $error === 'sort' => Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_OPTION_VALUE', 'sort'),
-                default => Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_TAG'),
-            };
+        $attributes = TagSyntaxService::parseAttributes($rawAttributes);
+        $errors = EmbedOptionsService::validationErrors($attributes);
 
-            return '<div class="alert alert-warning" role="alert">'
-                . htmlspecialchars($message, ENT_QUOTES, 'UTF-8')
-                . '</div>';
+        if ($errors !== []) {
+            return $this->renderValidationErrors($errors, $app);
+        }
+
+        $options = EmbedOptionsService::resolve($attributes);
+        if (!$this->viewExists($options['id'])) {
+            return $this->renderValidationErrors([[
+                'code' => 'unknown_view',
+                'parameter' => 'id',
+                'value' => (string) $options['id'],
+                'detail' => '',
+            ]], $app);
         }
 
         $query = [
@@ -114,7 +110,7 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
         }
 
         $url = Route::_('index.php?' . http_build_query($query), false);
-        $title = $options['title_set']
+        $title = $options['title_set'] && $options['title'] !== ''
             ? $options['title']
             : Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_IFRAME_TITLE', $options['id']);
         $openLabel = Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_OPEN_LIST');
@@ -136,6 +132,82 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
             . htmlspecialchars($openLabel, ENT_QUOTES, 'UTF-8')
             . '</a></p></noscript>'
             . '</div>';
+    }
+
+    /**
+     * @param list<array{code: string, parameter: string, value: string, detail: string}> $errors
+     */
+    private function renderValidationErrors(array $errors, SiteApplication $app): string
+    {
+        $items = array_map(
+            fn(array $error): string => '<li>'
+                . htmlspecialchars($this->validationMessage($error), ENT_QUOTES, 'UTF-8')
+                . '</li>',
+            $errors
+        );
+
+        $helpUrl = EmbeddedListHelpService::syntaxUrl();
+        $helpLink = $helpUrl !== ''
+            ? '<a class="ms-3" href="' . htmlspecialchars($helpUrl, ENT_QUOTES, 'UTF-8')
+                . '" target="_blank" rel="noopener noreferrer">'
+                . '<span class="fa-solid fa-circle-question me-1" aria-hidden="true"></span>'
+                . htmlspecialchars(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_SYNTAX_HELP'), ENT_QUOTES, 'UTF-8')
+                . '</a>'
+            : '';
+
+        return '<div class="alert alert-warning" role="alert">'
+            . '<div class="d-flex flex-wrap align-items-center justify-content-between gap-2"><strong>'
+            . '<span class="fa-solid fa-triangle-exclamation me-1" aria-hidden="true"></span>'
+            . htmlspecialchars(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_VALIDATION_INTRO'), ENT_QUOTES, 'UTF-8')
+            . '</strong>' . $helpLink . '</div><ul class="mb-0 mt-2">'
+            . implode('', $items)
+            . '</ul></div>';
+    }
+
+    /**
+     * @param array{code: string, parameter: string, value: string, detail: string} $error
+     */
+    private function validationMessage(array $error): string
+    {
+        $value = $error['value'] !== ''
+            ? $error['value']
+            : Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EMPTY_VALUE');
+
+        if ($error['code'] === 'unknown_option') {
+            return Text::sprintf(
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_OPTION',
+                $error['parameter'],
+                $value
+            );
+        }
+
+        if ($error['code'] === 'unknown_action') {
+            return Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_ACTION', $value);
+        }
+
+        if ($error['code'] === 'unknown_view') {
+            return Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_VIEW', $value);
+        }
+
+        $detailKey = match ($error['detail']) {
+            'id' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_ID',
+            'height' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_HEIGHT',
+            'pagination' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_PAGINATION',
+            'layout' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LAYOUT',
+            'loading' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LOADING',
+            'fields' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_FIELDS',
+            'actions' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_ACTIONS',
+            'sort' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_SORT',
+            'dir_count' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_DIR_COUNT',
+            default => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_DIR',
+        };
+
+        return Text::sprintf(
+            'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_OPTION_VALUE',
+            $error['parameter'],
+            $value,
+            Text::_($detailKey)
+        );
     }
 
     private function viewExists(int $id): bool

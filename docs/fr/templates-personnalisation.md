@@ -121,25 +121,58 @@ Balises détectées :
 
 ### Intégrer une vue liste avec CBList
 
-Le plugin de contenu `CBList` intègre une vue liste interactive complète dans
-un article Joomla, tout en isolant la requête du composant de celle de
-l’article :
+Le plugin de contenu `CBList` intègre une vue liste interactive complète
+ContentBuilder NG dans un article Joomla. La vue conserve ses droits ACL, ses
+filtres, sa pagination et ses actions sur les enregistrements.
+
+Exemple simple — affiche la vue 15 avec ses champs, son titre, son tri, sa
+pagination, ses actions, sa mise en page et son thème configurés, sans aucune
+personnalisation CBList :
 
 ```text
 {CBList id=15}
 ```
 
-Le paramètre facultatif `itemid` applique les réglages d’un élément de menu
-ContentBuilder NG existant. `layout` sélectionne une mise en page de liste.
-`fields` conserve les champs indiqués, séparés par `|`, en utilisant leurs noms source, leurs identifiants de référence ou leurs libellés exacts. L’ordre des sélecteurs détermine l’ordre des colonnes et ne peut que réduire les champs déjà visibles et autorisés dans la vue. `actions` fonctionne comme une liste blanche00a0: par exemple, `actions="search"` conserve la recherche et masque notamment l’action «00a0Éditer00a0». `height` définit la hauteur minimale en pixels, et `loading` accepte `lazy` ou `eager`. `title` définit le titre personnalisé visible00a0; s’il est omis, le titre CBNG est conservé, tandis que `title=""` masque le titre :
+Exemple réaliste avec les principales options :
 
 ```text
-{CBList id=25 itemid=142 layout=cards fields="Nom|Email|Ville" height=700 title="Inscriptions"}
+{CBList id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 actions="detail|edit|export" layout=cards height=700 loading=lazy}
 ```
 
-Le cadre intégré adapte automatiquement sa hauteur et conserve les ACL, les
-filtres, la pagination et les actions sur les enregistrements.
-Le tri initial accepte plusieurs champs avec une direction correspondante. Les valeurs sont séparées par `|` et doivent avoir le même nombre d’éléments : `sort="Nom|Prenom" dir="asc|desc"`. Une direction en trop, manquante ou inconnue est refusée.
+Pour `fields` et `sort`, utilisez uniquement les noms source exacts des éléments,
+en respectant la casse, ou leurs identifiants de référence exacts. Les libellés
+affichés et les variantes d’accent ou de casse sont invalides : si le nom source
+est `Prenom`, `Prénom` et `prenom` sont refusés.
+
+`id` identifie la vue ContentBuilder NG et reste obligatoire ; les exemples du
+projet utilisent la vue `15`. `fields` filtre et ordonne les colonnes affichées.
+`title` remplace le titre visible de la vue ; omettez-le pour conserver le titre
+configuré, ou utilisez la forme plus explicite `title=hide` pour le masquer
+complètement. `title=""` reste équivalent. `sort` définit le tri initial :
+une seule valeur `dir="asc"` ou `dir="desc"` s’applique à tous les champs triés.
+Indiquez une direction par champ, séparée par `|`, uniquement pour mélanger les
+directions. `pagination` fixe le nombre d’enregistrements par page. `actions`
+sélectionne les contrôles disponibles dans la limite des ACL. `layout`, `height`
+et `loading` règlent la présentation et le chargement du cadre.
+
+- `layout=cards` affiche les enregistrements sous forme de cartes plutôt que
+  dans le tableau standard. C’est l’alias lisible de la mise en page `listcard`.
+  Sans `layout`, la mise en page normale de la vue est conservée.
+- `height=700` fixe la hauteur minimale initiale du cadre à 700 pixels. Le cadre
+  peut ensuite s’agrandir automatiquement si la liste a besoin de plus de place.
+- `loading=lazy` est la valeur par défaut : la liste est chargée lorsqu’elle
+  approche de la partie visible de la page. `loading=eager` la charge immédiatement.
+- CBList utilise le thème configuré dans la vue ContentBuilder NG. **Thoth** est
+  le thème par défaut et de secours ; la balise CBList ne possède pas d’option
+  `theme=`.
+
+CBList et CBStats peuvent être associés dans le même article, par exemple un
+graphique de synthèse suivi de la liste détaillée des inscrits :
+
+```text
+{CBStats id=15 field=Ville output=bar}
+{CBList id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc"}
+```
 
 CBStats insère dans les contenus Joomla des statistiques dynamiques provenant
 d'une vue ContentBuilder NG. Sa syntaxe générale est :

@@ -20,28 +20,50 @@ final class EmbeddedListFieldFilterService
 
     /**
      * @param array<int|string, int|string> $visibleColumns
-     * @param array<int|string, string>     $labels
      * @param array<int|string, string>     $names
      *
      * @return list<int|string>
      */
     public static function filter(
         array $visibleColumns,
-        array $labels,
+        array $names,
+        string $rawSelectors
+    ): array {
+        $match = self::matchSelectors($visibleColumns, $names, $rawSelectors);
+
+        if ($match['unknown'] !== []) {
+            throw new \InvalidArgumentException('unknown_field:' . $match['unknown'][0]);
+        }
+
+        return $match['columns'];
+    }
+
+    /**
+     * Matches only exact source element names or exact reference IDs.
+     * Display labels, case changes and accent variants are intentionally
+     * rejected so article syntax remains stable when labels are translated.
+     *
+     * @param array<int|string, int|string> $visibleColumns
+     * @param array<int|string, string>     $names
+     *
+     * @return array{columns: list<int|string>, unknown: list<string>}
+     */
+    public static function matchSelectors(
+        array $visibleColumns,
         array $names,
         string $rawSelectors
     ): array {
         $selectors = self::parseSelectors($rawSelectors);
 
         if ($selectors === []) {
-            return array_values($visibleColumns);
+            return ['columns' => array_values($visibleColumns), 'unknown' => []];
         }
 
         $filteredColumns = [];
         $selectedReferences = [];
+        $unknownSelectors = [];
 
         foreach ($selectors as $selector) {
-            $normalizedSelector = self::normalize($selector);
             $selectorMatched = false;
 
             foreach ($visibleColumns as $referenceId) {
@@ -52,13 +74,12 @@ final class EmbeddedListFieldFilterService
                 }
 
                 $candidates = [
-                    (string) $referenceId,
-                    (string) ($names[$referenceId] ?? ""),
-                    (string) ($labels[$referenceId] ?? ""),
+                    $referenceKey,
+                    (string) ($names[$referenceId] ?? ''),
                 ];
 
                 foreach ($candidates as $candidate) {
-                    if ($normalizedSelector !== "" && self::normalize($candidate) === $normalizedSelector) {
+                    if ($selector !== '' && $candidate === $selector) {
                         $filteredColumns[] = $referenceId;
                         $selectorMatched = true;
                         $selectedReferences[$referenceKey] = true;
@@ -68,18 +89,16 @@ final class EmbeddedListFieldFilterService
             }
 
             if (!$selectorMatched) {
-                throw new \InvalidArgumentException('unknown_field:' . $selector);
+                $unknownSelectors[] = $selector;
             }
         }
 
-        return $filteredColumns;
+        return ['columns' => $filteredColumns, 'unknown' => $unknownSelectors];
     }
 
     /**
-     * Splits on `|`, same convention as {CBStats hide="..."}. `,` and `;`
-     * are rejected rather than accepted as an alternate separator: a field
-     * label can itself legitimately contain a comma, which silently
-     * splitting on it would corrupt.
+     * Splits selectors on `|`. Commas and semicolons are rejected rather than
+     * accepted as alternate separators.
      *
      * @return list<string>
      */
@@ -102,10 +121,5 @@ final class EmbeddedListFieldFilterService
         ));
 
         return array_values(array_unique($selectors));
-    }
-
-    private static function normalize(string $value): string
-    {
-        return mb_strtolower(trim($value), 'UTF-8');
     }
 }

@@ -15,6 +15,92 @@ final class EmbedOptionsService
     private const MIN_HEIGHT = 240;
     private const MAX_HEIGHT = 5000;
     private const LAYOUTS = ['default', 'cards', 'listone', 'listtwo', 'listthree', 'listcard', 'listcompact', 'listtiles'];
+    private const ALLOWED_KEYS = ['id', 'height', 'pagination', 'layout', 'loading', 'fields', 'actions', 'title', 'sort', 'dir'];
+
+    /**
+     * @param array<string, string> $attributes
+     *
+     * @return list<array{code: string, parameter: string, value: string, detail: string}>
+     */
+    public static function validationErrors(array $attributes): array
+    {
+        $errors = [];
+
+        foreach (array_values(array_diff(array_keys($attributes), self::ALLOWED_KEYS)) as $key) {
+            $errors[] = self::error('unknown_option', $key, (string) $attributes[$key]);
+        }
+
+        if (self::positiveInteger($attributes['id'] ?? '') === null) {
+            $errors[] = self::error('invalid_value', 'id', (string) ($attributes['id'] ?? ''), 'id');
+        }
+
+        if (isset($attributes['height']) && trim($attributes['height']) !== '') {
+            $height = self::positiveInteger($attributes['height']) ?? 0;
+            if ($height < self::MIN_HEIGHT || $height > self::MAX_HEIGHT) {
+                $errors[] = self::error('invalid_value', 'height', $attributes['height'], 'height');
+            }
+        }
+
+        if (isset($attributes['pagination']) && trim($attributes['pagination']) !== '') {
+            $pagination = self::positiveInteger($attributes['pagination']);
+            if ($pagination === null || $pagination > 5000) {
+                $errors[] = self::error('invalid_value', 'pagination', $attributes['pagination'], 'pagination');
+            }
+        }
+
+        $layout = trim((string) ($attributes['layout'] ?? ''));
+        if ($layout !== '' && !in_array($layout, self::LAYOUTS, true)) {
+            $errors[] = self::error('invalid_value', 'layout', $layout, 'layout');
+        }
+
+        $loading = strtolower(trim((string) ($attributes['loading'] ?? 'lazy')));
+        if (!in_array($loading, ['eager', 'lazy'], true)) {
+            $errors[] = self::error('invalid_value', 'loading', (string) ($attributes['loading'] ?? ''), 'loading');
+        }
+
+        try {
+            self::fieldSelectors((string) ($attributes['fields'] ?? ''));
+        } catch (\InvalidArgumentException) {
+            $errors[] = self::error('invalid_value', 'fields', (string) ($attributes['fields'] ?? ''), 'fields');
+        }
+
+        try {
+            $actions = EmbeddedListActionFilterService::parseActions((string) ($attributes['actions'] ?? ''));
+            foreach ($actions as $action) {
+                if (!EmbeddedListActionFilterService::isKnownAction($action)) {
+                    $errors[] = self::error('unknown_action', 'actions', $action, 'actions');
+                }
+            }
+        } catch (\InvalidArgumentException) {
+            $errors[] = self::error('invalid_value', 'actions', (string) ($attributes['actions'] ?? ''), 'actions');
+        }
+
+        $sort = trim((string) ($attributes['sort'] ?? ''));
+        $sortSelectors = [];
+        try {
+            $sortSelectors = self::fieldSelectors($sort);
+            if ($sort !== '' && $sortSelectors === []) {
+                $errors[] = self::error('invalid_value', 'sort', $sort, 'sort');
+            }
+        } catch (\InvalidArgumentException) {
+            $errors[] = self::error('invalid_value', 'sort', $sort, 'sort');
+        }
+
+        $rawDirection = (string) ($attributes['dir'] ?? 'asc');
+        $sortDirections = [];
+        try {
+            $sortDirections = self::fieldSelectors(strtolower(trim($rawDirection)));
+            if ($sortDirections === [] || array_diff($sortDirections, ['asc', 'desc']) !== []) {
+                $errors[] = self::error('invalid_value', 'dir', $rawDirection, 'dir');
+            } elseif ($sort !== '' && count($sortDirections) > 1 && count($sortDirections) !== count($sortSelectors)) {
+                $errors[] = self::error('invalid_value', 'dir', $rawDirection, 'dir_count');
+            }
+        } catch (\InvalidArgumentException) {
+            $errors[] = self::error('invalid_value', 'dir', $rawDirection, 'dir');
+        }
+
+        return $errors;
+    }
 
     /**
      * @param array<string, string> $attributes
@@ -28,18 +114,18 @@ final class EmbedOptionsService
      *     fields: list<string>,
      *     actions: list<string>,
      *     sort: string,
-     *     sort_direction: 'asc'|'desc',
+     *     sort_direction: non-empty-string,
      *     title: string,
      *     title_set: bool
      * }
      */
     public static function resolve(array $attributes): array
     {
-        $allowedKeys = ['id', 'height', 'pagination', 'layout', 'loading', 'fields', 'actions', 'title', 'sort', 'dir'];
-        $unknownKeys = array_values(array_diff(array_keys($attributes), $allowedKeys));
-        if ($unknownKeys !== []) {
-            throw new \InvalidArgumentException('option_unknown:' . $unknownKeys[0]);
+        $errors = self::validationErrors($attributes);
+        if ($errors !== []) {
+            throw new \InvalidArgumentException('validation:' . json_encode($errors, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
         }
+
         $id = self::positiveInteger($attributes['id'] ?? '');
 
         if ($id === null) {
@@ -63,11 +149,8 @@ final class EmbedOptionsService
         }
 
         $layout = trim((string) ($attributes['layout'] ?? ''));
-        if ($layout !== '' && preg_match('/^[A-Za-z0-9_-]+$/D', $layout) !== 1) {
-            throw new \InvalidArgumentException('layout');
-        }
-        if ($layout !== '' && !in_array($layout, self::LAYOUTS, true)) {
-            throw new \InvalidArgumentException('layout_unknown:' . $layout);
+        if ($layout === 'cards') {
+            $layout = 'listcard';
         }
 
         $loading = strtolower(trim((string) ($attributes['loading'] ?? 'lazy')));
@@ -84,8 +167,20 @@ final class EmbedOptionsService
         }
         $sortDirection = strtolower(trim((string) ($attributes['dir'] ?? 'asc')));
         $sortDirections = self::fieldSelectors($sortDirection);
-        if ($sortDirections === [] || array_diff($sortDirections, ['asc', 'desc']) !== [] || ($sort !== "" && count($sortDirections) !== count($sortSelectors))) {
+        if ($sortDirections === [] || array_diff($sortDirections, ['asc', 'desc']) !== []) {
             throw new \InvalidArgumentException('dir');
+        }
+        if ($sort !== '' && count($sortDirections) === 1 && count($sortSelectors) > 1) {
+            $sortDirections = array_fill(0, count($sortSelectors), $sortDirections[0]);
+            $sortDirection = implode('|', $sortDirections);
+        }
+        if ($sort !== '' && count($sortDirections) !== count($sortSelectors)) {
+            throw new \InvalidArgumentException('dir');
+        }
+
+        $title = trim((string) ($attributes['title'] ?? ''));
+        if (strcasecmp($title, 'hide') === 0) {
+            $title = '';
         }
 
         return [
@@ -98,8 +193,21 @@ final class EmbedOptionsService
             'actions' => $actions,
             'sort' => $sort,
             'sort_direction' => $sortDirection,
-            'title' => trim((string) ($attributes['title'] ?? '')),
+            'title' => $title,
             'title_set' => array_key_exists('title', $attributes),
+        ];
+    }
+
+    /**
+     * @return array{code: string, parameter: string, value: string, detail: string}
+     */
+    private static function error(string $code, string $parameter, string $value, string $detail = ''): array
+    {
+        return [
+            'code' => $code,
+            'parameter' => $parameter,
+            'value' => $value,
+            'detail' => $detail,
         ];
     }
 

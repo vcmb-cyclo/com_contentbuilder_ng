@@ -614,17 +614,36 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 			: Text::_($directStorageMode ? 'COM_CONTENTBUILDERNG_PREVIEW_NO_STORAGE_FIELDS' : 'COM_CONTENTBUILDERNG_PREVIEW_NO_LIST_FIELDS'); ?>
 	</div>
 <?php endif; ?>
-<?php if ($this->embedded_list_error !== ''): ?>
-	<div class="alert alert-warning mb-3">
-		<?php echo htmlspecialchars($this->embedded_list_error, ENT_QUOTES, 'UTF-8'); ?>
+<?php if ($this->embedded_list_errors !== []): ?>
+	<div class="alert alert-warning mb-0" data-cblist-errors-only>
+		<div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+			<strong>
+				<span class="fa-solid fa-triangle-exclamation me-1" aria-hidden="true"></span>
+				<?php echo Text::_('COM_CONTENTBUILDERNG_CBLIST_VALIDATION_INTRO'); ?>
+			</strong>
+			<?php if ($this->embedded_list_help_url !== ''): ?>
+				<a href="<?php echo htmlspecialchars($this->embedded_list_help_url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
+					<span class="fa-solid fa-circle-question me-1" aria-hidden="true"></span>
+					<?php echo Text::_('COM_CONTENTBUILDERNG_CBLIST_SYNTAX_HELP'); ?>
+				</a>
+			<?php endif; ?>
+		</div>
+		<ul class="mb-0">
+			<?php foreach ($this->embedded_list_errors as $embeddedListError): ?>
+				<li><?php echo htmlspecialchars($embeddedListError, ENT_QUOTES, 'UTF-8'); ?></li>
+			<?php endforeach; ?>
+		</ul>
 	</div>
 <?php endif; ?>
-<?php if ($embeddedListTitleProvided && $embeddedListTitle !== '') : ?>
-	<div class="cb-list-titlebar">
-		<h1 class="h3 cb-list-title">
-			<?php echo htmlspecialchars($embeddedListTitle, ENT_QUOTES, 'UTF-8'); ?>
-		</h1>
-	</div>
+<?php if ($this->embedded_list_errors !== []) { return; } ?>
+<?php if ($embeddedListTitleProvided) : ?>
+	<?php if ($embeddedListTitle !== '') : ?>
+		<div class="cb-list-titlebar">
+			<h1 class="h3 cb-list-title">
+				<?php echo htmlspecialchars($embeddedListTitle, ENT_QUOTES, 'UTF-8'); ?>
+			</h1>
+		</div>
+	<?php endif; ?>
 <?php else : ?>
 	<?php echo ContentbuilderngHelper::sanitizeStoredHtml($this->intro_text); ?>
 <?php endif; ?>
