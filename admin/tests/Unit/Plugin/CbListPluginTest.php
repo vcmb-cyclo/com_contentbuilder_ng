@@ -247,6 +247,50 @@ final class CbListPluginTest extends TestCase
         );
     }
 
+    public function testEmbeddedFieldFilterAcceptsExistingElementsThatAreNotVisible(): void
+    {
+        self::assertSame(
+            [12, 14],
+            EmbeddedListFieldFilterService::filter(
+                [12, 14],
+                [
+                    12 => 'Nom',
+                    13 => 'Prenom',
+                    14 => 'Email',
+                    15 => 'Telephone',
+                ],
+                'Nom|Prenom|Email|Telephone'
+            )
+        );
+
+        self::assertSame(
+            [
+                'columns' => [12, 14],
+                'unknown' => ['Adresse'],
+            ],
+            EmbeddedListFieldFilterService::matchFieldSelectors(
+                [12, 14],
+                [12 => 'Nom', 13 => 'Prenom', 14 => 'Email', 15 => 'Telephone'],
+                'Nom|Prenom|Email|Telephone|Adresse'
+            )
+        );
+    }
+
+    public function testSortMatchingStillRejectsElementsThatAreNotVisible(): void
+    {
+        self::assertSame(
+            [
+                'columns' => [12],
+                'unknown' => ['Prenom'],
+            ],
+            EmbeddedListFieldFilterService::matchSelectors(
+                [12],
+                [12 => 'Nom', 13 => 'Prenom'],
+                'Nom|Prenom'
+            )
+        );
+    }
+
     public function testEmbeddedFieldMatchingKeepsOnlyRequestedValidColumnsAndReportsEveryUnknownOne(): void
     {
         self::assertSame(

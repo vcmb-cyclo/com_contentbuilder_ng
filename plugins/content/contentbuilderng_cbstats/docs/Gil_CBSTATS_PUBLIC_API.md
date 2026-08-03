@@ -1,5 +1,17 @@
 # CBStats public syntax / API reference
 
+## Syntax validation and public help
+
+CBStats validates the complete tag before querying a view or rendering statistics.
+Independent syntax errors are reported together, with the parameter and invalid
+value identified whenever applicable. If the tag is invalid, no statistics view
+is displayed below the messages.
+
+Each validation block includes a **Help with CBStats syntax** link. It opens the
+localized public CBStats help page in a new browser tab, without requiring access
+to the Joomla administration or exposing view data. Access-control failures and
+unexpected internal errors deliberately remain generic.
+
 ## Table column headers
 
 `headers=` customizes only the two column headers of `output=table`:
@@ -14,7 +26,7 @@ The syntax is `key=label;key=label`, with surrounding spaces ignored. Unmapped h
 
 ## Manual export
 
-Only `export=manual` enables export for `output=pie`, `output=bar` and `output=table` in Joomla content. Other `export=` values are ignored:
+Only `export=manual` enables export for `output=pie`, `output=bar` and `output=table` in Joomla content. Other `export=` values are rejected with a validation message:
 
 ```text
 {CBStats id=25 field=Parcours output=pie title="👥 Total des inscrits" export=manual}

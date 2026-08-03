@@ -2,6 +2,19 @@
 
 > Codex must locate the real plugin manifest and language description keys before applying these texts. Do not invent a second description system.
 
+## Current concise description and validation help
+
+The manifest description now explains that CBStats displays a ContentBuilder NG
+statistics view directly in Joomla content, preserves the view's access rights and
+configuration, and starts with a simple `{CBStats id=ViewID output=total}` example.
+The localized plugin description below it documents the main outputs and options.
+
+An invalid tag displays all independent syntax errors together and no statistics
+result. Each message identifies the affected parameter and invalid value whenever
+applicable. The error block links to a localized public syntax page in a new browser
+tab; it does not require administrator access or expose view data. Permission and
+unexpected internal errors remain generic.
+
 ## Recommended short description — French
 
 **ContentBuilder NG - CBStats - Content - Statistiques** permet d'afficher dans les contenus Joomla des statistiques dynamiques issues des vues ContentBuilder NG au moyen de balises `{CBStats ...}`, ou de publier les sorties de données prises en charge via URL/API. Le plugin gère les totaux, tableaux, agrégats `sum`, `min`, `max` et `avg`, JSON, graphiques Pie, Bar, Histogram, Line et Radar, filtres, tris, tranches numériques `ranges=`, limites `limit=`, masquage `hide=`, deltas externes signés avec `add=`, titre du total avec `title=` et libellés d'affichage avec `titles=`. Exemples : `{CBStats id=25 field=Age output=avg}` et `{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50+"}`. Les réglages API de la vue ainsi que les permissions STATS et de champ restent appliqués.

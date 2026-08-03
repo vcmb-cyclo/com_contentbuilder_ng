@@ -83,6 +83,17 @@ final class EmbeddedListSortPaginationTest extends TestCase
         self::assertLessThan($report, $filter, $message);
     }
 
+    public function testFieldFilteringRecognisesExistingUnavailableElements(): void
+    {
+        $source = $this->read('site/src/View/List/HtmlView.php');
+
+        self::assertStringContainsString(
+            'EmbeddedListFieldFilterService::matchFieldSelectors(',
+            $source,
+            'fields= must validate against every existing source element while retaining only visible columns.'
+        );
+    }
+
     public function testDirectionIsReadWithoutStrippingTheSeparator(): void
     {
         $source = $this->read(self::MODEL);

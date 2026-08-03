@@ -68,7 +68,7 @@
                 <field
                     name="cbstats_headers_note"
                     type="note"
-                    label="headers="
+                    label="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_HEADERS_LABEL"
                     description="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_HEADERS_TEXT"
                     class="alert alert-info w-100"
                 />

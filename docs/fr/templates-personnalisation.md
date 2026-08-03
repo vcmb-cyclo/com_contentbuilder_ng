@@ -143,6 +143,10 @@ Pour `fields` et `sort`, utilisez uniquement les noms source exacts des élémen
 en respectant la casse, ou leurs identifiants de référence exacts. Les libellés
 affichés et les variantes d’accent ou de casse sont invalides : si le nom source
 est `Prenom`, `Prénom` et `prenom` sont refusés.
+Pour `fields`, un élément existant indiqué par son nom exact reste valide lorsqu’il
+est dépublié ou désactivé pour la liste. ContentBuilder omet simplement cette
+colonne : cet état n’est pas une erreur de syntaxe. Les champs utilisés par `sort`
+doivent toujours être des colonnes visibles de la liste.
 
 `id` identifie la vue ContentBuilder NG et reste obligatoire ; les exemples du
 projet utilisent la vue `15`. `fields` filtre et ordonne les colonnes affichées.
@@ -324,7 +328,11 @@ les réglages **API + Droits**, la disponibilité API/Stats des champs et l'ongl
 **API** de la vue. Les outputs URL disponibles sont `json`, `table`, `pie`, `bar`,
 `histogram`, `line`, `radar`, `total`, `sum`, `min`, `max`, `avg` et `form_name` ;
 les sorties de liste acceptent aussi `add`, `titles`, `sort`, `dir`, `ranges` et
-`limit`. Les erreurs publiques
+`limit`. Dans les articles Joomla, CBStats signale ensemble toutes les erreurs
+de syntaxe indépendantes de la balise, précise le paramètre et la valeur concernés
+et n'affiche aucune statistique tant que la balise est invalide. Le bloc d'erreur
+contient un lien vers l'aide publique localisée de la syntaxe CBStats, ouverte dans
+un nouvel onglet. Les erreurs de droits d'accès et les erreurs internes inattendues
 restent génériques. `debug=1` demande un
 diagnostic uniquement lorsque DEBUG est activé sur la vue ContentBuilder NG
 ciblée ; il n'accorde aucun accès et ne modifie jamais les permissions de vue, de

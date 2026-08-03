@@ -117,6 +117,9 @@ Realistic example with the principal options:
 For `fields` and `sort`, use only exact, case-sensitive source element names
 or exact reference IDs. Display labels and accent or case variants are invalid:
 if the source name is `Prenom`, `Prénom` and `prenom` are rejected.
+For `fields`, an exact existing element remains valid when it is unpublished or
+disabled for list display. ContentBuilder simply omits that column; this state is
+not a syntax error. Fields used by `sort` must still be visible list columns.
 
 `id` identifies the ContentBuilder NG view and is required; project examples use
 view `15`. `fields` filters and orders the displayed columns. `title` replaces
@@ -288,8 +291,12 @@ CBStats always enforces the view's STATS permission. For URL/API use, check the
 view's **API + Rights** settings, API/Stats field availability and the **API** tab.
 The supported URL outputs are `json`, `table`, `pie`, `bar`, `histogram`, `line`,
 `radar`, `total`, `sum`, `min`, `max`, `avg` and `form_name`; list outputs also
-accept `add`, `titles`, `sort`, `dir`, `ranges` and `limit`. Public errors
-remain generic. `debug=1` requests diagnostics only when DEBUG is enabled on the
+accept `add`, `titles`, `sort`, `dir`, `ranges` and `limit`. In Joomla articles,
+CBStats reports all independent tag syntax errors together, identifies the
+affected parameter and value, and does not display statistics when the tag is
+invalid. The error block links to localized public CBStats syntax help in a new
+browser tab. Access-control and unexpected internal errors remain generic.
+`debug=1` requests diagnostics only when DEBUG is enabled on the
 target ContentBuilder NG view; it never grants access or changes view, field or
 STATS permissions.
 

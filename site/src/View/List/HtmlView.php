@@ -263,7 +263,7 @@ class HtmlView extends BaseHtmlView
             : [];
 
         try {
-            $match = EmbeddedListFieldFilterService::matchSelectors(
+            $match = EmbeddedListFieldFilterService::matchFieldSelectors(
                 $visibleColumns,
                 $names,
                 $rawSelectors

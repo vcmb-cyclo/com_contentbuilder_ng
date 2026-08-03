@@ -29,13 +29,37 @@ final class EmbeddedListFieldFilterService
         array $names,
         string $rawSelectors
     ): array {
-        $match = self::matchSelectors($visibleColumns, $names, $rawSelectors);
+        $match = self::matchFieldSelectors($visibleColumns, $names, $rawSelectors);
 
         if ($match['unknown'] !== []) {
             throw new \InvalidArgumentException('unknown_field:' . $match['unknown'][0]);
         }
 
         return $match['columns'];
+    }
+
+    /**
+     * Validates fields against every source element while returning only the
+     * columns currently published and enabled for list display. An existing
+     * element that is unpublished or has list_include disabled is therefore a
+     * valid selector, but it cannot re-enable the column in the rendered list.
+     *
+     * @param array<int|string, int|string> $visibleColumns
+     * @param array<int|string, string>     $names
+     *
+     * @return array{columns: list<int|string>, unknown: list<string>}
+     */
+    public static function matchFieldSelectors(
+        array $visibleColumns,
+        array $names,
+        string $rawSelectors
+    ): array {
+        return self::matchSelectorsAgainstKnownElements(
+            $visibleColumns,
+            $names,
+            $rawSelectors,
+            true
+        );
     }
 
     /**
@@ -53,6 +77,26 @@ final class EmbeddedListFieldFilterService
         array $names,
         string $rawSelectors
     ): array {
+        return self::matchSelectorsAgainstKnownElements(
+            $visibleColumns,
+            $names,
+            $rawSelectors,
+            false
+        );
+    }
+
+    /**
+     * @param array<int|string, int|string> $visibleColumns
+     * @param array<int|string, string>     $names
+     *
+     * @return array{columns: list<int|string>, unknown: list<string>}
+     */
+    private static function matchSelectorsAgainstKnownElements(
+        array $visibleColumns,
+        array $names,
+        string $rawSelectors,
+        bool $acceptUnavailableElements
+    ): array {
         $selectors = self::parseSelectors($rawSelectors);
 
         if ($selectors === []) {
@@ -62,11 +106,24 @@ final class EmbeddedListFieldFilterService
         $filteredColumns = [];
         $selectedReferences = [];
         $unknownSelectors = [];
+        $visibleReferences = array_fill_keys(
+            array_map(static fn(int|string $referenceId): string => (string) $referenceId, $visibleColumns),
+            true
+        );
+        $knownReferences = $visibleColumns;
+
+        if ($acceptUnavailableElements) {
+            foreach (array_keys($names) as $referenceId) {
+                if (!isset($visibleReferences[(string) $referenceId])) {
+                    $knownReferences[] = $referenceId;
+                }
+            }
+        }
 
         foreach ($selectors as $selector) {
             $selectorMatched = false;
 
-            foreach ($visibleColumns as $referenceId) {
+            foreach ($knownReferences as $referenceId) {
                 $referenceKey = (string) $referenceId;
 
                 if (isset($selectedReferences[$referenceKey])) {
@@ -80,11 +137,19 @@ final class EmbeddedListFieldFilterService
 
                 foreach ($candidates as $candidate) {
                     if ($selector !== '' && $candidate === $selector) {
-                        $filteredColumns[] = $referenceId;
                         $selectorMatched = true;
-                        $selectedReferences[$referenceKey] = true;
+
+                        if (isset($visibleReferences[$referenceKey])) {
+                            $filteredColumns[] = $referenceId;
+                            $selectedReferences[$referenceKey] = true;
+                        }
+
                         break;
                     }
+                }
+
+                if ($selectorMatched) {
+                    break;
                 }
             }
 

@@ -17,6 +17,7 @@ namespace CB\Plugin\Content\ContentbuilderngStats\Extension;
 use CB\Component\Contentbuilderng\Site\Service\StatsService;
 use CB\Component\Contentbuilderng\Site\Service\StatsFilterValueService;
 use CB\Component\Contentbuilderng\Site\Service\StatsHideOptionsService;
+use CB\Component\Contentbuilderng\Site\Service\CbstatsHelpService;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Plugin\Content\ContentbuilderngStats\Service\PiePresentationService;
@@ -29,6 +30,7 @@ use CB\Plugin\Content\ContentbuilderngStats\Service\IdSumException;
 use CB\Plugin\Content\ContentbuilderngStats\Service\IdSumService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\DisplayOptionsService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\TableHeaderService;
+use CB\Plugin\Content\ContentbuilderngStats\Service\StatsTagValidationService;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
@@ -80,6 +82,24 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $idSumValue = trim((string) ($attributes['idsum'] ?? ''));
         $formId = (int) ($idValue !== '' ? $idValue : $this->extractId($rawAttributes));
         $formIds = [];
+
+        if (!class_exists(StatsService::class)) {
+            $servicePath = JPATH_ROOT . '/components/com_contentbuilderng/src/Service/StatsService.php';
+
+            if (is_file($servicePath)) {
+                require_once $servicePath;
+            }
+        }
+
+        if (!class_exists(StatsService::class)) {
+            return $this->renderErrorMessages([Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_UNAVAILABLE')]);
+        }
+
+        $validationErrors = StatsTagValidationService::validationErrors($attributes, $formId);
+        if ($validationErrors !== []) {
+            return $this->renderValidationErrors($validationErrors);
+        }
+
         $debugRequested = $this->isEnabled((string) ($attributes['debug'] ?? '0'));
         $debug = false;
         $output = TagSyntaxService::normalizeKeyword((string) ($attributes['output'] ?? 'total'));
@@ -131,13 +151,6 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
 
             $formIds = IdSumService::resolveSourceIds($idValue, $idSumValue, $formId);
 
-            if (!class_exists(StatsService::class)) {
-                $servicePath = JPATH_ROOT . '/components/com_contentbuilderng/src/Service/StatsService.php';
-
-                if (is_file($servicePath)) {
-                    require_once $servicePath;
-                }
-            }
             if (!class_exists(StatsFilterValueService::class)) {
                 $servicePath = JPATH_ROOT . '/components/com_contentbuilderng/src/Service/StatsFilterValueService.php';
 
@@ -310,7 +323,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                     ? Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_MANUAL_VALUES_REQUIRED')
                     : Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_MANUAL_VALUE_INVALID', $exception->getEntry());
 
-                return htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+                return $this->renderErrorMessages([$message]);
             }
 
             if ($exception instanceof IdSumException) {
@@ -322,9 +335,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                     default => Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_IDSUM_INVALID'),
                 };
 
-                return $debugRequested
-                    ? $this->renderDebugMessage($message)
-                    : Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_INVALID_REQUEST');
+                return $this->renderErrorMessages([$message]);
             }
 
             if (
@@ -333,9 +344,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             ) {
                 $message = Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_LIMIT');
 
-                return $debugRequested
-                    ? $this->renderDebugMessage($message)
-                    : Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_INVALID_REQUEST');
+                return $this->renderErrorMessages([$message]);
             }
 
             if (
@@ -348,7 +357,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                     StatsHideOptionsService::LEGACY_TOTAL,
                 ], true)
             ) {
-                return htmlspecialchars($this->getHideOptionsErrorMessage($exception), ENT_QUOTES, 'UTF-8');
+                return $this->renderErrorMessages([$this->getHideOptionsErrorMessage($exception)]);
             }
 
             if (
@@ -357,27 +366,116 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             ) {
                 $message = $this->getFieldStatsErrorMessage($exception);
 
-                return $debug
-                    ? $this->renderDebugMessage($message)
-                    : htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+                return $this->renderErrorMessages([
+                    $debug ? Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_MESSAGE', $message) : $message,
+                ]);
             }
 
             if (!$debug) {
-                return (int) $exception->getCode() === 400 || $exception instanceof \InvalidArgumentException
-                    ? Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_INVALID_REQUEST')
-                    : Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_UNAVAILABLE');
+                return $this->renderErrorMessages([
+                    (int) $exception->getCode() === 400 || $exception instanceof \InvalidArgumentException
+                        ? ((int) $exception->getCode() === 400 && $exception->getMessage() !== ''
+                            ? $exception->getMessage()
+                            : $this->getFieldStatsErrorMessage($exception))
+                        : Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_UNAVAILABLE'),
+                ]);
             }
 
             if ($exception instanceof \InvalidArgumentException) {
-                return $this->renderDebugMessage($this->getFieldStatsErrorMessage($exception));
+                return $this->renderErrorMessages([Text::sprintf(
+                    'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_MESSAGE',
+                    $this->getFieldStatsErrorMessage($exception)
+                )]);
             }
 
             $code = (int) $exception->getCode();
 
-            return $code >= 400 && $code < 500
-                ? $this->renderDebugMessage($exception->getMessage())
-                : Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_UNAVAILABLE');
+            return $this->renderErrorMessages([
+                $code >= 400 && $code < 500
+                    ? Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_MESSAGE', $exception->getMessage())
+                    : Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_UNAVAILABLE'),
+            ]);
         }
+    }
+
+    /**
+     * @param list<array{code: string, parameter: string, value: string, detail: string}> $errors
+     */
+    private function renderValidationErrors(array $errors): string
+    {
+        return $this->renderErrorMessages(array_map(
+            fn(array $error): string => $this->validationMessage($error),
+            $errors
+        ));
+    }
+
+    /** @param list<string> $messages */
+    private function renderErrorMessages(array $messages): string
+    {
+        $items = array_map(
+            static fn(string $message): string => '<li>'
+                . htmlspecialchars($message, ENT_QUOTES, 'UTF-8')
+                . '</li>',
+            $messages
+        );
+        $helpUrl = CbstatsHelpService::syntaxUrl();
+
+        return '<div class="alert alert-warning" role="alert">'
+            . '<div class="d-flex flex-wrap align-items-center justify-content-between gap-2"><strong>'
+            . '<span class="fa-solid fa-triangle-exclamation me-1" aria-hidden="true"></span>'
+            . htmlspecialchars(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_VALIDATION_INTRO'), ENT_QUOTES, 'UTF-8')
+            . '</strong><a class="ms-3" href="' . htmlspecialchars($helpUrl, ENT_QUOTES, 'UTF-8')
+            . '" target="_blank" rel="noopener noreferrer">'
+            . '<span class="fa-solid fa-circle-question me-1" aria-hidden="true"></span>'
+            . htmlspecialchars(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_SYNTAX_HELP'), ENT_QUOTES, 'UTF-8')
+            . '</a></div><ul class="mb-0 mt-2">' . implode('', $items) . '</ul></div>';
+    }
+
+    /** @param array{code: string, parameter: string, value: string, detail: string} $error */
+    private function validationMessage(array $error): string
+    {
+        $value = $error['value'] !== ''
+            ? $error['value']
+            : Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EMPTY_VALUE');
+
+        if ($error['code'] === 'unknown_option') {
+            return Text::sprintf(
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_UNKNOWN_OPTION',
+                $error['parameter'],
+                $value
+            );
+        }
+
+        $detailKey = match ($error['detail']) {
+            'source' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_SOURCE',
+            'id' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ID',
+            'idsum' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_IDSUM',
+            'id_conflict' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ID_CONFLICT',
+            'output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_OUTPUT',
+            'manual_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_MANUAL_OUTPUT',
+            'idsum_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_IDSUM_OUTPUT',
+            'field' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_FIELD',
+            'filter' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_FILTER',
+            'sort' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_SORT',
+            'manual_sort' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_MANUAL_SORT',
+            'dir' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_DIR',
+            'limit' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_LIMIT',
+            'hide' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_HIDE',
+            'export' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_EXPORT',
+            'background' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_BACKGROUND',
+            'add' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ADD',
+            'titles' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TITLES',
+            'headers' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_HEADERS',
+            'ranges' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_RANGES',
+            default => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_VALUES',
+        };
+
+        return Text::sprintf(
+            'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_INVALID_OPTION_VALUE',
+            $error['parameter'],
+            $value,
+            Text::_($detailKey)
+        );
     }
 
     private function renderDebugMessage(string $message): string
