@@ -10,7 +10,7 @@ les assistants de développement (Codex, Claude ou autre).
 - Version du document : 1.2
 - Dernière mise à jour : 2026-08-05
 - Version d'introduction : ContentBuilder NG 6.1.9-RC05
-- Version de l'option `limit` : ContentBuilder NG 6.1.9-RC06
+- Version de l'option `limit` : ContentBuilder NG 6.1.10-RC01
 - Plateforme : Joomla 6 uniquement
 - PHP : 8.3 ou version ultérieure
 - Base de données : MySQL ou MariaDB uniquement
@@ -205,7 +205,7 @@ page.
   et l'export au moyen du paramètre distinct `cblist_limit`.
 - `limit` n'est pas une frontière de sécurité : toutes les ACL et restrictions
   ContentBuilder NG restent obligatoires.
-- Aucun paramètre de masquage du résumé n'est ajouté en RC06.
+- Aucun paramètre de masquage du résumé n'est ajouté en 6.1.10-RC01.
 
 Ordre de traitement de référence :
 

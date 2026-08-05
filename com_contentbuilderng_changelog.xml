@@ -3,7 +3,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.9-RC06</version>
+		<version>6.1.10-RC01</version>
 		<addition>
 			<item>Added limit= to embedded CBList views, applied after access checks, filters and sorting and before pagination and export.</item>
 			<item>Added native DATE, DATETIME, INTEGER, DECIMAL and BOOLEAN controls and validation to direct Storage forms.</item>

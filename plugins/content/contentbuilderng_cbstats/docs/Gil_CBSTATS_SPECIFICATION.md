@@ -32,7 +32,7 @@ field=NomDuChamp
 
 Existing syntax and behavior must remain functional unless a specific approved migration says otherwise.
 
-Approved RC06 numeric syntax migration: scalar numeric options `id` and
+Approved 6.1.10-RC01 numeric syntax migration: scalar numeric options `id` and
 `limit`, and the numeric identifier list `idsum`, must be written without
 quotation marks. Valid examples are `id=15`, `limit=10` and `idsum=15+16`.
 Quoted forms such as `id="15"`, `limit="10"` and `idsum="15+16"` are invalid
