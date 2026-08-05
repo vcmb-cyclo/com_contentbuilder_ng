@@ -4,6 +4,8 @@
     const observers = new WeakMap();
 
     const resizeFrame = (frame) => {
+        const fallbackHeight = frame.style.height;
+
         try {
             const document = frame.contentDocument;
             const body = document?.body;
@@ -30,6 +32,10 @@
             }
 
             const minimum = Number.parseInt(frame.dataset.cblistMinHeight || '240', 10);
+            // scrollHeight cannot become smaller than the current iframe
+            // viewport. Reset it synchronously before measuring so a short
+            // last page can shrink after a long preceding page.
+            frame.style.height = '0px';
             const height = Math.max(
                 Number.isFinite(minimum) ? minimum : 240,
                 body.scrollHeight,
@@ -44,6 +50,7 @@
         } catch {
             // The list normally uses the same origin. Keep the configured
             // fallback height if a site-level policy prevents frame access.
+            frame.style.height = fallbackHeight;
         }
     };
 

@@ -499,6 +499,18 @@ final class CbListPluginTest extends TestCase
             $embedScript,
             'An error-only iframe must shrink to its message instead of keeping the configured minimum height.'
         );
+        $heightResetPosition = strpos($embedScript, "frame.style.height = '0px';");
+        $heightMeasurementPosition = strpos($embedScript, 'body.scrollHeight');
+        self::assertNotFalse(
+            $heightResetPosition,
+            'The iframe viewport must be reset before measuring a shorter paginated result.'
+        );
+        self::assertNotFalse($heightMeasurementPosition);
+        self::assertLessThan(
+            $heightMeasurementPosition,
+            $heightResetPosition,
+            'The height reset must happen before scrollHeight is measured.'
+        );
         self::assertStringContainsString("getString('cblist_fields', '')", $editTemplate);
         self::assertStringContainsString('foreach ($embeddedListParams as $embeddedListName', $detailsTemplate);
         self::assertStringContainsString('foreach ($embeddedListParams as $embeddedListName', $editTemplate);

@@ -38,6 +38,7 @@ done
 
 forbidden_patterns=(
     '^admin/tests/'
+    '^docs/specifications/'
     '^admin/vendor/bin/'
     '^admin/vendor/phpunit/'
     '^admin/vendor/sebastian/'
