@@ -12,3 +12,4 @@ aussi l'attribut Git `export-ignore` pour l'exclure des archives créées avec
 Spécifications disponibles :
 
 - [CBList](cblist.md)
+- [Pagination ContentBuilder NG](contentbuilder-pagination.md)

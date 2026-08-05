@@ -7,17 +7,18 @@ les assistants de développement (Codex, Claude ou autre).
 
 - Projet : ContentBuilder NG
 - Statut : implémentée et évolutive
-- Version du document : 1.2
-- Dernière mise à jour : 2026-08-05
+- Version du document : 1.3
+- Dernière mise à jour : 2026-08-06
 - Version d'introduction : ContentBuilder NG 6.1.9-RC05
 - Version de l'option `limit` : ContentBuilder NG 6.1.10-RC01
+- Version de la pagination compacte : ContentBuilder NG 6.1.10-RC02
 - Plateforme : Joomla 6 uniquement
 - PHP : 8.3 ou version ultérieure
 - Base de données : MySQL ou MariaDB uniquement
 - Base fonctionnelle : comportement publié au commit `d9ff1471`
 - Évolutions documentées : correction du rétrécissement de l'iframe après une
   pagination vers une page plus courte ; ajout de `limit` ; syntaxe stricte des
-  options numériques CBList et CBStats
+  options numériques CBList et CBStats ; pagination compacte et responsive
 - Exemple d'identifiant de vue dans toute nouvelle documentation : `15`
 
 Cette spécification décrit le contrat à préserver. Une évolution qui modifie ce
@@ -173,6 +174,21 @@ colonne visible et triable de la vue après application de sa configuration.
 - Option absente : conserver la limite configurée par la vue ou le contexte
   normal de ContentBuilder NG.
 - Les formes `pagination="25"` et `pagination='25'` sont invalides.
+
+#### Présentation compacte de la pagination — 6.1.10-RC02
+
+La pagination compacte est un comportement commun de ContentBuilder NG, et non
+une seconde pagination propre à CBList. Son contrat complet est défini dans
+[Pagination ContentBuilder NG](contentbuilder-pagination.md).
+
+CBList doit uniquement :
+
+- transmettre `pagination` comme taille de page et `cblist_limit` comme plafond
+  distinct ;
+- conserver son contexte, la recherche, les filtres, le tri, `fields`,
+  `actions` et `limit` dans tous les liens de pagination ;
+- fournir au modèle commun le total plafonné par `limit` ;
+- utiliser sans duplication le rendu compact partagé par les listes CB.
 
 ### 5.6 `limit` — facultatif
 
@@ -432,6 +448,12 @@ par des tests automatisés et si les invariants suivants restent vrais :
 25. L'export porte sur l'ensemble limité et non sur la seule page courante.
 26. `cblist_limit` survit aux parcours intégrés autorisés sans remplacer
     `list[limit]`.
+27. CBList utilise la pagination compacte commune de ContentBuilder NG sans
+    implémenter un second algorithme ou un second layout concurrent.
+28. La navigation compacte conserve l'état de recherche, de filtre, de tri et
+    les restrictions `fields`, `actions` et `limit`.
+29. Le nombre de pages transmis à la pagination commune est calculé sur le total
+    plafonné par `limit`.
 
 ## 12. Procédure à donner à une IA pour toute évolution
 
