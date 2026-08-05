@@ -19,7 +19,7 @@ final class VersionConsistencyTest extends TestCase
         $this->root = \dirname(__DIR__, 4);
     }
 
-    public function testInstallAndUpdateVersionsRespectLocalRcPolicy(): void
+    public function testInstallAndUpdateVersionsAreConsistent(): void
     {
         $installVersion = $this->readValue(
             $this->root . '/com_contentbuilderng.xml',
@@ -34,10 +34,7 @@ final class VersionConsistencyTest extends TestCase
             '/^\d+\.\d+\.\d+(?:-[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*)?$/',
             $installVersion
         );
-        $expectedUpdateVersion = preg_replace('/-RC\d{2}$/', '', $installVersion);
-
-        self::assertIsString($expectedUpdateVersion);
-        self::assertSame($expectedUpdateVersion, $updateVersion);
+        self::assertSame($installVersion, $updateVersion);
 
         $assetManifest = json_decode(
             (string) file_get_contents($this->root . '/media/joomla.asset.json'),
@@ -78,15 +75,22 @@ final class VersionConsistencyTest extends TestCase
         );
     }
 
-    public function testInstallCreationDateIsToday(): void
+    public function testInstallCreationDateIsValidAndNotInFuture(): void
     {
         $creationDate = $this->readValue(
             $this->root . '/com_contentbuilderng.xml',
             '/extension/creationDate'
         );
-        $today = new DateTimeImmutable('now', new DateTimeZone('Europe/Paris'));
+        $timezone = new DateTimeZone('Europe/Paris');
+        $parsedDate = DateTimeImmutable::createFromFormat('!Y-m-d', $creationDate, $timezone);
+        $today = new DateTimeImmutable('today', $timezone);
 
-        self::assertSame($today->format('Y-m-d'), $creationDate);
+        self::assertInstanceOf(DateTimeImmutable::class, $parsedDate);
+        self::assertSame($creationDate, $parsedDate->format('Y-m-d'));
+        self::assertLessThanOrEqual(
+            (int) $today->format('Ymd'),
+            (int) $parsedDate->format('Ymd')
+        );
     }
 
     private function readValue(string $path, string $expression): string

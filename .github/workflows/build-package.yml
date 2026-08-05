@@ -2,6 +2,12 @@ name: Test and Build Package
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: Publish the version from the component manifest
+        required: false
+        default: false
+        type: boolean
   pull_request:
   push:
     branches:
@@ -52,11 +58,7 @@ jobs:
         run: |
           manifest_version="$(grep -oPm1 '(?<=<version>)[^<]+' com_contentbuilderng.xml)"
           update_version="$(grep -oPm1 '(?<=<version>)[^<]+' com_contentbuilderng_update.xml)"
-          expected_update_version="${manifest_version}"
-          if [[ "${manifest_version}" =~ ^([0-9]+\.[0-9]+\.[0-9]+)-RC[0-9]{2}$ ]]; then
-            expected_update_version="${BASH_REMATCH[1]}"
-          fi
-          if [ "${expected_update_version}" != "${update_version}" ]; then
+          if [ "${manifest_version}" != "${update_version}" ]; then
             echo "::error::Version mismatch: manifest ${manifest_version} vs update stream ${update_version}."
             exit 1
           fi
@@ -277,7 +279,10 @@ jobs:
 
   release:
     name: Publish release
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      inputs.publish_release == true &&
+      github.ref == 'refs/heads/main'
     needs: package
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -326,15 +331,33 @@ jobs:
         run: |
           tag="${{ steps.release.outputs.tag }}"
           archive="${{ steps.release.outputs.archive }}"
+          is_rc=false
+          if [[ "${tag}" =~ -RC[0-9]{2}$ ]]; then
+            is_rc=true
+          fi
           if gh release view "${tag}" >/dev/null 2>&1; then
             gh release upload "${tag}" "${archive}" --clobber
-            gh release edit "${tag}" --draft=false
+            if [ "${is_rc}" = true ]; then
+              gh release edit "${tag}" --draft=false --prerelease
+            else
+              gh release edit "${tag}" --draft=false
+            fi
           else
-            gh release create "${tag}" \
-              "${archive}" \
-              --target "${GITHUB_SHA}" \
-              --title "ContentBuilder NG ${tag}" \
-              --generate-notes
+            if [ "${is_rc}" = true ]; then
+              gh release create "${tag}" \
+                "${archive}" \
+                --target "${GITHUB_SHA}" \
+                --title "ContentBuilder NG ${tag#v}" \
+                --generate-notes \
+                --prerelease \
+                --latest=false
+            else
+              gh release create "${tag}" \
+                "${archive}" \
+                --target "${GITHUB_SHA}" \
+                --title "ContentBuilder NG ${tag#v}" \
+                --generate-notes
+            fi
           fi
 
       - name: Publish update checksum to main
