@@ -184,6 +184,7 @@ $embeddedListRawActions = $isEmbeddedListRequest
     : '';
 $embeddedListSort = $isEmbeddedListRequest ? trim((string) $input->getString('cblist_sort', '')) : '';
 $embeddedListDir = $isEmbeddedListRequest ? trim((string) $input->getString('cblist_dir', '')) : '';
+$embeddedListLimit = $isEmbeddedListRequest ? (string) $input->getInt('cblist_limit', 0) : '';
 try {
     $cbListAllowedActions = EmbeddedListActionFilterService::parseActions($embeddedListRawActions);
 							} catch (\InvalidArgumentException) {
@@ -198,12 +199,14 @@ $showEditAction = $showEditAction && $cbListActionAllowed('edit');
 $embeddedListParams = EmbeddedListContextService::parameters(
     $embeddedListContext,
     $embeddedListFields,
-    $embeddedListRawActions
+    $embeddedListRawActions,
+    $embeddedListLimit
 );
 $embeddedListQuery = EmbeddedListContextService::buildQuery(
     $embeddedListContext,
     $embeddedListFields,
-    $embeddedListRawActions
+    $embeddedListRawActions,
+    $embeddedListLimit
 );
 $embeddedListTitle = $isEmbeddedListRequest
     ? trim((string) $input->getString('cblist_title', ''))
@@ -271,6 +274,12 @@ $exportQueryParams = [
     'list_publish_filter' => (int) ($state?->get('formsd_filter_publish') ?? $input->getInt('list_publish_filter', -1)),
     'list_language_filter' => (string) ($state?->get('formsd_filter_language') ?? $input->getCmd('list_language_filter', '')),
 ];
+if ($isEmbeddedListRequest) {
+    $exportQueryParams = array_merge($exportQueryParams, $embeddedListParams, [
+        'cblist_sort' => $embeddedListSort,
+        'cblist_dir' => $embeddedListDir,
+    ]);
+}
 $listQuery = http_build_query(['list' => $listState]);
 $formatListLastModification = static function ($value): string {
     $raw = trim((string) $value);
@@ -1663,6 +1672,9 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	<input type="hidden" name="cblist_sort" value="<?php echo htmlspecialchars($embeddedListSort, ENT_QUOTES, 'UTF-8'); ?>" />
 	<input type="hidden" name="cblist_dir" value="<?php echo htmlspecialchars($embeddedListDir, ENT_QUOTES, 'UTF-8'); ?>" />
 	<input type="hidden" name="cblist_actions" value="<?php echo htmlspecialchars($embeddedListRawActions, ENT_QUOTES, 'UTF-8'); ?>" />
+	<?php if ($embeddedListLimit !== '' && $embeddedListLimit !== '0') : ?>
+	<input type="hidden" name="cblist_limit" value="<?php echo (int) $embeddedListLimit; ?>" />
+	<?php endif; ?>
 	<?php if ($embeddedListTitleProvided) : ?>
 	<input type="hidden" name="cblist_title" value="<?php echo htmlspecialchars($embeddedListTitle, ENT_QUOTES, 'UTF-8'); ?>" />
 	<?php endif; ?>

@@ -32,6 +32,14 @@ field=NomDuChamp
 
 Existing syntax and behavior must remain functional unless a specific approved migration says otherwise.
 
+Approved RC06 numeric syntax migration: scalar numeric options `id` and
+`limit`, and the numeric identifier list `idsum`, must be written without
+quotation marks. Valid examples are `id=15`, `limit=10` and `idsum=15+16`.
+Quoted forms such as `id="15"`, `limit="10"` and `idsum="15+16"` are invalid
+and must produce a localized validation error. Numeric content inside textual
+mapping options such as `values`, `add`, `ranges` or `filter[value]` is not
+subject to this lexical rule.
+
 ### 2.3 One calculation engine
 
 Field statistics must be calculated once in PHP and reused by table, JSON and chart outputs.
@@ -82,7 +90,7 @@ Before refactoring, Codex must inspect the implementation to capture exact seman
 
 ## 4.1 Multi-view source with `idsum`
 
-`idsum="25+27"` is an alternative to `id=` for field statistics. It accepts
+`idsum=25+27` is an alternative to `id=` for field statistics. It accepts
 two to five unique positive view identifiers separated by `+`; simultaneous
 `id` and `idsum`, invalid identifiers and duplicate identifiers are rejected.
 

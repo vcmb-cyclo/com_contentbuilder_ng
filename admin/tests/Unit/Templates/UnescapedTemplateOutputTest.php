@@ -95,6 +95,10 @@ final class UnescapedTemplateOutputTest extends TestCase
         'site/tmpl/details/default.php' => 16,
         'site/tmpl/details/print.php' => 8,
         'site/tmpl/edit/default.php' => 76,
+        // Extension-authored translated help markup returned by Text::_();
+        // escaping it here would expose the intended HTML tags as text.
+        'site/tmpl/cblisthelp/default.php' => 1,
+        'site/tmpl/cbstatshelp/default.php' => 1,
         'site/tmpl/list/default.php' => 46,
         'site/tmpl/publicforms/default.php' => 20,
         'site/layouts/contentbuilderng/action_toolbar.php' => 2,

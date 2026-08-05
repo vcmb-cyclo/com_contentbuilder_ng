@@ -95,6 +95,7 @@ $embeddedListFields = $isEmbeddedListRequest
 $embeddedListRawActions = $isEmbeddedListRequest
     ? trim((string) $input->getString('cblist_actions', ''))
     : '';
+$embeddedListLimit = $isEmbeddedListRequest ? (string) $input->getInt('cblist_limit', 0) : '';
 try {
     $cbListAllowedActions = EmbeddedListActionFilterService::parseActions($embeddedListRawActions);
 } catch (\InvalidArgumentException) {
@@ -108,12 +109,14 @@ $cbListActionAllowed = static fn(string $action): bool
 $embeddedListParams = EmbeddedListContextService::parameters(
     $embeddedListContext,
     $embeddedListFields,
-    $embeddedListRawActions
+    $embeddedListRawActions,
+    $embeddedListLimit
 );
 $embeddedListQuery = EmbeddedListContextService::buildQuery(
     $embeddedListContext,
     $embeddedListFields,
-    $embeddedListRawActions
+    $embeddedListRawActions,
+    $embeddedListLimit
 );
 
 // {CBList actions="..."} is also an embedded-navigation firewall, not just

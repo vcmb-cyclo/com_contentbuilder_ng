@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CB\Component\Contentbuilderng\Tests\Unit\Plugin;
 
 use CB\Plugin\Content\ContentbuilderngStats\Service\StatsTagValidationService;
+use CB\Plugin\Content\ContentbuilderngStats\Service\TagSyntaxService;
 use PHPUnit\Framework\TestCase;
 
 final class CbStatsValidationServiceTest extends TestCase
@@ -59,6 +60,26 @@ final class CbStatsValidationServiceTest extends TestCase
         ]));
     }
 
+    public function testNumericOptionsAndIdSumRequireUnquotedValues(): void
+    {
+        $valid = TagSyntaxService::parse('id=15 limit=10 output=total');
+        self::assertSame([], StatsTagValidationService::validationErrors(
+            $valid['attributes'],
+            0,
+            $valid['quoted']
+        ));
+
+        $invalid = TagSyntaxService::parse('idsum="15+16" field=Route output=table limit=\'10\'');
+        self::assertSame(
+            ['idsum_syntax', 'limit_syntax'],
+            array_column(StatsTagValidationService::validationErrors(
+                $invalid['attributes'],
+                0,
+                $invalid['quoted']
+            ), 'detail')
+        );
+    }
+
     public function testPublicErrorsLinkToThePublicSyntaxPage(): void
     {
         $extension = (string) file_get_contents(
@@ -94,6 +115,7 @@ final class CbStatsValidationServiceTest extends TestCase
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_UNKNOWN_OPTION',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_INVALID_OPTION_VALUE',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_HEADERS_LABEL',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_NUMERIC_SYNTAX',
             ] as $key) {
                 self::assertArrayHasKey($key, $strings, $locale . ': ' . $key);
                 self::assertNotSame('', $strings[$key], $locale . ': ' . $key);

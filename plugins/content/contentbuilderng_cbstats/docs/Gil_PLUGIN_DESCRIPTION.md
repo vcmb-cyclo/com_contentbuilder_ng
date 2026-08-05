@@ -35,14 +35,14 @@ Exemples :
 
 ### Fusion de vues
 
-`idsum="25+27"` remplace `id=` pour additionner les statistiques de deux à
+`idsum=25+27` remplace `id=` pour additionner les statistiques de deux à
 cinq vues. Chaque vue applique ses droits, filtres et regroupements avant la
 fusion des libellés exactement identiques. `add=`, `titles=` et le tri
 s’appliquent ensuite au résultat final. Exemples :
 
 ```text
-{CBStats idsum="25+27" field="Parcours" output="table" title="Monticyclo / Montigravel"}
-{CBStats idsum="31+32+33+34+35" field="Distance" output="bar" title="BRM"}
+{CBStats idsum=25+27 field="Parcours" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
 ```
 
 ## Recommended short description — English
@@ -65,13 +65,13 @@ Examples:
 
 ### Merging views
 
-`idsum="25+27"` replaces `id=` to add statistics from two to five views. Each
+`idsum=25+27` replaces `id=` to add statistics from two to five views. Each
 view applies permissions, filters and grouping before exactly identical labels
 are merged. `add=`, `titles=` and sorting then apply to the final result.
 
 ```text
-{CBStats idsum="25+27" field="Route" output="table" title="Monticyclo / Montigravel"}
-{CBStats idsum="31+32+33+34+35" field="Distance" output="bar" title="BRM"}
+{CBStats idsum=25+27 field="Route" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
 ```
 
 ## Recommended short description — German
@@ -94,14 +94,14 @@ Beispiele:
 
 ### Ansichten zusammenführen
 
-`idsum="25+27"` ersetzt `id=`, um Statistiken aus zwei bis fünf Ansichten zu
+`idsum=25+27` ersetzt `id=`, um Statistiken aus zwei bis fünf Ansichten zu
 addieren. Jede Ansicht wendet Berechtigungen, Filter und Gruppierung an, bevor
 exakt gleiche Bezeichnungen zusammengeführt werden. `add=`, `titles=` und die
 Sortierung gelten anschließend für das Endergebnis.
 
 ```text
-{CBStats idsum="25+27" field="Strecke" output="table" title="Monticyclo / Montigravel"}
-{CBStats idsum="31+32+33+34+35" field="Distanz" output="bar" title="BRM"}
+{CBStats idsum=25+27 field="Strecke" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum=31+32+33+34+35 field="Distanz" output="bar" title="BRM"}
 ```
 
 ## Application rules
@@ -115,7 +115,7 @@ When updating the real plugin:
 5. Keep short descriptions short enough for Joomla extension listings and administrator views.
 ### Result limit and display options
 
-`limit="10"` keeps the first ten values after sorting, then recalculates the
+`limit=10` keeps the first ten values after sorting, then recalculates the
 displayed total and chart percentages from those values. `hide=` accepts
 `total`, `values` and `graph`, combined with `|`: `total` hides the displayed
 total, `values` hides the textual labels-and-values list below the graph without
@@ -126,16 +126,16 @@ shown. Hiding all three elements produces a message. The former `total=hide`
 syntax is rejected; use `hide="total"`.
 
 ```text
-{CBStats id="25" field="Town" output="table" sort="value" dir="desc" limit="10"}
-{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" hide="total"}
-{CBStats id="25" field="Age" output="histogram" ranges="18-29;30-39;40-49;50-59;60+" hide="total|values"}
-{CBStats id="25" field="Age" output="radar" ranges="18-29;30-39;40-49;50-59;60+" hide="graph|total"}
-{CBStats id="25" field="RegistrationDate" output="line" sort="value" dir="asc" hide="values"}
+{CBStats id=25 field="Town" output="table" sort="value" dir="desc" limit=10}
+{CBStats idsum=25+27 field="Club" output="bar" sort="value" dir="desc" limit=10 hide="total"}
+{CBStats id=25 field="Age" output="histogram" ranges="18-29;30-39;40-49;50-59;60+" hide="total|values"}
+{CBStats id=25 field="Age" output="radar" ranges="18-29;30-39;40-49;50-59;60+" hide="graph|total"}
+{CBStats id=25 field="RegistrationDate" output="line" sort="value" dir="asc" hide="values"}
 ```
 
 ### Limite du résultat et affichage du total
 
-`limit="10"` conserve les dix premières valeurs après le tri. `hide=` accepte
+`limit=10` conserve les dix premières valeurs après le tri. `hide=` accepte
 `total`, `values` et `graph`, combinés avec `|`. `total` masque le Total,
 `values` masque la liste textuelle des libellés et valeurs sous le graphique
 sans modifier le graphique lui-même, et `graph` masque le dessin tout en
@@ -144,15 +144,15 @@ est affiché. Masquer les trois éléments produit un message. L’ancienne synt
 `total=hide` est refusée ; utilisez `hide="total"`.
 
 ```text
-{CBStats id="25" field="Ville" output="table" sort="value" dir="desc" limit="10"}
-{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" hide="total"}
-{CBStats id="25" field="Age" output="radar" hide="graph|total"}
-{CBStats id="25" field="DateInscription" output="line" hide="values"}
+{CBStats id=25 field="Ville" output="table" sort="value" dir="desc" limit=10}
+{CBStats idsum=25+27 field="Club" output="bar" sort="value" dir="desc" limit=10 hide="total"}
+{CBStats id=25 field="Age" output="radar" hide="graph|total"}
+{CBStats id=25 field="DateInscription" output="line" hide="values"}
 ```
 
 ### Ergebnisbegrenzung und Summenanzeige
 
-`limit="10"` behält die ersten zehn Werte nach der Sortierung. `hide=` akzeptiert
+`limit=10` behält die ersten zehn Werte nach der Sortierung. `hide=` akzeptiert
 `total`, `values` und `graph`, mit `|` kombiniert. `total` blendet die Summe
 aus, `values` blendet nur die textuelle Beschriftungs- und Werteliste unter der
 Grafik aus, ohne die Grafik zu ändern, und `graph` blendet die Zeichnung aus und

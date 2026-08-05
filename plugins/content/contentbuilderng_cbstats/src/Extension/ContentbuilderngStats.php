@@ -75,7 +75,8 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
 
     private function renderStatsTag(string $rawAttributes): string
     {
-        $attributes = TagSyntaxService::parseAttributes($rawAttributes);
+        $syntax = TagSyntaxService::parse($rawAttributes);
+        $attributes = $syntax['attributes'];
         $source = TagSyntaxService::normalizeKeyword((string) ($attributes['source'] ?? 'view'));
         $manual = $source === 'manual';
         $idValue = trim((string) ($attributes['id'] ?? ''));
@@ -95,7 +96,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             return $this->renderErrorMessages([Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_UNAVAILABLE')]);
         }
 
-        $validationErrors = StatsTagValidationService::validationErrors($attributes, $formId);
+        $validationErrors = StatsTagValidationService::validationErrors($attributes, $formId, $syntax['quoted']);
         if ($validationErrors !== []) {
             return $this->renderValidationErrors($validationErrors);
         }
@@ -448,6 +449,8 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
 
         $detailKey = match ($error['detail']) {
             'source' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_SOURCE',
+            'id_syntax', 'idsum_syntax', 'limit_syntax'
+                => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_NUMERIC_SYNTAX',
             'id' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ID',
             'idsum' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_IDSUM',
             'id_conflict' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ID_CONFLICT',

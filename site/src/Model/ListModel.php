@@ -349,6 +349,11 @@ class ListModel extends BaseListModel
             $start = (int) $app->getUserState($startKey, 0);
         }
 
+        $embeddedResultLimit = $this->getEmbeddedResultLimit();
+        if ($embeddedResultLimit !== null && $start >= $embeddedResultLimit) {
+            $start = 0;
+        }
+
         // ✅ RESET page si on change un filtre (ou clique Search/Reset)
         if (
             $app->getInput()->get('filter', null) !== null ||
@@ -371,6 +376,32 @@ class ListModel extends BaseListModel
     private function getConfiguredListLimit(): int
     {
         return MenuParamHelper::getConfiguredListLimit($this->app, $this->_id);
+    }
+
+    private function getEmbeddedResultLimit(): ?int
+    {
+        $input = $this->app->getInput();
+        if (!EmbeddedListFieldFilterService::isEmbeddedRequest($input->getCmd('cblist_embed', ''))) {
+            return null;
+        }
+
+        $limit = $input->getInt('cblist_limit', 0);
+
+        return $limit >= 1 && $limit <= 5000 ? $limit : null;
+    }
+
+    /** @param array<int, object> $items @return array<int, object> */
+    private function applyEmbeddedResultLimit(array $items): array
+    {
+        $limit = $this->getEmbeddedResultLimit();
+        if ($limit === null) {
+            return $items;
+        }
+
+        $this->_total = min((int) $this->_total, $limit);
+        $remaining = max(0, $limit - (int) $this->getState('list.start'));
+
+        return array_slice($items, 0, $remaining);
     }
 
     private function getPaginationStateKeyPrefix(): string
@@ -634,6 +665,7 @@ class ListModel extends BaseListModel
                 -1
             );
             $this->_total = $storage->form->getListRecordsTotal($ids, $this->getState('formsd_filter'), $searchableElements);
+            $data->items = $this->applyEmbeddedResultLimit((array) $data->items);
             $recordMeta = $this->listSupportService->getListRecordMeta($data->items, (int) $storage->id, (string) $data->type, $data->reference_id);
             $data->published_items = $recordMeta['published_items'];
             $data->cb_record_ids = $recordMeta['cb_record_ids'];
@@ -1164,6 +1196,7 @@ class ListModel extends BaseListModel
                     }
                     $data->items = $this->templateRenderService->applyItemWrappers($this->_id, $data->items, $data);
                     $this->_total = $data->form->getListRecordsTotal($ids, $this->getState('formsd_filter'), $searchable_elements);
+                    $data->items = $this->applyEmbeddedResultLimit((array) $data->items);
                     $data->visible_cols = $ids;
 
                     $data->states = array();

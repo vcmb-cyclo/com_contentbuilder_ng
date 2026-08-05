@@ -39,6 +39,8 @@ $rangeStart = $pagStart + 1;
 $rangeEnd = min($pagStart + $pagLimit, $pagTotal);
 
 $input = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput();
+$isLimitedEmbeddedList = EmbeddedListFieldFilterService::isEmbeddedRequest($input->getCmd('cblist_embed', ''))
+    && $input->getInt('cblist_limit', 0) > 0;
 $params = Uri::getInstance()->getQuery(true);
 $params['option'] = 'com_contentbuilderng';
 $params['task'] = 'list.display';
@@ -72,7 +74,14 @@ $buildPageLink = static function (int $start) use ($params): string {
 ?>
 <nav class="pagination__wrapper d-flex flex-wrap align-items-center justify-content-start gap-2<?php echo $navClass !== '' ? ' ' . htmlspecialchars($navClass, ENT_QUOTES, 'UTF-8') : ''; ?>" aria-label="<?php echo Text::_('JLIB_HTML_PAGINATION'); ?>">
     <div class="small text-muted me-2 cb-pagination-summary">
-        <?php echo Text::sprintf('COM_CONTENTBUILDERNG_LIST_PAGINATION_SUMMARY', $rangeStart, $rangeEnd, $pagTotal); ?>
+        <?php echo Text::sprintf(
+            $isLimitedEmbeddedList
+                ? 'COM_CONTENTBUILDERNG_LIST_PAGINATION_SUMMARY_DISPLAYED'
+                : 'COM_CONTENTBUILDERNG_LIST_PAGINATION_SUMMARY',
+            $rangeStart,
+            $rangeEnd,
+            $pagTotal
+        ); ?>
     </div>
     <?php if ($showPagination) : ?>
         <ul class="pagination pagination-sm mb-0">

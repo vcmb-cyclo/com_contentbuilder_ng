@@ -111,7 +111,7 @@ pagination, actions, layout and theme, without any CBList override:
 Realistic example with the principal options:
 
 ```text
-{CBList id=15 fields="Nom|Prenom|Email" title="Registration list" sort="Nom|Prenom" dir="asc" pagination=25 actions="detail|edit|export" layout=cards height=700 loading=lazy}
+{CBList id=15 fields="Nom|Prenom|Email" title="Registration list" sort="Nom|Prenom" dir="asc" pagination=25 limit=10 actions="detail|edit|export" layout=cards height=700 loading=lazy}
 ```
 
 For `fields` and `sort`, use only exact, case-sensitive source element names
@@ -128,8 +128,14 @@ the visible view title; omit it to keep the configured title, or use the clearer
 defines the initial order, and one `dir="asc"` or `dir="desc"`
 applies to every sorted field. Use one `|`-separated direction per field only
 when mixing directions. `pagination` sets the number of records per page.
+`limit` keeps at most the first N accessible records after ACLs, search, filters
+and effective sorting. It is not pagination: pagination and export apply to the
+limited subset, and the displayed total does not reveal records beyond it.
 `actions` selects the available controls on top of ACL. `layout`, `height` and
 `loading` control the presentation and iframe loading.
+
+Numeric options `id`, `height`, `pagination` and `limit` must be written without
+quotation marks: use `limit=10`, not `limit="10"`.
 
 - `layout=cards` displays records as cards instead of the standard table. It is
   the readable alias of the `listcard` layout. Omitting `layout` keeps the
@@ -179,13 +185,13 @@ Examples:
 {CBStats id=3 filter[field]=Status filter[value]="Open" output=total}
 {CBStats id=3 filter[field]=Status filter[value]="Open*" output=total}
 {CBStats id=3 filter[field]=Status filter[value]="Open* | Pending" output=total}
-{CBStats idsum="25+27" field="Route" output="table" title="Monticyclo / Montigravel"}
-{CBStats idsum="31+32+33+34+35" field="Distance" output="bar" title="BRM"}
+{CBStats idsum=25+27 field="Route" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
 ```
 
 ### Merging views with `idsum`
 
-Use `idsum="25+27"` instead of `id=` to add statistics from two to five
+Use `idsum=25+27` instead of `id=` to add statistics from two to five
 ContentBuilder NG views. Identifiers are unique positive integers separated by
 `+`; `id` and `idsum` cannot be combined. `field=` is required for every
 `idsum` output, including `output=total`.
@@ -361,10 +367,10 @@ below the graph without changing the graph itself, and `graph` hides the
 drawing while retaining that lightweight textual list:
 
 ```text
-{CBStats id="25" field="Town" output="table" sort="value" dir="desc" limit="10"}
-{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" hide="total"}
-{CBStats id="25" field="Age" output="histogram" hide="total|values"}
-{CBStats id="25" field="Age" output="radar" hide="graph|total"}
+{CBStats id=25 field="Town" output="table" sort="value" dir="desc" limit=10}
+{CBStats idsum=25+27 field="Club" output="bar" sort="value" dir="desc" limit=10 hide="total"}
+{CBStats id=25 field="Age" output="histogram" hide="total|values"}
+{CBStats id=25 field="Age" output="radar" hide="graph|total"}
 ```
 
 The displayed total and chart percentages are recalculated from the values

@@ -1,6 +1,14 @@
 # Changelog
 
-## 6.1.9 — 2026-08-02
+## 6.1.9-RC06 — 2026-08-05
+
+### Added
+
+- Added `limit=` to `{CBList}` to retain the first accessible, filtered and sorted records before pagination, with capped totals and matching full-subset export.
+
+### Changed
+
+- CBList and CBStats numeric options now require unquoted numeric syntax, including `id=15`, `pagination=20`, `limit=10` and `idsum=15+16`.
 
 ### Fixed
 

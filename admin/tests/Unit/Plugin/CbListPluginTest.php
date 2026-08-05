@@ -30,7 +30,7 @@ final class CbListPluginTest extends TestCase
     public function testTagAttributesAndOptionsAreResolved(): void
     {
         $attributes = TagSyntaxService::parseAttributes(
-            ' id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 actions="detail|edit|export" layout=cards height=700 loading=lazy'
+            ' id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 limit=10 actions="detail|edit|export" layout=cards height=700 loading=lazy'
         );
 
         self::assertSame(
@@ -38,6 +38,7 @@ final class CbListPluginTest extends TestCase
                 'id' => 15,
                 'height' => 700,
                 'pagination' => 25,
+                'limit' => 10,
                 'layout' => 'listcard',
                 'loading' => 'lazy',
                 'fields' => ['Nom', 'Prenom', 'Email'],
@@ -58,6 +59,7 @@ final class CbListPluginTest extends TestCase
                 'id' => 7,
                 'height' => 240,
                 'pagination' => null,
+                'limit' => null,
                 'layout' => '',
                 'loading' => 'lazy',
                 'fields' => [],
@@ -184,6 +186,21 @@ final class CbListPluginTest extends TestCase
         );
     }
 
+    public function testNumericOptionsRequireUnquotedValues(): void
+    {
+        $valid = TagSyntaxService::parse('id=15 height=700 pagination=20 limit=10');
+        self::assertSame([], EmbedOptionsService::validationErrors($valid['attributes'], $valid['quoted']));
+
+        $invalid = TagSyntaxService::parse('id="15" height=\'700\' pagination="20" limit=\'10\'');
+        self::assertSame(
+            ['id_syntax', 'height_syntax', 'pagination_syntax', 'limit_syntax'],
+            array_column(
+                EmbedOptionsService::validationErrors($invalid['attributes'], $invalid['quoted']),
+                'detail'
+            )
+        );
+    }
+
     #[DataProvider('invalidOptionsProvider')]
     public function testInvalidOptionsAreRejected(array $attributes): void
     {
@@ -200,6 +217,9 @@ final class CbListPluginTest extends TestCase
             'mixed id' => [['id' => '25foo']],
             'height too small' => [['id' => '15', 'height' => '239']],
             'height too large' => [['id' => '15', 'height' => '5001']],
+            'limit zero' => [['id' => '15', 'limit' => '0']],
+            'limit too large' => [['id' => '15', 'limit' => '5001']],
+            'limit mixed' => [['id' => '15', 'limit' => '1A']],
             'invalid layout' => [['id' => '15', 'layout' => '../default']],
             'invalid loading' => [['id' => '15', 'loading' => 'automatic']],
             'fields comma separator rejected' => [['id' => '15', 'fields' => 'Name,Email']],
@@ -459,6 +479,9 @@ final class CbListPluginTest extends TestCase
         self::assertStringContainsString('private function buildEmbeddedListQuery(): string', $listController);
         self::assertStringContainsString('private function buildEmbeddedListQuery(): string', $editController);
         self::assertStringContainsString('name="cblist_actions"', $listTemplate);
+        self::assertStringContainsString('name="cblist_limit"', $listTemplate);
+        self::assertStringContainsString("getInt('cblist_limit', 0)", $listController);
+        self::assertStringContainsString("getInt('cblist_limit', 0)", $editController);
         self::assertStringContainsString('foreach ($this->embedded_list_errors as $embeddedListError)', $listTemplate);
         self::assertStringContainsString(
             'if ($this->embedded_list_errors !== []) { return; }',
@@ -516,6 +539,29 @@ final class CbListPluginTest extends TestCase
         self::assertStringContainsString('foreach ($embeddedListParams as $embeddedListName', $editTemplate);
     }
 
+    public function testLimitCapsPaginationAndExportWithoutReplacingPageSize(): void
+    {
+        $model = (string) file_get_contents(self::ROOT . '/site/src/Model/ListModel.php');
+        $export = (string) file_get_contents(self::ROOT . '/site/src/Model/ExportModel.php');
+        $layout = (string) file_get_contents(self::ROOT . '/site/layouts/contentbuilderng/list_pagination.php');
+        $template = (string) file_get_contents(self::ROOT . '/site/tmpl/list/default.php');
+        $extension = (string) file_get_contents(
+            self::ROOT . '/plugins/content/contentbuilderng_cblist/src/Extension/ContentbuilderngList.php'
+        );
+        $context = (string) file_get_contents(
+            self::ROOT . '/site/src/Service/EmbeddedListContextService.php'
+        );
+
+        self::assertStringContainsString("\$query['cblist_limit'] = \$options['limit'];", $extension);
+        self::assertStringContainsString("min((int) \$this->_total, \$limit)", $model);
+        self::assertStringContainsString("\$limit - (int) \$this->getState('list.start')", $model);
+        self::assertStringContainsString("getInt('cblist_limit', 0)", $export);
+        self::assertStringContainsString("'cblist_limit' => \$limit", $context);
+        self::assertStringContainsString('COM_CONTENTBUILDERNG_LIST_PAGINATION_SUMMARY_DISPLAYED', $layout);
+        self::assertStringContainsString("array_merge(\$exportQueryParams, \$embeddedListParams", $template);
+        self::assertStringNotContainsString("\$query['list'] = ['limit' => \$options['limit']]", $extension);
+    }
+
     public function testPluginIsBundledAndInstalled(): void
     {
         $installer = \file_get_contents(
@@ -560,8 +606,10 @@ final class CbListPluginTest extends TestCase
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_ACTION',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_VIEW',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_ID',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_NUMERIC_SYNTAX',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_HEIGHT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_PAGINATION',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LIMIT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LAYOUT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LOADING',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_FIELDS',
@@ -661,10 +709,12 @@ final class CbListPluginTest extends TestCase
         self::assertNotEmpty($matches[1], $language . ': no documented CBList example found');
 
         foreach ($matches[1] as $rawAttributes) {
+            $syntax = TagSyntaxService::parse((string) $rawAttributes);
             self::assertSame(
                 15,
                 EmbedOptionsService::resolve(
-                    TagSyntaxService::parseAttributes((string) $rawAttributes)
+                    $syntax['attributes'],
+                    $syntax['quoted']
                 )['id'],
                 $language . ': invalid documented CBList example'
             );

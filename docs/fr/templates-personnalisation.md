@@ -136,7 +136,7 @@ personnalisation CBList :
 Exemple réaliste avec les principales options :
 
 ```text
-{CBList id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 actions="detail|edit|export" layout=cards height=700 loading=lazy}
+{CBList id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 limit=10 actions="detail|edit|export" layout=cards height=700 loading=lazy}
 ```
 
 Pour `fields` et `sort`, utilisez uniquement les noms source exacts des éléments,
@@ -155,9 +155,16 @@ configuré, ou utilisez la forme plus explicite `title=hide` pour le masquer
 complètement. `title=""` reste équivalent. `sort` définit le tri initial :
 une seule valeur `dir="asc"` ou `dir="desc"` s’applique à tous les champs triés.
 Indiquez une direction par champ, séparée par `|`, uniquement pour mélanger les
-directions. `pagination` fixe le nombre d’enregistrements par page. `actions`
+directions. `pagination` fixe le nombre d’enregistrements par page. `limit`
+conserve au maximum les N premiers enregistrements accessibles après les ACL,
+la recherche, les filtres et le tri effectif. Ce n’est pas une pagination : la
+pagination et les exports portent sur le sous-ensemble limité, et le total
+affiché ne révèle pas les enregistrements situés au-delà. `actions`
 sélectionne les contrôles disponibles dans la limite des ACL. `layout`, `height`
 et `loading` règlent la présentation et le chargement du cadre.
+
+Les options numériques `id`, `height`, `pagination` et `limit` doivent être
+écrites sans guillemets : utilisez `limit=10`, et non `limit="10"`.
 
 - `layout=cards` affiche les enregistrements sous forme de cartes plutôt que
   dans le tableau standard. C’est l’alias lisible de la mise en page `listcard`.
@@ -208,13 +215,13 @@ Exemples :
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert" output=total}
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert*" output=total}
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert* | En attente" output=total}
-{CBStats idsum="25+27" field="Parcours" output="table" title="Monticyclo / Montigravel"}
-{CBStats idsum="31+32+33+34+35" field="Distance" output="bar" title="BRM"}
+{CBStats idsum=25+27 field="Parcours" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
 ```
 
 ### Fusionner des vues avec `idsum`
 
-Utiliser `idsum="25+27"` à la place de `id=` pour additionner les statistiques
+Utiliser `idsum=25+27` à la place de `id=` pour additionner les statistiques
 de deux à cinq vues ContentBuilder NG. Les identifiants sont des entiers
 positifs uniques séparés par `+` ; `id` et `idsum` ne peuvent pas être combinés.
 `field=` est obligatoire pour tous les outputs `idsum`, y compris
@@ -403,10 +410,10 @@ textuelle des libellés et valeurs sous le graphique sans modifier le graphique,
 et `graph` masque le dessin tout en conservant cette liste textuelle légère :
 
 ```text
-{CBStats id="25" field="Ville" output="table" sort="value" dir="desc" limit="10"}
-{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="10" hide="total"}
-{CBStats id="25" field="Age" output="histogram" hide="total|values"}
-{CBStats id="25" field="Age" output="radar" hide="graph|total"}
+{CBStats id=25 field="Ville" output="table" sort="value" dir="desc" limit=10}
+{CBStats idsum=25+27 field="Club" output="bar" sort="value" dir="desc" limit=10 hide="total"}
+{CBStats id=25 field="Age" output="histogram" hide="total|values"}
+{CBStats id=25 field="Age" output="radar" hide="graph|total"}
 ```
 
 Le total affiché et les pourcentages des graphiques sont recalculés sur les
