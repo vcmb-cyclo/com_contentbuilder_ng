@@ -52,6 +52,12 @@ Common field-based form:
 {CBStats id=IdVue field=NomDuChamp output=TYPE}
 ```
 
+Numeric options `id` and `limit`, and the numeric identifier list `idsum`, are
+written without quotation marks: `id=15`, `limit=10`, `idsum=15+16`. Quoted
+forms are invalid. Numbers contained inside textual options such as `values`,
+`add`, `ranges` or `filter[value]` remain textual data and are not affected by
+this lexical rule.
+
 ### Merge two to five views with `idsum`
 
 `idsum` is an alternative to `id`; the two parameters cannot be supplied
@@ -60,9 +66,9 @@ together. It accepts two to five unique positive view identifiers separated by
 output, including `output=total`:
 
 ```text
-{CBStats idsum="25+27" field="Parcours" output="table" title="Monticyclo / Montigravel"}
-{CBStats idsum="25+27" field="Fédération" output="pie"}
-{CBStats idsum="31+32+33+34+35" field="Distance" output="bar" title="BRM"}
+{CBStats idsum=25+27 field="Parcours" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum=25+27 field="Fédération" output="pie"}
+{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
 ```
 
 Each view independently enforces STATS and field permissions and applies the
@@ -424,11 +430,12 @@ Codex should update this section in the real canonical documentation after each 
 | Cross-repository docs/API | 4 | Completed |
 ## Limiting the final result and hiding result elements
 
-`limit` is optional and accepts a strictly positive integer:
+`limit` is optional and accepts a strictly positive integer written without
+quotation marks:
 
 ```text
-{CBStats id="25" field="Town" output="table" sort="value" dir="desc" limit="10"}
-{CBStats idsum="25+27" field="Club" output="bar" sort="value" dir="desc" limit="15"}
+{CBStats id=25 field="Town" output="table" sort="value" dir="desc" limit=10}
+{CBStats idsum=25+27 field="Club" output="bar" sort="value" dir="desc" limit=15}
 ```
 
 It is applied after the existing `sort=none|title|value` and `dir=asc|desc`.
@@ -473,10 +480,10 @@ ranges, including after `limit`, because overlapping ranges can legitimately
 count one record several times.
 
 ```text
-{CBStats id="25" field="Name" output="table" sort="title" dir="asc" hide="total"}
-{CBStats id="25" field="Email" output="histogram" sort="title" dir="asc" limit="50" hide="total"}
-{CBStats idsum="25+27" field="Town" output="radar" sort="value" dir="desc" limit="10" hide="graph|total"}
-{CBStats id="25" field="RegistrationDate" output="line" sort="value" dir="asc" hide="values"}
+{CBStats id=25 field="Name" output="table" sort="title" dir="asc" hide="total"}
+{CBStats id=25 field="Email" output="histogram" sort="title" dir="asc" limit=50 hide="total"}
+{CBStats idsum=25+27 field="Town" output="radar" sort="value" dir="desc" limit=10 hide="graph|total"}
+{CBStats id=25 field="RegistrationDate" output="line" sort="value" dir="asc" hide="values"}
 index.php?option=com_contentbuilderng&task=api.display&format=json&action=cbstats&id=25&field=Town&output=bar&hide=graph%7Ctotal
 ```
 

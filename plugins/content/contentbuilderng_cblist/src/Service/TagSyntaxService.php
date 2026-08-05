@@ -15,7 +15,16 @@ final class TagSyntaxService
      */
     public static function parseAttributes(string $rawAttributes): array
     {
+        return self::parse($rawAttributes)['attributes'];
+    }
+
+    /**
+     * @return array{attributes: array<string, string>, quoted: array<string, bool>}
+     */
+    public static function parse(string $rawAttributes): array
+    {
         $attributes = [];
+        $quoted = [];
         $rawAttributes = self::normalizeMarkup($rawAttributes);
 
         preg_match_all(
@@ -39,10 +48,12 @@ final class TagSyntaxService
 
             if ($key !== '') {
                 $attributes[$key] = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $quoted[$key] = str_starts_with((string) $match[2], '"')
+                    || str_starts_with((string) $match[2], "'");
             }
         }
 
-        return $attributes;
+        return ['attributes' => $attributes, 'quoted' => $quoted];
     }
 
     private static function normalizeMarkup(string $rawAttributes): string

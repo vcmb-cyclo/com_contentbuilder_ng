@@ -62,14 +62,15 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
 
     private function renderTag(string $rawAttributes, SiteApplication $app): string
     {
-        $attributes = TagSyntaxService::parseAttributes($rawAttributes);
-        $errors = EmbedOptionsService::validationErrors($attributes);
+        $syntax = TagSyntaxService::parse($rawAttributes);
+        $attributes = $syntax['attributes'];
+        $errors = EmbedOptionsService::validationErrors($attributes, $syntax['quoted']);
 
         if ($errors !== []) {
             return $this->renderValidationErrors($errors, $app);
         }
 
-        $options = EmbedOptionsService::resolve($attributes);
+        $options = EmbedOptionsService::resolve($attributes, $syntax['quoted']);
         if (!$this->viewExists($options['id'])) {
             return $this->renderValidationErrors([[
                 'code' => 'unknown_view',
@@ -94,6 +95,9 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
 
         if ($options['pagination'] !== null) {
             $query['list'] = ['limit' => $options['pagination']];
+        }
+        if ($options['limit'] !== null) {
+            $query['cblist_limit'] = $options['limit'];
         }
         if ($options['layout'] !== '') {
             $query['layout'] = $options['layout'];
@@ -190,9 +194,12 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
         }
 
         $detailKey = match ($error['detail']) {
+            'id_syntax', 'height_syntax', 'pagination_syntax', 'limit_syntax'
+                => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_NUMERIC_SYNTAX',
             'id' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_ID',
             'height' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_HEIGHT',
             'pagination' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_PAGINATION',
+            'limit' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LIMIT',
             'layout' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LAYOUT',
             'loading' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LOADING',
             'fields' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_FIELDS',

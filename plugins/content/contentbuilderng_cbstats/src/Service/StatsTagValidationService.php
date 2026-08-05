@@ -29,12 +29,22 @@ final class StatsTagValidationService
      *
      * @return list<array{code: string, parameter: string, value: string, detail: string}>
      */
-    public static function validationErrors(array $attributes, int $fallbackId = 0): array
+    public static function validationErrors(array $attributes, int $fallbackId = 0, array $quoted = []): array
     {
         $errors = [];
 
         foreach (array_values(array_diff(array_keys($attributes), self::ALLOWED_KEYS)) as $key) {
             $errors[] = self::error('unknown_option', $key, (string) $attributes[$key]);
+        }
+        foreach (['id', 'idsum', 'limit'] as $numericKey) {
+            if (($quoted[$numericKey] ?? false) === true) {
+                $errors[] = self::error(
+                    'invalid_value',
+                    $numericKey,
+                    (string) ($attributes[$numericKey] ?? ''),
+                    $numericKey . '_syntax'
+                );
+            }
         }
 
         $source = TagSyntaxService::normalizeKeyword((string) ($attributes['source'] ?? 'view'));

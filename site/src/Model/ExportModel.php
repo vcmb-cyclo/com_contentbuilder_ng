@@ -29,6 +29,7 @@ use CB\Component\Contentbuilderng\Administrator\Service\RuntimeUtilityService;
 use CB\Component\Contentbuilderng\Administrator\Service\ListSupportService;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PublishedRecordVisibilityHelper;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 class ExportModel extends BaseDatabaseModel
 {
@@ -371,17 +372,49 @@ class ExportModel extends BaseDatabaseModel
                         ? -1
                         : ($this->frontend && $data->own_only_fe ? (int) ($app->getIdentity()->id ?? 0) : -1);
                     $showAllLanguages = $isAdminPreview ? true : ($this->frontend ? $data->show_all_languages_fe : true);
+                    $exportOrdering = (string) $this->getState('formsd_filter_order');
                     $exportOrderDirection = $this->getState('formsd_filter_order_Dir')
                         ? (string) $this->getState('formsd_filter_order_Dir')
                         : (string) ($data->initial_order_dir ?? 'desc');
+                    $embeddedSort = trim((string) $app->getInput()->getString('cblist_sort', ''));
+                    if (
+                        $exportOrdering === ''
+                        && $embeddedSort !== ''
+                        && EmbeddedListFieldFilterService::isEmbeddedRequest(
+                            $app->getInput()->getCmd('cblist_embed', '')
+                        )
+                    ) {
+                        $sortMatch = EmbeddedListFieldFilterService::matchSelectors(
+                            $ids,
+                            (array) $data->form->getElementNames(),
+                            $embeddedSort
+                        );
+                        if ($sortMatch['unknown'] === []) {
+                            $directions = explode('|', strtolower(trim(
+                                (string) $app->getInput()->getString('cblist_dir', 'asc')
+                            )));
+                            $exportOrdering = implode('|', array_map(
+                                static fn(int|string $column): string => 'col' . $column,
+                                $sortMatch['columns']
+                            ));
+                            $exportOrderDirection = implode('|', array_map(
+                                static fn(string $direction): string => $direction === 'desc' ? 'desc' : 'asc',
+                                $directions
+                            ));
+                        }
+                    }
+                    $embeddedLimit = $app->getInput()->getInt('cblist_limit', 0);
+                    if ($embeddedLimit < 1 || $embeddedLimit > 5000) {
+                        $embeddedLimit = 0;
+                    }
 
                     $data->items = $data->form->getListRecords(
                         $ids,
                         $this->getState('formsd_filter'),
                         $searchable_elements,
                         0,
-                        0,
-                        $this->getState('formsd_filter_order'),
+                        $embeddedLimit,
+                        $exportOrdering,
                         $order_types,
                         $exportOrderDirection,
                         0,

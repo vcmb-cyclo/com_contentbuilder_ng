@@ -7,15 +7,17 @@ les assistants de développement (Codex, Claude ou autre).
 
 - Projet : ContentBuilder NG
 - Statut : implémentée et évolutive
-- Version du document : 1.1
+- Version du document : 1.2
 - Dernière mise à jour : 2026-08-05
 - Version d'introduction : ContentBuilder NG 6.1.9-RC05
+- Version de l'option `limit` : ContentBuilder NG 6.1.9-RC06
 - Plateforme : Joomla 6 uniquement
 - PHP : 8.3 ou version ultérieure
 - Base de données : MySQL ou MariaDB uniquement
 - Base fonctionnelle : comportement publié au commit `d9ff1471`
-- Évolution documentée : correction du rétrécissement de l'iframe après
-  une pagination vers une page plus courte
+- Évolutions documentées : correction du rétrécissement de l'iframe après une
+  pagination vers une page plus courte ; ajout de `limit` ; syntaxe stricte des
+  options numériques CBList et CBStats
 - Exemple d'identifiant de vue dans toute nouvelle documentation : `15`
 
 Cette spécification décrit le contrat à préserver. Une évolution qui modifie ce
@@ -64,7 +66,7 @@ Syntaxe minimale :
 Syntaxe complète représentative :
 
 ```text
-{CBList id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 actions="detail|edit|export" layout=cards height=700 loading=lazy}
+{CBList id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 limit=10 actions="detail|edit|export" layout=cards height=700 loading=lazy}
 ```
 
 Règles lexicales :
@@ -72,8 +74,12 @@ Règles lexicales :
 - le nom de balise `CBList` et les noms d'options ne sont pas sensibles à la
   casse ;
 - les options utilisent la forme `nom=valeur` ;
-- les valeurs peuvent être sans guillemets, entre guillemets doubles ou entre
-  apostrophes ;
+- les options numériques CBList `id`, `height`, `pagination` et `limit`
+  utilisent exclusivement des entiers sans guillemets ;
+- la même règle s'applique aux options numériques CBStats `id`, `limit` et à la
+  liste numérique `idsum`, par exemple `idsum=15+16` ;
+- les valeurs textuelles peuvent être sans guillemets, entre guillemets doubles
+  ou entre apostrophes ;
 - les valeurs contenant des espaces ou `|` doivent être écrites entre
   guillemets dans les exemples et instructions générés par une IA ;
 - une accolade fermante placée dans une valeur entre guillemets ne termine pas
@@ -166,8 +172,54 @@ colonne visible et triable de la vue après application de sa configuration.
 - Exemple : `pagination=25`.
 - Option absente : conserver la limite configurée par la vue ou le contexte
   normal de ContentBuilder NG.
+- Les formes `pagination="25"` et `pagination='25'` sont invalides.
 
-### 5.6 `actions` — facultatif
+### 5.6 `limit` — facultatif
+
+But : plafonner le nombre de résultats affichables sans définir une taille de
+page.
+
+- Type : entier strictement positif compris entre 1 et 5 000, sans guillemets.
+- Exemple : `limit=10`.
+- `limit="10"`, `limit='10'`, `limit=XX`, `limit=1A`, les nombres décimaux,
+  nuls ou négatifs sont invalides.
+- L'option est appliquée après les ACL, la recherche, les filtres et le tri
+  effectif.
+- La recherche porte sur tous les enregistrements accessibles à l'utilisateur,
+  et non uniquement sur les lignes définies par `limit`.
+- Après ces traitements, CBList conserve au maximum les `limit` premiers
+  résultats.
+- `limit` n'est pas une pagination et ne remplace jamais `pagination`.
+- Si `pagination < limit`, le sous-ensemble limité est paginé normalement.
+- Si `pagination >= limit`, aucune navigation entre pages n'est nécessaire.
+- Le total utilisé par la pagination est
+  `min(nombre de résultats accessibles après filtrage, limit)` ; le total réel
+  situé au-delà de `limit` n'est jamais affiché.
+- Le résumé utilise le format `1 - 10 sur 10 affichés` en français,
+  `1 - 10 of 10 displayed` en anglais et `1 - 10 von 10 angezeigt` en allemand.
+- L'export contient tout le sous-ensemble limité, indépendamment de la page
+  courante. Par exemple, `limit=100 pagination=20` exporte au maximum les 100
+  résultats retenus.
+- `limit` doit être conservé dans la recherche, les filtres, le tri, la
+  pagination, le détail, l'édition, l'enregistrement, les retours, les mutations
+  et l'export au moyen du paramètre distinct `cblist_limit`.
+- `limit` n'est pas une frontière de sécurité : toutes les ACL et restrictions
+  ContentBuilder NG restent obligatoires.
+- Aucun paramètre de masquage du résumé n'est ajouté en RC06.
+
+Ordre de traitement de référence :
+
+```text
+ACL et visibilité → recherche et filtres → tri effectif → limit → pagination → affichage ou export
+```
+
+Exemple avec recherche et pagination :
+
+```text
+{CBList id=15 fields="Nom|Prenom|Email" title=hide sort=Prenom dir=asc pagination=3 actions=search limit=10}
+```
+
+### 5.7 `actions` — facultatif
 
 But : définir une liste d'autorisation de contrôles dans les écrans intégrés de
 liste, détail et édition.
@@ -200,7 +252,7 @@ Vocabulaire exhaustif :
 
 Tout autre terme est invalide et doit être signalé.
 
-### 5.7 `layout` — facultatif
+### 5.8 `layout` — facultatif
 
 Valeurs autorisées, sensibles à la casse :
 
@@ -215,7 +267,7 @@ Valeurs autorisées, sensibles à la casse :
 
 Option absente : conserver la mise en page normale de la vue.
 
-### 5.8 `height` — facultatif
+### 5.9 `height` — facultatif
 
 - Type : entier strictement positif compris entre 240 et 5 000 pixels.
 - Valeur par défaut : 240 pixels.
@@ -232,7 +284,7 @@ Option absente : conserver la mise en page normale de la vue.
 - Un cadre qui contient uniquement des erreurs doit se réduire à la hauteur du
   message, sans conserver artificiellement la hauteur minimale.
 
-### 5.9 `loading` — facultatif
+### 5.10 `loading` — facultatif
 
 - Valeurs : `lazy` ou `eager`, sans sensibilité à la casse.
 - Valeur par défaut : `lazy`.
@@ -244,7 +296,7 @@ Option absente : conserver la mise en page normale de la vue.
 Les seules options autorisées sont :
 
 ```text
-id, height, pagination, layout, loading, fields, actions, title, sort, dir
+id, height, pagination, limit, layout, loading, fields, actions, title, sort, dir
 ```
 
 Une option analysée mais inconnue est une erreur. La validation doit être
@@ -294,7 +346,7 @@ iframes injectées après un événement `joomla:updated`.
 Une requête CBList porte le marqueur public `cblist_embed=content-plugin`. Ce
 marqueur identifie le contexte de rendu ; ce n'est pas un jeton d'autorisation.
 
-Les restrictions `fields` et `actions` doivent être conservées dans les
+Les restrictions `fields`, `actions` et `limit` doivent être conservées dans les
 formulaires, liens, redirections et retours nécessaires à :
 
 - la pagination ;
@@ -370,6 +422,16 @@ par des tests automatisés et si les invariants suivants restent vrais :
     production.
 20. Les tests unitaires, la validation du paquet et le smoke test Joomla passent
     selon le niveau de risque de la modification.
+21. Les options numériques CBList et CBStats sont acceptées sans guillemets et
+    refusées lorsqu'elles sont citées, avec un message explicite.
+22. `limit` est appliqué après ACL, recherche, filtres et tri, puis avant la
+    pagination et l'export.
+23. La dernière page ne rend jamais plus de lignes que le reliquat de `limit`.
+24. Le résumé et la pagination utilisent le total plafonné sans révéler le total
+    réel situé au-delà de `limit`.
+25. L'export porte sur l'ensemble limité et non sur la seule page courante.
+26. `cblist_limit` survit aux parcours intégrés autorisés sans remplacer
+    `list[limit]`.
 
 ## 12. Procédure à donner à une IA pour toute évolution
 
@@ -429,9 +491,13 @@ Pour CBList, CBStats ou une future balise, l'ordre normal est :
    FR et DE.
 10. **Validation** — tests ciblés, suite complète, paquet, installation Joomla et
     parcours navigateur selon le risque.
-11. **Revue** — vérifier sécurité, ACL, accessibilité, erreurs cumulatives et
+11. **Identification RC locale** — tout paquet de recette utilise strictement la
+    version `x.y.z-RCxx` dans son nom, le manifeste du composant, les manifestes
+    des plugins et l'écran About ; le fichier d'offre Joomla Update reste sur la
+    version stable tant qu'un déclenchement explicite n'est pas demandé.
+12. **Revue** — vérifier sécurité, ACL, accessibilité, erreurs cumulatives et
     absence de changements hors périmètre.
-12. **Publication séparée** — commit, tag, pré-release et Joomla Update restent
+13. **Publication séparée** — commit, tag, pré-release et Joomla Update restent
     des décisions explicites distinctes.
 
 Ce processus n'interdit pas les ajustements découverts pendant le développement,

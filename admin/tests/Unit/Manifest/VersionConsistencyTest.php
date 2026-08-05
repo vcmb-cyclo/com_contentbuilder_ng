@@ -19,7 +19,7 @@ final class VersionConsistencyTest extends TestCase
         $this->root = \dirname(__DIR__, 4);
     }
 
-    public function testInstallAndUpdateVersionsAreConsistent(): void
+    public function testInstallAndUpdateVersionsRespectLocalRcPolicy(): void
     {
         $installVersion = $this->readValue(
             $this->root . '/com_contentbuilderng.xml',
@@ -34,7 +34,10 @@ final class VersionConsistencyTest extends TestCase
             '/^\d+\.\d+\.\d+(?:-[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*)?$/',
             $installVersion
         );
-        self::assertSame($installVersion, $updateVersion);
+        $expectedUpdateVersion = preg_replace('/-RC\d{2}$/', '', $installVersion);
+
+        self::assertIsString($expectedUpdateVersion);
+        self::assertSame($expectedUpdateVersion, $updateVersion);
 
         $assetManifest = json_decode(
             (string) file_get_contents($this->root . '/media/joomla.asset.json'),
@@ -51,9 +54,9 @@ final class VersionConsistencyTest extends TestCase
 
         self::assertSame(
             'https://github.com/vcmb-cyclo/com_contentbuilderng/releases/download/v'
-                . $installVersion
+                . $updateVersion
                 . '/com_contentbuilderng-'
-                . $installVersion
+                . $updateVersion
                 . '.zip',
             $downloadUrl
         );

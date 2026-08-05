@@ -15,19 +15,31 @@ final class EmbedOptionsService
     private const MIN_HEIGHT = 240;
     private const MAX_HEIGHT = 5000;
     private const LAYOUTS = ['default', 'cards', 'listone', 'listtwo', 'listthree', 'listcard', 'listcompact', 'listtiles'];
-    private const ALLOWED_KEYS = ['id', 'height', 'pagination', 'layout', 'loading', 'fields', 'actions', 'title', 'sort', 'dir'];
+    private const MAX_LIMIT = 5000;
+    private const ALLOWED_KEYS = ['id', 'height', 'pagination', 'limit', 'layout', 'loading', 'fields', 'actions', 'title', 'sort', 'dir'];
 
     /**
      * @param array<string, string> $attributes
      *
      * @return list<array{code: string, parameter: string, value: string, detail: string}>
      */
-    public static function validationErrors(array $attributes): array
+    public static function validationErrors(array $attributes, array $quoted = []): array
     {
         $errors = [];
 
         foreach (array_values(array_diff(array_keys($attributes), self::ALLOWED_KEYS)) as $key) {
             $errors[] = self::error('unknown_option', $key, (string) $attributes[$key]);
+        }
+
+        foreach (['id', 'height', 'pagination', 'limit'] as $numericKey) {
+            if (($quoted[$numericKey] ?? false) === true) {
+                $errors[] = self::error(
+                    'invalid_value',
+                    $numericKey,
+                    (string) ($attributes[$numericKey] ?? ''),
+                    $numericKey . '_syntax'
+                );
+            }
         }
 
         if (self::positiveInteger($attributes['id'] ?? '') === null) {
@@ -45,6 +57,13 @@ final class EmbedOptionsService
             $pagination = self::positiveInteger($attributes['pagination']);
             if ($pagination === null || $pagination > 5000) {
                 $errors[] = self::error('invalid_value', 'pagination', $attributes['pagination'], 'pagination');
+            }
+        }
+
+        if (isset($attributes['limit']) && trim($attributes['limit']) !== '') {
+            $limit = self::positiveInteger($attributes['limit']);
+            if ($limit === null || $limit > self::MAX_LIMIT) {
+                $errors[] = self::error('invalid_value', 'limit', $attributes['limit'], 'limit');
             }
         }
 
@@ -109,6 +128,7 @@ final class EmbedOptionsService
      *     id: int,
      *     height: int,
      *     pagination: int|null,
+     *     limit: int|null,
      *     layout: string,
      *     loading: 'eager'|'lazy',
      *     fields: list<string>,
@@ -119,9 +139,9 @@ final class EmbedOptionsService
      *     title_set: bool
      * }
      */
-    public static function resolve(array $attributes): array
+    public static function resolve(array $attributes, array $quoted = []): array
     {
-        $errors = self::validationErrors($attributes);
+        $errors = self::validationErrors($attributes, $quoted);
         if ($errors !== []) {
             throw new \InvalidArgumentException('validation:' . json_encode($errors, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
         }
@@ -151,6 +171,14 @@ final class EmbedOptionsService
         $layout = trim((string) ($attributes['layout'] ?? ''));
         if ($layout === 'cards') {
             $layout = 'listcard';
+        }
+
+        $limit = null;
+        if (isset($attributes['limit']) && trim($attributes['limit']) !== '') {
+            $limit = self::positiveInteger($attributes['limit']);
+            if ($limit === null || $limit > self::MAX_LIMIT) {
+                throw new \InvalidArgumentException('limit');
+            }
         }
 
         $loading = strtolower(trim((string) ($attributes['loading'] ?? 'lazy')));
@@ -187,6 +215,7 @@ final class EmbedOptionsService
             'id' => $id,
             'height' => $height,
             'pagination' => $pagination,
+            'limit' => $limit,
             'layout' => $layout,
             'loading' => $loading,
             'fields' => $fields,

@@ -192,12 +192,12 @@ final class CbStatsIdSumServiceTest extends TestCase
             self::assertIsArray($adminStrings);
             self::assertArrayHasKey('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_IDSUM_DUPLICATE', $pluginStrings);
             self::assertStringContainsString(
-                'idsum=&quot;25+27&quot;',
+                'idsum=25+27',
                 (string) $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_TEXT']
             );
             self::assertArrayHasKey('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_IDSUM_HINT', $adminStrings);
             self::assertStringContainsString(
-                'idsum=&quot;31+32+33+34+35&quot;',
+                'idsum=31+32+33+34+35',
                 (string) $adminStrings['COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_IDSUM_HINT']
             );
         }

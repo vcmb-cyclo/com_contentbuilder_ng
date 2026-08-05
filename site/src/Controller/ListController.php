@@ -619,7 +619,8 @@ class ListController extends BaseController
         $query = EmbeddedListContextService::buildQuery(
             (string) $this->input->getCmd('cblist_embed', ''),
             (string) $this->input->getString('cblist_fields', ''),
-            (string) $this->input->getString('cblist_actions', '')
+            (string) $this->input->getString('cblist_actions', ''),
+            (string) $this->input->getInt('cblist_limit', 0)
         );
 
         $title = trim((string) $this->input->getString('cblist_title', ''));
