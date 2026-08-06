@@ -3,7 +3,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.10-RC01</version>
+		<version>6.1.10-RC02</version>
 		<addition>
 			<item>Added limit= to embedded CBList views, applied after access checks, filters and sorting and before pagination and export.</item>
 			<item>Added native DATE, DATETIME, INTEGER, DECIMAL and BOOLEAN controls and validation to direct Storage forms.</item>
@@ -14,6 +14,7 @@
 			<item>Added a CBList actions section to the frontend debug panel, listing which terms apply on each screen and whether each is currently allowed.</item>
 		</addition>
 		<change>
+			<item>Replaced long list pagination with a compact shared layout showing the first, last and nearby pages without horizontal scrolling.</item>
 			<item>CBList and CBStats numeric options now require unquoted numeric syntax.</item>
 			<item>Enabled the repository-wide PSR-12 quality gate and modernized CBStats with strict PHP types.</item>
 			<item>Direct Storage synchronization now preserves unpublished elements and refreshes native controls when SQL field types change.</item>
