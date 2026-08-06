@@ -600,6 +600,7 @@ namespace {
     require_once \dirname(__DIR__) . '/src/Service/ConfigImportService.php';
     require_once \dirname(__DIR__) . '/src/Helper/PhpTemplateHelper.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/Router.php';
+    require_once \dirname(__DIR__, 2) . '/site/src/Service/CompactPaginationService.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/SparseFieldsetService.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/StatsFilterValueService.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/StatsService.php';

@@ -16,6 +16,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Uri\Uri;
+use CB\Component\Contentbuilderng\Site\Service\CompactPaginationService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 $pagination = $displayData['pagination'] ?? null;
@@ -37,6 +38,7 @@ $pagLastStart = $pagPages > 0 ? max(0, ($pagPages - 1) * $pagLimit) : 0;
 $showPagination = $pagPages > 1;
 $rangeStart = $pagStart + 1;
 $rangeEnd = min($pagStart + $pagLimit, $pagTotal);
+$compactPages = CompactPaginationService::pages($pagPages, $pagCurrent);
 
 $input = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput();
 $isLimitedEmbeddedList = EmbeddedListFieldFilterService::isEmbeddedRequest($input->getCmd('cblist_embed', ''))
@@ -84,32 +86,54 @@ $buildPageLink = static function (int $start) use ($params): string {
         ); ?>
     </div>
     <?php if ($showPagination) : ?>
-        <ul class="pagination pagination-sm mb-0">
-            <li class="page-item<?php echo $pagCurrent <= 1 ? ' disabled' : ''; ?>">
-                <a class="page-link" href="<?php echo $buildPageLink(0); ?>" aria-label="<?php echo Text::_('JLIB_HTML_START'); ?>">
-                    <span aria-hidden="true">&lt;&lt;</span>
-                </a>
+        <ul class="pagination pagination-sm mb-0 cb-pagination-compact">
+            <li class="page-item cb-pagination-jump<?php echo $pagCurrent <= 1 ? ' disabled' : ''; ?>">
+                <?php if ($pagCurrent <= 1) : ?>
+                    <span class="page-link" aria-disabled="true" aria-label="<?php echo Text::_('JLIB_HTML_START'); ?>"><span aria-hidden="true">&lt;&lt;</span></span>
+                <?php else : ?>
+                    <a class="page-link" href="<?php echo $buildPageLink(0); ?>" aria-label="<?php echo Text::_('JLIB_HTML_START'); ?>"><span aria-hidden="true">&lt;&lt;</span></a>
+                <?php endif; ?>
             </li>
             <li class="page-item<?php echo $pagCurrent <= 1 ? ' disabled' : ''; ?>">
-                <a class="page-link" href="<?php echo $buildPageLink($pagStart - $pagLimit); ?>" aria-label="<?php echo Text::_('JPREV'); ?>">
-                    <span aria-hidden="true">&lt;</span>
-                </a>
+                <?php if ($pagCurrent <= 1) : ?>
+                    <span class="page-link" aria-disabled="true" aria-label="<?php echo Text::_('JPREV'); ?>"><span aria-hidden="true">&lt;</span></span>
+                <?php else : ?>
+                    <a class="page-link" href="<?php echo $buildPageLink($pagStart - $pagLimit); ?>" aria-label="<?php echo Text::_('JPREV'); ?>"><span aria-hidden="true">&lt;</span></a>
+                <?php endif; ?>
             </li>
-            <?php for ($p = 1; $p <= $pagPages; $p++) :
-                $startForPage = ($p - 1) * $pagLimit; ?>
-                <li class="page-item<?php echo $p === $pagCurrent ? ' active' : ''; ?>">
-                    <a class="page-link" href="<?php echo $buildPageLink($startForPage); ?>"><?php echo $p; ?></a>
+            <?php foreach ($compactPages as $page) : ?>
+                <?php if ($page === null) : ?>
+                    <li class="page-item disabled cb-pagination-ellipsis" aria-hidden="true">
+                        <span class="page-link">…</span>
+                    </li>
+                    <?php continue; ?>
+                <?php endif; ?>
+                <?php
+                $startForPage = ($page - 1) * $pagLimit;
+                $isCurrent = $page === $pagCurrent;
+                $isLocalPage = CompactPaginationService::isInLocalWindow($page, $pagPages, $pagCurrent);
+                ?>
+                <li class="page-item cb-pagination-number<?php echo $isLocalPage ? ' cb-pagination-local' : ' cb-pagination-edge'; ?><?php echo $isCurrent ? ' active' : ''; ?>">
+                    <?php if ($isCurrent) : ?>
+                        <span class="page-link" aria-current="page"><?php echo $page; ?></span>
+                    <?php else : ?>
+                        <a class="page-link" href="<?php echo $buildPageLink($startForPage); ?>"><?php echo $page; ?></a>
+                    <?php endif; ?>
                 </li>
-            <?php endfor; ?>
+            <?php endforeach; ?>
             <li class="page-item<?php echo $pagCurrent >= $pagPages ? ' disabled' : ''; ?>">
-                <a class="page-link" href="<?php echo $buildPageLink($pagStart + $pagLimit); ?>" aria-label="<?php echo Text::_('JNEXT'); ?>">
-                    <span aria-hidden="true">&gt;</span>
-                </a>
+                <?php if ($pagCurrent >= $pagPages) : ?>
+                    <span class="page-link" aria-disabled="true" aria-label="<?php echo Text::_('JNEXT'); ?>"><span aria-hidden="true">&gt;</span></span>
+                <?php else : ?>
+                    <a class="page-link" href="<?php echo $buildPageLink($pagStart + $pagLimit); ?>" aria-label="<?php echo Text::_('JNEXT'); ?>"><span aria-hidden="true">&gt;</span></a>
+                <?php endif; ?>
             </li>
-            <li class="page-item<?php echo $pagCurrent >= $pagPages ? ' disabled' : ''; ?>">
-                <a class="page-link" href="<?php echo $buildPageLink($pagLastStart); ?>" aria-label="<?php echo Text::_('JLIB_HTML_END'); ?>">
-                    <span aria-hidden="true">&gt;&gt;</span>
-                </a>
+            <li class="page-item cb-pagination-jump<?php echo $pagCurrent >= $pagPages ? ' disabled' : ''; ?>">
+                <?php if ($pagCurrent >= $pagPages) : ?>
+                    <span class="page-link" aria-disabled="true" aria-label="<?php echo Text::_('JLIB_HTML_END'); ?>"><span aria-hidden="true">&gt;&gt;</span></span>
+                <?php else : ?>
+                    <a class="page-link" href="<?php echo $buildPageLink($pagLastStart); ?>" aria-label="<?php echo Text::_('JLIB_HTML_END'); ?>"><span aria-hidden="true">&gt;&gt;</span></a>
+                <?php endif; ?>
             </li>
         </ul>
     <?php endif; ?>

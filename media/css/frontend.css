@@ -58,11 +58,39 @@
     }
 }
 
-/* ── Pagination : replier les items sur petits écrans ────────────
-   Bootstrap ne pose pas flex-wrap sur ul.pagination : avec beaucoup
-   de pages, la barre déborde du viewport en portrait mobile.       */
-.pagination__wrapper .pagination {
-    flex-wrap: wrap;
+/* ── Pagination compacte ──────────────────────────────────────── */
+.pagination__wrapper {
+    min-width: 0;
+    max-width: 100%;
+}
+.pagination__wrapper .cb-pagination-compact {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    white-space: nowrap;
+}
+.pagination__wrapper .cb-pagination-compact .page-link {
+    min-width: 1.85rem;
+    padding-right: .42rem;
+    padding-left: .42rem;
+    text-align: center;
+}
+.pagination__wrapper .cb-pagination-ellipsis .page-link {
+    min-width: 1.25rem;
+    padding-right: .2rem;
+    padding-left: .2rem;
+}
+
+@media (max-width: 575.98px) {
+    .pagination__wrapper .cb-pagination-edge,
+    .pagination__wrapper .cb-pagination-ellipsis {
+        display: none;
+    }
+}
+
+@media (max-width: 374.98px) {
+    .pagination__wrapper .cb-pagination-jump {
+        display: none;
+    }
 }
 
 /* ── Contenu d'enregistrement (details/edit/cartes) ──────────────

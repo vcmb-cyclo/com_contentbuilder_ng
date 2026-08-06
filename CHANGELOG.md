@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.1.10-RC02 — 2026-08-06
+
+### Changed
+
+- Replaced long frontend list pagination with a compact shared layout showing the first, last and nearby pages without horizontal scrolling.
+
 ## 6.1.10-RC01 — 2026-08-06
 
 ### Added
