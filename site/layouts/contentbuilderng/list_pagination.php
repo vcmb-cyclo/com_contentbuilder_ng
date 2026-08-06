@@ -115,9 +115,9 @@ $buildPageLink = static function (int $start) use ($params): string {
                 ?>
                 <li class="page-item cb-pagination-number<?php echo $isLocalPage ? ' cb-pagination-local' : ' cb-pagination-edge'; ?><?php echo $isCurrent ? ' active' : ''; ?>">
                     <?php if ($isCurrent) : ?>
-                        <span class="page-link" aria-current="page"><?php echo $page; ?></span>
+                        <span class="page-link" aria-current="page"><?php echo htmlspecialchars((string) $page, ENT_QUOTES, 'UTF-8'); ?></span>
                     <?php else : ?>
-                        <a class="page-link" href="<?php echo $buildPageLink($startForPage); ?>"><?php echo $page; ?></a>
+                        <a class="page-link" href="<?php echo $buildPageLink($startForPage); ?>"><?php echo htmlspecialchars((string) $page, ENT_QUOTES, 'UTF-8'); ?></a>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>
