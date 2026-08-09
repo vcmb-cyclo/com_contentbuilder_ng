@@ -23,6 +23,12 @@ final class MenuParamHelper
 
     public static function getMenuParam($params, string $key, $default = null)
     {
+        $value = $params->get($key, null);
+
+        if ($value !== null) {
+            return $value;
+        }
+
         $settings = $params->get('settings', null);
 
         if (is_array($settings) && array_key_exists($key, $settings)) {
@@ -47,11 +53,7 @@ final class MenuParamHelper
             return $value;
         }
 
-        // Joomla serializes menu metadata fields at the root of the params
-        // payload for this menu form. Keep the settings-group lookup above
-        // for already-normalized payloads, then read the format produced by
-        // current menu saves.
-        return $params->get($key, $default);
+        return $default;
     }
 
     public static function getConfiguredListLimit($app, int $formId = 0): int

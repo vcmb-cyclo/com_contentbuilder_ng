@@ -45,6 +45,23 @@ final class ElementMutationResyncTest extends TestCase
         self::assertStringContainsString('jform[params][form_id]', $field);
     }
 
+    public function testDynamicFilterOrderLabelIsAvailableToMenuMetadata(): void
+    {
+        $expectedTranslations = [
+            'en-GB' => 'Order',
+            'fr-FR' => 'Ordre',
+            'de-DE' => 'Reihenfolge',
+        ];
+
+        foreach ($expectedTranslations as $language => $expectedTranslation) {
+            $path = $this->root . '/admin/language/' . $language . '/com_contentbuilderng.sys.ini';
+            $translations = parse_ini_file($path);
+
+            self::assertIsArray($translations);
+            self::assertSame($expectedTranslation, $translations['COM_CONTENTBUILDERNG_ORDER_LABEL'] ?? null);
+        }
+    }
+
     private function read(string $relativePath): string
     {
         $path = $this->root . '/' . $relativePath;

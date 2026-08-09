@@ -32,16 +32,16 @@ class CbfilterField extends FormField
 
     protected function getInput()
     {
-        $selectedFormId = (int) ($this->form?->getValue('form_id', 'params.settings', 0) ?? 0);
+        $selectedFormId = (int) ($this->form?->getValue('form_id', 'params', 0) ?? 0);
         if ($selectedFormId <= 0) {
-            $selectedFormId = (int) ($this->form?->getValue('form_id', 'params', 0) ?? 0);
+            $selectedFormId = (int) ($this->form?->getValue('form_id', 'params.settings', 0) ?? 0);
         }
         if ($selectedFormId <= 0 && method_exists($this->form, 'getData')) {
             $data = $this->form->getData();
             if (is_object($data) && method_exists($data, 'get')) {
-                $selectedFormId = (int) $data->get('params.settings.form_id', 0);
+                $selectedFormId = (int) $data->get('params.form_id', 0);
                 if ($selectedFormId <= 0) {
-                    $selectedFormId = (int) $data->get('params.form_id', 0);
+                    $selectedFormId = (int) $data->get('params.settings.form_id', 0);
                 }
             }
         }

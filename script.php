@@ -72,7 +72,7 @@ class com_contentbuilderngInstallerScript
 
     private const SHARED_LOG_FILE = 'com_contentbuilderng.log';
     private const SHARED_LOG_KEEP_FILES = 10;
-    private const LEGACY_ROOT_MENU_SETTING_KEYS = [
+    private const LEGACY_NESTED_MENU_SETTING_KEYS = [
         'form_id',
         'record_id',
         'cb_controller',
@@ -386,7 +386,7 @@ class com_contentbuilderngInstallerScript
                 $this->updateMenuLinks('contentbuilder', 'com_contentbuilderng');
                 $this->updateMenuLinks('com_contentbuilder', 'com_contentbuilderng');
                 $this->updateMenuLinks('com_contentbuilder_ng', 'com_contentbuilderng');
-                $this->migrateLegacyRootMenuParamsToSettings();
+                $this->migrateLegacyNestedMenuSettingsToRootParams();
                 $this->migrateLegacyMenuBackButtonParams();
 
                 // Install / update plugins shipped in package
@@ -1240,7 +1240,7 @@ class com_contentbuilderngInstallerScript
         }
     }
 
-    private function migrateLegacyRootMenuParamsToSettings(): void
+    private function migrateLegacyNestedMenuSettingsToRootParams(): void
     {
         $db = $this->db();
 
@@ -1283,24 +1283,24 @@ class com_contentbuilderngInstallerScript
                 continue;
             }
 
-            $settings = $params['settings'] ?? [];
+            $settings = $params['settings'] ?? null;
 
             if (!is_array($settings)) {
-                $settings = [];
+                continue;
             }
 
             $changed = false;
 
-            foreach (self::LEGACY_ROOT_MENU_SETTING_KEYS as $key) {
-                if (!array_key_exists($key, $params)) {
+            foreach (self::LEGACY_NESTED_MENU_SETTING_KEYS as $key) {
+                if (!array_key_exists($key, $settings)) {
                     continue;
                 }
 
-                if (!array_key_exists($key, $settings)) {
-                    $settings[$key] = $params[$key];
+                if (!array_key_exists($key, $params)) {
+                    $params[$key] = $settings[$key];
                 }
 
-                unset($params[$key]);
+                unset($settings[$key]);
                 $changed = true;
             }
 
@@ -1308,7 +1308,11 @@ class com_contentbuilderngInstallerScript
                 continue;
             }
 
-            $params['settings'] = $settings;
+            if ($settings === []) {
+                unset($params['settings']);
+            } else {
+                $params['settings'] = $settings;
+            }
             $encodedParams = json_encode($params, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
             if ($encodedParams === false) {
@@ -1328,7 +1332,7 @@ class com_contentbuilderngInstallerScript
         }
 
         if ($updated > 0) {
-            $this->log("[OK] Migrated legacy root menu parameters into params.settings: {$updated} menu item(s).");
+            $this->log("[OK] Migrated legacy params.settings menu values to Joomla root parameters: {$updated} menu item(s).");
         }
     }
 

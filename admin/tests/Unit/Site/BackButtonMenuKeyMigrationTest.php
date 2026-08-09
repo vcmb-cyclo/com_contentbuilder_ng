@@ -22,7 +22,7 @@ final class BackButtonMenuKeyMigrationTest extends TestCase
         self::assertStringNotContainsString('?string $legacyKey = null', $source);
         self::assertStringNotContainsString("get(\$legacyKey, null, 'raw')", $source);
         self::assertStringNotContainsString("getMenuParam(\$params, \$legacyKey, null)", $source);
-        self::assertStringContainsString('return $params->get($key, $default);', $source);
+        self::assertStringContainsString('$value = $params->get($key, null);', $source);
     }
 
     public function testDispatcherOnlySeedsCanonicalBackButtonInputKey(): void
@@ -128,21 +128,30 @@ final class BackButtonMenuKeyMigrationTest extends TestCase
     {
         $source = $this->read('script.php');
 
-        self::assertStringContainsString('$this->migrateLegacyRootMenuParamsToSettings();', $source);
+        self::assertStringContainsString('$this->migrateLegacyNestedMenuSettingsToRootParams();', $source);
         self::assertStringContainsString('$this->migrateLegacyMenuBackButtonParams();', $source);
         self::assertStringContainsString("'cb_show_details_back_button'", $source);
         self::assertStringContainsString("'show_back_button'", $source);
     }
 
-    public function testInstallerDefinesRootMenuKeysToMoveIntoSettings(): void
+    public function testInstallerDefinesNestedMenuKeysToMoveToJoomlaRootParams(): void
     {
         $source = $this->read('script.php');
 
-        self::assertStringContainsString('private const LEGACY_ROOT_MENU_SETTING_KEYS = [', $source);
+        self::assertStringContainsString('private const LEGACY_NESTED_MENU_SETTING_KEYS = [', $source);
         self::assertStringContainsString("'form_id'", $source);
         self::assertStringContainsString("'cb_list_limit'", $source);
         self::assertStringContainsString("'cb_show_details_back_button'", $source);
         self::assertStringContainsString("'cb_show_permission_column'", $source);
+    }
+
+    public function testInstallerPreservesSavedRootMenuValuesAndRemovesStaleSettings(): void
+    {
+        $source = $this->read('script.php');
+
+        self::assertStringContainsString("if (!array_key_exists(\$key, \$params))", $source);
+        self::assertStringContainsString('$params[$key] = $settings[$key];', $source);
+        self::assertStringContainsString('unset($settings[$key]);', $source);
     }
 
     public function testInstallerMigratesPackedPayloadsDuringUpdateFlow(): void
@@ -188,6 +197,8 @@ final class BackButtonMenuKeyMigrationTest extends TestCase
 
         self::assertStringContainsString("getValue('form_id', 'params', 0)", $formsField);
         self::assertStringContainsString("get('params.form_id', 0)", $formsField);
+        self::assertStringContainsString('$value === (string) $selectedFormId', $formsField);
+        self::assertStringNotContainsString('$value === (string) $this->value', $formsField);
         self::assertStringContainsString("getValue('form_id', 'params', 0)", $filterField);
         self::assertStringContainsString("get('params.form_id', 0)", $filterField);
         self::assertStringContainsString('#jform_params_form_id', $filterField);
