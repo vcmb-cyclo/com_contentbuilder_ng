@@ -3,7 +3,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.10-RC02</version>
+		<version>6.1.10-RC03</version>
 		<addition>
 			<item>Added limit= to embedded CBList views, applied after access checks, filters and sorting and before pagination and export.</item>
 			<item>Added native DATE, DATETIME, INTEGER, DECIMAL and BOOLEAN controls and validation to direct Storage forms.</item>
@@ -20,6 +20,9 @@
 			<item>Direct Storage synchronization now preserves unpublished elements and refreshes native controls when SQL field types change.</item>
 		</change>
 		<fix>
+			<item>Fixed the dynamic filter order label rendering as a raw language key in the Joomla Menu Item editor.</item>
+			<item>Fixed ContentBuilder List menu items reverting to the first published view after a component update.</item>
+			<item>Updated vulnerable Composer and npm development dependencies to patched compatible releases.</item>
 			<item>Escaped free-text list and template output to prevent stored cross-site scripting.</item>
 			<item>Fixed Storage field creation, required-state display, row saving, sorting, system-field publication and schema-audit regressions.</item>
 			<item>Preserved CBList field and action context across navigation, saves and record actions, and hardened action permission checks.</item>

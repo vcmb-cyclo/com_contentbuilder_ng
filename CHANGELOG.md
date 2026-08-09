@@ -1,5 +1,13 @@
 # Changelog
 
+## 6.1.10-RC03 — 2026-08-09
+
+### Fixed
+
+- Fixed the dynamic filter order label rendering as the raw `COM_CONTENTBUILDERNG_ORDER_LABEL` key in the Joomla Menu Item editor.
+- Fixed ContentBuilder List menu items reverting to the first published view after a component update by preserving Joomla's root-level menu parameters and migrating previously nested values back to the standard format.
+- Updated the vulnerable development dependencies PHP_CodeSniffer, fast-uri, js-yaml and PostCSS to their patched compatible releases.
+
 ## 6.1.10-RC02 — 2026-08-06
 
 ### Changed

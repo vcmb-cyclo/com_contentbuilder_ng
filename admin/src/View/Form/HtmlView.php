@@ -448,6 +448,12 @@ class HtmlView extends BaseHtmlView
 
         $registry = new Registry();
         $registry->loadString($paramsJson);
+        $formId = (int) $registry->get('form_id', 0);
+
+        if ($formId > 0) {
+            return $formId;
+        }
+
         $settings = $registry->get('settings');
 
         if (is_object($settings) && method_exists($settings, 'get')) {
@@ -462,6 +468,6 @@ class HtmlView extends BaseHtmlView
             return (int) $settings->form_id;
         }
 
-        return (int) $registry->get('settings.form_id', $registry->get('form_id', 0));
+        return (int) $registry->get('settings.form_id', 0);
     }
 }

@@ -50,18 +50,18 @@ class FormsField extends FormField
 
     private function getSelectedFormId(): int
     {
-        $selectedFormId = (int) ($this->form?->getValue('form_id', 'params.settings', 0) ?? 0);
+        $selectedFormId = (int) ($this->form?->getValue('form_id', 'params', 0) ?? 0);
         if ($selectedFormId <= 0) {
-            $selectedFormId = (int) ($this->form?->getValue('form_id', 'params', 0) ?? 0);
+            $selectedFormId = (int) ($this->form?->getValue('form_id', 'params.settings', 0) ?? 0);
         }
 
         if ($selectedFormId <= 0 && method_exists($this->form, 'getData')) {
             $data = $this->form->getData();
 
             if (is_object($data) && method_exists($data, 'get')) {
-                $selectedFormId = (int) $data->get('params.settings.form_id', 0);
+                $selectedFormId = (int) $data->get('params.form_id', 0);
                 if ($selectedFormId <= 0) {
-                    $selectedFormId = (int) $data->get('params.form_id', 0);
+                    $selectedFormId = (int) $data->get('params.settings.form_id', 0);
                 }
             }
         }
@@ -181,7 +181,7 @@ class FormsField extends FormField
 
         foreach ($status as $form) {
             $value = (string) ($form->id ?? '');
-            $selected = $value === (string) $this->value ? ' selected="selected"' : '';
+            $selected = $value === (string) $selectedFormId ? ' selected="selected"' : '';
             $select .= '<option value="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"' . $selected . '>'
                 . htmlspecialchars((string) ($form->name ?? ''), ENT_QUOTES, 'UTF-8')
                 . '</option>';
