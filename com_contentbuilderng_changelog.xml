@@ -3,7 +3,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.10-RC07</version>
+		<version>6.1.10-RC08</version>
 		<addition>
 			<item>Added reusable Joomla-style menu controls with dynamic inheritance labels, per-menu themes and true override resets.</item>
 			<item>Added centralized pagination choices shared by component configuration, views, menus and frontend lists.</item>
