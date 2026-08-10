@@ -64,7 +64,8 @@ class ListlimitField extends FormField
             . '<input type="text" class="form-control" id="%s" value="%s" inputmode="numeric" autocomplete="off"%s%s%s>'
             . '<button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="%s"%s></button>'
             . '<ul class="dropdown-menu dropdown-menu-end">%s</ul>'
-            . '<input type="hidden" id="%s-value" name="%s" value="%s" data-cb-list-limit-storage%s>'
+            . '<input type="hidden" id="%s-value" name="%s" value="%s"'
+            . ' data-cb-list-limit-storage data-cb-dirty-track="true"%s>'
             . '</div><div class="form-text" data-cb-list-limit-warning hidden>%s</div>',
             $this->escape($mode),
             $this->escape($inheritValue),

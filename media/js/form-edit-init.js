@@ -1930,6 +1930,10 @@
 
         var type = String(field.type || '').toLowerCase();
 
+        if (type === 'hidden' && field.dataset.cbDirtyTrack === 'true') {
+            return true;
+        }
+
         if (
             type === 'hidden' &&
             /^(cb_create_sample_flag|cb_create_editable_sample_flag|cb_email_admin_create_sample_flag|cb_email_create_sample_flag)$/.test(String(field.id || ''))

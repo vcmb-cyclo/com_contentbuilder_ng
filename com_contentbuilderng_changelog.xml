@@ -3,7 +3,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.10-RC06</version>
+		<version>6.1.10-RC07</version>
 		<addition>
 			<item>Added reusable Joomla-style menu controls with dynamic inheritance labels, per-menu themes and true override resets.</item>
 			<item>Added centralized pagination choices shared by component configuration, views, menus and frontend lists.</item>
@@ -24,6 +24,7 @@
 			<item>Direct Storage synchronization now preserves unpublished elements and refreshes native controls when SQL field types change.</item>
 		</change>
 		<fix>
+			<item>Fixed the View list-limit control not enabling Joomla's Save actions after its value changed.</item>
 			<item>Preserved selected ContentBuilder views during updates and menu override resets.</item>
 			<item>Fixed menu translations, encoded group values and inherited or custom list-limit labels.</item>
 			<item>Fixed the dynamic filter order label rendering as a raw language key in the Joomla Menu Item editor.</item>
