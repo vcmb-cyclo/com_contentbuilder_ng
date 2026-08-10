@@ -183,7 +183,9 @@ class HtmlView extends BaseHtmlView
                 ->icon('fa fa-plug');
         }
 
-        $configReturn = urlencode(base64_encode((string) Uri::getInstance()));
+        $configReturn = urlencode(base64_encode(
+            (string) Uri::base() . 'index.php?option=com_contentbuilderng&view=forms'
+        ));
         ToolbarHelper::link(
             'index.php?option=com_config&view=component&component=com_contentbuilderng&return=' . $configReturn,
             'JTOOLBAR_OPTIONS',

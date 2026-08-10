@@ -57,8 +57,8 @@
 <administration>
     <menu>COM_CONTENTBUILDERNG</menu>
     <submenu>
-        <menu view="storages">COM_CONTENTBUILDERNG_STORAGES</menu>
         <menu view="forms">COM_CONTENTBUILDERNG_LIST</menu>
+        <menu view="storages">COM_CONTENTBUILDERNG_STORAGES</menu>
         <menu view="about">COM_CONTENTBUILDERNG_ABOUT</menu>
     </submenu>
 

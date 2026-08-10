@@ -26,7 +26,7 @@ class DisplayController extends BaseController
 {
     use ComponentAccessTrait;
 
-    protected $default_view = 'storages';
+    protected $default_view = 'forms';
 
     private function getApp(): CMSApplicationInterface
     {
