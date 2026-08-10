@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.1.10-RC07 — 2026-08-10
+
+### Fixed
+
+- Fixed the View list-limit control not enabling Joomla's Save actions after selecting a standard, custom, inherited or All value.
+
 ## 6.1.10-RC06 — 2026-08-10
 
 ### Added
