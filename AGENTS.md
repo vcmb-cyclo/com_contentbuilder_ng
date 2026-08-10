@@ -32,6 +32,21 @@
 - New admin UI should follow native Joomla behavior when applicable.
 - Preserve a non-AJAX fallback when practical.
 
+## Validated Joomla menu baseline
+- ContentBuilder NG `6.1.10-RC06` is the validated UX baseline for Joomla menu
+  parameters.
+- Preserve the native Joomla 6 look and feel. Use Joomla fields, layouts and
+  interactions instead of imitating Joomla with component-specific styling.
+- Preserve every already validated menu behavior unless a task explicitly asks
+  to change it.
+- Before rebuilding an RC after a menu change, check for regressions in menu
+  type ordering, selected-view persistence, Reset inheritance, translations,
+  section layout, field sizing and required-field validation.
+- Never describe lint, XML parsing or archive inspection as complete functional
+  validation. Clearly distinguish automated checks from manual Joomla UI tests.
+- Treat regressions reported by manual Joomla testing as missing regression
+  coverage and add a focused automated check when practical.
+
 ## CBList examples
 - Use ContentBuilder NG view ID `15` as the default placeholder in CBList
   documentation, descriptions, examples, tests and AI-generated instructions,

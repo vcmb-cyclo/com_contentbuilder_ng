@@ -24,6 +24,7 @@ use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Session\Session;
 use Joomla\CMS\Uri\Uri;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ListLimitHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\RatingHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
@@ -163,6 +164,17 @@ if ($previewFormName === '') {
     $previewFormName = Text::_('COM_CONTENTBUILDERNG_NOT_AVAILABLE');
 							}
 $previewFormName = htmlspecialchars($previewFormName, ENT_QUOTES, 'UTF-8');
+
+// Item wrappers encode reserved characters before the template receives them.
+// Decode once before the final HTML escape to avoid displaying entities such
+// as &#40; and &#41; literally while keeping the rendered output escaped.
+$escapeListValue = static function (mixed $value): string {
+	return htmlspecialchars(
+		html_entity_decode((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+		ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5,
+		'UTF-8'
+	);
+};
 $previewConfigTabLabel = Text::sprintf('COM_CONTENTBUILDERNG_PREVIEW_CONFIG_TAB', Text::_('COM_CONTENTBUILDERNG_FORM'));
 $previewFrontendPermissionHint = Text::sprintf(
     'COM_CONTENTBUILDERNG_PREVIEW_FRONTEND_PERMISSION_HINT',
@@ -217,9 +229,6 @@ $embeddedListTitleQuery = $embeddedListTitleProvided
     : '';
 $previewLayoutOptions = [
     'default' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_DEFAULT'),
-    'listone' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_LISTONE'),
-    'listtwo' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_LISTTWO'),
-    'listthree' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_LISTTHREE'),
     'listcard' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_LISTCARD'),
     'listcompact' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_LISTCOMPACT'),
     'listtiles' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_LIST_LAYOUT_LISTTILES'),
@@ -905,15 +914,20 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 											<?php
 											$currentLimit = (int) (($this->state?->get('list.limit')) ?? ($this->pagination->limit ?? 20));
 											$totalItems = (int) ($this->pagination->total ?? 0);
-											$limitOptions = [5, 10, 20, 25, 50, 100, 200, 500];
-											if ($currentLimit > 0 && $currentLimit !== $totalItems) {
-												$limitOptions[] = $currentLimit;
+											$isAllLimit = $currentLimit === 0;
+											$configuredLimitOptions = ListLimitHelper::getPaginationChoices();
+											$showAllOption = in_array(ListLimitHelper::ALL, $configuredLimitOptions, true) || $isAllLimit;
+											$limitOptions = array_values(array_filter(
+												$configuredLimitOptions,
+												static fn (int $value): bool => $value > ListLimitHelper::ALL
+											));
+											if ($currentLimit > 0 && !in_array($currentLimit, $limitOptions, true) && $currentLimit !== $totalItems) {
+												$limitOptions = ListLimitHelper::insertCurrentPaginationChoice($limitOptions, $currentLimit);
 											}
 											$limitOptions = array_values(array_unique(array_filter(
 												array_map('intval', $limitOptions),
 												static fn (int $value): bool => $value > 0 && $value !== $totalItems
 											)));
-											sort($limitOptions, SORT_NUMERIC);
 											?>
 											<select
 												id="list_limit"
@@ -928,8 +942,8 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 														<?php echo $label; ?>
 													</option>
 												<?php endforeach; ?>
-												<?php if ($totalItems > 0) : ?>
-													<option value="<?php echo $totalItems; ?>"<?php echo $totalItems === $currentLimit ? ' selected' : ''; ?>>
+											<?php if ($totalItems > 0 && $showAllOption) : ?>
+													<option value="0"<?php echo $isAllLimit || $totalItems === $currentLimit ? ' selected' : ''; ?>>
 														<?php echo Text::_('JALL'); ?>
 													</option>
 												<?php endif; ?>
@@ -1078,9 +1092,9 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 								<div class="cb-list-card-header-main">
 									<h2 class="cb-list-card-title">
 										<?php if (($primaryField['linkable'] ?? false) && $rowCanView) : ?>
-											<a href="<?php echo $link; ?>"><?php echo htmlspecialchars((string) $cardTitle, ENT_QUOTES, 'UTF-8'); ?></a>
+											<a href="<?php echo $link; ?>"><?php echo $escapeListValue($cardTitle); ?></a>
 									<?php else : ?>
-										<?php echo htmlspecialchars((string) $cardTitle, ENT_QUOTES, 'UTF-8'); ?>
+										<?php echo $escapeListValue($cardTitle); ?>
 									<?php endif; ?>
 								</h2>
 								<p class="cb-list-card-subtitle"><?php echo htmlspecialchars($cardSubtitle, ENT_QUOTES, 'UTF-8'); ?></p>
@@ -1182,9 +1196,9 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 									<div class="cb-list-card-label"><?php echo htmlspecialchars((string) $field['label'], ENT_QUOTES, 'UTF-8'); ?></div>
 									<div class="cb-list-card-value">
 										<?php if ($field['linkable']) : ?>
-											<a href="<?php echo $link; ?>"><?php echo nl2br(htmlspecialchars((string) $field['value'], ENT_QUOTES, 'UTF-8')); ?></a>
+											<a href="<?php echo $link; ?>"><?php echo nl2br($escapeListValue($field['value'])); ?></a>
 										<?php else : ?>
-											<?php echo nl2br(htmlspecialchars((string) $field['value'], ENT_QUOTES, 'UTF-8')); ?>
+											<?php echo nl2br($escapeListValue($field['value'])); ?>
 										<?php endif; ?>
 									</div>
 								</div>
@@ -1611,12 +1625,12 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 								if (in_array(str_replace('col', '', $key), $this->linkable_elements) && $rowCanView) {
 								?>
 									<a href="<?php echo $link; ?>">
-										<?php echo nl2br(htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8')); ?>
+										<?php echo nl2br($escapeListValue($value)); ?>
 									</a>
 								<?php
 								} else {
 								?>
-									<?php echo nl2br(htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8')); ?>
+									<?php echo nl2br($escapeListValue($value)); ?>
 								<?php
 								}
 								?>

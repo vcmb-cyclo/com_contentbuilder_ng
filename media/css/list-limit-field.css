@@ -1,0 +1,12 @@
+.cb-list-limit-control {
+    width: 15rem;
+    max-width: 100%;
+}
+
+.cb-list-limit-control > .form-control {
+    min-width: 0;
+}
+
+.cb-list-limit-control > .dropdown-menu {
+    min-width: 100%;
+}

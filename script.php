@@ -78,6 +78,7 @@ class com_contentbuilderngInstallerScript
         'cb_controller',
         'cb_category_id',
         'cb_category_menu_filter',
+        'cb_theme_plugin',
         'cb_list_filterhidden',
         'cb_list_orderhidden',
         'cb_show_author',

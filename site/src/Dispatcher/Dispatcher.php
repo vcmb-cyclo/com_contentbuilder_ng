@@ -60,6 +60,7 @@ class Dispatcher extends ComponentDispatcher
             'cb_prefix_in_title' => null,
             'force_menu_item_id' => null,
             'cb_category_menu_filter' => null,
+            'cb_theme_plugin' => null,
         ];
 
         foreach ($menuParamDefaults as $key => $default) {
@@ -133,14 +134,22 @@ class Dispatcher extends ComponentDispatcher
                         : MenuParamHelper::getMenuParam($params, $overridableKey, null)
                 );
             }
-            $input->set('cb_list_limit', MenuParamHelper::getMenuParam($params, 'cb_list_limit', 0));
+            $input->set('cb_list_limit', MenuParamHelper::getMenuParam($params, 'cb_list_limit', null));
             $input->set('force_menu_item_id', MenuParamHelper::getMenuParam($params, 'force_menu_item_id', 0));
             $input->set('cb_category_menu_filter', MenuParamHelper::getMenuParam($params, 'cb_category_menu_filter', 0));
+            $input->set('cb_theme_plugin', MenuParamHelper::getMenuParam($params, 'cb_theme_plugin', ''));
 
             $list = (array) $input->get('list', [], 'array');
-            $menuListLimit = (int) MenuParamHelper::getMenuParam($params, 'cb_list_limit', 0);
+            $menuListLimitRaw = MenuParamHelper::getMenuParam($params, 'cb_list_limit', null);
+            $menuListLimit = (int) $menuListLimitRaw;
             $currentListLimit = array_key_exists('limit', $list) ? (int) $list['limit'] : 0;
-            if (!$requestListLimitSubmitted && $menuListLimit > 0 && $currentListLimit !== $menuListLimit) {
+            if (
+                !$requestListLimitSubmitted
+                && $menuListLimitRaw !== null
+                && $menuListLimitRaw !== ''
+                && $menuListLimit >= 0
+                && $currentListLimit !== $menuListLimit
+            ) {
                 $list['limit'] = $menuListLimit;
                 if (!isset($list['start'])) {
                     $list['start'] = 0;

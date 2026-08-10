@@ -178,7 +178,7 @@ class FormTable extends Table
 
     public $show_preview_link = 0;
 
-    public $initial_list_limit = 50;
+    public $initial_list_limit = -1;
 
     public $save_button_title = '';
 

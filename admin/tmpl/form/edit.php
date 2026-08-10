@@ -592,9 +592,40 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             trim((string) ($this->item->email_admin_template ?? '')) !== ''
                 || trim((string) ($this->item->email_template ?? '')) !== ''
         );
-        $listStatesBadge = $neutralTabBadge(!empty((array) ($this->item->list_states ?? [])));
-        if ($listStatesBadge === '' && $this->form) {
-            $listStatesBadge = $neutralTabBadge(!empty((array) $this->form->getValue('list_states')));
+        $configuredListStates = (array) ($this->item->list_states ?? []);
+        if ($configuredListStates === [] && $this->form) {
+            $configuredListStates = (array) $this->form->getValue('list_states');
+        }
+        $hasPublishedListState = false;
+        foreach ($configuredListStates as $configuredListState) {
+            $published = is_array($configuredListState)
+                ? ($configuredListState['published'] ?? 0)
+                : ($configuredListState->published ?? 0);
+
+            if ((int) $published === 1) {
+                $hasPublishedListState = true;
+                break;
+            }
+        }
+        $showsListStates = !empty($this->item->list_state);
+        $hasListStatePermission = $hasFrontendPermission('state');
+        $listStatesBadge = '';
+
+        if ($hasPublishedListState || $showsListStates || $hasListStatePermission) {
+            if ($hasPublishedListState && $showsListStates && $hasListStatePermission) {
+                $listStatesBadgeClass = 'cb-template-state is-filled';
+                $listStatesBadgeTip = Text::_('COM_CONTENTBUILDERNG_LIST_STATES_BADGE_COHERENT');
+            } elseif ($hasPublishedListState && !$showsListStates && !$hasListStatePermission) {
+                $listStatesBadgeClass = 'cb-template-state is-neutral';
+                $listStatesBadgeTip = Text::_('COM_CONTENTBUILDERNG_LIST_STATES_BADGE_CONFIGURED');
+            } else {
+                $listStatesBadgeClass = 'cb-template-state is-inconsistent';
+                $listStatesBadgeTip = Text::_('COM_CONTENTBUILDERNG_LIST_STATES_BADGE_INCONSISTENT');
+            }
+
+            $listStatesBadge = ' <span class="' . $listStatesBadgeClass
+                . ' ms-1" aria-hidden="true" title="' . htmlspecialchars($listStatesBadgeTip, ENT_QUOTES, 'UTF-8') . '"></span>'
+                . '<span class="visually-hidden">' . htmlspecialchars($listStatesBadgeTip, ENT_QUOTES, 'UTF-8') . '</span>';
         }
         $listIntroBadge = $neutralTabBadge(trim((string) ($this->item->intro_text ?? '')) !== '');
         if ($listIntroBadge === '' && $this->form) {
@@ -831,18 +862,6 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab9', $viewTabLabel('fa-solid fa-sliders', 'COM_CONTENTBUILDERNG_ADVANCED_OPTIONS', 'COM_CONTENTBUILDERNG_TAB_TIP_ADVANCED_OPTIONS'));
         echo $advancedOptionsContent;
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab10', $viewTabLabel('fa-regular fa-newspaper', 'COM_CONTENTBUILDERNG_ARTICLE', 'COM_CONTENTBUILDERNG_TAB_TIP_ARTICLE'));
-        echo LayoutHelper::render(
-            'form.article_tab',
-            [
-                'item' => $this->item,
-                'allElements' => $this->all_elements,
-                'renderCheckbox' => $renderCheckbox,
-                'isBreezingFormsType' => $isBreezingFormsType,
-            ],
-            $componentLayoutBase
-        );
-        echo HTMLHelper::_('uitab.endTab');
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', $viewTabLabel('fa-regular fa-file-lines', 'COM_CONTENTBUILDERNG_LIST_INTRO_TEXT', 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_INTRO_TEXT', $listIntroBadge));
         ?>
         <?php
@@ -906,6 +925,18 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                 'breezingFormsEditableToken' => $breezingFormsEditableToken,
                 'editablePrepareSnippetOptions' => $editablePrepareSnippetOptions,
                 'prepareEffectOptions' => $prepareEffectOptions,
+            ],
+            $componentLayoutBase
+        );
+        echo HTMLHelper::_('uitab.endTab');
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab10', $viewTabLabel('fa-regular fa-newspaper', 'COM_CONTENTBUILDERNG_ARTICLE', 'COM_CONTENTBUILDERNG_TAB_TIP_ARTICLE'));
+        echo LayoutHelper::render(
+            'form.article_tab',
+            [
+                'item' => $this->item,
+                'allElements' => $this->all_elements,
+                'renderCheckbox' => $renderCheckbox,
+                'isBreezingFormsType' => $isBreezingFormsType,
             ],
             $componentLayoutBase
         );

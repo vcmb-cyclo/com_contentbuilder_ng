@@ -127,9 +127,9 @@ class PublicformsModel extends ListModel
                 $params = $item->getParams();
 
                 $forms = MenuParamHelper::getMenuParam($params, 'forms', 0);
-                $this->show_permissions = (bool) MenuParamHelper::getMenuParam($params, 'cb_show_permission_column', 0);
-                $this->show_permissions_new = (bool) MenuParamHelper::getMenuParam($params, 'cb_show_permission_new_column', 0);
-                $this->show_permissions_edit = (bool) MenuParamHelper::getMenuParam($params, 'cb_show_permission_edit_column', 0);
+                $this->show_permissions = (bool) MenuParamHelper::getResolvedMenuToggle($params, 'cb_show_permission_column', 0);
+                $this->show_permissions_new = (bool) MenuParamHelper::getResolvedMenuToggle($params, 'cb_show_permission_new_column', 0);
+                $this->show_permissions_edit = (bool) MenuParamHelper::getResolvedMenuToggle($params, 'cb_show_permission_edit_column', 0);
 
                 $resolvedMenuParams = $menu->getParams((int) $item->id);
                 if ($item->getParams()->get('show_page_heading', null) !== null) {
@@ -141,9 +141,9 @@ class PublicformsModel extends ListModel
                     );
                 }
 
-                $this->show_introtext = (bool) MenuParamHelper::getMenuParam($params, 'cb_show_introtext', 0);
-                $this->show_tags = (bool) MenuParamHelper::getMenuParam($params, 'cb_show_tags', 1);
-                $this->show_id = (bool) MenuParamHelper::getMenuParam($params, 'cb_show_id', 0);
+                $this->show_introtext = (bool) MenuParamHelper::getResolvedMenuToggle($params, 'cb_show_introtext', 0);
+                $this->show_tags = (bool) MenuParamHelper::getResolvedMenuToggle($params, 'cb_show_tags', 1);
+                $this->show_id = (bool) MenuParamHelper::getResolvedMenuToggle($params, 'cb_show_id', 0);
             }
 
             if ($forms !== null) {

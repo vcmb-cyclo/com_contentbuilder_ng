@@ -1185,7 +1185,8 @@ class contentbuilderng_com_breezingformsng
                 } else {
                     $i = 0;
                     foreach ($terms as $term) {
-                        $search .= 'Trim(`col' . intval($filter_record_id) . '`) Like ' . $db->quote(trim($term));
+                        $pattern = str_replace('*', '%', trim($term));
+                        $search .= 'Trim(`col' . intval($filter_record_id) . '`) Like ' . $db->quote($pattern);
                         if ($i + 1 < $cnt) {
                             $search .= ' Or ';
                         }

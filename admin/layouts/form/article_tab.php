@@ -201,7 +201,7 @@ $articleDefaults = [
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-12 col-md-6" id="cb-form-details-article-record-impact-language-field-group">
+                <div class="col-12" id="cb-form-details-article-record-impact-language-field-group">
                     <?php
                     echo $renderInlineBooleanControl(
                         '<span class="form-label mb-0 editlinktip hasTip" title="' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_ARTICLE_RECORD_IMPACT_TIP'), ENT_QUOTES, 'UTF-8') . '">' . Text::_('COM_CONTENTBUILDERNG_ARTICLE_RECORD_IMPACT') . '</span>',
@@ -209,7 +209,7 @@ $articleDefaults = [
                     );
                     ?>
                 </div>
-                <div class="col-12 col-md-6" id="cb-form-details-default-lang-code-ignore-field-group">
+                <div class="col-12" id="cb-form-details-default-lang-code-ignore-field-group">
                     <?php
                     echo $renderInlineBooleanControl(
                         '<span class="form-label mb-0 editlinktip hasTip" title="' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_DEFAULT_LANG_CODE_IGNORE_TIP'), ENT_QUOTES, 'UTF-8') . '">' . Text::_('COM_CONTENTBUILDERNG_DEFAULT_LANG_CODE_IGNORE') . '</span>',

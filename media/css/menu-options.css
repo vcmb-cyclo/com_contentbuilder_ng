@@ -21,16 +21,37 @@
 }
 
 .cb-menu-section-heading {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0;
+    color: var(--body-color, var(--bs-body-color, #1d2733));
+    font-weight: 700;
+}
+
+.spacer:has(> .cb-menu-section-heading) {
     display: flex;
     align-items: center;
+    gap: .75rem;
     width: 100%;
     margin: 1.35rem 0 .85rem;
-    padding: .45rem .65rem;
-    border-left: 4px solid var(--template-link-color, var(--bs-primary, #2a69b8));
-    border-bottom: 0;
-    background: color-mix(in srgb, var(--template-bg-light, #f0f4fb) 45%, #fff);
-    color: var(--body-color, #1d2733);
-    font-weight: 700;
+}
+
+.spacer:has(> .cb-menu-section-heading) > .before,
+.spacer:has(> .cb-menu-section-heading) > .after {
+    flex: 1 1 auto;
+    border-top: 1px solid var(--border-color, var(--bs-border-color, #dfe3e7));
+}
+
+.spacer:has(> .cb-menu-section-heading) > .cb-menu-section-heading {
+    flex: 0 0 auto;
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.spacer:has(> .cb-menu-section-heading) > .cb-menu-section-heading label {
+    margin: 0;
 }
 
 .cb-menu-reset-panel {
@@ -108,12 +129,6 @@ fieldset:has(.cb-menu-reset-panel) {
 .control-group:has(#jform_params_forms) + .control-group:has(.cb-menu-section-heading),
 .control-group:has(#jform_params_settings_forms) + .control-group:has(.cb-menu-section-heading) {
     margin-top: 0;
-}
-
-#jform_params_cb_list_limit,
-#jform_params_settings_cb_list_limit {
-    width: 5rem;
-    max-width: 5rem;
 }
 
 .cb-menu-multiforms-select {

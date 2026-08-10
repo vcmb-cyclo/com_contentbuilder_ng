@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_elements`
 --   show_records_per_page           1 = show the records-per-page selector.
 --   button_bar_sticky               1 = make the toolbar sticky on scroll.
 --   show_preview_link               1 = show the admin preview link.
---   initial_list_limit              Default records per page (25).
+--   initial_list_limit              Default records per page (-1 inherits the component setting; 0 displays all).
 --   filter_exact_match              1 = search uses exact match instead of LIKE.
 --   allow_external_filter           1 = accept filter parameters from URL.
 --
@@ -387,7 +387,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_forms`
     `show_records_per_page`               tinyint(1)   NOT NULL DEFAULT '1',
     `button_bar_sticky`                   tinyint(1)   NOT NULL DEFAULT '0',
     `show_preview_link`                   tinyint(1)   NOT NULL DEFAULT '0',
-    `initial_list_limit`                  tinyint      NOT NULL DEFAULT '25',
+    `initial_list_limit`                  tinyint      NOT NULL DEFAULT '-1',
     `save_button_title`                   varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `filter_exact_match`                  tinyint(1)   NOT NULL DEFAULT '1',
     `apply_button_title`                  varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',

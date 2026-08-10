@@ -14,6 +14,9 @@
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Language\Text;
+use CB\Component\Contentbuilderng\Administrator\Field\ListlimitField as ListLimitFieldControl;
+use CB\Component\Contentbuilderng\Administrator\Helper\ListLimitHelper;
+use Joomla\CMS\Form\Form;
 
 $item = $displayData['item'] ?? null;
 $elements = is_array($displayData['elements'] ?? null) ? $displayData['elements'] : [];
@@ -60,7 +63,7 @@ $advancedDefaults = [
     'cb_prefix_in_title' => 0,
     'show_filter' => 1,
     'show_records_per_page' => 1,
-    'initial_list_limit' => 50,
+    'initial_list_limit' => ListLimitHelper::INHERIT,
     'published_only' => 0,
     'allow_external_filter' => 0,
     'filter_exact_match' => 1,
@@ -389,22 +392,28 @@ $advancedDefaults = [
                                 </span>
                             </label>
                         </div>
-                        <div style="max-width: 140px;">
+                        <div>
                             <label class="form-label mb-1" for="initial_list_limit">
                                 <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_LIST_LIMIT_TIP'); ?>">
                                     <?php echo Text::_('COM_CONTENTBUILDERNG_FIELD_INITIAL_LIST_LIMIT'); ?>
                                 </span>
                             </label>
-                            <input
-                                type="number"
-                                class="form-control"
-                                name="jform[initial_list_limit]"
-                                id="initial_list_limit"
-                                min="1"
-                                required="required"
-                                step="1"
-                                value="<?php echo max(1, (int) ($item->initial_list_limit ?? 50)); ?>"
-                            />
+                            <?php
+                            $globalListLimit = ListLimitHelper::getGlobalDefault();
+                            $storedListLimit = ListLimitHelper::normalizeStoredViewValue(
+                                $item->initial_list_limit ?? ListLimitHelper::INHERIT
+                            );
+                            $listLimitForm = new Form('contentbuilderng-list-limit', ['control' => 'jform']);
+                            $listLimitField = new ListLimitFieldControl($listLimitForm);
+                            $listLimitField->setup(
+                                new SimpleXMLElement(sprintf(
+                                    '<field name="initial_list_limit" id="initial_list_limit" type="listlimit" data-cb-list-limit-mode="view" data-cb-list-limit-inherited="%d" filter="integer" />',
+                                    $globalListLimit
+                                )),
+                                $storedListLimit
+                            );
+                            ?>
+                            <?php echo $listLimitField->renderInput(); ?>
                         </div>
                         <div>
                             <input type="hidden" name="jform[allow_external_filter]" value="0" />
@@ -660,6 +669,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 case 'initial_sort_order':
                 case 'initial_sort_order2':
                 case 'initial_sort_order3':
+                case 'initial_list_limit':
                 case 'rating_slots':
                 case 'save_button_title':
                 case 'apply_button_title':

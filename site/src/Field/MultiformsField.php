@@ -31,6 +31,10 @@ class MultiformsField extends FormField
 
     protected function getInput()
     {
+        $wa = RuntimeContextHelper::getApplication()->getDocument()->getWebAssetManager();
+        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
+        $wa->useStyle('com_contentbuilderng.menu-options.css');
+
         $class = (string) ($this->element['class'] ?: '');
         $multiple = 'multiple="multiple" ';
         $db = $this->getDatabase();
@@ -45,11 +49,25 @@ class MultiformsField extends FormField
 
         $selectedValues = array_map('strval', (array) $this->value);
         $inputClass = trim($class . ' cb-menu-multiforms-select');
+        $visibleRows = min(15, max(1, count($status)));
         $select = '<select id="' . htmlspecialchars($this->id, ENT_QUOTES, 'UTF-8') . '"'
             . ' name="' . htmlspecialchars($this->name, ENT_QUOTES, 'UTF-8') . '"'
             . ' ' . $multiple
+            . ' size="' . $visibleRows . '"'
             . ' onchange="if(typeof contentbuilderng_setFormId != \'undefined\') { contentbuilderng_setFormId(this.options[this.selectedIndex].value); }"'
-            . ' class="' . htmlspecialchars($inputClass, ENT_QUOTES, 'UTF-8') . '">';
+            . ' class="' . htmlspecialchars($inputClass, ENT_QUOTES, 'UTF-8') . '"';
+
+        if ((string) ($this->element['required'] ?? '') === 'true') {
+            $select .= ' required="required" aria-required="true"';
+
+            $validationMessage = trim((string) ($this->element['message'] ?? ''));
+            if ($validationMessage !== '') {
+                $select .= ' data-validation-text="'
+                    . htmlspecialchars(\Joomla\CMS\Language\Text::_($validationMessage), ENT_QUOTES, 'UTF-8') . '"';
+            }
+        }
+
+        $select .= '>';
 
         foreach ($status as $form) {
             $value = (string) ($form->id ?? '');

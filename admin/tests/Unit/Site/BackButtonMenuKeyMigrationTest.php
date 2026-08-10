@@ -591,9 +591,6 @@ final class BackButtonMenuKeyMigrationTest extends TestCase
             'site/tmpl/edit/default.xml',
             'site/tmpl/latest/latest.xml',
             'site/tmpl/list/default.xml',
-            'site/tmpl/list/listone.xml',
-            'site/tmpl/list/listtwo.xml',
-            'site/tmpl/list/listthree.xml',
             'site/tmpl/publicforms/default.xml',
         ] as $relativePath) {
             $source = $this->read($relativePath);

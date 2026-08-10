@@ -29,6 +29,7 @@ use CB\Component\Contentbuilderng\Administrator\Service\DirectStorageFormProvisi
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ListLimitHelper;
 
 class ListController extends BaseController
 {
@@ -440,32 +441,17 @@ class ListController extends BaseController
         $app = $this->app;
         $option = 'com_contentbuilderng';
         $list = (array) $this->input->get('list', [], 'array');
-        $stateKeyPrefix = $this->getPaginationStateKeyPrefix();
-        $limitKey = $stateKeyPrefix . '.limit';
-        $startKey = $stateKeyPrefix . '.start';
         $configuredLimit = $this->getConfiguredListLimit();
         $explicitLimitRequest = MenuParamHelper::hasExplicitListLimitRequest($app);
 
-        $limit = $explicitLimitRequest && isset($list['limit']) ? (int) $list['limit'] : 0;
-        if ($limit === 0) {
-            $limit = $configuredLimit;
-        }
-        if ($limit === 0) {
-            $limit = (int) $app->getUserState($limitKey, 0);
-        }
-        if ($limit === 0) {
-            $limit = (int) $app->get('list_limit');
-        }
-        if ($limit < 1) {
-            $limit = 50;
-        }
+        $limit = $explicitLimitRequest && array_key_exists('limit', $list)
+            ? ListLimitHelper::normalizeRuntimeValue($list['limit'], $configuredLimit)
+            : $configuredLimit;
 
         if ($explicitLimitRequest && array_key_exists('start', $list)) {
             $start = max(0, (int) $list['start']);
-        } elseif ($configuredLimit > 0) {
-            $start = 0;
         } else {
-            $start = (int) $app->getUserState($startKey, 0);
+            $start = 0;
         }
 
         $ordering = isset($list['ordering']) ? preg_replace('/[^A-Za-z0-9_\\.]/', '', (string) $list['ordering']) : '';
@@ -497,30 +483,6 @@ class ListController extends BaseController
         $app = $this->app;
 
         return MenuParamHelper::getConfiguredListLimit($app, (int) $this->input->getInt('id', 0));
-    }
-
-    private function getPaginationStateKeyPrefix(): string
-    {
-        /** @var SiteApplication $app */
-        $app = $this->app;
-        $option = 'com_contentbuilderng';
-
-        $formId = (int) $this->input->getInt('id', 0);
-        if ($formId < 1) {
-            $menu = $app->getMenu()->getActive();
-            if ($menu) {
-                $formId = (int) MenuParamHelper::getMenuParam($menu->getParams(), 'form_id', 0);
-            }
-        }
-
-        $layout = (string) $this->input->getCmd('layout', 'default');
-        if ($layout === '') {
-            $layout = 'default';
-        }
-
-        $itemId = (int) $this->input->getInt('Itemid', 0);
-
-        return $option . '.liststate.' . $formId . '.' . $layout . '.' . $itemId;
     }
 
     /**

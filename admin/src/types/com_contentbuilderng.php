@@ -37,6 +37,13 @@ class contentbuilderng_com_contentbuilderng
     public $exists = false;
     public $form_id = 0;
 
+    private static function decodeStoredDisplayValue(mixed $value): mixed
+    {
+        return is_string($value)
+            ? html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8')
+            : $value;
+    }
+
 
     function __construct($id, $published = true)
     {
@@ -415,7 +422,9 @@ class contentbuilderng_com_contentbuilderng
                 $out[$i]->recRatingSum = $colValues['colRatingSum'];
                 $out[$i]->recValue = '';
                 if (isset($colValues['col' . $element['id'] . 'Value'])) {
-                    $out[$i]->recValue = $colValues['col' . $element['id'] . 'Value'];
+                    $out[$i]->recValue = self::decodeStoredDisplayValue(
+                        $colValues['col' . $element['id'] . 'Value']
+                    );
                 }
                 $i++;
             }
@@ -589,7 +598,8 @@ class contentbuilderng_com_contentbuilderng
                 } else {
                     $i = 0;
                     foreach ($terms as $term) {
-                        $search .= 'Trim(`col' . intval($filter_record_id) . '`) Like ' . $db->quote(trim($term));
+                        $pattern = str_replace('*', '%', trim($term));
+                        $search .= 'Trim(`col' . intval($filter_record_id) . '`) Like ' . $db->quote($pattern);
                         if ($i + 1 < $cnt) {
                             $search .= ' Or ';
                         }
@@ -805,6 +815,16 @@ class contentbuilderng_com_contentbuilderng
         ", $limitstart, $limit);
 
         $return = $db->loadObjectList();
+
+        foreach ((array) $return as $record) {
+            foreach ((array) $this->elements as $element) {
+                $column = 'col' . (int) ($element['id'] ?? 0);
+
+                if ($column !== 'col0' && property_exists($record, $column)) {
+                    $record->$column = self::decodeStoredDisplayValue($record->$column);
+                }
+            }
+        }
         $db->setQuery("
             Select Count(*) From (
                 Select

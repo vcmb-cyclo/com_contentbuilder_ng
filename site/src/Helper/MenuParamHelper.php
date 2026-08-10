@@ -14,6 +14,7 @@ namespace CB\Component\Contentbuilderng\Site\Helper;
 
 \defined('_JEXEC') or die('Restricted access');
 
+use CB\Component\Contentbuilderng\Administrator\Helper\ListLimitHelper;
 use Joomla\Database\DatabaseInterface;
 
 final class MenuParamHelper
@@ -58,14 +59,14 @@ final class MenuParamHelper
 
     public static function getConfiguredListLimit($app, int $formId = 0): int
     {
-        $inputLimit = (int) $app->getInput()->getInt('cb_list_limit', 0);
+        $inputLimit = $app->getInput()->get('cb_list_limit', null, 'raw');
 
-        if ($inputLimit > 0) {
-            return $inputLimit;
+        if ($inputLimit !== null && $inputLimit !== '' && (int) $inputLimit >= ListLimitHelper::ALL) {
+            return (int) $inputLimit;
         }
 
         if (!$app->isClient('site')) {
-            return 0;
+            return self::getFormInitialListLimit($app, $formId);
         }
 
         $itemId = (int) $app->getInput()->getInt('Itemid', 0);
@@ -76,10 +77,10 @@ final class MenuParamHelper
             return self::getFormInitialListLimit($app, $formId);
         }
 
-        $menuLimit = max(0, (int) self::getMenuParam($item->getParams(), 'cb_list_limit', 0));
+        $menuLimit = self::getMenuParam($item->getParams(), 'cb_list_limit', null);
 
-        if ($menuLimit > 0) {
-            return $menuLimit;
+        if ($menuLimit !== null && $menuLimit !== '' && (int) $menuLimit >= ListLimitHelper::ALL) {
+            return (int) $menuLimit;
         }
 
         return self::getFormInitialListLimit($app, $formId);
@@ -96,7 +97,7 @@ final class MenuParamHelper
     private static function getFormInitialListLimit($app, int $formId): int
     {
         if ($formId < 1) {
-            return 0;
+            return ListLimitHelper::getGlobalDefault();
         }
 
         if (array_key_exists($formId, self::$formInitialListLimitCache)) {
@@ -112,9 +113,9 @@ final class MenuParamHelper
                 ->where($db->quoteName('id') . ' = ' . (int) $formId);
 
             $db->setQuery($query, 0, 1);
-            $limit = max(0, (int) $db->loadResult());
+            $limit = ListLimitHelper::resolveViewValue($db->loadResult());
         } catch (\Throwable) {
-            $limit = 0;
+            $limit = ListLimitHelper::getGlobalDefault();
         }
 
         self::$formInitialListLimitCache[$formId] = $limit;

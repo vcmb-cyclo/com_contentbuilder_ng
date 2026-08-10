@@ -1,5 +1,23 @@
 # Changelog
 
+## 6.1.10-RC06 — 2026-08-10
+
+### Added
+
+- Added reusable Joomla-style menu controls with dynamic inheritance labels, a per-menu theme choice and a true reset of menu overrides.
+- Added centralized global pagination choices shared by component configuration, ContentBuilder views, Joomla menus and frontend lists.
+
+### Changed
+
+- Reorganized ContentBuilder menu parameters into clear native Joomla sections and placed the List View menu types first.
+- Consolidated the five legacy numbered list menu layouts into the standard List View while retaining the dedicated Cards, Compact Table and Tiles layouts.
+
+### Fixed
+
+- Preserved the selected ContentBuilder view during component updates and menu override resets.
+- Fixed menu language loading, encoded group values, filter help and ordering controls across the supported list layouts.
+- Fixed inherited and custom list limits, including numeric placement of custom frontend values and accurate `Use Default (…)` labels.
+
 ## 6.1.10-RC03 — 2026-08-09
 
 ### Fixed

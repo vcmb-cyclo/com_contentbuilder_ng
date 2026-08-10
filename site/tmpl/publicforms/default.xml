@@ -5,70 +5,60 @@
         <config>
             <fields name="params" addfieldprefix="CB\Component\Contentbuilderng\Site\Field">
                 <fieldset name="settings" group="settings" label="COM_CONTENTBUILDERNG_MENU_ITEM_LIST">
-                    <field required="true" message="COM_CONTENTBUILDERNG_SELECT_VIEW_REQUIRED" multiple="multiple" type="multiforms" label="COM_CONTENTBUILDERNG_SELECT_VIEWS" description="COM_CONTENTBUILDERNG_SELECT_VIEWS_DESC" name="forms" default="0"/>
-                    <field type="cbmenureset" label="" description="" name="cb_menu_reset" />
-                    <field type="note" label="COM_CONTENTBUILDERNG_MENU_OPTIONS_LIST" class="cb-menu-section-heading" />
+                    <field required="true" message="COM_CONTENTBUILDERNG_SELECT_VIEW_REQUIRED" multiple="multiple" type="multiforms" class="form-select" label="COM_CONTENTBUILDERNG_SELECT_VIEWS" description="COM_CONTENTBUILDERNG_SELECT_VIEWS_DESC" name="forms" default="" />
+                    <field type="menuoverridereset" label="COM_CONTENTBUILDERNG_RESET_TO_DEFAULT" description="COM_CONTENTBUILDERNG_RESET_TO_DEFAULT_DESC" name="cb_menu_reset" />
                     <field name="cb_controller" type="hidden" default="publicforms" />
-                    <field name="cb_show_author" type="radio" class="btn-group btn-group-yesno" default="-1" description="COM_CONTENTBUILDERNG_SHOW_AUTHOR_DESC" label="COM_CONTENTBUILDERNG_SHOW_AUTHOR">
-                        <option value="-1">JOPTION_USE_DEFAULT</option>
+
+                    <field type="spacer" class="cb-menu-section-heading" label="COM_CONTENTBUILDERNG_MENU_OPTIONS_EDIT" />
+                    <field name="cb_show_top_bar" type="menuinherit" class="form-select-color-state" default="-1" description="COM_CONTENTBUILDERNG_SHOW_TOP_BAR_DESC" label="COM_CONTENTBUILDERNG_SHOW_TOP_BAR" data-cb-menu-fixed-default="1" data-cb-menu-inherit-value="-1" data-cb-menu-override="true" validate="options">
                         <option value="0">COM_CONTENTBUILDERNG_NO</option>
                         <option value="1">COM_CONTENTBUILDERNG_YES</option>
                     </field>
-                    <field type="note" label="COM_CONTENTBUILDERNG_MENU_OPTIONS_EDIT" class="cb-menu-section-heading" />
-                    <field name="cb_show_top_bar" type="radio" class="btn-group btn-group-yesno" default="-1" description="COM_CONTENTBUILDERNG_SHOW_TOP_BAR_DESC" label="COM_CONTENTBUILDERNG_SHOW_TOP_BAR">
-                        <option value="-1">JOPTION_USE_DEFAULT</option>
-                        <option value="0">COM_CONTENTBUILDERNG_NO</option>
-                        <option value="1">COM_CONTENTBUILDERNG_YES</option>
-                    </field>
-                    <field name="cb_show_bottom_bar" type="radio" class="btn-group btn-group-yesno" default="-1" description="COM_CONTENTBUILDERNG_SHOW_BOTTOM_BAR_DESC" label="COM_CONTENTBUILDERNG_SHOW_BOTTOM_BAR">
-                        <option value="-1">JOPTION_USE_DEFAULT</option>
-                        <option value="0">COM_CONTENTBUILDERNG_NO</option>
-                        <option value="1">COM_CONTENTBUILDERNG_YES</option>
-                    </field>
-                    <field type="note" label="COM_CONTENTBUILDERNG_MENU_OPTIONS_DETAILS" class="cb-menu-section-heading" />
-                    <field name="cb_show_details_top_bar" type="radio" class="btn-group btn-group-yesno" default="-1" description="COM_CONTENTBUILDERNG_SHOW_DETAILS_TOP_BAR_DESC" label="COM_CONTENTBUILDERNG_SHOW_DETAILS_TOP_BAR">
-                        <option value="-1">JOPTION_USE_DEFAULT</option>
-                        <option value="0">COM_CONTENTBUILDERNG_NO</option>
-                        <option value="1">COM_CONTENTBUILDERNG_YES</option>
-                    </field>
-                    <field name="cb_show_details_bottom_bar" type="radio" class="btn-group btn-group-yesno" default="-1" description="COM_CONTENTBUILDERNG_SHOW_DETAILS_BOTTOM_BAR_DESC" label="COM_CONTENTBUILDERNG_SHOW_DETAILS_BOTTOM_BAR">
-                        <option value="-1">JOPTION_USE_DEFAULT</option>
+                    <field name="cb_show_bottom_bar" type="menuinherit" class="form-select-color-state" default="-1" description="COM_CONTENTBUILDERNG_SHOW_BOTTOM_BAR_DESC" label="COM_CONTENTBUILDERNG_SHOW_BOTTOM_BAR" data-cb-menu-fixed-default="0" data-cb-menu-inherit-value="-1" data-cb-menu-override="true" validate="options">
                         <option value="0">COM_CONTENTBUILDERNG_NO</option>
                         <option value="1">COM_CONTENTBUILDERNG_YES</option>
                     </field>
 
-                    <field name="cb_show_details_back_button" type="radio" class="btn-group btn-group-yesno" default="-1" label="COM_CONTENTBUILDERNG_SHOW_BACK_BUTTON" description="COM_CONTENTBUILDERNG_SHOW_BACK_BUTTON_DESC">
-                        <option value="-1">JOPTION_USE_DEFAULT</option>
+                    <field type="spacer" class="cb-menu-section-heading" label="COM_CONTENTBUILDERNG_MENU_OPTIONS_DETAILS" />
+                    <field name="cb_show_details_top_bar" type="menuinherit" class="form-select-color-state" default="-1" description="COM_CONTENTBUILDERNG_SHOW_DETAILS_TOP_BAR_DESC" label="COM_CONTENTBUILDERNG_SHOW_DETAILS_TOP_BAR" data-cb-menu-fixed-default="1" data-cb-menu-inherit-value="-1" data-cb-menu-override="true" validate="options">
                         <option value="0">COM_CONTENTBUILDERNG_NO</option>
                         <option value="1">COM_CONTENTBUILDERNG_YES</option>
                     </field>
-                    <field type="note" label="COM_CONTENTBUILDERNG_MENU_OPTIONS_LIST" class="cb-menu-section-heading" />
-                    <field name="cb_show_id" type="radio" default="0" description="COM_CONTENTBUILDERNG_SHOW_ID_COLUMN_DESC" label="COM_CONTENTBUILDERNG_SHOW_ID_COLUMN">
+                    <field name="cb_show_details_bottom_bar" type="menuinherit" class="form-select-color-state" default="-1" description="COM_CONTENTBUILDERNG_SHOW_DETAILS_BOTTOM_BAR_DESC" label="COM_CONTENTBUILDERNG_SHOW_DETAILS_BOTTOM_BAR" data-cb-menu-fixed-default="0" data-cb-menu-inherit-value="-1" data-cb-menu-override="true" validate="options">
                         <option value="0">COM_CONTENTBUILDERNG_NO</option>
                         <option value="1">COM_CONTENTBUILDERNG_YES</option>
                     </field>
-
-                    <field name="cb_show_tags" type="radio" default="1" description="COM_CONTENTBUILDERNG_SHOW_TAGS_COLUMN_DESC" label="COM_CONTENTBUILDERNG_SHOW_TAGS_COLUMN">
+                    <field name="cb_show_details_back_button" type="menuinherit" class="form-select-color-state" default="-1" label="COM_CONTENTBUILDERNG_SHOW_BACK_BUTTON" description="COM_CONTENTBUILDERNG_SHOW_BACK_BUTTON_DESC" data-cb-menu-fixed-default="1" data-cb-menu-inherit-value="-1" data-cb-menu-override="true" validate="options">
                         <option value="0">COM_CONTENTBUILDERNG_NO</option>
                         <option value="1">COM_CONTENTBUILDERNG_YES</option>
                     </field>
-
-                    <field name="cb_show_permission_column" type="radio" default="0" description="COM_CONTENTBUILDERNG_SHOW_PERMISSION_COLUMN_DESC" label="COM_CONTENTBUILDERNG_SHOW_PERMISSION_COLUMN">
-                        <option value="0">COM_CONTENTBUILDERNG_NO</option>
-                        <option value="1">COM_CONTENTBUILDERNG_YES</option>
-                    </field>
-
-                    <field name="cb_show_permission_new_column" type="radio" default="0" description="COM_CONTENTBUILDERNG_SHOW_PERMISSION_NEW_COLUMN_DESC" label="COM_CONTENTBUILDERNG_SHOW_PERMISSION_NEW_COLUMN">
+                    <field name="cb_show_author" type="menuinherit" class="form-select-color-state" default="-1" description="COM_CONTENTBUILDERNG_SHOW_AUTHOR_DESC" label="COM_CONTENTBUILDERNG_SHOW_AUTHOR" data-cb-menu-fixed-default="1" data-cb-menu-inherit-value="-1" data-cb-menu-override="true" validate="options">
                         <option value="0">COM_CONTENTBUILDERNG_NO</option>
                         <option value="1">COM_CONTENTBUILDERNG_YES</option>
                     </field>
 
-                    <field name="cb_show_permission_edit_column" type="radio" default="0" description="COM_CONTENTBUILDERNG_SHOW_PERMISSION_EDIT_COLUMN_DESC" label="COM_CONTENTBUILDERNG_SHOW_PERMISSION_EDIT_COLUMN">
+                    <field type="spacer" class="cb-menu-section-heading" label="COM_CONTENTBUILDERNG_MENU_OPTIONS_SHOW" />
+                    <field name="cb_show_id" type="menuinherit" class="form-select-color-state" default="-1" description="COM_CONTENTBUILDERNG_SHOW_ID_COLUMN_DESC" label="COM_CONTENTBUILDERNG_SHOW_ID_COLUMN" data-cb-menu-fixed-default="0" data-cb-menu-inherit-value="-1" data-cb-menu-override="true" validate="options">
                         <option value="0">COM_CONTENTBUILDERNG_NO</option>
                         <option value="1">COM_CONTENTBUILDERNG_YES</option>
                     </field>
-
-                    <field name="cb_show_introtext" type="radio" default="0" description="COM_CONTENTBUILDERNG_SHOW_INTROTEXT_COLUMN_DESC" label="COM_CONTENTBUILDERNG_SHOW_INTROTEXT_COLUMN">
+                    <field name="cb_show_tags" type="menuinherit" class="form-select-color-state" default="-1" description="COM_CONTENTBUILDERNG_SHOW_TAGS_COLUMN_DESC" label="COM_CONTENTBUILDERNG_SHOW_TAGS_COLUMN" data-cb-menu-fixed-default="1" data-cb-menu-inherit-value="-1" data-cb-menu-override="true" validate="options">
+                        <option value="0">COM_CONTENTBUILDERNG_NO</option>
+                        <option value="1">COM_CONTENTBUILDERNG_YES</option>
+                    </field>
+                    <field name="cb_show_permission_column" type="menuinherit" class="form-select-color-state" default="-1" description="COM_CONTENTBUILDERNG_SHOW_PERMISSION_COLUMN_DESC" label="COM_CONTENTBUILDERNG_SHOW_PERMISSION_COLUMN" data-cb-menu-fixed-default="0" data-cb-menu-inherit-value="-1" data-cb-menu-override="true" validate="options">
+                        <option value="0">COM_CONTENTBUILDERNG_NO</option>
+                        <option value="1">COM_CONTENTBUILDERNG_YES</option>
+                    </field>
+                    <field name="cb_show_permission_new_column" type="menuinherit" class="form-select-color-state" default="-1" description="COM_CONTENTBUILDERNG_SHOW_PERMISSION_NEW_COLUMN_DESC" label="COM_CONTENTBUILDERNG_SHOW_PERMISSION_NEW_COLUMN" data-cb-menu-fixed-default="0" data-cb-menu-inherit-value="-1" data-cb-menu-override="true" validate="options">
+                        <option value="0">COM_CONTENTBUILDERNG_NO</option>
+                        <option value="1">COM_CONTENTBUILDERNG_YES</option>
+                    </field>
+                    <field name="cb_show_permission_edit_column" type="menuinherit" class="form-select-color-state" default="-1" description="COM_CONTENTBUILDERNG_SHOW_PERMISSION_EDIT_COLUMN_DESC" label="COM_CONTENTBUILDERNG_SHOW_PERMISSION_EDIT_COLUMN" data-cb-menu-fixed-default="0" data-cb-menu-inherit-value="-1" data-cb-menu-override="true" validate="options">
+                        <option value="0">COM_CONTENTBUILDERNG_NO</option>
+                        <option value="1">COM_CONTENTBUILDERNG_YES</option>
+                    </field>
+                    <field name="cb_show_introtext" type="menuinherit" class="form-select-color-state" default="-1" description="COM_CONTENTBUILDERNG_SHOW_INTROTEXT_COLUMN_DESC" label="COM_CONTENTBUILDERNG_SHOW_INTROTEXT_COLUMN" data-cb-menu-fixed-default="0" data-cb-menu-inherit-value="-1" data-cb-menu-override="true" validate="options">
                         <option value="0">COM_CONTENTBUILDERNG_NO</option>
                         <option value="1">COM_CONTENTBUILDERNG_YES</option>
                     </field>
