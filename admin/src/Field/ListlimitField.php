@@ -14,6 +14,11 @@ class ListlimitField extends FormField
 {
     protected $type = 'Listlimit';
 
+    public function renderInput(): string
+    {
+        return $this->getInput();
+    }
+
     protected function getInput(): string
     {
         $document = RuntimeContextHelper::getApplication()->getDocument();

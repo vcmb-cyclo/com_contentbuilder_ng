@@ -813,7 +813,7 @@ class HtmlView extends BaseHtmlView
                         $app->getInput(),
                         $app->getInput()->getBool('cb_preview_ok', false)
                     );
-                    $menuTheme = MenuThemeHelper::resolve($this->app->getInput(), $this->stored_theme);
+                    $menuTheme = MenuThemeHelper::resolve($app->getInput(), $this->stored_theme);
                     $themePlugin = PreviewThemeHelper::apply($menuTheme, $this->preview_theme);
                     $fallbackTheme = false;
                     if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {

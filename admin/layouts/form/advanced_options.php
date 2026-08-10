@@ -413,7 +413,7 @@ $advancedDefaults = [
                                 $storedListLimit
                             );
                             ?>
-                            <?php echo $listLimitField->input; ?>
+                            <?php echo $listLimitField->renderInput(); ?>
                         </div>
                         <div>
                             <input type="hidden" name="jform[allow_external_filter]" value="0" />
