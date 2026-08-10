@@ -25,6 +25,7 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Uri\Uri;
 use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewThemeHelper;
+use CB\Component\Contentbuilderng\Site\Helper\MenuThemeHelper;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListHelpService;
 
@@ -113,7 +114,8 @@ class HtmlView extends BaseHtmlView
             $app->getInput(),
             $app->getInput()->getBool('cb_preview_ok', false)
         );
-        $themePlugin = PreviewThemeHelper::apply($this->stored_theme, $this->preview_theme);
+        $menuTheme = MenuThemeHelper::resolve($app->getInput(), $this->stored_theme);
+        $themePlugin = PreviewThemeHelper::apply($menuTheme, $this->preview_theme);
         if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
             $themePlugin = 'thoth';
             PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin);

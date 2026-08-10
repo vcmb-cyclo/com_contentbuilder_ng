@@ -29,6 +29,7 @@ use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\ListModel as BaseListModel;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\ListLimitHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PublishedRecordVisibilityHelper;
@@ -323,30 +324,14 @@ class ListModel extends BaseListModel
         $configuredLimit = $this->getConfiguredListLimit();
         $explicitLimitRequest = MenuParamHelper::hasExplicitListLimitRequest($app);
 
-        // Priority for state-backed menu overrides:
-        // explicit request > menu setting > persisted session state > global default.
-        $limit = $explicitLimitRequest && isset($list['limit']) ? (int) $list['limit'] : 0;
-        if ($limit === 0) {
-            $limit = $configuredLimit;
-        }
-        if ($limit === 0) {
-            $limit = (int) $app->getUserState($limitKey, 0);
-        }
-        if ($limit === 0) {
-            $limit = (int) $app->get('list_limit');
-        }
-        if ($limit < 1) {
-            $limit = 50;
-        }
+        $limit = $explicitLimitRequest && array_key_exists('limit', $list)
+            ? ListLimitHelper::normalizeRuntimeValue($list['limit'], $configuredLimit)
+            : $configuredLimit;
 
         if ($explicitLimitRequest && array_key_exists('start', $list)) {
             $start = max(0, (int) $list['start']);
-        } elseif ($configuredLimit > 0) {
-            // When the menu defines the initial page size, reopen the list from the
-            // first page unless the request explicitly asks for another page.
-            $start = 0;
         } else {
-            $start = (int) $app->getUserState($startKey, 0);
+            $start = 0;
         }
 
         $embeddedResultLimit = $this->getEmbeddedResultLimit();

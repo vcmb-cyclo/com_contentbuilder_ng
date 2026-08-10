@@ -33,6 +33,7 @@ use Joomla\Registry\Registry;
 use CB\Component\Contentbuilderng\Site\Model\EditModel;
 use CB\Component\Contentbuilderng\Site\Helper\NavigationLinkHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewThemeHelper;
+use CB\Component\Contentbuilderng\Site\Helper\MenuThemeHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 
 class HtmlView extends BaseHtmlView
@@ -812,7 +813,8 @@ class HtmlView extends BaseHtmlView
                         $app->getInput(),
                         $app->getInput()->getBool('cb_preview_ok', false)
                     );
-                    $themePlugin = PreviewThemeHelper::apply($this->stored_theme, $this->preview_theme);
+                    $menuTheme = MenuThemeHelper::resolve($this->app->getInput(), $this->stored_theme);
+                    $themePlugin = PreviewThemeHelper::apply($menuTheme, $this->preview_theme);
                     $fallbackTheme = false;
                     if ($themePlugin === '' || !PluginHelper::importPlugin('contentbuilderng_themes', $themePlugin)) {
                         $themePlugin = 'thoth';

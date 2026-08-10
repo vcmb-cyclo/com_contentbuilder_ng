@@ -8,6 +8,7 @@ use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
+require_once \dirname(__DIR__, 3) . '/src/Helper/ListLimitHelper.php';
 require_once \dirname(__DIR__, 4) . '/site/src/Helper/MenuParamHelper.php';
 
 final class MenuParamHelperTest extends TestCase
@@ -140,7 +141,7 @@ final class MenuParamHelperTest extends TestCase
             public function getInput(): object
             {
                 return new class {
-                    public function getInt(string $key, int $default = 0): int
+                    public function get(string $key, mixed $default = null, string $filter = ''): mixed
                     {
                         return $key === 'cb_list_limit' ? 50 : $default;
                     }
@@ -156,22 +157,22 @@ final class MenuParamHelperTest extends TestCase
         self::assertSame(50, MenuParamHelper::getConfiguredListLimit($app));
     }
 
-    public function testReturnsZeroListLimitOutsideSiteClient(): void
+    public function testUsesExplicitAllRequestBeforeClientConfiguration(): void
     {
         $app = new class {
             public function getInput(): object
             {
                 return new class {
-                    public function getInt(string $key, int $default = 0): int
+                    public function get(string $key, mixed $default = null, string $filter = ''): mixed
                     {
-                        return $default;
+                        return $key === 'cb_list_limit' ? '0' : $default;
                     }
                 };
             }
 
-            public function isClient(string $client): bool
+            public function isClient(string $client): never
             {
-                return false;
+                throw new \LogicException('Client must not be inspected.');
             }
         };
 

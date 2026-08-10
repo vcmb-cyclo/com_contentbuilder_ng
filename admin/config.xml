@@ -1,10 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<config>
+<config
+    addfieldprefix="CB\Component\Contentbuilderng\Administrator\Field"
+    addruleprefix="CB\Component\Contentbuilderng\Administrator\Rule"
+>
     <fieldset
         name="general"
         label="COM_CONTENTBUILDERNG_CONFIG_GENERAL_LABEL"
         description="COM_CONTENTBUILDERNG_CONFIG_GENERAL_DESC"
     >
+        <field
+            name="default_list_limit"
+            type="listlimit"
+            default="20"
+            label="COM_CONTENTBUILDERNG_CONFIG_DEFAULT_LIST_LIMIT_LABEL"
+            description="COM_CONTENTBUILDERNG_CONFIG_DEFAULT_LIST_LIMIT_DESC"
+            filter="integer"
+        />
+        <field
+            name="pagination_choices"
+            type="paginationchoices"
+            label="COM_CONTENTBUILDERNG_CONFIG_PAGINATION_CHOICES_LABEL"
+            description="COM_CONTENTBUILDERNG_CONFIG_PAGINATION_CHOICES_DESC"
+            validate="paginationchoices"
+            message="COM_CONTENTBUILDERNG_CONFIG_PAGINATION_CHOICES_INVALID"
+            filter="string"
+        />
         <field
             name="enable_validations"
             type="radio"

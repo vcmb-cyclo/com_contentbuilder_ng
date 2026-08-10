@@ -129,7 +129,15 @@ final class FormTemplateLockLayoutTest extends TestCase
             $formTemplate
         );
         self::assertStringContainsString(
-            "\$listStatesBadge = \$neutralTabBadge(!empty((array) (\$this->item->list_states ?? [])))",
+            '$hasPublishedListState = false;',
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            'if ($hasPublishedListState || $showsListStates || $hasListStatePermission)',
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            'if ($hasPublishedListState && $showsListStates && $hasListStatePermission)',
             $formTemplate
         );
         self::assertStringContainsString(
