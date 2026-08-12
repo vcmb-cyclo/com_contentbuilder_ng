@@ -132,7 +132,79 @@ fieldset:has(.cb-menu-reset-panel) {
 }
 
 .cb-menu-multiforms-select {
-    width: min(36rem, calc(100% - 7rem));
-    max-width: min(36rem, calc(100% - 7rem));
+    width: min(24rem, calc(100% - 7rem));
+    max-width: min(24rem, calc(100% - 7rem));
     margin-right: 1rem;
+}
+
+select[data-cb-menu-view-selector],
+select[data-cb-menu-default-key],
+select[data-cb-menu-override],
+.cb-new-list-builder select.form-select {
+    width: min(24rem, 100%) !important;
+    max-width: 100%;
+    flex: 0 1 24rem;
+}
+
+[data-cb-list-limit-control] {
+    width: min(24rem, 100%) !important;
+    max-width: 100%;
+    flex: 0 1 24rem !important;
+}
+
+.cb-menu-capability-cell {
+    border-radius: .25rem;
+    transition: background-color .15s ease-in-out;
+}
+
+.cb-menu-capability-cell.is-inherited {
+    background-color: var(--bs-secondary-bg, #e9ecef) !important;
+    --bs-table-bg-type: var(--bs-secondary-bg, #e9ecef);
+    cursor: not-allowed;
+}
+
+.cb-menu-capability-cell.is-unavailable {
+    background-color: rgba(var(--bs-secondary-rgb, 108, 117, 125), .08) !important;
+    --bs-table-bg-type: rgba(var(--bs-secondary-rgb, 108, 117, 125), .08);
+    cursor: not-allowed;
+}
+
+.cb-menu-capability-cell .form-check-input:disabled {
+    opacity: 1;
+    cursor: not-allowed;
+}
+
+.cb-menu-capability-cell.is-inherited .form-check-input:disabled:checked {
+    background-color: var(--bs-secondary, #6c757d);
+    border-color: var(--bs-secondary, #6c757d);
+}
+
+.cb-menu-capability-cell.is-inherited .form-check-input:disabled:not(:checked),
+.cb-menu-capability-cell.is-unavailable .form-check-input:disabled {
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border-color: var(--bs-secondary-color, #6c757d);
+}
+
+.cb-new-list-builder,
+.cb-new-list-builder fieldset,
+.cb-new-list-builder .row > *,
+.cb-new-list-builder .table-responsive {
+    min-width: 0;
+}
+
+@media (max-width: 767.98px) {
+    .cb-menu-multiforms-select {
+        width: 100%;
+        max-width: 100%;
+        margin-right: 0;
+    }
+
+    select[data-cb-menu-view-selector],
+    select[data-cb-menu-default-key],
+    select[data-cb-menu-override],
+    .cb-new-list-builder select.form-select,
+    [data-cb-list-limit-control] {
+        width: 100%;
+        max-width: 100%;
+    }
 }

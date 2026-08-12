@@ -207,6 +207,21 @@ try {
 							}
 $cbListActionAllowed = static fn(string $action): bool
     => EmbeddedListActionFilterService::isAllowed($action, $cbListAllowedActions);
+$resolveMenuVisibility = static function (string $value, bool $default): bool {
+    return match ($value) {
+        'yes' => true,
+        'no' => false,
+        default => $default,
+    };
+};
+$showStateControl = $resolveMenuVisibility(
+    (string) $input->getCmd('cb_new_show_state', 'default'),
+    !empty($this->list_state)
+);
+$showStateFilter = $resolveMenuVisibility(
+    (string) $input->getCmd('cb_new_show_state_filter', 'default'),
+    !empty($this->list_state)
+);
 $showEditAction = $showEditAction && $cbListActionAllowed('edit');
 $embeddedListParams = EmbeddedListContextService::parameters(
     $embeddedListContext,
@@ -780,7 +795,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						<!-- GAUCHE : filtre + selects + boutons (optionnel) -->
 						<div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
 
-								<?php if ($this->list_state && $state_allowed && count($this->states)) : ?>
+								<?php if ($showStateControl && $state_allowed && count($this->states)) : ?>
 									<select class="form-select form-select-sm cb-filter-select-state" disabled
 										name="list_state" id="list_state" title="<?php echo Text::_('COM_CONTENTBUILDERNG_BULK_OPTIONS'); ?>: <?php echo Text::_('COM_CONTENTBUILDERNG_STATE_CHANGER'); ?>"
 										aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_STATE_CHANGER'); ?>"
@@ -831,7 +846,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 											title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_LIST_RESET_TOOLTIP'), ENT_QUOTES, 'UTF-8'); ?>"
 											onclick="document.getElementById('contentbuilderng_filter').value='';
                 <?php echo $this->list_language && count($this->languages) ? "if(document.getElementById('list_language_filter')) document.getElementById('list_language_filter').selectedIndex=0;" : ""; ?>
-                <?php echo $this->list_state && count($this->states) ? "if(document.getElementById('list_state_filter')) document.getElementById('list_state_filter').selectedIndex=0;" : ""; ?>
+                <?php echo $showStateFilter && count($this->states) ? "if(document.getElementById('list_state_filter')) document.getElementById('list_state_filter').selectedIndex=0;" : ""; ?>
                 <?php echo $this->list_publish ? "if(document.getElementById('list_publish_filter')) document.getElementById('list_publish_filter').selectedIndex=0;" : ""; ?>
                 document.adminForm.submit();">
 											<span class="fa-solid fa-rotate-left" aria-hidden="true"></span>
@@ -840,7 +855,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 									</div>
 								<?php endif; ?>
 
-							<?php if ($this->list_state && count($this->states) && $cbListActionAllowed('state')) : ?>
+							<?php if ($showStateFilter && count($this->states) && $cbListActionAllowed('state')) : ?>
 								<select class="form-select form-select-sm cb-filter-select-state"
 									name="list_state_filter" id="list_state_filter"
 									title="<?php echo Text::_('COM_CONTENTBUILDERNG_STATE_FILTER'); ?>"
@@ -1076,8 +1091,8 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 							? (string) $primaryField['label']
 							: Text::_('COM_CONTENTBUILDERNG_RECORD_ID');
 						$hasSelectionControl = $this->select_column && ($delete_allowed || $state_allowed || $publish_allowed);
-						$hasStateControl = $this->list_state && $state_allowed && count($this->states);
-						$hasStaticStateBadge = $this->list_state && !$hasStateControl && isset($this->state_titles[$row->colRecord]) && $this->state_titles[$row->colRecord] !== '';
+						$hasStateControl = $showStateControl && $state_allowed && count($this->states);
+						$hasStaticStateBadge = $showStateControl && !$hasStateControl && isset($this->state_titles[$row->colRecord]) && $this->state_titles[$row->colRecord] !== '';
 						$stateBadgeStyle = $getStateBadgeStyle($row->colRecord, (array) ($this->state_colors ?? []));
 						$showFooter = $hasSelectionControl || ($hasStateControl || ($hasStaticStateBadge && !$isTilesVariant));
 						$footerClass = 'cb-list-card-footer';
@@ -1136,7 +1151,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 								<?php if (!empty($this->debug_mode) && !empty($this->debug_show_cb_id)) : ?>
 									<span class="cb-list-card-badge"><?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_CB_ID_COLUMN'); ?> #<?php echo (int) ($this->cb_record_ids[$row->colRecord] ?? 0); ?></span>
 								<?php endif; ?>
-								<?php if ($this->list_state && ($hasStateControl || $hasStaticStateBadge) && $cbListActionAllowed('state')) : ?>
+								<?php if ($showStateControl && ($hasStateControl || $hasStaticStateBadge) && $cbListActionAllowed('state')) : ?>
 									<?php if ($hasStateControl && !$isTilesVariant) : ?>
 										<?php
 										$currentStateTitle = $this->state_titles[$row->colRecord] ?? '';
@@ -1244,7 +1259,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 									<span></span>
 								<?php endif; ?>
 
-								<?php if ($this->list_state && !$isTilesVariant && !$hasStateControl && $cbListActionAllowed('state')) : ?>
+								<?php if ($showStateControl && !$isTilesVariant && !$hasStateControl && $cbListActionAllowed('state')) : ?>
 									<div class="cb-list-card-state">
 										<?php if ($hasStaticStateBadge) : ?>
 											<span class="cb-list-card-badge" data-cb-state-badge data-record-id="<?php echo (int) $row->colRecord; ?>"<?php echo $stateBadgeStyle !== '' ? ' style="' . htmlspecialchars($stateBadgeStyle, ENT_QUOTES, 'UTF-8') . '"' : ''; ?>><?php echo htmlspecialchars((string) $this->state_titles[$row->colRecord], ENT_QUOTES, 'UTF-8'); ?></span>
@@ -1310,7 +1325,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 					<?php
 					}
 
-						if ($this->list_state && $cbListActionAllowed('state')) {
+						if ($showStateControl && $cbListActionAllowed('state')) {
 						?>
 							<th scope="col" class="table-light">
 								<?php echo HTMLHelper::_('grid.sort', Text::_('COM_CONTENTBUILDERNG_EDIT_STATE'), 'colState', $this->lists['order_Dir'], $this->lists['order']); ?>
@@ -1482,7 +1497,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 					}
 					?>
 					<?php
-					if ($this->list_state && $cbListActionAllowed('state')) {
+					if ($showStateControl && $cbListActionAllowed('state')) {
 						$stateCellStyle = $getStateBadgeStyle($row->colRecord, (array) ($this->state_colors ?? []));
 					?>
 						<td

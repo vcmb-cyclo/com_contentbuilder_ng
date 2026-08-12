@@ -176,6 +176,7 @@
         list: true,
         search: true,
         link: true,
+        detail: true,
         edit: true,
         wordwrap: false,
         publish: true,
@@ -396,6 +397,14 @@
                 nextTask: 'form.linkable',
                 enabled: false
             },
+            'form.detail_include': {
+                nextTask: 'form.no_detail_include',
+                enabled: true
+            },
+            'form.no_detail_include': {
+                nextTask: 'form.detail_include',
+                enabled: false
+            },
             'form.api_allowed': {
                 nextTask: 'form.not_api_allowed',
                 enabled: true
@@ -607,6 +616,8 @@
             'form.no_search_include',
             'form.linkable',
             'form.not_linkable',
+            'form.detail_include',
+            'form.no_detail_include',
             'form.api_allowed',
             'form.not_api_allowed',
             'form.editable',
@@ -696,6 +707,8 @@
     var cbFlagTaskMap = {
         'form.linkable':          { field: 'linkable',       value: '1' },
         'form.not_linkable':      { field: 'linkable',       value: '0' },
+        'form.detail_include':    { field: 'detail_include', value: '1' },
+        'form.no_detail_include': { field: 'detail_include', value: '0' },
         'form.editable':          { field: 'editable',       value: '1' },
         'form.not_editable':      { field: 'editable',       value: '0' },
         'form.api_allowed':       { field: 'api_allowed',    value: '1' },
@@ -972,6 +985,8 @@
             case 'form.listunpublish':
             case 'form.linkable':
             case 'form.not_linkable':
+            case 'form.detail_include':
+            case 'form.no_detail_include':
             case 'form.editable':
             case 'form.not_editable':
             case 'form.api_allowed':

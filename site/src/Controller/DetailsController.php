@@ -30,6 +30,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
 
 class DetailsController extends BaseController
 {
@@ -178,6 +179,13 @@ class DetailsController extends BaseController
 
     public function display($cachable = false, $urlparams = array())
     {
+        if (!EmbeddedListActionFilterService::isRequestAllowed(
+            (string) $this->input->getCmd('cblist_embed', ''),
+            (string) $this->input->getString('cblist_actions', ''),
+            'detail'
+        )) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_MENU_ACTION_DISABLED'), 403);
+        }
         $this->input->set('view', 'details');
         $storageId = $this->input->getInt('storage_id', 0);
         $isDirectStorageMode = $storageId > 0 && $this->input->getInt('id', 0) <= 0;

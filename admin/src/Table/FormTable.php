@@ -180,6 +180,8 @@ class FormTable extends Table
 
     public $initial_list_limit = -1;
 
+    public $maximum_records = 0;
+
     public $save_button_title = '';
 
     public $apply_button_title = '';

@@ -28,6 +28,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\RuntimeUtilityService;
 use CB\Component\Contentbuilderng\Administrator\Service\ListSupportService;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
+use CB\Component\Contentbuilderng\Site\Helper\MenuListConfigurationHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PublishedRecordVisibilityHelper;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
@@ -227,6 +228,10 @@ class ExportModel extends BaseDatabaseModel
                         throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
                     }
                     $searchable_elements = $this->listSupportService->getListSearchableElements($this->_id);
+                    $searchable_elements = MenuListConfigurationHelper::filterSearchableElements(
+                        $searchable_elements,
+                        (string) $app->getInput()->getString('cb_menu_search_fields', '')
+                    );
                     $data->labels = $data->form->getElementLabels();
 
                     if (
@@ -339,6 +344,10 @@ class ExportModel extends BaseDatabaseModel
                             ->where($db->quoteName('published') . ' = 1')
                             ->where($db->quoteName('type') . ' <> ' . $db->quote('hidden'))
                             ->order($db->quoteName('ordering'));
+                        $newMenuCustomColumns = $app->getInput()->getInt('cb_new_list_menu', 0) === 1;
+                        if ($newMenuCustomColumns) {
+                            $query->where($db->quoteName('list_include') . ' = 1');
+                        }
                         $db->setQuery($query);
                         $rows = $this->getDatabase()->loadAssocList();
                         $ids = array();
@@ -347,6 +356,32 @@ class ExportModel extends BaseDatabaseModel
                             $ids[] = $row['reference_id'];
                             $labels[] = $row['label'];
                             $order_types['col' . $row['reference_id']] = $row['order_type'];
+                        }
+                        if ($newMenuCustomColumns) {
+                            $ids = MenuListConfigurationHelper::filterSearchableElements(
+                                $ids,
+                                (string) $app->getInput()->getString('cb_menu_published_fields', '')
+                            );
+                        }
+                        $rawExportFields = trim((string) $app->getInput()->getString('cblist_fields', ''));
+                        if (
+                            $rawExportFields !== ''
+                            && EmbeddedListFieldFilterService::isEmbeddedRequest($app->getInput()->getCmd('cblist_embed', ''))
+                        ) {
+                            $match = EmbeddedListFieldFilterService::matchFieldSelectors(
+                                $ids,
+                                (array) $data->form->getElementNames(),
+                                $rawExportFields
+                            );
+                            $labelByReference = [];
+                            foreach ($rows as $row) {
+                                $labelByReference[(string) $row['reference_id']] = (string) $row['label'];
+                            }
+                            $ids = $match['columns'];
+                            $labels = array_map(
+                                static fn(int|string $reference): string => $labelByReference[(string) $reference] ?? (string) $reference,
+                                $ids
+                            );
                         }
                     }
                     $data->visible_cols = $ids;
@@ -384,18 +419,31 @@ class ExportModel extends BaseDatabaseModel
                             $app->getInput()->getCmd('cblist_embed', '')
                         )
                     ) {
-                        $sortMatch = EmbeddedListFieldFilterService::matchSelectors(
-                            $ids,
-                            (array) $data->form->getElementNames(),
-                            $embeddedSort
-                        );
-                        if ($sortMatch['unknown'] === []) {
+                        $sortColumns = [];
+                        $unknownSortFields = [];
+                        foreach (EmbeddedListFieldFilterService::parseSelectors($embeddedSort) as $selector) {
+                            if (strcasecmp($selector, 'ID') === 0) {
+                                $sortColumns[] = 'Record';
+                                continue;
+                            }
+                            $match = EmbeddedListFieldFilterService::matchSelectors(
+                                $ids,
+                                (array) $data->form->getElementNames(),
+                                $selector
+                            );
+                            if ($match['unknown'] !== [] || $match['columns'] === []) {
+                                $unknownSortFields[] = $selector;
+                                continue;
+                            }
+                            $sortColumns[] = (string) $match['columns'][0];
+                        }
+                        if ($unknownSortFields === []) {
                             $directions = explode('|', strtolower(trim(
                                 (string) $app->getInput()->getString('cblist_dir', 'asc')
                             )));
                             $exportOrdering = implode('|', array_map(
                                 static fn(int|string $column): string => 'col' . $column,
-                                $sortMatch['columns']
+                                $sortColumns
                             ));
                             $exportOrderDirection = implode('|', array_map(
                                 static fn(string $direction): string => $direction === 'desc' ? 'desc' : 'asc',

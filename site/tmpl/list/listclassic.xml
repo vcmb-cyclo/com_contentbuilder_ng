@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <metadata>
-    <layout title="COM_CONTENTBUILDERNG_MENU_ITEM_LIST">
+    <layout title="COM_CONTENTBUILDERNG_MENU_ITEM_LIST_CLASSIC">
         <message>COM_CONTENTBUILDERNG_SELECT_VIEW_MESSAGE</message>
         <config>
             <fields name="params" addfieldprefix="CB\Component\Contentbuilderng\Site\Field">
-                <fieldset name="settings" group="settings" label="COM_CONTENTBUILDERNG_MENU_ITEM_LIST">
+                <fieldset name="settings" group="settings" label="COM_CONTENTBUILDERNG_MENU_ITEM_LIST_CLASSIC">
                     <field required="true" message="COM_CONTENTBUILDERNG_SELECT_VIEW_REQUIRED" type="menuforms" label="COM_CONTENTBUILDERNG_SELECT_VIEW" description="COM_CONTENTBUILDERNG_SELECT_VIEW_DESC" name="form_id" default="" data-cb-menu-view-selector="true" validate="options" />
                     <field name="cb_theme_plugin" type="menutheme" default="" label="COM_CONTENTBUILDERNG_MENU_THEME_LABEL" description="COM_CONTENTBUILDERNG_MENU_THEME_DESC" data-cb-menu-default-key="cb_theme_plugin" data-cb-menu-inherit-value="" data-cb-menu-override="true" validate="options" />
                     <field type="menuoverridereset" label="COM_CONTENTBUILDERNG_RESET_TO_DEFAULT" description="COM_CONTENTBUILDERNG_RESET_TO_DEFAULT_DESC" name="cb_menu_reset" />
@@ -55,8 +55,10 @@
                         <option value="1">COM_CONTENTBUILDERNG_YES</option>
                     </field>
 
-                    <field type="spacer" class="cb-menu-section-heading" label="COM_CONTENTBUILDERNG_MENU_NEW_OPTIONS" />
-                    <field type="menulistbuilder" filter="raw" hiddenLabel="true" label="" description="" name="cb_new_config" default="{}" data-cb-menu-override="true" />
+                    <field type="spacer" class="cb-menu-section-heading" label="COM_CONTENTBUILDERNG_MENU_OPTIONS_FILTER" />
+                    <field type="cbfilterhidden" filter="raw" label="" description="" name="cb_list_filterhidden" default="" data-cb-menu-override="true" />
+                    <field type="cborderhidden" label="" description="" name="cb_list_orderhidden" default="" data-cb-menu-override="true" />
+                    <field type="cbfilter" filter="raw" label="COM_CONTENTBUILDERNG_SELECT_FILTER" description="" name="cb_list_filter" default="" menu-layout="native" data-cb-menu-override="true" />
                 </fieldset>
             </fields>
         </config>

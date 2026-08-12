@@ -39,6 +39,7 @@ $columnOptions = [
     'list' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_LIST'),
     'search' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_SEARCH'),
     'link' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_LINK'),
+    'detail' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_DETAIL'),
     'api' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_API'),
     'edit' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_EDIT'),
     'wordwrap' => Text::_('COM_CONTENTBUILDERNG_LIST_WORDWRAP'),
@@ -58,7 +59,7 @@ if ($hasBfSystemFields) {
 }
 $defaultHiddenColumns = ['wordwrap'];
 $visibleColumnCount = count($columnOptions);
-$tableColumnCount = $hasBfSystemFields ? 12 : 11;
+$tableColumnCount = $hasBfSystemFields ? 13 : 12;
 if ($debugModeEnabled) {
     $tableColumnCount++;
 }
@@ -142,6 +143,12 @@ if ($debugModeEnabled) {
                     <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_LINK'), 'linkable') : Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_LINK'); ?>
                 </span>
             </th>
+            <th id="cb-form-view-elements-heading-detail" data-cb-col="detail">
+                <span class="editlinktip hasTip cb-elements-heading-label"
+                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_DETAIL_INCLUDE_TIP'); ?>">
+                    <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_DETAIL'), 'detail_include') : Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_DETAIL'); ?>
+                </span>
+            </th>
             <th id="cb-form-view-elements-heading-api-allowed" data-cb-col="api">
                 <span class="editlinktip hasTip cb-elements-heading-label"
                     title="<?php echo Text::_('COM_CONTENTBUILDERNG_API_ALLOWED_TIP'); ?>">
@@ -185,9 +192,17 @@ if ($debugModeEnabled) {
             $listInclude = ContentbuilderngHelper::listIncludeInList('form', $row, $i);
             $searchInclude = ContentbuilderngHelper::listIncludeInSearch('form', $row, $i);
             $linkable = ContentbuilderngHelper::listLinkable('form', $row, $i);
+            $detailInclude = ContentbuilderngHelper::listDetailInclude('form', $row, $i);
             $apiAllowed = ContentbuilderngHelper::listApiAllowed('form', $row, $i);
             $editable = ContentbuilderngHelper::listEditable('form', $row, $i);
             $isBfSystemField = (int) ($row->reference_id ?? 0) < 0;
+            if ((int) ($row->published ?? 0) !== 1) {
+                $unavailable = '<span class="tbody-icon jgrid cb-view-capability-locked" title="'
+                    . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_FIELD_UNPUBLISHED_CAPABILITY_DISABLED'), ENT_QUOTES, 'UTF-8')
+                    . '"><span class="icon-lock" aria-hidden="true"></span></span>';
+                $detailInclude = $unavailable;
+                $editable = $unavailable;
+            }
             if ($isBfSystemField) {
                 $searchInclude = '<span class="text-muted" title="' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_SEARCH_DISABLED'), ENT_QUOTES, 'UTF-8') . '"><span class="icon-unpublish" aria-hidden="true"></span></span>';
                 $editable = '<span class="text-muted" title="' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_EDIT_DISABLED'), ENT_QUOTES, 'UTF-8') . '"><span class="icon-unpublish" aria-hidden="true"></span></span>';
@@ -277,6 +292,9 @@ if ($debugModeEnabled) {
                 </td>
                 <td class="align-top" data-cb-col="link">
                     <?php echo $linkable; ?>
+                </td>
+                <td class="align-top" data-cb-col="detail">
+                    <?php echo $detailInclude; ?>
                 </td>
                 <td class="align-top" data-cb-col="api">
                     <?php echo $apiAllowed; ?>

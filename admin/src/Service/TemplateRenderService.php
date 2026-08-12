@@ -1161,7 +1161,7 @@ class TemplateRenderService
         return '';
     }
 
-    public function getEditableTemplate($contentbuilderngFormId, $recordId, array $record, array $elementsAllowed, $execPrepare = true)
+    public function getEditableTemplate($contentbuilderngFormId, $recordId, array $record, array $elementsAllowed, $execPrepare = true, ?array $editableElementsAllowed = null)
     {
         $app = $this->getApp();
         $session = $app->getSession();
@@ -1408,7 +1408,8 @@ class TemplateRenderService
             $elementReferenceId = $element['reference_id'] ?? '';
             $elementCustomInit = $element['custom_init_script'] ?? '';
             $elementHint = $element['hint'] ?? '';
-            $isEditable = (int) ($element['editable'] ?? 1) === 1;
+            $isEditable = (int) ($element['editable'] ?? 1) === 1
+                && ($editableElementsAllowed === null || in_array($elementReferenceId, $editableElementsAllowed));
             $isSourceRequired = isset($sourceRequiredElements[(string) $elementReferenceId]);
             $hasLabelMarker = str_contains($template, '{' . $key . ':label}');
 

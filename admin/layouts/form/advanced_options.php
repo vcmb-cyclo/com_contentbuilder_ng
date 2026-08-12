@@ -64,6 +64,7 @@ $advancedDefaults = [
     'show_filter' => 1,
     'show_records_per_page' => 1,
     'initial_list_limit' => ListLimitHelper::INHERIT,
+    'maximum_records' => ListLimitHelper::ALL,
     'published_only' => 0,
     'allow_external_filter' => 0,
     'filter_exact_match' => 1,
@@ -416,6 +417,24 @@ $advancedDefaults = [
                             <?php echo $listLimitField->renderInput(); ?>
                         </div>
                         <div>
+                            <label class="form-label mb-1" for="maximum_records">
+                                <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_MAXIMUM_RECORDS_DESC'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_MAXIMUM_RECORDS'); ?>
+                                </span>
+                            </label>
+                            <?php
+                            $maximumRecordsForm = new Form('contentbuilderng-maximum-records', ['control' => 'jform']);
+                            $maximumRecordsField = new ListLimitFieldControl($maximumRecordsForm);
+                            $maximumRecordsField->setup(
+                                new SimpleXMLElement(
+                                    '<field name="maximum_records" id="maximum_records" type="listlimit" data-cb-list-limit-mode="global" filter="integer" />'
+                                ),
+                                max(ListLimitHelper::ALL, (int) ($item->maximum_records ?? ListLimitHelper::ALL))
+                            );
+                            ?>
+                            <?php echo $maximumRecordsField->renderInput(); ?>
+                        </div>
+                        <div>
                             <input type="hidden" name="jform[allow_external_filter]" value="0" />
                             <?php echo $renderCheckbox('jform[allow_external_filter]', 'allow_external_filter', (bool) ($item->allow_external_filter ?? false)); ?>
                             <label class="form-check-label" for="allow_external_filter">
@@ -670,6 +689,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 case 'initial_sort_order2':
                 case 'initial_sort_order3':
                 case 'initial_list_limit':
+                case 'maximum_records':
                 case 'rating_slots':
                 case 'save_button_title':
                 case 'apply_button_title':

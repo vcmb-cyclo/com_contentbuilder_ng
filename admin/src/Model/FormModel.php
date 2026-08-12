@@ -713,6 +713,8 @@ class FormModel extends AdminModel
 
             $data->initial_list_limit = -1;
 
+            $data->maximum_records = 0;
+
             $data->save_button_title = '';
 
             $data->apply_button_title = '';
@@ -1051,6 +1053,12 @@ class FormModel extends AdminModel
             $jform['initial_list_limit'] = -1;
         } else {
             $jform['initial_list_limit'] = max(-1, (int) $jform['initial_list_limit']);
+        }
+
+        if (!array_key_exists('maximum_records', $jform) || (string) $jform['maximum_records'] === '') {
+            $jform['maximum_records'] = 0;
+        } else {
+            $jform['maximum_records'] = max(0, min(5000, (int) $jform['maximum_records']));
         }
 
         // Tag défaut

@@ -32,6 +32,7 @@ use CB\Component\Contentbuilderng\Administrator\Service\TemplateRenderService;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
+use CB\Component\Contentbuilderng\Site\Helper\MenuListConfigurationHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PublishedRecordVisibilityHelper;
 
 class DetailsModel extends ListModel
@@ -436,7 +437,7 @@ class DetailsModel extends ListModel
                     if (count($ids)) {
                         $db = $this->getDatabase();
                         $query = $db->getQuery(true)
-                            ->select([$db->quoteName('label'), $db->quoteName('reference_id')])
+                            ->select([$db->quoteName('label'), $db->quoteName('reference_id'), $db->quoteName('detail_include')])
                             ->from($db->quoteName('#__contentbuilderng_elements'))
                             ->where($db->quoteName('form_id') . ' = ' . (int)$this->_id)
                             ->where($db->quoteName('reference_id') . ' IN (' . implode(',', $ids) . ')')
@@ -444,10 +445,26 @@ class DetailsModel extends ListModel
                             ->order($db->quoteName('ordering'));
                         $db->setQuery($query);
                         $rows = $db->loadAssocList();
+                        $filterElementIds = array();
                         $ids = array();
                         foreach ($rows as $row) {
-                            $ids[] = $row['reference_id'];
+                            $filterElementIds[] = $row['reference_id'];
+                            if ((int) $row['detail_include'] === 1) {
+                                $ids[] = $row['reference_id'];
+                            }
                         }
+                        $filterElementIds = MenuListConfigurationHelper::filterSearchableElements(
+                            $filterElementIds,
+                            (string) $app->getInput()->getString('cb_menu_published_fields', '')
+                        );
+                        $ids = MenuListConfigurationHelper::filterSearchableElements(
+                            $ids,
+                            (string) $app->getInput()->getString('cb_menu_published_fields', '')
+                        );
+                        $ids = MenuListConfigurationHelper::filterSearchableElements(
+                            $ids,
+                            (string) $app->getInput()->getString('cb_menu_detail_fields', '')
+                        );
                     }
 
                     if ($this->_latest) {
@@ -543,7 +560,7 @@ class DetailsModel extends ListModel
                                 : ($data->own_only ? (int) ($app->getIdentity()->id ?? 0) : -1));
                         $showAllLanguages = $isAdminPreview ? true : ($this->frontend ? $data->show_all_languages_fe : true);
 
-                        if (!$this->isRecordAllowedByMenuFilter($data, $ids)) {
+                        if (!$this->isRecordAllowedByMenuFilter($data, $filterElementIds ?? $ids)) {
                             throw new \Exception(Text::_('COM_CONTENTBUILDERNG_RECORD_NOT_FOUND'), 404);
                         }
 

@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_articles`
 --   item_wrapper             Template snippet wrapping the displayed value.
 --   wordwrap                 Max character width before wrapping (0 = unlimited).
 --   linkable                 1 = value is rendered as a link to the details view.
+--   detail_include           1 = value may be rendered in the details view.
 --   api_allowed              1 = field is exposed via the CB REST API.
 --   editable                 1 = field is editable in the inline edit view.
 --   validations              Comma-separated built-in or external validation names.
@@ -81,6 +82,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_elements`
     `item_wrapper`             text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
     `wordwrap`                 int        NOT NULL DEFAULT '0',
     `linkable`                 tinyint(1) NOT NULL DEFAULT '0',
+    `detail_include`           tinyint(1) NOT NULL DEFAULT '1',
     `api_allowed`              tinyint(1) NOT NULL DEFAULT '0',
     `editable`                 tinyint(1) NOT NULL DEFAULT '0',
     `validations`              text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
@@ -388,6 +390,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_forms`
     `button_bar_sticky`                   tinyint(1)   NOT NULL DEFAULT '0',
     `show_preview_link`                   tinyint(1)   NOT NULL DEFAULT '0',
     `initial_list_limit`                  tinyint      NOT NULL DEFAULT '-1',
+    `maximum_records`                     int          NOT NULL DEFAULT '0',
     `save_button_title`                   varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
     `filter_exact_match`                  tinyint(1)   NOT NULL DEFAULT '1',
     `apply_button_title`                  varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',

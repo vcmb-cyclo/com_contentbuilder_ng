@@ -59,6 +59,7 @@ use CB\Component\Contentbuilderng\Administrator\Service\TemplateRenderService;
 use CB\Component\Contentbuilderng\Administrator\Service\FieldValidationService;
 use CB\Component\Contentbuilderng\Site\Helper\DuplicateKeyViolationHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
+use CB\Component\Contentbuilderng\Site\Helper\MenuListConfigurationHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PublishedRecordVisibilityHelper;
 use CB\Component\Contentbuilderng\Site\Model\Edit\ListStateAndRatingTrait;
 use CB\Component\Contentbuilderng\Site\Model\Edit\OwnershipTrait;
@@ -575,6 +576,10 @@ class EditModel extends BaseDatabaseModel
                         foreach ($rows as $row) {
                             $ids[] = $row['reference_id'];
                         }
+                        $ids = MenuListConfigurationHelper::filterSearchableElements(
+                            $ids,
+                            (string) $this->app->getInput()->getString('cb_menu_published_fields', '')
+                        );
                     }
 
                     if (!$this->isRecordAllowedByMenuFilter($data, $ids)) {
@@ -750,7 +755,11 @@ var contentbuilderng = new function(){
                     );
                     //}
 
-                    $data->template = $this->templateRenderService->getEditableTemplate($this->_id, $this->_record_id, $data->items, $ids, !$data->edit_by_type);
+                    $menuEditableIds = MenuListConfigurationHelper::filterSearchableElements(
+                        $ids,
+                        (string) $this->app->getInput()->getString('cb_menu_edit_fields', '')
+                    );
+                    $data->template = $this->templateRenderService->getEditableTemplate($this->_id, $this->_record_id, $data->items, $ids, !$data->edit_by_type, $menuEditableIds);
 
                     if (
                         $this->app->isClient('administrator')
@@ -844,6 +853,25 @@ var contentbuilderng = new function(){
                         ->where($db->quoteName('editable') . ' = 1');
                     $db->setQuery($query);
                     $fields = $db->loadAssocList();
+                    $viewEditableIds = array_column($fields, 'reference_id');
+                    $menuPublishedIds = MenuListConfigurationHelper::filterSearchableElements(
+                        $viewEditableIds,
+                        (string) $this->app->getInput()->getString('cb_menu_published_fields', '')
+                    );
+                    $menuEditableIds = MenuListConfigurationHelper::filterSearchableElements(
+                        $menuPublishedIds,
+                        (string) $this->app->getInput()->getString('cb_menu_edit_fields', '')
+                    );
+                    $menuEditableLookup = array_fill_keys(array_map('strval', $menuEditableIds), true);
+                    foreach ($viewEditableIds as $viewEditableId) {
+                        if (!isset($menuEditableLookup[(string) $viewEditableId])) {
+                            $noneditable_fields[] = $viewEditableId;
+                        }
+                    }
+                    $fields = array_values(array_filter(
+                        $fields,
+                        static fn(array $field): bool => isset($menuEditableLookup[(string) ($field['reference_id'] ?? '')])
+                    ));
 
                     $the_fields = array();
                     $the_name_field = null;

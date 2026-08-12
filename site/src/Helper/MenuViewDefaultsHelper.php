@@ -20,6 +20,13 @@ final class MenuViewDefaultsHelper
         'show_back_button',
         'cb_filter_in_title',
         'cb_prefix_in_title',
+        'show_title_breadcrumb',
+        'show_filter',
+        'show_records_per_page',
+        'export_xls',
+        'print_button',
+        'list_rating',
+        'list_state',
     ];
 
     private static ?array $defaults = null;
@@ -56,7 +63,7 @@ final class MenuViewDefaultsHelper
         /** @var DatabaseInterface $db */
         $db = RuntimeContextHelper::getDatabase();
         $columns = array_merge(
-            ['id', 'name', 'default_category', 'initial_list_limit', 'theme_plugin'],
+            ['id', 'name', 'default_category', 'initial_list_limit', 'maximum_records', 'theme_plugin', 'config'],
             self::BOOLEAN_COLUMNS
         );
         $query = $db->getQuery(true)
@@ -100,8 +107,39 @@ final class MenuViewDefaultsHelper
                     : '',
                 'cb_category_menu_filter' => 0,
                 'cb_list_limit' => ListLimitHelper::resolveViewValue($form->initial_list_limit),
+                'cb_maximum_records' => max(ListLimitHelper::ALL, (int) $form->maximum_records),
                 'cb_theme_plugin' => trim((string) $form->theme_plugin) ?: 'thoth',
             ];
+
+            $configuration = json_decode((string) ($form->config ?? ''), true);
+            $configuration = is_array($configuration) ? $configuration : [];
+            $permissions = is_array($configuration['permissions_fe'] ?? null)
+                ? $configuration['permissions_fe']
+                : [];
+            $ownerPermissions = is_array($configuration['own_fe'] ?? null)
+                ? $configuration['own_fe']
+                : [];
+            foreach (
+                [
+                    'new' => 'new',
+                    'detail' => 'view',
+                    'edit' => 'edit',
+                    'delete' => 'delete',
+                    'publish' => 'publish',
+                    'state' => 'state',
+                ] as $menuAction => $permissionKey
+            ) {
+                $granted = !empty($ownerPermissions[$permissionKey]);
+
+                foreach ($permissions as $groupPermissions) {
+                    if (is_array($groupPermissions) && !empty($groupPermissions[$permissionKey])) {
+                        $granted = true;
+                        break;
+                    }
+                }
+
+                $values['cb_permission_' . $menuAction] = $granted ? 1 : 0;
+            }
 
             foreach (self::BOOLEAN_COLUMNS as $column) {
                 $key = $column === 'show_back_button' ? 'cb_show_details_back_button' : $column;

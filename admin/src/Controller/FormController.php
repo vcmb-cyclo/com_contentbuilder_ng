@@ -417,7 +417,7 @@ class FormController extends BaseFormController
     }
 
 
-    private const ALLOWED_FLAGS = ['linkable', 'editable', 'api_allowed', 'list_include', 'search_include'];
+    private const ALLOWED_FLAGS = ['linkable', 'detail_include', 'editable', 'api_allowed', 'list_include', 'search_include'];
 
     public function element_flag(): void
     {
@@ -822,7 +822,7 @@ class FormController extends BaseFormController
                 return false;
             }
 
-            $resyncMessages = $field === 'editable'
+            $resyncMessages = in_array($field, ['detail_include', 'editable'], true)
                 ? $this->resyncLockedTemplatesAfterElementChange($formId)
                 : [];
             $messages = $this->buildResyncMessageBundle(Text::_('JLIB_APPLICATION_SAVE_SUCCESS'), $resyncMessages);
@@ -928,6 +928,7 @@ class FormController extends BaseFormController
                     'list_include',
                     'search_include',
                     'linkable',
+                    'detail_include',
                     'editable',
                     'api_allowed',
                     'published',
@@ -943,6 +944,7 @@ class FormController extends BaseFormController
                     0,
                     0,
                     0,
+                    1,
                     0,
                     0,
                     1,
@@ -1034,7 +1036,7 @@ class FormController extends BaseFormController
                 ->insert($db->quoteName('#__contentbuilderng_elements'))
                 ->columns($db->quoteName([
                     'label', 'form_id', 'reference_id', 'type', 'options',
-                    'list_include', 'search_include', 'linkable', 'editable',
+                    'list_include', 'search_include', 'linkable', 'detail_include', 'editable',
                     'api_allowed', 'published', 'order_type', 'ordering',
                 ]))
                 ->values(implode(',', [
@@ -1043,7 +1045,7 @@ class FormController extends BaseFormController
                     $referenceId,
                     $db->quote('text'),
                     $db->quote(PackedDataHelper::encodePackedData($options)),
-                    0, 0, 0, 0, 0, 1,
+                    0, 0, 0, 1, 0, 0, 1,
                     $db->quote((string) ($definition['type'] ?? '')),
                     $ordering > 0 ? $ordering : 1,
                 ]));

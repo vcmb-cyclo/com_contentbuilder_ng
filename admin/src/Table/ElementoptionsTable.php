@@ -69,6 +69,8 @@ class ElementoptionsTable extends Table
 
     public $linkable = 0;
 
+    public $detail_include = 1;
+
     public $editable = 0;
 
     public $api_allowed = 0;

@@ -40,6 +40,56 @@ final class ListLimitConfigurationTest extends TestCase
         self::assertInstanceOf(\SimpleXMLElement::class, $viewField);
         self::assertSame('-1', (string) $viewField['default']);
         self::assertSame('-1', (string) $viewField['min']);
+
+        $maximumField = $form->xpath('//field[@name="maximum_records"]')[0] ?? null;
+        self::assertInstanceOf(\SimpleXMLElement::class, $maximumField);
+        self::assertSame('0', (string) $maximumField['default']);
+        self::assertSame('0', (string) $maximumField['min']);
+    }
+
+    public function testMaximumRecordsIsPersistedAndAddedByTheB6Schema(): void
+    {
+        $root = \dirname(__DIR__, 4);
+        $update = (string) \file_get_contents(
+            $root . '/admin/sql/updates/mysql/6.1.10-RC09-B6.sql'
+        );
+        $install = (string) \file_get_contents($root . '/admin/sql/install.sql');
+        $table = (string) \file_get_contents($root . '/admin/src/Table/FormTable.php');
+        $model = (string) \file_get_contents($root . '/admin/src/Model/FormModel.php');
+        $layout = (string) \file_get_contents($root . '/admin/layouts/form/advanced_options.php');
+
+        self::assertStringContainsString('ADD COLUMN `maximum_records` INT NOT NULL DEFAULT 0', $update);
+        self::assertStringContainsString('`maximum_records`', $install);
+        self::assertStringContainsString('public $maximum_records = 0;', $table);
+        self::assertStringContainsString("array_key_exists('maximum_records', \$jform)", $model);
+        self::assertStringContainsString('name="maximum_records"', $layout);
+        self::assertStringContainsString('data-cb-list-limit-mode="global"', $layout);
+    }
+
+    public function testDetailCapabilityIsAddedByTheB6SchemaAndDefaultsToEnabled(): void
+    {
+        $root = \dirname(__DIR__, 4);
+        $update = (string) \file_get_contents($root . '/admin/sql/updates/mysql/6.1.10-RC09-B6.sql');
+        $install = (string) \file_get_contents($root . '/admin/sql/install.sql');
+        $table = (string) \file_get_contents($root . '/admin/src/Table/ElementoptionsTable.php');
+        $schemaService = (string) \file_get_contents($root . '/admin/src/Service/SchemaService.php');
+        $installer = (string) \file_get_contents($root . '/script.php');
+
+        self::assertStringContainsString('ADD COLUMN `detail_include` TINYINT(1) NOT NULL DEFAULT 1', $update);
+        self::assertStringContainsString('`detail_include`', $install);
+        self::assertStringContainsString('public $detail_include = 1;', $table);
+        self::assertStringContainsString('public function ensureElementsDetailIncludeColumn(): void', $schemaService);
+        self::assertStringContainsString('$this->ensureElementsDetailIncludeColumn();', $installer);
+        self::assertStringContainsString('$this->schemaService->ensureElementsDetailIncludeColumn();', $installer);
+    }
+
+    public function testBreezingFormsRecordTypeNormalizationHandlesCanonicalDuplicates(): void
+    {
+        $installer = (string) \file_get_contents(\dirname(__DIR__, 4) . '/script.php');
+
+        self::assertStringContainsString('private function normalizeLegacyBreezingFormsRecordTypes(', $installer);
+        self::assertStringContainsString("->delete(\$db->quoteName('#__contentbuilderng_records'))", $installer);
+        self::assertStringContainsString('$canonicalId > 0 && $canonicalId !== $id', $installer);
     }
 
     public function testSchemaChangesOnlyTheDefaultForExistingRows(): void
@@ -54,7 +104,7 @@ final class ListLimitConfigurationTest extends TestCase
 
     public function testEveryListMenuAcceptsAllAndKeepsInheritanceEmpty(): void
     {
-        foreach (['default.xml', 'listcard.xml', 'listcompact.xml', 'listtiles.xml'] as $file) {
+        foreach (['default.xml', 'listclassic.xml', 'listcard.xml', 'listcompact.xml', 'listtiles.xml'] as $file) {
             $xml = new \SimpleXMLElement((string) \file_get_contents(
                 \dirname(__DIR__, 4) . '/site/tmpl/list/' . $file
             ));
@@ -88,6 +138,8 @@ final class ListLimitConfigurationTest extends TestCase
             self::assertArrayHasKey('COM_CONTENTBUILDERNG_CONFIG_PAGINATION_CHOICES_LABEL', $translations);
             self::assertArrayHasKey('COM_CONTENTBUILDERNG_CONFIG_PAGINATION_CHOICES_DESC', $translations);
             self::assertArrayHasKey('COM_CONTENTBUILDERNG_CONFIG_PAGINATION_CHOICES_INVALID', $translations);
+            self::assertArrayHasKey('COM_CONTENTBUILDERNG_MAXIMUM_RECORDS', $translations);
+            self::assertArrayHasKey('COM_CONTENTBUILDERNG_MAXIMUM_RECORDS_DESC', $translations);
         }
     }
 

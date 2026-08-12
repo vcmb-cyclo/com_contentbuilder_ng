@@ -32,6 +32,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\ListLimitHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
+use CB\Component\Contentbuilderng\Site\Helper\MenuListConfigurationHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PublishedRecordVisibilityHelper;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
@@ -728,6 +729,12 @@ class ListModel extends BaseListModel
                 $data->preview_no_list_fields = false;
                 $data->invalid_list_setup = false;
                 $data->list_header_sticky = (int) ($data->list_header_sticky ?? 0);
+                $menuLimitSelector = (string) $app->getInput()->getCmd('cb_new_show_limit_selector', 'default');
+                if ($menuLimitSelector === 'yes') {
+                    $data->show_records_per_page = 1;
+                } elseif ($menuLimitSelector === 'no') {
+                    $data->show_records_per_page = 0;
+                }
                 $isAdminPreview = $app->getInput()->getBool('cb_preview_ok', false);
 
                 if (!$isAdminPreview) {
@@ -984,9 +991,42 @@ class ListModel extends BaseListModel
                     foreach ($data->labels as $reference_id => $label) {
                         $ids[] = $this->getDatabase()->quote($reference_id);
                     }
-                    $searchable_elements = $this->listSupportService->getListSearchableElements($this->_id);
+                    $newMenuCustomColumns = $app->getInput()->getInt('cb_new_list_menu', 0) === 1;
+                    if ($newMenuCustomColumns) {
+                        $ids = array_map(
+                            [$this->getDatabase(), 'quote'],
+                            $this->getMenuElements(
+                                (string) $app->getInput()->getString('cblist_fields', ''),
+                                'list_include',
+                                (string) $app->getInput()->getString('cb_menu_published_fields', '')
+                            )
+                        );
+                    }
+                    $menuSearchVisibility = (string) $app->getInput()->getCmd('cb_new_show_search', 'default');
+                    if ($menuSearchVisibility === 'yes') {
+                        $data->show_filter = 1;
+                    } elseif ($menuSearchVisibility === 'no') {
+                        $data->show_filter = 0;
+                    }
+
+                    $searchable_elements = $newMenuCustomColumns
+                        ? $this->getMenuElements(
+                            (string) $app->getInput()->getString('cb_menu_search_fields', ''),
+                            'search_include',
+                            (string) $app->getInput()->getString('cb_menu_published_fields', '')
+                        )
+                        : MenuListConfigurationHelper::filterSearchableElements(
+                            $this->listSupportService->getListSearchableElements($this->_id),
+                            (string) $app->getInput()->getString('cb_menu_search_fields', '')
+                        );
                     $data->display_filter = count($searchable_elements) && $data->show_filter;
-                    $data->linkable_elements = $this->listSupportService->getListLinkableElements($this->_id);
+                    $data->linkable_elements = $newMenuCustomColumns
+                        ? $this->getMenuElements(
+                            (string) $app->getInput()->getString('cb_menu_link_fields', ''),
+                            'linkable',
+                            (string) $app->getInput()->getString('cb_menu_published_fields', '')
+                        )
+                        : $this->listSupportService->getListLinkableElements($this->_id);
                     $data->labels = array();
                     $order_types = array();
                     if (count($ids)) {
@@ -1002,8 +1042,10 @@ class ListModel extends BaseListModel
                             ->where($db->quoteName('form_id') . ' = ' . (int) $this->_id)
                             ->where($db->quoteName('reference_id') . ' IN (' . implode(',', $ids) . ')')
                             ->where($db->quoteName('published') . ' = 1')
-                            ->where($db->quoteName('list_include') . ' = 1')
                             ->order($db->quoteName('ordering'));
+                        if (!$newMenuCustomColumns) {
+                            $elemQuery->where($db->quoteName('list_include') . ' = 1');
+                        }
                         $db->setQuery($elemQuery);
                         $rows = $db->loadAssocList();
                         $ids = array();
@@ -1098,14 +1140,27 @@ class ListModel extends BaseListModel
                             $elementNames = is_object($data->form) && method_exists($data->form, 'getElementNames')
                                 ? (array) $data->form->getElementNames()
                                 : [];
-                            $sortMatch = EmbeddedListFieldFilterService::matchSelectors(
-                                array_keys($data->labels),
-                                $elementNames,
-                                $embeddedSort
-                            );
+                            $sortColumns = [];
+                            $unknownSortFields = [];
+                            foreach (EmbeddedListFieldFilterService::parseSelectors($embeddedSort) as $selector) {
+                                if (strcasecmp($selector, 'ID') === 0) {
+                                    $sortColumns[] = 'Record';
+                                    continue;
+                                }
+                                $match = EmbeddedListFieldFilterService::matchSelectors(
+                                    array_keys($data->labels),
+                                    $elementNames,
+                                    $selector
+                                );
+                                if ($match['unknown'] !== [] || $match['columns'] === []) {
+                                    $unknownSortFields[] = $selector;
+                                    continue;
+                                }
+                                $sortColumns[] = (string) $match['columns'][0];
+                            }
 
-                            if ($sortMatch['unknown'] !== []) {
-                                foreach ($sortMatch['unknown'] as $unknownSortField) {
+                            if ($unknownSortFields !== []) {
+                                foreach ($unknownSortFields as $unknownSortField) {
                                     $data->embedded_list_validation_errors[] = [
                                         'parameter' => 'sort',
                                         'value' => $unknownSortField,
@@ -1115,7 +1170,7 @@ class ListModel extends BaseListModel
                                 $sortDirections = explode('|', $embeddedDirection);
                                 $sortOrdering = [];
                                 $sortDirectionValues = [];
-                                foreach ($sortMatch['columns'] as $index => $sortColumn) {
+                                foreach ($sortColumns as $index => $sortColumn) {
                                     $sortDirection = strtolower(trim((string) ($sortDirections[$index] ?? '')));
                                     $sortOrdering[] = 'col' . $sortColumn;
                                     $sortDirectionValues[] = $sortDirection === 'desc' ? 'desc' : 'asc';
@@ -1278,6 +1333,48 @@ class ListModel extends BaseListModel
     public function getPagination()
     {
         return parent::getPagination();
+    }
+
+    /** @return list<int> */
+    private function getMenuElements(string $rawReferences, string $capability, string $rawPublishedReferences = ''): array
+    {
+        if (!in_array($capability, ['list_include', 'search_include', 'linkable'], true)) {
+            return [];
+        }
+
+        $references = array_values(array_filter(
+            EmbeddedListFieldFilterService::parseSelectors($rawReferences),
+            static fn(string $reference): bool => ctype_digit($reference)
+        ));
+        if ($rawPublishedReferences !== '') {
+            $publishedByMenu = array_fill_keys(array_filter(
+                EmbeddedListFieldFilterService::parseSelectors($rawPublishedReferences),
+                static fn(string $reference): bool => ctype_digit($reference)
+            ), true);
+            $references = array_values(array_filter(
+                $references,
+                static fn(string $reference): bool => isset($publishedByMenu[$reference])
+            ));
+        }
+        if ($references === []) {
+            return [];
+        }
+
+        $db = $this->getDatabase();
+        $query = $db->getQuery(true)
+            ->select($db->quoteName('reference_id'))
+            ->from($db->quoteName('#__contentbuilderng_elements'))
+            ->where($db->quoteName('form_id') . ' = ' . (int) $this->_id)
+            ->where($db->quoteName('published') . ' = 1')
+            ->where($db->quoteName($capability) . ' = 1')
+            ->whereIn($db->quoteName('reference_id'), array_map('intval', $references));
+        $db->setQuery($query);
+        $published = array_fill_keys(array_map('strval', (array) $db->loadColumn()), true);
+
+        return array_values(array_map(
+            'intval',
+            array_filter($references, static fn(string $reference): bool => isset($published[$reference]))
+        ));
     }
 
 

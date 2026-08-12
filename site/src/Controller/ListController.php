@@ -24,6 +24,7 @@ use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewThemeHelper;
 use CB\Component\Contentbuilderng\Site\Model\EditModel;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use CB\Component\Contentbuilderng\Administrator\Service\DirectStorageFormProvisioningService;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
@@ -86,6 +87,7 @@ class ListController extends BaseController
 
     public function delete(): void
     {
+        $this->assertConstrainedAction('delete');
         if (!$this->checkToken('post', false)) {
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
         }
@@ -260,6 +262,7 @@ class ListController extends BaseController
 
     public function publish(): void
     {
+        $this->assertConstrainedAction('publish');
         if (!$this->checkToken('post', false)) {
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
         }
@@ -340,6 +343,17 @@ class ListController extends BaseController
             false
         );
         $this->setRedirect($link, $msg, 'message');
+    }
+
+    private function assertConstrainedAction(string $action): void
+    {
+        if (!EmbeddedListActionFilterService::isRequestAllowed(
+            (string) $this->input->getCmd('cblist_embed', ''),
+            (string) $this->input->getString('cblist_actions', ''),
+            $action
+        )) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_MENU_ACTION_DISABLED'), 403);
+        }
     }
 
     #[\Override]

@@ -257,6 +257,18 @@ class HtmlView extends BaseHtmlView
             ->icon('fa fa-link text-danger')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_NOT_LINKABLE_TIP')]);
+        $statusChildToolbar->standardButton('detail_include')
+            ->task('form.detail_include')
+            ->text('COM_CONTENTBUILDERNG_DETAIL_INCLUDE')
+            ->icon('fa fa-eye text-success')
+            ->listCheck(true)
+            ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_DETAIL_INCLUDE_TIP')]);
+        $statusChildToolbar->standardButton('no_detail_include')
+            ->task('form.no_detail_include')
+            ->text('COM_CONTENTBUILDERNG_NO_DETAIL_INCLUDE')
+            ->icon('fa fa-eye text-danger')
+            ->listCheck(true)
+            ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_NO_DETAIL_INCLUDE_TIP')]);
         $statusChildToolbar->standardButton('api_allowed')
             ->task('form.api_allowed')
             ->text('COM_CONTENTBUILDERNG_API_ALLOWED')

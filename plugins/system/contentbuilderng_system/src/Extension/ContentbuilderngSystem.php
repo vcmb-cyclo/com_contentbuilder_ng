@@ -158,6 +158,54 @@ final class ContentbuilderngSystem extends CMSPlugin implements SubscriberInterf
         if ($pluginParams->def('nocache', 1)) {
             $this->app->getConfig()->set('config.caching', $this->caching);
         }
+
+        $this->keepContentbuilderAdminMenuOpenInOptions();
+    }
+
+    /**
+     * Keep the ContentBuilder NG branch visible while Joomla renders its
+     * component configuration through com_config.
+     */
+    private function keepContentbuilderAdminMenuOpenInOptions(): void
+    {
+        if (!$this->app->isClient('administrator')) {
+            return;
+        }
+
+        $input = $this->app->getInput();
+
+        $option = $input->getCmd('option');
+        $isContentbuilder = $option === 'com_contentbuilderng';
+        $isContentbuilderOptions = $option === 'com_config'
+            && $input->getCmd('view') === 'component'
+            && $input->getCmd('component') === 'com_contentbuilderng';
+
+        if (!$isContentbuilder && !$isContentbuilderOptions) {
+            return;
+        }
+
+        $document = $this->app->getDocument();
+
+        if (!method_exists($document, 'getWebAssetManager')) {
+            return;
+        }
+
+        $document->getWebAssetManager()->addInlineScript(<<<'JS'
+document.addEventListener('DOMContentLoaded', () => {
+    const viewsLink = document.querySelector(
+        '.main-nav a[href*="option=com_contentbuilderng"][href*="view=forms"]'
+    );
+
+    let parent = viewsLink?.closest('li')?.parentElement?.closest('li') ?? null;
+
+    while (parent) {
+        parent.classList.add('mm-active');
+        parent.querySelector(':scope > a.has-arrow')?.setAttribute('aria-expanded', 'true');
+        parent.querySelector(':scope > ul.mm-collapse')?.classList.add('mm-show');
+        parent = parent.parentElement?.closest('li') ?? null;
+    }
+});
+JS);
     }
 
     public function onAfterDispatch()
