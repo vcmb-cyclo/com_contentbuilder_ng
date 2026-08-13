@@ -42,7 +42,8 @@ final class UnescapedTemplateOutputTest extends TestCase
      */
     private const SAFE_CALL_PATTERN = '/escape\(|htmlspecialchars|Text::|HTMLHelper|json_encode|loadTemplate|'
         . 'LayoutHelper|->render|renderInput|renderDirectionButtonGroup|Route::|sanitizeStoredHtml|'
-        . 'escapeListValue|listLimitField->input|detailInclude|editable|unavailable|inactive/';
+        . 'escapeListValue|listLimitField->input|detailInclude|editable|unavailable|inactive|'
+        . 'isDetailEnabled|isEditEnabled/';
 
     private const UNESCAPED_ECHO_PATTERN = '/(?:<\?=\s*|echo\s+)\$[A-Za-z_]/';
 
