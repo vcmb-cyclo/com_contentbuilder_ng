@@ -18,7 +18,7 @@ class RuntimeUtilityService
     {
     }
 
-    public function sanitizeHiddenFilterValue(string $value): string
+    public function sanitizeDataFilterTerm(string $value): string
     {
         $value = trim(str_replace(["\r", "\n"], '', $value));
 
@@ -28,7 +28,7 @@ class RuntimeUtilityService
 
         if ($this->startsWithIgnoreCase($value, '$value') || $this->startsWithIgnoreCase($value, '<?php')) {
             Log::add(
-                'Blocked PHP expression in hidden filter value.',
+                'Blocked PHP expression in data filter term.',
                 Log::WARNING,
                 'com_contentbuilderng'
             );

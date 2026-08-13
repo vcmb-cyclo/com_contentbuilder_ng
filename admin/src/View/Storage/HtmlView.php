@@ -341,7 +341,10 @@ class HtmlView extends BaseHtmlView
             $toolbar->link(Text::_('COM_CONTENTBUILDERNG_PREVIEW'), $previewUrl)
                 ->icon('icon-eye')
                 ->target('_blank')
-                ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_TIP')]);
+                ->attributes([
+                    'title' => Text::_('COM_CONTENTBUILDERNG_PREVIEW_TIP'),
+                    'data-cb-open-preview' => 'true',
+                ]);
 
             if (!$isExternalTable) {
             // Regroupe "Synchroniser la table" et "Mettre à jour depuis un

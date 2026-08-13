@@ -35,7 +35,10 @@ final class MenulistbuilderField extends FormField
         $config = is_array($config) ? $config : [];
         $elements = $this->getElements($formId);
         if ((string) ($config['columnsMode'] ?? 'default') === 'custom') {
-            $columnOrder = array_flip(array_map('strval', is_array($config['columns'] ?? null) ? $config['columns'] : []));
+            $storedOrder = is_array($config['columnOrder'] ?? null)
+                ? $config['columnOrder']
+                : (is_array($config['columns'] ?? null) ? $config['columns'] : []);
+            $columnOrder = array_flip(array_map('strval', $storedOrder));
             usort($elements, static function (array $left, array $right) use ($columnOrder): int {
                 $leftOrder = $columnOrder[(string) $left['reference_id']] ?? PHP_INT_MAX;
                 $rightOrder = $columnOrder[(string) $right['reference_id']] ?? PHP_INT_MAX;
@@ -74,6 +77,10 @@ final class MenulistbuilderField extends FormField
             'yes' => 'JYES',
             'no' => 'JNO',
         ];
+        $visibilityOptions = [
+            'default' => 'COM_CONTENTBUILDERNG_MENU_NEW_USE_DEFAULT',
+            'no' => 'COM_CONTENTBUILDERNG_MENU_NEW_HIDE',
+        ];
         $out = '<input type="hidden" name="' . $this->name . '" id="' . $id . '" value="' . $encodedConfig
             . '" data-cb-new-list-config data-cb-menu-override="true">';
         $out .= '<div id="' . $id . '_builder" class="cb-new-list-builder" data-cb-new-list-builder data-cb-config-input="'
@@ -81,95 +88,123 @@ final class MenulistbuilderField extends FormField
             . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_FIELD_INHERITED_TIP'), ENT_QUOTES, 'UTF-8')
             . '" data-cb-unavailable-control-title="'
             . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_FIELD_UNAVAILABLE_TIP'), ENT_QUOTES, 'UTF-8') . '">';
-        $legacyFilters = (string) ($this->form?->getValue('cb_list_filterhidden', 'params.settings', '') ?? '');
-        if ($legacyFilters === '') {
-            $legacyFilters = (string) ($this->form?->getValue('cb_list_filterhidden', 'params', '') ?? '');
-        }
-        if (trim($legacyFilters) !== '') {
-            $out .= '<div class="alert alert-warning"><strong>'
-                . Text::_('COM_CONTENTBUILDERNG_MENU_NEW_CLASSIC_FILTERS_FOUND') . '</strong> '
-                . Text::_('COM_CONTENTBUILDERNG_MENU_NEW_CLASSIC_FILTERS_FOUND_DESC') . '</div>';
-        }
-        $out .= '<div class="alert alert-info">' . Text::_('COM_CONTENTBUILDERNG_MENU_NEW_INTRO') . '</div>';
-
-        $out .= $this->section(
-            Text::_('COM_CONTENTBUILDERNG_MENU_NEW_DISPLAY'),
-            '<div class="row g-3">'
-            . $this->selectControl('titleMode', Text::_('COM_CONTENTBUILDERNG_MENU_NEW_TITLE_MODE'), [
+        $introductionHtml = '<div class="cb-menu-introduction-settings">'
+            . '<div class="cb-menu-horizontal-control"><label class="form-label">'
+            . Text::_('COM_CONTENTBUILDERNG_MENU_NEW_TITLE_MODE') . '</label><div><select class="form-select" data-cb-key="titleMode" data-cb-reset-value="default" data-cb-view-default-key="show_title_breadcrumb">'
+            . $options([
                 'default' => 'COM_CONTENTBUILDERNG_MENU_NEW_USE_DEFAULT',
                 'custom' => 'COM_CONTENTBUILDERNG_MENU_NEW_CUSTOM',
                 'hidden' => 'COM_CONTENTBUILDERNG_MENU_NEW_HIDDEN',
-            ], (string) ($config['titleMode'] ?? 'default'), $options, 'show_title_breadcrumb')
-            . '<div class="col-12" data-cb-show-when="titleMode:custom"><label class="form-label">'
-            . Text::_('COM_CONTENTBUILDERNG_MENU_NEW_CUSTOM_TITLE') . '</label><input type="text" maxlength="255" class="form-control" data-cb-key="title" value="'
-            . htmlspecialchars((string) ($config['title'] ?? ''), ENT_QUOTES, 'UTF-8') . '"></div></div>'
-        );
+            ], (string) ($config['titleMode'] ?? 'default')) . '</select>'
+            . $this->inlineHelp('COM_CONTENTBUILDERNG_MENU_NEW_TITLE_MODE_DESC') . '</div></div>'
+            . '<div class="cb-menu-horizontal-control" data-cb-show-when="titleMode:custom"><label class="form-label">'
+            . Text::_('COM_CONTENTBUILDERNG_MENU_NEW_CUSTOM_TITLE') . '</label><div><div class="input-group align-items-start"><textarea rows="2" class="form-control cb-menu-introduction-textarea" data-cb-key="title" data-cb-reset-value="">'
+            . htmlspecialchars((string) ($config['title'] ?? ''), ENT_QUOTES, 'UTF-8') . '</textarea><span class="input-group-text" data-cb-title-character-count data-cb-line-label-one="'
+            . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_LINE'), ENT_QUOTES, 'UTF-8') . '" data-cb-line-label-many="'
+            . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_LINES'), ENT_QUOTES, 'UTF-8') . '" aria-live="polite" title="'
+            . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_CHARACTER_COUNT'), ENT_QUOTES, 'UTF-8') . '">0/255 · 1 '
+            . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_LINE'), ENT_QUOTES, 'UTF-8') . '</span></div></div></div></div>';
 
         $sortRows = is_array($config['sort'] ?? null) ? array_values($config['sort']) : [];
-        $sortHtml = '<div class="row g-3"><div class="col-12 col-lg-4"><label class="form-label">'
-            . Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SORT_MODE') . '</label><select class="form-select" data-cb-key="sortMode">'
-            . $options($modeOptions, (string) ($config['sortMode'] ?? 'default')) . '</select></div></div>';
-        $sortHtml .= '<div class="mt-3" data-cb-show-when="sortMode:custom">';
-        for ($index = 0; $index < 3; $index++) {
-            $row = is_array($sortRows[$index] ?? null) ? $sortRows[$index] : [];
-            $sortHtml .= '<div class="row g-2 mb-2"><div class="col"><select class="form-select" data-cb-sort-field="' . $index . '">'
-                . '<option value="">' . Text::_('COM_CONTENTBUILDERNG_NONE') . '</option>'
-                . '<option value="ID"' . (($row['field'] ?? '') === 'ID' ? ' selected' : '') . '>ID</option>';
-            foreach ($elements as $element) {
-                $reference = (string) $element['reference_id'];
-                $sortHtml .= '<option value="' . htmlspecialchars($reference, ENT_QUOTES, 'UTF-8') . '"'
-                    . (($row['field'] ?? '') === $reference ? ' selected' : '') . '>'
-                    . htmlspecialchars((string) $element['label'], ENT_QUOTES, 'UTF-8') . '</option>';
-            }
-            $sortHtml .= '</select></div><div class="col-auto"><select class="form-select" data-cb-sort-dir="' . $index . '">'
-                . '<option value="asc"' . (($row['dir'] ?? 'asc') === 'asc' ? ' selected' : '') . '>ASC</option>'
-                . '<option value="desc"' . (($row['dir'] ?? '') === 'desc' ? ' selected' : '') . '>DESC</option>'
-                . '</select></div></div>';
-        }
-        $sortHtml .= '</div>' . $this->inlineHelp('COM_CONTENTBUILDERNG_MENU_NEW_SORT_DESC');
-
         $storedMaximumRecords = array_key_exists('maximumRecords', $config)
             ? max(-1, min(5000, (int) $config['maximumRecords']))
             : -1;
-        $sortHtml .= '<hr><div class="row g-3"><div class="col-12 col-lg-4"><label class="form-label">'
-            . Text::_('COM_CONTENTBUILDERNG_MENU_NEW_MAX_RECORDS') . '</label>'
+        $topHtml = '<div class="cb-menu-top-settings">'
+            . '<div class="cb-menu-top-native-field" data-cb-native-field-slot="cb_list_limit"></div>'
+            . '<div class="cb-menu-top-control"><label class="form-label">'
+            . Text::_('COM_CONTENTBUILDERNG_MENU_NEW_MAX_RECORDS') . '</label><div>'
             . $this->listLimitControl(
                 $id . '_maximum_records',
                 $storedMaximumRecords,
                 $viewMaximumRecords,
                 'maximumRecords',
                 'cb_maximum_records'
-            ) . $this->inlineHelp('COM_CONTENTBUILDERNG_MENU_NEW_MAX_RECORDS_DESC') . '</div></div>';
-        $out .= $this->section(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_DATA'), $sortHtml);
+            ) . $this->inlineHelp('COM_CONTENTBUILDERNG_MENU_NEW_MAX_RECORDS_DESC') . '</div></div>'
+            . '<div class="cb-menu-top-control"><label class="form-label">'
+            . Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SORT_MODE') . '</label><div><select class="form-select" data-cb-key="sortMode" data-cb-reset-value="default">'
+            . $options($modeOptions, (string) ($config['sortMode'] ?? 'default')) . '</select></div></div>'
+            . '<div class="cb-menu-custom-sort" data-cb-show-when="sortMode:custom">';
+        for ($index = 0; $index < 3; $index++) {
+            $row = is_array($sortRows[$index] ?? null) ? $sortRows[$index] : [];
+            $sortField = (string) ($row['field'] ?? '');
+            $sortDirection = $sortField === '' ? 'asc' : (string) ($row['dir'] ?? 'asc');
+            $topHtml .= '<div class="d-flex flex-wrap align-items-center gap-2 mb-2 cb-menu-sort-row"><select class="form-select cb-menu-sort-field" data-cb-sort-field="' . $index . '">'
+                . '<option value="">' . Text::_('COM_CONTENTBUILDERNG_NONE') . '</option>'
+                . '<option value="ID"' . ($sortField === 'ID' ? ' selected' : '') . '>ID</option>';
+            foreach ($elements as $element) {
+                $reference = (string) $element['reference_id'];
+                $topHtml .= '<option value="' . htmlspecialchars($reference, ENT_QUOTES, 'UTF-8') . '"'
+                    . ($sortField === $reference ? ' selected' : '') . '>'
+                    . htmlspecialchars((string) $element['label'], ENT_QUOTES, 'UTF-8') . '</option>';
+            }
+            $topHtml .= '</select><select class="form-select cb-menu-sort-direction" data-cb-sort-dir="' . $index . '">'
+                . '<option value="asc"' . ($sortDirection === 'asc' ? ' selected' : '') . '>ASC</option>'
+                . '<option value="desc"' . ($sortDirection === 'desc' ? ' selected' : '') . '>DESC</option>'
+                . '</select></div>';
+        }
+        $out .= $topHtml . '</div>' . $this->inlineHelp('COM_CONTENTBUILDERNG_MENU_NEW_SORT_DESC')
+            . $introductionHtml . '</div>';
+
+        $actions = is_array($config['action'] ?? null) ? $config['action'] : [];
+        $displayHtml = '<div class="cb-menu-native-display-fields">'
+            . '<div class="row g-3 mb-4 cb-menu-display-grid">'
+            . $this->selectControl(
+                'action.export',
+                Text::_('COM_CONTENTBUILDERNG_MENU_NEW_ACTION_EXPORT'),
+                $toggleOptions,
+                (string) ($actions['export'] ?? 'default'),
+                $options,
+                'export_xls',
+                true
+            )
+            . '<div class="col-12 col-lg-4" data-cb-native-field-slot="cb_show_details_back_button"></div>'
+            . $this->selectControl(
+                'action.rating',
+                Text::_('COM_CONTENTBUILDERNG_MENU_NEW_ACTION_RATING'),
+                $toggleOptions,
+                (string) ($actions['rating'] ?? 'default'),
+                $options,
+                'list_rating',
+                true
+            )
+            . '</div><div class="row g-3 mb-4 cb-menu-display-grid">'
+            . '<div class="col-12 col-lg-4" data-cb-native-field-slot="cb_show_details_top_bar"></div>'
+            . '<div class="col-12 col-lg-4" data-cb-native-field-slot="cb_show_details_bottom_bar"></div>'
+            . $this->selectControl(
+                'action.print',
+                Text::_('COM_CONTENTBUILDERNG_MENU_NEW_ACTION_PRINT'),
+                $toggleOptions,
+                (string) ($actions['print'] ?? 'default'),
+                $options,
+                'print_button',
+                true
+            )
+            . '</div><div class="row g-3 cb-menu-display-grid">'
+            . '<div class="col-12 col-lg-4" data-cb-native-field-slot="cb_show_top_bar"></div>'
+            . '<div class="col-12 col-lg-4" data-cb-native-field-slot="cb_show_bottom_bar"></div>'
+            . $this->selectControl(
+                'editListButton',
+                Text::_('COM_CONTENTBUILDERNG_MENU_NEW_EDIT_LIST_BUTTON'),
+                $visibilityOptions,
+                (string) ($config['editListButton'] ?? 'default'),
+                $options,
+                'edit_button',
+                true,
+                'COM_CONTENTBUILDERNG_MENU_NEW_EDIT_LIST_BUTTON_DESC'
+            )
+            . '</div></div>' . $this->inlineHelp('COM_CONTENTBUILDERNG_MENU_NEW_ACTIONS_DESC', 'mt-2');
+        $out .= $this->section(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_DISPLAY'), $displayHtml);
 
         $searchHtml = '<div class="row g-3">'
             . $this->selectControl('searchShow', Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SHOW_SEARCH'), $toggleOptions, (string) ($config['searchShow'] ?? 'default'), $options, 'show_filter', true, 'COM_CONTENTBUILDERNG_MENU_NEW_SHOW_SEARCH_DESC')
             . $this->selectControl('stateShow', Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SHOW_STATE'), $toggleOptions, (string) ($config['stateShow'] ?? 'default'), $options, 'list_state', true, 'COM_CONTENTBUILDERNG_MENU_NEW_SHOW_STATE_DESC')
             . $this->selectControl('stateFilterShow', Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SHOW_STATE_FILTER'), $toggleOptions, (string) ($config['stateFilterShow'] ?? 'default'), $options, 'list_state', true, 'COM_CONTENTBUILDERNG_MENU_NEW_SHOW_STATE_FILTER_DESC')
             . '</div>';
-        $out .= $this->section(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SEARCH_PAGINATION'), $searchHtml);
+        $out .= $this->section(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SEARCH_STATE'), $searchHtml);
 
-        $actionLabels = [
-            'export' => ['COM_CONTENTBUILDERNG_MENU_NEW_ACTION_EXPORT', 'export_xls'],
-            'print' => ['COM_CONTENTBUILDERNG_MENU_NEW_ACTION_PRINT', 'print_button'],
-            'rating' => ['COM_CONTENTBUILDERNG_MENU_NEW_ACTION_RATING', 'list_rating'],
-        ];
-        $actions = is_array($config['action'] ?? null) ? $config['action'] : [];
         $security = is_array($config['security'] ?? null) ? $config['security'] : [];
-        $actionsHtml = $this->inlineHelp('COM_CONTENTBUILDERNG_MENU_NEW_ACTIONS_DESC', 'mb-3') . '<div class="row g-3">';
-        foreach ($actionLabels as $key => [$label, $defaultKey]) {
-            $actionsHtml .= $this->selectControl(
-                'action.' . $key,
-                Text::_($label),
-                $toggleOptions,
-                (string) ($actions[$key] ?? 'default'),
-                $options,
-                $defaultKey,
-                true
-            );
-        }
-        $actionsHtml .= '</div><hr><h4>' . Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SECURITY_RESTRICTIONS') . '</h4><div class="alert alert-warning hide-aware-inline-help d-none">'
-            . Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SECURITY_DESC') . '</div><div class="row g-3">';
+        $additionalDisplayHtml = $this->inlineHelp('COM_CONTENTBUILDERNG_MENU_NEW_ADDITIONAL_DISPLAY_DESC', 'mb-3')
+            . '<div class="row g-3">';
         $securityLabels = [
             'new' => 'COM_CONTENTBUILDERNG_MENU_NEW_ACTION_CREATE',
             'detail' => 'COM_CONTENTBUILDERNG_MENU_NEW_ACTION_DETAIL',
@@ -182,23 +217,25 @@ final class MenulistbuilderField extends FormField
             $permissionEnabled = (int) ($viewDefaults['cb_permission_' . $key] ?? 0) === 1;
             $securityOptions = [
                 'inherit' => Text::sprintf(
-                    'COM_CONTENTBUILDERNG_USE_DEFAULT_VALUE',
+                    'COM_CONTENTBUILDERNG_MENU_NEW_VIEW_PERMISSIONS_VALUE',
                     Text::_($permissionEnabled ? 'JYES' : 'JNO')
                 ),
                 'disabled' => 'JDISABLED',
             ];
-            $actionsHtml .= $this->selectControl(
+            $additionalDisplayHtml .= $this->selectControl(
                 'security.' . $key,
                 Text::_($label),
                 $securityOptions,
                 (string) ($security[$key] ?? 'inherit'),
                 $options,
-                '',
-                true
+                'cb_permission_' . $key,
+                true,
+                'COM_CONTENTBUILDERNG_MENU_NEW_ADDITIONAL_' . strtoupper($key) . '_DESC',
+                $permissionEnabled
             );
         }
-        $actionsHtml .= '</div>';
-        $out .= $this->section(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_ACTIONS'), $actionsHtml);
+        $additionalDisplayHtml .= '</div>';
+        $out .= $this->section(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_ADDITIONAL_DISPLAY'), $additionalDisplayHtml);
 
         $columnMode = (string) ($config['columnsMode'] ?? 'default');
         $selectedColumns = array_map('strval', is_array($config['columns'] ?? null) ? $config['columns'] : []);
@@ -233,7 +270,8 @@ final class MenulistbuilderField extends FormField
             $viewDetail = (int) $element['detail_include'] === 1;
             $viewEdit = (int) $element['editable'] === 1;
             $checked = $viewList && ($columnMode === 'custom' ? in_array($reference, $selectedColumns, true) : true);
-            $columnsHtml .= '<tr data-cb-column-row data-reference="' . htmlspecialchars($reference, ENT_QUOTES, 'UTF-8') . '" data-can-list="'
+            $columnsHtml .= '<tr data-cb-column-row data-reference="' . htmlspecialchars($reference, ENT_QUOTES, 'UTF-8') . '" data-view-order="'
+                . (int) $element['ordering'] . '" data-can-list="'
                 . ($isPublished && $viewList ? '1' : '0') . '" data-can-search="' . ($isPublished && $viewSearch ? '1' : '0')
                 . '" data-can-link="' . ($isPublished && $viewLink ? '1' : '0') . '" data-can-detail="'
                 . ($isPublished && $viewDetail ? '1' : '0') . '" data-can-edit="'
@@ -294,7 +332,7 @@ final class MenulistbuilderField extends FormField
 
     private function section(string $title, string $content): string
     {
-        return '<fieldset class="mb-4"><legend><span class="cb-menu-section-heading">'
+        return '<fieldset class="cb-menu-builder-section mb-4"><legend><span class="cb-menu-section-heading">'
             . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</span></legend>' . $content . '</fieldset>';
     }
 
@@ -307,17 +345,22 @@ final class MenulistbuilderField extends FormField
         callable $options,
         string $defaultKey = '',
         bool $colourState = false,
-        string $descriptionKey = ''
-    ): string
-    {
+        string $descriptionKey = '',
+        ?bool $inheritedBoolean = null
+    ): string {
         $defaultAttribute = $defaultKey !== ''
             ? ' data-cb-view-default-key="' . htmlspecialchars($defaultKey, ENT_QUOTES, 'UTF-8') . '"'
             : '';
 
+        $resetValue = str_starts_with($key, 'security.') ? 'inherit' : 'default';
+        $inheritedAttribute = $inheritedBoolean === null
+            ? ''
+            : ' data-cb-inherited-boolean="' . ($inheritedBoolean ? 'yes' : 'no') . '"';
+
         return '<div class="col-12 col-lg-4"><label class="form-label">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
             . '</label><select class="form-select' . ($colourState ? ' form-select-color-state' : '') . '" data-cb-key="'
-            . htmlspecialchars($key, ENT_QUOTES, 'UTF-8') . '"'
-            . $defaultAttribute . '>'
+            . htmlspecialchars($key, ENT_QUOTES, 'UTF-8') . '" data-cb-reset-value="' . $resetValue . '"'
+            . $defaultAttribute . $inheritedAttribute . '>'
             . $options($values, $selected) . '</select>'
             . ($descriptionKey !== '' ? $this->inlineHelp($descriptionKey) : '')
             . '</div>';
@@ -351,8 +394,7 @@ final class MenulistbuilderField extends FormField
         int $inherited,
         string $configKey,
         string $defaultKey
-    ): string
-    {
+    ): string {
         $value = max(-1, min(5000, $value));
         $allLabel = Text::_('JALL');
         $choices = ListLimitHelper::getPaginationChoices();
@@ -384,6 +426,6 @@ final class MenulistbuilderField extends FormField
             . '"></button><ul class="dropdown-menu dropdown-menu-end">' . $items . '</ul><input type="hidden" id="'
             . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . '-value" value="' . $value
             . '" data-cb-list-limit-storage data-cb-key="' . htmlspecialchars($configKey, ENT_QUOTES, 'UTF-8')
-            . '" data-cb-menu-default-key="' . htmlspecialchars($defaultKey, ENT_QUOTES, 'UTF-8') . '"></div>';
+            . '" data-cb-reset-value="-1" data-cb-menu-default-key="' . htmlspecialchars($defaultKey, ENT_QUOTES, 'UTF-8') . '"></div>';
     }
 }

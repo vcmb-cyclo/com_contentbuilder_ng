@@ -7,6 +7,7 @@ namespace CB\Component\Contentbuilderng\Site\Dispatcher;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuListConfigurationHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuViewDefaultsHelper;
+use CB\Component\Contentbuilderng\Site\Service\MenuDataFilterService;
 use Joomla\CMS\Dispatcher\ComponentDispatcher;
 
 class Dispatcher extends ComponentDispatcher
@@ -48,8 +49,7 @@ class Dispatcher extends ComponentDispatcher
         $menuParamDefaults = [
             'cb_controller' => null,
             'cb_category_id' => null,
-            'cb_list_filterhidden' => null,
-            'cb_list_orderhidden' => null,
+            MenuDataFilterService::INPUT_NAME => null,
             'cb_show_author' => null,
             'cb_show_top_bar' => null,
             'cb_show_details_top_bar' => null,
@@ -70,6 +70,7 @@ class Dispatcher extends ComponentDispatcher
             'cb_menu_published_fields' => null,
             'cb_new_list_menu' => null,
             'cb_new_show_search' => null,
+            'cb_new_show_list_edit' => null,
             'cb_new_show_limit_selector' => null,
         ];
 
@@ -145,8 +146,6 @@ class Dispatcher extends ComponentDispatcher
                 );
             } else {
                 $newListRequestParameters = [];
-                $input->set('cb_list_filterhidden', MenuParamHelper::getMenuParam($params, 'cb_list_filterhidden', null));
-                $input->set('cb_list_orderhidden', MenuParamHelper::getMenuParam($params, 'cb_list_orderhidden', null));
             }
             foreach (self::REQUEST_OVERRIDABLE_MENU_PARAMS as $overridableKey) {
                 $input->set(

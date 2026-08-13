@@ -603,6 +603,8 @@ class FormModel extends AdminModel
             $data->initial_sort_order2 = -1;
             $data->initial_sort_order3 = -1;
             $data->initial_order_dir = 'desc';
+            $data->initial_order_dir2 = 'asc';
+            $data->initial_order_dir3 = 'asc';
             $data->default_section = 0;
             $data->default_category = 0;
             $data->create_articles = 0;

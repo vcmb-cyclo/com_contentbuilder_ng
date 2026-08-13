@@ -202,6 +202,11 @@ final class InstallerService
             JPATH_SITE . '/components/com_contentbuilderng/tmpl/list/listfour.xml',
             JPATH_SITE . '/components/com_contentbuilderng/tmpl/list/listfive.php',
             JPATH_SITE . '/components/com_contentbuilderng/tmpl/list/listfive.xml',
+            JPATH_SITE . '/components/com_contentbuilderng/tmpl/list/listclassic.php',
+            JPATH_SITE . '/components/com_contentbuilderng/tmpl/list/listclassic.xml',
+            JPATH_SITE . '/components/com_contentbuilderng/src/Field/CbfilterField.php',
+            JPATH_SITE . '/components/com_contentbuilderng/src/Field/CbfilterhiddenField.php',
+            JPATH_SITE . '/components/com_contentbuilderng/src/Field/CborderhiddenField.php',
             // Legacy plugin root files replaced by src/Extension/ + services/provider.php
             JPATH_PLUGINS . '/contentbuilderng_themes/blank/blank.php',
             JPATH_PLUGINS . '/contentbuilderng_themes/dark/dark.php',

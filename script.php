@@ -390,6 +390,7 @@ class com_contentbuilderngInstallerScript
                 $this->updateMenuLinks('com_contentbuilder_ng', 'com_contentbuilderng');
                 $this->migrateLegacyNestedMenuSettingsToRootParams();
                 $this->migrateLegacyMenuBackButtonParams();
+                $this->migrateClassicListMenusToModernListView();
 
                 // Install / update plugins shipped in package
                 $source = $this->resolveInstallSourcePath($parent);
@@ -2033,6 +2034,34 @@ class com_contentbuilderngInstallerScript
         } else {
             $this->log('[INFO] No legacy BreezingForms type value needed normalization.');
         }
+    }
+
+    private function migrateClassicListMenusToModernListView(): void
+    {
+        $summary = $this->migrationService->migrateClassicListMenus();
+        $migrated = (int) ($summary['migrated'] ?? 0);
+        $legacyMenus = is_array($summary['legacy'] ?? null) ? $summary['legacy'] : [];
+
+        if ($migrated > 0) {
+            $this->purgeCaches('postflight:migrateClassicListMenus');
+        }
+
+        if ($legacyMenus === []) {
+            return;
+        }
+
+        $labels = array_map(
+            static fn(mixed $label): string => htmlspecialchars((string) $label, ENT_QUOTES, 'UTF-8'),
+            $legacyMenus
+        );
+        Factory::getApplication()->enqueueMessage(
+            $this->installerText(
+                'COM_CONTENTBUILDERNG_INSTALLER_CLASSIC_LIST_MIGRATION_WARNING',
+                'Legacy filters or display ordering were removed while migrating these menu items to List View: %s. Recreate filters under Displayed columns → Data filter and sorting under Initial sort order → Custom.',
+                implode(', ', $labels)
+            ),
+            'warning'
+        );
     }
 
     /**

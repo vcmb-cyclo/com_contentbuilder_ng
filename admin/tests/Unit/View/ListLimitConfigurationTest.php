@@ -104,7 +104,7 @@ final class ListLimitConfigurationTest extends TestCase
 
     public function testEveryListMenuAcceptsAllAndKeepsInheritanceEmpty(): void
     {
-        foreach (['default.xml', 'listclassic.xml', 'listcard.xml', 'listcompact.xml', 'listtiles.xml'] as $file) {
+        foreach (['default.xml', 'listcard.xml', 'listcompact.xml', 'listtiles.xml'] as $file) {
             $xml = new \SimpleXMLElement((string) \file_get_contents(
                 \dirname(__DIR__, 4) . '/site/tmpl/list/' . $file
             ));

@@ -54,10 +54,46 @@
     margin: 0;
 }
 
-.cb-menu-reset-panel {
-    display: flex;
-    justify-content: flex-end;
+.control-group:has(.cb-menu-section-heading),
+.control-group:has(.cb-menu-section-heading) > .controls,
+.control-group:has(.cb-menu-section-heading) > .field-value {
+    display: block;
     width: 100%;
+    max-width: none;
+}
+
+.control-group:has(.cb-menu-section-heading) > .control-label,
+.control-group:has(.cb-menu-section-heading) > .form-label {
+    display: none;
+}
+
+.cb-menu-builder-section {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+}
+
+.cb-menu-builder-section > legend {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    margin: 1.35rem 0 .85rem;
+    padding: 0;
+    font-size: 1.1rem;
+    line-height: 1.25;
+}
+
+.cb-menu-builder-section > legend::before,
+.cb-menu-builder-section > legend::after {
+    content: "";
+    flex: 1 1 auto;
+    border-top: 1px solid var(--border-color, var(--bs-border-color, #dfe3e7));
+}
+
+.cb-menu-reset-panel {
+    display: block;
+    width: auto;
     margin: 0;
 }
 
@@ -65,9 +101,53 @@
     white-space: nowrap;
 }
 
-.options-form > fieldset:has(.cb-menu-reset-panel),
-fieldset:has(.cb-menu-reset-panel) {
+fieldset:not(:has([data-cb-new-list-builder])):has(.cb-menu-reset-panel) {
     position: relative;
+}
+
+fieldset:not(:has([data-cb-new-list-builder])) .control-group:has(.cb-menu-reset-panel),
+fieldset:not(:has([data-cb-new-list-builder])) .form-group:has(.cb-menu-reset-panel),
+fieldset:not(:has([data-cb-new-list-builder])) .mb-3:has(.cb-menu-reset-panel) {
+    height: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+}
+
+fieldset:not(:has([data-cb-new-list-builder])) .control-group:has(.cb-menu-reset-panel) > .control-label,
+fieldset:not(:has([data-cb-new-list-builder])) .control-group:has(.cb-menu-reset-panel) > .form-label,
+fieldset:not(:has([data-cb-new-list-builder])) .control-group:has(.cb-menu-reset-panel) > label,
+fieldset:not(:has([data-cb-new-list-builder])) .form-group:has(.cb-menu-reset-panel) > .control-label,
+fieldset:not(:has([data-cb-new-list-builder])) .form-group:has(.cb-menu-reset-panel) > .form-label,
+fieldset:not(:has([data-cb-new-list-builder])) .form-group:has(.cb-menu-reset-panel) > label,
+fieldset:not(:has([data-cb-new-list-builder])) .mb-3:has(.cb-menu-reset-panel) > .control-label,
+fieldset:not(:has([data-cb-new-list-builder])) .mb-3:has(.cb-menu-reset-panel) > .form-label,
+fieldset:not(:has([data-cb-new-list-builder])) .mb-3:has(.cb-menu-reset-panel) > label {
+    display: none;
+}
+
+fieldset:not(:has([data-cb-new-list-builder])) .control-group:has(.cb-menu-reset-panel) > .controls,
+fieldset:not(:has([data-cb-new-list-builder])) .control-group:has(.cb-menu-reset-panel) > .field-value,
+fieldset:not(:has([data-cb-new-list-builder])) .form-group:has(.cb-menu-reset-panel) > .controls,
+fieldset:not(:has([data-cb-new-list-builder])) .form-group:has(.cb-menu-reset-panel) > .field-value,
+fieldset:not(:has([data-cb-new-list-builder])) .mb-3:has(.cb-menu-reset-panel) > .controls,
+fieldset:not(:has([data-cb-new-list-builder])) .mb-3:has(.cb-menu-reset-panel) > .field-value {
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+fieldset:not(:has([data-cb-new-list-builder])) .cb-menu-reset-panel {
+    position: absolute;
+    top: .75rem;
+    right: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+fieldset:not(:has([data-cb-new-list-builder])) .cb-menu-reset-panel .btn {
+    pointer-events: auto;
 }
 
 .control-group:has(#jform_params_form_id),
@@ -77,79 +157,156 @@ fieldset:has(.cb-menu-reset-panel) {
     margin-bottom: .75rem;
 }
 
-.control-group:has(.cb-menu-reset-panel),
-.form-group:has(.cb-menu-reset-panel),
-.mb-3:has(.cb-menu-reset-panel) {
-    height: 0;
-    min-height: 0;
-    margin: 0;
-    padding: 0;
-    overflow: visible;
-}
-
-.control-group:has(.cb-menu-reset-panel) > .control-label,
-.control-group:has(.cb-menu-reset-panel) > .form-label,
-.control-group:has(.cb-menu-reset-panel) > label,
-.form-group:has(.cb-menu-reset-panel) > .control-label,
-.form-group:has(.cb-menu-reset-panel) > .form-label,
-.form-group:has(.cb-menu-reset-panel) > label,
-.mb-3:has(.cb-menu-reset-panel) > .control-label,
-.mb-3:has(.cb-menu-reset-panel) > .form-label,
-.mb-3:has(.cb-menu-reset-panel) > label {
-    display: none;
-}
-
-.control-group:has(.cb-menu-reset-panel) > .controls,
-.control-group:has(.cb-menu-reset-panel) > .field-value,
-.form-group:has(.cb-menu-reset-panel) > .controls,
-.form-group:has(.cb-menu-reset-panel) > .field-value,
-.mb-3:has(.cb-menu-reset-panel) > .controls,
-.mb-3:has(.cb-menu-reset-panel) > .field-value {
-    margin: 0;
-    padding: 0;
-    min-height: 0;
-}
-
-.cb-menu-reset-panel {
-    position: absolute;
-    top: .75rem;
-    right: 0;
-    width: auto;
-    z-index: 2;
-    pointer-events: none;
-}
-
-.cb-menu-reset-panel .btn {
-    pointer-events: auto;
-}
-
-.control-group:has(.cb-menu-reset-panel) + .control-group:has(.cb-menu-section-heading),
-.control-group:has(#jform_params_form_id) + .control-group:has(.cb-menu-section-heading),
-.control-group:has(#jform_params_settings_form_id) + .control-group:has(.cb-menu-section-heading),
-.control-group:has(#jform_params_forms) + .control-group:has(.cb-menu-section-heading),
-.control-group:has(#jform_params_settings_forms) + .control-group:has(.cb-menu-section-heading) {
-    margin-top: 0;
-}
-
 .cb-menu-multiforms-select {
-    width: min(24rem, calc(100% - 7rem));
-    max-width: min(24rem, calc(100% - 7rem));
+    width: auto;
+    min-width: min(300px, calc(100% - 7rem));
+    max-width: calc(100% - 7rem);
     margin-right: 1rem;
+    white-space: nowrap;
 }
 
-select[data-cb-menu-view-selector],
 select[data-cb-menu-default-key],
 select[data-cb-menu-override],
 .cb-new-list-builder select.form-select {
-    width: min(24rem, 100%) !important;
+    width: min(300px, 100%) !important;
     max-width: 100%;
-    flex: 0 1 24rem;
+    flex: 0 1 300px;
 }
 
 [data-cb-list-limit-control] {
-    width: min(24rem, 100%) !important;
+    width: min(300px, 100%) !important;
     max-width: 100%;
-    flex: 0 1 24rem !important;
+    flex: 0 1 300px !important;
+}
+
+select[data-cb-menu-view-selector] {
+    display: inline-block;
+    field-sizing: content;
+    width: auto !important;
+    min-width: min(300px, 100%);
+    max-width: 100%;
+    white-space: nowrap;
+}
+
+.cb-new-list-builder .cb-menu-sort-field {
+    flex: 0 1 300px;
+}
+
+.cb-new-list-builder .cb-menu-sort-direction {
+    width: 4.75rem !important;
+    flex: 0 0 4.75rem;
+}
+
+.form-select-color-state.cb-form-select-inherited-success {
+    color: var(--success, #198754);
+    border-color: color-mix(in srgb, var(--success, #198754) 58%, var(--border-color, #ced4da));
+}
+
+.form-select-color-state.cb-form-select-inherited-danger {
+    color: var(--danger, #dc3545);
+    border-color: color-mix(in srgb, var(--danger, #dc3545) 58%, var(--border-color, #ced4da));
+}
+
+.cb-menu-top-settings {
+    margin-top: 1.5rem;
+}
+
+.cb-menu-top-control,
+.cb-menu-horizontal-control,
+.cb-menu-top-native-field > .control-group,
+.cb-menu-top-native-field > .form-group,
+.cb-menu-top-native-field > .mb-3 {
+    display: grid;
+    grid-template-columns: minmax(12rem, 20rem) minmax(0, 1fr);
+    align-items: start;
+    column-gap: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.cb-menu-top-control > .form-label,
+.cb-menu-horizontal-control > .form-label,
+.cb-menu-top-native-field .control-label,
+.cb-menu-top-native-field .form-label {
+    margin: .65rem 0 0;
+}
+
+.cb-menu-top-control > div {
+    display: flex;
+    align-items: flex-start;
+    min-width: 0;
+}
+
+.cb-menu-horizontal-control > div {
+    min-width: 0;
+}
+
+.cb-menu-introduction-settings {
+    margin-top: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.cb-menu-display-actions {
+    margin-bottom: 1.5rem;
+}
+
+.cb-menu-horizontal-control > div > .form-control {
+    width: 100%;
+    max-width: 100%;
+}
+
+.cb-menu-horizontal-control > div > .form-select {
+    width: min(300px, 100%);
+    max-width: 100%;
+}
+
+.cb-menu-introduction-textarea {
+    min-height: calc(3rem + 2px);
+    max-height: calc(7.5rem + 2px);
+    overflow-y: hidden;
+    resize: none;
+    white-space: pre-wrap;
+}
+
+.cb-menu-introduction-textarea.is-scrollable {
+    overflow-y: auto;
+}
+
+[data-cb-title-character-count] {
+    min-height: calc(3rem + 2px);
+    white-space: nowrap;
+}
+
+.cb-menu-top-native-field .controls,
+.cb-menu-top-native-field .field-value {
+    margin: 0;
+    min-width: 0;
+}
+
+.cb-menu-display-grid > [data-cb-native-field-slot] {
+    min-width: 0;
+}
+
+.cb-menu-display-grid > [data-cb-native-field-slot] > .control-group,
+.cb-menu-display-grid > [data-cb-native-field-slot] > .form-group,
+.cb-menu-display-grid > [data-cb-native-field-slot] > .mb-3 {
+    display: block;
+    margin: 0;
+}
+
+.cb-menu-display-grid .control-label,
+.cb-menu-display-grid .form-label {
+    display: block;
+    margin: 0 0 .5rem;
+}
+
+.cb-menu-display-grid .controls,
+.cb-menu-display-grid .field-value {
+    margin: 0;
+    min-width: 0;
+}
+
+.cb-menu-custom-sort {
+    margin-left: calc(20rem + 1.25rem);
 }
 
 .cb-menu-capability-cell {
@@ -206,5 +363,30 @@ select[data-cb-menu-override],
     [data-cb-list-limit-control] {
         width: 100%;
         max-width: 100%;
+    }
+
+    .cb-menu-top-control,
+    .cb-menu-horizontal-control,
+    .cb-menu-top-native-field > .control-group,
+    .cb-menu-top-native-field > .form-group,
+    .cb-menu-top-native-field > .mb-3 {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: .35rem;
+    }
+
+    .cb-menu-top-control > .form-label,
+    .cb-menu-horizontal-control > .form-label,
+    .cb-menu-top-native-field .control-label,
+    .cb-menu-top-native-field .form-label {
+        margin-top: 0;
+    }
+
+    .cb-menu-custom-sort {
+        margin-left: 0;
+    }
+
+    .cb-new-list-builder .cb-menu-sort-direction {
+        width: 4.75rem !important;
+        flex: 0 0 4.75rem;
     }
 }

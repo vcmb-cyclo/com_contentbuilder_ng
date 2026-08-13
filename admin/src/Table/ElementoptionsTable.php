@@ -89,7 +89,7 @@ class ElementoptionsTable extends Table
     /**
      * Constructor
      *
-     * @param object Database connector object
+     * @param DatabaseDriver $db Database connector object
      */
     public function __construct(DatabaseDriver $db)
     {

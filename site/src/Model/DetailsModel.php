@@ -34,7 +34,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuListConfigurationHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PublishedRecordVisibilityHelper;
-
+use CB\Component\Contentbuilderng\Site\Service\MenuDataFilterService;
 class DetailsModel extends ListModel
 {
     private function getComponent(): ContentbuilderngComponent
@@ -61,9 +61,11 @@ class DetailsModel extends ListModel
 
     private $_show_page_heading = true;
 
-    private $_menu_filter = array();
+    /** @var array<string, list<string>> */
+    private array $recordFilters = [];
 
-    private $_menu_filter_order = array();
+    /** @var array<string, int|string> */
+    private array $recordFilterOrder = [];
 
     private $_latest = false;
 
@@ -136,51 +138,10 @@ class DetailsModel extends ListModel
             }
         }
 
-        $menu_filter = $app->getInput()->get('cb_list_filterhidden', null, 'raw');
-        if (($menu_filter === null || $menu_filter === '') && $app->isClient('site')) {
-            $activeMenu = $app->getMenu()->getActive();
-            if ($activeMenu) {
-                $menu_filter = MenuParamHelper::getMenuParam($activeMenu->getParams(), 'cb_list_filterhidden', null);
-            }
-        }
-
-        if ($menu_filter !== null) {
-            $lines = explode("\n", $menu_filter);
-            foreach ($lines as $line) {
-                $keyval = explode("\t", $line);
-                if (count($keyval) == 2) {
-                    $keyval[1] = str_replace(array("\n", "\r"), "", $keyval[1]);
-                    $keyval[1] = $this->runtimeUtilityService->sanitizeHiddenFilterValue($keyval[1]);
-                    if ($keyval[1] != '') {
-                        $this->_menu_filter[$keyval[0]] = explode('|', $keyval[1]);
-                    }
-                }
-            }
-        }
-
-        $menu_filter_order = $app->getInput()->get('cb_list_orderhidden', null, 'raw');
-        if (($menu_filter_order === null || $menu_filter_order === '') && $app->isClient('site')) {
-            $activeMenu = $app->getMenu()->getActive();
-            if ($activeMenu) {
-                $menu_filter_order = MenuParamHelper::getMenuParam($activeMenu->getParams(), 'cb_list_orderhidden', null);
-            }
-        }
-
-        if ($menu_filter_order !== null) {
-            $lines = explode("\n", $menu_filter_order);
-            foreach ($lines as $line) {
-                $keyval = explode("\t", $line);
-                if (count($keyval) == 2) {
-                    $keyval[1] = str_replace(array("\n", "\r"), "", $keyval[1]);
-                    if ($keyval[1] != '') {
-                        $this->_menu_filter_order[$keyval[0]] = intval($keyval[1]);
-                    }
-                }
-            }
-        }
-
-        @natsort($this->_menu_filter_order);
-
+        $this->recordFilters = MenuDataFilterService::decode(
+            $app->getInput()->get(MenuDataFilterService::INPUT_NAME, '', 'raw'),
+            $this->runtimeUtilityService
+        );
         $this->setIds($app->getInput()->getInt('id', 0), $app->getInput()->getCmd('record_id', ''));
     }
 
@@ -485,7 +446,7 @@ class DetailsModel extends ListModel
                             -1,
                             -1,
                             -1,
-                            $this->_menu_filter,
+                            $this->recordFilters,
                             true,
                             null
                         );
@@ -601,13 +562,13 @@ class DetailsModel extends ListModel
                         }
 
                         $ordered_extra_title = '';
-                        foreach ($this->_menu_filter_order as $order_key => $order) {
-                            if (isset($this->_menu_filter[$order_key])) {
+                        foreach ($this->recordFilterOrder as $order_key => $order) {
+                            if (isset($this->recordFilters[$order_key])) {
                                 // range test
-                                $is_range = strstr(strtolower(implode(',', $this->_menu_filter[$order_key])), '@range') !== false;
-                                $is_match = strstr(strtolower(implode(',', $this->_menu_filter[$order_key])), '@match') !== false;
+                                $is_range = strstr(strtolower(implode(',', $this->recordFilters[$order_key])), '@range') !== false;
+                                $is_match = strstr(strtolower(implode(',', $this->recordFilters[$order_key])), '@match') !== false;
                                 if ($is_range) {
-                                    $ex = explode('/', implode(', ', $this->_menu_filter[$order_key]));
+                                    $ex = explode('/', implode(', ', $this->recordFilters[$order_key]));
                                     if (count($ex) == 3) {
                                         $ex2 = explode('to', trim($ex[2]));
                                         $out = '';
@@ -628,12 +589,12 @@ class DetailsModel extends ListModel
                                             $out = Text::_('COM_CONTENTBUILDERNG_FROM') . ' ' . trim($val);
                                         }
                                         if ($out) {
-                                            $this->_menu_filter[$order_key] = $ex;
+                                            $this->recordFilters[$order_key] = $ex;
                                             $ordered_extra_title .= ' &raquo; ' . htmlspecialchars($data->labels[$order_key], ENT_QUOTES, 'UTF-8') . ': ' . htmlspecialchars($out, ENT_QUOTES, 'UTF-8');
                                         }
                                     }
                                 } elseif ($is_match) {
-                                    $ex = explode('/', implode(', ', $this->_menu_filter[$order_key]));
+                                    $ex = explode('/', implode(', ', $this->recordFilters[$order_key]));
                                     if (count($ex) == 2) {
                                         $ex2 = explode(';', trim($ex[1]));
                                         $out = '';
@@ -648,12 +609,12 @@ class DetailsModel extends ListModel
                                             $i++;
                                         }
                                         if ($out) {
-                                            $this->_menu_filter[$order_key] = $ex;
+                                            $this->recordFilters[$order_key] = $ex;
                                             $ordered_extra_title .= ' &raquo; ' . htmlspecialchars($data->labels[$order_key], ENT_QUOTES, 'UTF-8') . ': ' . htmlspecialchars($out, ENT_QUOTES, 'UTF-8');
                                         }
                                     }
                                 } else {
-                                    $ordered_extra_title .= ' &raquo; ' . htmlspecialchars($data->labels[$order_key], ENT_QUOTES, 'UTF-8') . ': ' . htmlspecialchars(implode(', ', $this->_menu_filter[$order_key]), ENT_QUOTES, 'UTF-8');
+                                    $ordered_extra_title .= ' &raquo; ' . htmlspecialchars($data->labels[$order_key], ENT_QUOTES, 'UTF-8') . ': ' . htmlspecialchars(implode(', ', $this->recordFilters[$order_key]), ENT_QUOTES, 'UTF-8');
                                 }
                             }
                         }
@@ -821,7 +782,7 @@ class DetailsModel extends ListModel
 
     private function isRecordAllowedByMenuFilter(object $data, array $ids): bool
     {
-        if ((int) $this->_record_id <= 0 || empty($this->_menu_filter)) {
+        if ((int) $this->_record_id <= 0 || empty($this->recordFilters)) {
             return true;
         }
 
@@ -851,7 +812,7 @@ class DetailsModel extends ListModel
             -1,
             -1,
             -1,
-            $this->_menu_filter,
+            $this->recordFilters,
             $showAllLanguages,
             null
         );

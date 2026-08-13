@@ -86,6 +86,8 @@ class FormTable extends Table
     public $initial_sort_order2 = -1;
     public $initial_sort_order3 = -1;
     public $initial_order_dir = 'desc';
+    public $initial_order_dir2 = 'asc';
+    public $initial_order_dir3 = 'asc';
     public $create_articles = 0;
     public $default_section = 0;
     public $default_category = 0;
@@ -191,7 +193,7 @@ class FormTable extends Table
     /**
      * Constructor
      *
-     * @param object Database connector object
+     * @param DatabaseDriver $db Database connector object
      */
     public function __construct(DatabaseDriver $db)
     {

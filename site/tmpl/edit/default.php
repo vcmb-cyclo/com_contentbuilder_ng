@@ -962,9 +962,9 @@ PreviewColorModeHelper::registerAssets($wa, $previewColorMode);
                         <?php echo Text::_('COM_CONTENTBUILDERNG_PREVIEW_OPEN_EDIT_SCREEN'); ?>
                     </a>
                 <?php endif; ?>
-                <a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
-                    <span class="fa-solid fa-arrow-left me-1" aria-hidden="true"></span>
-                    <?php echo Text::_('COM_CONTENTBUILDERNG_BACK_TO_ADMIN'); ?>
+                <a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>" data-cb-close-preview>
+                    <span class="fa-solid fa-xmark me-1" aria-hidden="true"></span>
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_CLOSE_PREVIEW'); ?>
                 </a>
             </span>
         </div>

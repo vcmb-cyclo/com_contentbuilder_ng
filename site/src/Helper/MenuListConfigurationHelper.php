@@ -7,6 +7,7 @@ namespace CB\Component\Contentbuilderng\Site\Helper;
 \defined('_JEXEC') or die;
 
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
+use CB\Component\Contentbuilderng\Site\Service\MenuDataFilterService;
 
 final class MenuListConfigurationHelper
 {
@@ -46,7 +47,11 @@ final class MenuListConfigurationHelper
         $query = is_array($item->query ?? null) ? $item->query : [];
 
         return (string) ($query['view'] ?? '') === 'list'
-            && in_array((string) ($query['layout'] ?? 'default'), ['', 'default'], true);
+            && in_array(
+                (string) ($query['layout'] ?? 'default'),
+                ['', 'default', 'listcard', 'listcompact', 'listtiles'],
+                true
+            );
     }
 
     /** @return array<string, string|int|null> */
@@ -75,8 +80,13 @@ final class MenuListConfigurationHelper
             $publishedFields = '__none__';
         }
         $parameters = [
-            'cb_list_filterhidden' => self::filterStorage($config, $publishedFields),
-            'cb_list_orderhidden' => null,
+            MenuDataFilterService::INPUT_NAME => MenuDataFilterService::encode(
+                (array) ($config['filters'] ?? []),
+                $publishedFields === '' ? null : array_values(array_filter(
+                    explode('|', $publishedFields),
+                    static fn(string $reference): bool => ctype_digit($reference)
+                ))
+            ),
             'cb_menu_search_fields' => $searchFields,
             'cb_menu_link_fields' => $linkFields,
             'cb_menu_detail_fields' => $detailFields,
@@ -86,11 +96,14 @@ final class MenuListConfigurationHelper
         if ($customColumns && $hasColumnSelection) {
             $parameters['cb_new_list_menu'] = 1;
         }
-        foreach ([
+        foreach (
+            [
             'searchShow' => 'cb_new_show_search',
             'stateShow' => 'cb_new_show_state',
             'stateFilterShow' => 'cb_new_show_state_filter',
-        ] as $configKey => $requestKey) {
+            'editListButton' => 'cb_new_show_list_edit',
+            ] as $configKey => $requestKey
+        ) {
             $value = self::toggleValue($config, $configKey);
             if ($value !== 'default') {
                 $parameters[$requestKey] = $value;
@@ -149,7 +162,7 @@ final class MenuListConfigurationHelper
             $parameters['cblist_actions'] = implode('|', $restrictedActions);
         }
 
-        if (count($parameters) > 7 || $fields !== '' || $searchFields !== '' || $linkFields !== '' || $detailFields !== '' || $editFields !== '' || $publishedFields !== '' || self::filterStorage($config, $publishedFields) !== '') {
+        if (count($parameters) > 6 || $fields !== '' || $searchFields !== '' || $linkFields !== '' || $detailFields !== '' || $editFields !== '' || $publishedFields !== '' || $parameters[MenuDataFilterService::INPUT_NAME] !== '') {
             $parameters['cblist_embed'] = 'content-plugin';
         }
 
@@ -168,29 +181,6 @@ final class MenuListConfigurationHelper
         ), static fn(string $value): bool => $value !== '')));
 
         return implode('|', $values);
-    }
-
-    private static function filterStorage(array $config, string $publishedFields = ''): string
-    {
-        $allowed = $publishedFields === ''
-            ? null
-            : array_fill_keys(array_filter(explode('|', $publishedFields), static fn(string $value): bool => ctype_digit($value)), true);
-        $lines = [];
-        foreach ((array) ($config['filters'] ?? []) as $reference => $rawValue) {
-            $reference = trim((string) $reference);
-            if ($allowed !== null && !isset($allowed[$reference])) {
-                continue;
-            }
-            $value = implode('|', array_values(array_filter(array_map(
-                static fn(string $part): string => trim($part),
-                explode('|', (string) $rawValue)
-            ), static fn(string $part): bool => $part !== '')));
-            if ($reference !== '' && $value !== '') {
-                $lines[] = $reference . "\t" . $value;
-            }
-        }
-
-        return implode("\n", $lines);
     }
 
     /** @return list<string>|null */
@@ -221,9 +211,10 @@ final class MenuListConfigurationHelper
 
     private static function normalizeTitle(string $title): string
     {
+        $title = str_replace(["\r\n", "\r"], "\n", $title);
         $title = preg_replace_callback(
             '/[\p{Cc}\p{Cf}]/u',
-            static fn(array $match): string => $match[0] === "\u{200D}" ? $match[0] : '',
+            static fn(array $match): string => in_array($match[0], ["\n", "\u{200D}"], true) ? $match[0] : '',
             $title
         ) ?? $title;
         $title = trim($title);

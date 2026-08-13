@@ -190,6 +190,16 @@
       <option value="asc">JGLOBAL_ORDER_ASCENDING</option>
       <option value="desc">JGLOBAL_ORDER_DESCENDING</option>
     </field>
+    <field name="initial_order_dir2" type="list" default="asc" filter="string"
+           label="COM_CONTENTBUILDERNG_FIELD_INITIAL_ORDER_DIR">
+      <option value="asc">JGLOBAL_ORDER_ASCENDING</option>
+      <option value="desc">JGLOBAL_ORDER_DESCENDING</option>
+    </field>
+    <field name="initial_order_dir3" type="list" default="asc" filter="string"
+           label="COM_CONTENTBUILDERNG_FIELD_INITIAL_ORDER_DIR">
+      <option value="asc">JGLOBAL_ORDER_ASCENDING</option>
+      <option value="desc">JGLOBAL_ORDER_DESCENDING</option>
+    </field>
 
     <field name="show_id_column" type="radio" default="1" filter="intval"
            label="COM_CONTENTBUILDERNG_FIELD_SHOW_ID_COLUMN">

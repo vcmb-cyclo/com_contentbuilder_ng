@@ -323,6 +323,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_forms`
     `initial_sort_order2`                 varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '-1',
     `initial_sort_order3`                 varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '-1',
     `initial_order_dir`                   varchar(4)   COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'desc',
+    `initial_order_dir2`                  varchar(4)   COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'asc',
+    `initial_order_dir3`                  varchar(4)   COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'asc',
     `title_field`                         int          NOT NULL DEFAULT '0',
     `delete_articles`                     tinyint(1)   NOT NULL DEFAULT '1',
     `edit_by_type`                        tinyint(1)   NOT NULL DEFAULT '0',

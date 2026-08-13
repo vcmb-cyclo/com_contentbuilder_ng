@@ -1269,6 +1269,9 @@ class contentbuilderng_com_breezingformsng
         $initialOrder3Expr = $init_order_by3 == -1 || $init_order_by3 == 0
             ? 'colRecord'
             : (isset($orderExpressions[$init_order_by3]) ? $orderExpressions[$init_order_by3] : '`' . $init_order_by3 . '`');
+        $initialOrderDirection1 = strtolower((string) ($form?->initial_order_dir ?? ($order_Dir ?: 'asc'))) === 'asc' ? 'asc' : 'desc';
+        $initialOrderDirection2 = strtolower((string) ($form?->initial_order_dir2 ?? $initialOrderDirection1)) === 'asc' ? 'asc' : 'desc';
+        $initialOrderDirection3 = strtolower((string) ($form?->initial_order_dir3 ?? $initialOrderDirection1)) === 'asc' ? 'asc' : 'desc';
 
         $db->setQuery("
             Select
@@ -1346,7 +1349,7 @@ class contentbuilderng_com_breezingformsng
                 s.record = r.id
             And
                 r.archived = 0
-            Group By s.record $search " . ($order ? " Order By " . $orderExpr . " " : ' Order By ' . $initialOrder1Expr . ' ' . ($order_Dir ? (strtolower($order_Dir) == 'asc' ? 'asc' : 'desc') : 'asc') . ', ' . $initialOrder2Expr . ' ' . ($order_Dir ? (strtolower($order_Dir) == 'asc' ? 'asc' : 'desc') : 'asc') . ', ' . $initialOrder3Expr . ' ' . ($order_Dir ? (strtolower($order_Dir) == 'asc' ? 'asc' : 'desc') : 'asc') . ' ') . " " . $orderTail . $secondaryOrder . "
+            Group By s.record $search " . ($order ? " Order By " . $orderExpr . " " : ' Order By ' . $initialOrder1Expr . ' ' . $initialOrderDirection1 . ', ' . $initialOrder2Expr . ' ' . $initialOrderDirection2 . ', ' . $initialOrder3Expr . ' ' . $initialOrderDirection3 . ' ') . " " . $orderTail . $secondaryOrder . "
         ", $limitstart, $limit);
 
         try {

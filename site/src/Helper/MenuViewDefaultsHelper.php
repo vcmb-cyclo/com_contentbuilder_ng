@@ -23,6 +23,7 @@ final class MenuViewDefaultsHelper
         'show_title_breadcrumb',
         'show_filter',
         'show_records_per_page',
+        'edit_button',
         'export_xls',
         'print_button',
         'list_rating',
@@ -69,7 +70,6 @@ final class MenuViewDefaultsHelper
         $query = $db->getQuery(true)
             ->select(array_map([$db, 'quoteName'], $columns))
             ->from($db->quoteName('#__contentbuilderng_forms'))
-            ->where($db->quoteName('published') . ' = 1')
             ->order([$db->quoteName('name') . ' ASC', $db->quoteName('id') . ' ASC']);
         $db->setQuery($query);
 

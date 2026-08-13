@@ -9,6 +9,22 @@ use PHPUnit\Framework\TestCase;
 
 final class MenuListConfigurationHelperTest extends TestCase
 {
+    public function testNewListMenuDetectionIncludesEveryHarmonisedLayout(): void
+    {
+        foreach (['', 'default', 'listcard', 'listcompact', 'listtiles'] as $layout) {
+            $item = (object) ['query' => ['view' => 'list', 'layout' => $layout]];
+
+            self::assertTrue(MenuListConfigurationHelper::isNewListMenu($item), $layout);
+        }
+
+        self::assertFalse(MenuListConfigurationHelper::isNewListMenu(
+            (object) ['query' => ['view' => 'list', 'layout' => 'unsupported-layout']]
+        ));
+        self::assertFalse(MenuListConfigurationHelper::isNewListMenu(
+            (object) ['query' => ['view' => 'create', 'layout' => 'default']]
+        ));
+    }
+
     public function testConfigurationBuildsConstrainedRequestParameters(): void
     {
         $parameters = MenuListConfigurationHelper::requestParameters([
@@ -31,6 +47,7 @@ final class MenuListConfigurationHelperTest extends TestCase
             'searchShow' => 'no',
             'stateShow' => 'yes',
             'stateFilterShow' => 'no',
+            'editListButton' => 'no',
             'action' => [
                 'export' => 'no',
             ],
@@ -42,7 +59,7 @@ final class MenuListConfigurationHelperTest extends TestCase
 
         self::assertSame('🚲 Routes', $parameters['cblist_title']);
         self::assertSame('12|9', $parameters['cblist_fields']);
-        self::assertSame("9\tRoute 1*|*Gravel", $parameters['cb_list_filterhidden']);
+        self::assertSame('{"9":["Route 1*","*Gravel"]}', $parameters['cb_menu_data_filters']);
         self::assertSame('12', $parameters['cb_menu_search_fields']);
         self::assertSame('9', $parameters['cb_menu_link_fields']);
         self::assertSame('9', $parameters['cb_menu_detail_fields']);
@@ -57,6 +74,7 @@ final class MenuListConfigurationHelperTest extends TestCase
         self::assertSame('no', $parameters['cb_new_show_search']);
         self::assertSame('yes', $parameters['cb_new_show_state']);
         self::assertSame('no', $parameters['cb_new_show_state_filter']);
+        self::assertSame('no', $parameters['cb_new_show_list_edit']);
         self::assertStringNotContainsString('delete', (string) $parameters['cblist_actions']);
         self::assertStringNotContainsString('detail', (string) $parameters['cblist_actions']);
         self::assertStringNotContainsString('export', (string) $parameters['cblist_actions']);
@@ -70,6 +88,17 @@ final class MenuListConfigurationHelperTest extends TestCase
             [7, 12],
             MenuListConfigurationHelper::filterSearchableElements([3, 7, 12], '12|7|99')
         );
+    }
+
+    public function testCustomIntroductionPreservesIntentionalLineBreaksAndUnicodeLimit(): void
+    {
+        $parameters = MenuListConfigurationHelper::requestParameters([
+            'titleMode' => 'custom',
+            'title' => "  Première ligne\r\nDeuxième ligne 🚲  ",
+        ]);
+
+        self::assertSame("Première ligne\nDeuxième ligne 🚲", $parameters['cblist_title']);
+        self::assertLessThanOrEqual(255, mb_strlen($parameters['cblist_title'], 'UTF-8'));
     }
 
     public function testCustomColumnsCanDisableAllViewSearchFields(): void
@@ -110,12 +139,13 @@ final class MenuListConfigurationHelperTest extends TestCase
         $parameters = MenuListConfigurationHelper::requestParameters([]);
 
         self::assertArrayNotHasKey('cblist_embed', $parameters);
-        self::assertSame('', $parameters['cb_list_filterhidden']);
+        self::assertSame('', $parameters['cb_menu_data_filters']);
         self::assertSame('', $parameters['cb_menu_link_fields']);
         self::assertArrayNotHasKey('cb_new_list_menu', $parameters);
         self::assertArrayNotHasKey('cb_new_show_search', $parameters);
         self::assertArrayNotHasKey('cb_new_show_state', $parameters);
         self::assertArrayNotHasKey('cb_new_show_state_filter', $parameters);
+        self::assertArrayNotHasKey('cb_new_show_list_edit', $parameters);
     }
 
     public function testSearchVisibilityCanOverrideTheViewSetting(): void
@@ -127,6 +157,18 @@ final class MenuListConfigurationHelperTest extends TestCase
         self::assertSame(
             'no',
             MenuListConfigurationHelper::requestParameters(['searchShow' => 'no'])['cb_new_show_search']
+        );
+    }
+
+    public function testListEditButtonCanOnlyInheritOrHideTheViewButton(): void
+    {
+        self::assertArrayNotHasKey(
+            'cb_new_show_list_edit',
+            MenuListConfigurationHelper::requestParameters(['editListButton' => 'default'])
+        );
+        self::assertSame(
+            'no',
+            MenuListConfigurationHelper::requestParameters(['editListButton' => 'no'])['cb_new_show_list_edit']
         );
     }
 
@@ -161,5 +203,24 @@ final class MenuListConfigurationHelperTest extends TestCase
         self::assertStringNotContainsString('export', (string) $parameters['cblist_actions']);
         self::assertStringNotContainsString('detail', (string) $parameters['cblist_actions']);
         self::assertSame('content-plugin', $parameters['cblist_embed']);
+    }
+
+    public function testHiddenListColumnKeepsItsFilterWithoutBecomingDisplayed(): void
+    {
+        $parameters = MenuListConfigurationHelper::requestParameters([
+            'columnsMode' => 'custom',
+            'columnOrder' => ['9', '12'],
+            'columns' => ['12'],
+            'searchFields' => ['9', '12'],
+            'linkFields' => ['9', '12'],
+            'detailFields' => ['9', '12'],
+            'editFields' => ['12'],
+            'publishedFields' => ['9', '12'],
+            'filters' => ['9' => 'DAN*'],
+        ]);
+
+        self::assertSame('12', $parameters['cblist_fields']);
+        self::assertSame('9|12', $parameters['cb_menu_search_fields']);
+        self::assertSame('{"9":["DAN*"]}', $parameters['cb_menu_data_filters']);
     }
 }

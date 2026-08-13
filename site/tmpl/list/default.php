@@ -222,7 +222,10 @@ $showStateFilter = $resolveMenuVisibility(
     (string) $input->getCmd('cb_new_show_state_filter', 'default'),
     !empty($this->list_state)
 );
-$showEditAction = $showEditAction && $cbListActionAllowed('edit');
+$showEditAction = $resolveMenuVisibility(
+    (string) $input->getCmd('cb_new_show_list_edit', 'default'),
+    $showEditAction
+) && $cbListActionAllowed('edit');
 $embeddedListParams = EmbeddedListContextService::parameters(
     $embeddedListContext,
     $embeddedListFields,
@@ -629,9 +632,9 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
                     </small>
                 <?php endif; ?>
 			</span>
-			<a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>">
-				<span class="fa-solid fa-arrow-left me-1" aria-hidden="true"></span>
-				<?php echo Text::_('COM_CONTENTBUILDERNG_BACK_TO_ADMIN'); ?>
+			<a class="btn btn-sm btn-outline-secondary" href="<?php echo $adminReturnUrl; ?>" data-cb-close-preview>
+				<span class="fa-solid fa-xmark me-1" aria-hidden="true"></span>
+				<?php echo Text::_('COM_CONTENTBUILDERNG_CLOSE_PREVIEW'); ?>
 			</a>
 		</div>
 	<?php endif; ?>
@@ -673,7 +676,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	<?php if ($embeddedListTitle !== '') : ?>
 		<div class="cb-list-titlebar">
 			<h1 class="h3 cb-list-title">
-				<?php echo htmlspecialchars($embeddedListTitle, ENT_QUOTES, 'UTF-8'); ?>
+				<?php echo nl2br(htmlspecialchars($embeddedListTitle, ENT_QUOTES, 'UTF-8'), false); ?>
 			</h1>
 		</div>
 	<?php endif; ?>
@@ -1126,7 +1129,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 										</span>
 									<?php endif; ?>
 								<?php endif; ?>
-									<?php if (!empty($this->edit_button) && $rowCanEdit) : ?>
+									<?php if ($showEditAction && $rowCanEdit) : ?>
 										<a class="btn btn-sm btn-outline-secondary" href="<?php echo $edit_link; ?>" title="<?php echo Text::_('COM_CONTENTBUILDERNG_EDIT'); ?>">
 											<span class="fa-solid fa-pen" aria-hidden="true"></span>
 										</a>

@@ -30,9 +30,10 @@ final class FrontendListEditActionTest extends TestCase
             $template
         );
         self::assertStringContainsString(
-            'if (!empty($this->edit_button) && $rowCanEdit)',
+            'if ($showEditAction && $rowCanEdit)',
             $template
         );
+        self::assertStringContainsString("getCmd('cb_new_show_list_edit', 'default')", $template);
         self::assertStringContainsString(
             "\$rowCanEdit = (\$edit_allowed || \$canAccessOwnedRecord('edit', \$row->colRecord)) && \$cbListActionAllowed('edit');",
             $template

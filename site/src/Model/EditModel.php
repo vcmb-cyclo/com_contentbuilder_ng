@@ -61,6 +61,7 @@ use CB\Component\Contentbuilderng\Site\Helper\DuplicateKeyViolationHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
 use CB\Component\Contentbuilderng\Site\Helper\MenuListConfigurationHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PublishedRecordVisibilityHelper;
+use CB\Component\Contentbuilderng\Site\Service\MenuDataFilterService;
 use CB\Component\Contentbuilderng\Site\Model\Edit\ListStateAndRatingTrait;
 use CB\Component\Contentbuilderng\Site\Model\Edit\OwnershipTrait;
 use CB\Component\Contentbuilderng\Site\Model\Edit\PathHelpersTrait;
@@ -140,9 +141,8 @@ class EditModel extends BaseDatabaseModel
 
     private $_show_page_heading = true;
 
-    private $_menu_filter = array();
-
-    private $_menu_filter_order = array();
+    /** @var array<string, list<string>> */
+    private array $recordFilters = [];
 
     private $_latest = false;
 
@@ -234,50 +234,10 @@ class EditModel extends BaseDatabaseModel
             }
         }
 
-        $menu_filter = $this->app->getInput()->get('cb_list_filterhidden', null, 'raw');
-        if (($menu_filter === null || $menu_filter === '') && $this->app->isClient('site')) {
-            $activeMenu = $this->app->getMenu()->getActive();
-            if ($activeMenu) {
-                $menu_filter = MenuParamHelper::getMenuParam($activeMenu->getParams(), 'cb_list_filterhidden', null);
-            }
-        }
-
-        if ($menu_filter !== null) {
-            $lines = explode("\n", $menu_filter);
-            foreach ($lines as $line) {
-                $keyval = explode("\t", $line);
-                if (count($keyval) == 2) {
-                    $keyval[1] = str_replace(array("\n", "\r"), "", $keyval[1]);
-                    $keyval[1] = $this->runtimeUtilityService->sanitizeHiddenFilterValue($keyval[1]);
-                    if ($keyval[1] != '') {
-                        $this->_menu_filter[$keyval[0]] = explode('|', $keyval[1]);
-                    }
-                }
-            }
-        }
-
-        $menu_filter_order = $this->app->getInput()->get('cb_list_orderhidden', null, 'raw');
-        if (($menu_filter_order === null || $menu_filter_order === '') && $this->app->isClient('site')) {
-            $activeMenu = $this->app->getMenu()->getActive();
-            if ($activeMenu) {
-                $menu_filter_order = MenuParamHelper::getMenuParam($activeMenu->getParams(), 'cb_list_orderhidden', null);
-            }
-        }
-
-        if ($menu_filter_order !== null) {
-            $lines = explode("\n", $menu_filter_order);
-            foreach ($lines as $line) {
-                $keyval = explode("\t", $line);
-                if (count($keyval) == 2) {
-                    $keyval[1] = str_replace(array("\n", "\r"), "", $keyval[1]);
-                    if ($keyval[1] != '') {
-                        $this->_menu_filter_order[$keyval[0]] = intval($keyval[1]);
-                    }
-                }
-            }
-        }
-
-        @natsort($this->_menu_filter_order);
+        $this->recordFilters = MenuDataFilterService::decode(
+            $this->app->getInput()->get(MenuDataFilterService::INPUT_NAME, '', 'raw'),
+            $this->runtimeUtilityService
+        );
 
         $this->setIds($this->app->getInput()->getInt('id', 0), $this->app->getInput()->getCmd('record_id', 0));
 

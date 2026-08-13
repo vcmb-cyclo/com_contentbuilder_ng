@@ -6,9 +6,10 @@ Cette spécification décrit le nouveau type de menu ContentBuilder NG
 « List View », type par défaut à partir du cycle 6.1.10-RC09.
 
 - Projet : ContentBuilder NG
-- Statut : architecture fonctionnelle validée, corrections fonctionnelles et UX intégrées dans RC09-B7
-- Version du document : 1.4
-- Dernière mise à jour : 2026-08-12
+- Statut : socle fonctionnel RC09-B13 validé ; Classic supprimé en RC09-B14 ;
+  séparation des restrictions d'accès et des boutons de liste en RC09-B16
+- Version du document : 2.0
+- Dernière mise à jour : 2026-08-13
 - Plateforme : Joomla 6 uniquement
 - PHP : 8.3 ou version ultérieure
 - Base de données : MySQL ou MariaDB uniquement
@@ -16,8 +17,9 @@ Cette spécification décrit le nouveau type de menu ContentBuilder NG
 - Fichier de paramètres : `site/tmpl/list/default.xml`
 - Rendu frontend : présentation tabulaire actuelle du List View Classic
 
-Le nouveau List View ne remplace pas les layouts Cards, Compact Table ou
-Tiles. Ces types de menu restent séparés et inchangés en RC09.
+Les layouts Cards, Compact Table et Tiles restent des types de menu séparés,
+mais utilisent le même contrat de paramètres, le même ordre et les mêmes
+fonctionnalités que List View. Seul leur rendu visuel spécialisé diffère.
 
 ## 2. Objectif
 
@@ -58,7 +60,8 @@ Le thème utilise le contrôle commun validé en RC08 :
 - choix explicite parmi les thèmes disponibles.
 
 Les layouts Cards, Compact Table et Tiles ne deviennent pas des thèmes du
-nouveau List View.
+nouveau List View. Ils réutilisent néanmoins automatiquement son constructeur
+et toutes ses règles fonctionnelles.
 
 ## 4. Titre visible de la liste
 
@@ -82,6 +85,11 @@ Règles du titre personnalisé :
 - sortie échappée ;
 - une valeur vide après normalisation est invalide ;
 - masquer le titre exige le mode explicite `Hidden`.
+
+Ce contrôle termine le bloc principal List View, avant le premier séparateur
+de sous-catégorie. Le libellé et le sélecteur utilisent le même alignement
+horizontal que les autres réglages placés en haut de page. Lorsque le mode
+Custom est sélectionné, Custom introduction apparaît sur la ligne suivante.
 
 ## 5. Colonnes affichées, capacités et filtres fixes
 
@@ -108,7 +116,7 @@ Deux modes sont disponibles :
 - `Custom` : permet de choisir un sous-ensemble autorisé et son ordre propre au
   menu.
 
-### 5.3 Interface RC09-B6
+### 5.3 Interface RC09-B12
 
 Un tableau Joomla unifié intitulé « Colonnes affichées » est placé en bas de
 l'onglet. Il reprend les indicateurs de la Vue afin que l'administrateur voie
@@ -290,10 +298,9 @@ L'export et la pagination travaillent sur le sous-ensemble limité.
 
 ### 8.2 Nombre de lignes par page
 
-Le libellé `Initial list limit` est remplacé dans `CB → View → Options` et
-dans le menu Joomla par `Default page size`.
+Le menu Joomla présente ce réglage sous le libellé `Lines per page`.
 
-`Default page size` conserve le contrôle partagé RC06 :
+`Lines per page` conserve le contrôle partagé RC06 :
 
 - héritage de la Vue puis de la configuration globale ;
 - `0` = All ;
@@ -302,8 +309,8 @@ dans le menu Joomla par `Default page size`.
 
 `List limit selector` utilise `Use Default (Yes/No) / Yes / No`.
 
-Le contrôle `Maximum records` utilise le même composant Joomla à liste
-déroulante et saisie Custom que `Default page size`.
+Le contrôle `Maximum lines` utilise le même composant Joomla à liste
+déroulante et saisie Custom que `Lines per page`.
 
 Le libellé reste court. Son aide inline explique précisément qu'il s'agit du
 nombre d'enregistrements affichés par page à l'ouverture de la liste, que la
@@ -318,13 +325,14 @@ Les options d'interface utilisent individuellement :
 - `Yes` ;
 - `No`.
 
-Actions concernées :
+Options concernées :
 
-- Export ;
-- Print ;
+- Excel export ;
+- Detail - Print, qui conserve strictement l'impression historique de la fiche
+  Detail et n'ajoute aucune impression de liste ;
 - Rating, uniquement lorsque la Vue fournit déjà cette fonction.
 
-`Back button` et `Default page size` ne sont pas dupliqués dans ce groupe :
+`Back button` et `Lines per page` ne sont pas dupliqués dans ce groupe :
 ils conservent les contrôles communs déjà validés en RC08/RC06.
 
 Toute option `Use Default` affiche la valeur réellement héritée de la Vue,
@@ -333,7 +341,7 @@ par exemple `Use Default (Yes)` ou `Use Default (No)`.
 Les listes Oui/Non utilisent l'état couleur Joomla validé en RC08 : Oui vert,
 Non rouge, héritage neutre.
 
-Les options `State` et `State filter` proposent séparément
+Les options `Show State` et `Show State filter` proposent séparément
 `Use Default (Yes/No) / Yes / No`.
 
 Une option d'affichage ne contourne jamais une permission applicable et ne
@@ -393,31 +401,53 @@ L'export conserve le mécanisme actuel et respecte le contrat du nouveau menu :
 
 ## 12. Groupes de paramètres
 
-Ordre retenu pour RC09-B6 :
+Ordre fonctionnel validé dans RC09-B13 :
 
-1. **List View**
-   - Select View ;
-   - Theme ;
-   - Reset to Default.
-2. **Display**
-   - Title.
-3. **Data**
-   - Initial Sort Order ;
-   - Maximum records, hérité de la Vue.
-4. **Search and pagination**
+1. Le message d'information général, placé en haut de l'onglet.
+2. Select View, Theme et Reset to Default, sans sous-titre « List View » redondant.
+3. Lines per page.
+4. Maximum lines, hérité de la Vue.
+5. Initial Sort Order ; en mode Custom, jusqu'à trois couples champ/direction
+   sont affichés immédiatement sous le sélecteur.
+6. View introduction, dernier réglage du bloc principal List View ; Custom
+   introduction apparaît sur la ligne suivante lorsqu'il est activé.
+7. **Display - Detail - Edit**
+   - première ligne : Excel export, Back button et Rating ;
+   - deuxième ligne : Detail - Top panel, Detail - Bottom panel et
+     Detail - Print ;
+   - troisième ligne : Edit - Top panel, Edit - Bottom panel et Edit - List button.
+8. **Search and State**
    - Show Search ;
-   - State ;
-   - State filter ;
-   - Default page size ;
-   - List limit selector.
-5. **Actions**
-   - actions d'interface ;
-   - restrictions de sécurité.
-6. Groupes existants **Detail**, **Edit** et **Article**, sans régression.
-7. **Displayed columns**, en bas de page.
+   - Show State ;
+   - Show State filter.
+9. **Access restrictions**
+   - Create access ;
+   - Detail access ;
+   - Editing access ;
+   - Deletion access ;
+   - Publishing access ;
+   - State access.
+10. **Displayed columns**, avec les filtres de données.
+11. **Article**, groupe peu utilisé placé en fin d'onglet.
 
-Le groupe Actions reste unique dans le premier prototype. Son éventuel
-découpage sera décidé après validation visuelle.
+Les intitulés d'organisation « New » et « Classic » ne sont pas affichés dans
+les groupes de réglages. Chaque sous-catégorie utilise le séparateur Joomla
+validé sur le List View historique : trait fin, titre centré, trait fin.
+
+Le groupe **Display** fusionne les réglages d'affichage et les anciennes
+« Actions ». Le terme Action n'est pas utilisé comme titre de groupe, car il
+ne décrit pas correctement ces contrôles visuels. Le groupe
+**Access restrictions** contient les contrôles qui peuvent interdire, pour ce
+menu, des opérations autorisées par la Vue ; il ne s'agit pas d'un éditeur
+d'ACL et ces contrôles ne peuvent jamais accorder une autorisation. Le résumé
+Oui/Non décrit la configuration frontend de la Vue, pas les droits effectifs
+d'un compte particulier. Ceux-ci dépendent aussi de ses groupes, des règles de
+propriété et de ses privilèges Joomla.
+
+**Edit - List button** est un réglage d'affichage distinct. Il hérite de
+`View > Options > Edit button` ou masque uniquement le crayon de modification
+dans la liste. Il ne modifie ni les ACL, ni l'accès à l'écran Edit depuis un
+autre emplacement.
 
 ## 13. Reset to Default
 
@@ -430,6 +460,12 @@ Le Reset du nouveau List View :
 - supprime les filtres fixes du nouveau menu ;
 - supprime tout ancien paramètre de filtre Classic encore présent ;
 - déclenche l'état modifié du formulaire Joomla.
+
+Il restaure aussi visuellement et fonctionnellement chaque famille de champs :
+introduction, actions d'affichage, recherche et états, restrictions, colonnes,
+recherche par colonne, liens, Detail/Edit/Published, filtres de données, ordre
+personnalisé, directions de tri, nombre de lignes et limite maximale. L'ordre
+des colonnes revient à celui de la Vue mère.
 
 Il ne copie jamais les valeurs courantes de la Vue dans le menu.
 
@@ -445,25 +481,58 @@ Le constructeur enregistre toute sa configuration dans `cb_new_config`.
   l'identique ;
 - chaque modification déclenche l'état modifié natif du formulaire Joomla.
 
-## 14. Adoption des anciens menus et nettoyage Classic
+## 14. Migration définitive des anciens menus Classic — proposition B14
 
-Les anciens menus `layout=default` sans filtre Classic adoptent directement le
-nouveau List View.
+Cette évolution n'appartient pas encore au socle fonctionnel B13 validé.
+RC09-B14 propose de supprimer entièrement le type de menu, le XML, le wrapper
+PHP et les trois anciens FormFields de List View Classic.
 
-Lorsqu'un ancien filtre Classic est détecté :
+Pendant l'installation ou la mise à jour :
 
-- l'administration affiche un message informatif ;
-- elle propose `List View (Classic)` pour conserver le comportement existant ;
-- elle propose le nouveau `List View` pour repartir du nouveau contrat ;
-- le choix Classic conserve les paramètres historiques ;
-- le choix New puis la sauvegarde supprime définitivement les anciens
-  paramètres de filtre et d'ordre Classic ;
-- aucune conversion automatique de la syntaxe historique n'est effectuée ;
-- aucun message n'est affiché sur le frontend.
+- chaque lien `layout=listclassic` devient `layout=default` ;
+- les paramètres `cb_list_filterhidden`, `cb_list_orderhidden` et
+  `cb_list_filter` sont supprimés à la racine et dans l'ancien groupe
+  `params.settings` ;
+- les autres réglages du menu sont conservés ;
+- un menu sans ancienne configuration est migré silencieusement ;
+- si un filtre ou un ordre historique non vide est supprimé, Joomla affiche un
+  warning traduit contenant le titre et l'identifiant du menu ;
+- le warning demande de recréer les filtres dans
+  `Displayed columns → Data filter` et le tri dans
+  `Initial sort order → Custom` ;
+- les cinq anciens fichiers déjà installés sont supprimés physiquement par le
+  script de mise à jour.
 
-Le choix Classic doit être présenté comme le choix prudent lorsque des filtres
-historiques non vides sont détectés. Aucune donnée n'est supprimée avant une
-sauvegarde explicite du choix New.
+À partir de B15, les nouveaux Data filters utilisent exclusivement le stockage
+JSON `cb_menu_data_filters`, commun aux listes, détails, formulaires Edit et
+exports. L'ancien stockage tabulé `cb_list_filterhidden`, son ordre parallèle
+`cb_list_orderhidden` et leur parser frontend sont supprimés. Les anciennes clés
+ne subsistent que dans le code de migration chargé de nettoyer la base.
+
+À partir de B19, le nom du paramètre `cb_menu_data_filters` est défini une seule
+fois par `MenuDataFilterService::INPUT_NAME`. Le code actif emploie uniquement
+le vocabulaire Data filter (`sanitizeDataFilterTerm`, `recordFilters`) ; les
+anciens noms « hidden filter » ne sont conservés que comme littéraux dans la
+migration et ses tests afin de reconnaître puis supprimer les anciennes données.
+Cette réorganisation interne ne modifie ni la syntaxe `|` / `*`, ni le stockage
+JSON, ni l'application commune des filtres aux listes, détails, éditions et
+exports.
+
+L'ordre de toutes les lignes du constructeur est enregistré séparément dans
+`columnOrder`. Il ne dépend jamais de la liste des colonnes visibles. Un champ
+masqué peut donc rester à la position choisie et participer à la recherche, au
+lien, au détail ou à un Data filter sans redevenir visible après sauvegarde.
+
+## 14.1 Layouts spécialisés — socle B13
+
+`List View (Cards)`, `List View (Compact Table)` et `List View (Tiles)` :
+
+- exposent exactement les mêmes champs XML que `List View` ;
+- utilisent le même constructeur `menulistbuilder` ;
+- appliquent les mêmes colonnes, recherche, filtres de données, tri,
+  pagination, affichages et restrictions ;
+- conservent leur wrapper PHP et leur rendu visuel spécialisé ;
+- ne dupliquent aucune liste d'options ni logique de configuration.
 
 ## 15. Interface, langues et aide
 
@@ -483,9 +552,14 @@ sauvegarde explicite du choix New.
 - Les exemples de filtres utilisent du code visuellement identifiable.
 - Aucun texte technique de stockage n'est exposé à l'utilisateur.
 
-## 16. Critères d'acceptation RC09-B6
+## 16. Critères d'acceptation
 
-1. Le nouveau List View est le type par défaut et le Classic reste sélectionnable.
+Tous les critères décrivent le socle fonctionnel B13 validé, sauf les critères
+1, 14, 51 et 52. Ces quatre critères concernent exclusivement la proposition
+de suppression/migration B14 et restent à valider par installation/mise à
+jour dans Docker.
+
+1. List View est l'unique type de menu tabulaire classique ; aucun type Classic n'est découvrable.
 2. La sélection de Vue est obligatoire et le thème est héritable.
 3. Default reprend les colonnes et leur ordre depuis la Vue.
 4. Custom sélectionne et réordonne uniquement les colonnes autorisées.
@@ -497,33 +571,96 @@ sauvegarde explicite du choix New.
 10. Pagination, All et Custom ne régressent pas.
 11. Les restrictions du menu réduisent les ACL et ne les étendent jamais.
 12. L'export ne divulgue aucune colonne masquée et conserve les états présents.
-13. Le Reset conserve la Vue et supprime toutes les surcharges New.
-14. Le choix New supprime les anciens filtres Classic uniquement à la sauvegarde.
+13. Le Reset conserve la Vue et supprime toutes les surcharges du List View.
+14. La mise à jour migre automatiquement les liens Classic et nettoie leurs paramètres obsolètes.
 15. L'interface est utilisable sur une Vue comportant de nombreux champs.
 16. Le rendu frontend reste celui du tableau actuel avec tri par en-tête.
 17. Save et Save & Close conservent toutes les options du constructeur.
 18. Le constructeur est aligné sur la largeur des autres groupes Joomla.
 19. Les valeurs héritées Oui/Non sont visibles dans les options Use Default.
-20. Back button et Default page size ne sont présents qu'une seule fois.
+20. Back button et Lines per page ne sont présents qu'une seule fois.
 21. Export No masque l'export et Detail Disabled bloque les liens et l'accès direct.
 22. Les cases Liste, Recherche, Lien, Detail, Modifier et Publié du mode Custom
     sont modifiables uniquement dans la limite autorisée par la Vue mère.
 23. Les sélecteurs sont limités à une largeur lisible et les valeurs Oui/Non utilisent les couleurs Joomla verte/rouge.
 24. State et State filter proposent séparément Use Default/Yes/No.
-25. Maximum records utilise le contrôle commun à liste déroulante, All et saisie Custom.
+25. Maximum lines utilise le contrôle commun à liste déroulante, All et saisie Custom.
 26. Les nouvelles options exposent une aide courte via Toggle Inline Help.
 27. Detail No empêche toute injection de la valeur dans la fiche, quel que soit
     le contenu historique du template.
 28. Un champ Published No ne peut pas être activé dans Detail ou Edit par un
     menu Joomla.
 29. L'ACL visible Detail conserve la clé technique historique `view`.
+30. Le message d'information est placé en haut et Article en fin d'onglet.
+31. Display - Detail - Edit regroupe les contrôles Export, Print et Rating,
+    les barres Detail/Edit et le bouton Retour.
+32. Access restrictions remplace le titre Security sans modifier le plafond
+    d'autorisation fourni par la Vue.
+33. Chaque sous-catégorie utilise un séparateur fin avec son titre centré.
+34. View introduction et Custom introduction sont conservés, alignés avec les
+    autres contrôles horizontaux et terminent le bloc principal List View.
+35. L'aide permanente des filtres se termine par l'exemple
+    `data1 | data2* | da*ta3 | *data4`, sans point final.
+36. Les sélecteurs de Display et Search and State font 300 px au maximum et
+    restent responsives.
+37. Chaque critère de tri de la Vue possède sa propre direction ASC/DESC.
+38. Publier ou dépublier un champ met immédiatement à jour les cadenas Detail
+    et Edit sans sauvegarde intermédiaire.
+39. Un critère de tri inutilisé (`None`) utilise `Ascending` comme direction
+    par défaut dans la Vue et dans le menu.
+40. Lines per page, Maximum lines et Initial Sort Order sont regroupés en haut
+    de page, sans sous-catégorie Pagination and Sorting.
+41. Custom introduction affiche un compteur Unicode `N/255` et refuse toute
+    saisie au-delà de 255 points de code sans couper un caractère Unicode.
+42. Reset to Default restaure toutes les familles de champs dynamiques, les
+    trois critères de tri et l'ordre de la Vue, tout en conservant la Vue.
+43. Les deux chemins AJAX de publication, dont le gestionnaire délégué utilisé
+    par l'interface, mettent immédiatement à jour les cadenas Detail/Edit.
+44. Custom introduction est une zone de texte de deux lignes qui grandit
+    automatiquement jusqu'à cinq lignes, puis utilise un ascenseur vertical.
+45. Son compteur affiche `N/255 · X ligne(s)` ; seuls les retours volontaires
+    sont comptés et ils sont conservés dans le rendu frontend.
+46. Print conserve strictement son fonctionnement Detail historique, porte le
+    libellé Detail - Print et se trouve immédiatement sous Detail - Bottom panel.
+47. Rating termine le groupe Display - Detail - Edit et les deux contrôles
+    déplacés utilisent le même alignement horizontal que les panneaux.
+48. Tous les contrôles de Display - Detail - Edit partagent la même grille
+    horizontale ; leurs libellés sont préfixés par Detail - ou Edit - afin de
+    rendre explicite l'écran concerné.
+49. Le groupe est ordonné en trois lignes compactes : Excel export, Back button
+    et Rating ; Detail - Top panel, Detail - Bottom panel et Detail - Print ;
+    puis Edit - Top panel et Edit - Bottom panel.
+50. Cards, Compact Table et Tiles utilisent exactement le contrat de champs du
+    nouveau List View tout en conservant leur rendu spécialisé.
+51. Les menus Classic existants deviennent des List View sans perdre leurs
+    paramètres modernes compatibles.
+52. Un warning traduit et ciblé est affiché uniquement lorsqu'un filtre ou un
+    ordre historique non vide est supprimé.
+53. Dans la Vue mère, un champ dépublié affiche un cadenas dans Detail ou Edit
+    uniquement lorsque la capacité correspondante était activée. Une capacité
+    déjà désactivée reste représentée par une croix grise non interactive. La
+    republication restaure exactement les valeurs Detail/Edit conservées.
+54. L'ordre du constructeur est conservé pour toutes les lignes, y compris une
+    colonne List désactivée utilisée uniquement par Search, Link, Detail ou Data filter.
+55. Les Data filters utilisent le format JSON interne `cb_menu_data_filters` ;
+    aucun parser ou FormField Classic n'est utilisé pendant l'affichage frontend.
+56. Les valeurs héritées Oui/Activé utilisent un vert léger, les valeurs
+    héritées Non/Désactivé un rouge léger, les héritages non booléens restent gris
+    et les surcharges explicites conservent les couleurs Joomla fortes.
+57. Chaque restriction Access restrictions possède une aide inline précisant
+    qu'elle peut conserver ou réduire l'ACL de la Vue, sans jamais l'étendre.
+58. Une Vue non publiée sélectionnable dans un menu fournit elle aussi ses
+    valeurs héritées réelles au constructeur.
+59. Le bouton Close preview ferme l'onglet ouvert par Preview ; si le navigateur
+    interdit la fermeture, il utilise le retour administration comme repli.
+60. Preview utilise les réglages et le thème de la Vue, sans surcharge d'un
+    élément de menu Joomla et sans Data filter propre à un menu.
 
-## 17. Hors périmètre RC09-B6
+## 17. Hors périmètre RC09-B16
 
-- intégration de Cards, Compact Table ou Tiles dans ce type de menu ;
-- suppression des types de menu de layouts spécialisés ;
+- fusion de Cards, Compact Table ou Tiles dans un seul type de menu ;
+- modification de leur rendu frontend spécialisé ;
 - iframe, `height`, `loading=lazy` ou `loading=eager` ;
 - modification du plugin CBList ;
 - ajout de permissions depuis un menu ;
-- modification du parser Classic ;
 - migration automatique des filtres Classic vers le nouveau format.

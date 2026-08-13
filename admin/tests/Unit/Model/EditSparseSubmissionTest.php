@@ -15,6 +15,7 @@ final class EditSparseSubmissionTest extends TestCase
         );
 
         self::assertIsString($model);
+        $model = str_replace("\r\n", "\n", $model);
         self::assertStringContainsString(
             "if (!\$this->app->getInput()->post->exists('cb_' . \$id)) {\n                                    continue;",
             $model

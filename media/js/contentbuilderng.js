@@ -65,3 +65,20 @@ function cbRate(url, lastId) {
 window.is_numeric = is_numeric;
 window.cbRetrieveRatingResults = cbRetrieveRatingResults;
 window.cbRate = cbRate;
+
+document.addEventListener('click', (event) => {
+    const closePreview = event.target.closest?.('[data-cb-close-preview]');
+
+    if (!closePreview || !window.opener || window.opener.closed) {
+        return;
+    }
+
+    event.preventDefault();
+    const fallbackUrl = closePreview.href;
+    window.close();
+    window.setTimeout(() => {
+        if (!window.closed && fallbackUrl) {
+            window.location.assign(fallbackUrl);
+        }
+    }, 100);
+});
