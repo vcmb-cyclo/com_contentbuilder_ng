@@ -1,7 +1,7 @@
 # Colonnes d’une Vue et priorité des autorisations
 
 Cette page explique les colonnes **List**, **Search**, **Link**, **Detail**,
-**API**, **Edit** et **Publish** de l’onglet Vue de ContentBuilder NG.
+**Edit**, **API** et **Publish** de l’onglet Vue de ContentBuilder NG.
 
 ## Deux publications différentes
 
@@ -25,8 +25,8 @@ enregistrement.
 | **Search** | Autorise la recherche de la liste à interroger le champ. Un champ peut être recherchable sans être affiché. |
 | **Link** | Transforme la valeur affichée en lien vers la fiche Détail. Cette option ne sélectionne pas le contenu de la fiche. |
 | **Detail** | Rend le champ disponible dans la fiche Détail. Un template Détail et la permission d’accéder à l’enregistrement restent nécessaires. |
-| **API** | Autorise l’exposition ou l’interrogation du champ par l’API, les statistiques et certaines sorties de plugins. Les permissions API continuent de s’appliquer. |
 | **Edit** | Rend le champ disponible pour la modification. Un template Modifier et les permissions sur l’enregistrement restent nécessaires. |
+| **API** | Autorise l’exposition ou l’interrogation du champ par l’API, les statistiques et certaines sorties de plugins. Les permissions API continuent de s’appliquer. |
 | **Publish** | Commutateur principal du champ dans cette Vue. |
 
 ## Ordre de priorité
@@ -34,7 +34,7 @@ enregistrement.
 L’autorisation effective suit cet ordre :
 
 1. **Publish du champ** : le champ doit être publié dans la Vue ;
-2. **fonction du champ** : List, Search, Link, Detail, API ou Edit doit être
+2. **fonction du champ** : List, Search, Link, Detail, Edit ou API doit être
    autorisée ;
 3. **menu Joomla** : un menu List View peut réduire certaines fonctions, mais
    ne peut pas dépasser la Vue mère ;
@@ -55,6 +55,11 @@ champ est republié.
 Les cadenas affichés dans **Detail** et **Edit** signalent cette situation pour
 les deux usages les plus sensibles : exposition d’une valeur et modification
 d’une valeur. Ils ne représentent pas une ACL supplémentaire.
+
+Un champ en lecture seule utilise la même présentation frontend, que la
+restriction provienne de la Vue mère ou du menu Joomla List View : badge
+**Read-only**, curseur interdit, texte en italique et valeur sélectionnée
+toujours visible pour les groupes radio.
 
 ## Exemples
 

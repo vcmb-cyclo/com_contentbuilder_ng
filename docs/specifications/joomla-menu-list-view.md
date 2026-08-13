@@ -6,10 +6,9 @@ Cette spécification décrit le nouveau type de menu ContentBuilder NG
 « List View », type par défaut à partir du cycle 6.1.10-RC09.
 
 - Projet : ContentBuilder NG
-- Statut : socle fonctionnel RC09-B13 validé ; Classic supprimé en RC09-B14 ;
-  séparation des restrictions d'accès et des boutons de liste en RC09-B16
-- Version du document : 2.0
-- Dernière mise à jour : 2026-08-13
+- Statut : RC09-B20 validée et publiée sous 6.1.10-RC09
+- Version du document : 2.1
+- Dernière mise à jour : 2026-08-14
 - Plateforme : Joomla 6 uniquement
 - PHP : 8.3 ou version ultérieure
 - Base de données : MySQL ou MariaDB uniquement
@@ -481,11 +480,10 @@ Le constructeur enregistre toute sa configuration dans `cb_new_config`.
   l'identique ;
 - chaque modification déclenche l'état modifié natif du formulaire Joomla.
 
-## 14. Migration définitive des anciens menus Classic — proposition B14
+## 14. Migration définitive des anciens menus Classic
 
-Cette évolution n'appartient pas encore au socle fonctionnel B13 validé.
-RC09-B14 propose de supprimer entièrement le type de menu, le XML, le wrapper
-PHP et les trois anciens FormFields de List View Classic.
+La migration RC09 supprime entièrement le type de menu, le XML, le wrapper PHP
+et les trois anciens FormFields de List View Classic.
 
 Pendant l'installation ou la mise à jour :
 
@@ -523,7 +521,7 @@ L'ordre de toutes les lignes du constructeur est enregistré séparément dans
 masqué peut donc rester à la position choisie et participer à la recherche, au
 lien, au détail ou à un Data filter sans redevenir visible après sauvegarde.
 
-## 14.1 Layouts spécialisés — socle B13
+## 14.1 Layouts spécialisés
 
 `List View (Cards)`, `List View (Compact Table)` et `List View (Tiles)` :
 
@@ -554,10 +552,8 @@ lien, au détail ou à un Data filter sans redevenir visible après sauvegarde.
 
 ## 16. Critères d'acceptation
 
-Tous les critères décrivent le socle fonctionnel B13 validé, sauf les critères
-1, 14, 51 et 52. Ces quatre critères concernent exclusivement la proposition
-de suppression/migration B14 et restent à valider par installation/mise à
-jour dans Docker.
+Tous les critères ci-dessous décrivent le comportement RC09-B20 validé et
+publié sous 6.1.10-RC09.
 
 1. List View est l'unique type de menu tabulaire classique ; aucun type Classic n'est découvrable.
 2. La sélection de Vue est obligatoire et le thème est héritable.
@@ -655,8 +651,12 @@ jour dans Docker.
     interdit la fermeture, il utilise le retour administration comme repli.
 60. Preview utilise les réglages et le thème de la Vue, sans surcharge d'un
     élément de menu Joomla et sans Data filter propre à un menu.
+61. Les champs Edit en lecture seule utilisent une présentation uniforme quel
+    que soit l'origine de la restriction (Vue ou menu) : badge Read-only,
+    curseur interdit, valeur lisible en italique et valeur sélectionnée visible
+    pour les groupes radio.
 
-## 17. Hors périmètre RC09-B16
+## 17. Hors périmètre RC09
 
 - fusion de Cards, Compact Table ou Tiles dans un seul type de menu ;
 - modification de leur rendu frontend spécialisé ;
