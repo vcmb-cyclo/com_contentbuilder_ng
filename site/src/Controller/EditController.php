@@ -742,11 +742,13 @@ class EditController extends BaseController
 
     private function assertConstrainedAction(string $action): void
     {
-        if (!EmbeddedListActionFilterService::isRequestAllowed(
-            (string) $this->input->getCmd('cblist_embed', ''),
-            (string) $this->input->getString('cblist_actions', ''),
-            $action
-        )) {
+        if (
+            !EmbeddedListActionFilterService::isRequestAllowed(
+                (string) $this->input->getCmd('cblist_embed', ''),
+                (string) $this->input->getString('cblist_actions', ''),
+                $action
+            )
+        ) {
             throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_MENU_ACTION_DISABLED'), 403);
         }
     }

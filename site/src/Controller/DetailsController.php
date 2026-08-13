@@ -179,11 +179,13 @@ class DetailsController extends BaseController
 
     public function display($cachable = false, $urlparams = array())
     {
-        if (!EmbeddedListActionFilterService::isRequestAllowed(
-            (string) $this->input->getCmd('cblist_embed', ''),
-            (string) $this->input->getString('cblist_actions', ''),
-            'detail'
-        )) {
+        if (
+            !EmbeddedListActionFilterService::isRequestAllowed(
+                (string) $this->input->getCmd('cblist_embed', ''),
+                (string) $this->input->getString('cblist_actions', ''),
+                'detail'
+            )
+        ) {
             throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_MENU_ACTION_DISABLED'), 403);
         }
         $this->input->set('view', 'details');
