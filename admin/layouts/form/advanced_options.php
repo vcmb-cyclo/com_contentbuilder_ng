@@ -27,14 +27,14 @@ if (!is_callable($renderCheckbox)) {
     $renderCheckbox = static fn (): string => '';
 }
 
-$renderDirectionButtonGroup = static function (string $name, string $selected): string {
+$renderDirectionButtonGroup = static function (string $name, string $id, string $selected): string {
     $selected = strtolower($selected) === 'asc' ? 'asc' : 'desc';
 
     return '<div class="btn-group btn-group-sm" role="group" aria-label="' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER'), ENT_QUOTES, 'UTF-8') . '">'
-        . '<input class="btn-check" type="radio" name="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" id="initial_order_dir_asc" value="asc"' . ($selected === 'asc' ? ' checked="checked"' : '') . ' />'
-        . '<label class="btn btn-outline-secondary" for="initial_order_dir_asc">' . Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_ASC') . '</label>'
-        . '<input class="btn-check" type="radio" name="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" id="initial_order_dir_desc" value="desc"' . ($selected === 'desc' ? ' checked="checked"' : '') . ' />'
-        . '<label class="btn btn-outline-secondary" for="initial_order_dir_desc">' . Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_DESC') . '</label>'
+        . '<input class="btn-check" type="radio" name="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" id="' . $id . '_asc" value="asc"' . ($selected === 'asc' ? ' checked="checked"' : '') . ' />'
+        . '<label class="btn btn-outline-secondary" for="' . $id . '_asc">' . Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_ASC') . '</label>'
+        . '<input class="btn-check" type="radio" name="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" id="' . $id . '_desc" value="desc"' . ($selected === 'desc' ? ' checked="checked"' : '') . ' />'
+        . '<label class="btn btn-outline-secondary" for="' . $id . '_desc">' . Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_DESC') . '</label>'
         . '</div>';
 };
 
@@ -64,6 +64,7 @@ $advancedDefaults = [
     'show_filter' => 1,
     'show_records_per_page' => 1,
     'initial_list_limit' => ListLimitHelper::INHERIT,
+    'maximum_records' => ListLimitHelper::ALL,
     'published_only' => 0,
     'allow_external_filter' => 0,
     'filter_exact_match' => 1,
@@ -71,6 +72,8 @@ $advancedDefaults = [
     'initial_sort_order2' => '-1',
     'initial_sort_order3' => '-1',
     'initial_order_dir' => 'desc',
+    'initial_order_dir2' => 'asc',
+    'initial_order_dir3' => 'asc',
     'list_rating' => 0,
     'rating_slots' => '5',
     'cb_show_author' => 1,
@@ -416,6 +419,24 @@ $advancedDefaults = [
                             <?php echo $listLimitField->renderInput(); ?>
                         </div>
                         <div>
+                            <label class="form-label mb-1" for="maximum_records">
+                                <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_MAXIMUM_RECORDS_DESC'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_MAXIMUM_RECORDS'); ?>
+                                </span>
+                            </label>
+                            <?php
+                            $maximumRecordsForm = new Form('contentbuilderng-maximum-records', ['control' => 'jform']);
+                            $maximumRecordsField = new ListLimitFieldControl($maximumRecordsForm);
+                            $maximumRecordsField->setup(
+                                new SimpleXMLElement(
+                                    '<field name="maximum_records" id="maximum_records" type="listlimit" data-cb-list-limit-mode="global" filter="integer" />'
+                                ),
+                                max(ListLimitHelper::ALL, (int) ($item->maximum_records ?? ListLimitHelper::ALL))
+                            );
+                            ?>
+                            <?php echo $maximumRecordsField->renderInput(); ?>
+                        </div>
+                        <div>
                             <input type="hidden" name="jform[allow_external_filter]" value="0" />
                             <?php echo $renderCheckbox('jform[allow_external_filter]', 'allow_external_filter', (bool) ($item->allow_external_filter ?? false)); ?>
                             <label class="form-check-label" for="allow_external_filter">
@@ -481,8 +502,8 @@ $advancedDefaults = [
                                 <?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER'); ?>:
                             </b></span>
                     </label>
-                    <select class="form-select-sm" name="jform[initial_sort_order]" id="initial_sort_order"
-                        style="max-width: 200px;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                    <select class="form-select-sm" name="jform[initial_sort_order]" id="initial_sort_order" style="max-width: 200px;">
                         <option value="" <?php echo (($item->initial_sort_order ?? null) === 0 || (string) ($item->initial_sort_order ?? '') === '0') ? ' selected="selected"' : ''; ?>>
                             <?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_BY_ID'); ?>
                         </option>
@@ -492,6 +513,9 @@ $advancedDefaults = [
                             </option>
                         <?php endforeach; ?>
                     </select>
+                    <?php echo $renderDirectionButtonGroup('jform[initial_order_dir]', 'initial_order_dir', (string) ($item->initial_order_dir ?? 'desc')); ?>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
                     <select class="form-select-sm" name="jform[initial_sort_order2]" id="initial_sort_order2"
                         style="max-width: 200px;">
                         <option value="-1">
@@ -506,6 +530,9 @@ $advancedDefaults = [
                             </option>
                         <?php endforeach; ?>
                     </select>
+                    <?php echo $renderDirectionButtonGroup('jform[initial_order_dir2]', 'initial_order_dir2', (string) (($item->initial_sort_order2 ?? -1) == -1 ? 'asc' : ($item->initial_order_dir2 ?? 'asc'))); ?>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
                     <select class="form-select-sm" name="jform[initial_sort_order3]" id="initial_sort_order3"
                         style="max-width: 200px;">
                         <option value="-1">
@@ -520,8 +547,7 @@ $advancedDefaults = [
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <div class="pt-2">
-                        <?php echo $renderDirectionButtonGroup('jform[initial_order_dir]', (string) ($item->initial_order_dir ?? 'desc')); ?>
+                    <?php echo $renderDirectionButtonGroup('jform[initial_order_dir3]', 'initial_order_dir3', (string) (($item->initial_sort_order3 ?? -1) == -1 ? 'asc' : ($item->initial_order_dir3 ?? 'asc'))); ?>
                     </div>
                 </div>
             </fieldset>
@@ -605,6 +631,26 @@ $advancedDefaults = [
 document.addEventListener('DOMContentLoaded', function () {
     var button = document.getElementById('cb-reset-advanced-options');
 
+    ['2', '3'].forEach(function (suffix) {
+        var orderField = document.getElementById('initial_sort_order' + suffix);
+
+        if (!orderField) {
+            return;
+        }
+
+        orderField.addEventListener('change', function () {
+            if (String(orderField.value) !== '-1') {
+                return;
+            }
+
+            var ascending = document.getElementById('initial_order_dir' + suffix + '_asc');
+            if (ascending && !ascending.checked) {
+                ascending.checked = true;
+                ascending.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    });
+
     if (!button) {
         return;
     }
@@ -663,6 +709,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             switch (name) {
                 case 'initial_order_dir':
+                case 'initial_order_dir2':
+                case 'initial_order_dir3':
                     setRadio(name, value);
                     break;
 
@@ -670,6 +718,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 case 'initial_sort_order2':
                 case 'initial_sort_order3':
                 case 'initial_list_limit':
+                case 'maximum_records':
                 case 'rating_slots':
                 case 'save_button_title':
                 case 'apply_button_title':

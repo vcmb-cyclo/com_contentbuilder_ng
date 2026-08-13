@@ -232,6 +232,30 @@ window.ContentBuilderNgAdmin = window.ContentBuilderNgAdmin || (function () {
         }
     }, true);
 
+    // Firefox treats a regular target="_blank" link as noopener. Open Preview
+    // from the trusted click instead so its Close button may close the tab.
+    // If a popup policy blocks window.open(), the native link remains the
+    // non-JavaScript fallback.
+    document.addEventListener('click', function (event) {
+        var trigger = typeof event.target.closest === 'function'
+            ? event.target.closest('[data-cb-open-preview]')
+            : null;
+
+        if (!trigger || !trigger.href) {
+            return;
+        }
+
+        var previewWindow = window.open(trigger.href, 'contentbuilderng-preview');
+
+        if (!previewWindow) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        previewWindow.focus();
+    }, true);
+
     return {
         applyTabTooltips: applyTabTooltips,
         getTabTargetId: getTabTargetId,

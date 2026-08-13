@@ -39,8 +39,9 @@ $columnOptions = [
     'list' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_LIST'),
     'search' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_SEARCH'),
     'link' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_LINK'),
-    'api' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_API'),
+    'detail' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_DETAIL'),
     'edit' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_EDIT'),
+    'api' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_API'),
     'wordwrap' => Text::_('COM_CONTENTBUILDERNG_LIST_WORDWRAP'),
     'publish' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_PUBLISH'),
     'order' => Text::_('COM_CONTENTBUILDERNG_ORDERBY'),
@@ -58,12 +59,15 @@ if ($hasBfSystemFields) {
 }
 $defaultHiddenColumns = ['wordwrap'];
 $visibleColumnCount = count($columnOptions);
-$tableColumnCount = $hasBfSystemFields ? 12 : 11;
+$tableColumnCount = $hasBfSystemFields ? 13 : 12;
 if ($debugModeEnabled) {
     $tableColumnCount++;
 }
 ?>
 <input type="hidden" name="bf_system_element_id" id="cb_bf_system_element_id" value="" />
+<div class="alert alert-info hide-aware-inline-help d-none" role="note">
+    <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_COLUMNS_PRIORITY_HELP'); ?>
+</div>
 <div class="d-flex justify-content-end mb-2 cb-elements-columns-pending">
     <div class="dropdown cb-elements-columns-dropdown">
         <button type="button"
@@ -142,16 +146,22 @@ if ($debugModeEnabled) {
                     <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_LINK'), 'linkable') : Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_LINK'); ?>
                 </span>
             </th>
-            <th id="cb-form-view-elements-heading-api-allowed" data-cb-col="api">
+            <th id="cb-form-view-elements-heading-detail" data-cb-col="detail">
                 <span class="editlinktip hasTip cb-elements-heading-label"
-                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_API_ALLOWED_TIP'); ?>">
-                    <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_API'), 'api_allowed') : Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_API'); ?>
+                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_DETAIL_INCLUDE_TIP'); ?>">
+                    <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_DETAIL'), 'detail_include') : Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_DETAIL'); ?>
                 </span>
             </th>
             <th id="cb-form-view-elements-heading-editable" data-cb-col="edit">
                 <span class="editlinktip hasTip cb-elements-heading-label"
                     title="<?php echo Text::_('COM_CONTENTBUILDERNG_EDITABLE_TIP'); ?>">
                     <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_EDIT'), 'editable') : Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_EDIT'); ?>
+                </span>
+            </th>
+            <th id="cb-form-view-elements-heading-api-allowed" data-cb-col="api">
+                <span class="editlinktip hasTip cb-elements-heading-label"
+                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_API_ALLOWED_TIP'); ?>">
+                    <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_API'), 'api_allowed') : Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_API'); ?>
                 </span>
             </th>
             <th id="cb-form-view-elements-heading-wordwrap" data-cb-col="wordwrap">
@@ -185,9 +195,19 @@ if ($debugModeEnabled) {
             $listInclude = ContentbuilderngHelper::listIncludeInList('form', $row, $i);
             $searchInclude = ContentbuilderngHelper::listIncludeInSearch('form', $row, $i);
             $linkable = ContentbuilderngHelper::listLinkable('form', $row, $i);
+            $detailInclude = ContentbuilderngHelper::listDetailInclude('form', $row, $i);
             $apiAllowed = ContentbuilderngHelper::listApiAllowed('form', $row, $i);
             $editable = ContentbuilderngHelper::listEditable('form', $row, $i);
             $isBfSystemField = (int) ($row->reference_id ?? 0) < 0;
+            $isPublished = (int) ($row->published ?? 0) === 1;
+            $isDetailEnabled = (int) ($row->detail_include ?? 0) === 1;
+            $isEditEnabled = (int) ($row->editable ?? 0) === 1;
+            $unavailable = '<span class="tbody-icon jgrid cb-view-capability-locked" title="'
+                . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_FIELD_UNPUBLISHED_CAPABILITY_DISABLED'), ENT_QUOTES, 'UTF-8')
+                . '"><span class="icon-lock" aria-hidden="true"></span></span>';
+            $inactive = '<span class="tbody-icon jgrid text-muted cb-view-capability-off" aria-disabled="true" title="'
+                . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_FIELD_UNPUBLISHED_CAPABILITY_DISABLED'), ENT_QUOTES, 'UTF-8')
+                . '"><span class="icon-unpublish" aria-hidden="true"></span></span>';
             if ($isBfSystemField) {
                 $searchInclude = '<span class="text-muted" title="' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_SEARCH_DISABLED'), ENT_QUOTES, 'UTF-8') . '"><span class="icon-unpublish" aria-hidden="true"></span></span>';
                 $editable = '<span class="text-muted" title="' . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_BF_SYSTEM_FIELD_EDIT_DISABLED'), ENT_QUOTES, 'UTF-8') . '"><span class="icon-unpublish" aria-hidden="true"></span></span>';
@@ -278,18 +298,29 @@ if ($debugModeEnabled) {
                 <td class="align-top" data-cb-col="link">
                     <?php echo $linkable; ?>
                 </td>
-                <td class="align-top" data-cb-col="api">
-                    <?php echo $apiAllowed; ?>
+                <td class="align-top" data-cb-col="detail" data-cb-published-capability="detail" data-cb-capability-enabled="<?php echo $isDetailEnabled ? '1' : '0'; ?>">
+                    <span data-cb-capability-control<?php echo $isPublished ? '' : ' hidden'; ?>><?php echo $detailInclude; ?></span>
+                    <span data-cb-capability-lock<?php echo !$isPublished && $isDetailEnabled ? '' : ' hidden'; ?>><?php echo $unavailable; ?></span>
+                    <span data-cb-capability-off<?php echo !$isPublished && !$isDetailEnabled ? '' : ' hidden'; ?>><?php echo $inactive; ?></span>
                 </td>
-                <td class="align-top" data-cb-col="edit">
-                    <?php echo $editable; ?>
+                <td class="align-top" data-cb-col="edit"<?php echo $isBfSystemField ? '' : ' data-cb-published-capability="edit" data-cb-capability-enabled="' . ($isEditEnabled ? '1' : '0') . '"'; ?>>
+                    <?php if ($isBfSystemField) : ?>
+                        <?php echo $editable; ?>
+                    <?php else : ?>
+                        <span data-cb-capability-control<?php echo $isPublished ? '' : ' hidden'; ?>><?php echo $editable; ?></span>
+                        <span data-cb-capability-lock<?php echo !$isPublished && $isEditEnabled ? '' : ' hidden'; ?>><?php echo $unavailable; ?></span>
+                        <span data-cb-capability-off<?php echo !$isPublished && !$isEditEnabled ? '' : ' hidden'; ?>><?php echo $inactive; ?></span>
+                    <?php endif; ?>
                     <?php
                     if (!($item->edit_by_type ?? false) && (int) ($row->editable ?? 0) === 1) {
                         $typeBadgeClass = $isModifiedElement ? 'is-modified' : 'is-default';
                         $typeBadgeTitle = $isModifiedElement ? ' title="' . htmlspecialchars('Element settings changed from default', ENT_QUOTES, 'UTF-8') . '"' : '';
-                        echo '<div class="mt-1"><a class="cb-item-type-badge ' . $typeBadgeClass . '" href="index.php?option=com_contentbuilderng&amp;view=elementoptions&amp;tmpl=component&amp;element_id=' . $row->id . '&amp;id=' . (int) ($item->id ?? 0) . '" data-bs-toggle="modal" data-bs-target="#text-type-modal"' . $typeBadgeTitle . '>' . ($isModifiedElement ? 'Modified' : 'Default') . '</a></div>';
+                        echo '<div class="mt-1" data-cb-edit-type-badge' . ($isPublished ? '' : ' hidden') . '><a class="cb-item-type-badge ' . $typeBadgeClass . '" href="index.php?option=com_contentbuilderng&amp;view=elementoptions&amp;tmpl=component&amp;element_id=' . $row->id . '&amp;id=' . (int) ($item->id ?? 0) . '" data-bs-toggle="modal" data-bs-target="#text-type-modal"' . $typeBadgeTitle . '>' . ($isModifiedElement ? 'Modified' : 'Default') . '</a></div>';
                     }
                     ?>
+                </td>
+                <td class="align-top" data-cb-col="api">
+                    <?php echo $apiAllowed; ?>
                 </td>
                 <td class="align-top" data-cb-col="wordwrap">
                     <input class="form-control form-control-sm cb-wordwrap-input" type="text" size="4" maxlength="4" inputmode="numeric" pattern="[0-9]{0,4}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);"

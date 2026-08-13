@@ -184,7 +184,7 @@ class HtmlView extends BaseHtmlView
         }
 
         $configReturn = urlencode(base64_encode(
-            (string) Uri::base() . 'index.php?option=com_contentbuilderng&view=forms'
+            (string) Uri::base() . 'index.php?option=com_contentbuilderng&view=forms&layout=default'
         ));
         ToolbarHelper::link(
             'index.php?option=com_config&view=component&component=com_contentbuilderng&return=' . $configReturn,

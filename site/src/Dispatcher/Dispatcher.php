@@ -5,6 +5,9 @@ namespace CB\Component\Contentbuilderng\Site\Dispatcher;
 \defined('_JEXEC') or die;
 
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
+use CB\Component\Contentbuilderng\Site\Helper\MenuListConfigurationHelper;
+use CB\Component\Contentbuilderng\Site\Helper\MenuViewDefaultsHelper;
+use CB\Component\Contentbuilderng\Site\Service\MenuDataFilterService;
 use Joomla\CMS\Dispatcher\ComponentDispatcher;
 
 class Dispatcher extends ComponentDispatcher
@@ -46,8 +49,7 @@ class Dispatcher extends ComponentDispatcher
         $menuParamDefaults = [
             'cb_controller' => null,
             'cb_category_id' => null,
-            'cb_list_filterhidden' => null,
-            'cb_list_orderhidden' => null,
+            MenuDataFilterService::INPUT_NAME => null,
             'cb_show_author' => null,
             'cb_show_top_bar' => null,
             'cb_show_details_top_bar' => null,
@@ -61,6 +63,15 @@ class Dispatcher extends ComponentDispatcher
             'force_menu_item_id' => null,
             'cb_category_menu_filter' => null,
             'cb_theme_plugin' => null,
+            'cb_menu_search_fields' => null,
+            'cb_menu_link_fields' => null,
+            'cb_menu_detail_fields' => null,
+            'cb_menu_edit_fields' => null,
+            'cb_menu_published_fields' => null,
+            'cb_new_list_menu' => null,
+            'cb_new_show_search' => null,
+            'cb_new_show_list_edit' => null,
+            'cb_new_show_limit_selector' => null,
         ];
 
         foreach ($menuParamDefaults as $key => $default) {
@@ -124,8 +135,18 @@ class Dispatcher extends ComponentDispatcher
 
             $input->set('cb_category_id', (int) MenuParamHelper::getMenuParam($params, 'cb_category_id', 0));
             $input->set('cb_controller', MenuParamHelper::getMenuParam($params, 'cb_controller', null));
-            $input->set('cb_list_filterhidden', MenuParamHelper::getMenuParam($params, 'cb_list_filterhidden', null));
-            $input->set('cb_list_orderhidden', MenuParamHelper::getMenuParam($params, 'cb_list_orderhidden', null));
+            if (MenuListConfigurationHelper::isNewListMenu($item)) {
+                $newListConfig = MenuListConfigurationHelper::decode(
+                    MenuParamHelper::getMenuParam($params, 'cb_new_config', '{}')
+                );
+                $viewDefaults = MenuViewDefaultsHelper::get($formId);
+                $newListRequestParameters = MenuListConfigurationHelper::requestParameters(
+                    $newListConfig,
+                    (int) ($viewDefaults['cb_maximum_records'] ?? 0)
+                );
+            } else {
+                $newListRequestParameters = [];
+            }
             foreach (self::REQUEST_OVERRIDABLE_MENU_PARAMS as $overridableKey) {
                 $input->set(
                     $overridableKey,
@@ -133,6 +154,9 @@ class Dispatcher extends ComponentDispatcher
                         ? $requestedMenuOverrides[$overridableKey]
                         : MenuParamHelper::getMenuParam($params, $overridableKey, null)
                 );
+            }
+            foreach ($newListRequestParameters as $key => $value) {
+                $input->set($key, $value);
             }
             $input->set('cb_list_limit', MenuParamHelper::getMenuParam($params, 'cb_list_limit', null));
             $input->set('force_menu_item_id', MenuParamHelper::getMenuParam($params, 'force_menu_item_id', 0));

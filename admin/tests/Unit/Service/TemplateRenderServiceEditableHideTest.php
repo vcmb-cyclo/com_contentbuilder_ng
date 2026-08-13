@@ -16,7 +16,7 @@ final class TemplateRenderServiceEditableHideTest extends TestCase
             . '/admin/src/Service/TemplateRenderService.php';
         $source = \file_get_contents($path);
         self::assertIsString($source);
-        $this->source = $source;
+        $this->source = str_replace("\r\n", "\n", $source);
     }
 
     public function testEditableHideIfEmptyKeepsEmptyEditableItemsVisible(): void

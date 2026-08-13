@@ -602,6 +602,11 @@ namespace {
     require_once \dirname(__DIR__, 2) . '/site/src/Service/Router.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/CompactPaginationService.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/SparseFieldsetService.php';
+    require_once \dirname(__DIR__, 2) . '/site/src/Service/EmbeddedListFieldFilterService.php';
+    require_once \dirname(__DIR__, 2) . '/site/src/Service/EmbeddedListActionFilterService.php';
+    require_once \dirname(__DIR__) . '/src/Service/RuntimeUtilityService.php';
+    require_once \dirname(__DIR__, 2) . '/site/src/Service/MenuDataFilterService.php';
+    require_once \dirname(__DIR__, 2) . '/site/src/Helper/MenuListConfigurationHelper.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/StatsFilterValueService.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/StatsService.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/StatsHideOptionsService.php';

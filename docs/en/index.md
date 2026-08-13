@@ -102,6 +102,7 @@ See [Core concepts](concepts.md) for full details.
 - [Administration](administration.md)
 - [Frontend](frontend.md)
 - [Permissions and ACL](permissions-acl.md)
+- [View columns and permission priority](view-columns-and-priorities.md)
 - [JSON API](api-json.md)
 - [Templates and customization](templates-customization.md)
 - [Maintenance and troubleshooting](maintenance-troubleshooting.md)

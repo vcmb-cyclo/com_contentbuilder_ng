@@ -376,6 +376,7 @@ class com_contentbuilderngInstallerScript
                 $this->ensureFormsDisplayColumns();
                 $this->ensureFormsFilterExactMatchDefault();
                 $this->ensureElementsLinkableDefault();
+                $this->ensureElementsDetailIncludeColumn();
                 $this->ensureElementsApiAllowedColumn();
                 $this->ensureElementsListIncludeDefault();
                 $this->ensureElementsSearchIncludeDefault();
@@ -389,6 +390,7 @@ class com_contentbuilderngInstallerScript
                 $this->updateMenuLinks('com_contentbuilder_ng', 'com_contentbuilderng');
                 $this->migrateLegacyNestedMenuSettingsToRootParams();
                 $this->migrateLegacyMenuBackButtonParams();
+                $this->migrateClassicListMenusToModernListView();
 
                 // Install / update plugins shipped in package
                 $source = $this->resolveInstallSourcePath($parent);
@@ -1058,6 +1060,11 @@ class com_contentbuilderngInstallerScript
     private function ensureElementsLinkableDefault(): void
     {
         $this->schemaService->ensureElementsLinkableDefault();
+    }
+
+    private function ensureElementsDetailIncludeColumn(): void
+    {
+        $this->schemaService->ensureElementsDetailIncludeColumn();
     }
 
     private function ensureElementsApiAllowedColumn(): void
@@ -1996,6 +2003,15 @@ class com_contentbuilderngInstallerScript
                 continue;
             }
 
+            if ($table === '#__contentbuilderng_records') {
+                try {
+                    $totalUpdated += $this->normalizeLegacyBreezingFormsRecordTypes($legacyTypes, $targetType);
+                } catch (\Throwable $e) {
+                    $this->log("[WARNING] Failed normalizing legacy BreezingForms types in {$table}: " . $e->getMessage(), Log::WARNING);
+                }
+                continue;
+            }
+
             try {
                 $q = $db->getQuery(true)
                     ->update($db->quoteName($table))
@@ -2018,6 +2034,109 @@ class com_contentbuilderngInstallerScript
         } else {
             $this->log('[INFO] No legacy BreezingForms type value needed normalization.');
         }
+    }
+
+    private function migrateClassicListMenusToModernListView(): void
+    {
+        $summary = $this->migrationService->migrateClassicListMenus();
+        $migrated = (int) ($summary['migrated'] ?? 0);
+        $legacyMenus = is_array($summary['legacy'] ?? null) ? $summary['legacy'] : [];
+
+        if ($migrated > 0) {
+            $this->purgeCaches('postflight:migrateClassicListMenus');
+        }
+
+        if ($legacyMenus === []) {
+            return;
+        }
+
+        $labels = array_map(
+            static fn(mixed $label): string => htmlspecialchars((string) $label, ENT_QUOTES, 'UTF-8'),
+            $legacyMenus
+        );
+        Factory::getApplication()->enqueueMessage(
+            $this->installerText(
+                'COM_CONTENTBUILDERNG_INSTALLER_CLASSIC_LIST_MIGRATION_WARNING',
+                'Legacy filters or display ordering were removed while migrating these menu items to List View: %s. Recreate filters under Displayed columns → Data filter and sorting under Initial sort order → Custom.',
+                implode(', ', $labels)
+            ),
+            'warning'
+        );
+    }
+
+    /**
+     * Normalize records one by one so legacy aliases that identify the same
+     * source record cannot collide with the canonical unique key.
+     */
+    private function normalizeLegacyBreezingFormsRecordTypes(array $legacyTypes, string $targetType): int
+    {
+        $db = $this->db();
+        $legacyTypes = array_values(array_filter(
+            array_unique($legacyTypes),
+            static fn(string $type): bool => $type !== $targetType
+        ));
+
+        if ($legacyTypes === []) {
+            return 0;
+        }
+
+        $quoted = array_map(static fn(string $type): string => $db->quote($type), $legacyTypes);
+        $query = $db->getQuery(true)
+            ->select($db->quoteName(['id', 'reference_id', 'record_id']))
+            ->from($db->quoteName('#__contentbuilderng_records'))
+            ->where($db->quoteName('type') . ' IN (' . implode(',', $quoted) . ')')
+            ->order($db->quoteName('id') . ' ASC');
+        $db->setQuery($query);
+        $legacyRows = $db->loadAssocList() ?: [];
+        $updated = 0;
+        $removed = 0;
+
+        foreach ($legacyRows as $legacyRow) {
+            $id = (int) ($legacyRow['id'] ?? 0);
+            $referenceId = (int) ($legacyRow['reference_id'] ?? 0);
+            $recordId = (int) ($legacyRow['record_id'] ?? 0);
+
+            if ($id < 1) {
+                continue;
+            }
+
+            $canonicalQuery = $db->getQuery(true)
+                ->select($db->quoteName('id'))
+                ->from($db->quoteName('#__contentbuilderng_records'))
+                ->where($db->quoteName('type') . ' = ' . $db->quote($targetType))
+                ->where($db->quoteName('reference_id') . ' = ' . $referenceId)
+                ->where($db->quoteName('record_id') . ' = ' . $recordId);
+            $db->setQuery($canonicalQuery, 0, 1);
+            $canonicalId = (int) $db->loadResult();
+
+            if ($canonicalId > 0 && $canonicalId !== $id) {
+                $delete = $db->getQuery(true)
+                    ->delete($db->quoteName('#__contentbuilderng_records'))
+                    ->where($db->quoteName('id') . ' = ' . $id);
+                $db->setQuery($delete);
+                $db->execute();
+                $removed++;
+                continue;
+            }
+
+            $update = $db->getQuery(true)
+                ->update($db->quoteName('#__contentbuilderng_records'))
+                ->set($db->quoteName('type') . ' = ' . $db->quote($targetType))
+                ->where($db->quoteName('id') . ' = ' . $id);
+            $db->setQuery($update);
+            $db->execute();
+            $updated += (int) $db->getAffectedRows();
+        }
+
+        if ($removed > 0) {
+            $this->log("[OK] Removed {$removed} duplicate legacy BreezingForms record mapping(s) before type normalization.");
+        }
+
+        if ($updated > 0) {
+            $this->log("[OK] Normalized {$updated} legacy BreezingForms type row(s) in #__contentbuilderng_records.");
+        }
+
+        return $updated + $removed;
     }
 
     // ---------------------------------------------------------------------

@@ -69,6 +69,8 @@ class ElementoptionsTable extends Table
 
     public $linkable = 0;
 
+    public $detail_include = 1;
+
     public $editable = 0;
 
     public $api_allowed = 0;
@@ -87,7 +89,7 @@ class ElementoptionsTable extends Table
     /**
      * Constructor
      *
-     * @param object Database connector object
+     * @param DatabaseDriver $db Database connector object
      */
     public function __construct(DatabaseDriver $db)
     {

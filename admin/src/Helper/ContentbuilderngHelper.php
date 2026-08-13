@@ -600,6 +600,19 @@ class ContentbuilderngHelper
         );
     }
 
+    public static function listDetailInclude($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark', $prefix = '')
+    {
+        return self::renderBooleanStateToggle(
+            !empty($row->detail_include),
+            (int) $i,
+            (string) $prefix . (string) $domain . '.',
+            'detail_include',
+            'no_detail_include',
+            'COM_CONTENTBUILDERNG_DETAIL_INCLUDE',
+            'COM_CONTENTBUILDERNG_NO_DETAIL_INCLUDE'
+        );
+    }
+
     public static function listEditable($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark', $prefix = '')
     {
         return self::renderBooleanStateToggle(

@@ -5,6 +5,7 @@
 #adminForm .cb-perm-inherited .form-check-input{background-color:#dce2e8!important;border-color:#b8c2cc!important}
 #adminForm .cb-perm-inherited .form-check-input:indeterminate{background-color:#c8d1db!important;border-color:#9eacba!important}
 .cb-elements-table th[data-cb-col="api"],.cb-elements-table td[data-cb-col="api"]{width:4.75rem;text-align:center}
+.cb-elements-table th[data-cb-col="detail"],.cb-elements-table td[data-cb-col="detail"]{width:4.75rem;text-align:center}
 .cb-form-view-source-details{flex:1 1 0;min-width:0}.cb-form-view-inline-input{min-width:0}
 
 joomla-tab#view-pane{position:relative}
@@ -18,3 +19,4 @@ joomla-tab#view-pane>div[role="tablist"]>button[role="tab"] .cb-template-state.i
 .cb-item-label-cell{flex-flow:row wrap;align-items:center;column-gap:.5rem}
 .cb-item-label-display{flex:0 1 auto;min-width:0;width:auto!important}.cb-item-label-cell>.form-control{flex:1 1 14rem;min-width:10rem;width:auto!important}
 .cb-item-order-type-select{flex:0 0 auto;align-self:center}
+.cb-view-capability-locked{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border:2px solid var(--bs-secondary-color,#6c757d);border-radius:50%;background:var(--bs-secondary-bg,#e9ecef);color:var(--bs-secondary-color,#6c757d);cursor:not-allowed}.cb-view-capability-locked .icon-lock{font-size:.8rem}

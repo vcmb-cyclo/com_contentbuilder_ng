@@ -28,8 +28,10 @@ use CB\Component\Contentbuilderng\Administrator\Helper\ContentbuilderngHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\RuntimeUtilityService;
 use CB\Component\Contentbuilderng\Administrator\Service\ListSupportService;
 use CB\Component\Contentbuilderng\Site\Helper\MenuParamHelper;
+use CB\Component\Contentbuilderng\Site\Helper\MenuListConfigurationHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PublishedRecordVisibilityHelper;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
+use CB\Component\Contentbuilderng\Site\Service\MenuDataFilterService;
 
 class ExportModel extends BaseDatabaseModel
 {
@@ -48,9 +50,11 @@ class ExportModel extends BaseDatabaseModel
     private readonly ListSupportService $listSupportService;
     private $frontend = false;
 
-    private $_menu_filter = array();
+    /** @var array<string, list<string>> */
+    private array $recordFilters = [];
 
-    private $_menu_filter_order = array();
+    /** @var array<string, int|string> */
+    private array $recordFilterOrder = [];
 
     protected int $_id = 0;
 
@@ -121,49 +125,10 @@ class ExportModel extends BaseDatabaseModel
         $this->setState('formsd_filter_order', $filter_order);
         $this->setState('formsd_filter_order_Dir', $filter_order_Dir);
 
-        $menu_filter = $app->getInput()->get('cb_list_filterhidden', null, 'raw');
-        if (($menu_filter === null || $menu_filter === '') && $app->isClient('site')) {
-            $activeMenu = $app->getMenu()->getActive();
-            if ($activeMenu) {
-                $menu_filter = MenuParamHelper::getMenuParam($activeMenu->getParams(), 'cb_list_filterhidden', null);
-            }
-        }
-
-        if ($menu_filter !== null) {
-            $lines  = explode("\n", $menu_filter);
-            foreach ($lines as $line) {
-                $keyval = explode("\t", $line);
-                if (count($keyval) == 2) {
-                    $keyval[1] = $this->runtimeUtilityService->sanitizeHiddenFilterValue($keyval[1]);
-                    if ($keyval[1] != '') {
-                        $this->_menu_filter[$keyval[0]] = explode('|', $keyval[1]);
-                    }
-                }
-            }
-        }
-
-        $menu_filter_order = $app->getInput()->get('cb_list_orderhidden', null, 'raw');
-        if (($menu_filter_order === null || $menu_filter_order === '') && $app->isClient('site')) {
-            $activeMenu = $app->getMenu()->getActive();
-            if ($activeMenu) {
-                $menu_filter_order = MenuParamHelper::getMenuParam($activeMenu->getParams(), 'cb_list_orderhidden', null);
-            }
-        }
-
-        if ($menu_filter_order !== null) {
-            $lines  = explode("\n", $menu_filter_order);
-            foreach ($lines as $line) {
-                $keyval = explode("\t", $line);
-                if (count($keyval) == 2) {
-                    $keyval[1] = str_replace(array("\n", "\r"), "", $keyval[1]);
-                    if ($keyval[1] != '') {
-                        $this->_menu_filter_order[$keyval[0]] = intval($keyval[1]);
-                    }
-                }
-            }
-        }
-
-        @natsort($this->_menu_filter_order);
+        $this->recordFilters = MenuDataFilterService::decode(
+            $app->getInput()->get(MenuDataFilterService::INPUT_NAME, '', 'raw'),
+            $this->runtimeUtilityService
+        );
 
         $app->getSession()->set($option . 'formsd_id', $this->_id);
     }
@@ -227,6 +192,10 @@ class ExportModel extends BaseDatabaseModel
                         throw new \Exception(Text::_('COM_CONTENTBUILDERNG_FORM_NOT_FOUND'), 404);
                     }
                     $searchable_elements = $this->listSupportService->getListSearchableElements($this->_id);
+                    $searchable_elements = MenuListConfigurationHelper::filterSearchableElements(
+                        $searchable_elements,
+                        (string) $app->getInput()->getString('cb_menu_search_fields', '')
+                    );
                     $data->labels = $data->form->getElementLabels();
 
                     if (
@@ -263,18 +232,18 @@ class ExportModel extends BaseDatabaseModel
                             $i++;
                         }
 
-                        $this->_menu_filter = $new_filters;
-                        $this->_menu_filter_order = $orders;
+                        $this->recordFilters = $new_filters;
+                        $this->recordFilterOrder = $orders;
                     }
 
                     $ordered_extra_title = '';
-                    foreach ($this->_menu_filter_order as $order_key => $order) {
-                        if (isset($this->_menu_filter[$order_key])) {
+                    foreach ($this->recordFilterOrder as $order_key => $order) {
+                        if (isset($this->recordFilters[$order_key])) {
                             // range test
-                            $is_range = strstr(strtolower(implode(',', $this->_menu_filter[$order_key])), '@range') !== false;
-                            $is_match = strstr(strtolower(implode(',', $this->_menu_filter[$order_key])), '@match') !== false;
+                            $is_range = strstr(strtolower(implode(',', $this->recordFilters[$order_key])), '@range') !== false;
+                            $is_match = strstr(strtolower(implode(',', $this->recordFilters[$order_key])), '@match') !== false;
                             if ($is_range) {
-                                $ex = explode('/', implode(', ', $this->_menu_filter[$order_key]));
+                                $ex = explode('/', implode(', ', $this->recordFilters[$order_key]));
                                 if (count($ex) == 3) {
                                     $ex2 = explode('to', trim($ex[2]));
                                     $out = '';
@@ -295,12 +264,12 @@ class ExportModel extends BaseDatabaseModel
                                         $out = Text::_('COM_CONTENTBUILDERNG_FROM2') . ' ' . trim($val);
                                     }
                                     if ($out) {
-                                        $this->_menu_filter[$order_key] = $ex;
+                                        $this->recordFilters[$order_key] = $ex;
                                         $ordered_extra_title .= ' &raquo; ' . htmlspecialchars($data->labels[$order_key], ENT_QUOTES, 'UTF-8') . ': ' . htmlspecialchars($out, ENT_QUOTES, 'UTF-8');
                                     }
                                 }
                             } elseif ($is_match) {
-                                $ex = explode('/', implode(', ', $this->_menu_filter[$order_key]));
+                                $ex = explode('/', implode(', ', $this->recordFilters[$order_key]));
                                 if (count($ex) == 2) {
                                     $ex2 = explode(';', trim($ex[1]));
                                     $out = '';
@@ -315,12 +284,12 @@ class ExportModel extends BaseDatabaseModel
                                         $i++;
                                     }
                                     if ($out) {
-                                        $this->_menu_filter[$order_key] = $ex;
+                                        $this->recordFilters[$order_key] = $ex;
                                         $ordered_extra_title .= ' &raquo; ' . htmlspecialchars($data->labels[$order_key], ENT_QUOTES, 'UTF-8') . ': ' . htmlspecialchars($out, ENT_QUOTES, 'UTF-8');
                                     }
                                 }
                             } else {
-                                $ordered_extra_title .= ' &raquo; ' . htmlspecialchars($data->labels[$order_key], ENT_QUOTES, 'UTF-8') . ': ' . htmlspecialchars(implode(', ', $this->_menu_filter[$order_key]), ENT_QUOTES, 'UTF-8');
+                                $ordered_extra_title .= ' &raquo; ' . htmlspecialchars($data->labels[$order_key], ENT_QUOTES, 'UTF-8') . ': ' . htmlspecialchars(implode(', ', $this->recordFilters[$order_key]), ENT_QUOTES, 'UTF-8');
                             }
                         }
                     }
@@ -339,6 +308,10 @@ class ExportModel extends BaseDatabaseModel
                             ->where($db->quoteName('published') . ' = 1')
                             ->where($db->quoteName('type') . ' <> ' . $db->quote('hidden'))
                             ->order($db->quoteName('ordering'));
+                        $newMenuCustomColumns = $app->getInput()->getInt('cb_new_list_menu', 0) === 1;
+                        if ($newMenuCustomColumns) {
+                            $query->where($db->quoteName('list_include') . ' = 1');
+                        }
                         $db->setQuery($query);
                         $rows = $this->getDatabase()->loadAssocList();
                         $ids = array();
@@ -347,6 +320,32 @@ class ExportModel extends BaseDatabaseModel
                             $ids[] = $row['reference_id'];
                             $labels[] = $row['label'];
                             $order_types['col' . $row['reference_id']] = $row['order_type'];
+                        }
+                        if ($newMenuCustomColumns) {
+                            $ids = MenuListConfigurationHelper::filterSearchableElements(
+                                $ids,
+                                (string) $app->getInput()->getString('cb_menu_published_fields', '')
+                            );
+                        }
+                        $rawExportFields = trim((string) $app->getInput()->getString('cblist_fields', ''));
+                        if (
+                            $rawExportFields !== ''
+                            && EmbeddedListFieldFilterService::isEmbeddedRequest($app->getInput()->getCmd('cblist_embed', ''))
+                        ) {
+                            $match = EmbeddedListFieldFilterService::matchFieldSelectors(
+                                $ids,
+                                (array) $data->form->getElementNames(),
+                                $rawExportFields
+                            );
+                            $labelByReference = [];
+                            foreach ($rows as $row) {
+                                $labelByReference[(string) $row['reference_id']] = (string) $row['label'];
+                            }
+                            $ids = $match['columns'];
+                            $labels = array_map(
+                                static fn(int|string $reference): string => $labelByReference[(string) $reference] ?? (string) $reference,
+                                $ids
+                            );
                         }
                     }
                     $data->visible_cols = $ids;
@@ -384,18 +383,31 @@ class ExportModel extends BaseDatabaseModel
                             $app->getInput()->getCmd('cblist_embed', '')
                         )
                     ) {
-                        $sortMatch = EmbeddedListFieldFilterService::matchSelectors(
-                            $ids,
-                            (array) $data->form->getElementNames(),
-                            $embeddedSort
-                        );
-                        if ($sortMatch['unknown'] === []) {
+                        $sortColumns = [];
+                        $unknownSortFields = [];
+                        foreach (EmbeddedListFieldFilterService::parseSelectors($embeddedSort) as $selector) {
+                            if (strcasecmp($selector, 'ID') === 0) {
+                                $sortColumns[] = 'Record';
+                                continue;
+                            }
+                            $match = EmbeddedListFieldFilterService::matchSelectors(
+                                $ids,
+                                (array) $data->form->getElementNames(),
+                                $selector
+                            );
+                            if ($match['unknown'] !== [] || $match['columns'] === []) {
+                                $unknownSortFields[] = $selector;
+                                continue;
+                            }
+                            $sortColumns[] = (string) $match['columns'][0];
+                        }
+                        if ($unknownSortFields === []) {
                             $directions = explode('|', strtolower(trim(
                                 (string) $app->getInput()->getString('cblist_dir', 'asc')
                             )));
                             $exportOrdering = implode('|', array_map(
                                 static fn(int|string $column): string => 'col' . $column,
-                                $sortMatch['columns']
+                                $sortColumns
                             ));
                             $exportOrderDirection = implode('|', array_map(
                                 static fn(string $direction): string => $direction === 'desc' ? 'desc' : 'asc',
@@ -425,7 +437,7 @@ class ExportModel extends BaseDatabaseModel
                         $data->initial_sort_order == -1 ? -1 : 'col' . $data->initial_sort_order,
                         $data->initial_sort_order2 == -1 ? -1 : ((string) $data->initial_sort_order2 === '0' ? 'colRecord' : 'col' . $data->initial_sort_order2),
                         $data->initial_sort_order3 == -1 ? -1 : ((string) $data->initial_sort_order3 === '0' ? 'colRecord' : 'col' . $data->initial_sort_order3),
-                        $this->_menu_filter,
+                        $this->recordFilters,
                         $showAllLanguages,
                         $this->getState('formsd_filter_language'),
                         $act_as_registration,

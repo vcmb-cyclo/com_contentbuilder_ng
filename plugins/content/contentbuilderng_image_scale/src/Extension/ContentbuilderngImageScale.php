@@ -858,7 +858,7 @@ final class ContentbuilderngImageScale extends CMSPlugin implements SubscriberIn
 	public function measureTime()
 	{
 		$a = explode(' ', microtime());
-		return ((double) $a[0] + $a[1]) / 1000;
+		return ((float) $a[0] + $a[1]) / 1000;
 	}
 	/*
 					  public function resize_image($source_image, $destination_width, $destination_height, $type = 0, $bgcolor = array(0,0,0)) {

@@ -176,6 +176,7 @@
         list: true,
         search: true,
         link: true,
+        detail: true,
         edit: true,
         wordwrap: false,
         publish: true,
@@ -396,6 +397,14 @@
                 nextTask: 'form.linkable',
                 enabled: false
             },
+            'form.detail_include': {
+                nextTask: 'form.no_detail_include',
+                enabled: true
+            },
+            'form.no_detail_include': {
+                nextTask: 'form.detail_include',
+                enabled: false
+            },
             'form.api_allowed': {
                 nextTask: 'form.not_api_allowed',
                 enabled: true
@@ -599,6 +608,84 @@
         }
     }
 
+    function cbRefreshPublishedCapabilityCell(cell, published) {
+        var control = cell.querySelector('[data-cb-capability-control]');
+        var lock = cell.querySelector('[data-cb-capability-lock]');
+        var off = cell.querySelector('[data-cb-capability-off]');
+        var enabled = cell.dataset.cbCapabilityEnabled === '1';
+
+        if (control) {
+            control.hidden = !published;
+        }
+        if (lock) {
+            lock.hidden = published || !enabled;
+        }
+        if (off) {
+            off.hidden = published || enabled;
+        }
+    }
+
+    function cbUpdateStoredCapabilityState(actionElement, task, rowId) {
+        var capability = '';
+
+        if (task === 'form.detail_include' || task === 'form.no_detail_include') {
+            capability = 'detail';
+        } else if (task === 'form.editable' || task === 'form.not_editable') {
+            capability = 'edit';
+        } else {
+            return;
+        }
+
+        var row = actionElement && typeof actionElement.closest === 'function'
+            ? actionElement.closest('tr[data-cb-row-id]') : null;
+        if (!row && rowId !== '') {
+            row = document.querySelector('tr[data-cb-row-id="' + window.CSS.escape(String(rowId)) + '"]');
+        }
+        if (!row) {
+            return;
+        }
+
+        var cell = row.querySelector('[data-cb-published-capability="' + capability + '"]');
+        var meta = cbGetToggleTaskMeta(task);
+        if (!cell || !meta) {
+            return;
+        }
+
+        cell.dataset.cbCapabilityEnabled = meta.enabled ? '1' : '0';
+    }
+
+    function cbUpdatePublishedCapabilities(actionElement, task, rowId) {
+        if (task !== 'form.listpublish' && task !== 'form.listunpublish') {
+            return;
+        }
+
+        var row = actionElement && typeof actionElement.closest === 'function'
+            ? actionElement.closest('tr[data-cb-row-id]') : null;
+        if (!row && rowId !== '') {
+            row = document.querySelector('tr[data-cb-row-id="' + window.CSS.escape(String(rowId)) + '"]');
+        }
+        if (!row) {
+            return;
+        }
+
+        var published = task === 'form.listpublish';
+        row.querySelectorAll('[data-cb-published-capability]').forEach(function(cell) {
+            cbRefreshPublishedCapabilityCell(cell, published);
+        });
+
+        var editTypeBadge = row.querySelector('[data-cb-edit-type-badge]');
+        if (editTypeBadge) {
+            editTypeBadge.hidden = !published;
+        }
+    }
+
+    function cbApplyAjaxRowMutation(actionElement, task, rowId) {
+        cbApplyAjaxToggleState(actionElement, task);
+        cbUpdateStoredCapabilityState(actionElement, task, rowId);
+        cbUpdateEditableBadge(actionElement, task, rowId);
+        cbUpdatePublishedCapabilities(actionElement, task, rowId);
+    }
+
     function cbIsAjaxToggleTask(task) {
         return [
             'form.list_include',
@@ -607,6 +694,8 @@
             'form.no_search_include',
             'form.linkable',
             'form.not_linkable',
+            'form.detail_include',
+            'form.no_detail_include',
             'form.api_allowed',
             'form.not_api_allowed',
             'form.editable',
@@ -696,6 +785,8 @@
     var cbFlagTaskMap = {
         'form.linkable':          { field: 'linkable',       value: '1' },
         'form.not_linkable':      { field: 'linkable',       value: '0' },
+        'form.detail_include':    { field: 'detail_include', value: '1' },
+        'form.no_detail_include': { field: 'detail_include', value: '0' },
         'form.editable':          { field: 'editable',       value: '1' },
         'form.not_editable':      { field: 'editable',       value: '0' },
         'form.api_allowed':       { field: 'api_allowed',    value: '1' },
@@ -908,12 +999,14 @@
                         actionElement = row.querySelector(
                             '[data-item-task="' + task + '"], [data-submit-task="' + task + '"], [data-task="' + task + '"], [onclick*="' + task + '"]'
                         );
+                        if (!actionElement && (task === 'form.listpublish' || task === 'form.listunpublish')) {
+                            actionElement = row.querySelector('[data-cb-col="publish"] .js-grid-item-action, [data-cb-col="publish"] button, [data-cb-col="publish"] a');
+                        }
                     }
                 }
 
                 cbSubmitTaskAjax(task, rowId, function() {
-                    cbApplyAjaxToggleState(actionElement, task);
-                    cbUpdateEditableBadge(actionElement, task, rowId);
+                    cbApplyAjaxRowMutation(actionElement, task, rowId);
                     if (task === 'form.debug_on' || task === 'form.debug_off') {
                         cbReloadForDebugToggle(rowId);
                     }
@@ -972,6 +1065,8 @@
             case 'form.listunpublish':
             case 'form.linkable':
             case 'form.not_linkable':
+            case 'form.detail_include':
+            case 'form.no_detail_include':
             case 'form.editable':
             case 'form.not_editable':
             case 'form.api_allowed':
@@ -1645,8 +1740,7 @@
             }
 
             cbSubmitTaskAjax(task, rowId, function() {
-                cbApplyAjaxToggleState(actionElement, task);
-                cbUpdateEditableBadge(actionElement, task, rowId);
+                cbApplyAjaxRowMutation(actionElement, task, rowId);
                 if (task === 'form.debug_on' || task === 'form.debug_off') {
                     cbReloadForDebugToggle(rowId);
                 }

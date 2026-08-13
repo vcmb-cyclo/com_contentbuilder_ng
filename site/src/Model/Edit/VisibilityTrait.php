@@ -25,7 +25,7 @@ trait VisibilityTrait
 {
     private function isRecordAllowedByMenuFilter(object $data, array $ids): bool
     {
-        if ((int) $this->_record_id <= 0 || empty($this->_menu_filter)) {
+        if ((int) $this->_record_id <= 0 || empty($this->recordFilters)) {
             return true;
         }
 
@@ -53,7 +53,7 @@ trait VisibilityTrait
             -1,
             -1,
             -1,
-            $this->_menu_filter,
+            $this->recordFilters,
             $showAllLanguages,
             null
         );

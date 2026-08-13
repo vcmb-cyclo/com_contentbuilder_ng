@@ -1161,7 +1161,7 @@ class TemplateRenderService
         return '';
     }
 
-    public function getEditableTemplate($contentbuilderngFormId, $recordId, array $record, array $elementsAllowed, $execPrepare = true)
+    public function getEditableTemplate($contentbuilderngFormId, $recordId, array $record, array $elementsAllowed, $execPrepare = true, ?array $editableElementsAllowed = null)
     {
         $app = $this->getApp();
         $session = $app->getSession();
@@ -1408,7 +1408,8 @@ class TemplateRenderService
             $elementReferenceId = $element['reference_id'] ?? '';
             $elementCustomInit = $element['custom_init_script'] ?? '';
             $elementHint = $element['hint'] ?? '';
-            $isEditable = (int) ($element['editable'] ?? 1) === 1;
+            $isEditable = (int) ($element['editable'] ?? 1) === 1
+                && ($editableElementsAllowed === null || in_array($elementReferenceId, $editableElementsAllowed));
             $isSourceRequired = isset($sourceRequiredElements[(string) $elementReferenceId]);
             $hasLabelMarker = str_contains($template, '{' . $key . ':label}');
 
@@ -1428,6 +1429,7 @@ class TemplateRenderService
             if (!is_object($options)) {
                 $options = new \stdClass();
             }
+            $isReadOnly = !$isEditable || (bool) ($options->readonly ?? false);
 
             $sourceVarcharSize = (int) ($sourceVarcharSizes[(string) $elementReferenceId] ?? 0);
             if ($elementType === 'text' && $sourceVarcharSize > 0) {
@@ -1633,6 +1635,13 @@ class TemplateRenderService
                 $theItem = preg_replace('/\s+onclick="[^"]*"/i', '', $theItem);
             }
 
+            if ($isReadOnly && $elementType !== 'hidden' && $theItem !== '') {
+                $readOnlyText = Text::_('COM_CONTENTBUILDERNG_FIELD_READ_ONLY');
+                $theItem = '<div class="cbReadOnlyField" role="group" aria-label="'
+                    . htmlspecialchars($readOnlyText, ENT_QUOTES, 'UTF-8')
+                    . '">' . $theItem . '</div>';
+            }
+
             if ($elementCustomInit) {
                 $theInitScripts .= $elementCustomInit . "\n";
             }
@@ -1655,9 +1664,20 @@ class TemplateRenderService
             if ($theItem !== '' || $replaceTokens) {
                 $tip = 'hasTip';
                 $tipPrefix = htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') . '::';
+                $readOnlyText = Text::_('COM_CONTENTBUILDERNG_FIELD_READ_ONLY');
+                $readOnlyBadge = $isReadOnly
+                    ? ' <span class="cbReadOnlyBadge badge rounded-pill text-bg-secondary" title="'
+                        . htmlspecialchars($readOnlyText, ENT_QUOTES, 'UTF-8')
+                        . '"><span class="icon-lock" aria-hidden="true"></span> '
+                        . htmlspecialchars($readOnlyText, ENT_QUOTES, 'UTF-8')
+                        . '</span>'
+                    : '';
                 $labelHtml = $this->debugFieldNamePrefix((int) $contentbuilderngFormId, (string) $key, (string) ($result['type'] ?? ''))
-                    . '<label ' . ($elementHint ? 'class="editlinktip ' . $tip . '" title="' . $tipPrefix . $elementHint . '" ' : '') . 'for="cb_' . $item['id'] . '">' . $item['label'] . $asterisk . ($elementHint ? ' <img style="cursor: pointer;" src="' . Uri::root(true) . '/media/com_contentbuilderng/images/icon_info.png" border="0"/>' : '') . '</label>';
+                    . '<label ' . ($elementHint ? 'class="editlinktip ' . $tip . '" title="' . $tipPrefix . $elementHint . '" ' : '') . 'for="cb_' . $item['id'] . '">' . $item['label'] . $asterisk . $readOnlyBadge . ($elementHint ? ' <img style="cursor: pointer;" src="' . Uri::root(true) . '/media/com_contentbuilderng/images/icon_info.png" border="0"/>' : '') . '</label>';
                 $valueHtml = nl2br(htmlspecialchars((string) $hideIfEmptyValue, ENT_QUOTES, 'UTF-8'));
+                if ($isReadOnly) {
+                    $valueHtml = '<span class="cbReadOnlyValue">' . $valueHtml . '</span>';
+                }
                 $template = $this->replaceEditableReadonlyPair($template, (string) $key, $labelHtml, $valueHtml);
                 $template = str_replace('{' . $key . ':label}', $labelHtml, $template);
                 $template = str_replace('{' . $key . ':value}', '<div class="form-control-plaintext py-0">' . $valueHtml . '</div>', $template);

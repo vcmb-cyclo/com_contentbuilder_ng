@@ -24,11 +24,11 @@ final class RuntimeUtilityServiceTest extends TestCase
         Log::$entries = [];
     }
 
-    public function testSanitizesAndExpandsHiddenFilterVariables(): void
+    public function testSanitizesAndExpandsDataFilterVariables(): void
     {
         self::assertSame(
             '42|unit_user|Unit User|2026-02-17 12:00:00|12:00:00|2026-02-17 12:00:00',
-            $this->service->sanitizeHiddenFilterValue(
+            $this->service->sanitizeDataFilterTerm(
                 " {userid}|{username}|{name}|{date}|{time}|{datetime}\r\n"
             )
         );
@@ -50,14 +50,14 @@ final class RuntimeUtilityServiceTest extends TestCase
     #[DataProvider('blockedExpressionProvider')]
     public function testBlocksPhpExpressions(string $value): void
     {
-        self::assertSame('', $this->service->sanitizeHiddenFilterValue($value));
-        self::assertSame('Blocked PHP expression in hidden filter value.', Log::$entries[0][0]);
+        self::assertSame('', $this->service->sanitizeDataFilterTerm($value));
+        self::assertSame('Blocked PHP expression in data filter term.', Log::$entries[0][0]);
         self::assertSame(Log::WARNING, Log::$entries[0][1]);
     }
 
     public function testReturnsEmptyStringWithoutLogging(): void
     {
-        self::assertSame('', $this->service->sanitizeHiddenFilterValue(" \r\n "));
+        self::assertSame('', $this->service->sanitizeDataFilterTerm(" \r\n "));
         self::assertSame([], Log::$entries);
     }
 

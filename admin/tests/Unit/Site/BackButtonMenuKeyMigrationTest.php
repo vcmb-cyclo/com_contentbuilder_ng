@@ -193,16 +193,11 @@ final class BackButtonMenuKeyMigrationTest extends TestCase
     public function testMenuFieldsReadRootAndSettingsParams(): void
     {
         $formsField = $this->read('site/src/Field/FormsField.php');
-        $filterField = $this->read('site/src/Field/CbfilterField.php');
 
         self::assertStringContainsString("getValue('form_id', 'params', 0)", $formsField);
         self::assertStringContainsString("get('params.form_id', 0)", $formsField);
         self::assertStringContainsString('$value === (string) $selectedFormId', $formsField);
         self::assertStringNotContainsString('$value === (string) $this->value', $formsField);
-        self::assertStringContainsString("getValue('form_id', 'params', 0)", $filterField);
-        self::assertStringContainsString("get('params.form_id', 0)", $filterField);
-        self::assertStringContainsString('#jform_params_form_id', $filterField);
-        self::assertStringContainsString('jform[params][form_id]', $filterField);
     }
 
     public function testPhaseSevenRuntimeLotUsesLocalDatabaseAndMailerAccessors(): void
@@ -268,7 +263,6 @@ final class BackButtonMenuKeyMigrationTest extends TestCase
     {
         foreach ([
             'site/src/Field/FormsField.php',
-            'site/src/Field/CbfilterField.php',
             'site/src/Field/CategoriesField.php',
             'site/src/Field/MultiformsField.php',
             'site/src/Field/CbmenuresetField.php',

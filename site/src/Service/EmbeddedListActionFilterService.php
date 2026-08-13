@@ -87,6 +87,19 @@ final class EmbeddedListActionFilterService
         return $allowedActions === [] || in_array($action, $allowedActions, true);
     }
 
+    public static function isRequestAllowed(string $context, string $rawActions, string $action): bool
+    {
+        if (!EmbeddedListFieldFilterService::isEmbeddedRequest($context)) {
+            return true;
+        }
+
+        try {
+            return self::isAllowed($action, self::parseActions($rawActions));
+        } catch (\InvalidArgumentException) {
+            return false;
+        }
+    }
+
     /**
      * Builds the "which {CBList actions="..."} terms apply here, and are
      * they currently allowed" table shown in the frontend debug panel, for

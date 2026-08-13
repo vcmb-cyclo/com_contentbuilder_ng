@@ -103,6 +103,7 @@ Voir [Concepts](concepts.md) pour le détail complet.
 - [Administration](administration.md)
 - [Frontend](frontend.md)
 - [Permissions et ACL](permissions-acl.md)
+- [Colonnes d’une Vue et priorité des autorisations](colonnes-vue-et-priorites.md)
 - [API JSON](api-json.md)
 - [Templates et personnalisation](templates-personnalisation.md)
 - [Maintenance et dépannage](maintenance-depannage.md)

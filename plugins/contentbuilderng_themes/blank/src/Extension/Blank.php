@@ -222,6 +222,7 @@ final class Blank extends CMSPlugin implements SubscriberInterface
 				->select([$db->quoteName('id'), $db->quoteName('type')])
 				->from($db->quoteName('#__contentbuilderng_elements'))
 				->where($db->quoteName('published') . ' = 1')
+				->where($db->quoteName('detail_include') . ' = 1')
 				->where($db->quoteName('form_id') . ' = ' . (int) $contentbuilderng_form_id)
 				->where($db->quoteName('reference_id') . ' = ' . $db->quote($reference_id));
 			$db->setQuery($query);

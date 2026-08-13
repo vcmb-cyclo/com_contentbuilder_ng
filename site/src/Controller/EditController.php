@@ -37,6 +37,7 @@ use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewThemeHelper;
 use CB\Component\Contentbuilderng\Site\Model\EditModel;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
 
 class EditController extends BaseController
 {
@@ -220,6 +221,7 @@ class EditController extends BaseController
 
     public function save($apply = false)
     {
+        $this->assertConstrainedAction($this->input->getInt('record_id', 0) > 0 ? 'edit' : 'new');
         $isAdminPreview = $this->applyPreviewContextForAction();
 
         if ($this->siteApp->isClient('site') && $this->siteApp->getInput()->getInt('Itemid', 0)) {
@@ -306,6 +308,7 @@ class EditController extends BaseController
 
     public function delete()
     {
+        $this->assertConstrainedAction('delete');
         $this->checkToken('post');
 
         // Never bypassed for an admin-preview session: the preview permission
@@ -383,6 +386,7 @@ class EditController extends BaseController
 
     public function state()
     {
+        $this->assertConstrainedAction('state');
         if (!$this->checkToken('post', false)) {
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'), 403);
         }
@@ -426,6 +430,7 @@ class EditController extends BaseController
 
     public function publish()
     {
+        $this->assertConstrainedAction('publish');
         // "request" (not "post"): the per-row publish toggle is a GET link, so
         // the token is carried in the query string. The list template appends
         // it via Session::getFormToken().
@@ -667,6 +672,7 @@ class EditController extends BaseController
         // 1) d'abord depuis l'URL
         $formId   = $this->input->getInt('id', 0);
         $recordId = $this->input->getInt('record_id', 0);
+        $this->assertConstrainedAction($recordId > 0 ? 'edit' : 'new');
 
         if ($isDirectStorageMode) {
             // Édition directe d'un storage : résout (ou crée à la volée, avec
@@ -732,6 +738,19 @@ class EditController extends BaseController
         $this->siteApp->getInput()->set('view', 'edit');
 
         parent::display();
+    }
+
+    private function assertConstrainedAction(string $action): void
+    {
+        if (
+            !EmbeddedListActionFilterService::isRequestAllowed(
+                (string) $this->input->getCmd('cblist_embed', ''),
+                (string) $this->input->getString('cblist_actions', ''),
+                $action
+            )
+        ) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_MENU_ACTION_DISABLED'), 403);
+        }
     }
 
     /**

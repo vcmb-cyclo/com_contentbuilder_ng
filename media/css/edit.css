@@ -19,6 +19,63 @@
 .cbEditableWrapper .cbEditableBody{
     margin-bottom:1rem;
 }
+.cbEditableWrapper .cbReadOnlyBadge{
+    display:inline-flex;
+    align-items:center;
+    gap:.2rem;
+    margin-left:.35rem;
+    font-size:.68rem;
+    font-weight:600;
+    letter-spacing:normal;
+    line-height:1.25;
+    text-transform:none;
+    vertical-align:middle;
+}
+.cbEditableWrapper .cbReadOnlyField{
+    display:flex;
+    align-items:center;
+    min-width:0;
+    cursor:not-allowed;
+}
+.cbEditableWrapper .cbReadOnlyField *{
+    cursor:not-allowed;
+}
+.cbEditableWrapper .cbReadOnlyField > .cbFormField{
+    min-width:0;
+}
+.cbEditableWrapper .cbReadOnlyField :is(input,textarea,select,button):is([readonly],[disabled]){
+    color:var(--bs-secondary-color,#6c757d)!important;
+    background-color:var(--bs-secondary-bg,#e9ecef)!important;
+    border-color:var(--bs-border-color,#ced4da)!important;
+    border-style:dashed!important;
+    box-shadow:none!important;
+    cursor:not-allowed;
+    font-style:italic;
+    opacity:1;
+}
+.cbEditableWrapper .cbReadOnlyField .form-check-label{
+    color:var(--bs-secondary-color,#6c757d);
+    font-style:italic;
+}
+.cbEditableWrapper .cbReadOnlyField .form-check-input:disabled{
+    filter:none;
+    opacity:.65;
+}
+.cbEditableWrapper .cbReadOnlyField .form-check-input:disabled:checked{
+    background-color:var(--bs-secondary-color,#6c757d)!important;
+    border-color:var(--bs-secondary-color,#6c757d)!important;
+    opacity:1;
+}
+.cbEditableWrapper .cbReadOnlyField .form-check-input:disabled:checked + .form-check-label{
+    color:var(--bs-body-color,#212529);
+    font-weight:700;
+    font-style:italic;
+}
+.cbEditableWrapper .cbReadOnlyValue{
+    color:var(--bs-secondary-color,#6c757d);
+    font-style:italic;
+    cursor:not-allowed;
+}
 @media (prefers-color-scheme: dark){
     html:not([data-bs-theme="light"]) .cbEditStateControl .form-label,
     html:not([data-bs-theme="light"]) .cbEditRatingControl .form-label{
@@ -61,6 +118,14 @@
     html:not([data-bs-theme="light"]) .cbEditRatingControl .cbVotingDisplay{
         filter:drop-shadow(0 1px 0 rgba(0,0,0,.35));
     }
+    html:not([data-bs-theme="light"]) .cbEditableWrapper .cbReadOnlyField :is(input,textarea,select,button):is([readonly],[disabled]){
+        color:#b9c6d6!important;
+        background-color:#1b2735!important;
+        border-color:rgba(190,213,241,.35)!important;
+    }
+    html:not([data-bs-theme="light"]) .cbEditableWrapper .cbReadOnlyValue{
+        color:#b9c6d6;
+    }
 }
 html[data-bs-theme="dark"] .cbEditStateControl .form-label,
 html[data-bs-theme="dark"] .cbEditRatingControl .form-label{
@@ -102,6 +167,14 @@ html[data-bs-theme="dark"] .cbEditRatingControl .cbRatingVotes{
 }
 html[data-bs-theme="dark"] .cbEditRatingControl .cbVotingDisplay{
     filter:drop-shadow(0 1px 0 rgba(0,0,0,.35));
+}
+html[data-bs-theme="dark"] .cbEditableWrapper .cbReadOnlyField :is(input,textarea,select,button):is([readonly],[disabled]){
+    color:#b9c6d6!important;
+    background-color:#1b2735!important;
+    border-color:rgba(190,213,241,.35)!important;
+}
+html[data-bs-theme="dark"] .cbEditableWrapper .cbReadOnlyValue{
+    color:#b9c6d6;
 }
 @media (max-width:575.98px){
     .cbEditStateControlRow{

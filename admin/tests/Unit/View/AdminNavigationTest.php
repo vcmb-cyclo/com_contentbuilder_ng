@@ -23,7 +23,7 @@ final class AdminNavigationTest extends TestCase
         self::assertStringContainsString("protected \$default_view = 'forms';", $displayController);
         self::assertStringNotContainsString("protected \$default_view = 'storages';", $displayController);
         self::assertStringContainsString(
-            "index.php?option=com_contentbuilderng&view=forms",
+            "index.php?option=com_contentbuilderng&view=forms&layout=default",
             $aboutView
         );
     }
@@ -37,6 +37,21 @@ final class AdminNavigationTest extends TestCase
         self::assertGreaterThanOrEqual(2, \count($submenu));
         self::assertSame('forms', (string) $submenu[0]['view']);
         self::assertSame('storages', (string) $submenu[1]['view']);
+    }
+
+    public function testContentbuilderOptionsKeepsItsAdministratorMenuBranchOpen(): void
+    {
+        $plugin = $this->read(
+            'plugins/system/contentbuilderng_system/src/Extension/ContentbuilderngSystem.php'
+        );
+
+        self::assertStringContainsString("\$option === 'com_contentbuilderng'", $plugin);
+        self::assertStringContainsString("\$option === 'com_config'", $plugin);
+        self::assertStringContainsString("getCmd('component') === 'com_contentbuilderng'", $plugin);
+        self::assertStringContainsString('view=forms', $plugin);
+        self::assertStringContainsString("classList.add('mm-active')", $plugin);
+        self::assertStringContainsString("classList.add('mm-show')", $plugin);
+        self::assertStringContainsString("setAttribute('aria-expanded', 'true')", $plugin);
     }
 
     private function read(string $relativePath): string

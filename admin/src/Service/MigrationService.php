@@ -238,6 +238,155 @@ final class MigrationService
         }
     }
 
+    /**
+     * Migrates removed List View Classic menu items to the sole supported List View.
+     *
+     * @return array{migrated: int, legacy: list<string>}
+     */
+    public function migrateClassicListMenus(): array
+    {
+        $db = $this->db();
+        $rows = $this->safe(function () use ($db): array {
+            $query = $db->getQuery(true)
+                ->select($db->quoteName(['id', 'title', 'link', 'params']))
+                ->from($db->quoteName('#__menu'))
+                ->where($db->quoteName('client_id') . ' = 0')
+                ->where($db->quoteName('type') . ' = ' . $db->quote('component'))
+                ->where($db->quoteName('link') . ' LIKE ' . $db->quote('%option=com_contentbuilderng%'))
+                ->where($db->quoteName('link') . ' LIKE ' . $db->quote('%layout=listclassic%'))
+                ->order($db->quoteName('id') . ' ASC');
+            $db->setQuery($query);
+
+            return $db->loadAssocList() ?: [];
+        }, []);
+
+        $migrated = 0;
+        $legacyMenus = [];
+
+        foreach ($rows as $row) {
+            $normalized = self::modernizeClassicListMenu($row);
+
+            if ($normalized === null) {
+                continue;
+            }
+
+            $menuId = (int) $normalized['id'];
+            $updated = $this->safe(function () use ($db, $menuId, $normalized): bool {
+                $query = $db->getQuery(true)
+                    ->update($db->quoteName('#__menu'))
+                    ->set($db->quoteName('link') . ' = ' . $db->quote($normalized['link']))
+                    ->set($db->quoteName('params') . ' = ' . $db->quote($normalized['params']))
+                    ->where($db->quoteName('id') . ' = ' . $menuId);
+                $db->setQuery($query);
+                $db->execute();
+
+                return true;
+            }, false);
+
+            if (!$updated) {
+                continue;
+            }
+
+            $migrated++;
+
+            if ($normalized['hadLegacyConfiguration']) {
+                $title = trim((string) $normalized['title']);
+                $legacyMenus[] = ($title !== '' ? $title : 'Menu') . ' [ID ' . $menuId . ']';
+            }
+        }
+
+        if ($migrated > 0) {
+            $this->log("[OK] Migrated {$migrated} List View Classic menu item(s) to List View and removed obsolete parameters.");
+        }
+
+        return ['migrated' => $migrated, 'legacy' => $legacyMenus];
+    }
+
+    /**
+     * Pure row normalizer used by the installer and its migration tests.
+     *
+     * @param array<string, mixed> $row
+     * @return array{id: int, title: string, link: string, params: string, hadLegacyConfiguration: bool}|null
+     */
+    public static function modernizeClassicListMenu(array $row): ?array
+    {
+        $link = (string) ($row['link'] ?? '');
+        $queryString = (string) (parse_url(str_replace('&amp;', '&', $link), PHP_URL_QUERY) ?? '');
+        parse_str($queryString, $query);
+
+        if (
+            ($query['option'] ?? '') !== 'com_contentbuilderng'
+            || ($query['view'] ?? '') !== 'list'
+            || ($query['layout'] ?? '') !== 'listclassic'
+        ) {
+            return null;
+        }
+
+        $query['layout'] = 'default';
+        $path = (string) (parse_url($link, PHP_URL_PATH) ?? 'index.php');
+        $fragment = (string) (parse_url($link, PHP_URL_FRAGMENT) ?? '');
+        $modernLink = $path . '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986)
+            . ($fragment !== '' ? '#' . $fragment : '');
+        $rawParams = trim((string) ($row['params'] ?? ''));
+        $params = $rawParams === '' ? [] : json_decode($rawParams, true);
+
+        if (!is_array($params)) {
+            return null;
+        }
+
+        $legacyKeys = ['cb_list_filterhidden', 'cb_list_orderhidden', 'cb_list_filter'];
+        $hadLegacyConfiguration = false;
+
+        foreach ($legacyKeys as $key) {
+            if (self::hasStoredMenuValue($params[$key] ?? null)) {
+                $hadLegacyConfiguration = true;
+            }
+
+            unset($params[$key]);
+        }
+
+        $settings = $params['settings'] ?? null;
+
+        if (is_array($settings)) {
+            foreach ($legacyKeys as $key) {
+                if (self::hasStoredMenuValue($settings[$key] ?? null)) {
+                    $hadLegacyConfiguration = true;
+                }
+
+                unset($settings[$key]);
+            }
+
+            if ($settings === []) {
+                unset($params['settings']);
+            } else {
+                $params['settings'] = $settings;
+            }
+        }
+
+        $encodedParams = json_encode($params, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        if ($encodedParams === false) {
+            return null;
+        }
+
+        return [
+            'id' => (int) ($row['id'] ?? 0),
+            'title' => (string) ($row['title'] ?? ''),
+            'link' => $modernLink,
+            'params' => $encodedParams,
+            'hadLegacyConfiguration' => $hadLegacyConfiguration,
+        ];
+    }
+
+    private static function hasStoredMenuValue(mixed $value): bool
+    {
+        if (is_array($value)) {
+            return $value !== [];
+        }
+
+        return trim((string) ($value ?? '')) !== '';
+    }
+
     public function repairLegacyMenuTitleKeys(): void
     {
         $db = $this->db();

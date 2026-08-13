@@ -201,7 +201,7 @@ final class Dark extends CMSPlugin implements SubscriberInterface
         }
 
         $db = Factory::getContainer()->get(DatabaseInterface::class);
-        $elementTypes = $this->fetchElementTypes($db, $contentbuilderng_form_id, false);
+        $elementTypes = $this->fetchElementTypes($db, $contentbuilderng_form_id, false, true);
 
         $out = '<ul class="list-group list-group-flush">' . "\n";
         $names = TemplateFieldOrderHelper::getOrderedNames($db, $contentbuilderng_form_id, $form);
@@ -286,7 +286,7 @@ final class Dark extends CMSPlugin implements SubscriberInterface
         return $out;
     }
 
-    private function fetchElementTypes(DatabaseInterface $db, int $contentbuilderng_form_id, bool $editableOnly): array
+    private function fetchElementTypes(DatabaseInterface $db, int $contentbuilderng_form_id, bool $editableOnly, bool $detailOnly = false): array
     {
         $query = $db->getQuery(true)
             ->select([
@@ -298,6 +298,9 @@ final class Dark extends CMSPlugin implements SubscriberInterface
             ->where($db->quoteName('form_id') . ' = ' . (int) $contentbuilderng_form_id);
         if ($editableOnly) {
             $query->where($db->quoteName('editable') . ' = 1');
+        }
+        if ($detailOnly) {
+            $query->where($db->quoteName('detail_include') . ' = 1');
         }
         $db->setQuery($query);
 
