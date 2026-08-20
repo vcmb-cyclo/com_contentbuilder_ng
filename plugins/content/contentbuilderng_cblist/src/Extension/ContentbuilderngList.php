@@ -8,6 +8,8 @@ namespace CB\Plugin\Content\ContentbuilderngList\Extension;
 
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListHelpService;
+use CB\Component\Contentbuilderng\Site\Service\EmbeddedListValueService;
+use CB\Component\Contentbuilderng\Site\Service\ContentCardService;
 use CB\Plugin\Content\ContentbuilderngList\Service\EmbedOptionsService;
 use CB\Plugin\Content\ContentbuilderngList\Service\TagSyntaxService;
 use Joomla\CMS\Application\SiteApplication;
@@ -80,6 +82,21 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
             ]], $app);
         }
 
+        if ($options['output'] === 'value') {
+            $result = EmbeddedListValueService::resolve($app, $options);
+            if ($result['errors'] !== []) {
+                return $this->renderValidationErrors($result['errors'], $app);
+            }
+
+            return $result['value'] === null
+                ? ''
+                : htmlspecialchars(
+                    html_entity_decode($result['value'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                    ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5,
+                    'UTF-8'
+                );
+        }
+
         $query = [
             'option' => 'com_contentbuilderng',
             'task' => 'list.display',
@@ -89,11 +106,13 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
         ];
 
         if ($options['title_set']) {
-            $query['cblist_title'] = $options['title'];
+            $query['cblist_title'] = $options['card'] !== '' ? '' : $options['title'];
             $query['cblist_title_set'] = 1;
         }
 
-        if ($options['pagination'] !== null) {
+        if ($options['pagination'] === 0) {
+            $query['cblist_hide_pagination'] = 1;
+        } elseif ($options['pagination'] !== null) {
             $query['list'] = ['limit' => $options['pagination']];
         }
         if ($options['limit'] !== null) {
@@ -120,9 +139,9 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
         $openLabel = Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_OPEN_LIST');
         $instanceId = 'cblist-frame-' . (++self::$instance);
 
-        $this->loadAssets($app);
+        $this->loadAssets($app, $options['card'] !== '');
 
-        return '<div class="cblist-embed">'
+        $embed = '<div class="cblist-embed">'
             . '<iframe'
             . ' id="' . $instanceId . '"'
             . ' class="cblist-embed__frame"'
@@ -136,6 +155,13 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
             . htmlspecialchars($openLabel, ENT_QUOTES, 'UTF-8')
             . '</a></p></noscript>'
             . '</div>';
+
+        return ContentCardService::render(
+            $embed,
+            $options['card'],
+            $options['title_set'] ? $options['title'] : '',
+            $options['w']
+        );
     }
 
     /**
@@ -194,12 +220,20 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
         }
 
         $detailKey = match ($error['detail']) {
-            'id_syntax', 'height_syntax', 'pagination_syntax', 'limit_syntax'
+            'id_syntax', 'height_syntax', 'pagination_syntax', 'limit_syntax', 'offset_syntax', 'w_syntax'
                 => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_NUMERIC_SYNTAX',
             'id' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_ID',
             'height' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_HEIGHT',
             'pagination' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_PAGINATION',
             'limit' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LIMIT',
+            'offset' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_OFFSET',
+            'output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_OUTPUT',
+            'card' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_CARD',
+            'w' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_W',
+            'w_requires_card' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_W_CARD',
+            'fields_single' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_SINGLE_FIELD',
+            'output_incompatible' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_OUTPUT_COMPATIBILITY',
+            'offset_requires_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_OFFSET_MODE',
             'layout' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LAYOUT',
             'loading' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LOADING',
             'fields' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_FIELDS',
@@ -229,10 +263,14 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
         return (int) $db->loadResult() === 1;
     }
 
-    private function loadAssets(SiteApplication $app): void
+    private function loadAssets(SiteApplication $app, bool $withCards = false): void
     {
         $assets = $this->getWebAssetManager($app);
         $assets->usePreset('plg_content_contentbuilderng_cblist.embed');
+        if ($withCards) {
+            $assets->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
+            $assets->useStyle('com_contentbuilderng.cards');
+        }
     }
 
     private function getWebAssetManager(SiteApplication $app): WebAssetManager

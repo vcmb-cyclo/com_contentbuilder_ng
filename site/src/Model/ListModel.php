@@ -300,17 +300,23 @@ class ListModel extends BaseListModel
         }
 
         $embeddedResultLimit = $this->getEmbeddedResultLimit();
+        $isEmbeddedValueOutput = EmbeddedListFieldFilterService::isEmbeddedRequest(
+            $app->getInput()->getCmd('cblist_embed', '')
+        ) && $app->getInput()->getBool('cblist_value_output', false);
         if ($embeddedResultLimit !== null && $start >= $embeddedResultLimit) {
             $start = 0;
         }
 
         // ✅ RESET page si on change un filtre (ou clique Search/Reset)
         if (
-            $app->getInput()->get('filter', null) !== null ||
-            $app->getInput()->get('list_state_filter', null) !== null ||
-            $app->getInput()->get('list_publish_filter', null) !== null ||
-            $app->getInput()->get('list_language_filter', null) !== null ||
-            $app->getInput()->getBool('filter_reset', false)
+            !$isEmbeddedValueOutput
+            && (
+                $app->getInput()->get('filter', null) !== null
+                || $app->getInput()->get('list_state_filter', null) !== null
+                || $app->getInput()->get('list_publish_filter', null) !== null
+                || $app->getInput()->get('list_language_filter', null) !== null
+                || $app->getInput()->getBool('filter_reset', false)
+            )
         ) {
             $start = 0;
         }
@@ -1007,7 +1013,10 @@ class ListModel extends BaseListModel
                             ->where($db->quoteName('reference_id') . ' IN (' . implode(',', $ids) . ')')
                             ->where($db->quoteName('published') . ' = 1')
                             ->order($db->quoteName('ordering'));
-                        if (!$newMenuCustomColumns) {
+                        $isEmbeddedValueOutput = EmbeddedListFieldFilterService::isEmbeddedRequest(
+                            $app->getInput()->getCmd('cblist_embed', '')
+                        ) && $app->getInput()->getBool('cblist_value_output', false);
+                        if (!$newMenuCustomColumns && !$isEmbeddedValueOutput) {
                             $elemQuery->where($db->quoteName('list_include') . ' = 1');
                         }
                         $db->setQuery($elemQuery);

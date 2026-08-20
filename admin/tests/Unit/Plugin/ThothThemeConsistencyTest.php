@@ -23,7 +23,7 @@ final class ThothThemeConsistencyTest extends TestCase
         foreach ($parts as $path) {
             $content = \file_get_contents($path);
             self::assertIsString($content, "Cannot read {$path}");
-            $source .= $content;
+            $source .= str_replace("\r\n", "\n", $content);
         }
         $this->source = $source;
     }

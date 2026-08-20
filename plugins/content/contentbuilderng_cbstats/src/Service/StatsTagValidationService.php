@@ -8,6 +8,7 @@ namespace CB\Plugin\Content\ContentbuilderngStats\Service;
 
 use CB\Component\Contentbuilderng\Site\Service\StatsHideOptionsService;
 use CB\Component\Contentbuilderng\Site\Service\StatsService;
+use CB\Component\Contentbuilderng\Site\Service\ContentCardService;
 
 final class StatsTagValidationService
 {
@@ -22,6 +23,7 @@ final class StatsTagValidationService
         'source', 'id', 'idsum', 'debug', 'output', 'field', 'filter[field]',
         'filter[value]', 'value', 'add', 'titles', 'ranges', 'headers', 'title',
         'background', 'sort', 'dir', 'values', 'export', 'limit', 'hide', 'total',
+        'card', 'w', 'width', 'height',
     ];
 
     /**
@@ -36,7 +38,7 @@ final class StatsTagValidationService
         foreach (array_values(array_diff(array_keys($attributes), self::ALLOWED_KEYS)) as $key) {
             $errors[] = self::error('unknown_option', $key, (string) $attributes[$key]);
         }
-        foreach (['id', 'idsum', 'limit'] as $numericKey) {
+        foreach (['id', 'idsum', 'limit', 'w'] as $numericKey) {
             if (($quoted[$numericKey] ?? false) === true) {
                 $errors[] = self::error(
                     'invalid_value',
@@ -58,6 +60,25 @@ final class StatsTagValidationService
         $allowedOutputs = $manual ? self::MANUAL_OUTPUTS : self::OUTPUTS;
         if (!in_array($output, $allowedOutputs, true)) {
             $errors[] = self::error('invalid_value', 'output', (string) ($attributes['output'] ?? ''), $manual ? 'manual_output' : 'output');
+        }
+
+        $card = trim((string) ($attributes['card'] ?? ''));
+        if ($card !== '' && !ContentCardService::isValid($card)) {
+            $errors[] = self::error('invalid_value', 'card', $card, 'card');
+        }
+
+        $width = trim((string) ($attributes['w'] ?? ''));
+        if ($width !== '' && !ContentCardService::isValidWidth($width)) {
+            $errors[] = self::error('invalid_value', 'w', $width, 'w');
+        } elseif ($width !== '' && !ContentCardService::isValid($card)) {
+            $errors[] = self::error('invalid_value', 'w', $width, 'w_requires_card');
+        }
+
+        foreach (['width', 'height'] as $dimension) {
+            $value = trim((string) ($attributes[$dimension] ?? ''));
+            if ($value !== '' && CssDimensionService::normalize($value) === null) {
+                $errors[] = self::error('invalid_value', $dimension, $value, $dimension);
+            }
         }
 
         if ($source === 'view') {

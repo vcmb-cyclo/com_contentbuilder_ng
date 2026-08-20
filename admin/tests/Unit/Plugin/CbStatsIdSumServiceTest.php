@@ -203,7 +203,7 @@ final class CbStatsIdSumServiceTest extends TestCase
         }
 
         $apiLayout = (string) file_get_contents(self::ROOT . '/admin/layouts/form/api_tab.php');
-        self::assertStringContainsString('COM_CONTENTBUILDERNG_API_CONTENT_PLUGIN_IDSUM_HINT', $apiLayout);
+        self::assertStringContainsString('COM_CONTENTBUILDERNG_API_OPEN_CBSTATS_HELP', $apiLayout);
     }
 
     private function payload(array $values): array

@@ -8,7 +8,8 @@
 }
 
 .cbstats-bar-chart {
-    width: min(100%, 760px);
+    width: 100%;
+    max-width: 100%;
     height: clamp(140px, calc(var(--cbstats-bar-items) * 30px + 48px), 600px);
     margin-inline: auto;
 }
@@ -29,4 +30,13 @@
     .cbstats-bar-chart {
         height: clamp(144px, calc(var(--cbstats-bar-items) * 34px + 48px), 640px);
     }
+}
+
+.cbstats-bar-chart[data-cbstats-custom-width="1"] {
+    width: var(--cbstats-chart-width);
+    max-width: none;
+}
+
+.cbstats-bar-chart[data-cbstats-custom-height="1"] {
+    height: var(--cbstats-chart-height);
 }

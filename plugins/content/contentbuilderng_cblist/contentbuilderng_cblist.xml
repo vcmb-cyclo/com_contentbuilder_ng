@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="plugin" group="content" version="6.0" method="upgrade">
     <name>PLG_CONTENT_CONTENTBUILDERNG_CBLIST</name>
-    <creationDate>2026-08-06</creationDate>
+    <creationDate>2026-08-20</creationDate>
     <author>XDA+GIL</author>
     <authorEmail>noreply@vcmb.fr</authorEmail>
     <authorUrl>https://breezingforms-ng.vcmb.fr</authorUrl>
     <copyright>Copyright © 2026 XDA+GIL</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-    <version>6.1.10-RC02</version>
+    <version>6.1.10-RC10</version>
     <description>PLG_CONTENT_CONTENTBUILDERNG_CBLIST_XML_DESCRIPTION</description>
     <namespace path="src">CB\Plugin\Content\ContentbuilderngList</namespace>
     <files>
@@ -38,10 +38,24 @@
                     class="alert alert-info w-100"
                 />
                 <field
+                    name="cblist_value_note"
+                    type="note"
+                    label="PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_VALUE_LABEL"
+                    description="PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_VALUE_TEXT"
+                    class="alert alert-info w-100"
+                />
+                <field
                     name="cblist_actions_note"
                     type="note"
                     label="PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_LABEL"
                     description="PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_TEXT"
+                    class="alert alert-info w-100"
+                />
+                <field
+                    name="cblist_none_note"
+                    type="note"
+                    label="PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_NONE_LABEL"
+                    description="PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_NONE_TEXT"
                     class="alert alert-info w-100"
                 />
             </fieldset>

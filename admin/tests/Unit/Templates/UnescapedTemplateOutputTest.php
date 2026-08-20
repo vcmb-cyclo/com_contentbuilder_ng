@@ -75,7 +75,8 @@ final class UnescapedTemplateOutputTest extends TestCase
         'admin/tmpl/user/default.php' => 10,
         'admin/tmpl/users/default.php' => 13,
         'admin/layouts/form/advanced_options.php' => 33,
-        'admin/layouts/form/api_tab.php' => 5,
+        // Permission badges are assembled from fixed keys and escaped labels.
+        'admin/layouts/form/api_tab.php' => 6,
         'admin/layouts/form/article_tab.php' => 11,
         'admin/layouts/form/audit_tab.php' => 4,
         'admin/layouts/form/bf_system_fields_modal.php' => 3,

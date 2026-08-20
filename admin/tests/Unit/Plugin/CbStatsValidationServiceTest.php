@@ -60,6 +60,69 @@ final class CbStatsValidationServiceTest extends TestCase
         ]));
     }
 
+    public function testCardsAndResponsiveDimensionsAreValidatedStrictly(): void
+    {
+        foreach (['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6'] as $card) {
+            self::assertSame([], StatsTagValidationService::validationErrors([
+                'id' => '15', 'field' => 'Group', 'output' => 'pie',
+                'card' => $card, 'width' => '350', 'height' => '280px',
+            ]));
+        }
+
+        foreach (['350', '350px', '80%', '100%'] as $width) {
+            self::assertSame([], StatsTagValidationService::validationErrors([
+                'id' => '15', 'field' => 'Group', 'output' => 'pie', 'width' => $width,
+            ]));
+        }
+
+        foreach (['280', '280px', '80%'] as $height) {
+            self::assertSame([], StatsTagValidationService::validationErrors([
+                'id' => '15', 'field' => 'Group', 'output' => 'bar', 'height' => $height,
+            ]));
+        }
+
+        self::assertSame(
+            ['card', 'width', 'height'],
+            array_column(StatsTagValidationService::validationErrors([
+                'id' => '15', 'field' => 'Group', 'output' => 'pie',
+                'card' => 'h7', 'width' => 'calc(100%)', 'height' => '101%',
+            ]), 'parameter')
+        );
+    }
+
+    public function testCardWidthsAreStrictAndRequireACard(): void
+    {
+        foreach (['33', '66', '100'] as $width) {
+            self::assertSame([], StatsTagValidationService::validationErrors([
+                'id' => '15', 'field' => 'Group', 'output' => 'bar',
+                'card' => 'v1', 'w' => $width,
+            ]));
+        }
+
+        self::assertSame(
+            ['w_requires_card'],
+            array_column(StatsTagValidationService::validationErrors([
+                'id' => '15', 'field' => 'Group', 'output' => 'bar', 'w' => '66',
+            ]), 'detail')
+        );
+        self::assertSame(
+            ['w'],
+            array_column(StatsTagValidationService::validationErrors([
+                'id' => '15', 'field' => 'Group', 'output' => 'bar', 'card' => 'v1', 'w' => '50',
+            ]), 'detail')
+        );
+
+        $syntax = TagSyntaxService::parse('id=15 field=Group output=bar card=v1 w="66"');
+        self::assertSame(
+            ['w_syntax'],
+            array_column(StatsTagValidationService::validationErrors(
+                $syntax['attributes'],
+                0,
+                $syntax['quoted']
+            ), 'detail')
+        );
+    }
+
     public function testNumericOptionsAndIdSumRequireUnquotedValues(): void
     {
         $valid = TagSyntaxService::parse('id=15 limit=10 output=total');

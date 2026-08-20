@@ -1,13 +1,21 @@
 {
     "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
     "name": "com_contentbuilderng",
-  "version": "6.1.10-RC09",
+  "version": "6.1.10-RC10",
     "description": "Assets pour le composant ContentBuilderng",
     "assets": [
         {
+            "name": "com_contentbuilderng.cards",
+            "type": "style",
+            "uri": "com_contentbuilderng/cards.css"
+        },
+        {
             "name": "com_contentbuilderng.frontend",
             "type": "style",
-            "uri": "com_contentbuilderng/frontend.css"
+            "uri": "com_contentbuilderng/frontend.css",
+            "dependencies": [
+                "com_contentbuilderng.cards"
+            ]
         },
         {
             "name": "com_contentbuilderng.list",

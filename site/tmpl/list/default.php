@@ -197,6 +197,7 @@ $embeddedListRawActions = $isEmbeddedListRequest
 $embeddedListSort = $isEmbeddedListRequest ? trim((string) $input->getString('cblist_sort', '')) : '';
 $embeddedListDir = $isEmbeddedListRequest ? trim((string) $input->getString('cblist_dir', '')) : '';
 $embeddedListLimit = $isEmbeddedListRequest ? (string) $input->getInt('cblist_limit', 0) : '';
+$embeddedListHidePagination = $isEmbeddedListRequest && $input->getBool('cblist_hide_pagination', false);
 try {
     $cbListAllowedActions = EmbeddedListActionFilterService::parseActions($embeddedListRawActions);
 							} catch (\InvalidArgumentException) {
@@ -230,13 +231,15 @@ $embeddedListParams = EmbeddedListContextService::parameters(
     $embeddedListContext,
     $embeddedListFields,
     $embeddedListRawActions,
-    $embeddedListLimit
+    $embeddedListLimit,
+    $embeddedListHidePagination ? '1' : ''
 );
 $embeddedListQuery = EmbeddedListContextService::buildQuery(
     $embeddedListContext,
     $embeddedListFields,
     $embeddedListRawActions,
-    $embeddedListLimit
+    $embeddedListLimit,
+    $embeddedListHidePagination ? '1' : ''
 );
 $embeddedListTitle = $isEmbeddedListRequest
     ? trim((string) $input->getString('cblist_title', ''))
@@ -692,6 +695,18 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	$showPreviewLink = !empty($this->show_preview_link);
 	$showTopBar = MenuParamHelper::resolveInputOrMenuToggle($app, 'cb_show_top_bar', (int) ($this->cb_show_top_bar ?? 1)) === 1;
 	$showBottomBar = MenuParamHelper::resolveInputOrMenuToggle($app, 'cb_show_bottom_bar', (int) ($this->cb_show_bottom_bar ?? 1)) === 1;
+	$hasTopBarContent = $language_allowed
+		|| ($showStateControl && $state_allowed && count($this->states))
+		|| ($this->list_publish && $publish_allowed)
+		|| ($this->display_filter && $cbListActionAllowed('search'))
+		|| ($showStateFilter && count($this->states) && $cbListActionAllowed('state'))
+		|| ($this->list_publish && $cbListActionAllowed('publish'))
+		|| ($this->list_language && $cbListActionAllowed('language'))
+		|| $showNewButton
+		|| $delete_allowed
+		|| ($this->show_records_per_page && !$embeddedListHidePagination)
+		|| ($this->export_xls && empty($this->invalid_list_setup) && $cbListActionAllowed('export'));
+	$showTopBar = $showTopBar && $hasTopBarContent;
 	$listEditBaseParams = [
 		'option' => 'com_contentbuilderng',
 		'task' => 'edit.display',
@@ -908,7 +923,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						</div>
 
 						<!-- DROITE : actions + limitbox + excel -->
-						<?php if ($showNewButton || $delete_allowed || $this->show_records_per_page || ($this->export_xls && empty($this->invalid_list_setup) && $cbListActionAllowed('export'))) : ?>
+						<?php if ($showNewButton || $delete_allowed || ($this->show_records_per_page && !$embeddedListHidePagination) || ($this->export_xls && empty($this->invalid_list_setup) && $cbListActionAllowed('export'))) : ?>
 								<div class="d-flex align-items-center gap-2 ms-auto cb-list-toolbar-actions">
 
 										<?php if ($showNewButton) : ?>
@@ -927,7 +942,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 											</button>
 										<?php endif; ?>
 
-									<?php if ($this->show_records_per_page) : ?>
+									<?php if ($this->show_records_per_page && !$embeddedListHidePagination) : ?>
 										<div class="cb-filter-rpp-wrap">
 											<?php
 											$currentLimit = (int) (($this->state?->get('list.limit')) ?? ($this->pagination->limit ?? 20));
@@ -1273,12 +1288,14 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 					</article>
 				<?php } ?>
 			</div>
+			<?php if (!$embeddedListHidePagination) : ?>
 			<?php echo LayoutHelper::render('contentbuilderng.list_pagination', [
 				'pagination' => $this->pagination,
 				'lists' => $this->lists,
 				'requestList' => $requestList,
 				'navClass' => 'mt-3',
 			]); ?>
+			<?php endif; ?>
 		</div>
 	<?php else : ?>
 	<div class="cb-scroll-x cb-list-panel cb-list-data-panel">
@@ -1662,7 +1679,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 			} ?>
 			</tbody>
 				<?php
-				$paginationHtml = LayoutHelper::render('contentbuilderng.list_pagination', [
+				$paginationHtml = $embeddedListHidePagination ? '' : LayoutHelper::render('contentbuilderng.list_pagination', [
 				    'pagination' => $this->pagination,
 				    'lists' => $this->lists,
 				    'requestList' => $requestList,
@@ -1704,6 +1721,9 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	<input type="hidden" name="cblist_sort" value="<?php echo htmlspecialchars($embeddedListSort, ENT_QUOTES, 'UTF-8'); ?>" />
 	<input type="hidden" name="cblist_dir" value="<?php echo htmlspecialchars($embeddedListDir, ENT_QUOTES, 'UTF-8'); ?>" />
 	<input type="hidden" name="cblist_actions" value="<?php echo htmlspecialchars($embeddedListRawActions, ENT_QUOTES, 'UTF-8'); ?>" />
+	<?php if ($embeddedListHidePagination) : ?>
+	<input type="hidden" name="cblist_hide_pagination" value="1" />
+	<?php endif; ?>
 	<?php if ($embeddedListLimit !== '' && $embeddedListLimit !== '0') : ?>
 	<input type="hidden" name="cblist_limit" value="<?php echo (int) $embeddedListLimit; ?>" />
 	<?php endif; ?>

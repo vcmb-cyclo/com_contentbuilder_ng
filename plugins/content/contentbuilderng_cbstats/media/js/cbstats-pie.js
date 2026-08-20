@@ -65,7 +65,7 @@
             plugins: [percentageLabels],
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: canvas.parentElement?.dataset.cbstatsCustomHeight !== '1',
                 animation: {
                     duration: 450,
                 },
