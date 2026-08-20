@@ -1,5 +1,48 @@
 # Changelog
 
+## 6.1.10-RC10 — 2026-08-20
+
+### Added
+
+- Added `{CBList output=value}` with strict single-field selection, implicit `sort=ID dir=desc offset=0`, optional `offset=` and plain Unicode text output without an iframe.
+- Added `actions=none` and `pagination=0` to render embedded CBList data without list actions, selectors, pagination controls or empty control containers.
+- Added shared responsive Cards for CBList and CBStats with `card=h1` to `card=h6`, `card=v1` to `card=v6`, the `.cb-cards` grid and strict `w=33`, `w=66` and `w=100` card widths.
+- Added strict CBStats `width=` and `height=` chart dimensions, accepting positive pixel values or percentages.
+- Added a configurable default page size for the administrator View tab.
+
+### Changed
+
+- Made CBStats Pie charts responsive and centred by default at 80% width with a 350px maximum; Bar, Histogram, Line and Radar now use the available width without causing horizontal scrolling.
+- Simplified the View API tab into concise CBList and CBStats summaries with examples, test URLs and links to the complete public help pages.
+- Expanded the CBList and CBStats English, French and German help into example-driven references covering the complete public syntax, Card grids and visual overrides.
+- Applied precise option-and-value syntax validation messages consistently to CBList and CBStats.
+
+### Fixed
+
+- Removed empty CBList toolbar containers when no control is rendered.
+- Corrected shared Card titles so they remain horizontal above their content and aligned Cards occupy the intended responsive grid columns.
+
+## 6.1.10-RC09 — 2026-08-14
+
+### Added
+
+- Added the Joomla List View menu builder with ordered field visibility, labels, links, search, sorting, filters, actions, access restrictions, themes and inherited view defaults.
+- Added dedicated Cards, Compact Table and Tiles menu layouts alongside the standard List View.
+- Added schema support and migration for the persisted menu list configuration.
+
+### Changed
+
+- Made List View the single standard tabular menu type and migrated legacy Classic menu items to it.
+- Kept menu access restrictions separate from visible list action buttons and propagated the effective configuration consistently to list, detail, edit and export screens.
+- Improved administrator previews, read-only field presentation and multilingual menu configuration help.
+
+## 6.1.10-RC08 — 2026-08-11
+
+### Changed
+
+- Changed the ContentBuilder NG administrator landing page from Storages to Views.
+- Made the About page Options return to the Views screen after saving or closing the component configuration.
+
 ## 6.1.10-RC07 — 2026-08-10
 
 ### Fixed
