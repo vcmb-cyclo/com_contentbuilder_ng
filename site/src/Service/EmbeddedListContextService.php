@@ -11,13 +11,7 @@ final class EmbeddedListContextService
     /**
      * @return array<string, string>
      */
-    public static function parameters(
-        string $context,
-        string $fields,
-        string $actions,
-        string $limit = '',
-        string $hidePagination = ''
-    ): array
+    public static function parameters(string $context, string $fields, string $actions, string $limit = '', string $hidePagination = ''): array
     {
         if (!EmbeddedListFieldFilterService::isEmbeddedRequest($context)) {
             return [];
@@ -44,16 +38,9 @@ final class EmbeddedListContextService
         ], static fn(string $value): bool => $value !== '');
     }
 
-    public static function buildQuery(
-        string $context,
-        string $fields,
-        string $actions,
-        string $limit = '',
-        string $hidePagination = ''
-    ): string
+    public static function buildQuery(string $context, string $fields, string $actions, string $limit = '', string $hidePagination = ''): string
     {
         $parameters = self::parameters($context, $fields, $actions, $limit, $hidePagination);
-
         return $parameters === [] ? '' : '&' . http_build_query($parameters);
     }
 }

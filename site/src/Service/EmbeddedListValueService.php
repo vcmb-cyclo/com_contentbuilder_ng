@@ -16,7 +16,9 @@ namespace CB\Component\Contentbuilderng\Site\Service;
 
 \defined('_JEXEC') or die('Restricted access');
 
+use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
+use CB\Component\Contentbuilderng\Site\Model\ListModel;
 use Joomla\CMS\Application\SiteApplication;
 
 final class EmbeddedListValueService
@@ -88,8 +90,13 @@ final class EmbeddedListValueService
                 return ['value' => null, 'errors' => []];
             }
 
+            /** @var ContentbuilderngComponent $component */
             $component = $app->bootComponent('com_contentbuilderng');
             $model = $component->getMVCFactory()->createModel('List', 'Site', ['ignore_request' => false]);
+            if (!$model instanceof ListModel) {
+                return ['value' => null, 'errors' => []];
+            }
+
             $data = $model->getData();
 
             if (!is_object($data)) {
