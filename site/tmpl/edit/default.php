@@ -57,6 +57,7 @@ $embeddedListRawActions = $isEmbeddedListRequest
     ? trim((string) $app->getInput()->getString('cblist_actions', ''))
     : '';
 $embeddedListLimit = $isEmbeddedListRequest ? (string) $app->getInput()->getInt('cblist_limit', 0) : '';
+$embeddedListHidePagination = $isEmbeddedListRequest && $app->getInput()->getBool('cblist_hide_pagination', false);
 try {
     $cbListAllowedActions = EmbeddedListActionFilterService::parseActions($embeddedListRawActions);
 } catch (\InvalidArgumentException) {
@@ -69,13 +70,15 @@ $embeddedListParams = EmbeddedListContextService::parameters(
     $embeddedListContext,
     $embeddedListFields,
     $embeddedListRawActions,
-    $embeddedListLimit
+    $embeddedListLimit,
+    $embeddedListHidePagination ? '1' : ''
 );
 $embeddedListQuery = EmbeddedListContextService::buildQuery(
     $embeddedListContext,
     $embeddedListFields,
     $embeddedListRawActions,
-    $embeddedListLimit
+    $embeddedListLimit,
+    $embeddedListHidePagination ? '1' : ''
 );
 
 $new_allowed = $new_allowed && $cbListActionAllowed('new');

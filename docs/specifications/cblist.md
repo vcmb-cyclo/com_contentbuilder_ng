@@ -1,5 +1,23 @@
 # CBList — spécification fonctionnelle et technique
 
+## Card commune facultative — RC10-B3
+
+`card=h1` à `card=h6` et `card=v1` à `card=v6` utilisent la Card CSS commune
+ContentBuilder NG. Sans `card`, le rendu reste inchangé. Le bandeau reprend
+uniquement un `title=` explicite et non vide, sans dupliquer le titre intérieur.
+`card` est incompatible avec `output=value`.
+Le titre des variantes H et V est horizontal et placé au-dessus du contenu.
+Les variantes V sont compactes et juxtaposables ; elles passent en pleine
+largeur sur petit écran.
+`w=33`, `w=66` et `w=100` occupent respectivement une, deux ou trois colonnes
+du conteneur `.cb-cards`. La valeur doit être numérique, sans guillemets, et
+n'est valide qu'avec `card=`. Sans `w=`, V vaut 33 et H vaut 100. Sur petit
+écran, toutes les Cards occupent 100 %. `w` est incompatible avec
+`output=value`, comme `card`.
+
+Exemple : `{CBList id=15 title="Inscriptions" card=h1}`.
+Exemple : `{CBList id=15 title="Inscriptions" card=v2 w=66}`.
+
 ## 1. Statut du document
 
 Ce document est la spécification de référence de `{CBList}` pour les humains et
@@ -7,18 +25,20 @@ les assistants de développement (Codex, Claude ou autre).
 
 - Projet : ContentBuilder NG
 - Statut : implémentée et évolutive
-- Version du document : 1.3
-- Dernière mise à jour : 2026-08-06
+- Version du document : 1.4
+- Dernière mise à jour : 2026-08-20
 - Version d'introduction : ContentBuilder NG 6.1.9-RC05
 - Version de l'option `limit` : ContentBuilder NG 6.1.10-RC01
 - Version de la pagination compacte : ContentBuilder NG 6.1.10-RC02
+- Version de `pagination=0`, `output=value` et `offset` : ContentBuilder NG 6.1.10-RC10
 - Plateforme : Joomla 6 uniquement
 - PHP : 8.3 ou version ultérieure
 - Base de données : MySQL ou MariaDB uniquement
 - Base fonctionnelle : comportement publié au commit `d9ff1471`
 - Évolutions documentées : correction du rétrécissement de l'iframe après une
   pagination vers une page plus courte ; ajout de `limit` ; syntaxe stricte des
-  options numériques CBList et CBStats ; pagination compacte et responsive
+  options numériques CBList et CBStats ; pagination compacte et responsive ;
+  masquage de la pagination et sortie d'une valeur texte unique
 - Exemple d'identifiant de vue dans toute nouvelle documentation : `15`
 
 Cette spécification décrit le contrat à préserver. Une évolution qui modifie ce
@@ -75,7 +95,7 @@ Règles lexicales :
 - le nom de balise `CBList` et les noms d'options ne sont pas sensibles à la
   casse ;
 - les options utilisent la forme `nom=valeur` ;
-- les options numériques CBList `id`, `height`, `pagination` et `limit`
+- les options numériques CBList `id`, `height`, `pagination`, `limit` et `offset`
   utilisent exclusivement des entiers sans guillemets ;
 - la même règle s'applique aux options numériques CBStats `id`, `limit` et à la
   liste numérique `idsum`, par exemple `idsum=15+16` ;
@@ -169,10 +189,13 @@ colonne visible et triable de la vue après application de sa configuration.
 
 ### 5.5 `pagination` — facultatif
 
-- Type : entier strictement positif compris entre 1 et 5 000.
+- Type : entier compris entre 0 et 5 000.
 - Exemple : `pagination=25`.
 - Option absente : conserver la limite configurée par la vue ou le contexte
   normal de ContentBuilder NG.
+- `pagination=0` conserve cette limite et les données affichées, mais masque le
+  sélecteur du nombre d'enregistrements en haut ainsi que les contrôles de
+  pagination en bas. Aucun défilement ou découpage supplémentaire n'est créé.
 - Les formes `pagination="25"` et `pagination='25'` sont invalides.
 
 #### Présentation compacte de la pagination — 6.1.10-RC02
@@ -235,7 +258,37 @@ Exemple avec recherche et pagination :
 {CBList id=15 fields="Nom|Prenom|Email" title=hide sort=Prenom dir=asc pagination=3 actions=search limit=10}
 ```
 
-### 5.7 `actions` — facultatif
+### 5.7 `output=value` et `offset` — facultatifs
+
+But : insérer directement la valeur texte d'un unique champ, sans iframe.
+
+- Syntaxe minimale : `{CBList id=15 fields="Nom" output=value}`.
+- `fields` est obligatoire et doit contenir exactement un champ existant.
+- Le résultat est du texte Unicode échappé pour le document HTML ; aucun code
+  HTML provenant de la donnée n'est exécuté.
+- Les ACL, la visibilité, la recherche et tous les filtres ContentBuilder sont
+  appliqués avant le tri et la sélection de la valeur.
+- Sans `sort`, `dir` ni `offset`, les valeurs implicites sont
+  `sort=ID dir=desc offset=0` : la dernière valeur accessible est renvoyée.
+- `sort` peut viser un autre élément existant que celui indiqué dans `fields`.
+- `offset` est un entier sans guillemets compris entre 0 et 4 999. `offset=1`
+  sélectionne le résultat précédant celui désigné par `offset=0`.
+- `limit`, s'il est présent, plafonne d'abord les résultats ; un `offset`
+  extérieur à ce sous-ensemble ne renvoie rien.
+- Aucun résultat ou une valeur absente ne produit aucune sortie.
+- `offset` sans `output=value` est invalide.
+- Avec `output=value`, les options de présentation `pagination`, `actions`,
+  `title`, `layout`, `height` et `loading` sont invalides, même avec leur valeur
+  par défaut. L'erreur cite toujours l'option et la valeur reçue.
+
+Exemples :
+
+```text
+{CBList id=15 fields="Nom" output=value}
+{CBList id=15 fields="Statut" sort="Nom" dir=asc offset=1 output=value}
+```
+
+### 5.8 `actions` — facultatif
 
 But : définir une liste d'autorisation de contrôles dans les écrans intégrés de
 liste, détail et édition.
@@ -246,6 +299,10 @@ liste, détail et édition.
 - Les valeurs vides et doublons sont éliminés.
 - Option absente ou vide : ne rien restreindre au-delà des ACL et de la
   configuration de la vue.
+- `actions=none` : masquer et interdire tous les contrôles couverts par
+  `actions`, y compris recherche, filtres, création, détail, édition,
+  suppression, export, notation et impression.
+- `none` est exclusif : `actions="none|detail"` est invalide.
 - Option présente : masquer ou interdire tous les contrôles non cités.
 - Cette option ne doit jamais accorder une capacité refusée par les ACL, la
   propriété, l'état de la vue ou une autre règle ContentBuilder NG.
@@ -268,7 +325,18 @@ Vocabulaire exhaustif :
 
 Tout autre terme est invalide et doit être signalé.
 
-### 5.8 `layout` — facultatif
+`actions=none` ne masque pas le sélecteur du nombre de lignes ni la navigation
+de pagination, qui ne sont pas des actions. Pour une liste sans commandes en
+haut ou en bas, utiliser :
+
+```text
+{CBList id=15 actions=none pagination=0}
+```
+
+Lorsque cette combinaison ne laisse aucun contrôle disponible, CBList ne doit
+rendre aucun conteneur, panneau ou espace vide à la place de la barre d'outils.
+
+### 5.9 `layout` — facultatif
 
 Valeurs autorisées, sensibles à la casse :
 
@@ -283,7 +351,7 @@ Valeurs autorisées, sensibles à la casse :
 
 Option absente : conserver la mise en page normale de la vue.
 
-### 5.9 `height` — facultatif
+### 5.10 `height` — facultatif
 
 - Type : entier strictement positif compris entre 240 et 5 000 pixels.
 - Valeur par défaut : 240 pixels.
@@ -300,7 +368,7 @@ Option absente : conserver la mise en page normale de la vue.
 - Un cadre qui contient uniquement des erreurs doit se réduire à la hauteur du
   message, sans conserver artificiellement la hauteur minimale.
 
-### 5.10 `loading` — facultatif
+### 5.11 `loading` — facultatif
 
 - Valeurs : `lazy` ou `eager`, sans sensibilité à la casse.
 - Valeur par défaut : `lazy`.
@@ -312,7 +380,7 @@ Option absente : conserver la mise en page normale de la vue.
 Les seules options autorisées sont :
 
 ```text
-id, height, pagination, limit, layout, loading, fields, actions, title, sort, dir
+id, height, pagination, limit, layout, loading, fields, actions, title, sort, dir, output, offset
 ```
 
 Une option analysée mais inconnue est une erreur. La validation doit être
@@ -454,6 +522,18 @@ par des tests automatisés et si les invariants suivants restent vrais :
     les restrictions `fields`, `actions` et `limit`.
 29. Le nombre de pages transmis à la pagination commune est calculé sur le total
     plafonné par `limit`.
+30. `pagination=0` masque les deux zones de contrôle de pagination sans modifier
+    la taille de page ni le jeu de données.
+31. `output=value` ne crée aucune iframe et renvoie uniquement du texte Unicode
+    échappé après les ACL, restrictions, recherches, filtres et tri.
+32. Le mode valeur impose exactement un champ, utilise par défaut
+    `sort=ID dir=desc offset=0` et accepte un champ de tri différent.
+33. Un `offset` hors résultat ne renvoie rien ; une syntaxe numérique citée ou
+    invalide est refusée avec l'option et sa valeur dans le message.
+34. Les options de présentation incompatibles avec `output=value` sont toutes
+    signalées en une passe et aucune donnée n'est rendue.
+35. `actions=none` interdit toutes les actions intégrées ; combiné à
+    `pagination=0`, il ne laisse aucun contrôle ni cadre vide en haut ou en bas.
 
 ## 12. Procédure à donner à une IA pour toute évolution
 

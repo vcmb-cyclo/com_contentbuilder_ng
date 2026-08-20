@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CB\Plugin\Content\ContentbuilderngList\Service;
 
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
+use CB\Component\Contentbuilderng\Site\Service\ContentCardService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
 
 \defined('_JEXEC') or die;
@@ -16,7 +17,23 @@ final class EmbedOptionsService
     private const MAX_HEIGHT = 5000;
     private const LAYOUTS = ['default', 'cards', 'listone', 'listtwo', 'listthree', 'listcard', 'listcompact', 'listtiles'];
     private const MAX_LIMIT = 5000;
-    private const ALLOWED_KEYS = ['id', 'height', 'pagination', 'limit', 'layout', 'loading', 'fields', 'actions', 'title', 'sort', 'dir'];
+    private const ALLOWED_KEYS = [
+        'id',
+        'height',
+        'pagination',
+        'limit',
+        'layout',
+        'loading',
+        'fields',
+        'actions',
+        'title',
+        'sort',
+        'dir',
+        'output',
+        'offset',
+        'card',
+        'w',
+    ];
 
     /**
      * @param array<string, string> $attributes
@@ -31,7 +48,7 @@ final class EmbedOptionsService
             $errors[] = self::error('unknown_option', $key, (string) $attributes[$key]);
         }
 
-        foreach (['id', 'height', 'pagination', 'limit'] as $numericKey) {
+        foreach (['id', 'height', 'pagination', 'limit', 'offset', 'w'] as $numericKey) {
             if (($quoted[$numericKey] ?? false) === true) {
                 $errors[] = self::error(
                     'invalid_value',
@@ -54,7 +71,7 @@ final class EmbedOptionsService
         }
 
         if (isset($attributes['pagination']) && trim($attributes['pagination']) !== '') {
-            $pagination = self::positiveInteger($attributes['pagination']);
+            $pagination = self::nonNegativeInteger($attributes['pagination']);
             if ($pagination === null || $pagination > 5000) {
                 $errors[] = self::error('invalid_value', 'pagination', $attributes['pagination'], 'pagination');
             }
@@ -65,6 +82,30 @@ final class EmbedOptionsService
             if ($limit === null || $limit > self::MAX_LIMIT) {
                 $errors[] = self::error('invalid_value', 'limit', $attributes['limit'], 'limit');
             }
+        }
+
+        if (isset($attributes['offset']) && trim($attributes['offset']) !== '') {
+            $offset = self::nonNegativeInteger($attributes['offset']);
+            if ($offset === null || $offset > self::MAX_LIMIT - 1) {
+                $errors[] = self::error('invalid_value', 'offset', $attributes['offset'], 'offset');
+            }
+        }
+
+        $output = strtolower(trim((string) ($attributes['output'] ?? 'list')));
+        if (!in_array($output, ['list', 'value'], true)) {
+            $errors[] = self::error('invalid_value', 'output', (string) ($attributes['output'] ?? ''), 'output');
+        }
+
+        $card = strtolower(trim((string) ($attributes['card'] ?? '')));
+        if ($card !== '' && !ContentCardService::isValid($card)) {
+            $errors[] = self::error('invalid_value', 'card', (string) $attributes['card'], 'card');
+        }
+
+        $width = trim((string) ($attributes['w'] ?? ''));
+        if ($width !== '' && !ContentCardService::isValidWidth($width)) {
+            $errors[] = self::error('invalid_value', 'w', $width, 'w');
+        } elseif ($width !== '' && !ContentCardService::isValid($card)) {
+            $errors[] = self::error('invalid_value', 'w', $width, 'w_requires_card');
         }
 
         $layout = trim((string) ($attributes['layout'] ?? ''));
@@ -78,9 +119,37 @@ final class EmbedOptionsService
         }
 
         try {
-            self::fieldSelectors((string) ($attributes['fields'] ?? ''));
+            $fields = self::fieldSelectors((string) ($attributes['fields'] ?? ''));
+            if ($output === 'value' && count($fields) !== 1) {
+                $errors[] = self::error(
+                    'invalid_value',
+                    'fields',
+                    (string) ($attributes['fields'] ?? ''),
+                    'fields_single'
+                );
+            }
         } catch (\InvalidArgumentException) {
             $errors[] = self::error('invalid_value', 'fields', (string) ($attributes['fields'] ?? ''), 'fields');
+        }
+
+        if ($output === 'value') {
+            foreach (['pagination', 'actions', 'title', 'layout', 'height', 'loading', 'card', 'w'] as $incompatibleKey) {
+                if (array_key_exists($incompatibleKey, $attributes)) {
+                    $errors[] = self::error(
+                        'invalid_value',
+                        $incompatibleKey,
+                        (string) $attributes[$incompatibleKey],
+                        'output_incompatible'
+                    );
+                }
+            }
+        } elseif (array_key_exists('offset', $attributes)) {
+            $errors[] = self::error(
+                'invalid_value',
+                'offset',
+                (string) $attributes['offset'],
+                'offset_requires_output'
+            );
         }
 
         try {
@@ -105,7 +174,7 @@ final class EmbedOptionsService
             $errors[] = self::error('invalid_value', 'sort', $sort, 'sort');
         }
 
-        $rawDirection = (string) ($attributes['dir'] ?? 'asc');
+        $rawDirection = (string) ($attributes['dir'] ?? ($output === 'value' ? 'desc' : 'asc'));
         $sortDirections = [];
         try {
             $sortDirections = self::fieldSelectors(strtolower(trim($rawDirection)));
@@ -136,7 +205,11 @@ final class EmbedOptionsService
      *     sort: string,
      *     sort_direction: non-empty-string,
      *     title: string,
-     *     title_set: bool
+     *     title_set: bool,
+     *     output: 'list'|'value',
+     *     offset: int,
+     *     card: string,
+     *     w: string
      * }
      */
     public static function resolve(array $attributes, array $quoted = []): array
@@ -162,7 +235,7 @@ final class EmbedOptionsService
 
         $pagination = null;
         if (isset($attributes['pagination']) && trim($attributes['pagination']) !== '') {
-            $pagination = self::positiveInteger($attributes['pagination']);
+            $pagination = self::nonNegativeInteger($attributes['pagination']);
             if ($pagination === null || $pagination > 5000) {
                 throw new \InvalidArgumentException('pagination');
             }
@@ -187,13 +260,19 @@ final class EmbedOptionsService
         }
 
         $fields = self::fieldSelectors((string) ($attributes['fields'] ?? ''));
+        $output = strtolower(trim((string) ($attributes['output'] ?? 'list')));
+        $offset = isset($attributes['offset'])
+            ? (self::nonNegativeInteger($attributes['offset']) ?? 0)
+            : 0;
+        $card = ContentCardService::normalize((string) ($attributes['card'] ?? ''));
+        $width = ContentCardService::normalizeWidth((string) ($attributes['w'] ?? ''));
         $actions = self::actionSelectors((string) ($attributes['actions'] ?? ''));
-        $sort = trim((string) ($attributes['sort'] ?? ''));
+        $sort = trim((string) ($attributes['sort'] ?? ($output === 'value' ? 'ID' : '')));
         $sortSelectors = self::fieldSelectors($sort);
         if ($sort !== "" && $sortSelectors === []) {
             throw new \InvalidArgumentException('sort');
         }
-        $sortDirection = strtolower(trim((string) ($attributes['dir'] ?? 'asc')));
+        $sortDirection = strtolower(trim((string) ($attributes['dir'] ?? ($output === 'value' ? 'desc' : 'asc'))));
         $sortDirections = self::fieldSelectors($sortDirection);
         if ($sortDirections === [] || array_diff($sortDirections, ['asc', 'desc']) !== []) {
             throw new \InvalidArgumentException('dir');
@@ -224,6 +303,10 @@ final class EmbedOptionsService
             'sort_direction' => $sortDirection,
             'title' => $title,
             'title_set' => array_key_exists('title', $attributes),
+            'output' => $output,
+            'offset' => $offset,
+            'card' => $card,
+            'w' => $width,
         ];
     }
 
@@ -287,5 +370,18 @@ final class EmbedOptionsService
         $integer = filter_var($value, FILTER_VALIDATE_INT);
 
         return is_int($integer) && $integer > 0 ? $integer : null;
+    }
+
+    private static function nonNegativeInteger(string $value): ?int
+    {
+        $value = trim($value);
+
+        if (preg_match('/^(?:0|[1-9][0-9]*)$/D', $value) !== 1) {
+            return null;
+        }
+
+        $integer = filter_var($value, FILTER_VALIDATE_INT);
+
+        return is_int($integer) && $integer >= 0 ? $integer : null;
     }
 }

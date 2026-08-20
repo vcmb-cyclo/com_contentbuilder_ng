@@ -473,3 +473,27 @@ A pass is complete only when:
 - The former `total=hide` syntax is rejected and is not treated as an alias.
 - Any invalid `hide` or `limit` value is rejected through the normal CBStats
   invalid-request path.
+
+## Cards and responsive dimensions — 6.1.10-RC10-B3
+
+`card=h1` to `card=h6` and `card=v1` to `card=v6` use the shared component
+asset `com_contentbuilderng.cards`. This is opt-in. A header exists only with
+an explicit non-empty `title=` and the inner title is not duplicated.
+For H and V variants alike, the title is horizontal and above the content.
+H variants use the available width. V variants are compact inline cards that
+sit next to each other when space permits and become full-width on small screens.
+
+Optional `w=33`, `w=66` and `w=100` make the Card span one, two or all three
+columns of a `.cb-cards` grid. Values are strict unquoted numbers and require a
+valid `card=` option. Without `w=`, V variants use 33 and H variants use 100.
+All variants become full-width on small screens. When the current row has too
+few free columns, the Card starts on the next row. `w=` controls the Card;
+CBStats `width=` controls the chart inside it.
+
+Example: `{CBStats id=15 field=Group output=bar title="Groups" card=v2 w=66 width=100%}`.
+
+Chart options `width=` and `height=` accept a positive number, `px` or `%`.
+A number without a unit means pixels. Without `width=`, Pie uses 80% with a
+maximum of 350px and is centred; Bar and other charts use 100%. Explicit width
+removes the Pie maximum. Explicit height disables maintained aspect ratio;
+percentage height requires a parent with a defined height.

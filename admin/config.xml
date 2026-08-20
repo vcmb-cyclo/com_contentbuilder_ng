@@ -26,6 +26,14 @@
             filter="string"
         />
         <field
+            name="view_elements_limit"
+            type="listlimit"
+            default="20"
+            label="COM_CONTENTBUILDERNG_CONFIG_VIEW_ELEMENTS_LIMIT_LABEL"
+            description="COM_CONTENTBUILDERNG_CONFIG_VIEW_ELEMENTS_LIMIT_DESC"
+            filter="integer"
+        />
+        <field
             name="enable_validations"
             type="radio"
             default="1"

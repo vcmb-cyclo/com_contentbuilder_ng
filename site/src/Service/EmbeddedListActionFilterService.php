@@ -23,7 +23,9 @@ final class EmbeddedListActionFilterService
 {
     public const NONE = 'none';
     /**
-     * The exhaustive, only-valid set of {CBList actions="..."} values.
+     * The exhaustive set of individual controls accepted by
+     * {CBList actions="..."}. The exclusive keyword `none` is handled
+     * separately.
      * Keep in sync with docs/en/frontend.md, docs/fr/frontend.md and the
      * plugin's own help text in all three languages.
      */
@@ -71,12 +73,18 @@ final class EmbeddedListActionFilterService
             static fn(string $action): bool => $action !== ''
         ));
 
-        return array_values(array_unique($actions));
+        $actions = array_values(array_unique($actions));
+
+        if (in_array(self::NONE, $actions, true) && count($actions) !== 1) {
+            throw new \InvalidArgumentException('actions');
+        }
+
+        return $actions;
     }
 
     public static function isKnownAction(string $action): bool
     {
-        return in_array($action, self::ACTIONS, true);
+        return $action === self::NONE || in_array($action, self::ACTIONS, true);
     }
 
     /**
@@ -84,7 +92,8 @@ final class EmbeddedListActionFilterService
      */
     public static function isAllowed(string $action, array $allowedActions): bool
     {
-        return $allowedActions === [] || in_array($action, $allowedActions, true);
+        return $allowedActions === []
+            || (!in_array(self::NONE, $allowedActions, true) && in_array($action, $allowedActions, true));
     }
 
     public static function isRequestAllowed(string $context, string $rawActions, string $action): bool

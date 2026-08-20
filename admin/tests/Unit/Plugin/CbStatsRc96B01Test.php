@@ -195,8 +195,8 @@ final class CbStatsRc96B01Test extends TestCase
         self::assertStringContainsString("root.dataset.cbstatsInitialised === 'true'", $javascript);
         self::assertStringContainsString("['histogram', 'line', 'radar'].includes(output)", $javascript);
         self::assertStringContainsString("querySelectorAll('[data-cbstats-chart]').forEach(initialise)", $javascript);
-        self::assertStringContainsString('overflow-x: auto', $css);
-        self::assertStringContainsString('calc(var(--cbstats-chart-items) * 4.5rem)', $css);
+        self::assertStringNotContainsString('overflow-x: auto', $css);
+        self::assertStringContainsString('max-width: 100%', $css);
         self::assertContains(
             'plg_content_contentbuilderng_cbstats.chartjs',
             array_column($assets['assets'], 'name')

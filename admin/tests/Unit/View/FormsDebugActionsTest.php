@@ -163,7 +163,7 @@ final class FormsDebugActionsTest extends TestCase
         $contents = \file_get_contents($this->root . '/' . $relativePath);
         self::assertIsString($contents, 'Unable to read ' . $relativePath);
 
-        return $contents;
+        return str_replace("\r\n", "\n", $contents);
     }
 
     /**

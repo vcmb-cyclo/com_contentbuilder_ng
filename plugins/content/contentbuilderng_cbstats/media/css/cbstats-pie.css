@@ -8,9 +8,22 @@
 }
 
 .cbstats-pie-chart {
-    width: min(100%, 320px);
+    width: 80%;
+    max-width: 350px;
     aspect-ratio: 1;
     margin-inline: auto;
+    padding: 0.25rem;
+    box-sizing: border-box;
+}
+
+.cbstats-pie-chart[data-cbstats-custom-width="1"] {
+    width: var(--cbstats-chart-width);
+    max-width: none;
+}
+
+.cbstats-pie-chart[data-cbstats-custom-height="1"] {
+    height: var(--cbstats-chart-height);
+    aspect-ratio: auto;
 }
 
 .cbstats-pie-canvas {

@@ -13,7 +13,11 @@ final class FormTemplateLockLayoutTest extends TestCase
         $root = \dirname(__DIR__, 4);
         $detailsLayout = (string) \file_get_contents($root . '/admin/layouts/form/details_display.php');
         $editLayout = (string) \file_get_contents($root . '/admin/layouts/form/edit_display.php');
-        $formTemplate = (string) \file_get_contents($root . '/admin/tmpl/form/edit.php');
+        $formTemplate = str_replace(
+            "\r\n",
+            "\n",
+            (string) \file_get_contents($root . '/admin/tmpl/form/edit.php')
+        );
 
         self::assertStringContainsString(
             "<?php if (is_callable(\$renderCheckbox)) : ?>",
@@ -82,7 +86,11 @@ final class FormTemplateLockLayoutTest extends TestCase
     public function testEmptyTemplateDotRequiresMatchingFrontendPermission(): void
     {
         $root = \dirname(__DIR__, 4);
-        $formTemplate = (string) \file_get_contents($root . '/admin/tmpl/form/edit.php');
+        $formTemplate = str_replace(
+            "\r\n",
+            "\n",
+            (string) \file_get_contents($root . '/admin/tmpl/form/edit.php')
+        );
 
         self::assertStringContainsString(
             "\$detailsTemplateRequired = \$hasFrontendPermission('view')",

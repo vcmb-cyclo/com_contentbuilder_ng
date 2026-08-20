@@ -71,7 +71,9 @@ final class CbStatsRc91B01Test extends TestCase
 
         self::assertStringContainsString('calc(var(--cbstats-bar-items) * 30px + 48px)', $css);
         self::assertStringContainsString('calc(var(--cbstats-bar-items) * 34px + 48px)', $css);
-        self::assertStringContainsString('width: min(100%, 760px)', $css);
+        self::assertStringContainsString('width: 100%', $css);
+        self::assertStringContainsString('width: var(--cbstats-chart-width)', $css);
+        self::assertStringContainsString('max-width: 100%', $css);
         self::assertStringContainsString('categoryPercentage: 0.9', $javascript);
         self::assertStringContainsString('barPercentage: 0.9', $javascript);
         self::assertStringContainsString('maxBarThickness: 24', $javascript);

@@ -15,6 +15,7 @@ final class FormSaveButtonTest extends TestCase
         );
 
         self::assertIsString($script);
+        $script = str_replace("\r\n", "\n", $script);
         self::assertStringContainsString(
             "function cbSetDirtyState(isDirty) {\n"
                 . "        cbDirtyState = !!isDirty;\n"

@@ -28,11 +28,20 @@ final class HtmlView extends BaseHtmlView
     #[\Override]
     public function display($tpl = null): void
     {
-        Factory::getApplication()->getLanguage()->load(
+        $app = Factory::getApplication();
+        $language = $app->getLanguage();
+        $languageTag = match ($app->getInput()->getString('help_lang')) {
+            'fr', 'fr-FR' => 'fr-FR',
+            'en', 'en-GB' => 'en-GB',
+            'de', 'de-DE' => 'de-DE',
+            default => $language->getTag(),
+        };
+
+        $language->load(
             'plg_content_contentbuilderng_cbstats',
             JPATH_PLUGINS . '/content/contentbuilderng_cbstats',
-            null,
-            false,
+            $languageTag,
+            true,
             true
         );
 
@@ -44,10 +53,17 @@ final class HtmlView extends BaseHtmlView
             $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_PRESENTATION_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_PRESENTATION_TEXT'),
             $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_HEADERS_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_HEADERS_TEXT'),
             $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DISPLAY_OPTIONS_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DISPLAY_OPTIONS_TEXT'),
+            $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_CARD_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_CARD_TEXT'),
+            $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_CARD_GRID_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_CARD_GRID_TEXT'),
+            $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_CARD_WIDTH_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_CARD_WIDTH_TEXT'),
+            $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_ARTICLE_EXAMPLE_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_ARTICLE_EXAMPLE_TEXT'),
+            $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_CARD_CUSTOMIZE_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_CARD_CUSTOMIZE_TEXT'),
+            $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DIMENSIONS_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DIMENSIONS_TEXT'),
             $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_HIDE_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_HIDE_TEXT'),
             $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_MANUAL_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_MANUAL_TEXT'),
             $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_EXPORT_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_EXPORT_TEXT'),
             $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DEBUG_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DEBUG_TEXT'),
+            $this->section('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_REFERENCE_LABEL', 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_REFERENCE_TEXT'),
         ];
 
         $this->getDocument()->setTitle(strip_tags($this->pageTitle));

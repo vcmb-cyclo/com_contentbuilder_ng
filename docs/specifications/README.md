@@ -14,3 +14,4 @@ Spécifications disponibles :
 - [CBList](cblist.md)
 - [Pagination ContentBuilder NG](contentbuilder-pagination.md)
 - [Menu Joomla — List View](joomla-menu-list-view.md)
+- [Interface partagée et Cards CSS](shared-ui-cards.md)

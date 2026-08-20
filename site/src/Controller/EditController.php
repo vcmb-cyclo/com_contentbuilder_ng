@@ -522,7 +522,8 @@ class EditController extends BaseController
             (string) $this->input->getCmd('cblist_embed', ''),
             (string) $this->input->getString('cblist_fields', ''),
             (string) $this->input->getString('cblist_actions', ''),
-            (string) $this->input->getInt('cblist_limit', 0)
+            (string) $this->input->getInt('cblist_limit', 0),
+            $this->input->getBool('cblist_hide_pagination', false) ? '1' : ''
         );
 
         $title = trim((string) $this->input->getString('cblist_title', ''));

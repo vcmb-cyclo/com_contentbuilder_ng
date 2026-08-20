@@ -3,8 +3,13 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.10-RC09</version>
+		<version>6.1.10-RC10</version>
 		<addition>
+			<item>Added shared responsive Cards for CBList and CBStats, with six colours and optional 33%, 66% or full-row widths.</item>
+			<item>Added responsive Pie, Bar, Histogram, Line and Radar dimensions with strict width and height options.</item>
+			<item>Added CBList output=value for retrieving one filtered field value without an iframe.</item>
+			<item>Added concise CBList and CBStats guidance to the View API tab and complete public help manuals.</item>
+			<item>Added a configurable Backend View-tab pagination limit.</item>
 			<item>Added reusable Joomla-style menu controls with dynamic inheritance labels, per-menu themes and true override resets.</item>
 			<item>Added centralized pagination choices shared by component configuration, views, menus and frontend lists.</item>
 			<item>Added limit= to embedded CBList views, applied after access checks, filters and sorting and before pagination and export.</item>

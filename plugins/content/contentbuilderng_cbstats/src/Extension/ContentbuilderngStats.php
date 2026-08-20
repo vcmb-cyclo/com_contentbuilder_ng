@@ -18,6 +18,7 @@ use CB\Component\Contentbuilderng\Site\Service\StatsService;
 use CB\Component\Contentbuilderng\Site\Service\StatsFilterValueService;
 use CB\Component\Contentbuilderng\Site\Service\StatsHideOptionsService;
 use CB\Component\Contentbuilderng\Site\Service\CbstatsHelpService;
+use CB\Component\Contentbuilderng\Site\Service\ContentCardService;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Plugin\Content\ContentbuilderngStats\Service\PiePresentationService;
@@ -31,6 +32,7 @@ use CB\Plugin\Content\ContentbuilderngStats\Service\IdSumService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\DisplayOptionsService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\TableHeaderService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\StatsTagValidationService;
+use CB\Plugin\Content\ContentbuilderngStats\Service\CssDimensionService;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
@@ -52,6 +54,8 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
     private static bool $chartAssetsLoaded = false;
     private static bool $chartAssetRegistryLoaded = false;
     private static bool $manualExportAssetsLoaded = false;
+    /** @var array{width: string, height: string} */
+    private array $currentDimensions = ['width' => '', 'height' => ''];
 
     public static function getSubscribedEvents(): array
     {
@@ -68,8 +72,31 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
 
         $article->text = preg_replace_callback(
             TagSyntaxService::TAG_PATTERN,
-            fn(array $match): string => $this->renderStatsTag((string) ($match[1] ?? '')),
+            fn(array $match): string => $this->renderArticleTag((string) ($match[1] ?? '')),
             (string) $article->text
+        );
+    }
+
+    private function renderArticleTag(string $rawAttributes): string
+    {
+        $syntax = TagSyntaxService::parse($rawAttributes);
+        $attributes = $syntax['attributes'];
+        $html = $this->renderStatsTag($rawAttributes);
+        $card = ContentCardService::normalize((string) ($attributes['card'] ?? ''));
+
+        if ($card === '' || str_contains($html, 'class="alert alert-warning"')) {
+            return $html;
+        }
+
+        $wa = $this->getCbstatsWebAssetManager();
+        $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
+        $wa->useStyle('com_contentbuilderng.cards');
+
+        return ContentCardService::render(
+            $html,
+            $card,
+            (string) ($attributes['title'] ?? ''),
+            ContentCardService::normalizeWidth((string) ($attributes['w'] ?? ''))
         );
     }
 
@@ -101,6 +128,11 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             return $this->renderValidationErrors($validationErrors);
         }
 
+        $this->currentDimensions = [
+            'width' => CssDimensionService::normalize((string) ($attributes['width'] ?? '')) ?? '',
+            'height' => CssDimensionService::normalize((string) ($attributes['height'] ?? '')) ?? '',
+        ];
+
         $debugRequested = $this->isEnabled((string) ($attributes['debug'] ?? '0'));
         $debug = false;
         $output = TagSyntaxService::normalizeKeyword((string) ($attributes['output'] ?? 'total'));
@@ -116,7 +148,8 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $titles = trim((string) ($attributes['titles'] ?? ''));
         $ranges = trim((string) ($attributes['ranges'] ?? ''));
         $headers = trim((string) ($attributes['headers'] ?? ''));
-        $title = trim((string) ($attributes['title'] ?? ''));
+        $card = ContentCardService::normalize((string) ($attributes['card'] ?? ''));
+        $title = $card === '' ? trim((string) ($attributes['title'] ?? '')) : '';
         $background = TotalPresentationService::validateBackground((string) ($attributes['background'] ?? ''));
         $sort = TagSyntaxService::normalizeKeyword((string) ($attributes['sort'] ?? 'none'));
         $dir = TagSyntaxService::normalizeKeyword((string) ($attributes['dir'] ?? 'asc'));
@@ -449,7 +482,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
 
         $detailKey = match ($error['detail']) {
             'source' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_SOURCE',
-            'id_syntax', 'idsum_syntax', 'limit_syntax'
+            'id_syntax', 'idsum_syntax', 'limit_syntax', 'w_syntax'
                 => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_NUMERIC_SYNTAX',
             'id' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ID',
             'idsum' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_IDSUM',
@@ -466,6 +499,11 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             'hide' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_HIDE',
             'export' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_EXPORT',
             'background' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_BACKGROUND',
+            'card' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_CARD',
+            'w' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_W',
+            'w_requires_card' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_W_CARD',
+            'width' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_WIDTH',
+            'height' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_HEIGHT',
             'add' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ADD',
             'titles' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TITLES',
             'headers' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_HEADERS',
@@ -747,7 +785,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             $ariaLabel = Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_PIE_ARIA_LABEL', $fieldLabel);
             $html .= ' data-cbstats-pie="' . $encodedPayload . '"'
                 . $this->renderBackgroundStyle($background) . '>'
-                . '<div class="cbstats-pie-chart">'
+                . '<div class="cbstats-pie-chart"' . $this->renderDimensionAttributes() . '>'
                 . '<canvas id="' . $instanceId . '" class="cbstats-pie-canvas" role="img" aria-label="'
                 . htmlspecialchars($ariaLabel, ENT_QUOTES, 'UTF-8') . '">'
                 . htmlspecialchars(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_CHART_UNAVAILABLE'), ENT_QUOTES, 'UTF-8')
@@ -805,7 +843,9 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             $ariaLabel = Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_BAR_ARIA_LABEL', $fieldLabel);
             $html .= ' data-cbstats-bar="' . $encodedPayload . '"'
                 . $this->renderBackgroundStyle($background) . '>'
-                . '<div class="cbstats-bar-chart" style="--cbstats-bar-items:' . count($items) . '">'
+                . '<div class="cbstats-bar-chart"' . $this->renderDimensionAttributes([
+                    '--cbstats-bar-items' => (string) count($items),
+                ]) . '>'
                 . '<canvas id="' . $instanceId . '" class="cbstats-bar-canvas" role="img" aria-label="'
                 . htmlspecialchars($ariaLabel, ENT_QUOTES, 'UTF-8') . '">'
                 . htmlspecialchars(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_CHART_UNAVAILABLE'), ENT_QUOTES, 'UTF-8')
@@ -884,7 +924,9 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             $html .= ' data-cbstats-chart="' . $encodedPayload . '"'
                 . $this->renderBackgroundStyle($background) . '>'
                 . '<div class="cbstats-chart-viewport"><div class="cbstats-chart-canvas-wrapper"'
-                . ' style="--cbstats-chart-items:' . count($items) . '">'
+                . $this->renderDimensionAttributes([
+                    '--cbstats-chart-items' => (string) count($items),
+                ]) . '>'
                 . '<canvas id="' . $instanceId . '" class="cbstats-chart-canvas" role="img" aria-label="'
                 . htmlspecialchars($ariaLabel, ENT_QUOTES, 'UTF-8') . '">'
                 . htmlspecialchars(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_CHART_UNAVAILABLE'), ENT_QUOTES, 'UTF-8')
@@ -1125,6 +1167,31 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
     private function renderBackgroundStyle(string $background): string
     {
         return $background === '' ? '' : ' style="--cbstats-background:' . $background . '"';
+    }
+
+    /** @param array<string, string> $properties */
+    private function renderDimensionAttributes(array $properties = []): string
+    {
+        $attributes = '';
+        if ($this->currentDimensions['width'] !== '') {
+            $attributes .= ' data-cbstats-custom-width="1"';
+            $properties['--cbstats-chart-width'] = $this->currentDimensions['width'];
+        }
+        if ($this->currentDimensions['height'] !== '') {
+            $attributes .= ' data-cbstats-custom-height="1"';
+            $properties['--cbstats-chart-height'] = $this->currentDimensions['height'];
+        }
+
+        if ($properties === []) {
+            return $attributes;
+        }
+
+        $declarations = [];
+        foreach ($properties as $name => $value) {
+            $declarations[] = $name . ':' . $value;
+        }
+
+        return $attributes . ' style="' . htmlspecialchars(implode(';', $declarations), ENT_QUOTES, 'UTF-8') . '"';
     }
 
     private function loadPieAssets(): void

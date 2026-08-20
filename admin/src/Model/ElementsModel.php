@@ -22,6 +22,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Model;
 
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\Database\DatabaseQuery;
@@ -172,8 +173,19 @@ class ElementsModel extends ListModel
         $search = $app->getUserStateFromRequest('com_contentbuilderng.elements.filter.search', 'filter_search', '', 'string');
         $this->setState('filter.search', $search);
 
-        // Pagination (scope local a la liste des elements)
-        $limit = $app->getUserStateFromRequest($context . '.list.limit', 'limit', $app->get('list_limit'), 'uint');
+        // Pagination (scope local à l'onglet View de la vue courante).
+        $configuredLimit = max(
+            0,
+            (int) ComponentHelper::getParams('com_contentbuilderng')->get('view_elements_limit', 20)
+        );
+        $hasExplicitLimit = array_key_exists(
+            'limit',
+            (array) $app->getInput()->get('list', [], 'array')
+        ) || $app->getInput()->get('limit', null, 'raw') !== null;
+        $limit = $enteredFromOtherView && !$hasExplicitLimit
+            ? $configuredLimit
+            : $app->getUserStateFromRequest($context . '.list.limit', 'limit', $configuredLimit, 'uint');
+        $app->setUserState($context . '.list.limit', $limit);
         $this->setState('list.limit', $limit);
 
         $startDefault = $enteredFromOtherView ? 0 : (int) $app->getUserState($context . '.list.start', 0);
@@ -205,9 +217,9 @@ class ElementsModel extends ListModel
         } elseif ($app->getInput()->get('limit', null, 'raw') !== null) {
             $effectiveLimit = (int) $app->getInput()->getInt('limit', (int) $limit);
         } elseif ($enteredFromOtherView) {
-            $effectiveLimit = (int) ($limit ?: $app->get('list_limit'));
+            $effectiveLimit = (int) $limit;
         } else {
-            $effectiveLimit = (int) $app->getUserState($context . '.list.limit', (int) ($limit ?: $app->get('list_limit')));
+            $effectiveLimit = (int) $app->getUserState($context . '.list.limit', (int) $limit);
         }
         $effectiveLimit = max(0, $effectiveLimit);
 

@@ -7,6 +7,7 @@ namespace CB\Component\Contentbuilderng\Tests\Unit\Plugin;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListActionFilterService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListContextService;
 use CB\Component\Contentbuilderng\Site\Service\EmbeddedListFieldFilterService;
+use CB\Component\Contentbuilderng\Site\Service\ContentCardService;
 use CB\Plugin\Content\ContentbuilderngList\Service\EmbedOptionsService;
 use CB\Plugin\Content\ContentbuilderngList\Service\TagSyntaxService;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -47,6 +48,10 @@ final class CbListPluginTest extends TestCase
                 'sort_direction' => 'asc|asc',
                 'title' => 'Liste des inscrits',
                 'title_set' => true,
+                'output' => 'list',
+                'offset' => 0,
+                'card' => '',
+                'w' => '',
             ],
             EmbedOptionsService::resolve($attributes)
         );
@@ -68,8 +73,43 @@ final class CbListPluginTest extends TestCase
                 'sort_direction' => 'asc',
                 'title' => '',
                 'title_set' => false,
+                'output' => 'list',
+                'offset' => 0,
+                'card' => '',
+                'w' => '',
             ],
             EmbedOptionsService::resolve(['id' => '7'])
+        );
+    }
+
+    public function testCardWidthsAreStrictAndRequireACard(): void
+    {
+        foreach (['33', '66', '100'] as $width) {
+            self::assertSame($width, EmbedOptionsService::resolve([
+                'id' => '15',
+                'card' => 'v1',
+                'w' => $width,
+            ])['w']);
+        }
+
+        self::assertSame(
+            ['w'],
+            array_column(EmbedOptionsService::validationErrors(['id' => '15', 'w' => '66']), 'parameter')
+        );
+        self::assertSame(
+            ['w'],
+            array_column(EmbedOptionsService::validationErrors(['id' => '15', 'card' => 'v1', 'w' => '50']), 'parameter')
+        );
+
+        $syntax = TagSyntaxService::parse('id=15 card=v1 w="66"');
+        self::assertSame(
+            ['w_syntax'],
+            array_column(EmbedOptionsService::validationErrors($syntax['attributes'], $syntax['quoted']), 'detail')
+        );
+
+        self::assertStringContainsString(
+            'class="cb-card cb-card-v1 cb-card-w66"',
+            ContentCardService::render('Content', 'v1', 'Title', '66')
         );
     }
 
@@ -117,12 +157,6 @@ final class CbListPluginTest extends TestCase
                     'parameter' => 'headers',
                     'value' => 'Noms',
                     'detail' => '',
-                ],
-                [
-                    'code' => 'invalid_value',
-                    'parameter' => 'pagination',
-                    'value' => '0',
-                    'detail' => 'pagination',
                 ],
                 [
                     'code' => 'invalid_value',
@@ -190,12 +224,22 @@ final class CbListPluginTest extends TestCase
     {
         $valid = TagSyntaxService::parse('id=15 height=700 pagination=20 limit=10');
         self::assertSame([], EmbedOptionsService::validationErrors($valid['attributes'], $valid['quoted']));
+        $validOffset = TagSyntaxService::parse('id=15 fields=Nom output=value offset=1');
+        self::assertSame([], EmbedOptionsService::validationErrors($validOffset['attributes'], $validOffset['quoted']));
 
         $invalid = TagSyntaxService::parse('id="15" height=\'700\' pagination="20" limit=\'10\'');
         self::assertSame(
             ['id_syntax', 'height_syntax', 'pagination_syntax', 'limit_syntax'],
             array_column(
                 EmbedOptionsService::validationErrors($invalid['attributes'], $invalid['quoted']),
+                'detail'
+            )
+        );
+        $invalidOffset = TagSyntaxService::parse('id=15 fields=Nom output=value offset="1"');
+        self::assertContains(
+            'offset_syntax',
+            array_column(
+                EmbedOptionsService::validationErrors($invalidOffset['attributes'], $invalidOffset['quoted']),
                 'detail'
             )
         );
@@ -220,6 +264,12 @@ final class CbListPluginTest extends TestCase
             'limit zero' => [['id' => '15', 'limit' => '0']],
             'limit too large' => [['id' => '15', 'limit' => '5001']],
             'limit mixed' => [['id' => '15', 'limit' => '1A']],
+            'pagination negative' => [['id' => '15', 'pagination' => '-1']],
+            'offset without value output' => [['id' => '15', 'offset' => '1']],
+            'value output without field' => [['id' => '15', 'output' => 'value']],
+            'value output with two fields' => [['id' => '15', 'fields' => 'Nom|Email', 'output' => 'value']],
+            'value output with presentation option' => [['id' => '15', 'fields' => 'Nom', 'output' => 'value', 'pagination' => '0']],
+            'unknown output' => [['id' => '15', 'fields' => 'Nom', 'output' => 'raw']],
             'invalid layout' => [['id' => '15', 'layout' => '../default']],
             'invalid loading' => [['id' => '15', 'loading' => 'automatic']],
             'fields comma separator rejected' => [['id' => '15', 'fields' => 'Name,Email']],
@@ -228,12 +278,28 @@ final class CbListPluginTest extends TestCase
             'actions comma separator rejected' => [['id' => '15', 'actions' => 'search,export']],
             'actions semicolon separator rejected' => [['id' => '15', 'actions' => 'search;export']],
             'unknown action' => [['id' => '15', 'actions' => 'search|teleport']],
+            'none combined with an action' => [['id' => '15', 'actions' => 'none|detail']],
             'sort direction count mismatch' => [[
                 'id' => '15',
                 'sort' => 'Field 1|Field 2|Field 3',
                 'dir' => 'asc|desc',
             ]],
         ];
+    }
+
+    public function testValueOutputDefaultsAndPaginationZeroAreResolved(): void
+    {
+        $value = EmbedOptionsService::resolve([
+            'id' => '15',
+            'fields' => 'Nom',
+            'output' => 'value',
+        ]);
+
+        self::assertSame('value', $value['output']);
+        self::assertSame('ID', $value['sort']);
+        self::assertSame('desc', $value['sort_direction']);
+        self::assertSame(0, $value['offset']);
+        self::assertSame(0, EmbedOptionsService::resolve(['id' => '15', 'pagination' => '0'])['pagination']);
     }
 
     public function testEmbeddedFieldFilterOnlyReducesVisibleColumns(): void
@@ -357,6 +423,7 @@ final class CbListPluginTest extends TestCase
             EmbeddedListActionFilterService::parseActions('Search|Detail|EXPORT|detail')
         );
         self::assertSame([], EmbeddedListActionFilterService::parseActions(''));
+        self::assertSame(['none'], EmbeddedListActionFilterService::parseActions('NONE'));
     }
 
     public function testActionSelectorsRejectCommaAndSemicolon(): void
@@ -412,6 +479,28 @@ final class CbListPluginTest extends TestCase
         self::assertFalse(EmbeddedListActionFilterService::isAllowed('edit', $allowed));
     }
 
+    public function testNoneDisablesEveryEmbeddedActionAndCannotBeCombined(): void
+    {
+        self::assertTrue(EmbeddedListActionFilterService::isKnownAction('none'));
+        self::assertFalse(EmbeddedListActionFilterService::isAllowed('search', ['none']));
+        self::assertFalse(EmbeddedListActionFilterService::isAllowed('detail', ['none']));
+
+        $this->expectException(\InvalidArgumentException::class);
+        EmbeddedListActionFilterService::parseActions('none|detail');
+    }
+
+    public function testEmptyTopToolbarIsNotRendered(): void
+    {
+        $template = (string) file_get_contents(self::ROOT . '/site/tmpl/list/default.php');
+
+        self::assertStringContainsString('$hasTopBarContent = $language_allowed', $template);
+        self::assertStringContainsString('$showTopBar = $showTopBar && $hasTopBarContent;', $template);
+        self::assertStringContainsString(
+            '($this->show_records_per_page && !$embeddedListHidePagination)',
+            $template
+        );
+    }
+
     public function testDebugStateReportsOnlyTheRequestedActions(): void
     {
         $state = EmbeddedListActionFilterService::debugState(
@@ -456,6 +545,16 @@ final class CbListPluginTest extends TestCase
         self::assertSame(
             '',
             EmbeddedListContextService::buildQuery('invalid-context', 'Name', 'detail')
+        );
+        self::assertSame(
+            '&cblist_embed=content-plugin&cblist_hide_pagination=1',
+            EmbeddedListContextService::buildQuery(
+                EmbeddedListFieldFilterService::REQUEST_CONTEXT,
+                '',
+                '',
+                '',
+                '1'
+            )
         );
     }
 
@@ -596,8 +695,12 @@ final class CbListPluginTest extends TestCase
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_TEXT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_FIELDS_LABEL',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_FIELDS_TEXT',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_VALUE_LABEL',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_VALUE_TEXT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_LABEL',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_TEXT',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_NONE_LABEL',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_NONE_TEXT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_VALIDATION_INTRO',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_SYNTAX_HELP',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EMPTY_VALUE',
@@ -610,6 +713,11 @@ final class CbListPluginTest extends TestCase
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_HEIGHT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_PAGINATION',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LIMIT',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_OFFSET',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_OUTPUT',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_SINGLE_FIELD',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_OUTPUT_COMPATIBILITY',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_OFFSET_MODE',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LAYOUT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LOADING',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_FIELDS',
@@ -694,7 +802,9 @@ final class CbListPluginTest extends TestCase
         $help = implode('', [
             $translations['PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_TEXT'],
             $translations['PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_FIELDS_TEXT'],
+            $translations['PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_VALUE_TEXT'],
             $translations['PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_TEXT'],
+            $translations['PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_NONE_TEXT'],
         ]);
         self::assertStringNotContainsString('{CBList id=25', $help, $language);
         self::assertStringContainsString('Thoth', $help, $language . ': missing default theme explanation');
