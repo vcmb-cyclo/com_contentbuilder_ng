@@ -15,3 +15,8 @@ Spécifications disponibles :
 - [Pagination ContentBuilder NG](contentbuilder-pagination.md)
 - [Menu Joomla — List View](joomla-menu-list-view.md)
 - [Interface partagée et Cards CSS](shared-ui-cards.md)
+- [États de liste ContentBuilder NG](contentbuilder-list-states.md)
+- [Indicateurs des onglets de vue](view-tab-indicators.md)
+- [Sélection des champs Edit et Export](view-edit-export.md)
+- [Aide contextuelle de la vue](contextual-view-help.md)
+- [Easter egg About](about-easter-egg.md)

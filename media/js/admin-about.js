@@ -40,6 +40,63 @@
         });
     }
 
+    function initializeEasterEgg() {
+        var hotspot = document.querySelector('[data-cb-easter-egg-hotspot]');
+        var overlay = document.querySelector('[data-cb-easter-egg]');
+        var image = overlay ? overlay.querySelector('[data-cb-easter-egg-image]') : null;
+        var closeButton = overlay ? overlay.querySelector('[data-cb-easter-egg-close]') : null;
+        var clickCount = 0;
+        var resetTimer = 0;
+
+        if (!hotspot || !overlay || !image || !closeButton) {
+            return;
+        }
+
+        var close = function () {
+            overlay.hidden = true;
+            overlay.setAttribute('aria-hidden', 'true');
+            image.removeAttribute('src');
+            document.body.classList.remove('cb-easter-egg-open');
+        };
+
+        var open = function () {
+            var source = String(image.dataset.src || '');
+            image.src = source + (source.indexOf('?') === -1 ? '?' : '&') + 'play=' + Date.now();
+            overlay.hidden = false;
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('cb-easter-egg-open');
+            closeButton.focus();
+        };
+
+        hotspot.addEventListener('click', function () {
+            clickCount += 1;
+            window.clearTimeout(resetTimer);
+            resetTimer = window.setTimeout(function () {
+                clickCount = 0;
+            }, 3000);
+
+            if (clickCount < 5) {
+                return;
+            }
+
+            clickCount = 0;
+            window.clearTimeout(resetTimer);
+            open();
+        });
+
+        closeButton.addEventListener('click', close);
+        overlay.addEventListener('click', function (event) {
+            if (event.target === overlay) {
+                close();
+            }
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !overlay.hidden) {
+                close();
+            }
+        });
+    }
+
     function refreshAuditSection() {
         var auditSection = document.getElementById('cb-audit-section');
 
@@ -193,4 +250,5 @@
     });
 
     initializeTooltips();
+    initializeEasterEgg();
 }());

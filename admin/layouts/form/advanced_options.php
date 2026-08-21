@@ -52,6 +52,9 @@ $advancedDefaults = [
     'edit_button' => 0,
     'new_button' => 0,
     'export_xls' => 1,
+    'export_id_column' => 1,
+    'export_state_column' => 0,
+    'export_publish_column' => 0,
     'print_button' => 0,
     'show_back_button' => 1,
     'show_title_breadcrumb' => 1,
@@ -275,6 +278,39 @@ $advancedDefaults = [
                                     <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_XLSEXPORT'); ?>
                                 </span>
                             </label>
+                        </div>
+                        <div class="w-100">
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                    id="cb-export-system-columns-toggle"
+                                    data-bs-toggle="dropdown"
+                                    data-bs-auto-close="outside"
+                                    aria-expanded="false"
+                                    title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_EXPORT_SYSTEM_COLUMNS_DESC'), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <span class="fa-solid fa-table-columns me-1" aria-hidden="true"></span>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_EXPORT_SYSTEM_COLUMNS'); ?>
+                                </button>
+                                <div class="dropdown-menu p-2" aria-labelledby="cb-export-system-columns-toggle">
+                                    <?php
+                                    $exportSystemColumns = [
+                                        'export_id_column' => 'COM_CONTENTBUILDERNG_EXPORT_SYSTEM_ID',
+                                        'export_state_column' => 'COM_CONTENTBUILDERNG_EXPORT_SYSTEM_STATE',
+                                        'export_publish_column' => 'COM_CONTENTBUILDERNG_EXPORT_SYSTEM_PUBLISHED',
+                                    ];
+                                    foreach ($exportSystemColumns as $fieldName => $labelKey) :
+                                    ?>
+                                        <label class="dropdown-item form-check d-flex align-items-center gap-2 mb-0">
+                                            <input type="hidden" name="jform[<?php echo $fieldName; ?>]" value="0" />
+                                            <?php echo $renderCheckbox(
+                                                'jform[' . $fieldName . ']',
+                                                $fieldName,
+                                                (bool) ($item->{$fieldName} ?? ($fieldName === 'export_id_column'))
+                                            ); ?>
+                                            <span><?php echo htmlspecialchars(Text::_($labelKey), ENT_QUOTES, 'UTF-8'); ?></span>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <input type="hidden" name="jform[print_button]" value="0" />

@@ -141,7 +141,7 @@ final class ThothThemeConsistencyTest extends TestCase
         );
     }
 
-    public function testEditableSampleKeepsPublishedNonEditableFieldsVisible(): void
+    public function testEditableSampleIncludesOnlyPublishedEditableFields(): void
     {
         self::assertStringContainsString(
             'private function fetchElementDefinitions(DatabaseInterface $db, int $contentbuilderng_form_id): array',
@@ -156,7 +156,7 @@ final class ThothThemeConsistencyTest extends TestCase
             'if (!$editable) {',
             $this->source
         );
-        self::assertStringContainsString(
+        self::assertStringNotContainsString(
             '<div class="mb-3"><label class="form-label">{\' . $name . \':label}</label><div class="form-control-plaintext py-0">{\' . $name . \':value}</div></div>',
             $this->source
         );

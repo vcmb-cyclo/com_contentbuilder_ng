@@ -36,19 +36,22 @@ final class ElementMutationResyncTest extends TestCase
         self::assertStringContainsString('item.type', $script);
     }
 
-    public function testPublishingAnElementImmediatelyRestoresDetailAndEditControls(): void
+    public function testPublishingAnElementImmediatelyRestoresDependentControls(): void
     {
         $layout = $this->read('admin/layouts/form/elements_table.php');
         $script = $this->read('media/js/form-edit-init.js');
 
         self::assertStringContainsString('data-cb-published-capability="detail"', $layout);
         self::assertStringContainsString('data-cb-published-capability="edit"', $layout);
+        self::assertStringContainsString('data-cb-published-capability="export"', $layout);
         self::assertStringContainsString('data-cb-capability-control', $layout);
         self::assertStringContainsString('data-cb-capability-lock', $layout);
         self::assertStringContainsString('data-cb-capability-off', $layout);
         self::assertStringContainsString('data-cb-capability-enabled=', $layout);
         self::assertStringContainsString('$isDetailEnabled', $layout);
         self::assertStringContainsString('$isEditEnabled', $layout);
+        self::assertStringContainsString('$isExportEnabled', $layout);
+        self::assertStringContainsString("capability = 'export';", $script);
         self::assertStringContainsString('function cbRefreshPublishedCapabilityCell', $script);
         self::assertStringContainsString("cell.dataset.cbCapabilityEnabled === '1'", $script);
         self::assertStringContainsString('lock.hidden = published || !enabled;', $script);

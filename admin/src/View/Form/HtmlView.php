@@ -293,6 +293,18 @@ class HtmlView extends BaseHtmlView
             ->icon('fa fa-pen text-danger')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_NOT_EDITABLE_TIP')]);
+        $statusChildToolbar->standardButton('export_include')
+            ->task('form.export_include')
+            ->text('COM_CONTENTBUILDERNG_EXPORT_INCLUDE')
+            ->icon('fa fa-file-export text-success')
+            ->listCheck(true)
+            ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_EXPORT_INCLUDE_TIP')]);
+        $statusChildToolbar->standardButton('no_export_include')
+            ->task('form.no_export_include')
+            ->text('COM_CONTENTBUILDERNG_NO_EXPORT_INCLUDE')
+            ->icon('fa fa-file-export text-danger')
+            ->listCheck(true)
+            ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_NO_EXPORT_INCLUDE_TIP')]);
         $statusChildToolbar->publish('form.publish')
             ->icon('fa-solid fa-check text-success')
             ->listCheck(true)
@@ -301,6 +313,87 @@ class HtmlView extends BaseHtmlView
             ->icon('fa-solid fa-circle-xmark text-danger')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_UNPUBLISH_ELEMENTS_TIP')]);
+
+        $stateResetActions = [
+            ['state_reset_inactive', 'inactive', 'COM_CONTENTBUILDERNG_LIST_STATES_RESET_INACTIVE', 'fa fa-broom'],
+            ['state_reset_palette', 'palette', 'COM_CONTENTBUILDERNG_LIST_STATES_RESET_PALETTE', 'fa fa-palette'],
+            ['state_reset_disable', 'disable', 'COM_CONTENTBUILDERNG_LIST_STATES_RESET_DISABLE', 'fa fa-ban'],
+        ];
+
+        if (!empty($this->item->debug_mode) && $identity->authorise('core.admin')) {
+            $stateResetActions[] = [
+                'state_reset_full',
+                'full',
+                'COM_CONTENTBUILDERNG_LIST_STATES_RESET_FULL',
+                'fa fa-triangle-exclamation text-danger',
+            ];
+        }
+
+        foreach ($stateResetActions as [$buttonName, $resetAction, $textKey, $icon]) {
+            $statusChildToolbar->standardButton($buttonName)
+                ->task('')
+                ->text($textKey)
+                ->icon($icon)
+                ->listCheck(false)
+                ->attributes([
+                    'data-cb-actions-context' => 'states',
+                    'data-cb-list-states-reset' => $resetAction,
+                ]);
+        }
+
+        $detailsTemplateActionKey = trim((string) ($this->item->details_template ?? '')) === ''
+            ? 'COM_CONTENTBUILDERNG_CREATE_TEMPLATE'
+            : 'COM_CONTENTBUILDERNG_DETAILS_ACTION_REGENERATE';
+        $editTemplateActionKey = trim((string) ($this->item->editable_template ?? '')) === ''
+            ? 'COM_CONTENTBUILDERNG_CREATE_TEMPLATE'
+            : 'COM_CONTENTBUILDERNG_EDIT_ACTION_REGENERATE';
+        $templateActions = [
+            'details' => [
+                ['details_reset_display', 'display', 'COM_CONTENTBUILDERNG_DETAILS_ACTION_RESET_DISPLAY', 'fa fa-rotate-left'],
+                ['details_regenerate_template', 'regenerate', $detailsTemplateActionKey, 'fa fa-wand-magic-sparkles'],
+                ['details_disable', 'disable', 'COM_CONTENTBUILDERNG_DETAILS_ACTION_DISABLE', 'fa fa-ban'],
+            ],
+            'edit' => [
+                ['edit_reset_display', 'display', 'COM_CONTENTBUILDERNG_EDIT_ACTION_RESET_DISPLAY', 'fa fa-rotate-left'],
+                ['edit_regenerate_template', 'regenerate', $editTemplateActionKey, 'fa fa-wand-magic-sparkles'],
+                ['edit_disable', 'disable', 'COM_CONTENTBUILDERNG_EDIT_ACTION_DISABLE', 'fa fa-ban'],
+            ],
+        ];
+
+        if (!empty($this->item->debug_mode) && $identity->authorise('core.admin')) {
+            $templateActions['details'][] = ['details_reset_full', 'full', 'COM_CONTENTBUILDERNG_DETAILS_ACTION_RESET_FULL', 'fa fa-triangle-exclamation text-danger'];
+            $templateActions['edit'][] = ['edit_reset_full', 'full', 'COM_CONTENTBUILDERNG_EDIT_ACTION_RESET_FULL', 'fa fa-triangle-exclamation text-danger'];
+        }
+
+        foreach ($templateActions as $context => $actions) {
+            foreach ($actions as [$buttonName, $action, $textKey, $icon]) {
+                $statusChildToolbar->standardButton($buttonName)
+                    ->task('')
+                    ->text($textKey)
+                    ->icon($icon)
+                    ->listCheck(false)
+                    ->attributes([
+                        'data-cb-actions-context' => $context,
+                        'data-cb-template-action' => $context . ':' . $action,
+                    ]);
+            }
+        }
+
+        $contentResetActions = [
+            ['intro_reset', 'intro', 'COM_CONTENTBUILDERNG_ACTION_RESET_INTRO'],
+            ['article_reset', 'article', 'COM_CONTENTBUILDERNG_ACTION_RESET_ARTICLE'],
+        ];
+        foreach ($contentResetActions as [$buttonName, $context, $textKey]) {
+            $statusChildToolbar->standardButton($buttonName)
+                ->task('')
+                ->text($textKey)
+                ->icon('fa fa-rotate-left')
+                ->listCheck(false)
+                ->attributes([
+                    'data-cb-actions-context' => $context,
+                    'data-cb-content-reset' => $context,
+                ]);
+        }
 
         ToolbarHelper::cancel('form.cancel', 'JTOOLBAR_CLOSE');
 

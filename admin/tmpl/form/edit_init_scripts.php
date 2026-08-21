@@ -11,6 +11,7 @@ $cbFormEditConfig = [
     'isBreezingFormsType' => $isBreezingFormsType,
     'breezingFormsEditableToken' => $breezingFormsEditableToken,
     'limitstart' => \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('limitstart', 0),
+    'helpUrl' => Uri::base() . 'index.php?option=com_contentbuilderng&view=form&layout=help&tmpl=component',
     'text' => [
         'columns' => Text::_('COM_CONTENTBUILDERNG_COLUMNS'),
         'typeEditEnableBfConfirm' => Text::_('COM_CONTENTBUILDERNG_TYPE_EDIT_ENABLE_BF_CONFIRM'),
@@ -22,7 +23,24 @@ $cbFormEditConfig = [
         'errorEnterFormname' => Text::_('COM_CONTENTBUILDERNG_ERROR_ENTER_FORMNAME'),
         'errorEnterFormnameAll' => Text::_('COM_CONTENTBUILDERNG_ERROR_ENTER_FORMNAME_ALL'),
         'initialiseOverwriteConfirm' => Text::_('COM_CONTENTBUILDERNG_INITIALISE_OVERWRITE_CONFIRM'),
+        'listStatesResetInactiveConfirm' => Text::_('COM_CONTENTBUILDERNG_LIST_STATES_RESET_INACTIVE_CONFIRM'),
+        'listStatesResetPaletteConfirm' => Text::_('COM_CONTENTBUILDERNG_LIST_STATES_RESET_PALETTE_CONFIRM'),
+        'listStatesResetDisableConfirm' => Text::_('COM_CONTENTBUILDERNG_LIST_STATES_RESET_DISABLE_CONFIRM'),
+        'listStatesResetFullConfirm' => Text::_('COM_CONTENTBUILDERNG_LIST_STATES_RESET_FULL_CONFIRM'),
+        'detailsResetDisplayConfirm' => Text::_('COM_CONTENTBUILDERNG_DETAILS_ACTION_RESET_DISPLAY_CONFIRM'),
+        'detailsRegenerateConfirm' => Text::_('COM_CONTENTBUILDERNG_DETAILS_ACTION_REGENERATE_CONFIRM'),
+        'detailsDisableConfirm' => Text::_('COM_CONTENTBUILDERNG_DETAILS_ACTION_DISABLE_CONFIRM'),
+        'detailsResetFullConfirm' => Text::_('COM_CONTENTBUILDERNG_DETAILS_ACTION_RESET_FULL_CONFIRM'),
+        'editResetDisplayConfirm' => Text::_('COM_CONTENTBUILDERNG_EDIT_ACTION_RESET_DISPLAY_CONFIRM'),
+        'editRegenerateConfirm' => Text::_('COM_CONTENTBUILDERNG_EDIT_ACTION_REGENERATE_CONFIRM'),
+        'editDisableConfirm' => Text::_('COM_CONTENTBUILDERNG_EDIT_ACTION_DISABLE_CONFIRM'),
+        'editResetFullConfirm' => Text::_('COM_CONTENTBUILDERNG_EDIT_ACTION_RESET_FULL_CONFIRM'),
+        'resetIntroConfirm' => Text::_('COM_CONTENTBUILDERNG_RESET_LIST_INTRO_CONFIRM'),
     ],
+    'listStateDefaultTitles' => array_map(
+        static fn(int $index): string => Text::sprintf('COM_CONTENTBUILDERNG_LIST_STATE_DEFAULT_TITLE', $index),
+        range(1, 10)
+    ),
 ];
 
 $cbFormEditInitScriptPath = JPATH_ROOT . '/media/com_contentbuilderng/js/form-edit-init.js';

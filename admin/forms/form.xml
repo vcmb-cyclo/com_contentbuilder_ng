@@ -207,6 +207,24 @@
       <option value="1">JYES</option>
     </field>
 
+    <field name="export_id_column" type="radio" default="1" filter="intval"
+           label="COM_CONTENTBUILDERNG_EXPORT_SYSTEM_ID">
+      <option value="0">JNO</option>
+      <option value="1">JYES</option>
+    </field>
+
+    <field name="export_state_column" type="radio" default="0" filter="intval"
+           label="COM_CONTENTBUILDERNG_EXPORT_SYSTEM_STATE">
+      <option value="0">JNO</option>
+      <option value="1">JYES</option>
+    </field>
+
+    <field name="export_publish_column" type="radio" default="0" filter="intval"
+           label="COM_CONTENTBUILDERNG_EXPORT_SYSTEM_PUBLISHED">
+      <option value="0">JNO</option>
+      <option value="1">JYES</option>
+    </field>
+
     <field name="select_column" type="radio" default="0" filter="intval"
            label="COM_CONTENTBUILDERNG_FIELD_SELECT_COLUMN">
       <option value="0">JNO</option>

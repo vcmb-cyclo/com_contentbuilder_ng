@@ -27,40 +27,24 @@ $editablePrepareSnippetOptions = is_array($displayData['editablePrepareSnippetOp
 $prepareEffectOptions = is_array($displayData['prepareEffectOptions'] ?? null) ? $displayData['prepareEffectOptions'] : [];
 $templateAuditChecks = (array) ($displayData['templateAuditChecks'] ?? []);
 $templateAuditReferences = (array) ($displayData['templateAuditReferences'] ?? []);
-$editDisplayDefaults = [
-    'cb_show_top_bar' => true,
-    'cb_show_bottom_bar' => false,
-];
 ?>
 <?php echo LayoutHelper::render('form.template_audit_errors', [
     'auditChecks' => $templateAuditChecks,
     'references' => $templateAuditReferences,
 ]); ?>
-<h3 id="cb-form-edit-display" class="mb-3">
+<h3 id="cb-form-edit-display" class="mb-1">
     <?php echo Text::_('COM_CONTENTBUILDERNG_TAB_EDIT_DISPLAY'); ?>
 </h3>
-<p class="text-muted mb-3">
+<p class="text-muted mb-2">
     <?php echo Text::_('COM_CONTENTBUILDERNG_TAB_EDIT_DISPLAY_INTRO'); ?>
 </p>
-<div class="alert alert-info mb-3">
-    <?php echo Text::_('COM_CONTENTBUILDERNG_TAB_EDIT_DISPLAY_PERMISSION_HINT'); ?>
-</div>
-<div class="row gx-3 gy-1 mt-0 align-items-stretch mb-3" id="cb-form-edit-show-buttons-row">
-    <div class="col-12 col-xl-4 d-flex" id="cb-form-edit-show-buttons">
-        <div class="border rounded bg-body p-3 d-flex flex-column flex-grow-1" id="cb-form-edit-show-buttons-card">
-            <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                <h4 class="h6 text-body-secondary mb-0">
-                    <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_BUTTON_OPTIONS'); ?>
-                </h4>
-                <button type="button" class="btn btn-secondary btn-sm" id="cb-reset-edit-display"
-                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_RESET_EDIT_DISPLAY_TOOLTIP'); ?>"
-                    aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_RESET_EDIT_DISPLAY_TOOLTIP'); ?>"
-                    data-defaults="<?php echo htmlspecialchars(json_encode($editDisplayDefaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8'); ?>"
-                    data-confirm="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_RESET_EDIT_DISPLAY_CONFIRM'), ENT_QUOTES, 'UTF-8'); ?>">
-                    <span class="fa-solid fa-rotate-left" aria-hidden="true"></span>
-                    <?php echo Text::_('COM_CONTENTBUILDERNG_RESET'); ?>
-                </button>
-            </div>
+<input type="hidden" name="jform[edit_by_type]" id="cb-form-edit-by-type-hidden" value="0" />
+<div class="row gx-2 gy-1 mt-0 align-items-stretch mb-2" id="cb-form-edit-show-buttons-row">
+    <div class="col-12 d-flex" id="cb-form-edit-show-buttons">
+        <div class="border rounded bg-body p-2 d-flex flex-column flex-grow-1" id="cb-form-edit-show-buttons-card">
+            <h4 class="h6 text-body-secondary mb-1">
+                <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_BUTTON_OPTIONS'); ?>
+            </h4>
             <div class="d-flex flex-wrap align-items-center gap-3">
                 <div>
                     <input type="hidden" name="jform[cb_show_top_bar]" id="cb-form-edit-show-top-bar-hidden" value="0" />
@@ -80,73 +64,53 @@ $editDisplayDefaults = [
                         </span>
                     </label>
                 </div>
+                <?php if (is_callable($renderCheckbox) && (empty($item->edit_by_type) || !$isBreezingFormsType)) : ?>
+                    <div class="form-check mb-0 flex-shrink-0 text-nowrap border-start ps-3">
+                        <input type="hidden" name="jform[editable_template_locked]" value="0" />
+                        <?php echo $renderCheckbox('jform[editable_template_locked]', 'editable_template_locked', !empty($item->editable_template_locked)); ?>
+                        <label class="form-check-label" for="editable_template_locked">
+                            <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_TIP'); ?>">
+                                <span class="fa-solid fa-lock me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED'); ?>
+                            </span>
+                        </label>
+                    </div>
+                <?php endif; ?>
+                <?php if ($canEditByType) : ?>
+                    <div class="form-check mb-0 flex-shrink-0 border-start ps-3" id="cb-form-edit-by-type-field-group">
+                        <?php echo is_callable($renderCheckbox) ? $renderCheckbox('jform[edit_by_type]', 'edit_by_type', (bool) ($item->edit_by_type ?? false)) : ''; ?>
+                        <label class="form-check-label" for="edit_by_type">
+                            <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EDIT_TIP'); ?>">
+                                <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EDIT'); ?>
+                            </span>
+                        </label>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
     <?php if (empty($item->edit_by_type) || !$isBreezingFormsType) : ?>
-        <div class="col-12 col-xl-8 d-flex" id="cb-form-edit-create-sample-card-col">
-            <div class="border rounded bg-body p-3 d-flex flex-column flex-grow-1" id="cb-form-edit-create-sample-card">
-                <h4 class="h6 text-body-secondary mb-2">
-                    <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE'); ?>
-                </h4>
-                <input type="hidden" name="jform[create_editable_sample]" id="cb_create_editable_sample_flag" value="0" />
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                    <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1" id="create_editable_sample"
-                        title="<?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE_TIP'); ?>"
-                        aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE_TIP'); ?>"
-                        onclick="cbQueueEditableSampleGeneration(this);">
-                        <span class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></span>
-                        <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE'); ?>
-                    </button>
-                    <?php if (is_callable($renderCheckbox)) : ?>
-                        <div class="form-check mb-0 ms-xl-auto flex-shrink-0 text-nowrap">
-                            <input type="hidden" name="jform[editable_template_locked]" value="0" />
-                            <?php echo $renderCheckbox('jform[editable_template_locked]', 'editable_template_locked', !empty($item->editable_template_locked)); ?>
-                            <label class="form-check-label" for="editable_template_locked">
-                                <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED_TIP'); ?>">
-                                    <span class="fa-solid fa-lock me-1" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_TEMPLATE_LOCKED'); ?>
-                                </span>
-                            </label>
-                        </div>
-                    <?php endif; ?>
-                    <small id="cb_create_editable_sample_hint" class="text-success d-none">
-                        <?php echo Text::_('COM_CONTENTBUILDERNG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
-                    </small>
-                </div>
-            </div>
-        </div>
+        <input type="hidden" name="jform[create_editable_sample]" id="cb_create_editable_sample_flag" value="0" />
     <?php endif; ?>
 </div>
-<input type="hidden" name="jform[edit_by_type]" id="cb-form-edit-by-type-hidden" value="0" />
-<?php if ($canEditByType) : ?>
-    <div class="form-check mb-3" id="cb-form-edit-by-type-field-group">
-        <?php echo is_callable($renderCheckbox) ? $renderCheckbox('jform[edit_by_type]', 'edit_by_type', (bool) ($item->edit_by_type ?? false)) : ''; ?>
-        <label class="form-check-label" for="edit_by_type">
-            <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EDIT_TIP'); ?>">
-                <?php echo Text::_('COM_CONTENTBUILDERNG_TYPE_EDIT'); ?>
-            </span>
-        </label>
-    </div>
-<?php endif; ?>
 <?php if (!empty($item->edit_by_type) && $isBreezingFormsType) : ?>
     <?php echo $breezingFormsProvidedMessage; ?>
     <input type="hidden" name="jform[editable_template]" id="cb-form-edit-editable-template-hidden" value="<?php echo htmlspecialchars($breezingFormsEditableToken, ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="jform[upload_directory]" id="cb-form-edit-upload-directory-hidden" value="<?php echo htmlspecialchars(trim((string) ($item->upload_directory ?? '')) ?: JPATH_SITE . '/media/com_contentbuilderng/upload', ENT_QUOTES, 'UTF-8'); ?>" />
 <?php else : ?>
     <input type="hidden" name="jform[protect_upload_directory]" id="cb-form-edit-protect-upload-directory-hidden" value="0" />
-    <div id="cb-form-edit-upload" class="cb-upload-box">
-        <div class="row g-3 align-items-end" id="cb-form-edit-upload-row">
-            <div class="col-lg-8" id="cb-form-edit-upload-directory-field-group">
-                <label for="upload_directory" class="form-label mb-2"><span class="editlinktip hasTip"
+    <div id="cb-form-edit-upload" class="cb-upload-box mb-2">
+        <div class="d-flex flex-wrap align-items-center gap-2" id="cb-form-edit-upload-row">
+            <div class="d-flex align-items-center gap-2 flex-grow-1" id="cb-form-edit-upload-directory-field-group">
+                <label for="upload_directory" class="form-label mb-0 text-nowrap"><span class="editlinktip hasTip"
                         title="<?php echo Text::_('COM_CONTENTBUILDERNG_UPLOAD_DIRECTORY_TIP'); ?>">
                         <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_OPTIONS_UPLOAD_DIRECTORY'); ?>
                     </span></label>
-                <input class="form-control form-control-sm" type="text"
+                <input class="form-control form-control-sm flex-grow-1" type="text"
                     value="<?php echo htmlspecialchars(trim((string) ($item->upload_directory ?? '')) ?: JPATH_SITE . '/media/com_contentbuilderng/upload', ENT_QUOTES, 'UTF-8'); ?>"
                     name="jform[upload_directory]" id="upload_directory" />
             </div>
-            <div class="col-lg-auto" id="cb-form-edit-protect-upload-directory-field-group">
-                <div class="form-check mb-1">
+            <div class="flex-shrink-0" id="cb-form-edit-protect-upload-directory-field-group">
+                <div class="form-check mb-0">
                     <?php echo is_callable($renderCheckbox) ? $renderCheckbox('jform[protect_upload_directory]', 'protect_upload_directory', trim((string) ($item->protect_upload_directory ?? '')) !== '') : ''; ?>
                     <label class="form-check-label" for="protect_upload_directory">
                         <?php echo Text::_('COM_CONTENTBUILDERNG_PROTECT_UPLOAD_DIRECTORY'); ?>
@@ -155,8 +119,6 @@ $editDisplayDefaults = [
             </div>
         </div>
     </div>
-    <br />
-    <br />
     <div id="cb-form-edit-template-field-group">
         <?php echo $form ? $form->renderField('editable_template') : ''; ?>
     </div>
@@ -194,34 +156,3 @@ $editDisplayDefaults = [
     );
     ?>
 <?php endif; ?>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const resetButton = document.getElementById("cb-reset-edit-display");
-
-    if (!resetButton) {
-        return;
-    }
-
-    resetButton.addEventListener("click", function () {
-        const confirmMessage = resetButton.getAttribute("data-confirm") || "";
-
-        if (confirmMessage && !window.confirm(confirmMessage)) {
-            return;
-        }
-
-        const defaults = JSON.parse(resetButton.getAttribute("data-defaults") || "{}");
-
-        Object.entries(defaults).forEach(function ([name, value]) {
-            const checkbox = document.getElementById(name);
-
-            if (!checkbox) {
-                return;
-            }
-
-            checkbox.checked = value;
-            checkbox.dispatchEvent(new Event("change", {bubbles: true}));
-        });
-    });
-});
-</script>

@@ -298,7 +298,6 @@ final class Thoth extends CMSPlugin implements SubscriberInterface
             }
 
             if (!$editable) {
-                $out .= '<div class="mb-3"><label class="form-label">{' . $name . ':label}</label><div class="form-control-plaintext py-0">{' . $name . ':value}</div></div>' . "\n";
                 continue;
             }
 

@@ -306,6 +306,7 @@ class ExportModel extends BaseDatabaseModel
                             ->where($db->quoteName('form_id') . ' = ' . (int) $this->_id)
                             ->where($db->quoteName('reference_id') . ' IN (' . implode(',', $ids) . ')')
                             ->where($db->quoteName('published') . ' = 1')
+                            ->where($db->quoteName('export_include') . ' = 1')
                             ->where($db->quoteName('type') . ' <> ' . $db->quote('hidden'))
                             ->order($db->quoteName('ordering'));
                         $newMenuCustomColumns = $app->getInput()->getInt('cb_new_list_menu', 0) === 1;

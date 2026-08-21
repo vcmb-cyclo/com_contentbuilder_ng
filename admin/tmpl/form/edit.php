@@ -220,7 +220,13 @@ $permGroupLabel = static function (string $groupText, int $groupId = 0, string $
         . '<span class="cb-perm-group-text">' . htmlspecialchars($titleLabel, ENT_QUOTES, 'UTF-8') . '</span></span>';
 };
 
-$viewTabLabel = static function (string $iconClass, string $labelKey, ?string $tipKey = null, string $badgesHtml = ''): string {
+$viewTabLabel = static function (
+    string $iconClass,
+    string $labelKey,
+    ?string $tipKey = null,
+    string $badgesHtml = '',
+    bool $tipIsTranslated = false
+): string {
     $label = '<span class="' . htmlspecialchars($iconClass, ENT_QUOTES, 'UTF-8') . '" aria-hidden="true"></span> '
         . htmlspecialchars(Text::_($labelKey), ENT_QUOTES, 'UTF-8')
         . $badgesHtml;
@@ -229,7 +235,7 @@ $viewTabLabel = static function (string $iconClass, string $labelKey, ?string $t
         return $label;
     }
 
-    $tip = Text::_($tipKey);
+    $tip = $tipIsTranslated ? $tipKey : Text::_($tipKey);
 
     return '<span class="cb-perm-header-tip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="'
         . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '" title="' . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '">'
@@ -503,6 +509,19 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         };
         $detailsTemplateRequired = $hasFrontendPermission('view');
         $editableTemplateRequired = $hasFrontendPermission('edit') || $hasFrontendPermission('new');
+        $hasPublishedLinkableElement = false;
+        foreach ((array) ($this->all_elements ?? []) as $viewElement) {
+            if (!empty($viewElement->published) && !empty($viewElement->linkable)) {
+                $hasPublishedLinkableElement = true;
+                break;
+            }
+        }
+        $detailsEntryPointEnabled = $detailsTemplateRequired && $hasPublishedLinkableElement;
+        $editableEntryPointEnabled = (
+            $hasFrontendPermission('edit') && !empty($this->item->edit_button)
+        ) || (
+            $hasFrontendPermission('new') && !empty($this->item->new_button)
+        );
         // At-a-glance state of the two template tabs. An empty template is only
         // surfaced when frontend permissions make the corresponding screen useful.
         $templateAuditReferences = [
@@ -537,57 +556,78 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
 
             return false;
         };
-        $templateStateBadge = static function (
+        $templateTabState = static function (
             bool $filled,
-            bool $inconsistent,
-            string $emptyTipKey,
+            bool $hasAuditIssue,
             bool $required,
+            bool $entryPointEnabled,
             bool $locked = false
-        ): string {
-            // A locked template is regenerated on every save, so the empty/filled
-            // dot says nothing useful about it — show the lock instead.
+        ): array {
+            if ($hasAuditIssue || ($required && !$filled)) {
+                $stateClass = 'cb-template-state is-inconsistent';
+                $stateTipKey = 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_INVALID';
+            } elseif ($entryPointEnabled && !$hasAuditIssue) {
+                $stateClass = 'cb-template-state is-filled';
+                $stateTipKey = 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_ACTIVE';
+            } elseif ($filled || $locked || $required) {
+                $stateClass = 'cb-template-state is-incomplete';
+                $stateTipKey = 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_INCOMPLETE';
+            } else {
+                return [
+                    'badge' => '',
+                    'tipKey' => 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_INACTIVE_EMPTY',
+                    'locked' => false,
+                ];
+            }
+
+            $stateTip = Text::_($stateTipKey);
             if ($locked) {
                 $lockTip = Text::_('COM_CONTENTBUILDERNG_TAB_TEMPLATE_LOCKED');
-
-                return ' <span class="cb-template-state is-locked ms-1" aria-hidden="true" title="'
-                    . htmlspecialchars($lockTip, ENT_QUOTES, 'UTF-8') . '"></span>'
+                $badge = ' <span class="cb-template-lock-stack ms-1" aria-hidden="true">'
+                    . '<span class="' . $stateClass . ' cb-template-state-inline" title="'
+                    . htmlspecialchars($stateTip, ENT_QUOTES, 'UTF-8') . '"></span>'
+                    . '<span class="cb-template-lock-inline" title="'
+                    . htmlspecialchars($lockTip, ENT_QUOTES, 'UTF-8') . '"></span></span>'
+                    . '<span class="visually-hidden">' . htmlspecialchars($stateTip, ENT_QUOTES, 'UTF-8') . '</span>'
                     . '<span class="visually-hidden">' . htmlspecialchars($lockTip, ENT_QUOTES, 'UTF-8') . '</span>';
+            } else {
+                $badge = ' <span class="' . $stateClass
+                    . ' ms-1" aria-hidden="true" title="' . htmlspecialchars($stateTip, ENT_QUOTES, 'UTF-8') . '"></span>'
+                    . '<span class="visually-hidden">' . htmlspecialchars($stateTip, ENT_QUOTES, 'UTF-8') . '</span>';
             }
 
-            if (!$filled && !$inconsistent && !$required) {
-                return '';
-            }
-
-            $tip = Text::_($inconsistent
-                ? 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_INCONSISTENT'
-                : ($filled ? 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_FILLED' : $emptyTipKey));
-            $stateClass = $inconsistent
-                ? 'cb-template-state is-inconsistent'
-                : ($filled ? 'cb-template-state is-filled' : 'cb-template-state is-empty');
-
-            return ' <span class="' . $stateClass
-                . ' ms-1" aria-hidden="true" title="' . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '"></span>'
-                . '<span class="visually-hidden">' . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '</span>';
+            return ['badge' => $badge, 'tipKey' => $stateTipKey, 'locked' => $locked];
         };
         $neutralTabBadge = static function (bool $hasContent): string {
             return $hasContent
                 ? ' <span class="cb-template-state is-neutral ms-1" aria-hidden="true"></span>'
                 : '';
         };
-        $detailsTemplateBadge = $templateStateBadge(
+        $detailsTemplateState = $templateTabState(
             trim((string) ($this->item->details_template ?? '')) !== '',
             $hasTemplateAuditIssue($templateAuditReferences['details']),
-            'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY',
             $detailsTemplateRequired,
+            $detailsEntryPointEnabled,
             !empty($this->item->details_template_locked)
         );
-        $editableTemplateBadge = $templateStateBadge(
+        $editableTemplateState = $templateTabState(
             trim((string) ($this->item->editable_template ?? '')) !== '',
             $hasTemplateAuditIssue($templateAuditReferences['edit']),
-            'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY',
             $editableTemplateRequired,
+            $editableEntryPointEnabled,
             !empty($this->item->editable_template_locked)
         );
+        $buildTemplateTabTip = static function (string $baseKey, array $state): string {
+            $parts = [Text::_($baseKey), Text::_((string) $state['tipKey'])];
+            if (!empty($state['locked'])) {
+                $parts[] = Text::_('COM_CONTENTBUILDERNG_TAB_TEMPLATE_LOCKED_EXPLANATION');
+            }
+            return implode(' ', $parts);
+        };
+        $detailsTemplateBadge = (string) $detailsTemplateState['badge'];
+        $editableTemplateBadge = (string) $editableTemplateState['badge'];
+        $detailsTemplateTabTip = $buildTemplateTabTip('COM_CONTENTBUILDERNG_TAB_TIP_DETAILS_TEMPLATE', $detailsTemplateState);
+        $editableTemplateTabTip = $buildTemplateTabTip('COM_CONTENTBUILDERNG_TAB_TIP_EDITABLE_TEMPLATE', $editableTemplateState);
         $emailTemplateBadge = $neutralTabBadge(
             trim((string) ($this->item->email_admin_template ?? '')) !== ''
                 || trim((string) ($this->item->email_template ?? '')) !== ''
@@ -610,27 +650,51 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         $showsListStates = !empty($this->item->list_state);
         $hasListStatePermission = $hasFrontendPermission('state');
         $listStatesBadge = '';
+        $listStatesTabTipKey = 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES';
 
         if ($hasPublishedListState || $showsListStates || $hasListStatePermission) {
             if ($hasPublishedListState && $showsListStates && $hasListStatePermission) {
                 $listStatesBadgeClass = 'cb-template-state is-filled';
                 $listStatesBadgeTip = Text::_('COM_CONTENTBUILDERNG_LIST_STATES_BADGE_COHERENT');
+                $listStatesTabTipKey = 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES_GREEN';
             } elseif ($hasPublishedListState && !$showsListStates && !$hasListStatePermission) {
-                $listStatesBadgeClass = 'cb-template-state is-neutral';
+                $listStatesBadgeClass = 'cb-template-state is-incomplete';
                 $listStatesBadgeTip = Text::_('COM_CONTENTBUILDERNG_LIST_STATES_BADGE_CONFIGURED');
+                $listStatesTabTipKey = 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES_ORANGE';
             } else {
-                $listStatesBadgeClass = 'cb-template-state is-inconsistent';
-                $listStatesBadgeTip = Text::_('COM_CONTENTBUILDERNG_LIST_STATES_BADGE_INCONSISTENT');
+                if (!$hasPublishedListState && $showsListStates && $hasListStatePermission) {
+                    $listStatesBadgeClass = 'cb-template-state is-inconsistent';
+                    $listStatesTabTipKey = 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES_RED_NO_PUBLISHED_FULL';
+                } elseif (!$hasPublishedListState && $showsListStates) {
+                    $listStatesBadgeClass = 'cb-template-state is-inconsistent';
+                    $listStatesTabTipKey = 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES_RED_NO_PUBLISHED_DISPLAY';
+                } elseif (!$hasPublishedListState && $hasListStatePermission) {
+                    $listStatesBadgeClass = 'cb-template-state is-inconsistent';
+                    $listStatesTabTipKey = 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES_RED_NO_PUBLISHED_PERMISSION';
+                } elseif (!$hasListStatePermission) {
+                    $listStatesBadgeClass = 'cb-template-state is-incomplete';
+                    $listStatesTabTipKey = 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES_ORANGE_NO_PERMISSION';
+                } else {
+                    $listStatesBadgeClass = 'cb-template-state is-incomplete';
+                    $listStatesTabTipKey = 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES_ORANGE_NO_DISPLAY';
+                }
+                $listStatesBadgeTip = Text::_($listStatesTabTipKey);
             }
 
             $listStatesBadge = ' <span class="' . $listStatesBadgeClass
                 . ' ms-1" aria-hidden="true" title="' . htmlspecialchars($listStatesBadgeTip, ENT_QUOTES, 'UTF-8') . '"></span>'
                 . '<span class="visually-hidden">' . htmlspecialchars($listStatesBadgeTip, ENT_QUOTES, 'UTF-8') . '</span>';
         }
-        $listIntroBadge = $neutralTabBadge(trim((string) ($this->item->intro_text ?? '')) !== '');
-        if ($listIntroBadge === '' && $this->form) {
-            $listIntroBadge = $neutralTabBadge(trim((string) $this->form->getValue('intro_text')) !== '');
+        $hasListIntro = trim((string) ($this->item->intro_text ?? '')) !== '';
+        if (!$hasListIntro && $this->form) {
+            $hasListIntro = trim((string) $this->form->getValue('intro_text')) !== '';
         }
+        $listIntroBadge = $hasListIntro
+            ? ' <span class="cb-template-state is-filled ms-1" aria-hidden="true"></span>'
+            : '';
+        $listIntroTabTipKey = $hasListIntro
+            ? 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_INTRO_ACTIVE'
+            : 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_INTRO_EMPTY';
         if ($formId > 0 && $debugModeEnabled) {
             $allowedViewTabs[] = 'tab12';
             $allowedViewTabs[] = 'tab13';
@@ -862,7 +926,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab9', $viewTabLabel('fa-solid fa-sliders', 'COM_CONTENTBUILDERNG_ADVANCED_OPTIONS', 'COM_CONTENTBUILDERNG_TAB_TIP_ADVANCED_OPTIONS'));
         echo $advancedOptionsContent;
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', $viewTabLabel('fa-regular fa-file-lines', 'COM_CONTENTBUILDERNG_LIST_INTRO_TEXT', 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_INTRO_TEXT', $listIntroBadge));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', $viewTabLabel('fa-regular fa-file-lines', 'COM_CONTENTBUILDERNG_LIST_INTRO_TEXT', $listIntroTabTipKey, $listIntroBadge));
         ?>
         <?php
         echo LayoutHelper::render(
@@ -873,7 +937,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             $componentLayoutBase
         );
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', $viewTabLabel('fa-solid fa-list-check', 'COM_CONTENTBUILDERNG_LIST_STATES', 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES', $listStatesBadge));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', $viewTabLabel('fa-solid fa-list-check', 'COM_CONTENTBUILDERNG_LIST_STATES', $listStatesTabTipKey, $listStatesBadge));
         ?>
         <?php
         echo LayoutHelper::render(
@@ -888,7 +952,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         ?>
         <?php
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab3', $viewTabLabel('fa-regular fa-id-card', 'COM_CONTENTBUILDERNG_TAB_DETAILS_DISPLAY', 'COM_CONTENTBUILDERNG_TAB_TIP_DETAILS_TEMPLATE', $detailsTemplateBadge));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab3', $viewTabLabel('fa-regular fa-id-card', 'COM_CONTENTBUILDERNG_TAB_DETAILS_DISPLAY', $detailsTemplateTabTip, $detailsTemplateBadge, true));
 
         ?>
         <?php
@@ -908,7 +972,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         ?>
         <?php
         echo HTMLHelper::_('uitab.endTab');
-        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab5', $viewTabLabel('fa-regular fa-pen-to-square', 'COM_CONTENTBUILDERNG_TAB_EDIT_DISPLAY', 'COM_CONTENTBUILDERNG_TAB_TIP_EDITABLE_TEMPLATE', $editableTemplateBadge));
+        echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab5', $viewTabLabel('fa-regular fa-pen-to-square', 'COM_CONTENTBUILDERNG_TAB_EDIT_DISPLAY', $editableTemplateTabTip, $editableTemplateBadge, true));
         ?>
         <?php
         echo LayoutHelper::render(
@@ -1083,10 +1147,10 @@ $viewTabTooltips = [
     'tab0' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_VIEW'),
     'tab9' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_ADVANCED_OPTIONS'),
     'tab10' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_ARTICLE'),
-    'tab2' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_LIST_INTRO_TEXT'),
-    'tab1' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES'),
-    'tab3' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_DETAILS_TEMPLATE') . ' + ' . Text::_('COM_CONTENTBUILDERNG_TAB_TIP_DETAILS_PREPARE'),
-    'tab5' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_EDITABLE_TEMPLATE'),
+    'tab2' => Text::_($listIntroTabTipKey),
+    'tab1' => Text::_($listStatesTabTipKey),
+    'tab3' => $detailsTemplateTabTip,
+    'tab5' => $editableTemplateTabTip,
     'tab6' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_API'),
     'tab7' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_EMAIL_TEMPLATES'),
     'tab8' => Text::_('COM_CONTENTBUILDERNG_TAB_TIP_PERMISSIONS'),

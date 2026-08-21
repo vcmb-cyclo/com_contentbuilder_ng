@@ -1518,12 +1518,11 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 					?>
 					<?php
 					if ($showStateControl && $cbListActionAllowed('state')) {
-						$stateCellStyle = $getStateBadgeStyle($row->colRecord, (array) ($this->state_colors ?? []));
+						$stateControlStyle = $getStateBadgeStyle($row->colRecord, (array) ($this->state_colors ?? []));
 					?>
 						<td
 							data-cb-state-cell
-							data-record-id="<?php echo (int) $row->colRecord; ?>"
-							<?php echo $stateCellStyle !== '' ? 'style="' . htmlspecialchars($stateCellStyle, ENT_QUOTES, 'UTF-8') . '"' : ''; ?>>
+							data-record-id="<?php echo (int) $row->colRecord; ?>">
 							<?php if ($state_allowed && count($this->states)) : ?>
 								<?php
 								$currentStateTitle = $this->state_titles[$row->colRecord] ?? '';
@@ -1541,7 +1540,8 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 										title="<?php echo Text::_('COM_CONTENTBUILDERNG_EDIT_STATE'); ?>"
 										data-cb-state-select
 										data-record-id="<?php echo (int) $row->colRecord; ?>"
-										data-original-value="<?php echo htmlspecialchars($currentStateId, ENT_QUOTES, 'UTF-8'); ?>">
+										data-original-value="<?php echo htmlspecialchars($currentStateId, ENT_QUOTES, 'UTF-8'); ?>"
+										<?php echo $stateControlStyle !== '' ? 'style="' . htmlspecialchars($stateControlStyle, ENT_QUOTES, 'UTF-8') . '"' : ''; ?>>
 									<option value="" data-state-title="" data-state-color="" <?php echo $currentStateTitle === '' ? 'selected' : ''; ?>>-</option>
 									<?php foreach ($this->states as $state) : ?>
 										<option
@@ -1555,7 +1555,9 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 									<?php endforeach; ?>
 								</select>
 							<?php else : ?>
-								<?php echo isset($this->state_titles[$row->colRecord]) ? htmlspecialchars($this->state_titles[$row->colRecord], ENT_QUOTES, 'UTF-8') : ''; ?>
+								<?php if (isset($this->state_titles[$row->colRecord]) && $this->state_titles[$row->colRecord] !== '') : ?>
+									<span class="badge" data-cb-state-badge data-record-id="<?php echo (int) $row->colRecord; ?>" <?php echo $stateControlStyle !== '' ? 'style="' . htmlspecialchars($stateControlStyle, ENT_QUOTES, 'UTF-8') . '"' : ''; ?>><?php echo htmlspecialchars($this->state_titles[$row->colRecord], ENT_QUOTES, 'UTF-8'); ?></span>
+								<?php endif; ?>
 							<?php endif; ?>
 						</td>
 					<?php

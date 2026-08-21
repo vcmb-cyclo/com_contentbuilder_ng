@@ -365,7 +365,6 @@
 
 	function contentbuilderngUpdateStateUi(recordId, stateId, title, color, sourceOption) {
 		var selector = '[data-record-id="' + contentbuilderngEscapeSelector(recordId) + '"]';
-		var stateCells = document.querySelectorAll('[data-cb-state-cell]' + selector);
 		var stateBadges = document.querySelectorAll('[data-cb-state-badge]' + selector);
 		var stateSelects = document.querySelectorAll('[data-cb-state-select]' + selector);
 		var normalizedColor = String(color || '').replace(/^#/, '');
@@ -380,14 +379,6 @@
 				contentbuilderngClearStateSelectStyle(select);
 			}
 			contentbuilderngApplyStateOptionColors(select);
-		});
-
-		stateCells.forEach(function(stateCell) {
-			if (badgeStyle !== '') {
-				stateCell.setAttribute('style', badgeStyle);
-			} else {
-				stateCell.setAttribute('style', 'background-color:#FFFFFF;');
-			}
 		});
 
 		stateBadges.forEach(function(stateBadge) {

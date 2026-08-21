@@ -1,5 +1,115 @@
 # Changelog
 
+## 6.1.10-RC11 — 2026-08-22
+
+- Added a hidden five-click ContentBuilder NG piranha animation to the About screen.
+- Packaged the reusable 2026 animated WebP in the component's shared media directory.
+
+## 6.1.10-RC11-B15 — 2026-08-21
+
+- Made Published the visible master switch for Export, matching Detail and Edit.
+- Unpublished elements now show a lock for a preserved active Export setting or a disabled cross when Export is off.
+- Immediately refreshes the Export symbol when an element is published or unpublished without changing its stored Export choice.
+
+## 6.1.10-RC11-B14 — 2026-08-21
+
+- Moved the type-specific Edit control into the compact display-options row.
+- Removed its dedicated vertical block so the upload directory and template editor appear earlier.
+
+## 6.1.10-RC11-B13 — 2026-08-21
+
+- Rebuilt View Help as a contextual manual that opens directly on the active tab.
+- Added concise purpose, workflow, essential checks and warnings for every main configuration tab.
+- Added compact navigation across all help sections and retained complete State, Detail and Edit indicator guidance.
+
+## 6.1.10-RC11-B12 — 2026-08-21
+
+- Moved Introduction and Article resets into contextual Actions with automatic saving.
+- Moved Detail, Edit and State status and permission guidance into the View Help page.
+- Compacted the expert-oriented Edit tab, including a single-line upload-directory row and earlier template editor placement.
+
+## 6.1.10-RC11-B11 — 2026-08-21
+
+- Removed the duplicated legacy Create Template buttons from Detail and Edit.
+- Made the contextual action read Create or Regenerate according to the current template, with confirmation only before replacement.
+- Grouped the template lock on the left with the display options in one compact panel.
+
+## 6.1.10-RC11-B10 — 2026-08-21
+
+- Aligned the Detail/Edit functional symbol above the lock at a consistent height.
+- Aligned the lock with the bottom of the tab label and reduced the surrounding horizontal spacing.
+
+## 6.1.10-RC11-B9 — 2026-08-21
+
+- Stacked the functional Detail/Edit indicator directly above the template lock.
+- Automatically applies every contextual Detail, Edit and State action after its single confirmation.
+- Kept New-record access independent when disabling Edit; the full reset still disables both.
+
+## 6.1.10-RC11-B8 — 2026-08-21
+
+- Moved the Detail/Edit lock beside the tab label so it no longer masks the functional indicator.
+- Added contextual Detail and Edit actions for display reset, template regeneration and frontend disabling.
+- Reserved the full Detail/Edit reset for Debug mode and Super Users.
+- Hidden View element actions outside the View tab.
+
+## 6.1.10-RC11-B7 — 2026-08-21
+
+- Replaced the small gray/green/red tab dots with a green check, an orange
+  triangle, and a red cross for Intro, Detail, Edit, and State.
+- Added an incomplete state when a valid screen configuration is not fully
+  accessible because a permission, button, or link is missing.
+- Kept the absence of a symbol for features that are not configured.
+
+## 6.1.10-RC11-B6 — 2026-08-21
+
+### Added
+
+- Added an Export capability per element, with a visible View column, column-selector entry and bulk Actions commands.
+- Added a compact export-system-column selector for ID, State and Published, independent of frontend display settings.
+
+### Changed
+
+- Exports now include only elements that are both published and enabled for Export.
+- Locked and newly generated Edit templates now contain only published editable elements; Thoth no longer adds non-editable read-only values.
+- Existing views preserve their system-column export behavior during migration.
+
+## 6.1.10-RC11-B4 — 2026-08-21
+
+### Fixed
+
+- Synchronized the Coloris swatch, native color input and text preview immediately after every State reset, without requiring a Save and reload.
+
+## 6.1.10-RC11-B3 — 2026-08-21
+
+### Fixed
+
+- Targeted the actual Joomla child toolbar elements so the Actions menu switches reliably between View commands and State reset commands.
+- Made State reset clicks work with Joomla dropdown items whose custom data attributes are not rendered by the native toolbar layout.
+- Changed the asset version to prevent browsers from retaining the previous contextual Actions script.
+
+## 6.1.10-RC11-B2 — 2026-08-21
+
+### Changed
+
+- Moved the State reset commands into the global Actions toolbar and made that toolbar contextual to the active View editor tab.
+- Added precise dynamic indicators, hover explanations and legends for the Introduction, Details and Edit tabs, including combined template status and lock states.
+
+### Fixed
+
+- Closed and disabled the Actions dropdown when the last View element is deselected or when the active tab no longer supports its commands.
+
+## 6.1.10-RC11-B1 — 2026-08-21
+
+### Added
+
+- Added a multi-level State reset menu for cleaning inactive states, restoring the four-color base palette, disabling view states, and performing a Debug-only full reset for Super Users.
+- Added contextual State-tab indicators, precise hover explanations, a complete indicator legend, and help tooltips for Published, Title, Color, and Action.
+- Added a dedicated internal specification for list-state configuration and reset behavior.
+
+### Changed
+
+- New views now receive four published base states in green, orange, yellow, and red; the remaining six states are clean, white, and unpublished.
+
 ## 6.1.10-RC10 — 2026-08-20
 
 ### Added

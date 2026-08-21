@@ -179,6 +179,7 @@
         detail: true,
         edit: true,
         wordwrap: false,
+        export: true,
         publish: true,
         order: true
     });
@@ -379,6 +380,14 @@
             },
             'form.no_list_include': {
                 nextTask: 'form.list_include',
+                enabled: false
+            },
+            'form.export_include': {
+                nextTask: 'form.no_export_include',
+                enabled: true
+            },
+            'form.no_export_include': {
+                nextTask: 'form.export_include',
                 enabled: false
             },
             'form.search_include': {
@@ -632,6 +641,8 @@
             capability = 'detail';
         } else if (task === 'form.editable' || task === 'form.not_editable') {
             capability = 'edit';
+        } else if (task === 'form.export_include' || task === 'form.no_export_include') {
+            capability = 'export';
         } else {
             return;
         }
@@ -686,12 +697,28 @@
         cbUpdatePublishedCapabilities(actionElement, task, rowId);
     }
 
+    function cbReloadAfterLockedEditableChange(task, rowId) {
+        if (task !== 'form.editable' && task !== 'form.not_editable') {
+            return false;
+        }
+
+        var lock = document.getElementById('editable_template_locked');
+        if (!lock || !lock.checked) {
+            return false;
+        }
+
+        cbReloadForDebugToggle(rowId);
+        return true;
+    }
+
     function cbIsAjaxToggleTask(task) {
         return [
             'form.list_include',
             'form.no_list_include',
             'form.search_include',
             'form.no_search_include',
+            'form.export_include',
+            'form.no_export_include',
             'form.linkable',
             'form.not_linkable',
             'form.detail_include',
@@ -794,7 +821,9 @@
         'form.list_include':      { field: 'list_include',   value: '1' },
         'form.no_list_include':   { field: 'list_include',   value: '0' },
         'form.search_include':    { field: 'search_include', value: '1' },
-        'form.no_search_include': { field: 'search_include', value: '0' }
+        'form.no_search_include': { field: 'search_include', value: '0' },
+        'form.export_include':    { field: 'export_include', value: '1' },
+        'form.no_export_include': { field: 'export_include', value: '0' }
     };
     var cbPublishTaskMap = {
         'form.listpublish':   '1',
@@ -1007,6 +1036,9 @@
 
                 cbSubmitTaskAjax(task, rowId, function() {
                     cbApplyAjaxRowMutation(actionElement, task, rowId);
+                    if (cbReloadAfterLockedEditableChange(task, rowId)) {
+                        return;
+                    }
                     if (task === 'form.debug_on' || task === 'form.debug_off') {
                         cbReloadForDebugToggle(rowId);
                     }
@@ -1074,7 +1106,9 @@
             case 'form.list_include':
             case 'form.no_list_include':
             case 'form.search_include':
-            case 'form.no_search_include': {
+            case 'form.no_search_include':
+            case 'form.export_include':
+            case 'form.no_export_include': {
                 var fakeFormData = new FormData();
                 var serverTask = cbResolveServerTask(task, fakeFormData);
                 ['field', 'value'].forEach(function(name) {
@@ -1741,6 +1775,9 @@
 
             cbSubmitTaskAjax(task, rowId, function() {
                 cbApplyAjaxRowMutation(actionElement, task, rowId);
+                if (cbReloadAfterLockedEditableChange(task, rowId)) {
+                    return;
+                }
                 if (task === 'form.debug_on' || task === 'form.debug_off') {
                     cbReloadForDebugToggle(rowId);
                 }
@@ -1853,15 +1890,27 @@
         }
 
         var hex = cbNormalizeColorForPreview(input.value);
+        var previewColor = hex ? '#' + hex : '';
+        var colorisField = input.closest ? input.closest('.clr-field') : null;
 
         if (!hex) {
             input.style.backgroundColor = '';
             input.style.color = '';
-            return;
+        } else {
+            input.style.backgroundColor = previewColor;
+            input.style.color = cbPreviewTextColor(hex);
         }
 
-        input.style.backgroundColor = '#' + hex;
-        input.style.color = cbPreviewTextColor(hex);
+        if (colorisField) {
+            colorisField.style.color = previewColor;
+            colorisField.style.setProperty('--clr-color', previewColor);
+
+            var colorisButton = colorisField.querySelector('button');
+            if (colorisButton) {
+                colorisButton.style.color = previewColor;
+                colorisButton.style.backgroundColor = previewColor;
+            }
+        }
     }
 
     function cbSyncNativePickerFromTextInput(textInput) {
@@ -1989,6 +2038,634 @@
     window.setTimeout(cbInitListStateColorControls, 1200);
     window.setTimeout(cbInitColoris, 300);
     window.setTimeout(cbInitColoris, 1200);
+
+    const cbListStatePalette = Object.freeze(['60E309', 'FF9800', 'FCFC00', 'FC0000']);
+
+    function cbSetListStateField(field, value) {
+        if (!field) {
+            return;
+        }
+
+        if (field.type === 'checkbox') {
+            field.checked = !!value;
+        } else {
+            field.value = String(value);
+        }
+
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function cbResetListStateRow(row, index, published, color) {
+        if (!row) {
+            return;
+        }
+
+        var titles = Array.isArray(cbFormEditConfig.listStateDefaultTitles)
+            ? cbFormEditConfig.listStateDefaultTitles
+            : [];
+        var publishedInput = row.querySelector('input[name$="[published]"]');
+        var titleInput = row.querySelector('input[name$="[title]"]');
+        var colorInput = row.querySelector('input[data-cb-color-text="1"]');
+        var actionInput = row.querySelector('select[name$="[action]"]');
+
+        cbSetListStateField(publishedInput, published);
+        cbSetListStateField(titleInput, titles[index - 1] || ('State ' + index));
+        cbSetListStateField(colorInput, color);
+        cbSetListStateField(actionInput, '');
+
+        if (colorInput) {
+            cbApplyListStateColorPreview(colorInput);
+            cbSyncNativePickerFromTextInput(colorInput);
+            colorInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    }
+
+    function cbDisableListStateDisplay() {
+        cbSetListStateField(document.getElementById('list_state'), false);
+    }
+
+    function cbClearListStatePermissions() {
+        var selector = [
+            'input[type="checkbox"][name^="jform[perms_fe]"][name$="[state]"]',
+            'input[type="checkbox"][name="jform[own_fe][state]"]'
+        ].join(',');
+
+        document.querySelectorAll(selector).forEach(function(input) {
+            cbSetListStateField(input, false);
+        });
+    }
+
+    function cbApplyListStatesReset(action) {
+        var confirmMessages = {
+            inactive: cbFormEditConfig.text.listStatesResetInactiveConfirm,
+            palette: cbFormEditConfig.text.listStatesResetPaletteConfirm,
+            disable: cbFormEditConfig.text.listStatesResetDisableConfirm,
+            full: cbFormEditConfig.text.listStatesResetFullConfirm
+        };
+
+        if (!confirmMessages[action] || !window.confirm(confirmMessages[action])) {
+            return;
+        }
+
+        var rows = Array.from(document.querySelectorAll('[data-cb-list-state-row]'));
+
+        if (action === 'inactive') {
+            rows.forEach(function(row, rowIndex) {
+                var publishedInput = row.querySelector('input[name$="[published]"]');
+                if (!publishedInput || !publishedInput.checked) {
+                    cbResetListStateRow(row, rowIndex + 1, false, 'FFFFFF');
+                }
+            });
+        } else if (action === 'palette' || action === 'full') {
+            rows.forEach(function(row, rowIndex) {
+                var color = cbListStatePalette[rowIndex] || 'FFFFFF';
+                cbResetListStateRow(row, rowIndex + 1, rowIndex < cbListStatePalette.length, color);
+            });
+
+            if (action === 'full') {
+                cbDisableListStateDisplay();
+                cbClearListStatePermissions();
+            }
+        } else if (action === 'disable') {
+            rows.forEach(function(row) {
+                cbSetListStateField(row.querySelector('input[name$="[published]"]'), false);
+            });
+            cbDisableListStateDisplay();
+        }
+
+        cbHandleDirtyInteraction();
+        window.setTimeout(function() {
+            Joomla.submitbutton('form.apply');
+        }, 0);
+    }
+
+    document.addEventListener('click', function(event) {
+        var eventPath = typeof event.composedPath === 'function' ? event.composedPath() : [];
+        var button = event.target && event.target.closest
+            ? event.target.closest('[data-cb-list-states-reset]')
+            : null;
+
+        if (!button) {
+            button = eventPath.find(function(candidate) {
+                return candidate && candidate.matches
+                    && candidate.matches('[data-cb-list-states-reset]');
+            }) || null;
+        }
+
+        var resetAction = button
+            ? String(button.getAttribute('data-cb-list-states-reset') || '')
+            : '';
+
+        if (!resetAction) {
+            var resetByButtonId = {
+                'state_reset_inactive': 'inactive',
+                'state_reset_palette': 'palette',
+                'state_reset_disable': 'disable',
+                'state_reset_full': 'full'
+            };
+            var resetHost = eventPath.find(function(candidate) {
+                if (!candidate || typeof candidate.id !== 'string') {
+                    return false;
+                }
+                return Object.keys(resetByButtonId).some(function(name) {
+                    return candidate.id === name || candidate.id.endsWith('-' + name);
+                });
+            }) || null;
+
+            if (resetHost) {
+                Object.keys(resetByButtonId).some(function(name) {
+                    if (resetHost.id === name || resetHost.id.endsWith('-' + name)) {
+                        resetAction = resetByButtonId[name];
+                        return true;
+                    }
+                    return false;
+                });
+            }
+        }
+
+        if (!resetAction) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        cbApplyListStatesReset(resetAction);
+    }, true);
+
+    function cbSetNamedCheckbox(name, checked) {
+        var field = document.querySelector('input[type="checkbox"][name="jform[' + name + ']"], input[type="checkbox"]#' + name);
+        cbSetListStateField(field, checked);
+    }
+
+    function cbClearFrontendPermissions(actions) {
+        actions.forEach(function(action) {
+            var selector = [
+                'input[type="checkbox"][name^="jform[perms_fe]"][name$="[' + action + ']"]',
+                'input[type="checkbox"][name="jform[own_fe][' + action + ']"]'
+            ].join(',');
+            document.querySelectorAll(selector).forEach(function(input) {
+                cbSetListStateField(input, false);
+            });
+        });
+    }
+
+    function cbApplyTemplateAction(context, action) {
+        var confirmKey = context + (action === 'display'
+            ? 'ResetDisplayConfirm'
+            : action === 'regenerate'
+                ? 'RegenerateConfirm'
+                : action === 'disable'
+                    ? 'DisableConfirm'
+                    : 'ResetFullConfirm');
+        var message = cbFormEditConfig.text[confirmKey] || '';
+
+        if (action === 'regenerate') {
+            var templateField = context === 'details' ? 'details_template' : 'editable_template';
+            if (!cbTemplateHasContent(cbGetEditorFieldValue(templateField))) {
+                message = '';
+            }
+        }
+
+        if (message && !window.confirm(message)) {
+            return;
+        }
+
+        if (action === 'display') {
+            if (context === 'details') {
+                cbSetNamedCheckbox('cb_show_details_top_bar', true);
+                cbSetNamedCheckbox('cb_show_details_bottom_bar', false);
+            } else {
+                cbSetNamedCheckbox('cb_show_top_bar', true);
+                cbSetNamedCheckbox('cb_show_bottom_bar', false);
+            }
+        } else if (action === 'regenerate') {
+            if (context === 'details') {
+                cbQueueDetailsSampleGeneration(null);
+            } else {
+                var flag = document.getElementById('cb_create_editable_sample_flag');
+                if (flag) {
+                    flag.value = '1';
+                }
+            }
+        } else if (action === 'disable') {
+            if (context === 'details') {
+                cbClearFrontendPermissions(['view']);
+            } else {
+                cbSetNamedCheckbox('edit_button', false);
+                cbClearFrontendPermissions(['edit']);
+            }
+        } else if (action === 'full') {
+            if (context === 'details') {
+                cbSetEditorFieldValue('details_template', '');
+                cbSetEditorFieldValue('details_prepare', '');
+                cbSetNamedCheckbox('details_template_locked', false);
+                cbSetNamedCheckbox('cb_show_details_top_bar', false);
+                cbSetNamedCheckbox('cb_show_details_bottom_bar', false);
+                cbClearFrontendPermissions(['view']);
+            } else {
+                cbSetEditorFieldValue('editable_template', '');
+                cbSetEditorFieldValue('editable_prepare', '');
+                cbSetNamedCheckbox('editable_template_locked', false);
+                cbSetNamedCheckbox('cb_show_top_bar', false);
+                cbSetNamedCheckbox('cb_show_bottom_bar', false);
+                cbSetNamedCheckbox('edit_button', false);
+                cbSetNamedCheckbox('new_button', false);
+                cbClearFrontendPermissions(['edit', 'new']);
+            }
+        }
+
+        cbHandleDirtyInteraction();
+        window.setTimeout(function() {
+            Joomla.submitbutton('form.apply');
+        }, 0);
+    }
+
+    document.addEventListener('click', function(event) {
+        var path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+        var button = event.target && event.target.closest
+            ? event.target.closest('[data-cb-template-action]')
+            : null;
+        if (!button) {
+            button = path.find(function(candidate) {
+                return candidate && candidate.matches && candidate.matches('[data-cb-template-action]');
+            }) || null;
+        }
+
+        var encoded = button ? String(button.getAttribute('data-cb-template-action') || '') : '';
+        if (!encoded) {
+            var names = ['details_reset_display', 'details_regenerate_template', 'details_disable', 'details_reset_full',
+                'edit_reset_display', 'edit_regenerate_template', 'edit_disable', 'edit_reset_full'];
+            var host = path.find(function(candidate) {
+                return candidate && typeof candidate.id === 'string' && names.some(function(name) {
+                    return candidate.id === name || candidate.id.endsWith('-' + name);
+                });
+            });
+            if (host) {
+                var name = names.find(function(candidate) {
+                    return host.id === candidate || host.id.endsWith('-' + candidate);
+                });
+                var parts = name.split('_');
+                encoded = parts[0] + ':' + (name.indexOf('reset_display') !== -1 ? 'display'
+                    : name.indexOf('regenerate') !== -1 ? 'regenerate'
+                        : name.indexOf('reset_full') !== -1 ? 'full' : 'disable');
+            }
+        }
+
+        if (!encoded || encoded.indexOf(':') === -1) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        var parts = encoded.split(':');
+        cbApplyTemplateAction(parts[0], parts[1]);
+    }, true);
+
+    document.addEventListener('click', function(event) {
+        var path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+        var button = event.target && event.target.closest
+            ? event.target.closest('[data-cb-content-reset]')
+            : null;
+        if (!button) {
+            button = path.find(function(candidate) {
+                return candidate && candidate.matches && candidate.matches('[data-cb-content-reset]');
+            }) || null;
+        }
+        var context = button ? String(button.getAttribute('data-cb-content-reset') || '') : '';
+        if (!context) {
+            var host = path.find(function(candidate) {
+                return candidate && typeof candidate.id === 'string'
+                    && (candidate.id === 'intro_reset' || candidate.id.endsWith('-intro_reset')
+                        || candidate.id === 'article_reset' || candidate.id.endsWith('-article_reset'));
+            });
+            if (host) {
+                context = host.id.indexOf('intro_reset') !== -1 ? 'intro' : 'article';
+            }
+        }
+        if (!context) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        if (context === 'intro') {
+            if (!window.confirm(cbFormEditConfig.text.resetIntroConfirm || '')) {
+                return;
+            }
+            cbSetEditorFieldValue('intro_text', '');
+            cbHandleDirtyInteraction();
+            window.setTimeout(function() { Joomla.submitbutton('form.apply'); }, 0);
+        } else if (typeof window.cbResetArticleOptions === 'function') {
+            window.cbResetArticleOptions();
+        }
+    }, true);
+
+    const cbViewActionButtonNames = Object.freeze([
+        'list_include', 'no_list_include', 'search_include', 'no_search_include',
+        'linkable', 'not_linkable', 'detail_include', 'no_detail_include',
+        'api_allowed', 'not_api_allowed', 'editable', 'not_editable',
+        'export_include', 'no_export_include', 'publish', 'unpublish'
+    ]);
+    const cbStateResetButtonNames = Object.freeze([
+        'state_reset_inactive', 'state_reset_palette', 'state_reset_disable', 'state_reset_full'
+    ]);
+    const cbDetailsActionButtonNames = Object.freeze([
+        'details_reset_display', 'details_regenerate_template', 'details_disable', 'details_reset_full'
+    ]);
+    const cbEditActionButtonNames = Object.freeze([
+        'edit_reset_display', 'edit_regenerate_template', 'edit_disable', 'edit_reset_full'
+    ]);
+    const cbIntroActionButtonNames = Object.freeze(['intro_reset']);
+    const cbArticleActionButtonNames = Object.freeze(['article_reset']);
+
+    function cbToolbarRoots() {
+        var roots = [document];
+        document.querySelectorAll('joomla-toolbar-button').forEach(function(host) {
+            if (host.shadowRoot) {
+                roots.push(host.shadowRoot);
+            }
+        });
+        return roots;
+    }
+
+    function cbToolbarFindAll(selector) {
+        var matches = [];
+        cbToolbarRoots().forEach(function(root) {
+            root.querySelectorAll(selector).forEach(function(element) {
+                if (matches.indexOf(element) === -1) {
+                    matches.push(element);
+                }
+            });
+        });
+        return matches;
+    }
+
+    function cbToolbarNamedElements(name) {
+        var escapedName = String(name).replace(/"/g, '\\"');
+        return cbToolbarFindAll([
+            '#toolbar-' + escapedName,
+            '[id="' + escapedName + '"]',
+            '[id$="-' + escapedName + '"]',
+            '[data-task="form.' + escapedName + '"]',
+            '[task="form.' + escapedName + '"]',
+            '[onclick*="form.' + escapedName + '"]'
+        ].join(','));
+    }
+
+    function cbToolbarSetItemVisible(name, visible) {
+        cbToolbarNamedElements(name).forEach(function(element) {
+            var item = element.closest
+                ? (element.closest('joomla-toolbar-button, li, .dropdown-item') || element)
+                : element;
+            item.hidden = !visible;
+            item.classList.toggle('d-none', !visible);
+            if (!visible) {
+                item.style.setProperty('display', 'none', 'important');
+            } else {
+                item.style.removeProperty('display');
+            }
+        });
+    }
+
+    function cbGetActionsToolbarHost() {
+        return document.getElementById('toolbar-form-status-group')
+            || document.getElementById('form-status-group')
+            || document.querySelector('[id$="form-status-group"]');
+    }
+
+    function cbGetActionsToolbarButtons() {
+        var host = cbGetActionsToolbarHost();
+        var buttons = [];
+        var collect = function(root) {
+            if (!root) {
+                return;
+            }
+            root.querySelectorAll('button, a[role="button"], .dropdown-toggle').forEach(function(button) {
+                if (buttons.indexOf(button) === -1) {
+                    buttons.push(button);
+                }
+            });
+        };
+
+        if (host) {
+            if (host.matches && host.matches('button, a[role="button"]')) {
+                buttons.push(host);
+            }
+            collect(host);
+            collect(host.shadowRoot);
+        }
+
+        return buttons;
+    }
+
+    function cbCloseActionsToolbarMenu() {
+        cbGetActionsToolbarButtons().forEach(function(toggle) {
+            if (window.bootstrap && typeof window.bootstrap.Dropdown === 'function') {
+                var dropdown = window.bootstrap.Dropdown.getInstance(toggle);
+                if (dropdown && typeof dropdown.hide === 'function') {
+                    dropdown.hide();
+                }
+            }
+            toggle.setAttribute('aria-expanded', 'false');
+        });
+
+        var host = cbGetActionsToolbarHost();
+        [host, host && host.shadowRoot].forEach(function(root) {
+            if (!root || !root.querySelectorAll) {
+                return;
+            }
+            root.querySelectorAll('.dropdown-menu.show, .show.dropdown-menu').forEach(function(menu) {
+                menu.classList.remove('show');
+            });
+        });
+    }
+
+    function cbSetActionsToolbarEnabled(enabled) {
+        var host = cbGetActionsToolbarHost();
+        if (host) {
+            host.classList.toggle('disabled', !enabled);
+            host.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+            if ('disabled' in host) {
+                host.disabled = !enabled;
+            }
+        }
+
+        cbGetActionsToolbarButtons().forEach(function(button) {
+            if ('disabled' in button) {
+                button.disabled = !enabled;
+            }
+            button.classList.toggle('disabled', !enabled);
+            button.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+        });
+    }
+
+    var cbActiveViewTabId = '';
+
+    function cbViewTabTargetId(trigger) {
+        if (!trigger || typeof trigger.getAttribute !== 'function') {
+            return '';
+        }
+
+        var target = trigger.getAttribute('aria-controls')
+            || trigger.getAttribute('data-tab')
+            || trigger.getAttribute('data-bs-target')
+            || trigger.getAttribute('data-target')
+            || trigger.getAttribute('href')
+            || '';
+
+        return String(target).replace(/^#/, '').replace(/-tab$/, '');
+    }
+
+    function cbFindViewTabTrigger(event) {
+        var tabset = document.getElementById('view-pane');
+        var path = event && typeof event.composedPath === 'function'
+            ? event.composedPath()
+            : [];
+
+        return path.find(function(candidate) {
+            return candidate
+                && candidate !== tabset
+                && typeof candidate.matches === 'function'
+                && candidate.matches('button[aria-controls], button[data-tab], button[data-bs-target], button[data-target], a[aria-controls], a[data-tab], a[data-bs-target], a[data-target], a[href^="#"]')
+                && cbViewTabTargetId(candidate).indexOf('tab') === 0;
+        }) || null;
+    }
+
+    function cbGetActiveViewTabId() {
+        if (cbActiveViewTabId) {
+            return cbActiveViewTabId;
+        }
+
+        var tabset = document.getElementById('view-pane');
+        var roots = [tabset, tabset && tabset.shadowRoot];
+        var selected = null;
+
+        roots.some(function(root) {
+            if (!root || !root.querySelector) {
+                return false;
+            }
+            selected = root.querySelector(
+                'button[aria-selected="true"], a[aria-selected="true"], '
+                + 'button.active[aria-controls], a.active[aria-controls]'
+            );
+            return selected !== null;
+        });
+
+        if (selected) {
+            cbActiveViewTabId = cbViewTabTargetId(selected);
+        }
+
+        if (!cbActiveViewTabId && tabset) {
+            var activePanel = tabset.querySelector(
+                'joomla-tab-element[active], joomla-tab-element[aria-hidden="false"], '
+                + '[role="tabpanel"][active], [role="tabpanel"]:not([hidden])'
+            );
+            cbActiveViewTabId = activePanel
+                ? String(activePanel.getAttribute('name') || activePanel.id || '')
+                : '';
+        }
+
+        return cbActiveViewTabId || 'tab0';
+    }
+
+    function cbHasSelectedViewElements() {
+        return document.querySelector('.cb-elements-table input[name="cid[]"]:checked') !== null;
+    }
+
+    function cbRefreshContextualActions(closeMenu) {
+        var tabId = cbGetActiveViewTabId();
+        var isViewTab = tabId === 'tab0';
+        var isStatesTab = tabId === 'tab1';
+        var isIntroTab = tabId === 'tab2';
+        var isDetailsTab = tabId === 'tab3';
+        var isEditTab = tabId === 'tab5';
+        var isArticleTab = tabId === 'tab10';
+
+        if (closeMenu) {
+            cbCloseActionsToolbarMenu();
+        }
+
+        cbViewActionButtonNames.forEach(function(name) {
+            cbToolbarSetItemVisible(name, isViewTab);
+        });
+        cbStateResetButtonNames.forEach(function(name) {
+            cbToolbarSetItemVisible(name, isStatesTab);
+        });
+        cbDetailsActionButtonNames.forEach(function(name) {
+            cbToolbarSetItemVisible(name, isDetailsTab);
+        });
+        cbEditActionButtonNames.forEach(function(name) {
+            cbToolbarSetItemVisible(name, isEditTab);
+        });
+        cbIntroActionButtonNames.forEach(function(name) {
+            cbToolbarSetItemVisible(name, isIntroTab);
+        });
+        cbArticleActionButtonNames.forEach(function(name) {
+            cbToolbarSetItemVisible(name, isArticleTab);
+        });
+
+        cbSetActionsToolbarEnabled(isStatesTab || isIntroTab || isDetailsTab || isEditTab || isArticleTab || (isViewTab && cbHasSelectedViewElements()));
+    }
+
+    function cbInitContextualActions() {
+        cbRefreshContextualActions(true);
+
+        document.addEventListener('change', function(event) {
+            if (event.target && event.target.matches('.cb-elements-table input[name="cid[]"], .cb-elements-table input[name="checkall-toggle"]')) {
+                window.setTimeout(function() {
+                    cbRefreshContextualActions(!cbHasSelectedViewElements());
+                }, 0);
+            }
+        }, true);
+
+        document.addEventListener('click', function(event) {
+            var trigger = cbFindViewTabTrigger(event);
+            var targetId = cbViewTabTargetId(trigger);
+
+            if (targetId) {
+                cbActiveViewTabId = targetId;
+                cbRefreshContextualActions(true);
+            }
+        }, true);
+
+        var tabList = document.querySelector('joomla-tab#view-pane > div[role="tablist"]');
+        if (tabList && typeof MutationObserver === 'function') {
+            new MutationObserver(function(mutations) {
+                if (mutations.some(function(mutation) { return mutation.attributeName === 'aria-selected'; })) {
+                    cbRefreshContextualActions(true);
+                }
+            }).observe(tabList, { subtree: true, attributes: true, attributeFilter: ['aria-selected'] });
+        }
+    }
+
+    document.addEventListener('click', function(event) {
+        var path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+        var helpHost = path.find(function(candidate) {
+            if (!candidate || typeof candidate.getAttribute !== 'function') {
+                return false;
+            }
+            var id = String(candidate.id || '');
+            var href = String(candidate.getAttribute('href') || '');
+            return id === 'toolbar-help' || id === 'help' || id.endsWith('-help')
+                || href.indexOf('layout=help') !== -1;
+        }) || null;
+
+        if (!helpHost || !cbFormEditConfig.helpUrl) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof event.stopImmediatePropagation === 'function') {
+            event.stopImmediatePropagation();
+        }
+
+        var separator = cbFormEditConfig.helpUrl.indexOf('?') === -1 ? '?' : '&';
+        var helpUrl = cbFormEditConfig.helpUrl + separator + 'section=' + encodeURIComponent(cbGetActiveViewTabId());
+        window.open(helpUrl, 'cbng-view-help', 'width=1100,height=800,resizable=yes,scrollbars=yes');
+    }, true);
+
+    document.addEventListener('DOMContentLoaded', cbInitContextualActions);
+    window.addEventListener('load', function() { cbRefreshContextualActions(true); });
+    window.setTimeout(function() { cbRefreshContextualActions(true); }, 300);
 
     let cbDirtyState = false;
     let cbDirtySnapshot = '';

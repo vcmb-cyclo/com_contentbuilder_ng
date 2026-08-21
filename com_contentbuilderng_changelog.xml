@@ -3,8 +3,11 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.10-RC10</version>
+		<version>6.1.10-RC11</version>
 		<addition>
+			<item>Added a hidden five-click animated piranha Easter egg to the About screen.</item>
+			<item>Added a multi-level State reset menu with inactive-state cleanup, a four-color base palette, view-state disabling and a Debug-only full reset for Super Users.</item>
+			<item>Added contextual State-tab indicators, precise hover explanations, a complete color legend and help for every state setting.</item>
 			<item>Added shared responsive Cards for CBList and CBStats, with six colours and optional 33%, 66% or full-row widths.</item>
 			<item>Added responsive Pie, Bar, Histogram, Line and Radar dimensions with strict width and height options.</item>
 			<item>Added CBList output=value for retrieving one filtered field value without an iframe.</item>
@@ -21,6 +24,19 @@
 			<item>Added a CBList actions section to the frontend debug panel, listing which terms apply on each screen and whether each is currently allowed.</item>
 		</addition>
 		<change>
+			<item>Made the Export capability follow the same published lock and inactive-cross rendering as Detail and Edit.</item>
+			<item>Moved the type-specific Edit control into the compact display row to expose upload and template settings earlier.</item>
+			<item>Rebuilt View Help as a contextual manual that opens on the active tab and covers every main administrator workflow.</item>
+			<item>Moved Introduction and Article resets into contextual Actions, moved operational guidance into Help and compacted the expert Edit workflow.</item>
+			<item>Moved Detail and Edit template creation exclusively into contextual Actions and grouped their lock with display options.</item>
+			<item>Aligned Detail and Edit status symbols consistently above their baseline-aligned lock and reduced excess tab spacing.</item>
+			<item>Aligned Detail and Edit status symbols above their lock and automatically saved contextual Detail, Edit and State actions after one confirmation.</item>
+			<item>Kept New-record access independent when disabling Edit.</item>
+			<item>Moved Detail and Edit template locks beside their tab labels so status indicators remain unobstructed.</item>
+			<item>Added contextual Detail and Edit actions for display reset, template regeneration, frontend disabling and Debug-only full reset.</item>
+			<item>Restricted element bulk actions to the View tab.</item>
+			<item>Replaced the small Intro, Detail, Edit and State status dots with a green check, orange triangle or red cross, while leaving unconfigured features without a symbol.</item>
+			<item>New views now start with four published states in green, orange, yellow and red, followed by six clean unpublished states.</item>
 			<item>Centralized the active List View Data filter request contract and removed legacy hidden-filter vocabulary from runtime code.</item>
 			<item>Separated menu-level access restrictions from the Edit button displayed in List View.</item>
 			<item>Reorganized ContentBuilder menu parameters into clear native Joomla sections and placed List View menu types first.</item>

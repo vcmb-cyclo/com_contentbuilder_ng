@@ -42,6 +42,7 @@ $columnOptions = [
     'detail' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_DETAIL'),
     'edit' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_EDIT'),
     'api' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_API'),
+    'export' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_EXPORT'),
     'wordwrap' => Text::_('COM_CONTENTBUILDERNG_LIST_WORDWRAP'),
     'publish' => Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_PUBLISH'),
     'order' => Text::_('COM_CONTENTBUILDERNG_ORDERBY'),
@@ -59,7 +60,7 @@ if ($hasBfSystemFields) {
 }
 $defaultHiddenColumns = ['wordwrap'];
 $visibleColumnCount = count($columnOptions);
-$tableColumnCount = $hasBfSystemFields ? 13 : 12;
+$tableColumnCount = $hasBfSystemFields ? 14 : 13;
 if ($debugModeEnabled) {
     $tableColumnCount++;
 }
@@ -164,6 +165,12 @@ if ($debugModeEnabled) {
                     <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_API'), 'api_allowed') : Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_API'); ?>
                 </span>
             </th>
+            <th id="cb-form-view-elements-heading-export-include" data-cb-col="export">
+                <span class="editlinktip hasTip cb-elements-heading-label"
+                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_EXPORT_INCLUDE_TIP'); ?>">
+                    <?php echo is_callable($sortLink) ? $sortLink(Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_EXPORT'), 'export_include') : Text::_('COM_CONTENTBUILDERNG_ELEMENT_HEADING_EXPORT'); ?>
+                </span>
+            </th>
             <th id="cb-form-view-elements-heading-wordwrap" data-cb-col="wordwrap">
                 <span class="editlinktip hasTip"
                     title="<?php echo Text::_('COM_CONTENTBUILDERNG_LIST_WORDWRAP_TIP'); ?>">
@@ -197,11 +204,13 @@ if ($debugModeEnabled) {
             $linkable = ContentbuilderngHelper::listLinkable('form', $row, $i);
             $detailInclude = ContentbuilderngHelper::listDetailInclude('form', $row, $i);
             $apiAllowed = ContentbuilderngHelper::listApiAllowed('form', $row, $i);
+            $exportInclude = ContentbuilderngHelper::listIncludeInExport('form', $row, $i);
             $editable = ContentbuilderngHelper::listEditable('form', $row, $i);
             $isBfSystemField = (int) ($row->reference_id ?? 0) < 0;
             $isPublished = (int) ($row->published ?? 0) === 1;
             $isDetailEnabled = (int) ($row->detail_include ?? 0) === 1;
             $isEditEnabled = (int) ($row->editable ?? 0) === 1;
+            $isExportEnabled = (int) ($row->export_include ?? 0) === 1;
             $unavailable = '<span class="tbody-icon jgrid cb-view-capability-locked" title="'
                 . htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_FIELD_UNPUBLISHED_CAPABILITY_DISABLED'), ENT_QUOTES, 'UTF-8')
                 . '"><span class="icon-lock" aria-hidden="true"></span></span>';
@@ -321,6 +330,11 @@ if ($debugModeEnabled) {
                 </td>
                 <td class="align-top" data-cb-col="api">
                     <?php echo $apiAllowed; ?>
+                </td>
+                <td class="align-top" data-cb-col="export" data-cb-published-capability="export" data-cb-capability-enabled="<?php echo $isExportEnabled ? '1' : '0'; ?>">
+                    <span data-cb-capability-control<?php echo $isPublished ? '' : ' hidden'; ?>><?php echo $exportInclude; ?></span>
+                    <span data-cb-capability-lock<?php echo !$isPublished && $isExportEnabled ? '' : ' hidden'; ?>><?php echo $unavailable; ?></span>
+                    <span data-cb-capability-off<?php echo !$isPublished && !$isExportEnabled ? '' : ' hidden'; ?>><?php echo $inactive; ?></span>
                 </td>
                 <td class="align-top" data-cb-col="wordwrap">
                     <input class="form-control form-control-sm cb-wordwrap-input" type="text" size="4" maxlength="4" inputmode="numeric" pattern="[0-9]{0,4}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);"
