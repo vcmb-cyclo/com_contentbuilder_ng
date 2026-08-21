@@ -34,6 +34,11 @@ Publié reste l'interrupteur maître du rendu de la colonne Export :
 La publication ou dépublication actualise immédiatement ce rendu. Republier
 l'élément restaure sa capacité Export mémorisée sans la modifier.
 
+Les actions d'élément de l'onglet Vue sont enregistrées immédiatement par AJAX.
+Après leur réussite, la vue est rechargée à la même position afin de recalculer
+les indicateurs d'onglets, l'audit et les templates verrouillés. Le bouton
+**Enregistrer** reste donc inactif en l'absence d'autres modifications locales.
+
 Les restrictions de contexte continuent de s'appliquer : ACL, filtres,
 recherche, limites CBList, fields CBList et colonnes de menu.
 

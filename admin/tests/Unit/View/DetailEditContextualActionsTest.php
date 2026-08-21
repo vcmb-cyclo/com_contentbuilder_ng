@@ -39,6 +39,9 @@ final class DetailEditContextualActionsTest extends TestCase
         self::assertStringContainsString("cbClearFrontendPermissions(['edit', 'new']);", $source);
         self::assertStringContainsString("cbSetNamedCheckbox('edit_button', false);\n                cbClearFrontendPermissions(['edit']);", $source);
         self::assertStringContainsString("Joomla.submitbutton('form.apply');", $source);
+        self::assertStringContainsString('cbApplyAjaxRowMutation(actionElement, task, rowId);', $source);
+        self::assertStringContainsString('cbReloadForDebugToggle(rowId);', $source);
+        self::assertStringNotContainsString('cbReloadAfterLockedEditableChange', $source);
         self::assertStringContainsString("cbSetEditorFieldValue('details_template', '');", $source);
         self::assertStringContainsString("cbSetEditorFieldValue('editable_template', '');", $source);
     }

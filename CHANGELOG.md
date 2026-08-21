@@ -2,6 +2,12 @@
 
 ## 6.1.10-RC11 — 2026-08-22
 
+- Immediately refreshes all server-derived tab indicators and locked templates after a View-element action saved through AJAX.
+- Added coherent green, orange and red status indicators for Introduction, States, Detail and Edit, with contextual explanations in View Help.
+- Added contextual Actions for State, Introduction, Detail, Edit and Article resets, including automatic saving after one confirmation.
+- Added per-element Export selection, Published master locking and independent ID, State and Published export controls.
+- Made locked Edit templates follow the published and editable element selection consistently.
+- Reworked the View editor for expert administrators with compact controls, contextual Actions and tab-specific Help.
 - Added a hidden five-click ContentBuilder NG piranha animation to the About screen.
 - Packaged the reusable 2026 animated WebP in the component's shared media directory.
 

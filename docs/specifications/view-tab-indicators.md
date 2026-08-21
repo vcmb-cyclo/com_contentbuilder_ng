@@ -42,8 +42,9 @@ verrouillé et régénéré à chaque enregistrement. Il ne masque jamais l'éta
 fonctionnel. Les combinaisons vert + cadenas, orange + cadenas et rouge + cadenas
 sont donc possibles.
 
-Chaque onglet possède une infobulle adaptée à son état. Les panneaux Détail et
-Éditer contiennent une légende repliable complète.
+Chaque onglet possède une infobulle adaptée à son état. La légende complète et
+les rappels de permissions sont centralisés dans l'aide contextuelle ouverte par
+le bouton **Aide** ; ils ne prennent pas de place dans les panneaux de travail.
 
 ## Critères d'acceptation
 
@@ -52,6 +53,10 @@ Chaque onglet possède une infobulle adaptée à son état. Les panneaux Détail
 3. Le cadenas et le symbole sont visibles simultanément.
 4. Les infobulles expliquent la fonction, l'état et, le cas échéant, le verrou.
 5. Les textes anglais, français et allemands restent alignés.
+6. Après chaque action enregistrée par AJAX sur un élément de l'onglet Vue,
+   l'écran recharge automatiquement la configuration sauvegardée en restaurant
+   la position dans la liste. Tous les indicateurs, résultats d'audit et
+   templates verrouillés sont ainsi recalculés immédiatement.
 Le cadenas des onglets Détail et Édition est affiché immédiatement après leur libellé et aligné sur sa ligne basse. L'indicateur fonctionnel est placé juste au-dessus, à une hauteur identique pour la coche, le triangle et la croix. Le groupe reste compact et ne masque jamais le texte.
 
 ## Actions contextuelles Détail et Édition

@@ -73,9 +73,9 @@ Le menu déroulant se ferme après la désélection du dernier élément et à c
 changement d'onglet. Aucun menu de réinitialisation supplémentaire n'est rendu
 dans le contenu de l'onglet États.
 
-Les opérations modifient le formulaire courant, déclenchent son état modifié et
-ne sont persistées qu'après Enregistrer ou Enregistrer & Fermer. Une confirmation
-précise toujours les données conservées.
+Chaque opération demande une confirmation unique, modifie le formulaire courant
+puis l'enregistre automatiquement. Aucun second clic sur **Enregistrer** n'est
+nécessaire. Une confirmation précise toujours les données conservées.
 
 ### 5.1 Nettoyer les états inactifs
 
@@ -109,13 +109,13 @@ jamais les états déjà affectés aux enregistrements.
 - aucun tri permanent ou glisser-déposer des états ;
 - aucune modification de l'identifiant d'un état ;
 - aucune suppression des affectations existantes ;
-- aucun Reset exécuté immédiatement sans enregistrement explicite de la vue.
+- aucune suppression automatique des affectations d'état existantes.
 
 ## 7. Critères d'acceptation
 
 1. Les quatre opérations produisent exactement les effets documentés.
 2. Annuler une confirmation ne modifie aucun champ.
-3. Les Reset activent les boutons Joomla d'enregistrement.
+3. Les Reset enregistrent automatiquement la vue après leur confirmation unique.
 4. Le Reset complet est absent hors Debug ou sans `core.admin`.
 5. Les affectations d'état des enregistrements ne sont jamais supprimées.
 6. Les infobulles des colonnes décrivent Publier, Titre, Couleur et Action.

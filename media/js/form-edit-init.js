@@ -697,20 +697,6 @@
         cbUpdatePublishedCapabilities(actionElement, task, rowId);
     }
 
-    function cbReloadAfterLockedEditableChange(task, rowId) {
-        if (task !== 'form.editable' && task !== 'form.not_editable') {
-            return false;
-        }
-
-        var lock = document.getElementById('editable_template_locked');
-        if (!lock || !lock.checked) {
-            return false;
-        }
-
-        cbReloadForDebugToggle(rowId);
-        return true;
-    }
-
     function cbIsAjaxToggleTask(task) {
         return [
             'form.list_include',
@@ -1036,12 +1022,10 @@
 
                 cbSubmitTaskAjax(task, rowId, function() {
                     cbApplyAjaxRowMutation(actionElement, task, rowId);
-                    if (cbReloadAfterLockedEditableChange(task, rowId)) {
-                        return;
-                    }
-                    if (task === 'form.debug_on' || task === 'form.debug_off') {
-                        cbReloadForDebugToggle(rowId);
-                    }
+                    // Element actions are persisted immediately by the AJAX endpoint.
+                    // Reload the saved view so every server-derived tab indicator,
+                    // audit result and locked template reflects the new configuration.
+                    cbReloadForDebugToggle(rowId);
                 }, null, actionElement);
                 return false;
             }
@@ -1775,12 +1759,7 @@
 
             cbSubmitTaskAjax(task, rowId, function() {
                 cbApplyAjaxRowMutation(actionElement, task, rowId);
-                if (cbReloadAfterLockedEditableChange(task, rowId)) {
-                    return;
-                }
-                if (task === 'form.debug_on' || task === 'form.debug_off') {
-                    cbReloadForDebugToggle(rowId);
-                }
+                cbReloadForDebugToggle(rowId);
             }, null, actionElement);
         }, true);
 
