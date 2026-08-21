@@ -63,12 +63,12 @@ final class FormTemplateLockLayoutTest extends TestCase
         $formTemplate = (string) \file_get_contents($root . '/admin/tmpl/form/edit.php');
         $stateStart = \strpos($formTemplate, '$templateTabState = static function');
         $lockBranch = \strpos($formTemplate, 'if ($locked)', $stateStart ?: 0);
-        $dotBranch = \strpos($formTemplate, '$badgeClass = $stateClass;', $stateStart ?: 0);
+        $dotBranch = \strpos($formTemplate, '$badge = \' <span class="\' . $stateClass', $stateStart ?: 0);
 
         self::assertNotFalse($stateStart);
         self::assertNotFalse($lockBranch);
         self::assertNotFalse($dotBranch);
-        self::assertGreaterThan($dotBranch, $lockBranch);
+        self::assertGreaterThan($lockBranch, $dotBranch);
         self::assertStringContainsString(
             'cb-template-lock-inline',
             $formTemplate

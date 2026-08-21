@@ -298,7 +298,7 @@ $advancedDefaults = [
                                         'export_publish_column' => 'COM_CONTENTBUILDERNG_EXPORT_SYSTEM_PUBLISHED',
                                     ];
                                     foreach ($exportSystemColumns as $fieldName => $labelKey) :
-                                    ?>
+                                        ?>
                                         <label class="dropdown-item form-check d-flex align-items-center gap-2 mb-0">
                                             <input type="hidden" name="jform[<?php echo $fieldName; ?>]" value="0" />
                                             <?php echo $renderCheckbox(

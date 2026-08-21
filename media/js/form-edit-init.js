@@ -2378,7 +2378,7 @@
     }
 
     function cbToolbarNamedElements(name) {
-        var escapedName = String(name).replace(/"/g, '\\"');
+        var escapedName = window.CSS.escape(String(name));
         return cbToolbarFindAll([
             '#toolbar-' + escapedName,
             '[id="' + escapedName + '"]',

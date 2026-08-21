@@ -60,14 +60,13 @@ final class EditExportSelectionTest extends TestCase
         self::assertStringContainsString("':item}'", $editableGenerator);
     }
 
-    public function testLockedEditableToggleReloadsTheRegeneratedTemplate(): void
+    public function testEveryAjaxElementToggleReloadsServerDerivedState(): void
     {
         $root = \dirname(__DIR__, 4);
         $formScript = (string) \file_get_contents($root . '/media/js/form-edit-init.js');
 
-        self::assertStringContainsString('function cbReloadAfterLockedEditableChange', $formScript);
-        self::assertStringContainsString("document.getElementById('editable_template_locked')", $formScript);
-        self::assertStringContainsString('cbReloadForDebugToggle(rowId)', $formScript);
+        self::assertStringNotContainsString('cbReloadAfterLockedEditableChange', $formScript);
+        self::assertSame(2, substr_count($formScript, 'cbReloadForDebugToggle(rowId);'));
     }
 
     public function testExportStateLookupIsScopedToTheCurrentView(): void

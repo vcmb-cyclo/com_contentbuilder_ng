@@ -331,7 +331,7 @@ if ($debugModeEnabled) {
                 <td class="align-top" data-cb-col="api">
                     <?php echo $apiAllowed; ?>
                 </td>
-                <td class="align-top" data-cb-col="export" data-cb-published-capability="export" data-cb-capability-enabled="<?php echo $isExportEnabled ? '1' : '0'; ?>">
+                <td class="align-top" data-cb-col="export" data-cb-published-capability="export" data-cb-capability-enabled="<?php echo htmlspecialchars($isExportEnabled ? '1' : '0', ENT_QUOTES, 'UTF-8'); ?>">
                     <span data-cb-capability-control<?php echo $isPublished ? '' : ' hidden'; ?>><?php echo $exportInclude; ?></span>
                     <span data-cb-capability-lock<?php echo !$isPublished && $isExportEnabled ? '' : ' hidden'; ?>><?php echo $unavailable; ?></span>
                     <span data-cb-capability-off<?php echo !$isPublished && !$isExportEnabled ? '' : ' hidden'; ?>><?php echo $inactive; ?></span>

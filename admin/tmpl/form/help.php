@@ -51,7 +51,7 @@ $contextKeyPrefix = 'COM_CONTENTBUILDERNG_HELP_CONTEXT_' . $contentSuffix;
 
     <nav class="d-flex flex-wrap gap-1 mb-3" aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_HELP_CONTEXT_NAV'), ENT_QUOTES, 'UTF-8'); ?>">
         <?php foreach ($sections as $sectionId => [$sectionTitleKey]) : ?>
-            <a class="btn btn-sm <?php echo $sectionId === $requestedSection ? 'btn-primary' : 'btn-outline-secondary'; ?>"
+            <a class="btn btn-sm <?php echo htmlspecialchars($sectionId === $requestedSection ? 'btn-primary' : 'btn-outline-secondary', ENT_QUOTES, 'UTF-8'); ?>"
                href="<?php echo htmlspecialchars($helpBaseUrl . '&section=' . rawurlencode($sectionId), ENT_QUOTES, 'UTF-8'); ?>">
                 <?php echo Text::_($sectionTitleKey); ?>
             </a>

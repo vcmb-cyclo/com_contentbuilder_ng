@@ -34,7 +34,7 @@ final class ListStatesResetTest extends TestCase
         self::assertStringContainsString('function cbRefreshContextualActions(closeMenu)', $script);
         self::assertStringContainsString('cbCloseActionsToolbarMenu();', $script);
         self::assertStringContainsString(
-            'cbSetActionsToolbarEnabled(isStatesTab || (isViewTab && cbHasSelectedViewElements()))',
+            'cbSetActionsToolbarEnabled(isStatesTab || isIntroTab || isDetailsTab || isEditTab || isArticleTab || (isViewTab && cbHasSelectedViewElements()))',
             $script
         );
         self::assertStringContainsString('cbRefreshContextualActions(!cbHasSelectedViewElements())', $script);
