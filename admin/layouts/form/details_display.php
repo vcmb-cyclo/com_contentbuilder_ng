@@ -24,10 +24,6 @@ $prepareEffectOptions = is_array($displayData['prepareEffectOptions'] ?? null) ?
 $templateAuditChecks = (array) ($displayData['templateAuditChecks'] ?? []);
 $templateAuditReferences = (array) ($displayData['templateAuditReferences'] ?? []);
 
-$detailsDefaults = [
-    'cb_show_details_top_bar' => 1,
-    'cb_show_details_bottom_bar' => 0,
-];
 
 $prepareExamplesText = <<<'TXT'
 // Ici, vous pouvez modifier les libellés et les valeurs de chaque élément avant le rendu du template d'édition.
@@ -53,31 +49,14 @@ TXT;
     'auditChecks' => $templateAuditChecks,
     'references' => $templateAuditReferences,
 ]); ?>
-<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
-    <h3 id="cb-form-details-display" class="mb-0">
-        <?php echo Text::_('COM_CONTENTBUILDERNG_TAB_DETAILS_DISPLAY'); ?>
-    </h3>
-    <button
-        type="button"
-        class="btn btn-secondary"
-        id="cb-reset-details-display"
-        title="<?php echo Text::_('COM_CONTENTBUILDERNG_RESET_MENU_OPTIONS_TOOLTIP'); ?>"
-        aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_RESET_MENU_OPTIONS_TOOLTIP'); ?>"
-        data-defaults="<?php echo htmlspecialchars(json_encode($detailsDefaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8'); ?>"
-        data-confirm="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_RESET_MENU_OPTIONS_CONFIRM'), ENT_QUOTES, 'UTF-8'); ?>"
-    >
-        <span class="fa-solid fa-rotate-left" aria-hidden="true"></span>
-        <?php echo Text::_('COM_CONTENTBUILDERNG_RESET'); ?>
-    </button>
-</div>
+<h3 id="cb-form-details-display" class="mb-3">
+    <?php echo Text::_('COM_CONTENTBUILDERNG_TAB_DETAILS_DISPLAY'); ?>
+</h3>
 <p class="text-muted mb-3">
     <?php echo Text::_('COM_CONTENTBUILDERNG_TAB_DETAILS_DISPLAY_INTRO'); ?>
 </p>
-<div class="alert alert-info mb-3">
-    <?php echo Text::_('COM_CONTENTBUILDERNG_TAB_DETAILS_DISPLAY_PERMISSION_HINT'); ?>
-</div>
 <div class="row gx-3 gy-1 mt-0 align-items-stretch mb-3" id="cb-form-details-show-buttons-row">
-    <div class="col-12 col-xl-4 d-flex" id="cb-form-details-show-buttons">
+    <div class="col-12 d-flex" id="cb-form-details-show-buttons">
         <div class="border rounded bg-body p-3 d-flex flex-column flex-grow-1" id="cb-form-details-show-buttons-card">
             <h4 class="h6 text-body-secondary mb-2">
                 <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_BUTTON_OPTIONS'); ?>
@@ -101,25 +80,8 @@ TXT;
                         </span>
                     </label>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-xl-8 d-flex" id="cb-form-details-create-sample-card-col">
-        <div class="border rounded bg-body p-3 d-flex flex-column flex-grow-1" id="cb-form-details-create-sample-card">
-            <h4 class="h6 text-body-secondary mb-2">
-                <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE'); ?>
-            </h4>
-            <input type="hidden" name="jform[create_sample]" id="cb_create_sample_flag" value="0" />
-            <div class="d-flex flex-wrap align-items-center gap-2">
-                <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1" id="create_sample"
-                    title="<?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE') . ' - ' . Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE_TIP'); ?>"
-                    aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE') . ' - ' . Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE_TIP'); ?>"
-                    onclick="cbQueueDetailsSampleGeneration(this);">
-                    <span class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></span>
-                    <?php echo Text::_('COM_CONTENTBUILDERNG_CREATE_TEMPLATE'); ?>
-                </button>
                 <?php if (is_callable($renderCheckbox)) : ?>
-                    <div class="form-check mb-0 ms-xl-auto flex-shrink-0 text-nowrap">
+                    <div class="form-check mb-0 flex-shrink-0 text-nowrap border-start ps-3">
                         <input type="hidden" name="jform[details_template_locked]" value="0" />
                         <?php echo $renderCheckbox('jform[details_template_locked]', 'details_template_locked', !empty($item->details_template_locked)); ?>
                         <label class="form-check-label" for="details_template_locked">
@@ -129,12 +91,10 @@ TXT;
                         </label>
                     </div>
                 <?php endif; ?>
-                <small id="cb_create_sample_hint" class="text-success d-none">
-                    <?php echo Text::_('COM_CONTENTBUILDERNG_INITIALISE_WILL_APPLY_ON_SAVE'); ?>
-                </small>
             </div>
         </div>
     </div>
+    <input type="hidden" name="jform[create_sample]" id="cb_create_sample_flag" value="0" />
 </div>
 <div id="cb-form-details-template-field-group">
     <?php echo $form ? $form->renderField('details_template') : ''; ?>
@@ -168,45 +128,3 @@ echo LayoutHelper::render(
     JPATH_COMPONENT_ADMINISTRATOR . '/layouts'
 );
 ?>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var button = document.getElementById('cb-reset-details-display');
-
-    if (!button) {
-        return;
-    }
-
-    var defaults = {};
-
-    try {
-        defaults = JSON.parse(button.getAttribute('data-defaults') || '{}');
-    } catch (error) {
-        defaults = {};
-    }
-
-    var setCheckbox = function (name, checked) {
-        var field = document.querySelector('input[type="checkbox"][name="jform[' + name + ']"]');
-
-        if (!field) {
-            return;
-        }
-
-        field.checked = checked;
-        field.dispatchEvent(new Event('change', { bubbles: true }));
-    };
-
-    button.addEventListener('click', function () {
-        var confirmMessage = button.getAttribute('data-confirm') || '';
-
-        if (confirmMessage && !window.confirm(confirmMessage)) {
-            return;
-        }
-
-        Object.keys(defaults).forEach(function (name) {
-            var value = defaults[name];
-
-            setCheckbox(name, Number(value) === 1);
-        });
-    });
-});
-</script>

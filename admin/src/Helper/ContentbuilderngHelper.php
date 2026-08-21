@@ -587,6 +587,19 @@ class ContentbuilderngHelper
         );
     }
 
+    public static function listIncludeInExport($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark', $prefix = '')
+    {
+        return self::renderBooleanStateToggle(
+            !empty($row->export_include),
+            (int) $i,
+            (string) $prefix . (string) $domain . '.',
+            'export_include',
+            'no_export_include',
+            'COM_CONTENTBUILDERNG_EXPORT_INCLUDE',
+            'COM_CONTENTBUILDERNG_NO_EXPORT_INCLUDE'
+        );
+    }
+
     public static function listLinkable($domain, $row, $i, $publish_icon = 'fa-solid fa-check', $unpublish_icon = 'fa-solid fa-circle-xmark', $prefix = '')
     {
         return self::renderBooleanStateToggle(

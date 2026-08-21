@@ -417,7 +417,7 @@ class FormController extends BaseFormController
     }
 
 
-    private const ALLOWED_FLAGS = ['linkable', 'detail_include', 'editable', 'api_allowed', 'list_include', 'search_include'];
+    private const ALLOWED_FLAGS = ['linkable', 'detail_include', 'editable', 'api_allowed', 'list_include', 'search_include', 'export_include'];
 
     public function element_flag(): void
     {

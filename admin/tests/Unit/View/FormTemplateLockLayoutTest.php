@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 final class FormTemplateLockLayoutTest extends TestCase
 {
-    public function testTemplateLocksAreAlwaysRenderedInWideCreationPanels(): void
+    public function testTemplateLocksAreRenderedInCompactDisplayPanels(): void
     {
         $root = \dirname(__DIR__, 4);
         $detailsLayout = (string) \file_get_contents($root . '/admin/layouts/form/details_display.php');
@@ -31,22 +31,14 @@ final class FormTemplateLockLayoutTest extends TestCase
             "\$displayData['canLockTemplate']",
             $editLayout
         );
-        self::assertStringContainsString(
-            'class="col-12 col-xl-8 d-flex" id="cb-form-details-create-sample-card-col"',
-            $detailsLayout
-        );
-        self::assertStringContainsString(
-            'class="col-12 col-xl-8 d-flex" id="cb-form-edit-create-sample-card-col"',
-            $editLayout
-        );
-        self::assertStringContainsString(
-            'class="form-check mb-0 ms-xl-auto flex-shrink-0 text-nowrap"',
-            $detailsLayout
-        );
-        self::assertStringContainsString(
-            'class="form-check mb-0 ms-xl-auto flex-shrink-0 text-nowrap"',
-            $editLayout
-        );
+        self::assertStringNotContainsString('cb-form-details-create-sample-card', $detailsLayout);
+        self::assertStringNotContainsString('cb-form-edit-create-sample-card', $editLayout);
+        self::assertStringContainsString('class="form-check mb-0 flex-shrink-0 text-nowrap border-start ps-3"', $detailsLayout);
+        self::assertStringContainsString('class="form-check mb-0 flex-shrink-0 text-nowrap border-start ps-3"', $editLayout);
+        self::assertStringNotContainsString('id="create_sample"', $detailsLayout);
+        self::assertStringNotContainsString('id="create_editable_sample"', $editLayout);
+        self::assertStringContainsString('id="cb-form-edit-by-type-field-group"', $editLayout);
+        self::assertStringContainsString('form-check mb-0 flex-shrink-0 border-start ps-3', $editLayout);
         self::assertStringContainsString(
             "!empty(\$this->item->details_template_locked)",
             $formTemplate
@@ -65,22 +57,25 @@ final class FormTemplateLockLayoutTest extends TestCase
         );
     }
 
-    public function testTemplateLockBadgeTakesPriorityOverDotStates(): void
+    public function testTemplateLockComplementsDotStates(): void
     {
         $root = \dirname(__DIR__, 4);
         $formTemplate = (string) \file_get_contents($root . '/admin/tmpl/form/edit.php');
-        $badgeStart = \strpos($formTemplate, '$templateStateBadge = static function');
-        $lockBranch = \strpos($formTemplate, 'if ($locked)', $badgeStart ?: 0);
-        $dotBranch = \strpos($formTemplate, '$tip = Text::_($inconsistent', $badgeStart ?: 0);
+        $stateStart = \strpos($formTemplate, '$templateTabState = static function');
+        $lockBranch = \strpos($formTemplate, 'if ($locked)', $stateStart ?: 0);
+        $dotBranch = \strpos($formTemplate, '$badge = \' <span class="\' . $stateClass', $stateStart ?: 0);
 
-        self::assertNotFalse($badgeStart);
+        self::assertNotFalse($stateStart);
         self::assertNotFalse($lockBranch);
         self::assertNotFalse($dotBranch);
-        self::assertLessThan($dotBranch, $lockBranch);
+        self::assertGreaterThan($lockBranch, $dotBranch);
         self::assertStringContainsString(
-            'cb-template-state is-locked',
+            'cb-template-lock-inline',
             $formTemplate
         );
+        self::assertStringContainsString('cb-template-lock-stack', $formTemplate);
+        self::assertStringContainsString('cb-template-state-inline', $formTemplate);
+        self::assertStringNotContainsString('is-with-lock', $formTemplate);
     }
 
     public function testEmptyTemplateDotRequiresMatchingFrontendPermission(): void
@@ -100,16 +95,20 @@ final class FormTemplateLockLayoutTest extends TestCase
             "\$editableTemplateRequired = \$hasFrontendPermission('edit') || \$hasFrontendPermission('new')",
             $formTemplate
         );
+        self::assertStringContainsString('$detailsEntryPointEnabled = $detailsTemplateRequired && $hasPublishedLinkableElement', $formTemplate);
+        self::assertStringContainsString("\$hasFrontendPermission('edit') && !empty(\$this->item->edit_button)", $formTemplate);
+        self::assertStringContainsString("\$hasFrontendPermission('new') && !empty(\$this->item->new_button)", $formTemplate);
+        self::assertStringContainsString("'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_INCOMPLETE'", $formTemplate);
         self::assertStringContainsString(
-            'if (!$filled && !$inconsistent && !$required)',
+            "'tipKey' => 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_INACTIVE_EMPTY'",
             $formTemplate
         );
         self::assertStringContainsString(
-            "'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY',\n            \$detailsTemplateRequired,",
+            "\$detailsTemplateRequired,",
             $formTemplate
         );
         self::assertStringContainsString(
-            "'COM_CONTENTBUILDERNG_TAB_TEMPLATE_EMPTY',\n            \$editableTemplateRequired,",
+            "\$editableTemplateRequired,",
             $formTemplate
         );
     }
@@ -149,24 +148,19 @@ final class FormTemplateLockLayoutTest extends TestCase
             $formTemplate
         );
         self::assertStringContainsString(
-            "'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES', \$listStatesBadge",
+            "\$listStatesTabTipKey, \$listStatesBadge",
             $formTemplate
         );
         self::assertStringContainsString(
-            "\$listIntroBadge = \$neutralTabBadge(trim((string) (\$this->item->intro_text ?? '')) !== '')",
+            "\$listIntroBadge = \$hasListIntro",
             $formTemplate
         );
         self::assertStringContainsString(
-            "'COM_CONTENTBUILDERNG_TAB_TIP_LIST_INTRO_TEXT', \$listIntroBadge",
+            "'COM_CONTENTBUILDERNG_TAB_TIP_LIST_INTRO_ACTIVE'",
             $formTemplate
         );
-        self::assertStringContainsString(
-            '.cb-template-state.is-empty{border:',
-            $style
-        );
-        self::assertStringContainsString(
-            '.cb-template-state.is-neutral{background:',
-            $style
-        );
+        self::assertStringContainsString('.cb-template-state.is-filled::before{content:"✓"}', $style);
+        self::assertStringContainsString('.cb-template-state.is-incomplete::before{content:"▲"}', $style);
+        self::assertStringContainsString('.cb-template-state.is-inconsistent::before{content:"✕"}', $style);
     }
 }

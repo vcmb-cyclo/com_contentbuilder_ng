@@ -480,7 +480,7 @@ $renderNumberedAuditTitle = static function (string $sectionId, string $label, b
     id="adminForm"
 >
 <div class="cb-about-intro mt-3 mb-3">
-    <div class="cb-about-intro-media">
+    <div class="cb-about-intro-media" data-cb-easter-egg-trigger>
         <img
             src="<?php echo htmlspecialchars(Uri::root(true) . '/media/com_contentbuilderng/images/piranha_50x500_blanc.png', ENT_QUOTES, 'UTF-8'); ?>"
             alt="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_PIRANHA_IMAGE_ALT'), ENT_QUOTES, 'UTF-8'); ?>"
@@ -488,6 +488,13 @@ $renderNumberedAuditTitle = static function (string $sectionId, string $label, b
             style="max-width: 140px; height: auto;"
             loading="lazy"
         />
+        <button
+            type="button"
+            class="cb-about-easter-egg-hotspot"
+            data-cb-easter-egg-hotspot
+            tabindex="-1"
+            aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_PIRANHA_IMAGE_ALT'), ENT_QUOTES, 'UTF-8'); ?>"
+        ></button>
     </div>
     <div class="cb-about-intro-content">
         <p class="mb-0">
@@ -528,6 +535,17 @@ $renderNumberedAuditTitle = static function (string $sectionId, string $label, b
                 aria-label="<?php echo htmlspecialchars($tooltipLinkOpenApi, ENT_QUOTES, 'UTF-8'); ?>"
             ><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_OPENAPI_LINK'); ?></a>
         </div>
+    </div>
+</div>
+
+<div class="cb-about-easter-egg" data-cb-easter-egg hidden aria-hidden="true">
+    <div class="cb-about-easter-egg-dialog" role="dialog" aria-modal="true" aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_EASTER_EGG_DIALOG_LABEL'), ENT_QUOTES, 'UTF-8'); ?>">
+        <button type="button" class="cb-about-easter-egg-close" data-cb-easter-egg-close aria-label="<?php echo htmlspecialchars(Text::_('JCLOSE'), ENT_QUOTES, 'UTF-8'); ?>">
+            <span class="fa-solid fa-xmark" aria-hidden="true"></span>
+        </button>
+        <img data-cb-easter-egg-image
+            data-src="<?php echo htmlspecialchars(Uri::root(true) . '/media/com_contentbuilderng/images/cbng-easter-egg-2026.webp', ENT_QUOTES, 'UTF-8'); ?>"
+            alt="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_EASTER_EGG_IMAGE_ALT'), ENT_QUOTES, 'UTF-8'); ?>" />
     </div>
 </div>
 

@@ -115,8 +115,14 @@ class FormModel extends AdminModel
                 'id' => -1 * $index,
                 'action' => '',
                 'title' => Text::sprintf('COM_CONTENTBUILDERNG_LIST_STATE_DEFAULT_TITLE', $index),
-                'color' => $index === 1 ? '60E309' : ($index === 2 ? 'FCFC00' : ($index === 3 ? 'FC0000' : 'FFFFFF')),
-                'published' => $index <= 3 ? 1 : 0,
+                'color' => match ($index) {
+                    1 => '60E309',
+                    2 => 'FF9800',
+                    3 => 'FCFC00',
+                    4 => 'FC0000',
+                    default => 'FFFFFF',
+                },
+                'published' => $index <= 4 ? 1 : 0,
             ];
         }
 
@@ -1551,15 +1557,17 @@ class FormModel extends AdminModel
         if ($existingCount < 1) {
             // rien du tout -> on insert tout
             for ($i = 0; $i < $defaultCount; $i++) {
+                $defaultState = $this->_default_list_states[$i];
                 $query = $db->getQuery(true)
                     ->insert($db->quoteName('#__contentbuilderng_list_states'))
-                    ->columns($db->quoteName(['form_id', 'title', 'color', 'action']))
+                    ->columns($db->quoteName(['form_id', 'title', 'color', 'action', 'published']))
                     ->values(
                         implode(', ', [
                             (int) $formId,
-                            $db->quote('State'),
-                            $db->quote('FFFFFF'),
-                            $db->quote(''),
+                            $db->quote((string) $defaultState['title']),
+                            $db->quote((string) $defaultState['color']),
+                            $db->quote((string) $defaultState['action']),
+                            (int) $defaultState['published'],
                         ])
                     );
                 $db->setQuery($query);
@@ -1569,15 +1577,17 @@ class FormModel extends AdminModel
             // on complète le delta
             $add = $defaultCount - $existingCount;
             for ($i = 0; $i < $add; $i++) {
+                $defaultState = $this->_default_list_states[$existingCount + $i];
                 $query = $db->getQuery(true)
                     ->insert($db->quoteName('#__contentbuilderng_list_states'))
-                    ->columns($db->quoteName(['form_id', 'title', 'color', 'action']))
+                    ->columns($db->quoteName(['form_id', 'title', 'color', 'action', 'published']))
                     ->values(
                         implode(', ', [
                             (int) $formId,
-                            $db->quote('State'),
-                            $db->quote('FFFFFF'),
-                            $db->quote(''),
+                            $db->quote((string) $defaultState['title']),
+                            $db->quote((string) $defaultState['color']),
+                            $db->quote((string) $defaultState['action']),
+                            (int) $defaultState['published'],
                         ])
                     );
                 $db->setQuery($query);

@@ -63,23 +63,12 @@ $articleDefaults = [
     'protect_upload_directory' => 1,
 ];
 ?>
-<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
-    <h3 id="cb-form-article-options" class="mb-0">
-        <?php echo Text::_('COM_CONTENTBUILDERNG_ARTICLE'); ?>
-    </h3>
-    <button
-        type="button"
-        class="btn btn-secondary"
-        id="cb-reset-article-options"
-        title="<?php echo Text::_('COM_CONTENTBUILDERNG_RESET_ARTICLE_OPTIONS_TOOLTIP'); ?>"
-        aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_RESET_ARTICLE_OPTIONS_TOOLTIP'); ?>"
-        data-defaults="<?php echo htmlspecialchars(json_encode($articleDefaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8'); ?>"
-        data-confirm="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_RESET_ARTICLE_OPTIONS_CONFIRM'), ENT_QUOTES, 'UTF-8'); ?>"
-    >
-        <span class="fa-solid fa-rotate-left" aria-hidden="true"></span>
-        <?php echo Text::_('COM_CONTENTBUILDERNG_RESET'); ?>
-    </button>
-</div>
+<h3 id="cb-form-article-options" class="mb-3">
+    <?php echo Text::_('COM_CONTENTBUILDERNG_ARTICLE'); ?>
+</h3>
+<span id="cb-article-reset-data" class="d-none"
+    data-defaults="<?php echo htmlspecialchars(json_encode($articleDefaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8'); ?>"
+    data-confirm="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_RESET_ARTICLE_OPTIONS_CONFIRM'), ENT_QUOTES, 'UTF-8'); ?>"></span>
 <p class="text-muted mb-3">
     <?php echo Text::_('COM_CONTENTBUILDERNG_TAB_ARTICLE_INTRO'); ?>
 </p>
@@ -344,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     syncCategoryRequirement();
 
-    var button = document.getElementById('cb-reset-article-options');
+    var button = document.getElementById('cb-article-reset-data');
 
     if (!button) {
         return;
@@ -397,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
-    button.addEventListener('click', function () {
+    window.cbResetArticleOptions = function () {
         var confirmMessage = button.getAttribute('data-confirm') || '';
 
         if (confirmMessage && !window.confirm(confirmMessage)) {
@@ -426,6 +415,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     break;
             }
         });
-    });
+        if (typeof cbHandleDirtyInteraction === 'function') {
+            cbHandleDirtyInteraction();
+        }
+        window.setTimeout(function () {
+            Joomla.submitbutton('form.apply');
+        }, 0);
+    };
 });
 </script>

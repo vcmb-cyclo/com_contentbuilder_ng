@@ -60,6 +60,8 @@ class ElementoptionsTable extends Table
 
     public $list_include = 1;
 
+    public $export_include = 1;
+
     public $search_include = 0;
 
     /**

@@ -105,21 +105,21 @@ $colreserved = 0;
 // Case of show_id_column true -> First column reserved.
 $col_id = 0;
 $reserved_labels = [];
-if ($this->data->show_id_column) {
+if ($this->data->export_id_column) {
     $col_id = ++$colreserved;
     array_push($reserved_labels, Text::_('COM_CONTENTBUILDERNG_ID'));
 }
 
 // Case of state true -> column reserved.
 $col_state = 0;
-if ($this->data->list_state) {
+if ($this->data->export_state_column) {
     $col_state = ++$colreserved;
     array_push($reserved_labels, Text::_('COM_CONTENTBUILDERNG_EDIT_STATE'));
 }
 
 // Case of publish true -> column reserved.
 $col_publish = 0;
-if ($this->data->list_publish) {
+if ($this->data->export_publish_column) {
     $col_publish = ++$colreserved;
     array_push($reserved_labels, Text::_('COM_CONTENTBUILDERNG_PUBLISH'));
 }
@@ -148,14 +148,21 @@ foreach ((array) ($this->data->items ?? []) as $item) {
 
     // Si on veut mettre la colonne d'état.
     if ($col_state > 0) {
-        // Sécuriser la requête
-        $recordId = $db->quote($item->colRecord);
-        $sql = "SELECT title, color 
-                FROM `#__contentbuilderng_list_states` 
-                WHERE id = (SELECT state_id 
-                            FROM `#__contentbuilderng_list_records` 
-                            WHERE record_id = $recordId)";
-        $db->setQuery($sql);
+        $stateQuery = $db->getQuery(true)
+            ->select([
+                $db->quoteName('states.title'),
+                $db->quoteName('states.color'),
+            ])
+            ->from($db->quoteName('#__contentbuilderng_list_records', 'records'))
+            ->join(
+                'INNER',
+                $db->quoteName('#__contentbuilderng_list_states', 'states')
+                . ' ON ' . $db->quoteName('states.id') . ' = ' . $db->quoteName('records.state_id')
+            )
+            ->where($db->quoteName('records.form_id') . ' = ' . (int) $this->data->id)
+            ->where($db->quoteName('records.record_id') . ' = ' . (int) $item->colRecord)
+            ->where($db->quoteName('states.form_id') . ' = ' . (int) $this->data->id);
+        $db->setQuery($stateQuery, 0, 1);
         $result = $db->loadRow();
 
         if ($result !== null) {

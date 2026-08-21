@@ -105,20 +105,6 @@
             syncAutoPublishDefault();
         }
 
-        const resetButton = document.getElementById('cb-reset-list-intro');
-        if (resetButton) {
-            resetButton.addEventListener('click', function () {
-                const confirmMessage = resetButton.getAttribute('data-confirm') || '';
-
-                if (confirmMessage && !window.confirm(confirmMessage)) {
-                    return;
-                }
-
-                if (typeof cbSetEditorFieldValue === 'function') {
-                    cbSetEditorFieldValue('intro_text', '');
-                }
-            });
-        }
     });
 
     (() => {

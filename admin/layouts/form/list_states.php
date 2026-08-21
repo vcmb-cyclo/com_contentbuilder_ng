@@ -28,22 +28,22 @@ $listStates = is_array($item->list_states ?? null) ? $item->list_states : [];
 <table id="cb-form-list-states-table" class="table table-striped">
     <thead>
         <tr>
-            <th>
+            <th title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                 <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED') ?>
             </th>
-            <th>
+            <th title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                 <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE') ?>
             </th>
-            <th>
+            <th title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_LIST_STATES_COLOR_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                 <?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_COLOR') ?>
             </th>
-            <th>
+            <th title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_LIST_STATES_ACTION_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                 <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_ACTION') ?>
             </th>
         </tr>
     </thead>
     <?php
-    foreach ($listStates as $state) {
+    foreach ($listStates as $stateIndex => $state) {
         $k = 0;
         $stateRawColor = (string) ($state['color'] ?? '');
         $previewHex = strtoupper(ltrim(trim($stateRawColor), '#'));
@@ -64,7 +64,7 @@ $listStates = is_array($item->list_states ?? null) ? $item->list_states : [];
         $stateColorPickerId = 'list_state_color_picker_' . (int) $state['id'];
         $stateNativePickerValue = preg_match('/^[0-9A-F]{6}$/', $previewHex) ? '#' . $previewHex : '#FFFFFF';
         ?>
-        <tr class="<?php echo 'row' . $k; ?>">
+        <tr class="<?php echo 'row' . $k; ?>" data-cb-list-state-row="<?php echo (int) $stateIndex + 1; ?>">
             <td>
                 <?php echo is_callable($renderCheckbox) ? $renderCheckbox('jform[list_states][' . $state['id'] . '][published]', 'list_state_published_' . $state['id'], (bool) $state['published']) : ''; ?>
             </td>

@@ -73,6 +73,9 @@ class FormTable extends Table
     public $list_rating = 0;
     public $select_column = 0;
     public $show_id_column = 0;
+    public $export_id_column = 1;
+    public $export_state_column = 0;
+    public $export_publish_column = 0;
     public $use_view_name_as_title = 0;
     public $intro_text = '';
     public $published_only = 0;
