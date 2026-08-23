@@ -18,6 +18,7 @@
 
 .cb-card-header {
     box-sizing: border-box;
+    margin: 0;
     padding: .7rem 1rem;
     color: var(--cb-card-header-color);
     background: var(--cb-card-header-bg);

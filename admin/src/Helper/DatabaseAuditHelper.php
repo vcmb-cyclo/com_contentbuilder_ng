@@ -15,6 +15,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Helper;
 \defined('_JEXEC') or die('Restricted access');
 
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\BfFieldSyncAuditHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\BfContentRecordOrphanAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\AuditTableSupportHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\ContentRecordDuplicateAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\DebugModeAuditHelper;
@@ -260,6 +261,8 @@ final class DatabaseAuditHelper
         $errors = array_merge($errors, $elementReferenceErrors);
         [$contentRecordDuplicateIssues, $contentRecordDuplicateErrors] = ContentRecordDuplicateAuditHelper::inspect($db);
         $errors = array_merge($errors, $contentRecordDuplicateErrors);
+        [$bfContentRecordOrphans, $bfContentRecordOrphanErrors] = BfContentRecordOrphanAuditHelper::inspect($db);
+        $errors = array_merge($errors, $bfContentRecordOrphanErrors);
         [$invalidDatetimeSortIssues, $invalidDatetimeSortErrors] = InvalidDatetimeSortAuditHelper::inspect($db);
         $errors = array_merge($errors, $invalidDatetimeSortErrors);
         [$storageColumnTypeIssues, $storageColumnTypeErrors] = StorageColumnTypeAuditHelper::inspect($db);
@@ -339,6 +342,7 @@ final class DatabaseAuditHelper
             'frontend_permission_issues' => $frontendPermissionIssues,
             'element_reference_issues' => $elementReferenceIssues,
             'content_record_duplicate_issues' => $contentRecordDuplicateIssues,
+            'bf_content_record_orphans' => $bfContentRecordOrphans,
             'invalid_datetime_sort_issues' => $invalidDatetimeSortIssues,
             'storage_column_type_issues' => $storageColumnTypeIssues,
             'generated_article_category_issues' => $generatedArticleCategoryIssues,

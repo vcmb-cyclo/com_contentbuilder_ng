@@ -15,6 +15,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Service;
 \defined('_JEXEC') or die;
 
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\BfFieldSyncAuditHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\BfContentRecordOrphanAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\ElementReferenceAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleInstallerTempAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\UploadDirectoryProtectionAuditHelper;
@@ -51,6 +52,7 @@ class RepairWorkflowService
         'frontend_permission_consistency',
         'element_reference_consistency',
         'content_record_duplicates',
+        'bf_content_record_orphans',
         'generated_article_categories',
         'stale_language_files',
         'stale_installer_temp',
@@ -179,6 +181,7 @@ class RepairWorkflowService
             'generated_article_categories'   => $this->buildGeneratedArticleCategoryStepResult(GeneratedArticleCategoryAuditHelper::repair($this->db)),
             'element_reference_consistency'  => $this->buildElementReferenceConsistencyStepResult(ElementReferenceAuditHelper::repair($this->db)),
             'content_record_duplicates'      => $this->buildContentRecordDuplicatesStepResult(ContentRecordDuplicateAuditHelper::repair($this->db)),
+            'bf_content_record_orphans'      => $this->buildBfContentRecordOrphansStepResult(BfContentRecordOrphanAuditHelper::repair($this->db)),
             'stale_language_files'           => $this->buildStaleLanguageFilesStepResult(StaleLanguageFilesAuditHelper::repair()),
             'stale_installer_temp'           => $this->buildStaleInstallerTempStepResult(StaleInstallerTempAuditHelper::repair()),
             'upload_directory_protection'    => $this->buildUploadDirectoryProtectionStepResult(UploadDirectoryProtectionAuditHelper::repair($this->db)),
@@ -662,6 +665,34 @@ class RepairWorkflowService
                 'lines'        => $contentRecordDuplicatePreviewLines,
             ];
 
+            $bfContentRecordOrphans = (array) ($auditReport['bf_content_record_orphans'] ?? []);
+            $bfContentRecordOrphanRows = (int) ($auditSummary['bf_content_record_orphan_rows'] ?? 0);
+            $bfContentRecordOrphanPreviewLines = [];
+            foreach ($bfContentRecordOrphans as $orphanForm) {
+                if (!is_array($orphanForm)) {
+                    continue;
+                }
+                $recordIds = array_column((array) ($orphanForm['records'] ?? []), 'record_id');
+                $bfContentRecordOrphanPreviewLines[] = 'BF form #' . (int) ($orphanForm['form_id'] ?? 0)
+                    . ': record ids [' . implode(', ', array_map('intval', $recordIds)) . ']';
+            }
+            $prechecks['bf_content_record_orphans'] = [
+                'count' => count($bfContentRecordOrphans),
+                'description' => Text::sprintf(
+                    'COM_CONTENTBUILDERNG_DB_REPAIR_STEP_BF_CONTENT_RECORD_ORPHANS_PRECHECK',
+                    $bfContentRecordOrphanRows,
+                    count($bfContentRecordOrphans)
+                ),
+                'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
+                'has_errors' => false,
+                'details' => Text::sprintf(
+                    'COM_CONTENTBUILDERNG_DB_REPAIR_STEP_BF_CONTENT_RECORD_ORPHANS_PRECHECK',
+                    $bfContentRecordOrphanRows,
+                    count($bfContentRecordOrphans)
+                ),
+                'lines' => $bfContentRecordOrphanPreviewLines,
+            ];
+
             $prechecks['generated_article_categories'] = [
                 'count' => count($generatedArticleCategoryIssues),
                 'description' => match (true) {
@@ -711,7 +742,7 @@ class RepairWorkflowService
                 'has_errors' => $unprotectedUploadErrors !== [],
             ];
         } catch (\Throwable $e) {
-            foreach (['duplicate_indexes', 'historical_tables', 'historical_menu_entries', 'table_encoding', 'audit_columns', 'form_audit_columns', 'plugin_duplicates', 'bf_field_sync', 'menu_view_consistency', 'frontend_permission_consistency', 'element_reference_consistency', 'content_record_duplicates', 'generated_article_categories', 'stale_language_files', 'stale_installer_temp', 'upload_directory_protection'] as $stepId) {
+            foreach (['duplicate_indexes', 'historical_tables', 'historical_menu_entries', 'table_encoding', 'audit_columns', 'form_audit_columns', 'plugin_duplicates', 'bf_field_sync', 'menu_view_consistency', 'frontend_permission_consistency', 'element_reference_consistency', 'content_record_duplicates', 'bf_content_record_orphans', 'generated_article_categories', 'stale_language_files', 'stale_installer_temp', 'upload_directory_protection'] as $stepId) {
                 $prechecks[$stepId] = [
                     'count' => 1,
                     'description' => 'Pre-check unavailable for this step. You can still run the repair manually.',
@@ -1234,6 +1265,45 @@ class RepairWorkflowService
                 'COM_CONTENTBUILDERNG_CONTENT_RECORD_DUPLICATES_REPAIR_SUMMARY',
                 (int) ($summary['scanned'] ?? 0),
                 (int) ($summary['groups'] ?? 0),
+                (int) ($summary['rows_removed'] ?? 0),
+                (int) ($summary['unchanged'] ?? 0),
+                (int) ($summary['errors'] ?? 0)
+            ),
+            'lines' => $lines,
+        ];
+    }
+
+    private function buildBfContentRecordOrphansStepResult(array $summary): array
+    {
+        $lines = [];
+
+        foreach ((array) ($summary['items'] ?? []) as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $lines[] = Text::sprintf(
+                'COM_CONTENTBUILDERNG_BF_CONTENT_RECORD_ORPHANS_REPAIR_ITEM',
+                (int) ($item['form_id'] ?? 0),
+                (int) ($item['candidates'] ?? 0),
+                (int) ($item['rows_removed'] ?? 0),
+                (int) ($item['unchanged'] ?? 0),
+                trim((string) ($item['error'] ?? ''))
+            );
+        }
+
+        foreach ((array) ($summary['warnings'] ?? []) as $warning) {
+            if (trim((string) $warning) !== '') {
+                $lines[] = Text::sprintf('COM_CONTENTBUILDERNG_BF_CONTENT_RECORD_ORPHANS_REPAIR_WARNING', $warning);
+            }
+        }
+
+        return [
+            'level' => (int) ($summary['errors'] ?? 0) > 0 ? 'warning' : 'message',
+            'summary' => Text::sprintf(
+                'COM_CONTENTBUILDERNG_BF_CONTENT_RECORD_ORPHANS_REPAIR_SUMMARY',
+                (int) ($summary['scanned'] ?? 0),
+                (int) ($summary['forms'] ?? 0),
                 (int) ($summary['rows_removed'] ?? 0),
                 (int) ($summary['unchanged'] ?? 0),
                 (int) ($summary['errors'] ?? 0)

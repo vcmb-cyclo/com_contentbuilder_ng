@@ -15,6 +15,17 @@ la largeur disponible. Les variantes V sont compactes, se juxtaposent lorsque
 l'espace le permet et repassent en pleine largeur sur petit écran.
 Les titres des Cards sont centrés par défaut.
 
+Le titre est rendu en `h4` par défaut. Le dernier `|` d'un `title=` peut
+indiquer un niveau `h1` à `h6`, sans distinction de casse, ou une taille
+visuelle positive `remX` / `remX.X`. Les espaces autour du séparateur sont
+ignorés. Avec `rem`, le niveau sémantique reste `h4`. Un suffixe inconnu reste
+dans le titre complet, qui utilise alors le rendu `h4` par défaut.
+
+```text
+title="Départements | h4"
+title="Départements | rem1.25"
+```
+
 L'option publique facultative `w=` règle la largeur de la Card dans la grille :
 `w=33` occupe une colonne, `w=66` deux colonnes et `w=100` toute la ligne.
 Seules ces trois valeurs numériques sans guillemets sont admises et `w=` exige

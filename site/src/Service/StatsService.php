@@ -18,6 +18,7 @@ use CB\Component\Contentbuilderng\Administrator\Service\ApiFieldPermissionServic
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
+use Joomla\Database\QueryInterface;
 
 final class StatsService
 {
@@ -88,6 +89,9 @@ final class StatsService
             $this->db->quoteName('reference_id') . ' = ' . $this->db->quote((string) $formRow['reference_id']),
         ];
         $statsFilter = $this->getStatsFilterPayload($formId, $formRow, $options);
+        $recordsTable = (string) $formRow['type'] === 'com_breezingformsng'
+            ? $this->db->quoteName('#__contentbuilderng_records', 'records')
+            : $this->db->quoteName('#__contentbuilderng_records');
 
         if ($statsFilter !== null) {
             $recordWhere[] = $statsFilter['where'];
@@ -107,8 +111,9 @@ final class StatsService
                 'COALESCE(SUM(' . $this->db->quoteName('rating_sum') . '), 0) AS ' . $this->db->quoteName('rating_sum'),
                 'MAX(' . $this->db->quoteName('last_update') . ') AS ' . $this->db->quoteName('last_update'),
             ])
-            ->from($this->db->quoteName('#__contentbuilderng_records'))
-            ->where($recordWhere);
+            ->from($recordsTable);
+        $this->joinBreezingFormsRecords($query, $formRow);
+        $query->where($recordWhere);
         $this->db->setQuery($query, 0, 1);
         $records = $this->db->loadAssoc() ?: [];
 
@@ -120,8 +125,9 @@ final class StatsService
                 $this->db->quoteName('lang_code'),
                 'COUNT(*) AS ' . $this->db->quoteName('total'),
             ])
-            ->from($this->db->quoteName('#__contentbuilderng_records'))
-            ->where($recordWhere)
+            ->from($recordsTable);
+        $this->joinBreezingFormsRecords($query, $formRow);
+        $query->where($recordWhere)
             ->group($this->db->quoteName('lang_code'))
             ->order($this->db->quoteName('lang_code'));
         $this->db->setQuery($query);
@@ -158,6 +164,20 @@ final class StatsService
             ],
             'languages' => $languages,
         ] + ($statsFilter !== null ? ['filter' => $statsFilter['payload']] : []) + ($fieldStats !== null ? ['field' => $fieldStats] : []);
+    }
+
+    private function joinBreezingFormsRecords(QueryInterface $query, array $formRow): void
+    {
+        if ((string) ($formRow['type'] ?? '') !== 'com_breezingformsng') {
+            return;
+        }
+
+        $query->join(
+            'INNER',
+            $this->db->quoteName('#__facileforms_records', 'bf_records')
+            . ' ON ' . $this->db->quoteName('bf_records.id') . ' = ' . $this->db->quoteName('records.record_id')
+            . ' AND ' . $this->db->quoteName('bf_records.form') . ' = ' . $this->db->quoteName('records.reference_id')
+        );
     }
 
     private function getStatsFilterPayload(int $formId, array $formRow, array $options): ?array

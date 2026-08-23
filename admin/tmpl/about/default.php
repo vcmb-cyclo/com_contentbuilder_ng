@@ -95,6 +95,7 @@ $menuViewIssues = (array) ($auditReport['menu_view_issues'] ?? []);
 $frontendPermissionIssues = (array) ($auditReport['frontend_permission_issues'] ?? []);
 $elementReferenceIssues = (array) ($auditReport['element_reference_issues'] ?? []);
 $contentRecordDuplicateIssues = (array) ($auditReport['content_record_duplicate_issues'] ?? []);
+$bfContentRecordOrphans = (array) ($auditReport['bf_content_record_orphans'] ?? []);
 $invalidDatetimeSortIssues = (array) ($auditReport['invalid_datetime_sort_issues'] ?? []);
 $storageColumnTypeIssues = (array) ($auditReport['storage_column_type_issues'] ?? []);
 $generatedArticleCategoryIssues = (array) ($auditReport['generated_article_category_issues'] ?? []);
@@ -137,6 +138,7 @@ $bfFieldSyncMissingTotal = (int) ($auditSummary['bf_view_field_sync_missing_in_c
 $bfFieldSyncOrphanTotal = (int) ($auditSummary['bf_view_field_sync_orphan_in_cb'] ?? 0);
 $historicalMenuEntriesCount = (int) ($auditSummary['historical_menu_entries'] ?? count($historicalMenuEntries));
 $contentRecordDuplicateRowsToRemove = (int) ($auditSummary['content_record_duplicate_rows_to_remove'] ?? 0);
+$bfContentRecordOrphanRows = (int) ($auditSummary['bf_content_record_orphan_rows'] ?? 0);
 if ($contentRecordDuplicateRowsToRemove === 0 && $contentRecordDuplicateIssues !== []) {
     foreach ($contentRecordDuplicateIssues as $contentRecordDuplicateIssue) {
         if (!is_array($contentRecordDuplicateIssue)) {
@@ -300,6 +302,7 @@ $repairWorkflowStepLabels = [
     'frontend_permission_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FRONTEND_PERMISSION_CONSISTENCY'),
     'element_reference_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ELEMENT_REFERENCE_CONSISTENCY'),
     'content_record_duplicates' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES'),
+    'bf_content_record_orphans' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_CONTENT_RECORD_ORPHANS'),
     'generated_article_categories' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES'),
     'debug_mode' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE'),
     'stale_language_files' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_LANGUAGE_FILES'),
@@ -320,6 +323,7 @@ $repairWorkflowStepDescriptions = [
     'frontend_permission_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FRONTEND_PERMISSION_CONSISTENCY'),
     'element_reference_consistency' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_ELEMENT_REFERENCE_DESC'),
     'content_record_duplicates' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_CONTENT_RECORD_DUPLICATES_DESC'),
+    'bf_content_record_orphans' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_BF_CONTENT_RECORD_ORPHANS_DESC'),
     'generated_article_categories' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_GENERATED_ARTICLE_CATEGORIES_DESC'),
     'upload_directory_protection' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_UPLOAD_DIRECTORY_PROTECTION_DESC'),
 ];
@@ -349,6 +353,7 @@ $hasMenuViewIssues = (int) ($auditSummary['menu_view_issues'] ?? count($menuView
 $hasFrontendPermissionIssues = (int) ($auditSummary['frontend_permission_issues'] ?? count($frontendPermissionIssues)) > 0;
 $hasElementReferenceIssues = (int) ($auditSummary['element_reference_issues'] ?? count($elementReferenceIssues)) > 0;
 $hasContentRecordDuplicateIssues = (int) ($auditSummary['content_record_duplicate_issues'] ?? count($contentRecordDuplicateIssues)) > 0;
+$hasBfContentRecordOrphans = $bfContentRecordOrphanRows > 0;
 $generatedArticleCategoryIssueCount = (int) ($auditSummary['generated_article_category_issues'] ?? count($generatedArticleCategoryIssues));
 $generatedArticleCategoryRowCount = (int) ($auditSummary['generated_article_category_rows'] ?? 0);
 if ($generatedArticleCategoryRowCount === 0 && $generatedArticleCategoryIssues !== []) {

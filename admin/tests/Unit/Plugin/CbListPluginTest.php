@@ -138,6 +138,30 @@ final class CbListPluginTest extends TestCase
         self::assertStringContainsString('if ($embeddedListTitle !== \'\') :', $template);
     }
 
+    public function testSharedCardTitlesSupportHeadingAndRemSuffixes(): void
+    {
+        self::assertStringContainsString(
+            '<h4 class="cb-card-header">Departments</h4>',
+            ContentCardService::render('Content', 'h1', 'Departments')
+        );
+        self::assertStringContainsString(
+            '<h2 class="cb-card-header">Departments</h2>',
+            ContentCardService::render('Content', 'h1', ' Departments | H2 ')
+        );
+        self::assertStringContainsString(
+            '<h4 class="cb-card-header" style="font-size:1.25rem">Departments</h4>',
+            ContentCardService::render('Content', 'h1', 'Departments | REM1.25')
+        );
+        self::assertStringContainsString(
+            '<h4 class="cb-card-header">Departments | large</h4>',
+            ContentCardService::render('Content', 'h1', 'Departments | large')
+        );
+        self::assertStringContainsString(
+            '<h6 class="cb-card-header">North | Departments</h6>',
+            ContentCardService::render('Content', 'h1', 'North | Departments | h6')
+        );
+    }
+
     public function testHideTitleKeywordIsAnAliasForAnEmptyTitle(): void
     {
         foreach (['hide', 'HIDE', ' Hide '] as $value) {

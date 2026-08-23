@@ -3,8 +3,9 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.10-RC11</version>
+		<version>6.1.10-RC12-B2</version>
 		<addition>
+			<item>Added shared CBList and CBStats Card-title formatting with h1–h6 and positive rem suffixes; Card titles now default to semantic h4 headings.</item>
 			<item>Added a hidden five-click animated piranha Easter egg to the About screen.</item>
 			<item>Added a multi-level State reset menu with inactive-state cleanup, a four-color base palette, view-state disabling and a Debug-only full reset for Super Users.</item>
 			<item>Added contextual State-tab indicators, precise hover explanations, a complete color legend and help for every state setting.</item>
@@ -24,6 +25,7 @@
 			<item>Added a CBList actions section to the frontend debug panel, listing which terms apply on each screen and whether each is currently allowed.</item>
 		</addition>
 		<change>
+			<item>New views now enable Detail and Edit template locks by default.</item>
 			<item>Made the Export capability follow the same published lock and inactive-cross rendering as Detail and Edit.</item>
 			<item>Moved the type-specific Edit control into the compact display row to expose upload and template settings earlier.</item>
 			<item>Rebuilt View Help as a contextual manual that opens on the active tab and covers every main administrator workflow.</item>
@@ -47,6 +49,9 @@
 			<item>Direct Storage synchronization now preserves unpublished elements and refreshes native controls when SQL field types change.</item>
 		</change>
 		<fix>
+			<item>Added read-only detection and conservative repair of ContentBuilder record rows whose BreezingForms source record no longer exists.</item>
+			<item>Hardened CBStats totals for BreezingForms NG sources by validating both the source record ID and form ID.</item>
+			<item>Prevented empty locked Detail and Edit templates from showing false warning or error states when no corresponding published fields are active.</item>
 			<item>Made every read-only frontend Edit field immediately identifiable with shared accessible styling and a translated status badge.</item>
 			<item>Fixed invalid table constructor PHPDoc annotations and replaced a PHP 8.5-deprecated cast.</item>
 			<item>Fixed Close Preview not closing script-opened Preview tabs in Firefox.</item>
