@@ -1,13 +1,11 @@
 # Changelog
 
-## 6.1.10-RC12-B2 — 2026-08-23
+## 6.1.10-RC12 — 2026-08-23
 
 - Added read-only About Audit detection of orphan BreezingForms rows in `#__contentbuilderng_records`.
 - Added an idempotent About Repair step that revalidates the BreezingForms record ID and form ID before removing only proven ContentBuilder orphan rows.
 - Hardened CBStats totals and language aggregates for BreezingForms NG sources by joining the real BF record on both identifiers.
 - Fixed the BreezingForms NG editable-override deletion path so its ContentBuilder record mapping is removed before the BF record is deleted.
-
-## 6.1.10-RC12-B1 — 2026-08-22
 
 - Prevented empty locked Detail/Edit templates from showing false warning or error states when no corresponding published fields are active.
 - Enabled Detail and Edit template locks by default for newly created views.

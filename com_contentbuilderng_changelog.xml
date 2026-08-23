@@ -3,7 +3,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.10-RC12-B2</version>
+		<version>6.1.10-RC12</version>
 		<addition>
 			<item>Added shared CBList and CBStats Card-title formatting with h1–h6 and positive rem suffixes; Card titles now default to semantic h4 headings.</item>
 			<item>Added a hidden five-click animated piranha Easter egg to the About screen.</item>
