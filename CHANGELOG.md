@@ -1,6 +1,6 @@
 # Changelog
 
-## 6.1.10-RC12 — 2026-08-23
+## 6.1.10 — 2026-08-23
 
 - Added read-only About Audit detection of orphan BreezingForms rows in `#__contentbuilderng_records`.
 - Added an idempotent About Repair step that revalidates the BreezingForms record ID and form ID before removing only proven ContentBuilder orphan rows.
@@ -10,6 +10,13 @@
 - Prevented empty locked Detail/Edit templates from showing false warning or error states when no corresponding published fields are active.
 - Enabled Detail and Edit template locks by default for newly created views.
 - Added shared CBList/CBStats Card-title formatting with `h1`–`h6` and positive `remX` / `remX.X` suffixes; Card titles now default to semantic `h4` headings.
+- Expanded CBStats outputs, filters and responsive Pie, Bar, Histogram, Line and Radar sizing, with hardened `output=total` handling for BreezingForms NG sources.
+- Expanded CBList with filtered `output=value`, field/action allow-lists, multi-column sorting and controlled embedded-list limits.
+- Added shared responsive Card rendering and CSS for CBList and CBStats, including configurable widths, colours and heading levels.
+- Reworked pagination with centralized choices, compact long-list navigation and a configurable Backend View pagination limit.
+- Added concise CBList/CBStats API guidance in the View editor and complete public integration documentation.
+- Improved Joomla 6 and PHP 8.3+ compatibility, storage field handling, update migrations, permissions and frontend output safety.
+- Coordinated BreezingForms NG deletion cleanup with CBNG synchronization so deleted BF records no longer leave valid-looking ContentBuilder mappings.
 
 ## 6.1.10-RC11 — 2026-08-22
 

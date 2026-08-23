@@ -16,7 +16,7 @@ final class BfContentRecordOrphanAuditHelperTest extends TestCase
         $inspect = strstr($source, 'public static function inspect', false);
         $inspect = strstr((string) $inspect, 'public static function repair', true);
 
-        self::assertStringContainsString("->join(\n                    'LEFT'", (string) $inspect);
+        self::assertMatchesRegularExpression("/->join\\(\\R\\s+'LEFT'/", (string) $inspect);
         self::assertStringContainsString("quoteName('bf_records.id') . ' = ' . \$db->quoteName('records.record_id')", (string) $inspect);
         self::assertStringContainsString("quoteName('bf_records.form') . ' = ' . \$db->quoteName('records.reference_id')", (string) $inspect);
         self::assertStringNotContainsString('->delete(', (string) $inspect);
