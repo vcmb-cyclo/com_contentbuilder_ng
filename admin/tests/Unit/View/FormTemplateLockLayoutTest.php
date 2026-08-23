@@ -87,15 +87,10 @@ final class FormTemplateLockLayoutTest extends TestCase
             (string) \file_get_contents($root . '/admin/tmpl/form/edit.php')
         );
 
-        self::assertStringContainsString(
-            "\$detailsTemplateRequired = \$hasFrontendPermission('view')",
-            $formTemplate
-        );
-        self::assertStringContainsString(
-            "\$editableTemplateRequired = \$hasFrontendPermission('edit') || \$hasFrontendPermission('new')",
-            $formTemplate
-        );
+        self::assertStringContainsString("\$detailsTemplateRequired = \$hasPublishedDetailElement && \$hasFrontendPermission('view')", $formTemplate);
+        self::assertStringContainsString("\$editableTemplateRequired = \$hasPublishedEditableElement", $formTemplate);
         self::assertStringContainsString('$detailsEntryPointEnabled = $detailsTemplateRequired && $hasPublishedLinkableElement', $formTemplate);
+        self::assertStringContainsString('$editableEntryPointEnabled = $hasPublishedEditableElement', $formTemplate);
         self::assertStringContainsString("\$hasFrontendPermission('edit') && !empty(\$this->item->edit_button)", $formTemplate);
         self::assertStringContainsString("\$hasFrontendPermission('new') && !empty(\$this->item->new_button)", $formTemplate);
         self::assertStringContainsString("'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_INCOMPLETE'", $formTemplate);
@@ -111,6 +106,17 @@ final class FormTemplateLockLayoutTest extends TestCase
             "\$editableTemplateRequired,",
             $formTemplate
         );
+        self::assertStringContainsString("\$badge = ' <span class=\"cb-template-state is-locked ms-1\"", $formTemplate);
+    }
+
+    public function testTemplateLocksDefaultToEnabledForNewViews(): void
+    {
+        $root = \dirname(__DIR__, 4);
+        $form = simplexml_load_file($root . '/admin/forms/form.xml');
+
+        self::assertNotFalse($form);
+        self::assertSame('1', (string) $form->xpath('//field[@name="details_template_locked"]')[0]['default']);
+        self::assertSame('1', (string) $form->xpath('//field[@name="editable_template_locked"]')[0]['default']);
     }
 
     public function testContentOnlyTabsUseNeutralDotsOnlyWhenConfigured(): void

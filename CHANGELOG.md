@@ -1,5 +1,18 @@
 # Changelog
 
+## 6.1.10-RC12-B2 — 2026-08-23
+
+- Added read-only About Audit detection of orphan BreezingForms rows in `#__contentbuilderng_records`.
+- Added an idempotent About Repair step that revalidates the BreezingForms record ID and form ID before removing only proven ContentBuilder orphan rows.
+- Hardened CBStats totals and language aggregates for BreezingForms NG sources by joining the real BF record on both identifiers.
+- Fixed the BreezingForms NG editable-override deletion path so its ContentBuilder record mapping is removed before the BF record is deleted.
+
+## 6.1.10-RC12-B1 — 2026-08-22
+
+- Prevented empty locked Detail/Edit templates from showing false warning or error states when no corresponding published fields are active.
+- Enabled Detail and Edit template locks by default for newly created views.
+- Added shared CBList/CBStats Card-title formatting with `h1`–`h6` and positive `remX` / `remX.X` suffixes; Card titles now default to semantic `h4` headings.
+
 ## 6.1.10-RC11 — 2026-08-22
 
 - Immediately refreshes all server-derived tab indicators and locked templates after a View-element action saved through AJAX.

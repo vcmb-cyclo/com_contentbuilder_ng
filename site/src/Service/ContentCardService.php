@@ -39,6 +39,40 @@ final class ContentCardService
         return self::normalizeWidth($value) !== '';
     }
 
+    /**
+     * @return array{text:string,tag:string,fontSize:string}
+     */
+    public static function parseTitle(string $title): array
+    {
+        $parsed = [
+            'text' => $title,
+            'tag' => 'h4',
+            'fontSize' => '',
+        ];
+        $separator = strrpos($title, '|');
+
+        if ($separator === false) {
+            return $parsed;
+        }
+
+        $text = trim(substr($title, 0, $separator));
+        $suffix = strtolower(trim(substr($title, $separator + 1)));
+
+        if (preg_match('/^h[1-6]$/', $suffix) === 1) {
+            $parsed['text'] = $text;
+            $parsed['tag'] = $suffix;
+
+            return $parsed;
+        }
+
+        if (preg_match('/^rem(\d+(?:\.\d+)?)$/', $suffix, $match) === 1 && (float) $match[1] > 0) {
+            $parsed['text'] = $text;
+            $parsed['fontSize'] = $match[1] . 'rem';
+        }
+
+        return $parsed;
+    }
+
     public static function render(string $content, string $variant, string $title = '', string $width = ''): string
     {
         $variant = self::normalize($variant);
@@ -46,11 +80,17 @@ final class ContentCardService
             return $content;
         }
 
-        $header = trim($title) !== ''
-            ? '<div class="cb-card-header">'
-                . htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8')
-                . '</div>'
-            : '';
+        $parsedTitle = self::parseTitle($title);
+        $header = '';
+        if (trim($parsedTitle['text']) !== '') {
+            $tag = $parsedTitle['tag'];
+            $style = $parsedTitle['fontSize'] !== ''
+                ? ' style="font-size:' . $parsedTitle['fontSize'] . '"'
+                : '';
+            $header = '<' . $tag . ' class="cb-card-header"' . $style . '>'
+                . htmlspecialchars($parsedTitle['text'], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8')
+                . '</' . $tag . '>';
+        }
 
         $width = self::normalizeWidth($width);
         $widthClass = $width !== '' ? ' cb-card-w' . $width : '';

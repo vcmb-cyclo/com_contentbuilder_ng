@@ -68,6 +68,7 @@ final class DatabaseAuditReportBuilder
         $frontendPermissionIssues = (array) ($data['frontend_permission_issues'] ?? []);
         $elementReferenceIssues = (array) ($data['element_reference_issues'] ?? []);
         $contentRecordDuplicateIssues = (array) ($data['content_record_duplicate_issues'] ?? []);
+        $bfContentRecordOrphans = (array) ($data['bf_content_record_orphans'] ?? []);
         $invalidDatetimeSortIssues = (array) ($data['invalid_datetime_sort_issues'] ?? []);
         $storageColumnTypeIssues = (array) ($data['storage_column_type_issues'] ?? []);
         $generatedArticleCategoryIssues = (array) ($data['generated_article_category_issues'] ?? []);
@@ -138,6 +139,12 @@ final class DatabaseAuditReportBuilder
 
             $contentRecordDuplicateRowsToRemove += count((array) ($contentRecordDuplicateIssue['duplicate_ids'] ?? []));
         }
+        $bfContentRecordOrphanRows = 0;
+        foreach ($bfContentRecordOrphans as $bfContentRecordOrphan) {
+            if (is_array($bfContentRecordOrphan)) {
+                $bfContentRecordOrphanRows += (int) ($bfContentRecordOrphan['count'] ?? 0);
+            }
+        }
 
         $invalidGeneratedArticleCategoryRows = 0;
         foreach ($generatedArticleCategoryIssues as $generatedArticleCategoryIssue) {
@@ -192,6 +199,7 @@ final class DatabaseAuditReportBuilder
             + count($frontendPermissionIssues)
             + count($elementReferenceIssues)
             + count($contentRecordDuplicateIssues)
+            + count($bfContentRecordOrphans)
             + count($invalidDatetimeSortIssues)
             + count($storageColumnTypeIssues)
             + count($generatedArticleCategoryIssues)
@@ -216,6 +224,7 @@ final class DatabaseAuditReportBuilder
             + count($frontendPermissionIssues)
             + count($elementReferenceIssues)
             + count($contentRecordDuplicateIssues)
+            + count($bfContentRecordOrphans)
             + count($invalidDatetimeSortIssues)
             + count($storageColumnTypeIssues)
             + count($generatedArticleCategoryIssues)
@@ -248,6 +257,7 @@ final class DatabaseAuditReportBuilder
             'frontend_permission_issues' => $frontendPermissionIssues,
             'element_reference_issues' => $elementReferenceIssues,
             'content_record_duplicate_issues' => $contentRecordDuplicateIssues,
+            'bf_content_record_orphans' => $bfContentRecordOrphans,
             'invalid_datetime_sort_issues' => $invalidDatetimeSortIssues,
             'storage_column_type_issues' => $storageColumnTypeIssues,
             'generated_article_category_issues' => $generatedArticleCategoryIssues,
@@ -279,6 +289,8 @@ final class DatabaseAuditReportBuilder
                 'element_reference_issues' => count($elementReferenceIssues),
                 'content_record_duplicate_issues' => count($contentRecordDuplicateIssues),
                 'content_record_duplicate_rows_to_remove' => $contentRecordDuplicateRowsToRemove,
+                'bf_content_record_orphan_forms' => count($bfContentRecordOrphans),
+                'bf_content_record_orphan_rows' => $bfContentRecordOrphanRows,
                 'invalid_datetime_sort_issues' => count($invalidDatetimeSortIssues),
                 'invalid_datetime_sort_rows' => $invalidDatetimeSortRows,
                 'storage_column_type_issues' => count($storageColumnTypeIssues),

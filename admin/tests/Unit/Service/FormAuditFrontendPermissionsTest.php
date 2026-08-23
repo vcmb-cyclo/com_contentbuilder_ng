@@ -18,8 +18,11 @@ final class FormAuditFrontendPermissionsTest extends TestCase
         self::assertStringContainsString("'new_button', 'edit_button'", $source);
         self::assertStringContainsString("\$config['permissions_fe']", $source);
         self::assertStringContainsString("\$config['own_fe']", $source);
+        self::assertStringContainsString("'published', 'detail_include', 'editable'", $source);
         self::assertStringContainsString('COM_CONTENTBUILDERNG_AUDIT_CHECK_FRONTEND_NEW_WITHOUT_PERMISSION', $source);
         self::assertStringContainsString('COM_CONTENTBUILDERNG_AUDIT_CHECK_FRONTEND_EDIT_WITHOUT_PERMISSION', $source);
+        self::assertStringContainsString("\$hasPublishedDetailElement || (int) (\$element['detail_include'] ?? 0) === 1", $source);
+        self::assertStringContainsString("\$hasPublishedEditableElement || (int) (\$element['editable'] ?? 0) === 1", $source);
     }
 
     public function testPermissionAuditTranslationsExistInAllSupportedLanguages(): void

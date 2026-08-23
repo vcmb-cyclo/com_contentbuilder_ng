@@ -37,7 +37,10 @@ final class DetailEditContextualActionsTest extends TestCase
         self::assertStringContainsString('cbToolbarSetItemVisible(name, isViewTab);', $source);
         self::assertStringContainsString("cbClearFrontendPermissions(['view']);", $source);
         self::assertStringContainsString("cbClearFrontendPermissions(['edit', 'new']);", $source);
-        self::assertStringContainsString("cbSetNamedCheckbox('edit_button', false);\n                cbClearFrontendPermissions(['edit']);", $source);
+        self::assertMatchesRegularExpression(
+            "/cbSetNamedCheckbox\\('edit_button', false\\);\\R\\s+cbClearFrontendPermissions\\(\\['edit'\\]\\);/",
+            $source
+        );
         self::assertStringContainsString("Joomla.submitbutton('form.apply');", $source);
         self::assertStringContainsString('cbApplyAjaxRowMutation(actionElement, task, rowId);', $source);
         self::assertStringContainsString('cbReloadForDebugToggle(rowId);', $source);

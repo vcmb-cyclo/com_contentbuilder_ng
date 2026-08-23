@@ -163,6 +163,16 @@ use Joomla\CMS\Router\Route;
                         <th scope="row"><?php echo $renderAuditSummaryLink('content_record_duplicates', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES')); ?></th>
                         <td><?php echo (int) ($auditSummary['content_record_duplicate_issues'] ?? count($contentRecordDuplicateIssues)); ?></td>
                     </tr>
+                    <tr class="<?php echo $hasBfContentRecordOrphans ? 'table-warning' : ''; ?>">
+                        <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('bf_content_record_orphans'); ?></td>
+                        <th scope="row"><?php echo $renderAuditSummaryLink('bf_content_record_orphans', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_CONTENT_RECORD_ORPHANS')); ?></th>
+                        <td><?php echo (int) ($auditSummary['bf_content_record_orphan_forms'] ?? count($bfContentRecordOrphans)); ?></td>
+                    </tr>
+                    <tr class="<?php echo $hasBfContentRecordOrphans ? 'table-warning' : ''; ?>">
+                        <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('bf_content_record_orphan_rows'); ?></td>
+                        <th scope="row"><?php echo $renderAuditSummaryLink('bf_content_record_orphans', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_CONTENT_RECORD_ORPHAN_ROWS')); ?></th>
+                        <td><?php echo $bfContentRecordOrphanRows; ?></td>
+                    </tr>
                     <tr class="<?php echo $hasContentRecordDuplicateIssues ? 'table-warning' : ''; ?>">
                         <td class="text-muted text-end pe-2"><?php echo $auditSummaryRowNumber('content_record_duplicate_rows'); ?></td>
                         <th scope="row"><?php echo $renderAuditSummaryLink('content_record_duplicates', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATE_ROWS')); ?></th>
@@ -1171,7 +1181,38 @@ use Joomla\CMS\Router\Route;
             <?php endif; ?>
             </div>
 
-            <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('generated_article_categories'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 22;">
+            <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('bf_content_record_orphans'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 22;">
+                <h4 class="h6 mt-3<?php echo $hasBfContentRecordOrphans ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('bf_content_record_orphans', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_CONTENT_RECORD_ORPHANS'), $hasBfContentRecordOrphans); ?></h4>
+            <?php if ($bfContentRecordOrphans === []) : ?>
+                <div class="alert cb-audit-ok-alert">
+                    <span class="cb-audit-section-title"><span class="cb-audit-ok-check icon-check-circle" aria-hidden="true"></span><span><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_CONTENT_RECORD_ORPHANS_OK'); ?></span></span>
+                </div>
+            <?php else : ?>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead><tr>
+                            <th scope="col"><?php echo $auditRowNumberLabel; ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_FORM_ID'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_RECORD_IDS'); ?></th>
+                            <th scope="col"><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CB_RECORD_IDS'); ?></th>
+                        </tr></thead>
+                        <tbody>
+                        <?php foreach ($bfContentRecordOrphans as $index => $orphanForm) : ?>
+                            <?php $orphanRecords = (array) ($orphanForm['records'] ?? []); ?>
+                            <tr>
+                                <td><?php echo $index + 1; ?></td>
+                                <td><?php echo (int) ($orphanForm['form_id'] ?? 0); ?></td>
+                                <td><?php echo htmlspecialchars(implode(', ', array_map('intval', array_column($orphanRecords, 'record_id'))), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars(implode(', ', array_map('intval', array_column($orphanRecords, 'cb_record_id'))), ENT_QUOTES, 'UTF-8'); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+            </div>
+
+            <div id="<?php echo htmlspecialchars($getAuditSectionHeadingId('generated_article_categories'), ENT_QUOTES, 'UTF-8'); ?>" class="cb-audit-section-block" style="order: 23;">
                 <h4 class="h6 mt-3<?php echo $hasGeneratedArticleCategoryIssues ? ' text-warning-emphasis' : ''; ?>"><?php echo $renderNumberedAuditTitle('generated_article_categories', Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES'), $hasGeneratedArticleCategoryIssues); ?></h4>
             <?php if (empty($generatedArticleCategoryIssues)) : ?>
                 <div class="alert cb-audit-ok-alert">

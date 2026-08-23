@@ -489,14 +489,14 @@
     <!-- Keep the generated template in sync with the source form on every save -->
     <field name="details_template_locked"
            type="checkbox"
-           default="0"
+           default="1"
            filter="intval">
       <option value="1">JYES</option>
     </field>
 
     <field name="editable_template_locked"
            type="checkbox"
-           default="0"
+           default="1"
            filter="intval">
       <option value="1">JYES</option>
     </field>

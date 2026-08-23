@@ -75,7 +75,7 @@ final class FormAuditService
         }
 
         $query = $db->getQuery(true)
-            ->select($db->quoteName(['reference_id', 'label', 'published', 'editable', 'type', 'list_include', 'search_include']))
+            ->select($db->quoteName(['reference_id', 'label', 'published', 'detail_include', 'editable', 'type', 'list_include', 'search_include']))
             ->from($db->quoteName('#__contentbuilderng_elements'))
             ->where($db->quoteName('form_id') . ' = ' . $formId)
             ->order($db->quoteName('ordering'));
@@ -772,8 +772,15 @@ final class FormAuditService
         bool $auditFieldMissingInEdit
     ): array {
         $checks = [];
-        $detailsEmpty = $published !== [] && trim($detailsTemplate) === '' && $hasFrontendViewPermission;
-        $editableEmpty = $published !== [] && trim($editableTemplate) === '' && $hasFrontendEditPermission;
+        $hasPublishedDetailElement = false;
+        $hasPublishedEditableElement = false;
+        foreach ($published as $element) {
+            $hasPublishedDetailElement = $hasPublishedDetailElement || (int) ($element['detail_include'] ?? 0) === 1;
+            $hasPublishedEditableElement = $hasPublishedEditableElement || (int) ($element['editable'] ?? 0) === 1;
+        }
+
+        $detailsEmpty = $hasPublishedDetailElement && trim($detailsTemplate) === '' && $hasFrontendViewPermission;
+        $editableEmpty = $hasPublishedEditableElement && trim($editableTemplate) === '' && $hasFrontendEditPermission;
         $detailsTemplateCheckEnabled = $detailsEmpty && $auditDetailsTemplateEmpty;
 
         if ($detailsTemplateCheckEnabled && $editableEmpty) {
