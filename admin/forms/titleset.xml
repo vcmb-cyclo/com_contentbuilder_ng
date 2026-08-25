@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fieldset name="metadata" label="COM_CONTENTBUILDERNG_TITLESETS_METADATA">
+        <field name="filename" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_FILENAME" description="COM_CONTENTBUILDERNG_TITLESETS_FILENAME_DESC" required="true" />
+        <field name="name" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_NAME" description="COM_CONTENTBUILDERNG_TITLESETS_NAME_DESC" required="true" />
+        <field name="comments" type="textarea" label="COM_CONTENTBUILDERNG_TITLESETS_COMMENTS" description="COM_CONTENTBUILDERNG_TITLESETS_COMMENTS_DESC" rows="3" />
+        <field name="modified" type="hidden" />
+        <field name="source" type="hidden" />
+    </fieldset>
+    <fieldset name="titles" label="COM_CONTENTBUILDERNG_TITLESETS_MAPPINGS">
+        <field
+            name="titles"
+            type="subform"
+            multiple="true"
+            layout="joomla.form.field.subform.repeatable-table"
+            min="1"
+        >
+            <form>
+                <field name="value" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_ORIGINAL_VALUE" description="COM_CONTENTBUILDERNG_TITLESETS_ORIGINAL_VALUE_DESC" required="true" />
+                <field name="label" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_DISPLAY_LABEL" description="COM_CONTENTBUILDERNG_TITLESETS_DISPLAY_LABEL_DESC" required="true" />
+            </form>
+        </field>
+    </fieldset>
+</form>

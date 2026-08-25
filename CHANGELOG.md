@@ -1,5 +1,52 @@
 # Changelog
 
+## 6.1.11 — 2026-08-25
+
+- Added CBStats `output=distinct` for filtered counts of distinct non-empty field values.
+- Added CBStats `output=remaining target=Number` for the non-negative amount remaining before a positive target, using the normal filtered total.
+- Added editor-safe editorial Cards for free HTML, CBStats and CBList content with shared Card rendering.
+- Added reusable CBStats `titleset="file.ini"` mappings, bundled examples and a Joomla administrator manager with editing, validation, duplication, import and export.
+- Improved title-set administration with search, sorting, pagination, configurable columns, safe Site-file replacement and precise validation feedback.
+- Updated CBStats help, public documentation, specifications, Debug diagnostics and regression coverage.
+
+## 6.1.11-RC05 — 2026-08-25
+
+- Added CBStats `output=remaining target=Number` to calculate the non-negative difference between a positive target and the normal filtered total.
+- Reused the existing CBStats total/filter pipeline and added validation, Debug diagnostics, help, specifications and regression coverage.
+
+## 6.1.11-RC04 — 2026-08-25
+
+- Simplified the CBStats title-set editor to filename, title, optional comment, automatic last-modified date and value mappings.
+- Removed the language selector and advanced metadata from the editor and from newly saved files.
+- Replaced the Language list column with a concise Date column and moved supplied CBStats examples behind an optional column-selector toggle.
+- Allowed parentheses and common data characters in mapping values through a strict, non-executing title-section parser.
+- Added confirmed replacement of existing Site title-set files during import and precise import failure messages.
+
+## 6.1.11-RC03 — 2026-08-25
+
+- Added reusable CBStats `titleset="file.ini"` mappings with safe custom/provided directory resolution and inline `titles=` priority.
+- Added silent frontend fallback and Debug-only Warnings for missing or invalid title-set files.
+- Added a native Joomla title-set manager from About, including structured metadata, comments, mappings, validation, duplication and custom-file management.
+- Added a complete French department title set and multilingual country examples.
+- Refined title-set administration with filename-based content viewing, read-only provided files, a persistent column selector, contextual field help, and access from the About Actions menu.
+- Added file-title search and sortable columns to the CBStats title-set list.
+- Fixed title-set validation and saving when `.ini` is omitted, added precise save feedback, and protected unsaved editor changes on Cancel/navigation.
+- Fixed title-set toolbar submissions and read-only Close navigation; expanded search to filenames and titles, added 10-row pagination, concise source labels and two-line title display.
+- Rationalized title-set administration with Joomla-style selection actions, Save as Copy naming, installed-language suggestions with free input, compact editor layout and clearer Title/Entries labels.
+- Added safe title-set INI import and export: single-file `.ini`, multi-file `.zip`, validation before import, 1 MB limits and no silent overwrite of Site files.
+- Fixed selected CBStats actions by restoring Joomla selection state, added an explicit installed-language selector with free input, standardized `CBStats - …` titles, and replaced generic validation warnings with direct field-level errors.
+- Removed the redundant server-side Title requirement that could block Save and Save as Copy after an initial save.
+
+## 6.1.11-RC02 — 2026-08-25
+
+- Added editor-safe editorial Cards using a standard `div.cb-card-editorial`, with visually editable marked H1–H6 headers, compatible `data-title` support, and existing Card colours and widths.
+- Added automatic removal of empty whitespace and non-breaking-space text nodes between Cards to prevent unwanted grid spacing introduced by editors.
+
+## 6.1.11-RC01 — 2026-08-25
+
+- Added CBStats `output=distinct` to count distinct non-empty field values after the existing view, source and value filters have been applied.
+- Added article-tag and URL/API documentation and regression coverage for filtered distinct counts.
+
 ## 6.1.10 — 2026-08-23
 
 - Added read-only About Audit detection of orphan BreezingForms rows in `#__contentbuilderng_records`.

@@ -19,6 +19,8 @@ use CB\Component\Contentbuilderng\Site\Service\StatsFilterValueService;
 use CB\Component\Contentbuilderng\Site\Service\StatsHideOptionsService;
 use CB\Component\Contentbuilderng\Site\Service\CbstatsHelpService;
 use CB\Component\Contentbuilderng\Site\Service\ContentCardService;
+use CB\Component\Contentbuilderng\Site\Service\EditorialCardService;
+use CB\Component\Contentbuilderng\Site\Service\CbStatsTitleSetService;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Plugin\Content\ContentbuilderngStats\Service\PiePresentationService;
@@ -35,6 +37,7 @@ use CB\Plugin\Content\ContentbuilderngStats\Service\StatsTagValidationService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\CssDimensionService;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Log\Log;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\WebAsset\WebAssetManager;
 use Joomla\Event\EventInterface;
@@ -54,6 +57,9 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
     private static bool $chartAssetsLoaded = false;
     private static bool $chartAssetRegistryLoaded = false;
     private static bool $manualExportAssetsLoaded = false;
+    private ?CbStatsTitleSetService $titleSetService = null;
+    /** @var array<string, true> */
+    private array $warnedTitleSets = [];
     /** @var array{width: string, height: string} */
     private array $currentDimensions = ['width' => '', 'height' => ''];
 
@@ -66,15 +72,34 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
     {
         $article = $event->getArgument('subject');
 
-        if (!is_object($article) || !isset($article->text) || stripos((string) $article->text, '{CBStats') === false) {
+        if (!is_object($article) || !isset($article->text)) {
             return;
         }
 
-        $article->text = preg_replace_callback(
-            TagSyntaxService::TAG_PATTERN,
-            fn(array $match): string => $this->renderArticleTag((string) ($match[1] ?? '')),
-            (string) $article->text
-        );
+        $text = (string) $article->text;
+        $hasStats = stripos($text, '{CBStats') !== false;
+        $hasEditorialCards = EditorialCardService::containsMarker($text);
+
+        if (!$hasStats && !$hasEditorialCards) {
+            return;
+        }
+
+        if ($hasEditorialCards) {
+            $text = EditorialCardService::transform($text);
+            $wa = $this->getCbstatsWebAssetManager();
+            $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
+            $wa->useStyle('com_contentbuilderng.cards');
+        }
+
+        if ($hasStats) {
+            $text = preg_replace_callback(
+                TagSyntaxService::TAG_PATTERN,
+                fn(array $match): string => $this->renderArticleTag((string) ($match[1] ?? '')),
+                $text
+            );
+        }
+
+        $article->text = $text;
     }
 
     private function renderArticleTag(string $rawAttributes): string
@@ -137,15 +162,20 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $debug = false;
         $output = TagSyntaxService::normalizeKeyword((string) ($attributes['output'] ?? 'total'));
         $allowedOutputs = [
-            'total', 'table', 'form_name', 'sum', 'min', 'max', 'avg',
+            'total', 'remaining', 'table', 'form_name', 'distinct', 'sum', 'min', 'max', 'avg',
             'json', 'pie', 'bar', 'histogram', 'line', 'radar',
         ];
+        $listOutputs = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar'];
         $field = trim((string) ($attributes['field'] ?? ''));
         $filter = TagSyntaxService::resolveFilter($attributes);
         $filterField = $filter['field'];
         $filterValue = $filter['value'];
         $add = trim((string) ($attributes['add'] ?? ''));
         $titles = trim((string) ($attributes['titles'] ?? ''));
+        $titleSet = trim((string) ($attributes['titleset'] ?? ''));
+        $titleSetMappings = in_array($output, $listOutputs, true)
+            ? $this->resolveTitleSet($titleSet)
+            : [];
         $ranges = trim((string) ($attributes['ranges'] ?? ''));
         $headers = trim((string) ($attributes['headers'] ?? ''));
         $card = ContentCardService::normalize((string) ($attributes['card'] ?? ''));
@@ -155,6 +185,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $dir = TagSyntaxService::normalizeKeyword((string) ($attributes['dir'] ?? 'asc'));
         $values = (string) ($attributes['values'] ?? '');
         $exportManual = ManualExportService::isRequested((string) ($attributes['export'] ?? ''));
+        $target = (float) ($attributes['target'] ?? 0);
 
         try {
             $limit = DisplayOptionsService::parseLimit($attributes);
@@ -173,6 +204,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                     $dir,
                     $add,
                     $titles,
+                    $titleSetMappings,
                     $headers,
                     $headerMappings,
                     $title,
@@ -221,9 +253,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
 
             StatsHideOptionsService::validateForOutput($hideOptions, $output);
 
-            $listOutputs = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar'];
-            $fieldOutputs = [...$listOutputs, 'sum', 'min', 'max', 'avg'];
-
+            $fieldOutputs = [...$listOutputs, 'distinct', 'sum', 'min', 'max', 'avg'];
             if ((in_array($output, $fieldOutputs, true) || $idSumValue !== '') && $field === '') {
                 throw new \RuntimeException(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_FIELD_REQUIRED'), 400);
             }
@@ -279,7 +309,16 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                 );
             }
 
-            if ($debug && in_array($output, ['sum', 'min', 'max', 'avg'], true)) {
+            if ($debug && $output === 'remaining') {
+                return $this->renderDebugMessage(Text::sprintf(
+                    'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_REMAINING',
+                    $debugSource,
+                    $this->formatNumber($target),
+                    $this->formatNumber(StatsService::resolveRemainingOutput($payload, $target))
+                ));
+            }
+
+            if ($debug && in_array($output, ['distinct', 'sum', 'min', 'max', 'avg'], true)) {
                 $numericValue = $payload['field'][$output] ?? null;
                 return $this->renderDebugMessage(Text::sprintf(
                     'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_AGGREGATE',
@@ -301,6 +340,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                 $locale,
                 in_array($output, $listOutputs, true) ? $add : '',
                 in_array($output, $listOutputs, true) ? $titles : '',
+                in_array($output, $listOutputs, true) ? $titleSetMappings : [],
                 $rangeDefinitions
             );
             $fieldStats = in_array($output, $listOutputs, true)
@@ -346,6 +386,8 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                     $hideOptions
                 ),
                 'total' => (string) StatsService::resolveCbstatsOutput($payload, 'total'),
+                'remaining' => $this->formatNumber(StatsService::resolveRemainingOutput($payload, $target)),
+                'distinct' => $this->renderNumericFieldValue($payload, 'distinct'),
                 'sum' => $this->renderSum($payload),
                 'min' => $this->renderNumericFieldValue($payload, 'min'),
                 'max' => $this->renderNumericFieldValue($payload, 'max'),
@@ -482,12 +524,14 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
 
         $detailKey = match ($error['detail']) {
             'source' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_SOURCE',
-            'id_syntax', 'idsum_syntax', 'limit_syntax', 'w_syntax'
+            'id_syntax', 'idsum_syntax', 'limit_syntax', 'w_syntax', 'target_syntax'
                 => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_NUMERIC_SYNTAX',
             'id' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ID',
             'idsum' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_IDSUM',
             'id_conflict' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ID_CONFLICT',
             'output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_OUTPUT',
+            'target' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET',
+            'target_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET_OUTPUT',
             'manual_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_MANUAL_OUTPUT',
             'idsum_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_IDSUM_OUTPUT',
             'field' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_FIELD',
@@ -654,11 +698,13 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $locale,
         string $add,
         string $titles,
+        array $titleSetMappings = [],
         array $ranges = []
     ): array {
         $field = (array) ($payload['field'] ?? []);
         $additions = $field === [] ? [] : StatsService::parseFieldStatsAdditions($add);
-        $titleMappings = $field === [] ? [] : StatsService::parseFieldStatsTitles($titles);
+        $inlineTitleMappings = $field === [] ? [] : StatsService::parseFieldStatsTitles($titles);
+        $titleMappings = CbStatsTitleSetService::merge($titleSetMappings, $inlineTitleMappings);
         $values = (array) ($field['values'] ?? []);
 
         if ($ranges !== []) {
@@ -673,6 +719,29 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             $additions,
             $titleMappings
         );
+    }
+
+    /** @return array<string, string> */
+    private function resolveTitleSet(string $filename): array
+    {
+        if ($filename === '') {
+            return [];
+        }
+
+        $this->titleSetService ??= new CbStatsTitleSetService(JPATH_SITE);
+        $result = $this->titleSetService->resolve($filename);
+        if (
+            $result['status'] !== 'ok'
+            && !isset($this->warnedTitleSets[$filename])
+            && (bool) Factory::getApplication()->get('debug', false)
+        ) {
+            $key = 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_TITLESET_WARNING_'
+                . strtoupper($result['status']);
+            Log::add(Text::sprintf($key, $filename), Log::WARNING, 'com_contentbuilderng.cbstats');
+            $this->warnedTitleSets[$filename] = true;
+        }
+
+        return $result['titles'];
     }
 
     /**
@@ -1017,6 +1086,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $dir,
         string $add,
         string $titles,
+        array $titleSetMappings,
         string $headers,
         array $headerMappings,
         string $title,
@@ -1056,7 +1126,15 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             ],
         ];
         $locale = Factory::getApplication()->getLanguage()->getTag();
-        $fullFieldStats = $this->getFieldStats($payload, $sort, $dir, $locale, $add, $titles);
+        $fullFieldStats = $this->getFieldStats(
+            $payload,
+            $sort,
+            $dir,
+            $locale,
+            $add,
+            $titles,
+            $titleSetMappings
+        );
         $fieldStats = DisplayOptionsService::applyLimit($fullFieldStats, $limit);
         $total = array_sum(array_column($fieldStats, 'value'));
         $payload['records']['total'] = $total;

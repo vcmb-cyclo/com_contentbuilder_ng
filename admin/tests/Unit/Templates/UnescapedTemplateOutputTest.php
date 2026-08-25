@@ -41,7 +41,7 @@ final class UnescapedTemplateOutputTest extends TestCase
      * admin-authored rich text fields (intro_text and friends).
      */
     private const SAFE_CALL_PATTERN = '/escape\(|htmlspecialchars|Text::|HTMLHelper|json_encode|loadTemplate|'
-        . 'LayoutHelper|->render|renderInput|renderDirectionButtonGroup|Route::|sanitizeStoredHtml|'
+        . 'LayoutHelper|->render|renderFieldset|->getInput|renderInput|renderDirectionButtonGroup|Route::|sanitizeStoredHtml|'
         . 'escapeListValue|listLimitField->input|detailInclude|editable|unavailable|inactive|'
         . 'isDetailEnabled|isEditEnabled/';
 

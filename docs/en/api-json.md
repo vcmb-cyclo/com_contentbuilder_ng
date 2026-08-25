@@ -289,6 +289,7 @@ GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&
 | --- | --- | --- |
 | `json` | Raw normalized array | Yes |
 | `table`, `pie`, `bar`, `histogram`, `line`, `radar` | Normalized statistics payload | Yes |
+| `distinct` | Number of distinct non-empty filtered field values | Yes |
 | `total` | Matching record count | No |
 | `sum` | Count-weighted numeric sum | Yes |
 | `min`, `max` | Numeric minimum/maximum, or chronological ISO date boundary | Yes |
@@ -303,7 +304,7 @@ statistics payload used by the content renderers. JSON reuses the common signed
 #### Parameters
 
 - `id`: required positive ContentBuilder NG view ID;
-- `field`: required for `json`, all list/chart outputs, `sum`, `min`, `max` and `avg`;
+- `field`: required for `json`, all list/chart outputs, `distinct`, `sum`, `min`, `max` and `avg`;
 - `filter[field]` and `filter[value]`: optional, but must be provided together;
 - `sort=none|title|value`: optional for list/chart outputs; default `none`;
 - `dir=asc|desc`: optional for list/chart outputs; default `asc`.

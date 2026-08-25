@@ -553,6 +553,35 @@ namespace Joomla\CMS\Router {
     }
 }
 
+namespace Joomla\CMS\Filesystem {
+    if (!\class_exists(Folder::class, false)) {
+        class Folder
+        {
+            public static function create(string $path): bool
+            {
+                return \is_dir($path) || \mkdir($path, 0777, true);
+            }
+
+            public static function files(
+                string $path,
+                string $filter = '.',
+                bool $recurse = false,
+                bool $full = false
+            ): array {
+                $files = [];
+                foreach (new \DirectoryIterator($path) as $item) {
+                    if ($item->isDot() || !$item->isFile() || \preg_match('/' . $filter . '/i', $item->getFilename()) !== 1) {
+                        continue;
+                    }
+                    $files[] = $full ? $item->getPathname() : $item->getFilename();
+                }
+
+                return $files;
+            }
+        }
+    }
+}
+
 namespace Joomla\CMS\MVC\Model {
     if (!\class_exists(BaseDatabaseModel::class, false)) {
         class BaseDatabaseModel
@@ -611,6 +640,9 @@ namespace {
     require_once \dirname(__DIR__, 2) . '/site/src/Service/StatsService.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/StatsHideOptionsService.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/ContentCardService.php';
+    require_once \dirname(__DIR__, 2) . '/site/src/Service/EditorialCardService.php';
+    require_once \dirname(__DIR__, 2) . '/site/src/Service/CbStatsTitleSetService.php';
+    require_once \dirname(__DIR__) . '/src/Service/CbStatsTitleSetManagerService.php';
     require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/PiePresentationService.php';
     require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/TotalPresentationService.php';
     require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/IdSumException.php';

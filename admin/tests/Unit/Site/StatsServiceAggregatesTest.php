@@ -97,11 +97,18 @@ final class StatsServiceAggregatesTest extends TestCase
         $payload = [
             'form' => ['name' => 'Internal name', 'title' => 'Public title'],
             'records' => ['total' => 31],
-            'field' => ['sum' => 48.5, 'min' => -2.5, 'max' => 12.0, 'avg' => 4.25],
+            'field' => [
+                'values' => ['78' => 20, '60' => 11],
+                'sum' => 48.5,
+                'min' => -2.5,
+                'max' => 12.0,
+                'avg' => 4.25,
+            ],
         ];
 
         self::assertSame(31, StatsService::resolveCbstatsOutput($payload, 'total'));
         self::assertSame('Public title', StatsService::resolveCbstatsOutput($payload, 'form_name'));
+        self::assertSame(2, StatsService::resolveCbstatsOutput($payload, 'distinct'));
         self::assertSame(48.5, StatsService::resolveCbstatsOutput($payload, 'sum'));
         self::assertSame(-2.5, StatsService::resolveCbstatsOutput($payload, 'min'));
         self::assertSame(12.0, StatsService::resolveCbstatsOutput($payload, 'max'));
@@ -122,5 +129,24 @@ final class StatsServiceAggregatesTest extends TestCase
         self::assertSame('2026-01-02', StatsService::resolveCbstatsOutput($payload, 'min'));
         self::assertSame('2026-03-04', StatsService::resolveCbstatsOutput($payload, 'max'));
         self::assertSame(0, StatsService::resolveCbstatsOutput($payload, 'avg'));
+        self::assertSame(0, StatsService::resolveCbstatsOutput($payload, 'distinct'));
+    }
+
+    public function testDistinctCountsOnlyNonEmptyValuesRemainingAfterFiltering(): void
+    {
+        $filteredPayload = [
+            'field' => ['values' => ['' => 4, '  ' => 2, '78' => 5, '60' => 1]],
+        ];
+        self::assertSame(2, StatsService::resolveCbstatsOutput($filteredPayload, 'distinct'));
+    }
+
+    public function testRemainingUsesTheFilteredTotalAndNeverBecomesNegative(): void
+    {
+        $filteredPayload = ['records' => ['total' => 50]];
+
+        self::assertSame(150, StatsService::resolveRemainingOutput($filteredPayload, 200));
+        self::assertSame(0, StatsService::resolveRemainingOutput($filteredPayload, 50));
+        self::assertSame(0, StatsService::resolveRemainingOutput($filteredPayload, 25));
+        self::assertSame(150.5, StatsService::resolveRemainingOutput($filteredPayload, 200.5));
     }
 }

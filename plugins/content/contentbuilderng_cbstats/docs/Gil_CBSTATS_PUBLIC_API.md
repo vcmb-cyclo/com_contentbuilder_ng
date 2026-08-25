@@ -1,5 +1,9 @@
 # CBStats public syntax / API reference
 
+Stable baseline: ContentBuilder NG 6.1.11. This reference includes the
+validated `output=distinct`, `titleset` and
+`output=remaining target=Number` contracts.
+
 ## Syntax validation and public help
 
 CBStats validates the complete tag before querying a view or rendering statistics.
@@ -100,6 +104,7 @@ The following outputs are implemented in RC97 and must remain compatible:
 
 ```text
 output=total
+output=remaining target=200
 output=form_name
 output=table
 output=json
@@ -108,6 +113,7 @@ output=bar
 output=histogram
 output=line
 output=radar
+output=distinct
 output=sum
 output=min
 output=max
@@ -396,10 +402,10 @@ All outputs must preserve the plugin's existing:
 The existing `action=cbstats` endpoint supports:
 
 ```text
-output=json|table|pie|bar|histogram|line|radar|total|sum|min|max|avg|form_name
+output=json|table|pie|bar|histogram|line|radar|total|distinct|sum|min|max|avg|form_name
 ```
 
-`field` is required for list, chart and numeric aggregate outputs. It is not
+`field` is required for list, chart, `distinct` and numeric aggregate outputs. It is not
 required for `total` or `form_name`. Filters and permissions reuse the common
 CBStats engine. The JSON output remains the raw normalized array. Table and
 chart names return their normalized `total` and `items` data, without HTML;
@@ -529,3 +535,44 @@ Histogram and Line use the same normalized counts; neither creates missing
 dates or values. Histogram stays vertical and uses horizontal scrolling when
 needed. Radar requires at least 3 axes, accepts at most 8 and is recommended
 with **4 to 6 axes**.
+
+## Editorial Card markup
+
+Joomla articles may group free HTML, CBStats and CBList tags in the shared Card
+presentation with this standard HTML marker:
+
+```html
+<div class="cb-card-editorial" data-card="v1" data-w="33">
+  <h4 data-cb-card-title>Information</h4>
+  <p>Total: {CBStats id=15 output=total}</p>
+</div>
+```
+
+A direct child `h1`–`h6` carrying `data-cb-card-title` becomes the coloured
+Card header and remains visible in visual editors. An unmarked heading stays
+in the body. The legacy `data-title` attribute remains supported with the
+shared Hx/rem syntax and is used when no marked heading is present. `data-card`
+accepts `h1`–`h6` or `v1`–`v6` and defaults to `v1`; `data-w` accepts `33`,
+`66` or `100` and defaults to `33`. The complete explicit syntax is
+recommended. Invalid Card or width values use their defaults. The standard
+`div` is compatible with TinyMCE and JCE and renders through the existing
+shared Card HTML and CSS.
+
+## Reusable category titles with `titleset`
+
+Use a managed INI file when the same value labels are needed in several tags:
+
+```text
+{CBStats id=15 field=Country titleset="example-en-GB.ini" output=table}
+```
+
+The custom directory `media/contentbuilderng/cbstats/titlesets/` is searched
+before the provided directory `media/com_contentbuilderng/cbstats/titlesets/`.
+Inline `titles=` mappings have priority over file mappings. The INI file uses
+an optional `[metadata]` section and a required `[titles]` section containing
+`original="Display label"` entries; semicolon-prefixed comments are supported.
+
+Only a safe `.ini` filename without a path is accepted. Missing or invalid
+files preserve original values without a frontend error. With Joomla Debug
+enabled, the issue is recorded as a CBStats Warning. Manage custom files from
+ContentBuilder NG → About → CBStats title sets.

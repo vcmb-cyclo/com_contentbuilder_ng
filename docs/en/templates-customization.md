@@ -1,5 +1,7 @@
 # Templates and customization
 
+The CBStats syntax documented here is current for ContentBuilder NG 6.1.11.
+
 ContentBuilder NG stores view-specific templates for record details, editing,
 generated Joomla articles, emails, and some list output.
 
@@ -166,6 +168,7 @@ Examples:
 
 ```text
 {CBStats id=3 output=total}
+{CBStats id=15 output=remaining target=200}
 {CBStats id=3 output=form_name}
 {CBStats id=3 field=FieldName output=table}
 {CBStats id=3 field=FieldName output=json sort=title dir=asc}
@@ -179,12 +182,14 @@ Examples:
 {CBStats id=3 field=Category output=pie add="Existing=-2;External=3"}
 {CBStats id=3 field=Category output=table titles="1=Group 1;2=Group 2"}
 {CBStats id=3 field=Category output=bar add="1=-2;2=3" titles="1=Group 1;2=Group 2" sort=value dir=desc}
+{CBStats id=3 field=Department value="78|60" output=distinct}
 {CBStats id=3 field=FieldName output=sum}
 {CBStats id=3 field=FieldName output=min}
 {CBStats id=3 field=FieldName output=max}
 {CBStats id=3 filter[field]=Status filter[value]="Open" output=total}
 {CBStats id=3 filter[field]=Status filter[value]="Open*" output=total}
 {CBStats id=3 filter[field]=Status filter[value]="Open* | Pending" output=total}
+{CBStats id=15 filter[field]=Status filter[value]="Open" output=remaining target=200}
 {CBStats idsum=25+27 field="Route" output="table" title="Monticyclo / Montigravel"}
 {CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
 ```
@@ -296,7 +301,7 @@ remains `0`. All field-based outputs enforce the field's API/Stats availability.
 CBStats always enforces the view's STATS permission. For URL/API use, check the
 view's **API + Rights** settings, API/Stats field availability and the **API** tab.
 The supported URL outputs are `json`, `table`, `pie`, `bar`, `histogram`, `line`,
-`radar`, `total`, `sum`, `min`, `max`, `avg` and `form_name`; list outputs also
+`radar`, `total`, `distinct`, `sum`, `min`, `max`, `avg` and `form_name`; list outputs also
 accept `add`, `titles`, `sort`, `dir`, `ranges` and `limit`. In Joomla articles,
 CBStats reports all independent tag syntax errors together, identifies the
 affected parameter and value, and does not display statistics when the tag is
@@ -377,3 +382,64 @@ The displayed total and chart percentages are recalculated from the values
 retained by `limit`. Hiding does not change calculations, ACLs or filters.
 Hiding all three elements is rejected. The former `total=hide` syntax is no
 longer supported; use `hide="total"`.
+
+### Editorial Cards for free content
+
+Use an editor-safe standard `div` to group free HTML, CBStats and CBList tags
+with the shared Card presentation. The complete syntax is recommended:
+
+```html
+<div class="cb-cards">
+  <div class="cb-card-editorial" data-card="v1" data-w="33">
+    <h4 data-cb-card-title>Information</h4>
+    <p>Total: {CBStats id=15 output=total}</p>
+    <p>Distinct groups: {CBStats id=15 field=Group output=distinct}</p>
+    {CBList id=15 fields="Nom|Prenom" limit=5}
+  </div>
+</div>
+```
+
+A visible `<h1>` to `<h6 data-cb-card-title>` becomes the coloured Card header
+and remains editable in the visual editor. An Hx heading without this attribute
+stays in the body. The legacy `data-title` syntax remains supported with its
+shared H1–H6 and positive rem suffixes. Without either title form, no header is
+rendered. `data-card` defaults to `v1` and
+`data-w` defaults to `33`; accepted widths are `33`, `66` and `100`. Empty
+whitespace and non-breaking spaces inserted between Cards by an editor are
+ignored in `cb-cards` grids.
+
+### Reusable CBStats title sets
+
+Use a managed INI file when several statistics share the same display labels:
+
+```text
+{CBStats id=15 field=Department titleset="example-en-GB.ini" output=table}
+```
+
+Custom files in `media/contentbuilderng/cbstats/titlesets/` override provided
+files with the same name. Inline `titles=` mappings remain higher priority. A
+missing or invalid file leaves original values visible and only records a
+Warning when Joomla Debug is enabled.
+
+The editor is available from **ContentBuilder NG → About → Actions → CBStats
+title sets**. Clicking a filename displays its contents. Provided files remain
+read-only and can be duplicated into the site's directory; site-specific files
+are editable. The list column selector remembers hidden columns in the browser.
+The list also supports file-title search and sorting on its data columns.
+In the editor, the `.ini` filename extension is optional. Validate and Save
+display their result, and discarding unsaved changes requires confirmation.
+Search covers both filenames and file titles. The list displays 10 files by
+default, with 5, 10, 25, 50 or All choices. Source is shown as `CBStats` or `Site`,
+and long titles are limited to two lines.
+The list uses Joomla-style selection and an Actions menu. CBStats files can be
+duplicated; Site files can be edited, copied or deleted. Save as Copy generates
+`name-copy.ini`, then `name-copy-2.ini`. The Language field suggests installed
+Joomla languages while accepting a free-form tag such as `it-IT`.
+Selected title sets can be exported as one `.ini` file or, for multiple files,
+as one `.zip` archive. Import accepts multiple `.ini` files up to 1 MB each;
+all are validated before installation and existing Site files are never
+overwritten.
+Joomla selection state enables Duplicate and Export for selected CBStats files.
+The Language field combines a visible installed-language selector with the
+free-form tag input. Validation errors identify Filename, Title or Entries
+directly.

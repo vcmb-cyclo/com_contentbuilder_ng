@@ -1,5 +1,7 @@
 # Templates et personnalisation
 
+La syntaxe CBStats documentée ici correspond à ContentBuilder NG 6.1.11.
+
 ContentBuilder NG utilise des templates configurés dans chaque vue pour produire les
 détails, les formulaires d'édition, les articles et certaines présentations de liste.
 
@@ -196,6 +198,7 @@ Exemples :
 
 ```text
 {CBStats id=25 output=total}
+{CBStats id=15 output=remaining target=200}
 {CBStats id=25 output=form_name}
 {CBStats id=25 field=Parcours output=table}
 {CBStats id=25 field=Parcours output=json sort=title dir=asc}
@@ -209,12 +212,14 @@ Exemples :
 {CBStats id=25 field=Catégorie output=pie add="Existant=-2;Externe=3"}
 {CBStats id=25 field=Catégorie output=table titles="1=Groupe 1;2=Groupe 2"}
 {CBStats id=25 field=Catégorie output=bar add="1=-2;2=3" titles="1=Groupe 1;2=Groupe 2" sort=value dir=desc}
+{CBStats id=25 field=Departement value="78|60" output=distinct}
 {CBStats id=25 field=Parcours output=sum}
 {CBStats id=25 field=Parcours output=min}
 {CBStats id=25 field=Parcours output=max}
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert" output=total}
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert*" output=total}
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert* | En attente" output=total}
+{CBStats id=15 filter[field]=Statut filter[value]="Ouvert" output=remaining target=200}
 {CBStats idsum=25+27 field="Parcours" output="table" title="Monticyclo / Montigravel"}
 {CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
 ```
@@ -333,7 +338,7 @@ basées sur un champ vérifient sa disponibilité API/Stats.
 CBStats applique toujours la permission STATS de la vue. Pour l'URL/API, vérifiez
 les réglages **API + Droits**, la disponibilité API/Stats des champs et l'onglet
 **API** de la vue. Les outputs URL disponibles sont `json`, `table`, `pie`, `bar`,
-`histogram`, `line`, `radar`, `total`, `sum`, `min`, `max`, `avg` et `form_name` ;
+`histogram`, `line`, `radar`, `total`, `distinct`, `sum`, `min`, `max`, `avg` et `form_name` ;
 les sorties de liste acceptent aussi `add`, `titles`, `sort`, `dir`, `ranges` et
 `limit`. Dans les articles Joomla, CBStats signale ensemble toutes les erreurs
 de syntaxe indépendantes de la balise, précise le paramètre et la valeur concernés
@@ -420,3 +425,71 @@ Le total affiché et les pourcentages des graphiques sont recalculés sur les
 valeurs conservées par `limit`. Le masquage ne modifie ni les calculs, ni les
 ACL, ni les filtres. Masquer les trois éléments est refusé. L’ancienne syntaxe
 `total=hide` n’est plus prise en charge ; utilisez `hide="total"`.
+
+### Cards éditoriales pour contenu libre
+
+Utilisez un `div` HTML standard, compatible avec les éditeurs, pour regrouper du
+HTML libre ainsi que des balises CBStats et CBList avec le rendu partagé des
+Cards. La syntaxe complète est recommandée :
+
+```html
+<div class="cb-cards">
+  <div class="cb-card-editorial" data-card="v1" data-w="33">
+    <h4 data-cb-card-title>Informations</h4>
+    <p>Total : {CBStats id=15 output=total}</p>
+    <p>Groupes distincts : {CBStats id=15 field=Groupe output=distinct}</p>
+    {CBList id=15 fields="Nom|Prenom" limit=5}
+  </div>
+</div>
+```
+
+Le titre visible `<h1>` à `<h6 data-cb-card-title>` devient le bandeau coloré
+de la Card et reste modifiable dans l’éditeur visuel. Un titre Hx sans cet
+attribut reste dans le corps. L’ancienne syntaxe `data-title` reste acceptée
+et conserve ses suffixes H1 à H6 et rem positif. Sans l’un de ces titres,
+aucun bandeau n’est généré. `data-card` utilise
+`v1` par défaut et `data-w` utilise `33` par défaut ; les largeurs acceptées
+sont `33`, `66` et `100`. Les espaces vides et insécables insérés entre les
+Cards par un éditeur sont ignorés dans les grilles `cb-cards`.
+
+### Jeux de titres CBStats réutilisables
+
+Utilisez un fichier INI administré lorsque plusieurs statistiques partagent
+les mêmes renommages :
+
+```text
+{CBStats id=15 field=Departement titleset="departements-fr-FR.ini" output=table}
+```
+
+Les fichiers personnalisés de `media/contentbuilderng/cbstats/titlesets/`
+surchargent les fichiers fournis de même nom. Les correspondances `titles=`
+écrites dans la balise restent prioritaires. Un fichier absent ou invalide
+laisse les valeurs originales visibles et produit seulement un Warning lorsque
+le Debug Joomla est activé.
+
+L’éditeur est accessible dans **ContentBuilder NG → À propos → Actions → Jeux
+de titres CBStats**. Un clic sur le nom affiche le contenu. Les fichiers fournis
+restent en lecture seule et peuvent être dupliqués dans le répertoire du site ;
+les fichiers propres au site sont modifiables. Le sélecteur de colonnes de la
+liste mémorise les colonnes masquées dans le navigateur.
+La liste permet aussi de rechercher un titre de fichier et de trier les
+colonnes de données.
+Dans l’éditeur, l’extension `.ini` du nom de fichier est facultative. Les
+actions Valider et Enregistrer affichent leur résultat, et l’abandon de
+modifications non enregistrées demande confirmation.
+La recherche porte sur le nom et le titre du fichier. La liste affiche 10
+fichiers par défaut, avec les choix 5, 10, 25, 50 ou Tous. L’origine est indiquée
+par « CBStats » ou « Site » et les titres longs sont limités à deux lignes.
+La liste utilise la sélection et le menu Actions Joomla. Les fichiers CBStats
+peuvent être dupliqués ; les fichiers Site peuvent être modifiés, copiés ou
+supprimés. « Enregistrer une copie » génère `nom-copy.ini`, puis
+`nom-copy-2.ini`. Le champ Langue suggère les langues Joomla installées tout en
+acceptant librement un code comme `it-IT`.
+Les jeux sélectionnés peuvent être exportés dans un fichier `.ini` ou, pour une
+sélection multiple, dans une archive `.zip`. L’import accepte plusieurs
+fichiers `.ini` de 1 Mo maximum chacun. Tous sont validés avant installation et
+aucun fichier Site existant n’est écrasé.
+La sélection Joomla active notamment Dupliquer et Exporter pour les fichiers
+CBStats. Le champ Langue associe un sélecteur visible des langues installées à
+la saisie libre du code. Les erreurs de validation identifient directement le
+nom de fichier, le titre ou les entrées concernés.

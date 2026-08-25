@@ -13,17 +13,17 @@ use CB\Component\Contentbuilderng\Site\Service\ContentCardService;
 final class StatsTagValidationService
 {
     private const OUTPUTS = [
-        'total', 'table', 'form_name', 'sum', 'min', 'max', 'avg',
+        'total', 'remaining', 'table', 'form_name', 'distinct', 'sum', 'min', 'max', 'avg',
         'json', 'pie', 'bar', 'histogram', 'line', 'radar',
     ];
     private const MANUAL_OUTPUTS = ['total', 'table', 'pie', 'bar', 'histogram', 'line', 'radar'];
     private const LIST_OUTPUTS = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar'];
-    private const FIELD_OUTPUTS = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar', 'sum', 'min', 'max', 'avg'];
+    private const FIELD_OUTPUTS = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar', 'distinct', 'sum', 'min', 'max', 'avg'];
     private const ALLOWED_KEYS = [
         'source', 'id', 'idsum', 'debug', 'output', 'field', 'filter[field]',
-        'filter[value]', 'value', 'add', 'titles', 'ranges', 'headers', 'title',
+        'filter[value]', 'value', 'add', 'titles', 'titleset', 'ranges', 'headers', 'title',
         'background', 'sort', 'dir', 'values', 'export', 'limit', 'hide', 'total',
-        'card', 'w', 'width', 'height',
+        'card', 'w', 'width', 'height', 'target',
     ];
 
     /**
@@ -38,7 +38,7 @@ final class StatsTagValidationService
         foreach (array_values(array_diff(array_keys($attributes), self::ALLOWED_KEYS)) as $key) {
             $errors[] = self::error('unknown_option', $key, (string) $attributes[$key]);
         }
-        foreach (['id', 'idsum', 'limit', 'w'] as $numericKey) {
+        foreach (['id', 'idsum', 'limit', 'w', 'target'] as $numericKey) {
             if (($quoted[$numericKey] ?? false) === true) {
                 $errors[] = self::error(
                     'invalid_value',
@@ -60,6 +60,15 @@ final class StatsTagValidationService
         $allowedOutputs = $manual ? self::MANUAL_OUTPUTS : self::OUTPUTS;
         if (!in_array($output, $allowedOutputs, true)) {
             $errors[] = self::error('invalid_value', 'output', (string) ($attributes['output'] ?? ''), $manual ? 'manual_output' : 'output');
+        }
+
+        $target = trim((string) ($attributes['target'] ?? ''));
+        if ($output === 'remaining') {
+            if (!self::isPositiveNumber($target)) {
+                $errors[] = self::error('invalid_value', 'target', $target, 'target');
+            }
+        } elseif ($target !== '') {
+            $errors[] = self::error('invalid_value', 'target', $target, 'target_output');
         }
 
         $card = trim((string) ($attributes['card'] ?? ''));
@@ -229,6 +238,11 @@ final class StatsTagValidationService
     private static function isPositiveInteger(string $value): bool
     {
         return preg_match('/^[1-9][0-9]*$/D', $value) === 1;
+    }
+
+    private static function isPositiveNumber(string $value): bool
+    {
+        return preg_match('/^(?:[1-9][0-9]*(?:\.[0-9]+)?|0\.[0-9]*[1-9][0-9]*)$/D', $value) === 1;
     }
 
     /** @return array{code: string, parameter: string, value: string, detail: string} */

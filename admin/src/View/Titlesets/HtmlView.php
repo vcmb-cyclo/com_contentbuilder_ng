@@ -1,0 +1,84 @@
+<?php
+
+declare(strict_types=1);
+
+namespace CB\Component\Contentbuilderng\Administrator\View\Titlesets;
+
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
+use Joomla\CMS\Router\Route;
+use Joomla\CMS\Toolbar\ToolbarHelper;
+use Joomla\CMS\Toolbar\Toolbar;
+use CB\Component\Contentbuilderng\Administrator\Model\TitlesetsModel;
+use Joomla\CMS\Application\AdministratorApplication;
+use Joomla\CMS\Document\HtmlDocument;
+use Joomla\CMS\Factory;
+
+final class HtmlView extends BaseHtmlView
+{
+    protected array $items = [];
+
+    public function display($tpl = null): void
+    {
+        $app = Factory::getApplication();
+        if (!$app instanceof AdministratorApplication) {
+            throw new \RuntimeException('Unexpected application instance.');
+        }
+        if (!$app->getIdentity()->authorise('core.manage', 'com_contentbuilderng')) {
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+
+        $model = $this->getModel();
+        if (!$model instanceof TitlesetsModel) {
+            throw new \RuntimeException('Unexpected titlesets model.');
+        }
+        $this->items = $model->getItems();
+
+        ToolbarHelper::title(Text::_('COM_CONTENTBUILDERNG_TITLESETS_TITLE'), 'list');
+        /** @var HtmlDocument $document */
+        $document = $this->getDocument();
+        /** @var Toolbar $toolbar */
+        $toolbar = $document->getToolbar('toolbar');
+        $toolbar->linkButton('titleset-new')
+            ->url(Route::_('index.php?option=com_contentbuilderng&view=titleset', false))
+            ->text('JTOOLBAR_NEW')
+            ->icon('icon-new')
+            ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_NEW_DESC')]);
+        $actions = $toolbar->dropdownButton('titlesets-actions');
+        $actions->text(Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS'));
+        $actions->icon('icon-ellipsis-h');
+        $actions->toggleSplit(false);
+        $actions->buttonClass('btn btn-action');
+        $actions->listCheck(false);
+        $actionsToolbar = $actions->getChildToolbar();
+        foreach (
+            [
+                ['titlesets.duplicateSelected', 'COM_CONTENTBUILDERNG_TITLESETS_DUPLICATE', 'icon-copy'],
+                ['titlesets.editSelected', 'JACTION_EDIT', 'icon-edit'],
+                ['titlesets.copySelected', 'COM_CONTENTBUILDERNG_TITLESETS_COPY', 'icon-copy'],
+                ['titleset.exportSelected', 'COM_CONTENTBUILDERNG_TITLESETS_EXPORT', 'icon-download'],
+                ['titleset.deleteSelected', 'JACTION_DELETE', 'icon-trash'],
+            ] as [$task, $text, $icon]
+        ) {
+            $actionsToolbar->standardButton($task)
+                ->task($task)
+                ->text($text)
+                ->icon($icon)
+                ->listCheck(true);
+        }
+        $actionsToolbar->standardButton('titlesets-import')
+            ->task('titlesets.import')
+            ->text('COM_CONTENTBUILDERNG_TITLESETS_IMPORT')
+            ->icon('icon-upload')
+            ->listCheck(false);
+        $toolbar->linkButton('titlesets-close')
+            ->url(Route::_('index.php?option=com_contentbuilderng&view=about', false))
+            ->text('JTOOLBAR_CLOSE')
+            ->icon('icon-cancel')
+            ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_CLOSE_DESC')]);
+
+        parent::display($tpl);
+    }
+}

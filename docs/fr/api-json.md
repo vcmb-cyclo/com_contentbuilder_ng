@@ -296,6 +296,7 @@ GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&
 | --- | --- | --- |
 | `json` | Tableau normalisé brut | Oui |
 | `table`, `pie`, `bar`, `histogram`, `line`, `radar` | Statistiques normalisées | Oui |
+| `distinct` | Nombre de valeurs distinctes non vides du champ filtré | Oui |
 | `total` | Nombre d'enregistrements correspondants | Non |
 | `sum` | Somme numérique pondérée | Oui |
 | `min`, `max` | Minimum/maximum numérique, ou borne chronologique d'une date ISO | Oui |
@@ -310,7 +311,7 @@ traitement commun de `add` signé et de `titles`.
 #### Paramètres
 
 - `id` : identifiant positif obligatoire de la vue ContentBuilder NG ;
-- `field` : obligatoire pour `json`, toutes les sorties de liste/graphiques, `sum`, `min`, `max` et `avg` ;
+- `field` : obligatoire pour `json`, toutes les sorties de liste/graphiques, `distinct`, `sum`, `min`, `max` et `avg` ;
 - `filter[field]` et `filter[value]` : facultatifs, mais obligatoirement fournis ensemble ;
 - `sort=none|title|value` : facultatif pour les sorties de liste/graphiques, défaut `none` ;
 - `dir=asc|desc` : facultatif pour les sorties de liste/graphiques, défaut `asc`.

@@ -1,5 +1,9 @@
 # CBStats functional and technical specification
 
+Stable baseline: ContentBuilder NG 6.1.11. This specification includes the
+validated `distinct`, editorial Card, reusable `titleset` and `remaining`
+features delivered in that release.
+
 ## 1. Purpose
 
 CBStats is a generic Joomla content plugin integrated into the ContentBuilder NG repository. It exposes statistics through `{CBStats ...}` tags and must work with arbitrary ContentBuilder views and fields without embedding organization-specific knowledge.
@@ -60,6 +64,8 @@ output=bar
 output=histogram
 output=line
 output=radar
+output=distinct
+output=remaining target=200
 output=sum
 output=min
 output=max
@@ -67,6 +73,40 @@ output=avg
 ```
 
 These outputs are existing public contracts and must not regress.
+
+### 3.2 Remaining before a target
+
+`output=remaining` returns the positive difference between `target` and the
+normal filtered CBStats total. The normal view/source, permission and filtering
+pipeline runs first, then CBStats calculates `max(0, target - total)`.
+`target` is a required positive unquoted number and is only valid with this
+output. The implementation reuses the shared `output=total` payload; it does
+not query or count records independently.
+
+```text
+{CBStats id=15 output=remaining target=200}
+{CBStats id=15 filter[field]=Status filter[value]="Open" output=remaining target=200}
+```
+
+### 3.1 Distinct values
+
+`output=distinct` requires `field=` and returns the number of distinct,
+non-empty values of that field after the normal CBStats selection and filtering
+pipeline has completed. It reuses the same filtered `value => count` map as the
+other field outputs; it must not implement filtering independently.
+
+`filter[field]`, `filter[value]`, the same-field `value=` shorthand, wildcard
+matching, `|` alternatives, view/source restrictions and permissions therefore
+all run before the distinct count. With `idsum`, each view is filtered first and
+identical remaining values are counted once after the maps are merged.
+
+Examples:
+
+```text
+{CBStats id=25 field=Departement output=distinct}
+{CBStats id=25 field=Departement value="78" output=distinct}
+{CBStats id=25 field=Departement value="78|60" output=distinct}
+```
 
 ## 4. Existing filtering behavior to preserve
 
@@ -497,3 +537,89 @@ A number without a unit means pixels. Without `width=`, Pie uses 80% with a
 maximum of 350px and is centred; Bar and other charts use 100%. Explicit width
 removes the Pie maximum. Explicit height disables maintained aspect ratio;
 percentage height requires a parent with a defined height.
+
+## Editorial Cards — 6.1.11-RC02
+
+An article may group free HTML, CBStats and CBList tags in the shared Card
+presentation with a standard editor-safe `div`:
+
+```html
+<div class="cb-card-editorial" data-card="v1" data-w="33">
+  <h4 data-cb-card-title>Information</h4>
+  <p>Total: {CBStats id=15 output=total}</p>
+  <p>Distinct groups: {CBStats id=15 field=Group output=distinct}</p>
+  {CBList id=15 fields="Nom|Prenom" limit=5}
+</div>
+```
+
+The complete syntax is recommended. Missing or invalid `data-card` uses `v1`;
+missing or invalid `data-w` uses `33`. A direct child `h1`–`h6` carrying
+`data-cb-card-title` becomes the coloured Card header; an unmarked heading
+remains in the body. The legacy `data-title` attribute remains supported and
+reuses the shared H1–H6 and positive rem suffix parser. A visible marked
+heading takes priority when both forms are present. The body
+preserves normal Joomla article HTML and nested content-plugin tags.
+
+The renderer uses `DOMDocument`, not a regular expression, to process nested
+HTML. It converts the marker to the existing shared Card structure and loads
+`com_contentbuilderng.cards`. Direct text nodes containing only whitespace or
+non-breaking spaces are removed from `.cb-cards` grids so editor formatting
+cannot create anonymous grid items or extra spacing. Custom elements such as
+`<cb-card>` are unsupported because TinyMCE splits them and JCE removes them.
+
+## 18. Reusable `titleset` mappings
+
+`titleset="filename.ini"` loads display-only category mappings from an INI
+file after the normal CBStats data and filtering pipeline. Files are resolved
+first from `media/contentbuilderng/cbstats/titlesets/` and then from
+`media/com_contentbuilderng/cbstats/titlesets/`. Only a safe basename ending
+in `.ini` is accepted. Inline `titles=` mappings are applied last and therefore
+override mappings loaded from `titleset`.
+
+```ini
+; Reusable labels
+[metadata]
+name="Main countries"
+locale="en-GB"
+
+[titles]
+fr="France"
+be="Belgium"
+de="Germany"
+```
+
+```text
+{CBStats id=15 field=Country titleset="example-en-GB.ini" output=table}
+```
+
+The administrator can manage these files from **ContentBuilder NG → About →
+Actions → CBStats title sets**. Clicking a filename displays its contents.
+Provided files remain read-only and can be duplicated into the site's custom
+directory; site-specific files are editable. The list's column selector is
+stored locally in the browser. Field tooltips document the INI metadata and
+mapping values; a separate help screen is intentionally unnecessary.
+The administration list can be searched by file title and sorted by any data
+column; the Actions column is intentionally not sortable.
+The editor accepts filenames with or without the `.ini` extension and appends
+it when necessary. Validate and Save report their result, while Cancel and
+browser navigation request confirmation when the form contains unsaved edits.
+The list searches both filenames and file titles, displays 10 rows by default
+with 5/10/25/50/All choices, and limits long titles to two visual lines. Source
+labels identify the storage origin as `CBStats` or `Site`.
+The list uses Joomla-style row selection and an Actions menu. CBStats files can
+be duplicated; Site files can be edited, copied or deleted. Save as Copy writes
+`name-copy.ini`, then `name-copy-2.ini` when needed. The language field suggests
+installed Joomla languages while remaining free-form for tags such as `it-IT`.
+Selected title sets can be exported as one `.ini` file or, for multiple files,
+one `.zip` archive. Import accepts multiple `.ini` files up to 1 MB each. Every
+file is parsed and validated before installation; invalid files and filenames
+already present in the Site directory abort the import without overwriting.
+Joomla selection state (`boxchecked`) enables Duplicate and Export for selected
+CBStats files. The Language editor combines a visible installed-language
+selector with the free-form language-tag input. Validation failures are errors
+and identify Filename, Title or Entries directly.
+
+Missing, unreadable, empty or invalid files preserve original values and never
+replace the frontend result with an error. Joomla Debug records one Warning per
+file and request. ContentBuilder NG About links to the native Joomla manager;
+provided files are read-only and can be duplicated into the custom directory.

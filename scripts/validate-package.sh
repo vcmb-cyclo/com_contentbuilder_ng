@@ -18,6 +18,8 @@ required=(
     "admin/sql/install.sql"
     "admin/sql/updates/mysql/6.1.7.sql"
     "admin/sql/updates/mysql/6.1.8.sql"
+    "admin/vendor/autoload.php"
+    "admin/vendor/composer/installed.php"
     "site/src/Controller/ApiController.php"
     "media/joomla.asset.json"
     "plugins/system/contentbuilderng_system/contentbuilderng_system.xml"
