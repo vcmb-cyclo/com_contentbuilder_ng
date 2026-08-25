@@ -524,15 +524,14 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
 
         $detailKey = match ($error['detail']) {
             'source' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_SOURCE',
-            'id_syntax', 'idsum_syntax', 'limit_syntax', 'w_syntax'
+            'id_syntax', 'idsum_syntax', 'limit_syntax', 'w_syntax', 'target_syntax'
                 => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_NUMERIC_SYNTAX',
             'id' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ID',
             'idsum' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_IDSUM',
             'id_conflict' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ID_CONFLICT',
             'output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_OUTPUT',
-            'target' => $detail === 'target_output'
-                ? 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET_OUTPUT'
-                : 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET',
+            'target' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET',
+            'target_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET_OUTPUT',
             'manual_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_MANUAL_OUTPUT',
             'idsum_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_IDSUM_OUTPUT',
             'field' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_FIELD',

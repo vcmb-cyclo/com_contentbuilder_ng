@@ -1,5 +1,9 @@
 # CBStats public syntax / API reference
 
+Stable baseline: ContentBuilder NG 6.1.11. This reference includes the
+validated `output=distinct`, `titleset` and
+`output=remaining target=Number` contracts.
+
 ## Syntax validation and public help
 
 CBStats validates the complete tag before querying a view or rendering statistics.

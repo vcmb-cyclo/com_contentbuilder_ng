@@ -1,5 +1,7 @@
 # Templates et personnalisation
 
+La syntaxe CBStats documentée ici correspond à ContentBuilder NG 6.1.11.
+
 ContentBuilder NG utilise des templates configurés dans chaque vue pour produire les
 détails, les formulaires d'édition, les articles et certaines présentations de liste.
 

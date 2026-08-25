@@ -1,5 +1,9 @@
 # CBStats functional and technical specification
 
+Stable baseline: ContentBuilder NG 6.1.11. This specification includes the
+validated `distinct`, editorial Card, reusable `titleset` and `remaining`
+features delivered in that release.
+
 ## 1. Purpose
 
 CBStats is a generic Joomla content plugin integrated into the ContentBuilder NG repository. It exposes statistics through `{CBStats ...}` tags and must work with arbitrary ContentBuilder views and fields without embedding organization-specific knowledge.

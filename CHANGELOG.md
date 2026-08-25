@@ -1,5 +1,14 @@
 # Changelog
 
+## 6.1.11 — 2026-08-25
+
+- Added CBStats `output=distinct` for filtered counts of distinct non-empty field values.
+- Added CBStats `output=remaining target=Number` for the non-negative amount remaining before a positive target, using the normal filtered total.
+- Added editor-safe editorial Cards for free HTML, CBStats and CBList content with shared Card rendering.
+- Added reusable CBStats `titleset="file.ini"` mappings, bundled examples and a Joomla administrator manager with editing, validation, duplication, import and export.
+- Improved title-set administration with search, sorting, pagination, configurable columns, safe Site-file replacement and precise validation feedback.
+- Updated CBStats help, public documentation, specifications, Debug diagnostics and regression coverage.
+
 ## 6.1.11-RC05 — 2026-08-25
 
 - Added CBStats `output=remaining target=Number` to calculate the non-negative difference between a positive target and the normal filtered total.

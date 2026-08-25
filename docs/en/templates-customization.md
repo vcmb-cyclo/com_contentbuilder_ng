@@ -1,5 +1,7 @@
 # Templates and customization
 
+The CBStats syntax documented here is current for ContentBuilder NG 6.1.11.
+
 ContentBuilder NG stores view-specific templates for record details, editing,
 generated Joomla articles, emails, and some list output.
 
