@@ -539,10 +539,6 @@ $renderNumberedAuditTitle = static function (string $sectionId, string $label, b
                 title="<?php echo htmlspecialchars($tooltipLinkOpenApi, ENT_QUOTES, 'UTF-8'); ?>"
                 aria-label="<?php echo htmlspecialchars($tooltipLinkOpenApi, ENT_QUOTES, 'UTF-8'); ?>"
             ><?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_OPENAPI_LINK'); ?></a>
-            <a
-                class="cb-about-intro-link"
-                href="<?php echo Route::_('index.php?option=com_contentbuilderng&view=titlesets', false); ?>"
-            ><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_TITLE'); ?></a>
         </div>
     </div>
 </div>

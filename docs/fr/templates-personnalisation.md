@@ -462,3 +462,9 @@ surchargent les fichiers fournis de même nom. Les correspondances `titles=`
 écrites dans la balise restent prioritaires. Un fichier absent ou invalide
 laisse les valeurs originales visibles et produit seulement un Warning lorsque
 le Debug Joomla est activé.
+
+L’éditeur est accessible dans **ContentBuilder NG → À propos → Actions → Jeux
+de titres CBStats**. Un clic sur le nom affiche le contenu. Les fichiers fournis
+restent en lecture seule et peuvent être dupliqués dans le répertoire du site ;
+les fichiers propres au site sont modifiables. Le sélecteur de colonnes de la
+liste mémorise les colonnes masquées dans le navigateur.

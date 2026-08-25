@@ -6,6 +6,7 @@
 - Added silent frontend fallback and Debug-only Warnings for missing or invalid title-set files.
 - Added a native Joomla title-set manager from About, including structured metadata, comments, mappings, validation, duplication and custom-file management.
 - Added a complete French department title set and multilingual country examples.
+- Refined title-set administration with filename-based content viewing, read-only provided files, a persistent column selector, contextual field help, and access from the About Actions menu.
 
 ## 6.1.11-RC02 — 2026-08-25
 

@@ -171,6 +171,11 @@ class HtmlView extends BaseHtmlView
                 ->icon('fa fa-upload')
                 ->listCheck(false);
 
+            $maintenanceChildToolbar->linkButton('about_titlesets')
+                ->url(Route::_('index.php?option=com_contentbuilderng&view=titlesets', false))
+                ->text('COM_CONTENTBUILDERNG_TITLESETS_TITLE')
+                ->icon('fa fa-list');
+
             $toolbar->standardButton('about_show_log')
                 ->task('about.showLog')
                 ->text('COM_CONTENTBUILDERNG_ABOUT_SHOW_LOG')
@@ -182,10 +187,6 @@ class HtmlView extends BaseHtmlView
                 ->text('COM_CONTENTBUILDERNG_ABOUT_EXTENSIONS')
                 ->icon('fa fa-plug');
 
-            $toolbar->linkButton('about_titlesets')
-                ->url(Route::_('index.php?option=com_contentbuilderng&view=titlesets', false))
-                ->text('COM_CONTENTBUILDERNG_TITLESETS_TITLE')
-                ->icon('fa fa-list');
         }
 
         $configReturn = urlencode(base64_encode(

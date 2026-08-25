@@ -6,12 +6,13 @@ namespace CB\Component\Contentbuilderng\Administrator\View\Titleset;
 
 \defined('_JEXEC') or die;
 
+use CB\Component\Contentbuilderng\Administrator\Model\TitlesetModel;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
-use CB\Component\Contentbuilderng\Administrator\Model\TitlesetModel;
 
 final class HtmlView extends BaseHtmlView
 {
@@ -32,7 +33,20 @@ final class HtmlView extends BaseHtmlView
         $this->data = $model->getData();
         $this->form = $model->getForm();
 
-        ToolbarHelper::title(Text::_('COM_CONTENTBUILDERNG_TITLESETS_EDIT_TITLE'), 'edit');
+        $isProvided = ($this->data['source'] ?? '') === 'provided';
+        ToolbarHelper::title(Text::_($isProvided
+            ? 'COM_CONTENTBUILDERNG_TITLESETS_VIEW_TITLE'
+            : 'COM_CONTENTBUILDERNG_TITLESETS_EDIT_TITLE'), $isProvided ? 'eye' : 'edit');
+        if ($isProvided) {
+            ToolbarHelper::link(
+                Route::_('index.php?option=com_contentbuilderng&view=titleset&filename=' . rawurlencode((string) $this->data['filename']) . '&source=provided&duplicate=1', false),
+                'COM_CONTENTBUILDERNG_TITLESETS_DUPLICATE',
+                'copy'
+            );
+            ToolbarHelper::cancel('titleset.cancel');
+            parent::display($tpl);
+            return;
+        }
         ToolbarHelper::apply('titleset.apply');
         ToolbarHelper::save('titleset.save');
         ToolbarHelper::custom(

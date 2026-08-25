@@ -573,6 +573,13 @@ de="Germany"
 {CBStats id=15 field=Country titleset="example-en-GB.ini" output=table}
 ```
 
+The administrator can manage these files from **ContentBuilder NG → About →
+Actions → CBStats title sets**. Clicking a filename displays its contents.
+Provided files remain read-only and can be duplicated into the site's custom
+directory; site-specific files are editable. The list's column selector is
+stored locally in the browser. Field tooltips document the INI metadata and
+mapping values; a separate help screen is intentionally unnecessary.
+
 Missing, unreadable, empty or invalid files preserve original values and never
 replace the frontend result with an error. Joomla Debug records one Warning per
 file and request. ContentBuilder NG About links to the native Joomla manager;

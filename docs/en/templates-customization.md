@@ -416,3 +416,8 @@ Custom files in `media/contentbuilderng/cbstats/titlesets/` override provided
 files with the same name. Inline `titles=` mappings remain higher priority. A
 missing or invalid file leaves original values visible and only records a
 Warning when Joomla Debug is enabled.
+
+The editor is available from **ContentBuilder NG → About → Actions → CBStats
+title sets**. Clicking a filename displays its contents. Provided files remain
+read-only and can be duplicated into the site's directory; site-specific files
+are editable. The list column selector remembers hidden columns in the browser.
