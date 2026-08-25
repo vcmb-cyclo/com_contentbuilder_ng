@@ -591,6 +591,10 @@ The list uses Joomla-style row selection and an Actions menu. CBStats files can
 be duplicated; Site files can be edited, copied or deleted. Save as Copy writes
 `name-copy.ini`, then `name-copy-2.ini` when needed. The language field suggests
 installed Joomla languages while remaining free-form for tags such as `it-IT`.
+Selected title sets can be exported as one `.ini` file or, for multiple files,
+one `.zip` archive. Import accepts multiple `.ini` files up to 1 MB each. Every
+file is parsed and validated before installation; invalid files and filenames
+already present in the Site directory abort the import without overwriting.
 
 Missing, unreadable, empty or invalid files preserve original values and never
 replace the frontend result with an error. Joomla Debug records one Warning per

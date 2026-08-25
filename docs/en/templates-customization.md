@@ -431,3 +431,7 @@ The list uses Joomla-style selection and an Actions menu. CBStats files can be
 duplicated; Site files can be edited, copied or deleted. Save as Copy generates
 `name-copy.ini`, then `name-copy-2.ini`. The Language field suggests installed
 Joomla languages while accepting a free-form tag such as `it-IT`.
+Selected title sets can be exported as one `.ini` file or, for multiple files,
+as one `.zip` archive. Import accepts multiple `.ini` files up to 1 MB each;
+all are validated before installation and existing Site files are never
+overwritten.

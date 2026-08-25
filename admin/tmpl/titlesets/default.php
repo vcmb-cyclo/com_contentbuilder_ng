@@ -116,6 +116,7 @@ $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
     </div>
 </div>
 <input type="hidden" name="task" value="">
+<input type="file" name="titleset_files[]" accept=".ini,text/plain" multiple hidden data-cb-titlesets-import>
 <?php echo Joomla\CMS\HTML\HTMLHelper::_('form.token'); ?>
 </form>
 <style>
@@ -135,6 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const nextButton = document.querySelector('[data-cb-titlesets-next]');
     const pageInfo = document.querySelector('[data-cb-titlesets-page-info]');
     const form = document.getElementById('adminForm');
+    const importInput = document.querySelector('[data-cb-titlesets-import]');
     const collator = new Intl.Collator(document.documentElement.lang || undefined, { numeric: true, sensitivity: 'base' });
     let currentPage = 1;
     let state = {};
@@ -194,6 +196,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
     Joomla.submitbutton = function (task) {
+        if (task === 'titlesets.import') {
+            importInput?.click();
+            return true;
+        }
         const selected = [...document.querySelectorAll('input[name="cid[]"]:checked')];
         if (selected.length === 0) return false;
         const identifiers = selected.map(function (checkbox) {
@@ -217,8 +223,15 @@ document.addEventListener('DOMContentLoaded', function () {
             Joomla.submitform(task, form);
             return true;
         }
+        if (task === 'titleset.exportSelected') {
+            Joomla.submitform(task, form);
+            return true;
+        }
         return false;
     };
+    importInput?.addEventListener('change', function () {
+        if (importInput.files && importInput.files.length > 0) Joomla.submitform('titleset.importFiles', form);
+    });
     apply();
     filterRows();
 });

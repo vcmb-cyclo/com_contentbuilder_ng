@@ -179,6 +179,66 @@ final class CbStatsTitleSetManagerService
         return $candidate;
     }
 
+    public function validateImportFile(string $path, string $originalName): string
+    {
+        $filename = basename(trim($originalName));
+        if (!CbStatsTitleSetService::isValidFilename($filename) || !is_file($path)) {
+            throw new \InvalidArgumentException('Invalid title set import file.');
+        }
+
+        $result = CbStatsTitleSetService::parseFile($path);
+        if (($result['status'] ?? '') !== 'ok') {
+            throw new \InvalidArgumentException('Invalid title set import contents.');
+        }
+
+        $target = $this->siteRoot . '/' . CbStatsTitleSetService::CUSTOM_DIRECTORY . '/' . $filename;
+        if (is_file($target)) {
+            throw new \RuntimeException('A custom title set with this filename already exists.');
+        }
+
+        return $filename;
+    }
+
+    public function importFile(string $path, string $originalName): string
+    {
+        $filename = $this->validateImportFile($path, $originalName);
+        $directory = $this->siteRoot . '/' . CbStatsTitleSetService::CUSTOM_DIRECTORY;
+        if (!is_dir($directory) && !mkdir($directory, 0755, true)) {
+            throw new \RuntimeException('Unable to create the custom title set directory.');
+        }
+
+        $contents = file_get_contents($path);
+        if (!is_string($contents)) {
+            throw new \RuntimeException('Unable to read the uploaded title set file.');
+        }
+
+        $target = $directory . '/' . $filename;
+        $temporary = $target . '.tmp-' . bin2hex(random_bytes(6));
+        if (file_put_contents($temporary, $contents, LOCK_EX) === false || !rename($temporary, $target)) {
+            @unlink($temporary);
+            throw new \RuntimeException('Unable to install the uploaded title set file.');
+        }
+
+        return $filename;
+    }
+
+    public function getFileContents(string $filename, string $source): string
+    {
+        if (!CbStatsTitleSetService::isValidFilename($filename) || !in_array($source, ['custom', 'provided'], true)) {
+            throw new \InvalidArgumentException('Invalid title set identifier.');
+        }
+
+        $directory = $source === 'custom'
+            ? CbStatsTitleSetService::CUSTOM_DIRECTORY
+            : CbStatsTitleSetService::PROVIDED_DIRECTORY;
+        $contents = file_get_contents($this->siteRoot . '/' . $directory . '/' . $filename);
+        if (!is_string($contents)) {
+            throw new \RuntimeException('Unable to read the title set file.');
+        }
+
+        return $contents;
+    }
+
     private function normalizeFilename(string $filename): string
     {
         $filename = trim($filename);

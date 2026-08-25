@@ -481,3 +481,7 @@ peuvent être dupliqués ; les fichiers Site peuvent être modifiés, copiés 
 supprimés. « Enregistrer une copie » génère `nom-copy.ini`, puis
 `nom-copy-2.ini`. Le champ Langue suggère les langues Joomla installées tout en
 acceptant librement un code comme `it-IT`.
+Les jeux sélectionnés peuvent être exportés dans un fichier `.ini` ou, pour une
+sélection multiple, dans une archive `.zip`. L’import accepte plusieurs
+fichiers `.ini` de 1 Mo maximum chacun. Tous sont validés avant installation et
+aucun fichier Site existant n’est écrasé.

@@ -100,6 +100,21 @@ final class CbStatsTitleSetManagerServiceTest extends TestCase
         self::assertSame('countries-copy-2.ini', $this->service->saveCopy($data));
     }
 
+    public function testImportsValidIniWithoutOverwritingAndExportsItsContents(): void
+    {
+        $source = $this->root . '/upload.ini';
+        file_put_contents($source, "[metadata]\nname=\"Import\"\n[titles]\nfr=\"France\"\n");
+
+        self::assertSame('imported.ini', $this->service->importFile($source, 'imported.ini'));
+        self::assertStringContainsString(
+            'fr="France"',
+            $this->service->getFileContents('imported.ini', 'custom')
+        );
+
+        $this->expectException(\RuntimeException::class);
+        $this->service->importFile($source, 'imported.ini');
+    }
+
     public function testDeletesOnlyCustomFiles(): void
     {
         $this->service->save([

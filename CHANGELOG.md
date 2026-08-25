@@ -11,6 +11,7 @@
 - Fixed title-set validation and saving when `.ini` is omitted, added precise save feedback, and protected unsaved editor changes on Cancel/navigation.
 - Fixed title-set toolbar submissions and read-only Close navigation; expanded search to filenames and titles, added 10-row pagination, concise source labels and two-line title display.
 - Rationalized title-set administration with Joomla-style selection actions, Save as Copy naming, installed-language suggestions with free input, compact editor layout and clearer Title/Entries labels.
+- Added safe title-set INI import and export: single-file `.ini`, multi-file `.zip`, validation before import, 1 MB limits and no silent overwrite of Site files.
 
 ## 6.1.11-RC02 — 2026-08-25
 

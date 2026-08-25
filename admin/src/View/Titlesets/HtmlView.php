@@ -48,13 +48,14 @@ final class HtmlView extends BaseHtmlView
             ->icon('icon-ellipsis-h')
             ->toggleSplit(false)
             ->buttonClass('btn btn-action')
-            ->listCheck(true);
+            ->listCheck(false);
         $actionsToolbar = $actions->getChildToolbar();
         foreach (
             [
                 ['titlesets.duplicateSelected', 'COM_CONTENTBUILDERNG_TITLESETS_DUPLICATE', 'icon-copy'],
                 ['titlesets.editSelected', 'JACTION_EDIT', 'icon-edit'],
                 ['titlesets.copySelected', 'COM_CONTENTBUILDERNG_TITLESETS_COPY', 'icon-copy'],
+                ['titleset.exportSelected', 'COM_CONTENTBUILDERNG_TITLESETS_EXPORT', 'icon-download'],
                 ['titleset.deleteSelected', 'JACTION_DELETE', 'icon-trash'],
             ] as [$task, $text, $icon]
         ) {
@@ -64,6 +65,11 @@ final class HtmlView extends BaseHtmlView
                 ->icon($icon)
                 ->listCheck(true);
         }
+        $actionsToolbar->standardButton('titlesets-import')
+            ->task('titlesets.import')
+            ->text('COM_CONTENTBUILDERNG_TITLESETS_IMPORT')
+            ->icon('icon-upload')
+            ->listCheck(false);
         $toolbar->linkButton('titlesets-close')
             ->url(Route::_('index.php?option=com_contentbuilderng&view=about', false))
             ->text('JTOOLBAR_CLOSE')
