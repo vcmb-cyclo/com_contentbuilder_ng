@@ -44,9 +44,9 @@ final class TitlesetController extends BaseController
             $this->setMessage(Text::_('COM_CONTENTBUILDERNG_TITLESETS_COPY_SAVED'));
             $url = 'index.php?option=com_contentbuilderng&view=titleset&source=custom&filename='
                 . rawurlencode($filename);
-        } catch (\Throwable) {
+        } catch (\Throwable $exception) {
             $this->getApp()->setUserState('com_contentbuilderng.titleset.data', $data);
-            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED'), 'error');
+            $this->setMessage($this->saveFailureMessage($exception), 'error');
             $url = 'index.php?option=com_contentbuilderng&view=titleset';
         }
 
@@ -225,10 +225,10 @@ final class TitlesetController extends BaseController
         $result = (new CbStatsTitleSetManagerService(JPATH_SITE))->validate($data);
         $this->getApp()->setUserState('com_contentbuilderng.titleset.data', $data);
         $this->setMessage(
-            Text::_($result['valid']
-                ? 'COM_CONTENTBUILDERNG_TITLESETS_VALID'
-                : 'COM_CONTENTBUILDERNG_TITLESETS_INVALID'),
-            $result['valid'] ? 'message' : 'warning'
+            $result['valid']
+                ? Text::_('COM_CONTENTBUILDERNG_TITLESETS_VALID')
+                : $this->validationErrorsMessage((array) $result['errors']),
+            $result['valid'] ? 'message' : 'error'
         );
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=titleset', false));
     }
@@ -261,18 +261,9 @@ final class TitlesetController extends BaseController
                 ? 'index.php?option=com_contentbuilderng&view=titleset&source=custom&filename='
                     . rawurlencode($filename)
                 : 'index.php?option=com_contentbuilderng&view=titlesets';
-        } catch (\InvalidArgumentException $exception) {
+        } catch (\Throwable $exception) {
             $this->getApp()->setUserState('com_contentbuilderng.titleset.data', $data);
-            $errorKey = match (true) {
-                str_contains($exception->getMessage(), 'titles') => 'COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED_MAPPINGS',
-                str_contains($exception->getMessage(), 'name') => 'COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED_NAME',
-                default => 'COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED_FILENAME',
-            };
-            $this->setMessage(Text::_($errorKey), 'error');
-            $url = 'index.php?option=com_contentbuilderng&view=titleset';
-        } catch (\Throwable) {
-            $this->getApp()->setUserState('com_contentbuilderng.titleset.data', $data);
-            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED'), 'error');
+            $this->setMessage($this->saveFailureMessage($exception), 'error');
             $url = 'index.php?option=com_contentbuilderng&view=titleset';
         }
 
@@ -284,5 +275,25 @@ final class TitlesetController extends BaseController
         if (!$this->getApp()->getIdentity()->authorise('core.manage', 'com_contentbuilderng')) {
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
         }
+    }
+
+    /** @param list<string> $errors */
+    private function validationErrorsMessage(array $errors): string
+    {
+        $messages = [];
+        foreach (array_unique($errors) as $error) {
+            $messages[] = Text::_('COM_CONTENTBUILDERNG_TITLESETS_ERROR_' . strtoupper($error));
+        }
+
+        return implode(' ', $messages);
+    }
+
+    private function saveFailureMessage(\Throwable $exception): string
+    {
+        if ($exception instanceof \InvalidArgumentException) {
+            return $this->validationErrorsMessage(array_values(array_filter(explode(',', $exception->getMessage()))));
+        }
+
+        return Text::_('COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED_WRITE');
     }
 }

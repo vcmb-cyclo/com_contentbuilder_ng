@@ -595,6 +595,10 @@ Selected title sets can be exported as one `.ini` file or, for multiple files,
 one `.zip` archive. Import accepts multiple `.ini` files up to 1 MB each. Every
 file is parsed and validated before installation; invalid files and filenames
 already present in the Site directory abort the import without overwriting.
+Joomla selection state (`boxchecked`) enables Duplicate and Export for selected
+CBStats files. The Language editor combines a visible installed-language
+selector with the free-form language-tag input. Validation failures are errors
+and identify Filename, Title or Entries directly.
 
 Missing, unreadable, empty or invalid files preserve original values and never
 replace the frontend result with an error. Joomla Debug records one Warning per

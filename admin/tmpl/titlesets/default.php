@@ -116,6 +116,7 @@ $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
     </div>
 </div>
 <input type="hidden" name="task" value="">
+<input type="hidden" name="boxchecked" value="0">
 <input type="file" name="titleset_files[]" accept=".ini,text/plain" multiple hidden data-cb-titlesets-import>
 <?php echo Joomla\CMS\HTML\HTMLHelper::_('form.token'); ?>
 </form>

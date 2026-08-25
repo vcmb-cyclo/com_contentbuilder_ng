@@ -52,6 +52,12 @@ use Joomla\CMS\Router\Route;
             <option value="<?php echo htmlspecialchars($languageTag, ENT_QUOTES, 'UTF-8'); ?>"></option>
         <?php endforeach; ?>
     </datalist>
+    <select class="form-select mb-2 d-none" id="cbng-titleset-language-selector" aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_TITLESETS_LANGUAGE_SELECT'), ENT_QUOTES, 'UTF-8'); ?>">
+        <option value=""><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_LANGUAGE_SELECT'); ?></option>
+        <?php foreach ($this->languageTags as $languageTag) : ?>
+            <option value="<?php echo htmlspecialchars($languageTag, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($languageTag, ENT_QUOTES, 'UTF-8'); ?></option>
+        <?php endforeach; ?>
+    </select>
 
     <div class="card">
         <div class="card-header">
@@ -71,6 +77,19 @@ document.addEventListener('DOMContentLoaded', function () {
     let allowNavigation = false;
     form.addEventListener('input', function () { dirty = true; });
     form.addEventListener('change', function () { dirty = true; });
+    const localeInput = document.getElementById('jform_locale');
+    const localeSelector = document.getElementById('cbng-titleset-language-selector');
+    if (localeInput && localeSelector && localeInput.parentNode) {
+        localeInput.parentNode.insertBefore(localeSelector, localeInput);
+        localeSelector.classList.remove('d-none');
+        localeSelector.value = [...localeSelector.options].some(function (option) { return option.value === localeInput.value; }) ? localeInput.value : '';
+        localeSelector.addEventListener('change', function () {
+            if (localeSelector.value !== '') {
+                localeInput.value = localeSelector.value;
+                localeInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    }
     window.addEventListener('beforeunload', function (event) {
         if (!dirty || allowNavigation) return;
         event.preventDefault();

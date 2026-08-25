@@ -485,3 +485,7 @@ Les jeux sélectionnés peuvent être exportés dans un fichier `.ini` ou, pour 
 sélection multiple, dans une archive `.zip`. L’import accepte plusieurs
 fichiers `.ini` de 1 Mo maximum chacun. Tous sont validés avant installation et
 aucun fichier Site existant n’est écrasé.
+La sélection Joomla active notamment Dupliquer et Exporter pour les fichiers
+CBStats. Le champ Langue associe un sélecteur visible des langues installées à
+la saisie libre du code. Les erreurs de validation identifient directement le
+nom de fichier, le titre ou les entrées concernés.

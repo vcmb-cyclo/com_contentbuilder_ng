@@ -435,3 +435,7 @@ Selected title sets can be exported as one `.ini` file or, for multiple files,
 as one `.zip` archive. Import accepts multiple `.ini` files up to 1 MB each;
 all are validated before installation and existing Site files are never
 overwritten.
+Joomla selection state enables Duplicate and Export for selected CBStats files.
+The Language field combines a visible installed-language selector with the
+free-form tag input. Validation errors identify Filename, Title or Entries
+directly.
