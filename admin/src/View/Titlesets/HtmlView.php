@@ -13,6 +13,7 @@ use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Toolbar\Toolbar;
 use CB\Component\Contentbuilderng\Administrator\Model\TitlesetsModel;
 use Joomla\CMS\Application\AdministratorApplication;
+use Joomla\CMS\Document\HtmlDocument;
 use Joomla\CMS\Factory;
 
 final class HtmlView extends BaseHtmlView
@@ -36,19 +37,21 @@ final class HtmlView extends BaseHtmlView
         $this->items = $model->getItems();
 
         ToolbarHelper::title(Text::_('COM_CONTENTBUILDERNG_TITLESETS_TITLE'), 'list');
+        /** @var HtmlDocument $document */
+        $document = $this->getDocument();
         /** @var Toolbar $toolbar */
-        $toolbar = $this->getDocument()->getToolbar('toolbar');
+        $toolbar = $document->getToolbar('toolbar');
         $toolbar->linkButton('titleset-new')
             ->url(Route::_('index.php?option=com_contentbuilderng&view=titleset', false))
             ->text('JTOOLBAR_NEW')
             ->icon('icon-new')
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_NEW_DESC')]);
         $actions = $toolbar->dropdownButton('titlesets-actions');
-        $actions->text(Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS'))
-            ->icon('icon-ellipsis-h')
-            ->toggleSplit(false)
-            ->buttonClass('btn btn-action')
-            ->listCheck(false);
+        $actions->text(Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS'));
+        $actions->icon('icon-ellipsis-h');
+        $actions->toggleSplit(false);
+        $actions->buttonClass('btn btn-action');
+        $actions->listCheck(false);
         $actionsToolbar = $actions->getChildToolbar();
         foreach (
             [

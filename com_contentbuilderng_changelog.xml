@@ -3,7 +3,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.11-RC03</version>
+		<version>6.1.11</version>
 		<addition>
 			<item>Added reusable CBStats INI title sets, a native Joomla manager, Debug warnings, a complete French department mapping and multilingual country examples.</item>
 			<item>Added editor-safe editorial Cards with visually editable H1-H6 headers for grouping free HTML, CBStats and CBList content with the shared Card presentation.</item>

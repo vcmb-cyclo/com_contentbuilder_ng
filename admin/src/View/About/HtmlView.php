@@ -186,7 +186,6 @@ class HtmlView extends BaseHtmlView
                 ->url(Route::_('index.php?option=com_contentbuilderng&view=about&layout=extensions', false))
                 ->text('COM_CONTENTBUILDERNG_ABOUT_EXTENSIONS')
                 ->icon('fa fa-plug');
-
         }
 
         $configReturn = urlencode(base64_encode(

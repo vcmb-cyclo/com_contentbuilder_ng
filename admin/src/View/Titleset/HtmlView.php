@@ -8,6 +8,7 @@ namespace CB\Component\Contentbuilderng\Administrator\View\Titleset;
 
 use CB\Component\Contentbuilderng\Administrator\Model\TitlesetModel;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Document\HtmlDocument;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
@@ -38,8 +39,10 @@ final class HtmlView extends BaseHtmlView
             ? 'COM_CONTENTBUILDERNG_TITLESETS_VIEW_TITLE'
             : 'COM_CONTENTBUILDERNG_TITLESETS_EDIT_TITLE'), $isProvided ? 'eye' : 'edit');
         if ($isProvided) {
+            /** @var HtmlDocument $document */
+            $document = $this->getDocument();
             /** @var Toolbar $toolbar */
-            $toolbar = $this->getDocument()->getToolbar('toolbar');
+            $toolbar = $document->getToolbar('toolbar');
             $toolbar->linkButton('titleset-duplicate')
                 ->url(Route::_('index.php?option=com_contentbuilderng&view=titleset&filename=' . rawurlencode((string) $this->data['filename']) . '&source=provided&duplicate=1', false))
                 ->text('COM_CONTENTBUILDERNG_TITLESETS_DUPLICATE')
