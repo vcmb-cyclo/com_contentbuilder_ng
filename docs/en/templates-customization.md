@@ -166,6 +166,7 @@ Examples:
 
 ```text
 {CBStats id=3 output=total}
+{CBStats id=15 output=remaining target=200}
 {CBStats id=3 output=form_name}
 {CBStats id=3 field=FieldName output=table}
 {CBStats id=3 field=FieldName output=json sort=title dir=asc}
@@ -186,6 +187,7 @@ Examples:
 {CBStats id=3 filter[field]=Status filter[value]="Open" output=total}
 {CBStats id=3 filter[field]=Status filter[value]="Open*" output=total}
 {CBStats id=3 filter[field]=Status filter[value]="Open* | Pending" output=total}
+{CBStats id=15 filter[field]=Status filter[value]="Open" output=remaining target=200}
 {CBStats idsum=25+27 field="Route" output="table" title="Monticyclo / Montigravel"}
 {CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
 ```

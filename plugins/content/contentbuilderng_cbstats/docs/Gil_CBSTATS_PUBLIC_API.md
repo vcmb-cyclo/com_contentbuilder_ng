@@ -100,6 +100,7 @@ The following outputs are implemented in RC97 and must remain compatible:
 
 ```text
 output=total
+output=remaining target=200
 output=form_name
 output=table
 output=json

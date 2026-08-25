@@ -162,7 +162,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $debug = false;
         $output = TagSyntaxService::normalizeKeyword((string) ($attributes['output'] ?? 'total'));
         $allowedOutputs = [
-            'total', 'table', 'form_name', 'distinct', 'sum', 'min', 'max', 'avg',
+            'total', 'remaining', 'table', 'form_name', 'distinct', 'sum', 'min', 'max', 'avg',
             'json', 'pie', 'bar', 'histogram', 'line', 'radar',
         ];
         $listOutputs = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar'];
@@ -185,6 +185,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $dir = TagSyntaxService::normalizeKeyword((string) ($attributes['dir'] ?? 'asc'));
         $values = (string) ($attributes['values'] ?? '');
         $exportManual = ManualExportService::isRequested((string) ($attributes['export'] ?? ''));
+        $target = (float) ($attributes['target'] ?? 0);
 
         try {
             $limit = DisplayOptionsService::parseLimit($attributes);
@@ -308,6 +309,15 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                 );
             }
 
+            if ($debug && $output === 'remaining') {
+                return $this->renderDebugMessage(Text::sprintf(
+                    'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_REMAINING',
+                    $debugSource,
+                    $this->formatNumber($target),
+                    $this->formatNumber(StatsService::resolveRemainingOutput($payload, $target))
+                ));
+            }
+
             if ($debug && in_array($output, ['distinct', 'sum', 'min', 'max', 'avg'], true)) {
                 $numericValue = $payload['field'][$output] ?? null;
                 return $this->renderDebugMessage(Text::sprintf(
@@ -376,6 +386,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                     $hideOptions
                 ),
                 'total' => (string) StatsService::resolveCbstatsOutput($payload, 'total'),
+                'remaining' => $this->formatNumber(StatsService::resolveRemainingOutput($payload, $target)),
                 'distinct' => $this->renderNumericFieldValue($payload, 'distinct'),
                 'sum' => $this->renderSum($payload),
                 'min' => $this->renderNumericFieldValue($payload, 'min'),
@@ -519,6 +530,9 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             'idsum' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_IDSUM',
             'id_conflict' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ID_CONFLICT',
             'output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_OUTPUT',
+            'target' => $detail === 'target_output'
+                ? 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET_OUTPUT'
+                : 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET',
             'manual_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_MANUAL_OUTPUT',
             'idsum_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_IDSUM_OUTPUT',
             'field' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_FIELD',

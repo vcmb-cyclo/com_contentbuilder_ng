@@ -398,6 +398,11 @@ final class StatsService
         };
     }
 
+    public static function resolveRemainingOutput(array $payload, int|float $target): int|float
+    {
+        return max(0, $target - (int) self::resolveCbstatsOutput($payload, 'total'));
+    }
+
     public static function countDistinctFieldValues(array $values): int
     {
         return count(array_filter(

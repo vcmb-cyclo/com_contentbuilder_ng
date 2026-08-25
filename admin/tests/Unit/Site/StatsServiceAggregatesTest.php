@@ -139,4 +139,14 @@ final class StatsServiceAggregatesTest extends TestCase
         ];
         self::assertSame(2, StatsService::resolveCbstatsOutput($filteredPayload, 'distinct'));
     }
+
+    public function testRemainingUsesTheFilteredTotalAndNeverBecomesNegative(): void
+    {
+        $filteredPayload = ['records' => ['total' => 50]];
+
+        self::assertSame(150, StatsService::resolveRemainingOutput($filteredPayload, 200));
+        self::assertSame(0, StatsService::resolveRemainingOutput($filteredPayload, 50));
+        self::assertSame(0, StatsService::resolveRemainingOutput($filteredPayload, 25));
+        self::assertSame(150.5, StatsService::resolveRemainingOutput($filteredPayload, 200.5));
+    }
 }

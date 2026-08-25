@@ -76,6 +76,33 @@ final class CbStatsValidationServiceTest extends TestCase
                 'output' => 'distinct',
             ]), 'parameter'));
     }
+
+    public function testRemainingRequiresAPositiveUnquotedTargetAndAcceptsFilters(): void
+    {
+        $valid = TagSyntaxService::parse(
+            'id=15 output=remaining target=200 filter[field]=Status filter[value]="Open|Pending"'
+        );
+        self::assertSame([], StatsTagValidationService::validationErrors(
+            $valid['attributes'], 0, $valid['quoted']
+        ));
+
+        foreach (['', '0', '-1', 'abc'] as $target) {
+            self::assertSame(['target'], array_column(StatsTagValidationService::validationErrors([
+                'id' => '15', 'output' => 'remaining', 'target' => $target,
+            ]), 'parameter'));
+        }
+
+        $quoted = TagSyntaxService::parse('id=15 output=remaining target="200"');
+        self::assertSame(
+            ['target_syntax'],
+            array_column(StatsTagValidationService::validationErrors(
+                $quoted['attributes'], 0, $quoted['quoted']
+            ), 'detail')
+        );
+        self::assertSame(['target'], array_column(StatsTagValidationService::validationErrors([
+            'id' => '15', 'output' => 'total', 'target' => '200',
+        ]), 'parameter'));
+    }
     public function testCardsAndResponsiveDimensionsAreValidatedStrictly(): void
     {
         foreach (['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6'] as $card) {
@@ -197,6 +224,10 @@ final class CbStatsValidationServiceTest extends TestCase
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_HEADERS_LABEL',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DISTINCT_LABEL',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DISTINCT_TEXT',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_REMAINING_LABEL',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_REMAINING_TEXT',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET_OUTPUT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_EDITORIAL_CARD_LABEL',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_EDITORIAL_CARD_TEXT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_NUMERIC_SYNTAX',

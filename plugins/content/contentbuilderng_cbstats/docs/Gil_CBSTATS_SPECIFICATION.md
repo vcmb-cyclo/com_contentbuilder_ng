@@ -61,6 +61,7 @@ output=histogram
 output=line
 output=radar
 output=distinct
+output=remaining target=200
 output=sum
 output=min
 output=max
@@ -68,6 +69,20 @@ output=avg
 ```
 
 These outputs are existing public contracts and must not regress.
+
+### 3.2 Remaining before a target
+
+`output=remaining` returns the positive difference between `target` and the
+normal filtered CBStats total. The normal view/source, permission and filtering
+pipeline runs first, then CBStats calculates `max(0, target - total)`.
+`target` is a required positive unquoted number and is only valid with this
+output. The implementation reuses the shared `output=total` payload; it does
+not query or count records independently.
+
+```text
+{CBStats id=15 output=remaining target=200}
+{CBStats id=15 filter[field]=Status filter[value]="Open" output=remaining target=200}
+```
 
 ### 3.1 Distinct values
 

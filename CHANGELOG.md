@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.1.11-RC05 — 2026-08-25
+
+- Added CBStats `output=remaining target=Number` to calculate the non-negative difference between a positive target and the normal filtered total.
+- Reused the existing CBStats total/filter pipeline and added validation, Debug diagnostics, help, specifications and regression coverage.
+
 ## 6.1.11-RC04 — 2026-08-25
 
 - Simplified the CBStats title-set editor to filename, title, optional comment, automatic last-modified date and value mappings.

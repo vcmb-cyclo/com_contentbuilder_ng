@@ -196,6 +196,7 @@ Exemples :
 
 ```text
 {CBStats id=25 output=total}
+{CBStats id=15 output=remaining target=200}
 {CBStats id=25 output=form_name}
 {CBStats id=25 field=Parcours output=table}
 {CBStats id=25 field=Parcours output=json sort=title dir=asc}
@@ -216,6 +217,7 @@ Exemples :
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert" output=total}
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert*" output=total}
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert* | En attente" output=total}
+{CBStats id=15 filter[field]=Statut filter[value]="Ouvert" output=remaining target=200}
 {CBStats idsum=25+27 field="Parcours" output="table" title="Monticyclo / Montigravel"}
 {CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
 ```
