@@ -579,6 +579,8 @@ Provided files remain read-only and can be duplicated into the site's custom
 directory; site-specific files are editable. The list's column selector is
 stored locally in the browser. Field tooltips document the INI metadata and
 mapping values; a separate help screen is intentionally unnecessary.
+The administration list can be searched by file title and sorted by any data
+column; the Actions column is intentionally not sortable.
 
 Missing, unreadable, empty or invalid files preserve original values and never
 replace the frontend result with an error. Joomla Debug records one Warning per

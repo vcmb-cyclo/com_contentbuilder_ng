@@ -18,33 +18,56 @@ $columns = [
     'status' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_STATUS'),
     'actions' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_ACTIONS'),
 ];
+$sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
 ?>
 <div class="container-fluid">
     <div class="alert alert-info">
         <?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_INTRO'); ?>
     </div>
 
-    <div class="d-flex justify-content-end mb-2"><div class="dropdown">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <div class="input-group input-group-sm" style="max-width: 24rem;">
+            <span class="input-group-text"><span class="icon-search" aria-hidden="true"></span></span>
+            <input
+                type="search"
+                class="form-control"
+                id="cbng-titlesets-search"
+                placeholder="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_TITLESETS_SEARCH_PLACEHOLDER'), ENT_QUOTES, 'UTF-8'); ?>"
+                aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_TITLESETS_SEARCH_DESC'), ENT_QUOTES, 'UTF-8'); ?>"
+                title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_TITLESETS_SEARCH_DESC'), ENT_QUOTES, 'UTF-8'); ?>"
+            >
+            <button class="btn btn-outline-secondary" type="button" data-cb-titlesets-search-clear title="<?php echo htmlspecialchars(Text::_('JCLEAR'), ENT_QUOTES, 'UTF-8'); ?>">
+                <?php echo htmlspecialchars(Text::_('JCLEAR'), ENT_QUOTES, 'UTF-8'); ?>
+            </button>
+        </div>
+        <div class="dropdown">
         <button type="button" class="btn btn-primary btn-sm dropdown-toggle" id="cbng-titlesets-columns-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_TITLESETS_COLUMNS_DESC'), ENT_QUOTES, 'UTF-8'); ?>">
-            <span data-cb-titlesets-columns-count><?php echo count($columns); ?>/<?php echo count($columns); ?> <?php echo Text::_('COM_CONTENTBUILDERNG_COLUMNS'); ?></span>
+            <span data-cb-titlesets-columns-count data-cb-columns-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_COLUMNS'), ENT_QUOTES, 'UTF-8'); ?>"><?php echo count($columns); ?>/<?php echo count($columns); ?> <?php echo Text::_('COM_CONTENTBUILDERNG_COLUMNS'); ?></span>
         </button>
         <div class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="cbng-titlesets-columns-toggle">
             <?php foreach ($columns as $key => $label) : ?>
                 <label class="dropdown-item d-flex align-items-start gap-2 mb-1">
-                    <input class="form-check-input mt-1" type="checkbox" checked data-cb-titlesets-column-toggle="<?php echo $key; ?>">
+                    <input class="form-check-input mt-1" type="checkbox" checked data-cb-titlesets-column-toggle="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>">
                     <span><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></span>
                 </label>
             <?php endforeach; ?>
             <div class="dropdown-divider my-1"></div><button type="button" class="btn btn-link btn-sm px-2" data-cb-titlesets-columns-reset><?php echo Text::_('COM_CONTENTBUILDERNG_RESET'); ?></button>
         </div>
-    </div></div>
+        </div>
+    </div>
 
     <div class="table-responsive"><table class="table table-striped" id="cbng-titlesets">
         <thead>
             <tr>
                 <?php foreach ($columns as $key => $label) : ?>
-                    <th data-cb-titlesets-column="<?php echo $key; ?>"<?php echo $key === 'actions' ? ' class="text-end"' : ''; ?>>
-                        <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
+                    <th data-cb-titlesets-column="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>" data-cb-titlesets-sort-key="<?php echo htmlspecialchars(in_array($key, $sortableColumns, true) ? $key : '', ENT_QUOTES, 'UTF-8'); ?>" class="<?php echo htmlspecialchars($key === 'actions' ? 'text-end' : '', ENT_QUOTES, 'UTF-8'); ?>">
+                        <?php if (in_array($key, $sortableColumns, true)) : ?>
+                            <button type="button" class="btn btn-link p-0 text-decoration-none" data-cb-titlesets-sort="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo htmlspecialchars(Text::sprintf('COM_CONTENTBUILDERNG_TITLESETS_SORT_DESC', $label), ENT_QUOTES, 'UTF-8'); ?>">
+                                <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?> <span data-cb-sort-indicator aria-hidden="true"></span>
+                            </button>
+                        <?php else : ?>
+                            <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
+                        <?php endif; ?>
                     </th>
                 <?php endforeach; ?>
             </tr>
@@ -62,7 +85,7 @@ $columns = [
                 'COM_CONTENTBUILDERNG_TITLESETS_STATUS_' . strtoupper((string) $item['status'])
             );
             ?>
-            <tr>
+            <tr data-cb-titlesets-row data-cb-titlesets-name="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>">
                 <td data-cb-titlesets-column="filename"><a href="<?php echo Route::_($viewUrl, false); ?>" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_TITLESETS_OPEN_DESC'), ENT_QUOTES, 'UTF-8'); ?>"><code><?php echo htmlspecialchars((string) $item['filename'], ENT_QUOTES, 'UTF-8'); ?></code></a></td>
                 <td data-cb-titlesets-column="name"><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></td>
                 <td data-cb-titlesets-column="locale"><?php echo htmlspecialchars($locale, ENT_QUOTES, 'UTF-8'); ?></td>
@@ -89,6 +112,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const key = 'cbng.titlesets.columns';
     const toggles = [...document.querySelectorAll('[data-cb-titlesets-column-toggle]')];
     const count = document.querySelector('[data-cb-titlesets-columns-count]');
+    const tableBody = document.querySelector('#cbng-titlesets tbody');
+    const search = document.getElementById('cbng-titlesets-search');
+    const clearSearch = document.querySelector('[data-cb-titlesets-search-clear]');
+    const collator = new Intl.Collator(document.documentElement.lang || undefined, { numeric: true, sensitivity: 'base' });
     let state = {};
     try { state = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (error) {}
     function apply() {
@@ -100,11 +127,38 @@ document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('[data-cb-titlesets-column="' + column + '"]').forEach(function (cell) { cell.hidden = !shown; });
             if (shown) visible++;
         });
-        if (count) count.textContent = visible + '/' + toggles.length + ' ' + <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_COLUMNS'), JSON_UNESCAPED_UNICODE); ?>;
+        if (count) count.textContent = visible + '/' + toggles.length + ' ' + (count.dataset.cbColumnsLabel || '');
         try { localStorage.setItem(key, JSON.stringify(state)); } catch (error) {}
     }
     toggles.forEach(function (toggle) { toggle.addEventListener('change', function () { state[toggle.dataset.cbTitlesetsColumnToggle] = toggle.checked; apply(); }); });
     document.querySelector('[data-cb-titlesets-columns-reset]')?.addEventListener('click', function () { state = {}; apply(); });
+    function filterRows() {
+        const term = (search?.value || '').trim().toLocaleLowerCase();
+        document.querySelectorAll('[data-cb-titlesets-row]').forEach(function (row) {
+            row.hidden = term !== '' && !String(row.dataset.cbTitlesetsName || '').toLocaleLowerCase().includes(term);
+        });
+    }
+    search?.addEventListener('input', filterRows);
+    clearSearch?.addEventListener('click', function () { if (search) { search.value = ''; search.focus(); filterRows(); } });
+    document.querySelectorAll('[data-cb-titlesets-sort]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            if (!tableBody) return;
+            const column = button.dataset.cbTitlesetsSort;
+            const header = button.closest('th');
+            const ascending = header?.getAttribute('aria-sort') !== 'ascending';
+            document.querySelectorAll('[data-cb-titlesets-sort-key]').forEach(function (cell) { cell.removeAttribute('aria-sort'); cell.querySelector('[data-cb-sort-indicator]')?.replaceChildren(); });
+            header?.setAttribute('aria-sort', ascending ? 'ascending' : 'descending');
+            button.querySelector('[data-cb-sort-indicator]')?.replaceChildren(document.createTextNode(ascending ? '▲' : '▼'));
+            const rows = [...tableBody.querySelectorAll('[data-cb-titlesets-row]')];
+            rows.sort(function (left, right) {
+                const leftValue = left.querySelector('[data-cb-titlesets-column="' + column + '"]')?.textContent.trim() || '';
+                const rightValue = right.querySelector('[data-cb-titlesets-column="' + column + '"]')?.textContent.trim() || '';
+                const result = column === 'count' ? Number(leftValue) - Number(rightValue) : collator.compare(leftValue, rightValue);
+                return ascending ? result : -result;
+            });
+            rows.forEach(function (row) { tableBody.appendChild(row); });
+        });
+    });
     apply();
 });
 </script>

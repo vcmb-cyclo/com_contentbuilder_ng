@@ -468,3 +468,5 @@ de titres CBStats**. Un clic sur le nom affiche le contenu. Les fichiers fournis
 restent en lecture seule et peuvent être dupliqués dans le répertoire du site ;
 les fichiers propres au site sont modifiables. Le sélecteur de colonnes de la
 liste mémorise les colonnes masquées dans le navigateur.
+La liste permet aussi de rechercher un titre de fichier et de trier les
+colonnes de données.
