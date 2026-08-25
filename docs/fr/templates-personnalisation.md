@@ -430,7 +430,8 @@ Cards. La syntaxe complète est recommandée :
 
 ```html
 <div class="cb-cards">
-  <div class="cb-card-editorial" data-title="Informations | h4" data-card="v1" data-w="33">
+  <div class="cb-card-editorial" data-card="v1" data-w="33">
+    <h4 data-cb-card-title>Informations</h4>
     <p>Total : {CBStats id=15 output=total}</p>
     <p>Groupes distincts : {CBStats id=15 field=Groupe output=distinct}</p>
     {CBList id=15 fields="Nom|Prenom" limit=5}
@@ -438,8 +439,11 @@ Cards. La syntaxe complète est recommandée :
 </div>
 ```
 
-`data-title` est facultatif et accepte les suffixes de titre partagés H1 à H6
-et rem positif. En son absence, aucun bandeau n’est généré. `data-card` utilise
+Le titre visible `<h1>` à `<h6 data-cb-card-title>` devient le bandeau coloré
+de la Card et reste modifiable dans l’éditeur visuel. Un titre Hx sans cet
+attribut reste dans le corps. L’ancienne syntaxe `data-title` reste acceptée
+et conserve ses suffixes H1 à H6 et rem positif. Sans l’un de ces titres,
+aucun bandeau n’est généré. `data-card` utilise
 `v1` par défaut et `data-w` utilise `33` par défaut ; les largeurs acceptées
 sont `33`, `66` et `100`. Les espaces vides et insécables insérés entre les
 Cards par un éditeur sont ignorés dans les grilles `cb-cards`.

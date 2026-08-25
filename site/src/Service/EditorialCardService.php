@@ -14,6 +14,7 @@ use DOMXPath;
 final class EditorialCardService
 {
     private const MARKER_CLASS = 'cb-card-editorial';
+    private const TITLE_ATTRIBUTE = 'data-cb-card-title';
     private const ROOT_ID = 'cb-editorial-card-root';
 
     public static function containsMarker(string $html): bool
@@ -113,7 +114,14 @@ final class EditorialCardService
     {
         $variant = ContentCardService::normalize($card->getAttribute('data-card')) ?: 'v1';
         $width = ContentCardService::normalizeWidth($card->getAttribute('data-w')) ?: '33';
-        $title = ContentCardService::parseTitle($card->getAttribute('data-title'));
+        $visibleTitle = self::findVisibleTitle($card);
+        $title = $visibleTitle instanceof DOMElement
+            ? [
+                'text' => trim($visibleTitle->textContent),
+                'tag' => strtolower($visibleTitle->tagName),
+                'fontSize' => '',
+            ]
+            : ContentCardService::parseTitle($card->getAttribute('data-title'));
         $classes = preg_split('/\s+/', trim($card->getAttribute('class'))) ?: [];
         $classes = array_values(array_filter(
             $classes,
@@ -129,10 +137,17 @@ final class EditorialCardService
 
         $children = [];
         foreach ($card->childNodes as $child) {
+            if ($child === $visibleTitle) {
+                continue;
+            }
             $children[] = $child;
         }
 
-        foreach ($children as $child) {
+        $originalChildren = [];
+        foreach ($card->childNodes as $child) {
+            $originalChildren[] = $child;
+        }
+        foreach ($originalChildren as $child) {
             $card->removeChild($child);
         }
 
@@ -152,5 +167,23 @@ final class EditorialCardService
             $body->appendChild($child);
         }
         $card->appendChild($body);
+    }
+
+    private static function findVisibleTitle(DOMElement $card): ?DOMElement
+    {
+        foreach ($card->childNodes as $child) {
+            if (!$child instanceof DOMElement || !$child->hasAttribute(self::TITLE_ATTRIBUTE)) {
+                continue;
+            }
+
+            $tag = strtolower($child->tagName);
+            if (preg_match('/^h[1-6]$/', $tag) !== 1) {
+                continue;
+            }
+
+            return $child;
+        }
+
+        return null;
     }
 }

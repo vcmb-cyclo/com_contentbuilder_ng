@@ -537,12 +537,16 @@ Joomla articles may group free HTML, CBStats and CBList tags in the shared Card
 presentation with this standard HTML marker:
 
 ```html
-<div class="cb-card-editorial" data-title="Information | h4" data-card="v1" data-w="33">
+<div class="cb-card-editorial" data-card="v1" data-w="33">
+  <h4 data-cb-card-title>Information</h4>
   <p>Total: {CBStats id=15 output=total}</p>
 </div>
 ```
 
-`data-title` is optional and uses the shared Hx/rem title syntax. `data-card`
+A direct child `h1`–`h6` carrying `data-cb-card-title` becomes the coloured
+Card header and remains visible in visual editors. An unmarked heading stays
+in the body. The legacy `data-title` attribute remains supported with the
+shared Hx/rem syntax and is used when no marked heading is present. `data-card`
 accepts `h1`–`h6` or `v1`–`v6` and defaults to `v1`; `data-w` accepts `33`,
 `66` or `100` and defaults to `33`. The complete explicit syntax is
 recommended. Invalid Card or width values use their defaults. The standard

@@ -30,6 +30,52 @@ final class EditorialCardServiceTest extends TestCase
         self::assertStringContainsString('class="cb-card cb-card-v1 cb-card-w33"', $result);
     }
 
+    public function testVisibleHeadingBecomesCardHeaderAndIsRemovedFromBody(): void
+    {
+        $result = EditorialCardService::transform(
+            '<div class="cb-card-editorial" data-card="v4" data-w="33">'
+                . '<h2 data-cb-card-title>Informations</h2><p>Content</p></div>'
+        );
+
+        self::assertStringContainsString('<h2 class="cb-card-header">Informations</h2>', $result);
+        self::assertStringContainsString('<div class="cb-card-body"><p>Content</p></div>', $result);
+        self::assertStringNotContainsString('data-cb-card-title', $result);
+    }
+
+    public function testVisibleHeadingTakesPriorityOverLegacyDataTitle(): void
+    {
+        $result = EditorialCardService::transform(
+            '<div class="cb-card-editorial" data-title="Legacy|h5">'
+                . '<h3 data-cb-card-title>Visible</h3></div>'
+        );
+
+        self::assertStringContainsString('<h3 class="cb-card-header">Visible</h3>', $result);
+        self::assertStringNotContainsString('Legacy', $result);
+    }
+
+    public function testHeadingWithoutMarkerRemainsInCardBody(): void
+    {
+        $result = EditorialCardService::transform(
+            '<div class="cb-card-editorial"><h4>Body heading</h4><p>Content</p></div>'
+        );
+
+        self::assertStringNotContainsString('cb-card-header', $result);
+        self::assertStringContainsString(
+            '<div class="cb-card-body"><h4>Body heading</h4><p>Content</p></div>',
+            $result
+        );
+    }
+
+    public function testTitleMarkerOnNonHeadingIsIgnored(): void
+    {
+        $result = EditorialCardService::transform(
+            '<div class="cb-card-editorial"><p data-cb-card-title>Body text</p></div>'
+        );
+
+        self::assertStringNotContainsString('cb-card-header', $result);
+        self::assertStringContainsString('<p data-cb-card-title>Body text</p>', $result);
+    }
+
     public function testInvalidVariantAndWidthUseDefaults(): void
     {
         $result = EditorialCardService::transform(

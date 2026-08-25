@@ -2,7 +2,7 @@
 
 ## 6.1.11-RC02 — 2026-08-25
 
-- Added editor-safe editorial Cards using a standard `div.cb-card-editorial`, with optional titles, shared Hx/rem title formatting and existing Card colours and widths.
+- Added editor-safe editorial Cards using a standard `div.cb-card-editorial`, with visually editable marked H1–H6 headers, compatible `data-title` support, and existing Card colours and widths.
 - Added automatic removal of empty whitespace and non-breaking-space text nodes between Cards to prevent unwanted grid spacing introduced by editors.
 
 ## 6.1.11-RC01 — 2026-08-25

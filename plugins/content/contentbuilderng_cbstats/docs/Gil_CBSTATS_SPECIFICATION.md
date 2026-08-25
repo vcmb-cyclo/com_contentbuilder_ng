@@ -525,7 +525,8 @@ An article may group free HTML, CBStats and CBList tags in the shared Card
 presentation with a standard editor-safe `div`:
 
 ```html
-<div class="cb-card-editorial" data-title="Information | h4" data-card="v1" data-w="33">
+<div class="cb-card-editorial" data-card="v1" data-w="33">
+  <h4 data-cb-card-title>Information</h4>
   <p>Total: {CBStats id=15 output=total}</p>
   <p>Distinct groups: {CBStats id=15 field=Group output=distinct}</p>
   {CBList id=15 fields="Nom|Prenom" limit=5}
@@ -533,8 +534,11 @@ presentation with a standard editor-safe `div`:
 ```
 
 The complete syntax is recommended. Missing or invalid `data-card` uses `v1`;
-missing or invalid `data-w` uses `33`. `data-title` is optional and, when
-present, reuses the shared H1–H6 and positive rem suffix parser. The body
+missing or invalid `data-w` uses `33`. A direct child `h1`–`h6` carrying
+`data-cb-card-title` becomes the coloured Card header; an unmarked heading
+remains in the body. The legacy `data-title` attribute remains supported and
+reuses the shared H1–H6 and positive rem suffix parser. A visible marked
+heading takes priority when both forms are present. The body
 preserves normal Joomla article HTML and nested content-plugin tags.
 
 The renderer uses `DOMDocument`, not a regular expression, to process nested
