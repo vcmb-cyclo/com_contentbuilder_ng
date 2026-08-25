@@ -168,6 +168,8 @@ final class TitlesetController extends BaseController
                 'already_exists' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_ERROR_EXISTS',
                 'upload_invalid' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_INVALID',
                 'batch_duplicate' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_DUPLICATE',
+                'directory_failed' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_ERROR_DIRECTORY',
+                'replace_failed' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_ERROR_REPLACE',
                 'read_failed', 'write_failed' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_ERROR_WRITE',
                 default => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_FAILED',
             };
