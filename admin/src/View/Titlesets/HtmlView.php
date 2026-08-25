@@ -43,6 +43,27 @@ final class HtmlView extends BaseHtmlView
             ->text('JTOOLBAR_NEW')
             ->icon('icon-new')
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_NEW_DESC')]);
+        $actions = $toolbar->dropdownButton('titlesets-actions');
+        $actions->text(Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS'))
+            ->icon('icon-ellipsis-h')
+            ->toggleSplit(false)
+            ->buttonClass('btn btn-action')
+            ->listCheck(true);
+        $actionsToolbar = $actions->getChildToolbar();
+        foreach (
+            [
+                ['titlesets.duplicateSelected', 'COM_CONTENTBUILDERNG_TITLESETS_DUPLICATE', 'icon-copy'],
+                ['titlesets.editSelected', 'JACTION_EDIT', 'icon-edit'],
+                ['titlesets.copySelected', 'COM_CONTENTBUILDERNG_TITLESETS_COPY', 'icon-copy'],
+                ['titleset.deleteSelected', 'JACTION_DELETE', 'icon-trash'],
+            ] as [$task, $text, $icon]
+        ) {
+            $actionsToolbar->standardButton($task)
+                ->task($task)
+                ->text($text)
+                ->icon($icon)
+                ->listCheck(true);
+        }
         $toolbar->linkButton('titlesets-close')
             ->url(Route::_('index.php?option=com_contentbuilderng&view=about', false))
             ->text('JTOOLBAR_CLOSE')

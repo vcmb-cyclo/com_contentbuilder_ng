@@ -587,6 +587,10 @@ browser navigation request confirmation when the form contains unsaved edits.
 The list searches both filenames and file titles, displays 10 rows by default
 with 5/10/25/50/All choices, and limits long titles to two visual lines. Source
 labels identify the storage origin as `CBStats` or `Site`.
+The list uses Joomla-style row selection and an Actions menu. CBStats files can
+be duplicated; Site files can be edited, copied or deleted. Save as Copy writes
+`name-copy.ini`, then `name-copy-2.ini` when needed. The language field suggests
+installed Joomla languages while remaining free-form for tags such as `it-IT`.
 
 Missing, unreadable, empty or invalid files preserve original values and never
 replace the frontend result with an error. Joomla Debug records one Warning per

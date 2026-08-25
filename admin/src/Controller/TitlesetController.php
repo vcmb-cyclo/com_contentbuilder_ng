@@ -33,6 +33,47 @@ final class TitlesetController extends BaseController
         $this->saveAndRedirect(false);
     }
 
+    public function save2copy(): void
+    {
+        $this->checkToken();
+        $this->assertAuthorized();
+        $data = $this->input->post->get('jform', [], 'array');
+
+        try {
+            $filename = (new CbStatsTitleSetManagerService(JPATH_SITE))->saveCopy($data);
+            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_TITLESETS_COPY_SAVED'));
+            $url = 'index.php?option=com_contentbuilderng&view=titleset&source=custom&filename='
+                . rawurlencode($filename);
+        } catch (\Throwable) {
+            $this->getApp()->setUserState('com_contentbuilderng.titleset.data', $data);
+            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED'), 'error');
+            $url = 'index.php?option=com_contentbuilderng&view=titleset';
+        }
+
+        $this->setRedirect(Route::_($url, false));
+    }
+
+    public function deleteSelected(): void
+    {
+        $this->checkToken();
+        $this->assertAuthorized();
+        $selected = $this->input->post->get('cid', [], 'array');
+        $service = new CbStatsTitleSetManagerService(JPATH_SITE);
+        $deleted = 0;
+
+        foreach ($selected as $identifier) {
+            [$source, $filename] = array_pad(explode(':', (string) $identifier, 2), 2, '');
+            if ($source !== 'custom') {
+                continue;
+            }
+            $service->delete($filename);
+            $deleted++;
+        }
+
+        $this->setMessage(Text::plural('COM_CONTENTBUILDERNG_TITLESETS_N_DELETED', $deleted));
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=titlesets', false));
+    }
+
     public function validateFile(): void
     {
         $this->checkToken();

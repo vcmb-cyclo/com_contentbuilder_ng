@@ -88,6 +88,18 @@ final class CbStatsTitleSetManagerServiceTest extends TestCase
         );
     }
 
+    public function testSaveCopyUsesTheNextAvailableFilename(): void
+    {
+        $data = [
+            'filename' => 'countries.ini',
+            'name' => 'Countries',
+            'titles' => [['value' => 'fr', 'label' => 'France']],
+        ];
+
+        self::assertSame('countries-copy.ini', $this->service->saveCopy($data));
+        self::assertSame('countries-copy-2.ini', $this->service->saveCopy($data));
+    }
+
     public function testDeletesOnlyCustomFiles(): void
     {
         $this->service->save([

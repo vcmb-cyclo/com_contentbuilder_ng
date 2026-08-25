@@ -63,6 +63,9 @@ final class TitlesetModel extends BaseDatabaseModel
         if ($source === 'provided' && $app->getInput()->getBool('duplicate', false)) {
             $data['source'] = 'custom';
         }
+        if ($source === 'custom' && $app->getInput()->getBool('copy', false)) {
+            $data['filename'] = (new CbStatsTitleSetManagerService(JPATH_SITE))->suggestCopyFilename($filename);
+        }
 
         return $this->dataCache = $data;
     }

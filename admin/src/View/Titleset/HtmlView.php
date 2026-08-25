@@ -10,6 +10,7 @@ use CB\Component\Contentbuilderng\Administrator\Model\TitlesetModel;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Language\LanguageHelper;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
@@ -19,6 +20,7 @@ final class HtmlView extends BaseHtmlView
 {
     protected Form $form;
     protected array $data = [];
+    protected array $languageTags = [];
 
     public function display($tpl = null): void
     {
@@ -33,6 +35,11 @@ final class HtmlView extends BaseHtmlView
         }
         $this->data = $model->getData();
         $this->form = $model->getForm();
+        $this->languageTags = array_values(array_unique(array_merge(
+            array_keys(LanguageHelper::getKnownLanguages(JPATH_SITE)),
+            array_keys(LanguageHelper::getKnownLanguages(JPATH_ADMINISTRATOR))
+        )));
+        sort($this->languageTags, SORT_NATURAL | SORT_FLAG_CASE);
 
         $isProvided = ($this->data['source'] ?? '') === 'provided';
         ToolbarHelper::title(Text::_($isProvided
@@ -54,8 +61,14 @@ final class HtmlView extends BaseHtmlView
             parent::display($tpl);
             return;
         }
-        ToolbarHelper::apply('titleset.apply');
-        ToolbarHelper::save('titleset.save');
+        ToolbarHelper::saveGroup(
+            [
+                ['apply', 'titleset.apply', 'JTOOLBAR_APPLY'],
+                ['save', 'titleset.save', 'JTOOLBAR_SAVE'],
+                ['save2copy', 'titleset.save2copy', 'JTOOLBAR_SAVE_AS_COPY'],
+            ],
+            'btn-success'
+        );
         ToolbarHelper::custom(
             'titleset.validateFile',
             'check',
@@ -63,12 +76,6 @@ final class HtmlView extends BaseHtmlView
             'COM_CONTENTBUILDERNG_TITLESETS_VALIDATE',
             false
         );
-        if (($this->data['source'] ?? '') === 'custom' && ($this->data['filename'] ?? '') !== '') {
-            ToolbarHelper::deleteList(
-                Text::_('COM_CONTENTBUILDERNG_TITLESETS_DELETE_CONFIRM'),
-                'titleset.deleteFile'
-            );
-        }
         ToolbarHelper::cancel('titleset.cancel');
 
         parent::display($tpl);

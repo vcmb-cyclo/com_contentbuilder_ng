@@ -16,15 +16,11 @@ $columns = [
     'source' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_SOURCE'),
     'count' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_COUNT'),
     'status' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_STATUS'),
-    'actions' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_ACTIONS'),
 ];
 $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
 ?>
+<form action="<?php echo Route::_('index.php?option=com_contentbuilderng&view=titlesets'); ?>" method="post" name="adminForm" id="adminForm">
 <div class="container-fluid">
-    <div class="alert alert-info">
-        <?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_INTRO'); ?>
-    </div>
-
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
         <div class="input-group input-group-sm" style="max-width: 24rem;">
             <span class="input-group-text"><span class="icon-search" aria-hidden="true"></span></span>
@@ -59,6 +55,9 @@ $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
     <div class="table-responsive"><table class="table table-striped" id="cbng-titlesets">
         <thead>
             <tr>
+                <th class="text-center" style="width: 1%;">
+                    <input class="form-check-input" type="checkbox" name="checkall-toggle" value="" onclick="Joomla.checkAll(this);" aria-label="<?php echo htmlspecialchars(Text::_('JGLOBAL_CHECK_ALL'), ENT_QUOTES, 'UTF-8'); ?>">
+                </th>
                 <?php foreach ($columns as $key => $label) : ?>
                     <th data-cb-titlesets-column="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>" data-cb-titlesets-sort-key="<?php echo htmlspecialchars(in_array($key, $sortableColumns, true) ? $key : '', ENT_QUOTES, 'UTF-8'); ?>" class="<?php echo htmlspecialchars($key === 'actions' ? 'text-end' : '', ENT_QUOTES, 'UTF-8'); ?>">
                         <?php if (in_array($key, $sortableColumns, true)) : ?>
@@ -78,14 +77,14 @@ $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
             $isCustom = $item['source'] === 'custom';
             $viewUrl = 'index.php?option=com_contentbuilderng&view=titleset&filename='
                 . rawurlencode((string) $item['filename']) . '&source=' . $item['source'];
-            $actionUrl = $viewUrl . ($isCustom ? '' : '&duplicate=1');
             $name = (string) ($item['metadata']['name'] ?? '');
             $locale = (string) ($item['metadata']['locale'] ?? '');
             $statusLabel = Text::_(
                 'COM_CONTENTBUILDERNG_TITLESETS_STATUS_' . strtoupper((string) $item['status'])
             );
             ?>
-            <tr data-cb-titlesets-row data-cb-titlesets-search="<?php echo htmlspecialchars((string) $item['filename'] . ' ' . $name, ENT_QUOTES, 'UTF-8'); ?>">
+            <tr data-cb-titlesets-row data-cb-titlesets-source="<?php echo htmlspecialchars((string) $item['source'], ENT_QUOTES, 'UTF-8'); ?>" data-cb-titlesets-filename="<?php echo htmlspecialchars((string) $item['filename'], ENT_QUOTES, 'UTF-8'); ?>" data-cb-titlesets-search="<?php echo htmlspecialchars((string) $item['filename'] . ' ' . $name, ENT_QUOTES, 'UTF-8'); ?>">
+                <td class="text-center"><input class="form-check-input" type="checkbox" name="cid[]" value="<?php echo htmlspecialchars((string) $item['source'] . ':' . (string) $item['filename'], ENT_QUOTES, 'UTF-8'); ?>" onclick="Joomla.isChecked(this.checked);"></td>
                 <td data-cb-titlesets-column="filename"><a href="<?php echo Route::_($viewUrl, false); ?>" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_TITLESETS_OPEN_DESC'), ENT_QUOTES, 'UTF-8'); ?>"><code><?php echo htmlspecialchars((string) $item['filename'], ENT_QUOTES, 'UTF-8'); ?></code></a></td>
                 <td data-cb-titlesets-column="name"><span class="cb-titlesets-title"><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></span></td>
                 <td data-cb-titlesets-column="locale"><?php echo htmlspecialchars($locale, ENT_QUOTES, 'UTF-8'); ?></td>
@@ -94,11 +93,6 @@ $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
                     : 'COM_CONTENTBUILDERNG_TITLESETS_SOURCE_PROVIDED'); ?></td>
                 <td data-cb-titlesets-column="count"><?php echo (int) $item['count']; ?></td>
                 <td data-cb-titlesets-column="status"><?php echo htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?></td>
-                <td data-cb-titlesets-column="actions" class="text-end">
-                    <a class="btn btn-sm btn-outline-primary" href="<?php echo Route::_($actionUrl, false); ?>" title="<?php echo htmlspecialchars(Text::_($isCustom ? 'COM_CONTENTBUILDERNG_TITLESETS_EDIT_DESC' : 'COM_CONTENTBUILDERNG_TITLESETS_DUPLICATE_DESC'), ENT_QUOTES, 'UTF-8'); ?>">
-                        <?php echo Text::_($isCustom ? 'JACTION_EDIT' : 'COM_CONTENTBUILDERNG_TITLESETS_DUPLICATE'); ?>
-                    </a>
-                </td>
             </tr>
         <?php endforeach; ?>
         <?php if ($this->items === []) : ?>
@@ -121,6 +115,9 @@ $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
         </div>
     </div>
 </div>
+<input type="hidden" name="task" value="">
+<?php echo Joomla\CMS\HTML\HTMLHelper::_('form.token'); ?>
+</form>
 <style>
 #cbng-titlesets [data-cb-titlesets-column="name"] { width: 28%; }
 .cb-titlesets-title { display: -webkit-box; overflow: hidden; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
@@ -137,6 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const previousButton = document.querySelector('[data-cb-titlesets-prev]');
     const nextButton = document.querySelector('[data-cb-titlesets-next]');
     const pageInfo = document.querySelector('[data-cb-titlesets-page-info]');
+    const form = document.getElementById('adminForm');
     const collator = new Intl.Collator(document.documentElement.lang || undefined, { numeric: true, sensitivity: 'base' });
     let currentPage = 1;
     let state = {};
@@ -195,6 +193,32 @@ document.addEventListener('DOMContentLoaded', function () {
             filterRows();
         });
     });
+    Joomla.submitbutton = function (task) {
+        const selected = [...document.querySelectorAll('input[name="cid[]"]:checked')];
+        if (selected.length === 0) return false;
+        const identifiers = selected.map(function (checkbox) {
+            const separator = checkbox.value.indexOf(':');
+            return { source: checkbox.value.slice(0, separator), filename: checkbox.value.slice(separator + 1) };
+        });
+        const single = identifiers.length === 1 ? identifiers[0] : null;
+        if (task === 'titlesets.duplicateSelected') {
+            if (!single || single.source !== 'provided') { window.alert(<?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_TITLESETS_SELECT_ONE_CBSTATS'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>); return false; }
+            window.location.href = 'index.php?option=com_contentbuilderng&view=titleset&source=provided&duplicate=1&filename=' + encodeURIComponent(single.filename);
+            return true;
+        }
+        if (task === 'titlesets.editSelected' || task === 'titlesets.copySelected') {
+            if (!single || single.source !== 'custom') { window.alert(<?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_TITLESETS_SELECT_ONE_SITE'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>); return false; }
+            window.location.href = 'index.php?option=com_contentbuilderng&view=titleset&source=custom&filename=' + encodeURIComponent(single.filename) + (task === 'titlesets.copySelected' ? '&copy=1' : '');
+            return true;
+        }
+        if (task === 'titleset.deleteSelected') {
+            if (identifiers.some(function (item) { return item.source !== 'custom'; })) { window.alert(<?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_TITLESETS_DELETE_SITE_ONLY'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>); return false; }
+            if (!window.confirm(<?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_TITLESETS_DELETE_SELECTED_CONFIRM'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>)) return false;
+            Joomla.submitform(task, form);
+            return true;
+        }
+        return false;
+    };
     apply();
     filterRows();
 });

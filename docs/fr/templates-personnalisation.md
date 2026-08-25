@@ -476,3 +476,8 @@ modifications non enregistrées demande confirmation.
 La recherche porte sur le nom et le titre du fichier. La liste affiche 10
 fichiers par défaut, avec les choix 5, 10, 25, 50 ou Tous. L’origine est indiquée
 par « CBStats » ou « Site » et les titres longs sont limités à deux lignes.
+La liste utilise la sélection et le menu Actions Joomla. Les fichiers CBStats
+peuvent être dupliqués ; les fichiers Site peuvent être modifiés, copiés ou
+supprimés. « Enregistrer une copie » génère `nom-copy.ini`, puis
+`nom-copy-2.ini`. Le champ Langue suggère les langues Joomla installées tout en
+acceptant librement un code comme `it-IT`.

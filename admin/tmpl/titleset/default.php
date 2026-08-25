@@ -43,16 +43,15 @@ use Joomla\CMS\Router\Route;
     <?php HTMLHelper::_('behavior.formvalidator'); ?>
 <form action="<?php echo Route::_('index.php?option=com_contentbuilderng&view=titleset'); ?>"
       method="post" name="adminForm" id="titleset-form" class="form-validate">
-    <div class="alert alert-info">
-        <?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_EDIT_INTRO'); ?>
-    </div>
-
     <div class="card mb-3">
-        <div class="card-header">
-            <h2 class="h4 mb-0"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_METADATA'); ?></h2>
-        </div>
         <div class="card-body"><?php echo $this->form->renderFieldset('metadata'); ?></div>
     </div>
+
+    <datalist id="cbng-titleset-languages">
+        <?php foreach ($this->languageTags as $languageTag) : ?>
+            <option value="<?php echo htmlspecialchars($languageTag, ENT_QUOTES, 'UTF-8'); ?>"></option>
+        <?php endforeach; ?>
+    </datalist>
 
     <div class="card">
         <div class="card-header">

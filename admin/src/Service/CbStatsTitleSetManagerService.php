@@ -156,6 +156,29 @@ final class CbStatsTitleSetManagerService
         return $filename;
     }
 
+    /** @param array<string, mixed> $data */
+    public function saveCopy(array $data): string
+    {
+        $data['filename'] = $this->suggestCopyFilename((string) ($data['filename'] ?? 'titleset.ini'));
+
+        return $this->save($data);
+    }
+
+    public function suggestCopyFilename(string $filename): string
+    {
+        $filename = $this->normalizeFilename($filename);
+        $base = preg_replace('/\.ini\z/i', '', basename($filename)) ?: 'titleset';
+        $directory = $this->siteRoot . '/' . CbStatsTitleSetService::CUSTOM_DIRECTORY;
+        $candidate = $base . '-copy.ini';
+        $number = 2;
+
+        while (is_file($directory . '/' . $candidate)) {
+            $candidate = $base . '-copy-' . $number++ . '.ini';
+        }
+
+        return $candidate;
+    }
+
     private function normalizeFilename(string $filename): string
     {
         $filename = trim($filename);

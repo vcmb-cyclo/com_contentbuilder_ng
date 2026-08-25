@@ -427,3 +427,7 @@ display their result, and discarding unsaved changes requires confirmation.
 Search covers both filenames and file titles. The list displays 10 files by
 default, with 5, 10, 25, 50 or All choices. Source is shown as `CBStats` or `Site`,
 and long titles are limited to two lines.
+The list uses Joomla-style selection and an Actions menu. CBStats files can be
+duplicated; Site files can be edited, copied or deleted. Save as Copy generates
+`name-copy.ini`, then `name-copy-2.ini`. The Language field suggests installed
+Joomla languages while accepting a free-form tag such as `it-IT`.
