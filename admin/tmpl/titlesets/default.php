@@ -39,7 +39,7 @@ $sortableColumns = ['filename', 'name', 'modified', 'source', 'count', 'status']
         </div>
         <div class="dropdown">
         <button type="button" class="btn btn-primary btn-sm dropdown-toggle" id="cbng-titlesets-columns-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_TITLESETS_COLUMNS_DESC'), ENT_QUOTES, 'UTF-8'); ?>">
-            <span data-cb-titlesets-columns-count data-cb-columns-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_COLUMNS'), ENT_QUOTES, 'UTF-8'); ?>"><?php echo count($columns); ?>/<?php echo count($columns); ?> <?php echo Text::_('COM_CONTENTBUILDERNG_COLUMNS'); ?></span>
+            <span data-cb-titlesets-columns-count data-cb-columns-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_COLUMNS'), ENT_QUOTES, 'UTF-8'); ?>"><?php echo count($columns); ?>/<?php echo count($columns) + 1; ?> <?php echo Text::_('COM_CONTENTBUILDERNG_COLUMNS'); ?></span>
         </button>
         <div class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="cbng-titlesets-columns-toggle">
             <?php foreach ($columns as $key => $label) : ?>
@@ -166,12 +166,12 @@ document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('[data-cb-titlesets-column="' + column + '"]').forEach(function (cell) { cell.hidden = !shown; });
             if (shown) visible++;
         });
-        if (count) count.textContent = visible + '/' + toggles.length + ' ' + (count.dataset.cbColumnsLabel || '');
+        if (count) count.textContent = (visible + (providedToggle?.checked ? 1 : 0)) + '/' + (toggles.length + 1) + ' ' + (count.dataset.cbColumnsLabel || '');
         try { localStorage.setItem(key, JSON.stringify(state)); } catch (error) {}
     }
     toggles.forEach(function (toggle) { toggle.addEventListener('change', function () { state[toggle.dataset.cbTitlesetsColumnToggle] = toggle.checked; apply(); }); });
     document.querySelector('[data-cb-titlesets-columns-reset]')?.addEventListener('click', function () { state = {}; if (providedToggle) providedToggle.checked = false; apply(); filterRows(); });
-    providedToggle?.addEventListener('change', function () { state.showProvided = providedToggle.checked; try { localStorage.setItem(key, JSON.stringify(state)); } catch (error) {} currentPage = 1; filterRows(); });
+    providedToggle?.addEventListener('change', function () { state.showProvided = providedToggle.checked; try { localStorage.setItem(key, JSON.stringify(state)); } catch (error) {} currentPage = 1; apply(); filterRows(); });
     function filterRows() {
         const term = (search?.value || '').trim().toLocaleLowerCase();
         const matchingRows = [...document.querySelectorAll('[data-cb-titlesets-row]')].filter(function (row) {
