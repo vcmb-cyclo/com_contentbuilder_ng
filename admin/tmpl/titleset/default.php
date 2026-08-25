@@ -40,6 +40,7 @@ use Joomla\CMS\Router\Route;
     </div>
 </div>
 <?php else : ?>
+    <?php HTMLHelper::_('behavior.formvalidator'); ?>
 <form action="<?php echo Route::_('index.php?option=com_contentbuilderng&view=titleset'); ?>"
       method="post" name="adminForm" id="titleset-form" class="form-validate">
     <div class="alert alert-info">
@@ -66,7 +67,7 @@ use Joomla\CMS\Router\Route;
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('titleset-form');
-    if (!form || typeof Joomla === 'undefined' || typeof Joomla.submitbutton !== 'function') return;
+    if (!form || typeof Joomla === 'undefined' || typeof Joomla.submitform !== 'function') return;
     let dirty = false;
     let allowNavigation = false;
     form.addEventListener('input', function () { dirty = true; });
@@ -76,11 +77,11 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault();
         event.returnValue = '';
     });
-    const submitbutton = Joomla.submitbutton.bind(Joomla);
     Joomla.submitbutton = function (task) {
         if (task === 'titleset.cancel' && dirty && !window.confirm(<?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_TITLESETS_CANCEL_CONFIRM'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>)) return false;
         allowNavigation = true;
-        return submitbutton(task);
+        Joomla.submitform(task, form);
+        return true;
     };
 });
 </script>

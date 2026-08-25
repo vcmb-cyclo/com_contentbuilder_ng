@@ -73,12 +73,14 @@ final class CbStatsTitleSetManagerServiceTest extends TestCase
     {
         $filename = $this->service->save([
             'filename' => 'vcmb-groupes',
+            'name' => 'Groupes VCMB',
             'titles' => [['value' => 'route', 'label' => 'Route']],
         ]);
 
         self::assertSame('vcmb-groupes.ini', $filename);
         self::assertTrue($this->service->validate([
             'filename' => 'vcmb-groupes',
+            'name' => 'Groupes VCMB',
             'titles' => [['value' => 'route', 'label' => 'Route']],
         ])['valid']);
         self::assertFileExists(
@@ -90,6 +92,7 @@ final class CbStatsTitleSetManagerServiceTest extends TestCase
     {
         $this->service->save([
             'filename' => 'delete.ini',
+            'name' => 'Delete test',
             'titles' => [['value' => 'fr', 'label' => 'France']],
         ]);
         $this->service->delete('delete.ini');

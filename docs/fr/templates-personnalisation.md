@@ -473,3 +473,6 @@ colonnes de données.
 Dans l’éditeur, l’extension `.ini` du nom de fichier est facultative. Les
 actions Valider et Enregistrer affichent leur résultat, et l’abandon de
 modifications non enregistrées demande confirmation.
+La recherche porte sur le nom et le titre du fichier. La liste affiche 10
+fichiers par défaut, avec les choix 10, 25, 50 ou Tous. L’origine est indiquée
+par « CBStats » ou « Site » et les titres longs sont limités à deux lignes.

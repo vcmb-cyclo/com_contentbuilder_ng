@@ -13,6 +13,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
+use Joomla\CMS\Toolbar\Toolbar;
 
 final class HtmlView extends BaseHtmlView
 {
@@ -38,12 +39,18 @@ final class HtmlView extends BaseHtmlView
             ? 'COM_CONTENTBUILDERNG_TITLESETS_VIEW_TITLE'
             : 'COM_CONTENTBUILDERNG_TITLESETS_EDIT_TITLE'), $isProvided ? 'eye' : 'edit');
         if ($isProvided) {
-            ToolbarHelper::link(
-                Route::_('index.php?option=com_contentbuilderng&view=titleset&filename=' . rawurlencode((string) $this->data['filename']) . '&source=provided&duplicate=1', false),
-                'COM_CONTENTBUILDERNG_TITLESETS_DUPLICATE',
-                'copy'
-            );
-            ToolbarHelper::cancel('titleset.cancel');
+            /** @var Toolbar $toolbar */
+            $toolbar = $this->getDocument()->getToolbar('toolbar');
+            $toolbar->linkButton('titleset-duplicate')
+                ->url(Route::_('index.php?option=com_contentbuilderng&view=titleset&filename=' . rawurlencode((string) $this->data['filename']) . '&source=provided&duplicate=1', false))
+                ->text('COM_CONTENTBUILDERNG_TITLESETS_DUPLICATE')
+                ->icon('icon-copy')
+                ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_DUPLICATE_DESC')]);
+            $toolbar->linkButton('titleset-close')
+                ->url(Route::_('index.php?option=com_contentbuilderng&view=titlesets', false))
+                ->text('JTOOLBAR_CLOSE')
+                ->icon('icon-cancel')
+                ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_CLOSE_DESC')]);
             parent::display($tpl);
             return;
         }

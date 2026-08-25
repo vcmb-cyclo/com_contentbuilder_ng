@@ -584,6 +584,9 @@ column; the Actions column is intentionally not sortable.
 The editor accepts filenames with or without the `.ini` extension and appends
 it when necessary. Validate and Save report their result, while Cancel and
 browser navigation request confirmation when the form contains unsaved edits.
+The list searches both filenames and file titles, displays 10 rows by default
+with 10/25/50/All choices, and limits long titles to two visual lines. Source
+labels identify the storage origin as `CBStats` or `Site`.
 
 Missing, unreadable, empty or invalid files preserve original values and never
 replace the frontend result with an error. Joomla Debug records one Warning per

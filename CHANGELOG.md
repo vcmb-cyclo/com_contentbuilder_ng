@@ -9,6 +9,7 @@
 - Refined title-set administration with filename-based content viewing, read-only provided files, a persistent column selector, contextual field help, and access from the About Actions menu.
 - Added file-title search and sortable columns to the CBStats title-set list.
 - Fixed title-set validation and saving when `.ini` is omitted, added precise save feedback, and protected unsaved editor changes on Cancel/navigation.
+- Fixed title-set toolbar submissions and read-only Close navigation; expanded search to filenames and titles, added 10-row pagination, concise source labels and two-line title display.
 
 ## 6.1.11-RC02 — 2026-08-25
 

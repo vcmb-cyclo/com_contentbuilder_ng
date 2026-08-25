@@ -85,9 +85,9 @@ $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
                 'COM_CONTENTBUILDERNG_TITLESETS_STATUS_' . strtoupper((string) $item['status'])
             );
             ?>
-            <tr data-cb-titlesets-row data-cb-titlesets-name="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>">
+            <tr data-cb-titlesets-row data-cb-titlesets-search="<?php echo htmlspecialchars((string) $item['filename'] . ' ' . $name, ENT_QUOTES, 'UTF-8'); ?>">
                 <td data-cb-titlesets-column="filename"><a href="<?php echo Route::_($viewUrl, false); ?>" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_TITLESETS_OPEN_DESC'), ENT_QUOTES, 'UTF-8'); ?>"><code><?php echo htmlspecialchars((string) $item['filename'], ENT_QUOTES, 'UTF-8'); ?></code></a></td>
-                <td data-cb-titlesets-column="name"><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></td>
+                <td data-cb-titlesets-column="name"><span class="cb-titlesets-title"><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></span></td>
                 <td data-cb-titlesets-column="locale"><?php echo htmlspecialchars($locale, ENT_QUOTES, 'UTF-8'); ?></td>
                 <td data-cb-titlesets-column="source"><?php echo Text::_($isCustom
                     ? 'COM_CONTENTBUILDERNG_TITLESETS_SOURCE_CUSTOM'
@@ -106,7 +106,25 @@ $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
         <?php endif; ?>
         </tbody>
     </table></div>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-2" data-cb-titlesets-pagination>
+        <label class="d-flex align-items-center gap-2 mb-0">
+            <span><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_DISPLAY'); ?></span>
+            <select class="form-select form-select-sm" data-cb-titlesets-page-size>
+                <option value="10" selected>10</option><option value="25">25</option><option value="50">50</option>
+                <option value="0"><?php echo Text::_('JALL'); ?></option>
+            </select>
+        </label>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-cb-titlesets-prev title="<?php echo htmlspecialchars(Text::_('JPREV'), ENT_QUOTES, 'UTF-8'); ?>"><?php echo Text::_('JPREV'); ?></button>
+            <span data-cb-titlesets-page-info></span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-cb-titlesets-next title="<?php echo htmlspecialchars(Text::_('JNEXT'), ENT_QUOTES, 'UTF-8'); ?>"><?php echo Text::_('JNEXT'); ?></button>
+        </div>
+    </div>
 </div>
+<style>
+#cbng-titlesets [data-cb-titlesets-column="name"] { width: 28%; }
+.cb-titlesets-title { display: -webkit-box; overflow: hidden; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+</style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const key = 'cbng.titlesets.columns';
@@ -115,7 +133,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const tableBody = document.querySelector('#cbng-titlesets tbody');
     const search = document.getElementById('cbng-titlesets-search');
     const clearSearch = document.querySelector('[data-cb-titlesets-search-clear]');
+    const pageSizeSelect = document.querySelector('[data-cb-titlesets-page-size]');
+    const previousButton = document.querySelector('[data-cb-titlesets-prev]');
+    const nextButton = document.querySelector('[data-cb-titlesets-next]');
+    const pageInfo = document.querySelector('[data-cb-titlesets-page-info]');
     const collator = new Intl.Collator(document.documentElement.lang || undefined, { numeric: true, sensitivity: 'base' });
+    let currentPage = 1;
     let state = {};
     try { state = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (error) {}
     function apply() {
@@ -134,12 +157,24 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('[data-cb-titlesets-columns-reset]')?.addEventListener('click', function () { state = {}; apply(); });
     function filterRows() {
         const term = (search?.value || '').trim().toLocaleLowerCase();
-        document.querySelectorAll('[data-cb-titlesets-row]').forEach(function (row) {
-            row.hidden = term !== '' && !String(row.dataset.cbTitlesetsName || '').toLocaleLowerCase().includes(term);
+        const matchingRows = [...document.querySelectorAll('[data-cb-titlesets-row]')].filter(function (row) {
+            return term === '' || String(row.dataset.cbTitlesetsSearch || '').toLocaleLowerCase().includes(term);
         });
+        const pageSize = Number(pageSizeSelect?.value || 10);
+        const pageCount = pageSize === 0 ? 1 : Math.max(1, Math.ceil(matchingRows.length / pageSize));
+        currentPage = Math.min(currentPage, pageCount);
+        const start = pageSize === 0 ? 0 : (currentPage - 1) * pageSize;
+        const visibleRows = new Set(pageSize === 0 ? matchingRows : matchingRows.slice(start, start + pageSize));
+        document.querySelectorAll('[data-cb-titlesets-row]').forEach(function (row) { row.hidden = !visibleRows.has(row); });
+        if (pageInfo) pageInfo.textContent = currentPage + ' / ' + pageCount;
+        if (previousButton) previousButton.disabled = currentPage <= 1;
+        if (nextButton) nextButton.disabled = currentPage >= pageCount;
     }
-    search?.addEventListener('input', filterRows);
+    search?.addEventListener('input', function () { currentPage = 1; filterRows(); });
     clearSearch?.addEventListener('click', function () { if (search) { search.value = ''; search.focus(); filterRows(); } });
+    pageSizeSelect?.addEventListener('change', function () { currentPage = 1; filterRows(); });
+    previousButton?.addEventListener('click', function () { currentPage = Math.max(1, currentPage - 1); filterRows(); });
+    nextButton?.addEventListener('click', function () { currentPage++; filterRows(); });
     document.querySelectorAll('[data-cb-titlesets-sort]').forEach(function (button) {
         button.addEventListener('click', function () {
             if (!tableBody) return;
@@ -157,8 +192,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 return ascending ? result : -result;
             });
             rows.forEach(function (row) { tableBody.appendChild(row); });
+            filterRows();
         });
     });
     apply();
+    filterRows();
 });
 </script>

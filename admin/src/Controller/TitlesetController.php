@@ -79,9 +79,11 @@ final class TitlesetController extends BaseController
                 : 'index.php?option=com_contentbuilderng&view=titlesets';
         } catch (\InvalidArgumentException $exception) {
             $this->getApp()->setUserState('com_contentbuilderng.titleset.data', $data);
-            $errorKey = str_contains($exception->getMessage(), 'titles')
-                ? 'COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED_MAPPINGS'
-                : 'COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED_FILENAME';
+            $errorKey = match (true) {
+                str_contains($exception->getMessage(), 'titles') => 'COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED_MAPPINGS',
+                str_contains($exception->getMessage(), 'name') => 'COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED_NAME',
+                default => 'COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED_FILENAME',
+            };
             $this->setMessage(Text::_($errorKey), 'error');
             $url = 'index.php?option=com_contentbuilderng&view=titleset';
         } catch (\Throwable) {

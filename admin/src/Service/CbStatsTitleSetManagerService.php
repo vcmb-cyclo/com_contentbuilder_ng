@@ -100,6 +100,9 @@ final class CbStatsTitleSetManagerService
         if (!CbStatsTitleSetService::isValidFilename($filename)) {
             $errors[] = 'filename';
         }
+        if (trim((string) ($data['name'] ?? '')) === '') {
+            $errors[] = 'name';
+        }
 
         $titles = $this->normalizeTitles((array) ($data['titles'] ?? []));
         $submittedRows = array_values(array_filter(
