@@ -127,6 +127,8 @@ $sortableColumns = ['filename', 'name', 'modified', 'source', 'count', 'status']
 </form>
 <style>
 #cbng-titlesets [data-cb-titlesets-column="name"] { width: 28%; }
+#cbng-titlesets [data-cb-titlesets-column="filename"],
+#cbng-titlesets [data-cb-titlesets-column="modified"] { white-space: nowrap; }
 .cb-titlesets-title { display: -webkit-box; overflow: hidden; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 </style>
 <script>
