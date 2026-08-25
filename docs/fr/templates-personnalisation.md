@@ -447,3 +447,18 @@ aucun bandeau n’est généré. `data-card` utilise
 `v1` par défaut et `data-w` utilise `33` par défaut ; les largeurs acceptées
 sont `33`, `66` et `100`. Les espaces vides et insécables insérés entre les
 Cards par un éditeur sont ignorés dans les grilles `cb-cards`.
+
+### Jeux de titres CBStats réutilisables
+
+Utilisez un fichier INI administré lorsque plusieurs statistiques partagent
+les mêmes renommages :
+
+```text
+{CBStats id=15 field=Departement titleset="departements-fr-FR.ini" output=table}
+```
+
+Les fichiers personnalisés de `media/contentbuilderng/cbstats/titlesets/`
+surchargent les fichiers fournis de même nom. Les correspondances `titles=`
+écrites dans la balise restent prioritaires. Un fichier absent ou invalide
+laisse les valeurs originales visibles et produit seulement un Warning lorsque
+le Debug Joomla est activé.

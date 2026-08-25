@@ -27,6 +27,7 @@ use CB\Component\Contentbuilderng\Site\Service\SparseFieldsetService;
 use CB\Component\Contentbuilderng\Site\Service\StatsFilterValueService;
 use CB\Component\Contentbuilderng\Site\Service\StatsHideOptionsService;
 use CB\Component\Contentbuilderng\Site\Service\StatsService;
+use CB\Component\Contentbuilderng\Site\Service\CbStatsTitleSetService;
 use Joomla\CMS\Application\CMSWebApplicationInterface;
 use Joomla\CMS\Application\SiteApplication;
 use Joomla\CMS\Date\Date;
@@ -279,6 +280,7 @@ class ApiController extends BaseController
             $dir = strtolower(trim((string) $this->input->getCmd('dir', 'asc')));
             $add = trim((string) $this->input->getString('add', ''));
             $titles = trim((string) $this->input->getString('titles', ''));
+            $titleSet = trim((string) $this->input->getString('titleset', ''));
             $ranges = trim((string) $this->input->getString('ranges', ''));
 
             if (!in_array($sort, ['none', 'title', 'value'], true)) {
@@ -297,13 +299,29 @@ class ApiController extends BaseController
                     $values = StatsService::applyFieldStatsRanges($values, $rangeDefinitions);
                 }
 
+                $titleSetMappings = [];
+                if ($titleSet !== '') {
+                    $titleSetResult = (new CbStatsTitleSetService(JPATH_SITE))->resolve($titleSet);
+                    $titleSetMappings = $titleSetResult['titles'];
+                    if ($titleSetResult['status'] !== 'ok' && (bool) $this->siteApp->get('debug', false)) {
+                        Logger::warning(Text::sprintf(
+                            'COM_CONTENTBUILDERNG_API_CBSTATS_TITLESET_WARNING',
+                            $titleSet,
+                            $titleSetResult['status']
+                        ));
+                    }
+                }
+
                 $items = StatsService::normalizeFieldStats(
                     $values,
                     $rangeDefinitions === [] ? $sort : 'none',
                     $dir,
                     $this->siteApp->getLanguage()->getTag(),
                     StatsService::parseFieldStatsAdditions($add),
-                    StatsService::parseFieldStatsTitles($titles)
+                    CbStatsTitleSetService::merge(
+                        $titleSetMappings,
+                        StatsService::parseFieldStatsTitles($titles)
+                    )
                 );
                 $items = array_slice($items, 0, $this->getCbstatsLimit(count($items)));
 

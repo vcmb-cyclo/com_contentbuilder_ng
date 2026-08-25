@@ -403,3 +403,16 @@ rendered. `data-card` defaults to `v1` and
 `data-w` defaults to `33`; accepted widths are `33`, `66` and `100`. Empty
 whitespace and non-breaking spaces inserted between Cards by an editor are
 ignored in `cb-cards` grids.
+
+### Reusable CBStats title sets
+
+Use a managed INI file when several statistics share the same display labels:
+
+```text
+{CBStats id=15 field=Department titleset="example-en-GB.ini" output=table}
+```
+
+Custom files in `media/contentbuilderng/cbstats/titlesets/` override provided
+files with the same name. Inline `titles=` mappings remain higher priority. A
+missing or invalid file leaves original values visible and only records a
+Warning when Joomla Debug is enabled.

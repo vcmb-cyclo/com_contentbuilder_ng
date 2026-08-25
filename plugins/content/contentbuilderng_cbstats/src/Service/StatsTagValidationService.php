@@ -21,7 +21,7 @@ final class StatsTagValidationService
     private const FIELD_OUTPUTS = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar', 'distinct', 'sum', 'min', 'max', 'avg'];
     private const ALLOWED_KEYS = [
         'source', 'id', 'idsum', 'debug', 'output', 'field', 'filter[field]',
-        'filter[value]', 'value', 'add', 'titles', 'ranges', 'headers', 'title',
+        'filter[value]', 'value', 'add', 'titles', 'titleset', 'ranges', 'headers', 'title',
         'background', 'sort', 'dir', 'values', 'export', 'limit', 'hide', 'total',
         'card', 'w', 'width', 'height',
     ];

@@ -92,6 +92,7 @@ final class CbStatsRc91B01Test extends TestCase
             'cbstats_syntax_note',
             'cbstats_editorial_card_note',
             'cbstats_add_note',
+            'cbstats_titleset_note',
             'cbstats_debug_note',
             'cbstats_manual_note',
             'cbstats_export_note',

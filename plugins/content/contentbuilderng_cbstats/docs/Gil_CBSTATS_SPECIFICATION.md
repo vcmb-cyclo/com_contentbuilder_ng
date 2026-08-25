@@ -547,3 +547,33 @@ HTML. It converts the marker to the existing shared Card structure and loads
 non-breaking spaces are removed from `.cb-cards` grids so editor formatting
 cannot create anonymous grid items or extra spacing. Custom elements such as
 `<cb-card>` are unsupported because TinyMCE splits them and JCE removes them.
+
+## 18. Reusable `titleset` mappings
+
+`titleset="filename.ini"` loads display-only category mappings from an INI
+file after the normal CBStats data and filtering pipeline. Files are resolved
+first from `media/contentbuilderng/cbstats/titlesets/` and then from
+`media/com_contentbuilderng/cbstats/titlesets/`. Only a safe basename ending
+in `.ini` is accepted. Inline `titles=` mappings are applied last and therefore
+override mappings loaded from `titleset`.
+
+```ini
+; Reusable labels
+[metadata]
+name="Main countries"
+locale="en-GB"
+
+[titles]
+fr="France"
+be="Belgium"
+de="Germany"
+```
+
+```text
+{CBStats id=15 field=Country titleset="example-en-GB.ini" output=table}
+```
+
+Missing, unreadable, empty or invalid files preserve original values and never
+replace the frontend result with an error. Joomla Debug records one Warning per
+file and request. ContentBuilder NG About links to the native Joomla manager;
+provided files are read-only and can be duplicated into the custom directory.

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fieldset name="metadata" label="COM_CONTENTBUILDERNG_TITLESETS_METADATA">
+        <field name="filename" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_FILENAME" required="true" />
+        <field name="name" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_NAME" required="true" />
+        <field name="description" type="textarea" label="COM_CONTENTBUILDERNG_TITLESETS_DESCRIPTION" rows="3" />
+        <field name="locale" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_LOCALE" hint="fr-FR" />
+        <field name="version" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_VERSION" default="1.0" />
+        <field name="author" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_AUTHOR" />
+        <field name="comments" type="textarea" label="COM_CONTENTBUILDERNG_TITLESETS_COMMENTS" rows="4" />
+        <field name="source" type="hidden" />
+    </fieldset>
+    <fieldset name="titles" label="COM_CONTENTBUILDERNG_TITLESETS_MAPPINGS">
+        <field
+            name="titles"
+            type="subform"
+            multiple="true"
+            layout="joomla.form.field.subform.repeatable-table"
+            min="1"
+        >
+            <form>
+                <field name="value" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_ORIGINAL_VALUE" required="true" />
+                <field name="label" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_DISPLAY_LABEL" required="true" />
+            </form>
+        </field>
+    </fieldset>
+</form>

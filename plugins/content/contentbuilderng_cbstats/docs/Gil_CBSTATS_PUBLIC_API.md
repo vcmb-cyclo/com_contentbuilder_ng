@@ -552,3 +552,22 @@ accepts `h1`–`h6` or `v1`–`v6` and defaults to `v1`; `data-w` accepts `33`,
 recommended. Invalid Card or width values use their defaults. The standard
 `div` is compatible with TinyMCE and JCE and renders through the existing
 shared Card HTML and CSS.
+
+## Reusable category titles with `titleset`
+
+Use a managed INI file when the same value labels are needed in several tags:
+
+```text
+{CBStats id=15 field=Country titleset="example-en-GB.ini" output=table}
+```
+
+The custom directory `media/contentbuilderng/cbstats/titlesets/` is searched
+before the provided directory `media/com_contentbuilderng/cbstats/titlesets/`.
+Inline `titles=` mappings have priority over file mappings. The INI file uses
+an optional `[metadata]` section and a required `[titles]` section containing
+`original="Display label"` entries; semicolon-prefixed comments are supported.
+
+Only a safe `.ini` filename without a path is accepted. Missing or invalid
+files preserve original values without a frontend error. With Joomla Debug
+enabled, the issue is recorded as a CBStats Warning. Manage custom files from
+ContentBuilder NG → About → CBStats title sets.

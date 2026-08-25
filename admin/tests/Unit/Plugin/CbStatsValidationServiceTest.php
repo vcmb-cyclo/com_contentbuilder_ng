@@ -50,6 +50,7 @@ final class CbStatsValidationServiceTest extends TestCase
             'dir' => 'desc',
             'limit' => '10',
             'hide' => 'values',
+            'titleset' => 'departements-fr-FR.ini',
         ]));
         self::assertSame([], StatsTagValidationService::validationErrors([
             'source' => 'manual',
