@@ -422,3 +422,5 @@ title sets**. Clicking a filename displays its contents. Provided files remain
 read-only and can be duplicated into the site's directory; site-specific files
 are editable. The list column selector remembers hidden columns in the browser.
 The list also supports file-title search and sorting on its data columns.
+In the editor, the `.ini` filename extension is optional. Validate and Save
+display their result, and discarding unsaved changes requires confirmation.

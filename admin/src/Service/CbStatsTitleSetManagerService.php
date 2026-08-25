@@ -96,7 +96,7 @@ final class CbStatsTitleSetManagerService
     public function validate(array $data): array
     {
         $errors = [];
-        $filename = trim((string) ($data['filename'] ?? ''));
+        $filename = $this->normalizeFilename((string) ($data['filename'] ?? ''));
         if (!CbStatsTitleSetService::isValidFilename($filename)) {
             $errors[] = 'filename';
         }
@@ -131,7 +131,7 @@ final class CbStatsTitleSetManagerService
             file_put_contents($index, '');
         }
 
-        $filename = trim((string) $data['filename']);
+        $filename = $this->normalizeFilename((string) $data['filename']);
         $target = $directory . '/' . $filename;
         $temporary = $target . '.tmp-' . bin2hex(random_bytes(6));
         $contents = $this->serialize($data, $validation['titles']);
@@ -151,6 +151,15 @@ final class CbStatsTitleSetManagerService
         }
 
         return $filename;
+    }
+
+    private function normalizeFilename(string $filename): string
+    {
+        $filename = trim($filename);
+
+        return $filename !== '' && !str_ends_with(strtolower($filename), '.ini')
+            ? $filename . '.ini'
+            : $filename;
     }
 
     public function delete(string $filename): void

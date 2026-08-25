@@ -470,3 +470,6 @@ les fichiers propres au site sont modifiables. Le sélecteur de colonnes de la
 liste mémorise les colonnes masquées dans le navigateur.
 La liste permet aussi de rechercher un titre de fichier et de trier les
 colonnes de données.
+Dans l’éditeur, l’extension `.ini` du nom de fichier est facultative. Les
+actions Valider et Enregistrer affichent leur résultat, et l’abandon de
+modifications non enregistrées demande confirmation.

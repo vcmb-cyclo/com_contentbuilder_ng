@@ -63,4 +63,25 @@ use Joomla\CMS\Router\Route;
     <input type="hidden" name="task" value="">
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('titleset-form');
+    if (!form || typeof Joomla === 'undefined' || typeof Joomla.submitbutton !== 'function') return;
+    let dirty = false;
+    let allowNavigation = false;
+    form.addEventListener('input', function () { dirty = true; });
+    form.addEventListener('change', function () { dirty = true; });
+    window.addEventListener('beforeunload', function (event) {
+        if (!dirty || allowNavigation) return;
+        event.preventDefault();
+        event.returnValue = '';
+    });
+    const submitbutton = Joomla.submitbutton.bind(Joomla);
+    Joomla.submitbutton = function (task) {
+        if (task === 'titleset.cancel' && dirty && !window.confirm(<?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_TITLESETS_CANCEL_CONFIRM'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>)) return false;
+        allowNavigation = true;
+        return submitbutton(task);
+    };
+});
+</script>
 <?php endif; ?>

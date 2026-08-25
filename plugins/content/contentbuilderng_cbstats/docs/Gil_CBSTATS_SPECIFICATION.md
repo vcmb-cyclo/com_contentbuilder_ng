@@ -581,6 +581,9 @@ stored locally in the browser. Field tooltips document the INI metadata and
 mapping values; a separate help screen is intentionally unnecessary.
 The administration list can be searched by file title and sorted by any data
 column; the Actions column is intentionally not sortable.
+The editor accepts filenames with or without the `.ini` extension and appends
+it when necessary. Validate and Save report their result, while Cancel and
+browser navigation request confirmation when the form contains unsaved edits.
 
 Missing, unreadable, empty or invalid files preserve original values and never
 replace the frontend result with an error. Joomla Debug records one Warning per

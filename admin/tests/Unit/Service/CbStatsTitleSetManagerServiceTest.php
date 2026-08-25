@@ -69,6 +69,23 @@ final class CbStatsTitleSetManagerServiceTest extends TestCase
         ])['valid']);
     }
 
+    public function testAddsIniExtensionWhenItIsOmitted(): void
+    {
+        $filename = $this->service->save([
+            'filename' => 'vcmb-groupes',
+            'titles' => [['value' => 'route', 'label' => 'Route']],
+        ]);
+
+        self::assertSame('vcmb-groupes.ini', $filename);
+        self::assertTrue($this->service->validate([
+            'filename' => 'vcmb-groupes',
+            'titles' => [['value' => 'route', 'label' => 'Route']],
+        ])['valid']);
+        self::assertFileExists(
+            $this->root . '/' . CbStatsTitleSetService::CUSTOM_DIRECTORY . '/vcmb-groupes.ini'
+        );
+    }
+
     public function testDeletesOnlyCustomFiles(): void
     {
         $this->service->save([
