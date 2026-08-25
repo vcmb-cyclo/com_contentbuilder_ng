@@ -58,7 +58,7 @@ use Joomla\CMS\Router\Route;
                     ? HTMLHelper::_('date', '@' . (int) $this->data['modified'], Text::_('DATE_FORMAT_LC5'))
                     : Text::_('COM_CONTENTBUILDERNG_TITLESETS_NOT_SAVED'); ?></div>
             </div>
-            <?php foreach (['description', 'locale', 'version', 'author', 'modified', 'source'] as $hiddenField) : ?>
+            <?php foreach (['modified', 'source'] as $hiddenField) : ?>
                 <?php echo $this->form->getInput($hiddenField); ?>
             <?php endforeach; ?>
         </div>

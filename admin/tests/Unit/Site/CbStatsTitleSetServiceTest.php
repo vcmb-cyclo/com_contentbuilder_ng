@@ -102,6 +102,21 @@ INI);
         );
     }
 
+    public function testMappingKeysAcceptParenthesesAndCommonDataCharacters(): void
+    {
+        $this->writeCustom('groups.ini', <<<'INI'
+[titles]
+VCMB (78)="Vélo Club de Montigny"
+Route / Gravel="Route et gravel"
+INI);
+
+        $result = (new CbStatsTitleSetService($this->root))->resolve('groups.ini');
+
+        self::assertSame('ok', $result['status']);
+        self::assertSame('Vélo Club de Montigny', $result['titles']['VCMB (78)']);
+        self::assertSame('Route et gravel', $result['titles']['Route / Gravel']);
+    }
+
     public function testProvidedDepartmentAndCountryExamplesAreValid(): void
     {
         $directory = self::PROJECT_ROOT . '/media/cbstats/titlesets/';

@@ -6,18 +6,19 @@ declare(strict_types=1);
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\HTML\HTMLHelper;
 
 ?>
 <?php
 $columns = [
     'filename' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_FILENAME'),
     'name' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_NAME'),
-    'locale' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_LOCALE'),
+    'modified' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_DATE'),
     'source' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_SOURCE'),
     'count' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_COUNT'),
     'status' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_STATUS'),
 ];
-$sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
+$sortableColumns = ['filename', 'name', 'modified', 'source', 'count', 'status'];
 ?>
 <form action="<?php echo Route::_('index.php?option=com_contentbuilderng&view=titlesets'); ?>" method="post" name="adminForm" id="adminForm">
 <div class="container-fluid">
@@ -47,6 +48,11 @@ $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
                     <span><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></span>
                 </label>
             <?php endforeach; ?>
+            <div class="dropdown-divider my-1"></div>
+            <label class="dropdown-item d-flex align-items-start gap-2 mb-1">
+                <input class="form-check-input mt-1" type="checkbox" data-cb-titlesets-provided-toggle>
+                <span><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_SHOW_CBSTATS_EXAMPLES'); ?></span>
+            </label>
             <div class="dropdown-divider my-1"></div><button type="button" class="btn btn-link btn-sm px-2" data-cb-titlesets-columns-reset><?php echo Text::_('COM_CONTENTBUILDERNG_RESET'); ?></button>
         </div>
         </div>
@@ -78,7 +84,6 @@ $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
             $viewUrl = 'index.php?option=com_contentbuilderng&view=titleset&filename='
                 . rawurlencode((string) $item['filename']) . '&source=' . $item['source'];
             $name = (string) ($item['metadata']['name'] ?? '');
-            $locale = (string) ($item['metadata']['locale'] ?? '');
             $statusLabel = Text::_(
                 'COM_CONTENTBUILDERNG_TITLESETS_STATUS_' . strtoupper((string) $item['status'])
             );
@@ -87,7 +92,7 @@ $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
                 <td class="text-center"><input class="form-check-input" type="checkbox" name="cid[]" value="<?php echo htmlspecialchars((string) $item['source'] . ':' . (string) $item['filename'], ENT_QUOTES, 'UTF-8'); ?>" onclick="Joomla.isChecked(this.checked);"></td>
                 <td data-cb-titlesets-column="filename"><a href="<?php echo Route::_($viewUrl, false); ?>" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_TITLESETS_OPEN_DESC'), ENT_QUOTES, 'UTF-8'); ?>"><code><?php echo htmlspecialchars((string) $item['filename'], ENT_QUOTES, 'UTF-8'); ?></code></a></td>
                 <td data-cb-titlesets-column="name"><span class="cb-titlesets-title"><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></span></td>
-                <td data-cb-titlesets-column="locale"><?php echo htmlspecialchars($locale, ENT_QUOTES, 'UTF-8'); ?></td>
+                <td data-cb-titlesets-column="modified" data-cb-sort-value="<?php echo (int) ($item['modified'] ?? 0); ?>"><?php echo HTMLHelper::_('date', '@' . (int) ($item['modified'] ?? 0), Text::_('DATE_FORMAT_LC5')); ?></td>
                 <td data-cb-titlesets-column="source"><?php echo Text::_($isCustom
                     ? 'COM_CONTENTBUILDERNG_TITLESETS_SOURCE_CUSTOM'
                     : 'COM_CONTENTBUILDERNG_TITLESETS_SOURCE_PROVIDED'); ?></td>
@@ -138,10 +143,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const pageInfo = document.querySelector('[data-cb-titlesets-page-info]');
     const form = document.getElementById('adminForm');
     const importInput = document.querySelector('[data-cb-titlesets-import]');
+    const providedToggle = document.querySelector('[data-cb-titlesets-provided-toggle]');
     const collator = new Intl.Collator(document.documentElement.lang || undefined, { numeric: true, sensitivity: 'base' });
     let currentPage = 1;
     let state = {};
     try { state = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (error) {}
+    if (providedToggle) providedToggle.checked = state.showProvided === true;
     function apply() {
         let visible = 0;
         toggles.forEach(function (toggle) {
@@ -155,11 +162,13 @@ document.addEventListener('DOMContentLoaded', function () {
         try { localStorage.setItem(key, JSON.stringify(state)); } catch (error) {}
     }
     toggles.forEach(function (toggle) { toggle.addEventListener('change', function () { state[toggle.dataset.cbTitlesetsColumnToggle] = toggle.checked; apply(); }); });
-    document.querySelector('[data-cb-titlesets-columns-reset]')?.addEventListener('click', function () { state = {}; apply(); });
+    document.querySelector('[data-cb-titlesets-columns-reset]')?.addEventListener('click', function () { state = {}; if (providedToggle) providedToggle.checked = false; apply(); filterRows(); });
+    providedToggle?.addEventListener('change', function () { state.showProvided = providedToggle.checked; try { localStorage.setItem(key, JSON.stringify(state)); } catch (error) {} currentPage = 1; filterRows(); });
     function filterRows() {
         const term = (search?.value || '').trim().toLocaleLowerCase();
         const matchingRows = [...document.querySelectorAll('[data-cb-titlesets-row]')].filter(function (row) {
-            return term === '' || String(row.dataset.cbTitlesetsSearch || '').toLocaleLowerCase().includes(term);
+            const sourceMatches = row.dataset.cbTitlesetsSource !== 'provided' || providedToggle?.checked === true;
+            return sourceMatches && (term === '' || String(row.dataset.cbTitlesetsSearch || '').toLocaleLowerCase().includes(term));
         });
         const pageSize = Number(pageSizeSelect?.value || 10);
         const pageCount = pageSize === 0 ? 1 : Math.max(1, Math.ceil(matchingRows.length / pageSize));
@@ -187,9 +196,11 @@ document.addEventListener('DOMContentLoaded', function () {
             button.querySelector('[data-cb-sort-indicator]')?.replaceChildren(document.createTextNode(ascending ? '▲' : '▼'));
             const rows = [...tableBody.querySelectorAll('[data-cb-titlesets-row]')];
             rows.sort(function (left, right) {
-                const leftValue = left.querySelector('[data-cb-titlesets-column="' + column + '"]')?.textContent.trim() || '';
-                const rightValue = right.querySelector('[data-cb-titlesets-column="' + column + '"]')?.textContent.trim() || '';
-                const result = column === 'count' ? Number(leftValue) - Number(rightValue) : collator.compare(leftValue, rightValue);
+                const leftCell = left.querySelector('[data-cb-titlesets-column="' + column + '"]');
+                const rightCell = right.querySelector('[data-cb-titlesets-column="' + column + '"]');
+                const leftValue = leftCell?.dataset.cbSortValue || leftCell?.textContent.trim() || '';
+                const rightValue = rightCell?.dataset.cbSortValue || rightCell?.textContent.trim() || '';
+                const result = ['count', 'modified'].includes(column) ? Number(leftValue) - Number(rightValue) : collator.compare(leftValue, rightValue);
                 return ascending ? result : -result;
             });
             rows.forEach(function (row) { tableBody.appendChild(row); });

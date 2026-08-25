@@ -39,6 +39,7 @@ final class CbStatsTitleSetManagerService
                 $items[] = [
                     'filename' => $filename,
                     'source' => $source,
+                    'modified' => $entry->getMTime(),
                     'metadata' => $result['metadata'],
                     'status' => $result['status'],
                     'count' => count($result['titles']),
@@ -298,9 +299,7 @@ final class CbStatsTitleSetManagerService
 
         $lines[] = '';
         $lines[] = '[metadata]';
-        foreach (['name', 'description', 'locale', 'version', 'author'] as $key) {
-            $lines[] = $key . '=' . $this->quoteIni((string) ($data[$key] ?? ''));
-        }
+        $lines[] = 'name=' . $this->quoteIni((string) ($data['name'] ?? ''));
         $lines[] = '';
         $lines[] = '[titles]';
         foreach ($titles as $value => $label) {

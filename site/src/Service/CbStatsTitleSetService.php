@@ -67,9 +67,14 @@ final class CbStatsTitleSetService
 
     public static function isValidMappingKey(string $value): bool
     {
+        $value = trim($value);
+
         return $value !== ''
             && !str_contains($value, '=')
-            && preg_match('/[\r\n?{}|&~!()^"]/', $value) !== 1;
+            && !str_contains($value, "\0")
+            && !str_contains($value, "\r")
+            && !str_contains($value, "\n")
+            && !in_array($value[0], [';', '#'], true);
     }
 
     /**
@@ -99,26 +104,13 @@ final class CbStatsTitleSetService
             return self::emptyResult('empty');
         }
 
-        $parseWarning = false;
-        set_error_handler(static function () use (&$parseWarning): bool {
-            $parseWarning = true;
-
-            return true;
-        });
-
-        try {
-            $parsed = parse_ini_string($contents, true, INI_SCANNER_RAW);
-        } finally {
-            restore_error_handler();
-        }
-
-        if ($parseWarning || !is_array($parsed)) {
+        $parsed = self::parseContents($contents);
+        if ($parsed === null) {
             return self::emptyResult('invalid_syntax');
         }
 
-        $metadata = self::normalizeSection($parsed['metadata'] ?? []);
-        $rawTitles = $parsed['titles'] ?? null;
-        if (!is_array($rawTitles) || $rawTitles === []) {
+        $metadata = $parsed['metadata'];
+        if (!$parsed['hasTitles']) {
             $result = self::emptyResult('missing_titles');
             $result['metadata'] = $metadata;
             $result['comments'] = self::extractComments($contents);
@@ -126,23 +118,8 @@ final class CbStatsTitleSetService
             return $result;
         }
 
-        $titles = [];
-        $invalidEntries = 0;
-        foreach ($rawTitles as $value => $label) {
-            if (!is_scalar($label)) {
-                $invalidEntries++;
-                continue;
-            }
-
-            $key = trim((string) $value);
-            $text = trim((string) $label);
-            if ($key === '' || $text === '') {
-                $invalidEntries++;
-                continue;
-            }
-
-            $titles[$key] = $text;
-        }
+        $titles = $parsed['titles'];
+        $invalidEntries = $parsed['invalidEntries'];
 
         if ($titles === []) {
             $status = 'missing_titles';
@@ -160,6 +137,96 @@ final class CbStatsTitleSetService
             'source' => '',
             'invalidEntries' => $invalidEntries,
         ];
+    }
+
+    /**
+     * @return array{metadata: array<string, string>, titles: array<string, string>, hasTitles: bool, invalidEntries: int}|null
+     */
+    private static function parseContents(string $contents): ?array
+    {
+        $metadataLines = [];
+        $titles = [];
+        $invalidEntries = 0;
+        $section = '';
+        $hasTitles = false;
+
+        foreach (preg_split('/\R/', $contents) ?: [] as $line) {
+            $trimmed = trim($line);
+            if (preg_match('/^\[([^\]]+)]\s*$/', $trimmed, $match) === 1) {
+                $section = strtolower(trim($match[1]));
+                $hasTitles = $hasTitles || $section === 'titles';
+                if ($section !== 'titles') {
+                    $metadataLines[] = $line;
+                }
+                continue;
+            }
+
+            if ($section !== 'titles') {
+                $metadataLines[] = $line;
+                continue;
+            }
+
+            if ($trimmed === '' || in_array($trimmed[0], [';', '#'], true)) {
+                continue;
+            }
+
+            $separator = strpos($line, '=');
+            if ($separator === false) {
+                $invalidEntries++;
+                continue;
+            }
+
+            $key = trim(substr($line, 0, $separator));
+            $rawLabel = trim(substr($line, $separator + 1));
+            $label = self::parseIniValue($rawLabel);
+            if (!self::isValidMappingKey($key) || $label === null || trim($label) === '') {
+                $invalidEntries++;
+                continue;
+            }
+
+            $titles[$key] = trim($label);
+        }
+
+        $metadataContents = trim(implode("\n", $metadataLines));
+        $metadata = [];
+        if ($metadataContents !== '') {
+            $parseWarning = false;
+            set_error_handler(static function () use (&$parseWarning): bool {
+                $parseWarning = true;
+
+                return true;
+            });
+            try {
+                $parsedMetadata = parse_ini_string($metadataContents, true, INI_SCANNER_RAW);
+            } finally {
+                restore_error_handler();
+            }
+            if ($parseWarning || !is_array($parsedMetadata)) {
+                return null;
+            }
+            $metadata = self::normalizeSection($parsedMetadata['metadata'] ?? []);
+        }
+
+        return compact('metadata', 'titles', 'hasTitles', 'invalidEntries');
+    }
+
+    private static function parseIniValue(string $value): ?string
+    {
+        $parseWarning = false;
+        set_error_handler(static function () use (&$parseWarning): bool {
+            $parseWarning = true;
+
+            return true;
+        });
+        try {
+            $parsed = parse_ini_string('value=' . $value, false, INI_SCANNER_RAW);
+        } finally {
+            restore_error_handler();
+        }
+
+        return !$parseWarning && is_array($parsed) && is_scalar($parsed['value'] ?? null)
+            ? (string) $parsed['value']
+            : null;
     }
 
     /** @return array<string, string> */

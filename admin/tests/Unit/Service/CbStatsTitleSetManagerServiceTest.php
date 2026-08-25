@@ -54,6 +54,8 @@ final class CbStatsTitleSetManagerServiceTest extends TestCase
         self::assertSame('Premier commentaire' . "\n" . 'Second commentaire', $loaded['comments']);
         self::assertSame('Belgique', $loaded['titles'][1]['label']);
         self::assertSame('custom', $this->service->listFiles()[0]['source']);
+        self::assertArrayHasKey('modified', $this->service->listFiles()[0]);
+        self::assertStringNotContainsString('locale=', $this->service->getFileContents($filename, 'custom'));
     }
 
     public function testRejectsInvalidFilenameAndEmptyMappings(): void
@@ -86,6 +88,17 @@ final class CbStatsTitleSetManagerServiceTest extends TestCase
         self::assertFileExists(
             $this->root . '/' . CbStatsTitleSetService::CUSTOM_DIRECTORY . '/vcmb-groupes.ini'
         );
+    }
+
+    public function testSavesAndLoadsMappingKeysContainingParentheses(): void
+    {
+        $filename = $this->service->save([
+            'filename' => 'groupes.ini',
+            'name' => 'Groupes',
+            'titles' => [['value' => 'VCMB (78)', 'label' => 'Vélo Club de Montigny']],
+        ]);
+
+        self::assertSame('VCMB (78)', $this->service->load($filename, 'custom')['titles'][0]['value']);
     }
 
     public function testSaveCopyUsesTheNextAvailableFilename(): void

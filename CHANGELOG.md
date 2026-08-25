@@ -3,7 +3,9 @@
 ## 6.1.11-RC04 — 2026-08-25
 
 - Simplified the CBStats title-set editor to filename, title, optional comment, automatic last-modified date and value mappings.
-- Removed the language selector and advanced metadata from the editor while preserving existing metadata when files are saved again.
+- Removed the language selector and advanced metadata from the editor and from newly saved files.
+- Replaced the Language list column with a concise Date column and moved supplied CBStats examples behind an optional column-selector toggle.
+- Allowed parentheses and common data characters in mapping values through a strict, non-executing title-section parser.
 
 ## 6.1.11-RC03 — 2026-08-25
 
