@@ -20,7 +20,7 @@ $columns = [
 ];
 $sortableColumns = ['filename', 'name', 'modified', 'source', 'count', 'status'];
 ?>
-<form action="<?php echo Route::_('index.php?option=com_contentbuilderng&view=titlesets'); ?>" method="post" name="adminForm" id="adminForm">
+<form action="<?php echo Route::_('index.php?option=com_contentbuilderng&view=titlesets'); ?>" method="post" enctype="multipart/form-data" name="adminForm" id="adminForm">
 <div class="container-fluid">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
         <div class="input-group input-group-sm" style="max-width: 24rem;">

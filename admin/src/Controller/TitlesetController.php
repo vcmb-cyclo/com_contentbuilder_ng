@@ -9,6 +9,7 @@ namespace CB\Component\Contentbuilderng\Administrator\Controller;
 use CB\Component\Contentbuilderng\Administrator\Service\CbStatsTitleSetManagerService;
 use Joomla\CMS\Application\AdministratorApplication;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Log\Log;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 
@@ -162,6 +163,11 @@ final class TitlesetController extends BaseController
             }
             $this->setMessage(Text::plural('COM_CONTENTBUILDERNG_TITLESETS_N_IMPORTED', count($uploads)));
         } catch (\Throwable $exception) {
+            Log::add(
+                sprintf('Title-set import failed: %s: %s', $exception::class, $exception->getMessage()),
+                Log::ERROR,
+                'com_contentbuilderng'
+            );
             $key = match ($exception->getMessage()) {
                 'invalid_filename' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_ERROR_FILENAME',
                 'invalid_contents' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_ERROR_CONTENTS',
