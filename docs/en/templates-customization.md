@@ -179,6 +179,7 @@ Examples:
 {CBStats id=3 field=Category output=pie add="Existing=-2;External=3"}
 {CBStats id=3 field=Category output=table titles="1=Group 1;2=Group 2"}
 {CBStats id=3 field=Category output=bar add="1=-2;2=3" titles="1=Group 1;2=Group 2" sort=value dir=desc}
+{CBStats id=3 field=Department value="78|60" output=distinct}
 {CBStats id=3 field=FieldName output=sum}
 {CBStats id=3 field=FieldName output=min}
 {CBStats id=3 field=FieldName output=max}
@@ -296,7 +297,7 @@ remains `0`. All field-based outputs enforce the field's API/Stats availability.
 CBStats always enforces the view's STATS permission. For URL/API use, check the
 view's **API + Rights** settings, API/Stats field availability and the **API** tab.
 The supported URL outputs are `json`, `table`, `pie`, `bar`, `histogram`, `line`,
-`radar`, `total`, `sum`, `min`, `max`, `avg` and `form_name`; list outputs also
+`radar`, `total`, `distinct`, `sum`, `min`, `max`, `avg` and `form_name`; list outputs also
 accept `add`, `titles`, `sort`, `dir`, `ranges` and `limit`. In Joomla articles,
 CBStats reports all independent tag syntax errors together, identifies the
 affected parameter and value, and does not display statistics when the tag is

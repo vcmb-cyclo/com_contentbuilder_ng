@@ -71,6 +71,7 @@ final class CbStatsIdSumServiceTest extends TestCase
         ]);
 
         self::assertSame(['FFVélo' => 70, 'UFOLEP' => 5, 'FSGT' => 4], $merged['field']['values']);
+        self::assertSame(3, $merged['field']['distinct']);
     }
 
     public function testFiveViewsProduceCorrectTotal(): void

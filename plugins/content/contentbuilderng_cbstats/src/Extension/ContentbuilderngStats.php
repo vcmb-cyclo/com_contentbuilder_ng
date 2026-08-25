@@ -137,7 +137,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $debug = false;
         $output = TagSyntaxService::normalizeKeyword((string) ($attributes['output'] ?? 'total'));
         $allowedOutputs = [
-            'total', 'table', 'form_name', 'sum', 'min', 'max', 'avg',
+            'total', 'table', 'form_name', 'distinct', 'sum', 'min', 'max', 'avg',
             'json', 'pie', 'bar', 'histogram', 'line', 'radar',
         ];
         $field = trim((string) ($attributes['field'] ?? ''));
@@ -222,8 +222,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             StatsHideOptionsService::validateForOutput($hideOptions, $output);
 
             $listOutputs = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar'];
-            $fieldOutputs = [...$listOutputs, 'sum', 'min', 'max', 'avg'];
-
+            $fieldOutputs = [...$listOutputs, 'distinct', 'sum', 'min', 'max', 'avg'];
             if ((in_array($output, $fieldOutputs, true) || $idSumValue !== '') && $field === '') {
                 throw new \RuntimeException(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_FIELD_REQUIRED'), 400);
             }
@@ -279,7 +278,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                 );
             }
 
-            if ($debug && in_array($output, ['sum', 'min', 'max', 'avg'], true)) {
+            if ($debug && in_array($output, ['distinct', 'sum', 'min', 'max', 'avg'], true)) {
                 $numericValue = $payload['field'][$output] ?? null;
                 return $this->renderDebugMessage(Text::sprintf(
                     'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_AGGREGATE',
@@ -346,6 +345,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                     $hideOptions
                 ),
                 'total' => (string) StatsService::resolveCbstatsOutput($payload, 'total'),
+                'distinct' => $this->renderNumericFieldValue($payload, 'distinct'),
                 'sum' => $this->renderSum($payload),
                 'min' => $this->renderNumericFieldValue($payload, 'min'),
                 'max' => $this->renderNumericFieldValue($payload, 'max'),

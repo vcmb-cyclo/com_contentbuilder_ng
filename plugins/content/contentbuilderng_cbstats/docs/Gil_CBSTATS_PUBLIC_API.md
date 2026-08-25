@@ -108,6 +108,7 @@ output=bar
 output=histogram
 output=line
 output=radar
+output=distinct
 output=sum
 output=min
 output=max
@@ -396,10 +397,10 @@ All outputs must preserve the plugin's existing:
 The existing `action=cbstats` endpoint supports:
 
 ```text
-output=json|table|pie|bar|histogram|line|radar|total|sum|min|max|avg|form_name
+output=json|table|pie|bar|histogram|line|radar|total|distinct|sum|min|max|avg|form_name
 ```
 
-`field` is required for list, chart and numeric aggregate outputs. It is not
+`field` is required for list, chart, `distinct` and numeric aggregate outputs. It is not
 required for `total` or `form_name`. Filters and permissions reuse the common
 CBStats engine. The JSON output remains the raw normalized array. Table and
 chart names return their normalized `total` and `items` data, without HTML;

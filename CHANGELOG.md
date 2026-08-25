@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.1.11-RC01 — 2026-08-25
+
+- Added CBStats `output=distinct` to count distinct non-empty field values after the existing view, source and value filters have been applied.
+- Added article-tag and URL/API documentation and regression coverage for filtered distinct counts.
+
 ## 6.1.10 — 2026-08-23
 
 - Added read-only About Audit detection of orphan BreezingForms rows in `#__contentbuilderng_records`.

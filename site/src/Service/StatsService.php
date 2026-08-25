@@ -310,6 +310,7 @@ final class StatsService
             'name' => (string) $field['name'],
             'label' => (string) $field['label'],
             'total' => array_sum($values),
+            'distinct' => self::countDistinctFieldValues($values),
         ] + self::computeFieldAggregates($values) + [
             'values' => $values,
         ];
@@ -391,9 +392,18 @@ final class StatsService
         return match ($output) {
             'total' => (int) ($payload['records']['total'] ?? 0),
             'form_name' => self::resolveFormName($payload),
+            'distinct' => self::countDistinctFieldValues((array) ($payload['field']['values'] ?? [])),
             'sum', 'min', 'max', 'avg' => self::resolveFieldAggregate($payload, $output),
             default => throw new \InvalidArgumentException('Unsupported CBStats scalar output.'),
         };
+    }
+
+    public static function countDistinctFieldValues(array $values): int
+    {
+        return count(array_filter(
+            array_keys($values),
+            static fn(int|string $value): bool => trim((string) $value) !== ''
+        ));
     }
 
     private static function resolveFormName(array $payload): string

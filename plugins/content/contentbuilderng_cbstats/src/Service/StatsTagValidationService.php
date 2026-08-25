@@ -13,12 +13,12 @@ use CB\Component\Contentbuilderng\Site\Service\ContentCardService;
 final class StatsTagValidationService
 {
     private const OUTPUTS = [
-        'total', 'table', 'form_name', 'sum', 'min', 'max', 'avg',
+        'total', 'table', 'form_name', 'distinct', 'sum', 'min', 'max', 'avg',
         'json', 'pie', 'bar', 'histogram', 'line', 'radar',
     ];
     private const MANUAL_OUTPUTS = ['total', 'table', 'pie', 'bar', 'histogram', 'line', 'radar'];
     private const LIST_OUTPUTS = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar'];
-    private const FIELD_OUTPUTS = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar', 'sum', 'min', 'max', 'avg'];
+    private const FIELD_OUTPUTS = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar', 'distinct', 'sum', 'min', 'max', 'avg'];
     private const ALLOWED_KEYS = [
         'source', 'id', 'idsum', 'debug', 'output', 'field', 'filter[field]',
         'filter[value]', 'value', 'add', 'titles', 'ranges', 'headers', 'title',

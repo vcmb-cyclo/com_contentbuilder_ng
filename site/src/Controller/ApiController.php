@@ -211,7 +211,7 @@ class ApiController extends BaseController
         $output = strtolower(trim((string) $this->input->getCmd('output', 'json')));
         $supportedOutputs = [
             'json', 'table', 'pie', 'bar', 'histogram', 'line', 'radar',
-            'total', 'sum', 'min', 'max', 'avg', 'form_name',
+            'total', 'distinct', 'sum', 'min', 'max', 'avg', 'form_name',
         ];
 
         if (!in_array($output, $supportedOutputs, true)) {
@@ -224,8 +224,7 @@ class ApiController extends BaseController
     private function getCbstatsPayload(int $formId, string $output): array|int|float|string
     {
         $listOutputs = ['json', 'table', 'pie', 'bar', 'histogram', 'line', 'radar'];
-        $fieldOutputs = [...$listOutputs, 'sum', 'min', 'max', 'avg'];
-
+        $fieldOutputs = [...$listOutputs, 'distinct', 'sum', 'min', 'max', 'avg'];
         $field = trim((string) $this->input->getString('field', ''));
 
         if (in_array($output, $fieldOutputs, true) && $field === '') {

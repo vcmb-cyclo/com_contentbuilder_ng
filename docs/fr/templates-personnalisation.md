@@ -209,6 +209,7 @@ Exemples :
 {CBStats id=25 field=Catégorie output=pie add="Existant=-2;Externe=3"}
 {CBStats id=25 field=Catégorie output=table titles="1=Groupe 1;2=Groupe 2"}
 {CBStats id=25 field=Catégorie output=bar add="1=-2;2=3" titles="1=Groupe 1;2=Groupe 2" sort=value dir=desc}
+{CBStats id=25 field=Departement value="78|60" output=distinct}
 {CBStats id=25 field=Parcours output=sum}
 {CBStats id=25 field=Parcours output=min}
 {CBStats id=25 field=Parcours output=max}
@@ -333,7 +334,7 @@ basées sur un champ vérifient sa disponibilité API/Stats.
 CBStats applique toujours la permission STATS de la vue. Pour l'URL/API, vérifiez
 les réglages **API + Droits**, la disponibilité API/Stats des champs et l'onglet
 **API** de la vue. Les outputs URL disponibles sont `json`, `table`, `pie`, `bar`,
-`histogram`, `line`, `radar`, `total`, `sum`, `min`, `max`, `avg` et `form_name` ;
+`histogram`, `line`, `radar`, `total`, `distinct`, `sum`, `min`, `max`, `avg` et `form_name` ;
 les sorties de liste acceptent aussi `add`, `titles`, `sort`, `dir`, `ranges` et
 `limit`. Dans les articles Joomla, CBStats signale ensemble toutes les erreurs
 de syntaxe indépendantes de la balise, précise le paramètre et la valeur concernés

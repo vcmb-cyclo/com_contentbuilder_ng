@@ -104,6 +104,7 @@ final class IdSumService
         $merged['records']['total'] = $recordTotal;
         $merged['field'] = (array) ($merged['field'] ?? []);
         $merged['field']['total'] = array_sum($values);
+        $merged['field']['distinct'] = StatsService::countDistinctFieldValues($values);
         $merged['field']['values'] = $values;
         $merged['field'] = array_replace(
             $merged['field'],

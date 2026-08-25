@@ -60,6 +60,7 @@ output=bar
 output=histogram
 output=line
 output=radar
+output=distinct
 output=sum
 output=min
 output=max
@@ -67,6 +68,26 @@ output=avg
 ```
 
 These outputs are existing public contracts and must not regress.
+
+### 3.1 Distinct values
+
+`output=distinct` requires `field=` and returns the number of distinct,
+non-empty values of that field after the normal CBStats selection and filtering
+pipeline has completed. It reuses the same filtered `value => count` map as the
+other field outputs; it must not implement filtering independently.
+
+`filter[field]`, `filter[value]`, the same-field `value=` shorthand, wildcard
+matching, `|` alternatives, view/source restrictions and permissions therefore
+all run before the distinct count. With `idsum`, each view is filtered first and
+identical remaining values are counted once after the maps are merged.
+
+Examples:
+
+```text
+{CBStats id=25 field=Departement output=distinct}
+{CBStats id=25 field=Departement value="78" output=distinct}
+{CBStats id=25 field=Departement value="78|60" output=distinct}
+```
 
 ## 4. Existing filtering behavior to preserve
 

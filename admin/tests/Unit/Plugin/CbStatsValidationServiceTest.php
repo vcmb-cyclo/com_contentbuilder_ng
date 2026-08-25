@@ -60,6 +60,21 @@ final class CbStatsValidationServiceTest extends TestCase
         ]));
     }
 
+    public function testDistinctOutputRequiresAFieldAndAcceptsExistingFilters(): void
+    {
+        self::assertSame([], StatsTagValidationService::validationErrors([
+            'id' => '25',
+            'field' => 'Departement',
+            'output' => 'distinct',
+            'filter[field]' => 'Federation',
+            'filter[value]' => 'FFC|FFV*',
+            'value' => '78|60',
+        ]));
+        self::assertSame(['field'], array_column(StatsTagValidationService::validationErrors([
+                'id' => '25',
+                'output' => 'distinct',
+            ]), 'parameter'));
+    }
     public function testCardsAndResponsiveDimensionsAreValidatedStrictly(): void
     {
         foreach (['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6'] as $card) {
@@ -172,14 +187,18 @@ final class CbStatsValidationServiceTest extends TestCase
             $strings = parse_ini_file($path);
 
             self::assertIsArray($strings);
-            foreach ([
+            foreach (
+                [
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_VALIDATION_INTRO',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_SYNTAX_HELP',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_UNKNOWN_OPTION',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_INVALID_OPTION_VALUE',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_HEADERS_LABEL',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DISTINCT_LABEL',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DISTINCT_TEXT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_NUMERIC_SYNTAX',
-            ] as $key) {
+                ] as $key
+            ) {
                 self::assertArrayHasKey($key, $strings, $locale . ': ' . $key);
                 self::assertNotSame('', $strings[$key], $locale . ': ' . $key);
             }

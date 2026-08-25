@@ -162,7 +162,7 @@ $wa->useStyle('com_contentbuilderng.admin-form-api');
             <td>
                 <h4 class="h5 mb-2">CBStats</h4>
                 <p><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_SUMMARY'); ?></p>
-                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OUTPUTS'); ?></strong><br><code>total, form_name, table, json, pie, bar, histogram, line, radar, sum, min, max, avg</code></p>
+                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OUTPUTS'); ?></strong><br><code>total, form_name, distinct, table, json, pie, bar, histogram, line, radar, sum, min, max, avg</code></p>
                 <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OPTIONS'); ?></strong><br><code>id, field, output, filter, title, card, width, height</code></p>
                 <a class="btn btn-sm btn-outline-primary" href="<?php echo htmlspecialchars($cbStatsHelpUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                     <?php echo Text::_('COM_CONTENTBUILDERNG_API_OPEN_CBSTATS_HELP'); ?> <span aria-hidden="true">↗</span>
