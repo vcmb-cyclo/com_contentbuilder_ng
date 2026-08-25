@@ -13,6 +13,7 @@
 - Rationalized title-set administration with Joomla-style selection actions, Save as Copy naming, installed-language suggestions with free input, compact editor layout and clearer Title/Entries labels.
 - Added safe title-set INI import and export: single-file `.ini`, multi-file `.zip`, validation before import, 1 MB limits and no silent overwrite of Site files.
 - Fixed selected CBStats actions by restoring Joomla selection state, added an explicit installed-language selector with free input, standardized `CBStats - …` titles, and replaced generic validation warnings with direct field-level errors.
+- Removed the redundant server-side Title requirement that could block Save and Save as Copy after an initial save.
 
 ## 6.1.11-RC02 — 2026-08-25
 

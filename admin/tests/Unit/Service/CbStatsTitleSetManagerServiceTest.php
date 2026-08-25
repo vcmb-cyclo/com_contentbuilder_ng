@@ -115,6 +115,19 @@ final class CbStatsTitleSetManagerServiceTest extends TestCase
         $this->service->importFile($source, 'imported.ini');
     }
 
+    public function testMissingPostedTitleCannotBlockSaveOrCopy(): void
+    {
+        $data = [
+            'filename' => 'groups.ini',
+            'name' => '',
+            'titles' => [['value' => 'road', 'label' => 'Road']],
+        ];
+
+        self::assertSame('groups.ini', $this->service->save($data));
+        self::assertSame('groups', $this->service->load('groups.ini', 'custom')['name']);
+        self::assertSame('groups-copy.ini', $this->service->saveCopy($data));
+    }
+
     public function testDeletesOnlyCustomFiles(): void
     {
         $this->service->save([

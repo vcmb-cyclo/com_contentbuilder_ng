@@ -100,10 +100,6 @@ final class CbStatsTitleSetManagerService
         if (!CbStatsTitleSetService::isValidFilename($filename)) {
             $errors[] = 'filename';
         }
-        if (trim((string) ($data['name'] ?? '')) === '') {
-            $errors[] = 'name';
-        }
-
         $titles = $this->normalizeTitles((array) ($data['titles'] ?? []));
         $submittedRows = array_values(array_filter(
             (array) ($data['titles'] ?? []),
@@ -120,6 +116,11 @@ final class CbStatsTitleSetManagerService
     /** @param array<string, mixed> $data */
     public function save(array $data): string
     {
+        if (trim((string) ($data['name'] ?? '')) === '') {
+            $normalizedFilename = $this->normalizeFilename((string) ($data['filename'] ?? 'titleset.ini'));
+            $data['name'] = preg_replace('/\.ini\z/i', '', basename($normalizedFilename)) ?: 'titleset';
+        }
+
         $validation = $this->validate($data);
         if (!$validation['valid']) {
             throw new \InvalidArgumentException(implode(',', $validation['errors']));
