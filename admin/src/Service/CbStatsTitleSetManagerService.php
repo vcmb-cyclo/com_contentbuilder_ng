@@ -182,29 +182,29 @@ final class CbStatsTitleSetManagerService
         return $candidate;
     }
 
-    public function validateImportFile(string $path, string $originalName): string
+    public function validateImportFile(string $path, string $originalName, bool $overwrite = false): string
     {
         $filename = basename(trim($originalName));
         if (!CbStatsTitleSetService::isValidFilename($filename) || !is_file($path)) {
-            throw new \InvalidArgumentException('Invalid title set import file.');
+            throw new \InvalidArgumentException('invalid_filename');
         }
 
         $result = CbStatsTitleSetService::parseFile($path);
         if (($result['status'] ?? '') !== 'ok') {
-            throw new \InvalidArgumentException('Invalid title set import contents.');
+            throw new \InvalidArgumentException('invalid_contents');
         }
 
         $target = $this->siteRoot . '/' . CbStatsTitleSetService::CUSTOM_DIRECTORY . '/' . $filename;
-        if (is_file($target)) {
-            throw new \RuntimeException('A custom title set with this filename already exists.');
+        if (!$overwrite && is_file($target)) {
+            throw new \RuntimeException('already_exists');
         }
 
         return $filename;
     }
 
-    public function importFile(string $path, string $originalName): string
+    public function importFile(string $path, string $originalName, bool $overwrite = false): string
     {
-        $filename = $this->validateImportFile($path, $originalName);
+        $filename = $this->validateImportFile($path, $originalName, $overwrite);
         $directory = $this->siteRoot . '/' . CbStatsTitleSetService::CUSTOM_DIRECTORY;
         if (!is_dir($directory) && !mkdir($directory, 0755, true)) {
             throw new \RuntimeException('Unable to create the custom title set directory.');
@@ -212,14 +212,14 @@ final class CbStatsTitleSetManagerService
 
         $contents = file_get_contents($path);
         if (!is_string($contents)) {
-            throw new \RuntimeException('Unable to read the uploaded title set file.');
+            throw new \RuntimeException('read_failed');
         }
 
         $target = $directory . '/' . $filename;
         $temporary = $target . '.tmp-' . bin2hex(random_bytes(6));
         if (file_put_contents($temporary, $contents, LOCK_EX) === false || !rename($temporary, $target)) {
             @unlink($temporary);
-            throw new \RuntimeException('Unable to install the uploaded title set file.');
+            throw new \RuntimeException('write_failed');
         }
 
         return $filename;

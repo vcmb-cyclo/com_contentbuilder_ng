@@ -128,6 +128,21 @@ final class CbStatsTitleSetManagerServiceTest extends TestCase
         $this->service->importFile($source, 'imported.ini');
     }
 
+    public function testImportCanReplaceAnExistingCustomFileWhenExplicitlyConfirmed(): void
+    {
+        $first = $this->root . '/first.ini';
+        $replacement = $this->root . '/replacement.ini';
+        file_put_contents($first, "[metadata]\nname=First\n[titles]\nfr=France\n");
+        file_put_contents($replacement, "[metadata]\nname=Replacement\n[titles]\nbe=Belgique\n");
+
+        $this->service->importFile($first, 'countries.ini');
+        self::assertSame('countries.ini', $this->service->importFile($replacement, 'countries.ini', true));
+
+        $loaded = $this->service->load('countries.ini', 'custom');
+        self::assertSame('Replacement', $loaded['name']);
+        self::assertSame('be', $loaded['titles'][0]['value']);
+    }
+
     public function testMissingPostedTitleCannotBlockSaveOrCopy(): void
     {
         $data = [

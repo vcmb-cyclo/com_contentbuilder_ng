@@ -6,6 +6,7 @@
 - Removed the language selector and advanced metadata from the editor and from newly saved files.
 - Replaced the Language list column with a concise Date column and moved supplied CBStats examples behind an optional column-selector toggle.
 - Allowed parentheses and common data characters in mapping values through a strict, non-executing title-section parser.
+- Added confirmed replacement of existing Site title-set files during import and precise import failure messages.
 
 ## 6.1.11-RC03 — 2026-08-25
 

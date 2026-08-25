@@ -122,6 +122,7 @@ $sortableColumns = ['filename', 'name', 'modified', 'source', 'count', 'status']
 </div>
 <input type="hidden" name="task" value="">
 <input type="hidden" name="boxchecked" value="0">
+<input type="hidden" name="titleset_overwrite" value="0" data-cb-titlesets-overwrite>
 <input type="file" name="titleset_files[]" accept=".ini,text/plain" multiple hidden data-cb-titlesets-import>
 <?php echo Joomla\CMS\HTML\HTMLHelper::_('form.token'); ?>
 </form>
@@ -145,7 +146,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const pageInfo = document.querySelector('[data-cb-titlesets-page-info]');
     const form = document.getElementById('adminForm');
     const importInput = document.querySelector('[data-cb-titlesets-import]');
+    const overwriteInput = document.querySelector('[data-cb-titlesets-overwrite]');
     const providedToggle = document.querySelector('[data-cb-titlesets-provided-toggle]');
+    const customFilenames = new Set(<?php echo json_encode(array_values(array_map(
+        static fn(array $item): string => strtolower((string) $item['filename']),
+        array_filter($this->items, static fn(array $item): bool => $item['source'] === 'custom')
+    )), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>);
     const collator = new Intl.Collator(document.documentElement.lang || undefined, { numeric: true, sensitivity: 'base' });
     let currentPage = 1;
     let state = {};
@@ -244,7 +250,14 @@ document.addEventListener('DOMContentLoaded', function () {
         return false;
     };
     importInput?.addEventListener('change', function () {
-        if (importInput.files && importInput.files.length > 0) Joomla.submitform('titleset.importFiles', form);
+        if (!importInput.files || importInput.files.length === 0) return;
+        const hasConflict = [...importInput.files].some(function (file) { return customFilenames.has(file.name.toLocaleLowerCase()); });
+        if (hasConflict && !window.confirm(<?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_TITLESETS_IMPORT_OVERWRITE_CONFIRM'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>)) {
+            importInput.value = '';
+            return;
+        }
+        if (overwriteInput) overwriteInput.value = hasConflict ? '1' : '0';
+        Joomla.submitform('titleset.importFiles', form);
     });
     apply();
     filterRows();

@@ -136,6 +136,7 @@ final class TitlesetController extends BaseController
         $this->assertAuthorized();
         $uploads = $this->normalizeUploads((array) $this->input->files->get('titleset_files', [], 'array'));
         $service = new CbStatsTitleSetManagerService(JPATH_SITE);
+        $overwrite = $this->input->post->getBool('titleset_overwrite', false);
 
         try {
             if ($uploads === []) {
@@ -148,20 +149,29 @@ final class TitlesetController extends BaseController
                     || $upload['size'] > 1048576
                     || !is_uploaded_file($upload['tmp_name'])
                 ) {
-                    throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_TITLESETS_IMPORT_INVALID'));
+                    throw new \RuntimeException('upload_invalid');
                 }
-                $filename = $service->validateImportFile($upload['tmp_name'], $upload['name']);
+                $filename = $service->validateImportFile($upload['tmp_name'], $upload['name'], $overwrite);
                 if (isset($filenames[strtolower($filename)])) {
-                    throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_TITLESETS_IMPORT_DUPLICATE'));
+                    throw new \RuntimeException('batch_duplicate');
                 }
                 $filenames[strtolower($filename)] = true;
             }
             foreach ($uploads as $upload) {
-                $service->importFile($upload['tmp_name'], $upload['name']);
+                $service->importFile($upload['tmp_name'], $upload['name'], $overwrite);
             }
             $this->setMessage(Text::plural('COM_CONTENTBUILDERNG_TITLESETS_N_IMPORTED', count($uploads)));
-        } catch (\Throwable) {
-            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_TITLESETS_IMPORT_FAILED'), 'error');
+        } catch (\Throwable $exception) {
+            $key = match ($exception->getMessage()) {
+                'invalid_filename' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_ERROR_FILENAME',
+                'invalid_contents' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_ERROR_CONTENTS',
+                'already_exists' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_ERROR_EXISTS',
+                'upload_invalid' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_INVALID',
+                'batch_duplicate' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_DUPLICATE',
+                'read_failed', 'write_failed' => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_ERROR_WRITE',
+                default => 'COM_CONTENTBUILDERNG_TITLESETS_IMPORT_FAILED',
+            };
+            $this->setMessage(Text::_($key), 'error');
         }
 
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=titlesets', false));
