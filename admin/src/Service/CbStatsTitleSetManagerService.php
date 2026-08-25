@@ -129,7 +129,7 @@ final class CbStatsTitleSetManagerService
         }
 
         $directory = $this->siteRoot . '/' . CbStatsTitleSetService::CUSTOM_DIRECTORY;
-        if (!is_dir($directory) && !mkdir($directory, 0755, true)) {
+        if (!is_dir($directory) && !@mkdir($directory, 0755, true)) {
             throw new \RuntimeException('directory_failed');
         }
         $index = $directory . '/index.html';
@@ -206,18 +206,18 @@ final class CbStatsTitleSetManagerService
     {
         $filename = $this->validateImportFile($path, $originalName, $overwrite);
         $directory = $this->siteRoot . '/' . CbStatsTitleSetService::CUSTOM_DIRECTORY;
-        if (!is_dir($directory) && !mkdir($directory, 0755, true)) {
+        if (!is_dir($directory) && !@mkdir($directory, 0755, true)) {
             throw new \RuntimeException('directory_failed');
         }
 
-        $contents = file_get_contents($path);
+        $contents = @file_get_contents($path);
         if (!is_string($contents)) {
             throw new \RuntimeException('read_failed');
         }
 
         $target = $directory . '/' . $filename;
         $temporary = $target . '.tmp-' . bin2hex(random_bytes(6));
-        if (file_put_contents($temporary, $contents, LOCK_EX) === false) {
+        if (@file_put_contents($temporary, $contents, LOCK_EX) === false) {
             @unlink($temporary);
             throw new \RuntimeException('write_failed');
         }
@@ -225,12 +225,12 @@ final class CbStatsTitleSetManagerService
         $backup = null;
         if ($overwrite && is_file($target)) {
             $backup = $target . '.backup-' . bin2hex(random_bytes(6));
-            if (!rename($target, $backup)) {
+            if (!@rename($target, $backup)) {
                 @unlink($temporary);
                 throw new \RuntimeException('replace_failed');
             }
         }
-        if (!rename($temporary, $target)) {
+        if (!@rename($temporary, $target)) {
             @unlink($temporary);
             if ($backup !== null) {
                 @rename($backup, $target);
