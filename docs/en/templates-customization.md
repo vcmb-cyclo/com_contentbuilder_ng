@@ -425,5 +425,5 @@ The list also supports file-title search and sorting on its data columns.
 In the editor, the `.ini` filename extension is optional. Validate and Save
 display their result, and discarding unsaved changes requires confirmation.
 Search covers both filenames and file titles. The list displays 10 files by
-default, with 10, 25, 50 or All choices. Source is shown as `CBStats` or `Site`,
+default, with 5, 10, 25, 50 or All choices. Source is shown as `CBStats` or `Site`,
 and long titles are limited to two lines.

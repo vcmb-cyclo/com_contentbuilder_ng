@@ -110,7 +110,7 @@ $sortableColumns = ['filename', 'name', 'locale', 'source', 'count', 'status'];
         <label class="d-flex align-items-center gap-2 mb-0">
             <span><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_DISPLAY'); ?></span>
             <select class="form-select form-select-sm" data-cb-titlesets-page-size>
-                <option value="10" selected>10</option><option value="25">25</option><option value="50">50</option>
+                <option value="5">5</option><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option>
                 <option value="0"><?php echo Text::_('JALL'); ?></option>
             </select>
         </label>
