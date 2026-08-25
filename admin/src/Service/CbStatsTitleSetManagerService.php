@@ -78,6 +78,7 @@ final class CbStatsTitleSetManagerService
             'filename' => $filename,
             'source' => $source,
             'comments' => $result['comments'],
+            'modified' => filemtime($path) ?: null,
             'name' => (string) ($result['metadata']['name'] ?? ''),
             'description' => (string) ($result['metadata']['description'] ?? ''),
             'locale' => (string) ($result['metadata']['locale'] ?? ''),

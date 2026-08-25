@@ -12,12 +12,16 @@ use Joomla\CMS\Router\Route;
 <?php if (($this->data['source'] ?? '') === 'provided') : ?>
 <div class="container-fluid">
     <div class="alert alert-info"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_VIEW_INTRO'); ?></div>
-    <div class="card mb-3"><div class="card-header"><h2 class="h4 mb-0"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_METADATA'); ?></h2></div>
+    <div class="card mb-3">
         <div class="card-body"><dl class="row mb-0">
-            <?php foreach (['filename', 'name', 'description', 'locale', 'version', 'author', 'comments'] as $key) : ?>
+            <?php foreach (['filename', 'name', 'comments'] as $key) : ?>
                 <dt class="col-sm-3"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_' . strtoupper($key)); ?></dt>
                 <dd class="col-sm-9"><?php echo nl2br(htmlspecialchars((string) ($this->data[$key] ?? ''), ENT_QUOTES, 'UTF-8')); ?></dd>
             <?php endforeach; ?>
+            <dt class="col-sm-3"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_MODIFIED'); ?></dt>
+            <dd class="col-sm-9"><?php echo !empty($this->data['modified'])
+                ? HTMLHelper::_('date', '@' . (int) $this->data['modified'], Text::_('DATE_FORMAT_LC5'))
+                : Text::_('COM_CONTENTBUILDERNG_TITLESETS_NOT_SAVED'); ?></dd>
         </dl></div>
     </div>
     <div class="card"><div class="card-header"><h2 class="h4 mb-0"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_MAPPINGS'); ?></h2></div>
@@ -44,20 +48,21 @@ use Joomla\CMS\Router\Route;
 <form action="<?php echo Route::_('index.php?option=com_contentbuilderng&view=titleset'); ?>"
       method="post" name="adminForm" id="titleset-form" class="form-validate">
     <div class="card mb-3">
-        <div class="card-body"><?php echo $this->form->renderFieldset('metadata'); ?></div>
+        <div class="card-body">
+            <?php echo $this->form->renderField('filename'); ?>
+            <?php echo $this->form->renderField('name'); ?>
+            <?php echo $this->form->renderField('comments'); ?>
+            <div class="control-group">
+                <div class="control-label"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_MODIFIED'); ?></div>
+                <div class="controls pt-2"><?php echo !empty($this->data['modified'])
+                    ? HTMLHelper::_('date', '@' . (int) $this->data['modified'], Text::_('DATE_FORMAT_LC5'))
+                    : Text::_('COM_CONTENTBUILDERNG_TITLESETS_NOT_SAVED'); ?></div>
+            </div>
+            <?php foreach (['description', 'locale', 'version', 'author', 'modified', 'source'] as $hiddenField) : ?>
+                <?php echo $this->form->getInput($hiddenField); ?>
+            <?php endforeach; ?>
+        </div>
     </div>
-
-    <datalist id="cbng-titleset-languages">
-        <?php foreach ($this->languageTags as $languageTag) : ?>
-            <option value="<?php echo htmlspecialchars($languageTag, ENT_QUOTES, 'UTF-8'); ?>"></option>
-        <?php endforeach; ?>
-    </datalist>
-    <select class="form-select mb-2 d-none" id="cbng-titleset-language-selector" aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_TITLESETS_LANGUAGE_SELECT'), ENT_QUOTES, 'UTF-8'); ?>">
-        <option value=""><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_LANGUAGE_SELECT'); ?></option>
-        <?php foreach ($this->languageTags as $languageTag) : ?>
-            <option value="<?php echo htmlspecialchars($languageTag, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($languageTag, ENT_QUOTES, 'UTF-8'); ?></option>
-        <?php endforeach; ?>
-    </select>
 
     <div class="card">
         <div class="card-header">
@@ -77,19 +82,6 @@ document.addEventListener('DOMContentLoaded', function () {
     let allowNavigation = false;
     form.addEventListener('input', function () { dirty = true; });
     form.addEventListener('change', function () { dirty = true; });
-    const localeInput = document.getElementById('jform_locale');
-    const localeSelector = document.getElementById('cbng-titleset-language-selector');
-    if (localeInput && localeSelector && localeInput.parentNode) {
-        localeInput.parentNode.insertBefore(localeSelector, localeInput);
-        localeSelector.classList.remove('d-none');
-        localeSelector.value = [...localeSelector.options].some(function (option) { return option.value === localeInput.value; }) ? localeInput.value : '';
-        localeSelector.addEventListener('change', function () {
-            if (localeSelector.value !== '') {
-                localeInput.value = localeSelector.value;
-                localeInput.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        });
-    }
     window.addEventListener('beforeunload', function (event) {
         if (!dirty || allowNavigation) return;
         event.preventDefault();

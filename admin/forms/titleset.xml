@@ -3,11 +3,12 @@
     <fieldset name="metadata" label="COM_CONTENTBUILDERNG_TITLESETS_METADATA">
         <field name="filename" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_FILENAME" description="COM_CONTENTBUILDERNG_TITLESETS_FILENAME_DESC" required="true" />
         <field name="name" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_NAME" description="COM_CONTENTBUILDERNG_TITLESETS_NAME_DESC" required="true" />
-        <field name="description" type="textarea" label="COM_CONTENTBUILDERNG_TITLESETS_DESCRIPTION" description="COM_CONTENTBUILDERNG_TITLESETS_DESCRIPTION_DESC" rows="3" />
-        <field name="locale" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_LOCALE" description="COM_CONTENTBUILDERNG_TITLESETS_LOCALE_DESC" hint="fr-FR" list="cbng-titleset-languages" />
-        <field name="version" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_VERSION" description="COM_CONTENTBUILDERNG_TITLESETS_VERSION_DESC" default="1.0" />
-        <field name="author" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_AUTHOR" description="COM_CONTENTBUILDERNG_TITLESETS_AUTHOR_DESC" />
-        <field name="comments" type="textarea" label="COM_CONTENTBUILDERNG_TITLESETS_COMMENTS" description="COM_CONTENTBUILDERNG_TITLESETS_COMMENTS_DESC" rows="4" />
+        <field name="comments" type="textarea" label="COM_CONTENTBUILDERNG_TITLESETS_COMMENTS" description="COM_CONTENTBUILDERNG_TITLESETS_COMMENTS_DESC" rows="3" />
+        <field name="description" type="hidden" />
+        <field name="locale" type="hidden" />
+        <field name="version" type="hidden" />
+        <field name="author" type="hidden" />
+        <field name="modified" type="hidden" />
         <field name="source" type="hidden" />
     </fieldset>
     <fieldset name="titles" label="COM_CONTENTBUILDERNG_TITLESETS_MAPPINGS">

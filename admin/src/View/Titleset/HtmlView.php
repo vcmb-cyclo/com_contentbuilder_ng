@@ -10,7 +10,6 @@ use CB\Component\Contentbuilderng\Administrator\Model\TitlesetModel;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Language\LanguageHelper;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
@@ -20,7 +19,6 @@ final class HtmlView extends BaseHtmlView
 {
     protected Form $form;
     protected array $data = [];
-    protected array $languageTags = [];
 
     public function display($tpl = null): void
     {
@@ -35,12 +33,6 @@ final class HtmlView extends BaseHtmlView
         }
         $this->data = $model->getData();
         $this->form = $model->getForm();
-        $this->languageTags = array_values(array_unique(array_merge(
-            array_keys(LanguageHelper::getKnownLanguages(JPATH_SITE)),
-            array_keys(LanguageHelper::getKnownLanguages(JPATH_ADMINISTRATOR))
-        )));
-        sort($this->languageTags, SORT_NATURAL | SORT_FLAG_CASE);
-
         $isProvided = ($this->data['source'] ?? '') === 'provided';
         ToolbarHelper::title(Text::_($isProvided
             ? 'COM_CONTENTBUILDERNG_TITLESETS_VIEW_TITLE'

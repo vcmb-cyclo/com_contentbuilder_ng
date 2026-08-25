@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.1.11-RC04 — 2026-08-25
+
+- Simplified the CBStats title-set editor to filename, title, optional comment, automatic last-modified date and value mappings.
+- Removed the language selector and advanced metadata from the editor while preserving existing metadata when files are saved again.
+
 ## 6.1.11-RC03 — 2026-08-25
 
 - Added reusable CBStats `titleset="file.ini"` mappings with safe custom/provided directory resolution and inline `titles=` priority.
