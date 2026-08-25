@@ -611,6 +611,7 @@ namespace {
     require_once \dirname(__DIR__, 2) . '/site/src/Service/StatsService.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/StatsHideOptionsService.php';
     require_once \dirname(__DIR__, 2) . '/site/src/Service/ContentCardService.php';
+    require_once \dirname(__DIR__, 2) . '/site/src/Service/EditorialCardService.php';
     require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/PiePresentationService.php';
     require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/TotalPresentationService.php';
     require_once \dirname(__DIR__, 2) . '/plugins/content/contentbuilderng_cbstats/src/Service/IdSumException.php';

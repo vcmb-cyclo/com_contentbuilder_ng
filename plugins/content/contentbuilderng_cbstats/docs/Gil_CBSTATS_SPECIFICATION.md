@@ -518,3 +518,28 @@ A number without a unit means pixels. Without `width=`, Pie uses 80% with a
 maximum of 350px and is centred; Bar and other charts use 100%. Explicit width
 removes the Pie maximum. Explicit height disables maintained aspect ratio;
 percentage height requires a parent with a defined height.
+
+## Editorial Cards — 6.1.11-RC02
+
+An article may group free HTML, CBStats and CBList tags in the shared Card
+presentation with a standard editor-safe `div`:
+
+```html
+<div class="cb-card-editorial" data-title="Information | h4" data-card="v1" data-w="33">
+  <p>Total: {CBStats id=15 output=total}</p>
+  <p>Distinct groups: {CBStats id=15 field=Group output=distinct}</p>
+  {CBList id=15 fields="Nom|Prenom" limit=5}
+</div>
+```
+
+The complete syntax is recommended. Missing or invalid `data-card` uses `v1`;
+missing or invalid `data-w` uses `33`. `data-title` is optional and, when
+present, reuses the shared H1–H6 and positive rem suffix parser. The body
+preserves normal Joomla article HTML and nested content-plugin tags.
+
+The renderer uses `DOMDocument`, not a regular expression, to process nested
+HTML. It converts the marker to the existing shared Card structure and loads
+`com_contentbuilderng.cards`. Direct text nodes containing only whitespace or
+non-breaking spaces are removed from `.cb-cards` grids so editor formatting
+cannot create anonymous grid items or extra spacing. Custom elements such as
+`<cb-card>` are unsupported because TinyMCE splits them and JCE removes them.

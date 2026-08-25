@@ -378,3 +378,24 @@ The displayed total and chart percentages are recalculated from the values
 retained by `limit`. Hiding does not change calculations, ACLs or filters.
 Hiding all three elements is rejected. The former `total=hide` syntax is no
 longer supported; use `hide="total"`.
+
+### Editorial Cards for free content
+
+Use an editor-safe standard `div` to group free HTML, CBStats and CBList tags
+with the shared Card presentation. The complete syntax is recommended:
+
+```html
+<div class="cb-cards">
+  <div class="cb-card-editorial" data-title="Information | h4" data-card="v1" data-w="33">
+    <p>Total: {CBStats id=15 output=total}</p>
+    <p>Distinct groups: {CBStats id=15 field=Group output=distinct}</p>
+    {CBList id=15 fields="Nom|Prenom" limit=5}
+  </div>
+</div>
+```
+
+`data-title` is optional and supports the shared H1–H6 and positive rem title
+suffixes. Without it, no header is rendered. `data-card` defaults to `v1` and
+`data-w` defaults to `33`; accepted widths are `33`, `66` and `100`. Empty
+whitespace and non-breaking spaces inserted between Cards by an editor are
+ignored in `cb-cards` grids.

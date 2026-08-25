@@ -530,3 +530,21 @@ Histogram and Line use the same normalized counts; neither creates missing
 dates or values. Histogram stays vertical and uses horizontal scrolling when
 needed. Radar requires at least 3 axes, accepts at most 8 and is recommended
 with **4 to 6 axes**.
+
+## Editorial Card markup
+
+Joomla articles may group free HTML, CBStats and CBList tags in the shared Card
+presentation with this standard HTML marker:
+
+```html
+<div class="cb-card-editorial" data-title="Information | h4" data-card="v1" data-w="33">
+  <p>Total: {CBStats id=15 output=total}</p>
+</div>
+```
+
+`data-title` is optional and uses the shared Hx/rem title syntax. `data-card`
+accepts `h1`–`h6` or `v1`–`v6` and defaults to `v1`; `data-w` accepts `33`,
+`66` or `100` and defaults to `33`. The complete explicit syntax is
+recommended. Invalid Card or width values use their defaults. The standard
+`div` is compatible with TinyMCE and JCE and renders through the existing
+shared Card HTML and CSS.

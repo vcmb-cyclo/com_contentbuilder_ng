@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.1.11-RC02 — 2026-08-25
+
+- Added editor-safe editorial Cards using a standard `div.cb-card-editorial`, with optional titles, shared Hx/rem title formatting and existing Card colours and widths.
+- Added automatic removal of empty whitespace and non-breaking-space text nodes between Cards to prevent unwanted grid spacing introduced by editors.
+
 ## 6.1.11-RC01 — 2026-08-25
 
 - Added CBStats `output=distinct` to count distinct non-empty field values after the existing view, source and value filters have been applied.

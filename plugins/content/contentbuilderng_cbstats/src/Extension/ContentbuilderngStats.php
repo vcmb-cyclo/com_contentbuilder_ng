@@ -19,6 +19,7 @@ use CB\Component\Contentbuilderng\Site\Service\StatsFilterValueService;
 use CB\Component\Contentbuilderng\Site\Service\StatsHideOptionsService;
 use CB\Component\Contentbuilderng\Site\Service\CbstatsHelpService;
 use CB\Component\Contentbuilderng\Site\Service\ContentCardService;
+use CB\Component\Contentbuilderng\Site\Service\EditorialCardService;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Plugin\Content\ContentbuilderngStats\Service\PiePresentationService;
@@ -66,15 +67,34 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
     {
         $article = $event->getArgument('subject');
 
-        if (!is_object($article) || !isset($article->text) || stripos((string) $article->text, '{CBStats') === false) {
+        if (!is_object($article) || !isset($article->text)) {
             return;
         }
 
-        $article->text = preg_replace_callback(
-            TagSyntaxService::TAG_PATTERN,
-            fn(array $match): string => $this->renderArticleTag((string) ($match[1] ?? '')),
-            (string) $article->text
-        );
+        $text = (string) $article->text;
+        $hasStats = stripos($text, '{CBStats') !== false;
+        $hasEditorialCards = EditorialCardService::containsMarker($text);
+
+        if (!$hasStats && !$hasEditorialCards) {
+            return;
+        }
+
+        if ($hasEditorialCards) {
+            $text = EditorialCardService::transform($text);
+            $wa = $this->getCbstatsWebAssetManager();
+            $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
+            $wa->useStyle('com_contentbuilderng.cards');
+        }
+
+        if ($hasStats) {
+            $text = preg_replace_callback(
+                TagSyntaxService::TAG_PATTERN,
+                fn(array $match): string => $this->renderArticleTag((string) ($match[1] ?? '')),
+                $text
+            );
+        }
+
+        $article->text = $text;
     }
 
     private function renderArticleTag(string $rawAttributes): string

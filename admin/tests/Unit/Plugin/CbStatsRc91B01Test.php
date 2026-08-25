@@ -90,6 +90,7 @@ final class CbStatsRc91B01Test extends TestCase
         $fields = $manifest->xpath('/extension/config/fields/fieldset/field');
         self::assertSame([
             'cbstats_syntax_note',
+            'cbstats_editorial_card_note',
             'cbstats_add_note',
             'cbstats_debug_note',
             'cbstats_manual_note',

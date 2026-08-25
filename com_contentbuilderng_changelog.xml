@@ -3,8 +3,9 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.11-RC01</version>
+		<version>6.1.11-RC02</version>
 		<addition>
+			<item>Added editor-safe editorial Cards for grouping free HTML, CBStats and CBList content with the shared Card presentation.</item>
 			<item>Added CBStats output=distinct for counting distinct non-empty field values after all existing filters.</item>
 			<item>Added shared CBList and CBStats Card-title formatting with h1–h6 and positive rem suffixes; Card titles now default to semantic h4 headings.</item>
 			<item>Added a hidden five-click animated piranha Easter egg to the About screen.</item>

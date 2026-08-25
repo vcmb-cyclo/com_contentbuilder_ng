@@ -421,3 +421,25 @@ Le total affiché et les pourcentages des graphiques sont recalculés sur les
 valeurs conservées par `limit`. Le masquage ne modifie ni les calculs, ni les
 ACL, ni les filtres. Masquer les trois éléments est refusé. L’ancienne syntaxe
 `total=hide` n’est plus prise en charge ; utilisez `hide="total"`.
+
+### Cards éditoriales pour contenu libre
+
+Utilisez un `div` HTML standard, compatible avec les éditeurs, pour regrouper du
+HTML libre ainsi que des balises CBStats et CBList avec le rendu partagé des
+Cards. La syntaxe complète est recommandée :
+
+```html
+<div class="cb-cards">
+  <div class="cb-card-editorial" data-title="Informations | h4" data-card="v1" data-w="33">
+    <p>Total : {CBStats id=15 output=total}</p>
+    <p>Groupes distincts : {CBStats id=15 field=Groupe output=distinct}</p>
+    {CBList id=15 fields="Nom|Prenom" limit=5}
+  </div>
+</div>
+```
+
+`data-title` est facultatif et accepte les suffixes de titre partagés H1 à H6
+et rem positif. En son absence, aucun bandeau n’est généré. `data-card` utilise
+`v1` par défaut et `data-w` utilise `33` par défaut ; les largeurs acceptées
+sont `33`, `66` et `100`. Les espaces vides et insécables insérés entre les
+Cards par un éditeur sont ignorés dans les grilles `cb-cards`.
