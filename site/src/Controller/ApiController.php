@@ -366,7 +366,7 @@ class ApiController extends BaseController
                 }
 
                 return [
-                    'total' => $rangeDefinitions === []
+                    'total' => $groupDefinitions === []
                         ? array_sum(array_column($items, 'value'))
                         : (int) ($payload['records']['total'] ?? 0),
                     'items' => $items,
