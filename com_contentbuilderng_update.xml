@@ -1,23 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <updates>
-	<update>
-		<name>ContentBuilder NG</name>
-		<description>ContentBuilder NG Update</description>
-		<element>com_contentbuilderng</element>
-		<type>component</type>
-		<client>1</client>
-		<version>6.1.12</version>
-		<infourl title="ContentBuilder NG">https://breezingforms-ng.vcmb.fr/</infourl>
-		<changelogurl>https://raw.githubusercontent.com/vcmb-cyclo/com_contentbuilderng/main/com_contentbuilderng_changelog.xml</changelogurl>
-		<downloads>
-			<downloadurl type="full" format="zip">https://github.com/vcmb-cyclo/com_contentbuilderng/releases/download/v6.1.12/com_contentbuilderng-6.1.12.zip</downloadurl>
-			<sha256>786b8b548c513597663c156a6ada0c6671f2fdd6f15b4e03b63bdaf72d3f2ed6</sha256>
-		</downloads>
-		<tags>
-			<tag>stable</tag>
-		</tags>
-		<maintainer>XDA+GIL</maintainer>
-		<maintainerurl>https://breezingforms-ng.vcmb.fr</maintainerurl>
-		<targetplatform name="joomla" version="^6\..*$" />
-	</update>
 </updates>
