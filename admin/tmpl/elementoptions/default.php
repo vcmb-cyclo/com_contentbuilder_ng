@@ -5,14 +5,11 @@
  * @author      Markus Bopp
  * @author      XDA+GIL
  * @link        https://breezingforms-ng.vcmb.fr
- * @copyright   Copyright © 2026 XDA+GIL 
+ * @copyright   Copyright © 2026 XDA+GIL
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
-
-
-
 
 // No direct access
 \defined('_JEXEC') or die('Restricted access');
@@ -22,8 +19,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\FormSupportService;
-use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
-
+use CB\Component\Contentbuilderng\Administrator\Service\ElementSettingsStateService;
 $wa = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getDocument()->getWebAssetManager();
 $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
 $wa->useStyle('com_contentbuilderng.elementoptions');
@@ -31,11 +27,11 @@ $wa->useStyle('com_contentbuilderng.elementoptions');
 
 $element = $this->element ?? null;
 if (!is_object($element) || empty($element->id)) {
-?>
+    ?>
     <div class="alert alert-danger">
         <?php echo Text::_('COM_CONTENTBUILDERNG_ERROR'); ?>: Invalid or missing `element_id`.
     </div>
-<?php
+    <?php
     return;
 }
 
@@ -134,11 +130,11 @@ $typeIconMap = [
                 </option>
                 <?php
                 foreach ($plugins as $plugin) {
-                ?>
+                    ?>
                     <option value="<?php echo $plugin; ?>" data-icon="fa-solid fa-puzzle-piece" data-type-label="<?php echo htmlspecialchars($plugin, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $this->element->type == $plugin ? ' selected="selected"' : ''; ?>>
                         <?php echo $plugin; ?>
                     </option>
-                <?php
+                    <?php
                 }
                 ?>
             </select>
@@ -191,12 +187,12 @@ $typeIconMap = [
                     </button>
                     <?php
                     foreach ($plugins as $plugin) {
-                    ?>
+                        ?>
                         <button class="cb-type-picker-option" type="button" data-value="<?php echo htmlspecialchars($plugin, ENT_QUOTES, 'UTF-8'); ?>" data-icon="fa-solid fa-puzzle-piece" data-label="<?php echo htmlspecialchars($plugin, ENT_QUOTES, 'UTF-8'); ?>">
                             <span class="cb-type-picker-icon" aria-hidden="true"><span class="fa-solid fa-puzzle-piece" aria-hidden="true"></span></span>
                             <span><?php echo htmlspecialchars($plugin, ENT_QUOTES, 'UTF-8'); ?></span>
                         </button>
-                    <?php
+                        <?php
                     }
                     ?>
                 </div>
@@ -266,7 +262,7 @@ $typeIconMap = [
         switch ($this->element->type) {
             case is_array($the_item) && in_array($this->element->type, $plugins):
                 $is_plugin = true;
-        ?>
+                ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo htmlspecialchars($the_item['element_type'] ?? $this->element->type, ENT_QUOTES, 'UTF-8'); ?>
@@ -274,7 +270,7 @@ $typeIconMap = [
                     <table class="admintable" width="95%">
                         <?php
                         if (isset($the_item['has_hint']) && $the_item['has_hint']) {
-                        ?>
+                            ?>
                             <tr>
                                 <td class="key text-start" style="width: 100px;">
                                     <label for="hint">
@@ -286,7 +282,7 @@ $typeIconMap = [
                                         id="hint"><?php echo isset($this->element->hint) ? htmlspecialchars($this->element->hint, ENT_QUOTES, 'UTF-8') : ''; ?></textarea>
                                 </td>
                             </tr>
-                        <?php
+                            <?php
                         }
                         ?>
                     </table>
@@ -295,10 +291,10 @@ $typeIconMap = [
                     ?>
                 </fieldset>
                 <input type="hidden" name="field_type" value="<?php echo $this->element->type; ?>" />
-            <?php
+                <?php
                 break;
             case 'captcha':
-            ?>
+                ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_CAPTCHA'); ?>
@@ -318,10 +314,10 @@ $typeIconMap = [
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="captcha" />
-            <?php
+                <?php
                 break;
             case 'upload':
-            ?>
+                ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_UPLOAD'); ?>
@@ -377,12 +373,12 @@ $typeIconMap = [
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="upload" />
-            <?php
+                <?php
                 break;
             case 'checkboxgroup':
             case 'radiogroup':
             case 'select':
-            ?>
+                ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo $this->element->type == 'checkboxgroup' ? Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_CHECKBOXGROUP') : ($this->element->type == 'select' ? Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_SELECT') : Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_RADIO')); ?>
@@ -409,7 +405,6 @@ $typeIconMap = [
                             }
 
                             if (isset($this->element->default_value)) {
-
                                 if ($this->element->options->seperator == '') {
                                     $def = explode(" ", $this->element->default_value);
                                 } else {
@@ -417,7 +412,11 @@ $typeIconMap = [
                                 }
                             }
 
-                        ?>
+                            if (trim((string) ($this->element->default_value ?? '')) === '') {
+                                $def = array_map('strval', (array) ($this->sourceGroupDefaultValues ?? []));
+                            }
+
+                            ?>
 
                             <tr>
                                 <td class="key text-start" style="width: 100px;">
@@ -428,26 +427,26 @@ $typeIconMap = [
                                 <td class="text-start">
                                     <?php
                                     foreach ($this->group_definition as $key => $value) {
-                                    ?>
+                                        ?>
                                         <?php
                                         $defaultValueId = 'default_value' . htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
-                                        echo $renderCheckbox('default_value[]', $defaultValueId, in_array($key, $def), (string) $key);
+                                        echo $renderCheckbox('default_value[]', $defaultValueId, in_array((string) $key, $def, true), (string) $key);
                                         ?>
                                         <label for="default_value<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>">
                                             <?php echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); ?>
                                         </label>
                                         <br />
-                                    <?php
+                                        <?php
                                     }
                                     ?>
                                 </td>
                             </tr>
 
-                        <?php
+                            <?php
                         }
 
                         if ($this->element->type == 'select') {
-                        ?>
+                            ?>
                             <tr>
                                 <td class="key text-start" style="width: 100px;">
                                     <label for="multiple">
@@ -470,10 +469,10 @@ $typeIconMap = [
                                         value="<?php echo isset($this->element->options->length) ? $this->element->options->length : ''; ?>" />
                                 </td>
                             </tr>
-                        <?php
+                            <?php
                         }
                         if ($this->element->type == 'checkboxgroup' || $this->element->type == 'radiogroup') {
-                        ?>
+                            ?>
                             <tr>
                                 <td class="key text-start" style="width: 100px;">
                                     <label for="horizontal">
@@ -496,7 +495,7 @@ $typeIconMap = [
                                         value="<?php echo isset($this->element->options->horizontal_length) ? $this->element->options->horizontal_length : ''; ?>" />
                                 </td>
                             </tr>
-                        <?php
+                            <?php
                         }
                         ?>
                         <tr>
@@ -546,10 +545,10 @@ $typeIconMap = [
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="<?php echo $this->element->type; ?>" />
-            <?php
+                <?php
                 break;
             case 'textarea':
-            ?>
+                ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_TYPE_TEXTAREA'); ?>
@@ -651,10 +650,10 @@ $typeIconMap = [
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="textarea" />
-            <?php
+                <?php
                 break;
             case 'calendar':
-            ?>
+                ?>
 
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
@@ -733,11 +732,11 @@ $typeIconMap = [
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="calendar" />
-            <?php
+                <?php
                 break;
             case '':
             case 'text':
-            ?>
+                ?>
 
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
@@ -826,10 +825,10 @@ $typeIconMap = [
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="text" />
-            <?php
+                <?php
                 break;
             case 'hidden':
-            ?>
+                ?>
 
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
@@ -875,7 +874,7 @@ $typeIconMap = [
                     </table>
                 </fieldset>
                 <input type="hidden" name="field_type" value="hidden" />
-            <?php
+                <?php
                 break;
         }
 
@@ -903,7 +902,7 @@ $typeIconMap = [
             </h3>
             <?php
             if (($is_plugin && !empty($the_item['show_validation_settings'])) || !$is_plugin) {
-            ?>
+                ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_VALIDATION'); ?> (PHP)
@@ -933,11 +932,11 @@ $typeIconMap = [
                                     <?php
                                     $selected_validations = explode(',', (string) ($this->element->validations ?? ''));
                                     foreach ($this->validations as $validation) {
-                                    ?>
+                                        ?>
                                         <option <?php echo in_array($validation, $selected_validations) ? 'selected="selected" ' : ''; ?>value="<?php echo htmlspecialchars($validation, ENT_QUOTES, 'UTF-8'); ?>">
                                             <?php echo htmlspecialchars($validation, ENT_QUOTES, 'UTF-8'); ?>
                                         </option>
-                                    <?php
+                                        <?php
                                     }
                                     ?>
                                 </select>
@@ -962,11 +961,11 @@ $typeIconMap = [
                         </tr>
                     </table>
                 </fieldset>
-            <?php
+                <?php
             }
 
             if (($is_plugin && !empty($the_item['show_init_code_settings'])) || !$is_plugin) {
-            ?>
+                ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_INIT'); ?> (JS)
@@ -988,10 +987,10 @@ $typeIconMap = [
                         </tr>
                     </table>
                 </fieldset>
-            <?php
+                <?php
             }
             if (($is_plugin && !empty($the_item['show_action_code_settings'])) || !$is_plugin) {
-            ?>
+                ?>
                 <fieldset class="border rounded p-3 mb-3">
                     <legend>
                         <?php echo Text::_('COM_CONTENTBUILDERNG_ELEMENT_ACTION'); ?> (PHP)
@@ -1013,10 +1012,10 @@ $typeIconMap = [
                         </tr>
                     </table>
                 </fieldset>
-            <?php
+                <?php
             }
             ?>
-        <?php
+            <?php
             echo HTMLHelper::_('uitab.endTab');
         }
         echo HTMLHelper::_('uitab.endTabSet');
@@ -1152,45 +1151,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php
 $_eoElement = $this->element ?? null;
 if (is_object($_eoElement) && !empty($_eoElement->id)) {
-    $_eoType = trim((string) ($_eoElement->type ?? ''));
-    $_eoIsModified = false;
-    if ($_eoType !== '' && $_eoType !== 'text') {
-        $_eoIsModified = true;
-    } elseif (trim((string) ($_eoElement->item_wrapper ?? '')) !== '') {
-        $_eoIsModified = true;
-    } else {
-        foreach (['hint', 'default_value', 'validations', 'custom_init_script', 'custom_action_script', 'custom_validation_script', 'validation_message'] as $_eoField) {
-            if (trim((string) ($_eoElement->{$_eoField} ?? '')) !== '') {
-                $_eoIsModified = true;
-                break;
-            }
-        }
-        if (!$_eoIsModified) {
-            $_eoOptions = $_eoElement->options ?? null;
-            if (is_string($_eoOptions) || $_eoOptions === null) {
-                $_eoOptions = PackedDataHelper::decodePackedData((string) ($_eoOptions ?? ''), null);
-            }
-            if (is_object($_eoOptions)) {
-                $_eoOptions = (array) $_eoOptions;
-            }
-            if (is_array($_eoOptions)) {
-                $_eoIgnore = ['length' => '', 'maxlength' => '', 'password' => 0, 'readonly' => 0, 'seperator' => ',', 'class' => '', 'allow_raw' => false, 'allow_html' => false];
-                foreach ($_eoOptions as $_eoKey => $_eoVal) {
-                    if (is_string($_eoVal)) {
-                        $_eoVal = trim($_eoVal);
-                    }
-                    if (array_key_exists((string) $_eoKey, $_eoIgnore) && $_eoIgnore[(string) $_eoKey] === $_eoVal) {
-                        continue;
-                    }
-                    if ($_eoVal === '' || $_eoVal === null || $_eoVal === false || $_eoVal === 0 || $_eoVal === '0') {
-                        continue;
-                    }
-                    $_eoIsModified = true;
-                    break;
-                }
-            }
-        }
-    }
+    $_eoIsModified = ElementSettingsStateService::isModified($_eoElement, (string) ($this->sourceEditableType ?? 'text'));
     ?>
 <script>
 if (window.parent && window.parent !== window) {

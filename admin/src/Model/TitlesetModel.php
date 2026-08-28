@@ -56,6 +56,7 @@ final class TitlesetModel extends BaseDatabaseModel
                 'comments' => '',
                 'modified' => null,
                 'source' => 'custom',
+                'type' => 'titles',
                 'titles' => [['value' => '', 'label' => '']],
             ];
         }

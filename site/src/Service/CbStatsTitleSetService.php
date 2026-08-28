@@ -13,7 +13,7 @@ final class CbStatsTitleSetService
 
     /**
      * @var array<string, array{
-     *     titles: array<string, string>, metadata: array<string, string>,
+     *     titles: array<string, string>, groups: array<string, string>, metadata: array<string, string>,
      *     comments: string, status: string, source: string, invalidEntries: int
      * }>
      */
@@ -25,7 +25,7 @@ final class CbStatsTitleSetService
 
     /**
      * @return array{
-     *     titles: array<string, string>, metadata: array<string, string>,
+     *     titles: array<string, string>, groups: array<string, string>, metadata: array<string, string>,
      *     comments: string, status: string, source: string, invalidEntries: int
      * }
      */
@@ -89,7 +89,7 @@ final class CbStatsTitleSetService
 
     /**
      * @return array{
-     *     titles: array<string, string>, metadata: array<string, string>,
+     *     titles: array<string, string>, groups: array<string, string>, metadata: array<string, string>,
      *     comments: string, status: string, source: string, invalidEntries: int
      * }
      */
@@ -110,8 +110,8 @@ final class CbStatsTitleSetService
         }
 
         $metadata = $parsed['metadata'];
-        if (!$parsed['hasTitles']) {
-            $result = self::emptyResult('missing_titles');
+        if (!$parsed['hasTitles'] && !$parsed['hasGroups']) {
+            $result = self::emptyResult('missing_data');
             $result['metadata'] = $metadata;
             $result['comments'] = self::extractComments($contents);
 
@@ -119,10 +119,10 @@ final class CbStatsTitleSetService
         }
 
         $titles = $parsed['titles'];
+        $groups = $parsed['groups'];
         $invalidEntries = $parsed['invalidEntries'];
-
-        if ($titles === []) {
-            $status = 'missing_titles';
+        if ($titles === [] && $groups === []) {
+            $status = 'missing_data';
         } elseif ($invalidEntries > 0) {
             $status = 'invalid_entries';
         } else {
@@ -131,6 +131,7 @@ final class CbStatsTitleSetService
 
         return [
             'titles' => $titles,
+            'groups' => $groups,
             'metadata' => $metadata,
             'comments' => self::extractComments($contents),
             'status' => $status,
@@ -140,28 +141,30 @@ final class CbStatsTitleSetService
     }
 
     /**
-     * @return array{metadata: array<string, string>, titles: array<string, string>, hasTitles: bool, invalidEntries: int}|null
+     * @return array{metadata: array<string, string>, titles: array<string, string>, groups: array<string, string>, hasTitles: bool, hasGroups: bool, invalidEntries: int}|null
      */
     private static function parseContents(string $contents): ?array
     {
         $metadataLines = [];
         $titles = [];
+        $groups = [];
         $invalidEntries = 0;
         $section = '';
         $hasTitles = false;
-
+        $hasGroups = false;
         foreach (preg_split('/\R/', $contents) ?: [] as $line) {
             $trimmed = trim($line);
             if (preg_match('/^\[([^\]]+)]\s*$/', $trimmed, $match) === 1) {
                 $section = strtolower(trim($match[1]));
                 $hasTitles = $hasTitles || $section === 'titles';
-                if ($section !== 'titles') {
+                $hasGroups = $hasGroups || $section === 'groups';
+                if (!in_array($section, ['titles', 'groups'], true)) {
                     $metadataLines[] = $line;
                 }
                 continue;
             }
 
-            if ($section !== 'titles') {
+            if (!in_array($section, ['titles', 'groups'], true)) {
                 $metadataLines[] = $line;
                 continue;
             }
@@ -184,7 +187,20 @@ final class CbStatsTitleSetService
                 continue;
             }
 
-            $titles[$key] = trim($label);
+            if ($section === 'titles') {
+                $titles[$key] = trim($label);
+            } else {
+                try {
+                    if (count(StatsService::parseFieldStatsGroupSelectors($key)) !== 1) {
+                        $invalidEntries++;
+                        continue;
+                    }
+                } catch (\InvalidArgumentException) {
+                    $invalidEntries++;
+                    continue;
+                }
+                $groups[$key] = trim($label);
+            }
         }
 
         $metadataContents = trim(implode("\n", $metadataLines));
@@ -207,7 +223,7 @@ final class CbStatsTitleSetService
             $metadata = self::normalizeSection($parsedMetadata['metadata'] ?? []);
         }
 
-        return compact('metadata', 'titles', 'hasTitles', 'invalidEntries');
+        return compact('metadata', 'titles', 'groups', 'hasTitles', 'hasGroups', 'invalidEntries');
     }
 
     private static function parseIniValue(string $value): ?string
@@ -261,7 +277,7 @@ final class CbStatsTitleSetService
 
     /**
      * @return array{
-     *     titles: array<string, string>, metadata: array<string, string>,
+     *     titles: array<string, string>, groups: array<string, string>, metadata: array<string, string>,
      *     comments: string, status: string, source: string, invalidEntries: int
      * }
      */
@@ -269,6 +285,7 @@ final class CbStatsTitleSetService
     {
         return [
             'titles' => [],
+            'groups' => [],
             'metadata' => [],
             'comments' => '',
             'status' => $status,

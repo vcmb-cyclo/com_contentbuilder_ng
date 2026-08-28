@@ -36,13 +36,15 @@ final class CbStatsTitleSetManagerService
                 $file = $entry->getPathname();
                 $filename = basename($file);
                 $result = CbStatsTitleSetService::parseFile($file);
+                $type = $result['groups'] !== [] ? 'groups' : 'titles';
                 $items[] = [
                     'filename' => $filename,
                     'source' => $source,
                     'modified' => $entry->getMTime(),
                     'metadata' => $result['metadata'],
                     'status' => $result['status'],
-                    'count' => count($result['titles']),
+                    'type' => $type,
+                    'count' => count($result[$type]),
                 ];
             }
         }
@@ -74,7 +76,7 @@ final class CbStatsTitleSetManagerService
         }
 
         $result = CbStatsTitleSetService::parseFile($path);
-
+        $type = $result['groups'] !== [] ? 'groups' : 'titles';
         return [
             'filename' => $filename,
             'source' => $source,
@@ -85,10 +87,11 @@ final class CbStatsTitleSetManagerService
             'locale' => (string) ($result['metadata']['locale'] ?? ''),
             'version' => (string) ($result['metadata']['version'] ?? ''),
             'author' => (string) ($result['metadata']['author'] ?? ''),
+            'type' => $type,
             'titles' => array_map(
                 static fn(string $value, string $label): array => ['value' => $value, 'label' => $label],
-                array_keys($result['titles']),
-                array_values($result['titles'])
+                array_keys($result[$type]),
+                array_values($result[$type])
             ),
             'status' => $result['status'],
         ];
@@ -98,11 +101,12 @@ final class CbStatsTitleSetManagerService
     public function validate(array $data): array
     {
         $errors = [];
+        $type = in_array(($data['type'] ?? ''), ['titles', 'groups'], true) ? (string) $data['type'] : 'titles';
         $filename = $this->normalizeFilename((string) ($data['filename'] ?? ''));
         if (!CbStatsTitleSetService::isValidFilename($filename)) {
             $errors[] = 'filename';
         }
-        $titles = $this->normalizeTitles((array) ($data['titles'] ?? []));
+        $titles = $this->normalizeTitles((array) ($data['titles'] ?? []), $type);
         $submittedRows = array_values(array_filter(
             (array) ($data['titles'] ?? []),
             static fn(mixed $row): bool => is_array($row)
@@ -112,7 +116,7 @@ final class CbStatsTitleSetManagerService
             $errors[] = 'titles';
         }
 
-        return ['valid' => $errors === [], 'errors' => $errors, 'titles' => $titles];
+        return ['valid' => $errors === [], 'errors' => $errors, 'titles' => $titles, 'type' => $type];
     }
 
     /** @param array<string, mixed> $data */
@@ -140,8 +144,7 @@ final class CbStatsTitleSetManagerService
         $filename = $this->normalizeFilename((string) $data['filename']);
         $target = $directory . '/' . $filename;
         $temporary = $target . '.tmp-' . bin2hex(random_bytes(6));
-        $contents = $this->serialize($data, $validation['titles']);
-
+        $contents = $this->serialize($data, $validation['titles'], $validation['type']);
         if (file_put_contents($temporary, $contents, LOCK_EX) === false) {
             throw new \RuntimeException('Unable to write the temporary title set file.');
         }
@@ -283,7 +286,7 @@ final class CbStatsTitleSetManagerService
     }
 
     /** @return array<string, string> */
-    private function normalizeTitles(array $rows): array
+    private function normalizeTitles(array $rows, string $type): array
     {
         $titles = [];
         foreach ($rows as $row) {
@@ -293,8 +296,16 @@ final class CbStatsTitleSetManagerService
 
             $value = trim((string) ($row['value'] ?? ''));
             $label = trim((string) ($row['label'] ?? ''));
+            $validValue = CbStatsTitleSetService::isValidMappingKey($value);
+            if ($validValue && $type === 'groups') {
+                try {
+                    $validValue = count(\CB\Component\Contentbuilderng\Site\Service\StatsService::parseFieldStatsGroupSelectors($value)) === 1;
+                } catch (\InvalidArgumentException) {
+                    $validValue = false;
+                }
+            }
             if (
-                CbStatsTitleSetService::isValidMappingKey($value)
+                $validValue
                 && $label !== ''
                 && !str_contains($label, "\n")
                 && !str_contains($label, "\r")
@@ -307,7 +318,7 @@ final class CbStatsTitleSetManagerService
     }
 
     /** @param array<string, mixed> $data @param array<string, string> $titles */
-    private function serialize(array $data, array $titles): string
+    private function serialize(array $data, array $titles, string $type): string
     {
         $lines = [];
         foreach (preg_split('/\R/', trim((string) ($data['comments'] ?? ''))) ?: [] as $comment) {
@@ -320,7 +331,7 @@ final class CbStatsTitleSetManagerService
         $lines[] = '[metadata]';
         $lines[] = 'name=' . $this->quoteIni((string) ($data['name'] ?? ''));
         $lines[] = '';
-        $lines[] = '[titles]';
+        $lines[] = '[' . $type . ']';
         foreach ($titles as $value => $label) {
             $lines[] = $value . '=' . $this->quoteIni($label);
         }

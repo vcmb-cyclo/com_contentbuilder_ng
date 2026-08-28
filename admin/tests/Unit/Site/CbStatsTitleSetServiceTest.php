@@ -80,7 +80,7 @@ INI);
     {
         $this->writeCustom('metadata.ini', "[metadata]\nname=Only metadata\n");
         self::assertSame(
-            'missing_titles',
+            'missing_data',
             (new CbStatsTitleSetService($this->root))->resolve('metadata.ini')['status']
         );
 
@@ -102,6 +102,21 @@ INI);
         );
     }
 
+    public function testLoadsReusableValueGroups(): void
+    {
+        $this->writeCustom(
+            'ages.ini',
+            "[groups]\n13-=13 and under\n14-17=14 to 17\n70+=70 and over\n1,2,7,9=Group 1\n"
+        );
+        $result = (new CbStatsTitleSetService($this->root))->resolve('ages.ini');
+        self::assertSame('ok', $result['status']);
+        self::assertSame([
+            '13-' => '13 and under',
+            '14-17' => '14 to 17',
+            '70+' => '70 and over',
+            '1,2,7,9' => 'Group 1',
+        ], $result['groups']);
+    }
     public function testMappingKeysAcceptParenthesesAndCommonDataCharacters(): void
     {
         $this->writeCustom('groups.ini', <<<'INI'
@@ -132,6 +147,11 @@ INI);
             self::assertArrayHasKey('fr', $result['titles']);
             self::assertArrayHasKey('de', $result['titles']);
         }
+
+        $ages = CbStatsTitleSetService::parseFile($directory . 'ages-fr-FR.ini');
+        self::assertSame('ok', $ages['status']);
+        self::assertSame('13 ans et moins', $ages['groups']['13-']);
+        self::assertSame('70 ans et plus', $ages['groups']['70+']);
     }
 
     private function writeCustom(string $filename, string $contents): void

@@ -1,8 +1,20 @@
 # CBStats public syntax / API reference
 
-Stable baseline: ContentBuilder NG 6.1.11. This reference includes the
-validated `output=distinct`, `titleset` and
-`output=remaining target=Number` contracts.
+Stable release baseline: ContentBuilder NG 6.1.12. This reference
+includes the validated `output=distinct`, `titleset`, `groupset` and
+`output=remaining target=Number` contracts, plus `output=percentage` and
+`output=progress target=Number`.
+
+`output=percentage` requires `field=` and `value=`. It counts matching field
+values within the population restricted by the optional normal filter and
+returns a percentage capped at 100. `output=progress target=200` divides the
+normal filtered total by the positive target and is also capped at 100.
+
+`groups=` defines value groups as inclusive numeric intervals or explicit,
+non-contiguous value lists. `groupset="ages-fr-FR.ini"` loads reusable
+`[groups]` definitions from the same safe directories as `titleset`. Inline
+`groups=` has priority; inline `titles=` has priority over group-set labels and
+`titleset=`.
 
 ## Syntax validation and public help
 
@@ -59,7 +71,7 @@ Common field-based form:
 Numeric options `id` and `limit`, and the numeric identifier list `idsum`, are
 written without quotation marks: `id=15`, `limit=10`, `idsum=15+16`. Quoted
 forms are invalid. Numbers contained inside textual options such as `values`,
-`add`, `ranges` or `filter[value]` remain textual data and are not affected by
+`add`, `groups` or `filter[value]` remain textual data and are not affected by
 this lexical rule.
 
 ### Merge two to five views with `idsum`
@@ -90,7 +102,7 @@ permissions → filter and grouping in each view → merge identical labels
 Consequently, `titles=` cannot create artificial merge duplicates, and
 `sort=` applies to the final merged result. The global total is the sum of the
 real retained record totals from every authorized view; it is not derived from
-grouped field values. `output=form_name` is unavailable because an `idsum`
+grouped field values. `output=view_name` is unavailable because an `idsum`
 source has no single view name.
 
 CBStats rejects fewer than two or more than five identifiers, invalid or
@@ -105,7 +117,7 @@ The following outputs are implemented in RC97 and must remain compatible:
 ```text
 output=total
 output=remaining target=200
-output=form_name
+output=view_name
 output=table
 output=json
 output=pie
@@ -175,15 +187,15 @@ Behavior:
 ## 6. Histogram output
 
 ```text
-{CBStats id=25 field=Age output=histogram ranges="18-29;30-39;40-49;50-59;60+"}
+{CBStats id=25 field=Age output=histogram groups="18-29;30-39;40-49;50-59;60+"}
 ```
 
 Histogram is a responsive vertical chart using the same normalized labels and
-counts as Table, JSON, Pie and Bar. Use `ranges=` for numeric buckets; bounds
-are inclusive and declaration order is preserved. For example,
-`ranges="18-29;30-39;40-49;50+"` counts each age range independently and keeps
-the real filtered record total separate from the sum of buckets. It is useful
-for distributions such as age, distance or price.
+counts as Table, JSON, Pie and Bar. Use `groups=` to define value groups.
+Numeric interval bounds are inclusive and declaration order is preserved. For
+example, `groups="18-29;30-39;40-49;50+"` counts each age group independently
+and keeps the real filtered record total separate from the sum of groups. It is
+useful for distributions such as age, distance or price.
 
 ## 7. Line output
 
@@ -201,12 +213,12 @@ list outputs. For example, a date field can use
 ## 8. Radar output
 
 ```text
-{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50-59;60+" hide="graph|total"}
+{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50-59;60+" hide="graph|total"}
 ```
 
 Radar displays normalized values as axes in a responsive chart. It requires at
 least 3 axes and accepts at most 8; 4 to 6 axes are recommended for readable
-labels. Use `ranges=` for numeric dimensions or ordinary grouped values for
+labels. Use `groups=` for numeric dimensions or ordinary grouped values for
 categories, for example `{CBStats id=25 field=Skill output=radar}`. Radar uses
 the same tooltip, textual values list, permissions and no-data behavior as the
 other graphical outputs.
@@ -219,7 +231,7 @@ other graphical outputs.
 
 `output=avg` returns the arithmetic mean of original individual numeric values
 after ACLs, filters and an optional `idsum` merge. Empty and non-numeric values
-are ignored; the average is independent from `ranges=` and is not a count of
+are ignored; the average is independent from `groups=` and is not a count of
 distinct labels. For example, values `20`, `30`, `40` return `30`, while an
 empty value and the text `unknown` do not affect the calculation.
 
@@ -402,15 +414,15 @@ All outputs must preserve the plugin's existing:
 The existing `action=cbstats` endpoint supports:
 
 ```text
-output=json|table|pie|bar|histogram|line|radar|total|distinct|sum|min|max|avg|form_name
+output=json|table|pie|bar|histogram|line|radar|total|distinct|sum|min|max|avg|view_name
 ```
 
 `field` is required for list, chart, `distinct` and numeric aggregate outputs. It is not
-required for `total` or `form_name`. Filters and permissions reuse the common
+required for `total` or `view_name`. Filters and permissions reuse the common
 CBStats engine. The JSON output remains the raw normalized array. Table and
 chart names return their normalized `total` and `items` data, without HTML;
 scalar outputs use the standard ContentBuilder NG API success envelope.
-`ranges`, `titles`, `add`, `sort`, `dir` and `limit` use the same validation
+`groups`, `titles`, `add`, `sort`, `dir` and `limit` use the same validation
 and normalization path as article tags.
 
 ## 18. Status tracking
@@ -424,7 +436,7 @@ Codex should update this section in the real canonical documentation after each 
 | `output=json` | 1 | Implemented and validated |
 | `output=pie` | 2 | Implemented and validated |
 | `output=bar` | 3 | Implemented and validated |
-| `ranges` | RC97 | Implemented and validated |
+| `groups` | RC97 | Implemented and validated |
 | `output=avg` | RC97 | Implemented and validated |
 | `output=histogram` | RC97 | Implemented and validated |
 | `output=line` | RC97 | Implemented and validated |
@@ -480,9 +492,9 @@ The displayed total and chart percentages are recalculated from the retained
 values only. With `hide="total"`, that limited total remains available
 internally for percentages. No `Other` category is added.
 
-When `ranges=` is present, the displayed total is instead always the real
+When `groups=` is present, the displayed total is instead always the real
 retained record count after permissions and filters. It is never the sum of
-ranges, including after `limit`, because overlapping ranges can legitimately
+groups, including after `limit`, because overlapping groups can legitimately
 count one record several times.
 
 ```text
@@ -493,43 +505,47 @@ count one record several times.
 index.php?option=com_contentbuilderng&task=api.display&format=json&action=cbstats&id=25&field=Town&output=bar&hide=graph%7Ctotal
 ```
 
-## Explicit numeric ranges
+## Value groups
 
 ```text
-ranges="18-29;30-39;40-49;50-59;60+"
+groups="18-29;30-39;40-49;50-59;60+"
 ```
 
-Bounds are inclusive. `minimum-maximum` and `minimum+` are accepted. Empty and
-non-numeric field values are ignored. Declaration order is preserved and ranges
-are evaluated independently, so overlaps are intentionally supported:
+Intervals use inclusive bounds. `minimum-maximum`, `maximum-` and `minimum+`
+are accepted. Empty and non-numeric field values do not match interval groups.
+Declaration order is preserved and groups are evaluated independently, so
+overlaps are intentionally supported:
 
 ```text
-ranges="18-35;30-45;40-55;50+"
+groups="18-35;30-45;40-55;50+"
 ```
 
-`ranges=` is strictly numeric. For example, `ranges="Gravel;Route"` is rejected
-with a diagnostic identifying the first invalid item. To count text values, omit
-`ranges=` and use the normal grouped output:
+Explicit non-contiguous values use comma-separated exact values followed by an
+equals sign and a display label:
 
 ```text
-{CBStats id=25 field=pratique output=bar}
+groups="1,2,7,9=Group 1;3,4,8=Group 2"
+groups="Gravel,Route=Ride surfaces;Indoor,Track=Other surfaces"
 ```
 
-`titles=` renames range labels. Ranges work with Table, JSON, Pie, Bar,
-Histogram, Line and Radar, including an `idsum` source.
+Whitespace around selectors is trimmed and explicit values are matched exactly.
+Every explicit group requires a non-empty display label. `titles=` can override
+the labels of interval and explicit groups. Source values that match no group
+remain as individual categories after the declared groups. Groups work with
+Table, JSON, Pie, Bar, Histogram, Line and Radar, including an `idsum` source.
 
 ## Average, Histogram, Line and Radar
 
 ```text
 {CBStats id=25 field=Age output=avg}
-{CBStats id=25 field=Age output=histogram ranges="18-29;30-39;40-49;50-59;60+"}
+{CBStats id=25 field=Age output=histogram groups="18-29;30-39;40-49;50-59;60+"}
 {CBStats id=25 field=RegistrationDate output=line sort=title dir=asc limit=30}
-{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50-59;60+"}
+{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50-59;60+"}
 ```
 
 `avg` is the arithmetic mean of original individual numeric values after ACLs,
 filters and an optional `idsum` merge. It ignores empty and non-numeric values
-and is independent from ranges.
+and is independent from groups.
 
 Histogram and Line use the same normalized counts; neither creates missing
 dates or values. Histogram stays vertical and uses horizontal scrolling when

@@ -403,11 +403,12 @@
         border-color: var(--bs-primary-border-subtle);
         box-shadow: 0 0 0 .2rem rgba(var(--bs-primary-rgb), .08);
     }
-    .cb-repair-workflow-step.is-done,
-    .cb-repair-workflow-step.is-skipped,
-    .cb-repair-workflow-step.is-not_required {
+    .cb-repair-workflow-step.is-repaired {
         border-color: var(--bs-success-border-subtle);
         background: var(--bs-success-bg-subtle);
+    }
+    .cb-repair-workflow-step.is-neutral {
+        background: var(--bs-secondary-bg-subtle);
     }
     .cb-repair-workflow-step-head {
         display: flex;
@@ -448,11 +449,13 @@
         color: var(--bs-secondary-color);
         white-space: nowrap;
     }
-    .cb-repair-workflow-status.is-done,
-    .cb-repair-workflow-status.is-skipped,
-    .cb-repair-workflow-status.is-not_required {
+    .cb-repair-workflow-status.is-repaired {
         background: var(--bs-success-bg-subtle);
         color: var(--bs-success-text-emphasis);
+    }
+    .cb-repair-workflow-status.is-neutral {
+        background: var(--bs-secondary-bg-subtle);
+        color: var(--bs-secondary-color);
     }
     .cb-repair-workflow-status.is-current {
         background: var(--bs-primary-bg-subtle);
@@ -500,12 +503,17 @@
         display: inline-flex;
         align-items: center;
         gap: .55rem;
-        border: 1px solid var(--bs-success-border-subtle);
+        border: 1px solid var(--bs-border-color);
         border-radius: .85rem;
         padding: .85rem 1rem;
+        background: var(--bs-secondary-bg-subtle);
+        color: var(--bs-body-color);
+        font-weight: 600;
+    }
+    .cb-repair-workflow-summary.is-repaired {
+        border-color: var(--bs-success-border-subtle);
         background: var(--bs-success-bg-subtle);
         color: var(--bs-success-text-emphasis);
-        font-weight: 600;
     }
     .cb-repair-workflow-summary .icon-check-circle {
         font-size: 1rem;

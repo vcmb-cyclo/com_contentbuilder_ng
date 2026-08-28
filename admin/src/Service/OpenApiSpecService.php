@@ -187,8 +187,8 @@ final class OpenApiSpecService
                     'name' => 'output', 'in' => 'query', 'required' => false,
                     'description' => 'CBStats URL data output. List and chart outputs return normalized chart data, not HTML.',
                     'schema' => ['type' => 'string', 'enum' => [
-                        'json', 'table', 'pie', 'bar', 'histogram', 'line', 'radar',
-                        'total', 'sum', 'min', 'max', 'avg', 'form_name',
+                        'total', 'table', 'pie', 'bar', 'histogram', 'line', 'radar', 'json',
+                        'sum', 'min', 'max', 'avg', 'remaining', 'percentage', 'progress', 'distinct', 'view_name',
                     ]],
                     'example' => 'json',
                 ],
@@ -214,11 +214,16 @@ final class OpenApiSpecService
                         . 'Mappings apply after add and before sorting and do not merge categories.',
                     'schema' => ['type' => 'string'], 'example' => '1=Group 1;2=Group 2',
                 ],
-                'CbstatsRangesParam' => [
-                    'name' => 'ranges', 'in' => 'query', 'required' => false,
-                    'description' => 'Inclusive numeric ranges in declared order. Overlaps are allowed. '
-                        . 'Syntax: minimum-maximum or minimum+, separated by semicolons.',
-                    'schema' => ['type' => 'string'], 'example' => '18-29;30-39;40-49;50-59;60+',
+                'CbstatsGroupsParam' => [
+                    'name' => 'groups', 'in' => 'query', 'required' => false,
+                    'description' => 'Value groups in declared order. Numeric intervals and explicit value lists are allowed, '
+                        . 'overlapping groups are counted independently, and unmatched values remain individual categories.',
+                    'schema' => ['type' => 'string'], 'example' => '1,2,7,9=Group 1;3,4,8=Group 2',
+                ],
+                'CbstatsGroupSetParam' => [
+                    'name' => 'groupset', 'in' => 'query', 'required' => false,
+                    'description' => 'Filename of a managed reusable value-group set. Inline groups take priority.',
+                    'schema' => ['type' => 'string'], 'example' => 'ages-fr-FR.ini',
                 ],
                 'CbstatsLimitParam' => [
                     'name' => 'limit', 'in' => 'query', 'required' => false,
@@ -400,7 +405,7 @@ final class OpenApiSpecService
                         ['name' => 'action', 'in' => 'query', 'required' => true, 'schema' => ['type' => 'string', 'enum' => ['cbstats']]],
                         [
                             'name' => 'field', 'in' => 'query', 'required' => false,
-                            'description' => 'Required for list, chart, sum, min, max and avg outputs; not required for total or form_name. '
+                            'description' => 'Required for list, chart, sum, min, max and avg outputs; not required for total or view_name. '
                                 . 'Resolved by reference, name, or label; must be published and API-authorized.',
                             'schema' => ['type' => 'string'], 'example' => 'FieldName',
                         ],
@@ -411,7 +416,8 @@ final class OpenApiSpecService
                         ['$ref' => '#/components/parameters/CbstatsDirParam'],
                         ['$ref' => '#/components/parameters/CbstatsAddParam'],
                         ['$ref' => '#/components/parameters/CbstatsTitlesParam'],
-                        ['$ref' => '#/components/parameters/CbstatsRangesParam'],
+                        ['$ref' => '#/components/parameters/CbstatsGroupsParam'],
+                        ['$ref' => '#/components/parameters/CbstatsGroupSetParam'],
                         ['$ref' => '#/components/parameters/CbstatsLimitParam'],
                     ],
                     'responses' => [

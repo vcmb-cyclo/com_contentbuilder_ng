@@ -101,6 +101,25 @@ final class CbStatsTitleSetManagerServiceTest extends TestCase
         self::assertSame('VCMB (78)', $this->service->load($filename, 'custom')['titles'][0]['value']);
     }
 
+    public function testSavesLoadsAndListsReusableValueGroups(): void
+    {
+        $filename = $this->service->save([
+            'filename' => 'ages.ini',
+            'name' => 'Groupes de valeurs',
+            'type' => 'groups',
+            'titles' => [
+                ['value' => '13-', 'label' => 'Moins de 13 ans'],
+                ['value' => '13-17', 'label' => '13 à 17 ans'],
+                ['value' => '70+', 'label' => '70 ans et plus'],
+                ['value' => '1,2,7,9', 'label' => 'Groupe 1'],
+            ],
+        ]);
+        $loaded = $this->service->load($filename, 'custom');
+        self::assertSame('groups', $loaded['type']);
+        self::assertSame('13-', $loaded['titles'][0]['value']);
+        self::assertSame('groups', $this->service->listFiles()[0]['type']);
+        self::assertStringContainsString('[groups]', $this->service->getFileContents($filename, 'custom'));
+    }
     public function testSaveCopyUsesTheNextAvailableFilename(): void
     {
         $data = [

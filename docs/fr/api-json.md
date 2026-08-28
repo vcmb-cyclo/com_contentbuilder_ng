@@ -301,7 +301,7 @@ GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&
 | `sum` | Somme numérique pondérée | Oui |
 | `min`, `max` | Minimum/maximum numérique, ou borne chronologique d'une date ISO | Oui |
 | `avg` | Moyenne arithmétique des valeurs numériques individuelles retenues | Oui |
-| `form_name` | Titre ou nom de la vue | Non |
+| `view_name` | Nom de la vue ContentBuilder NG | Non |
 
 En l'absence de `output`, le point d'accès utilise `json` par défaut ; `field` est
 donc obligatoire. Les requêtes URL pour Table et les graphiques retournent les
@@ -353,14 +353,14 @@ Exemples complets :
 
 ```text
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&output=total
-GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&output=form_name
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&output=view_name
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Montant&output=sum
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Montant&output=min
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Montant&output=max
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Montant&output=avg
-GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=histogram&ranges=18-29%3B30-39%3B40-49%3B50%2B
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=histogram&groups=18-29%3B30-39%3B40-49%3B50%2B
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=DateInscription&output=line&sort=title&dir=asc&limit=30
-GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=radar&ranges=18-29%3B30-39%3B40-49%3B50-59%3B60%2B
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=radar&groups=18-29%3B30-39%3B40-49%3B50-59%3B60%2B
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Catégorie&output=json&filter[field]=Statut&filter[value]=Ouvert*%20%7C%20En%20attente&sort=value&dir=desc
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Catégorie&output=json&add=1%3D-2%3B2%3D3&titles=1%3DGroupe%201%3B2%3DGroupe%202
 ```
@@ -426,7 +426,7 @@ L'API utilise l'identité et la session Joomla de la requête. Le dépôt ne fou
 dans ces fichiers un mécanisme autonome documenté de jeton API permanent :
 **À vérifier** selon l'authentification mise en place sur votre site.
 
-### Outputs CBStats RC97 et tranches numériques
+### Groupes de valeurs et outputs visuels CBStats
 
 L’URL `action=cbstats` accepte `avg`, `histogram`, `line` et `radar`, en plus
 des sorties de liste, scalaires et graphiques déjà disponibles. `avg` calcule
@@ -435,14 +435,15 @@ les filtres ; les valeurs vides ou non numériques sont ignorées. Exemple :
 
 ```text
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=avg
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=15&field=Civilite&value=H&output=percentage
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=15&output=progress&target=200
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=15&field=Age&output=histogram&groupset=ages-fr-FR.ini
 ```
 
-`ranges=18-29;30-39;40-49;50-59;60+` crée des tranches numériques inclusives,
-dans l’ordre déclaré ; les chevauchements sont autorisés et chaque tranche est
-comptée indépendamment. Par exemple, `ranges=18-35;30-45;40-55;50+` compte
-volontairement un âge dans chaque tranche correspondante. Les graphiques
-retournent les données normalisées `total` et `items`, sans HTML. Histogram est
-vertical, Line conserve l’ordre final des catégories et Radar est recommandé
-avec 4 à 6 axes (minimum 3, maximum 8). Seuls `minimum-maximum` et `minimum+`
-sont valides. Un texte tel que `ranges=Gravel;Route` est rejeté ; omettez
-`ranges` pour compter les valeurs textuelles du champ.
+`groups=18-29;30-39;40-49;50-59;60+` crée des groupes par intervalles inclusifs,
+dans l’ordre déclaré. `groups=1,2,7,9=Groupe%201;3,4,8=Groupe%202` crée des
+groupes explicites de valeurs non contiguës. Les chevauchements sont autorisés
+et chaque groupe est compté indépendamment. Les graphiques retournent les
+données normalisées `total` et `items`, sans HTML. Histogram est vertical, Line
+conserve l’ordre final des catégories et Radar est recommandé avec 4 à 6 axes
+(minimum 3, maximum 8).

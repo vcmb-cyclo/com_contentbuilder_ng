@@ -294,7 +294,7 @@ GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&
 | `sum` | Count-weighted numeric sum | Yes |
 | `min`, `max` | Numeric minimum/maximum, or chronological ISO date boundary | Yes |
 | `avg` | Arithmetic mean of retained individual numeric values | Yes |
-| `form_name` | View title or name | No |
+| `view_name` | ContentBuilder NG view name | No |
 
 When `output` is absent, the endpoint defaults to `json`, so `field` is then
 required. URL requests for Table and chart outputs return the same normalized
@@ -342,14 +342,14 @@ Complete examples:
 
 ```text
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&output=total
-GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&output=form_name
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&output=view_name
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Amount&output=sum
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Amount&output=min
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Amount&output=max
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Amount&output=avg
-GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=histogram&ranges=18-29%3B30-39%3B40-49%3B50%2B
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=histogram&groups=18-29%3B30-39%3B40-49%3B50%2B
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=RegistrationDate&output=line&sort=title&dir=asc&limit=30
-GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=radar&ranges=18-29%3B30-39%3B40-49%3B50-59%3B60%2B
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=radar&groups=18-29%3B30-39%3B40-49%3B50-59%3B60%2B
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Category&output=json&filter[field]=Status&filter[value]=Open*%20%7C%20Pending&sort=value&dir=desc
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Category&output=json&add=1%3D-2%3B2%3D3&titles=1%3DGroup%201%3B2%3DGroup%202
 ```
@@ -411,7 +411,7 @@ The API uses the Joomla identity and session attached to the request. The inspec
 files do not document a standalone permanent API-token mechanism: **To verify** for
 the authentication system deployed on the site.
 
-### CBStats RC97 outputs and numeric ranges
+### CBStats value groups and visual outputs
 
 The `action=cbstats` URL accepts `avg`, `histogram`, `line` and `radar` in
 addition to the existing list, scalar and chart outputs. `avg` is the arithmetic
@@ -420,13 +420,14 @@ non-numeric values are ignored. For example:
 
 ```text
 GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=3&field=Age&output=avg
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=15&field=Gender&value=M&output=percentage
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=15&output=progress&target=200
+GET /index.php?option=com_contentbuilderng&task=api.display&action=cbstats&id=15&field=Age&output=histogram&groupset=ages-fr-FR.ini
 ```
 
-`ranges=18-29;30-39;40-49;50-59;60+` creates inclusive, declaration-ordered
-numeric ranges; overlaps are allowed and each range is counted independently.
-For example, `ranges=18-35;30-45;40-55;50+` deliberately counts an age in
-every matching bucket. Chart outputs return normalized `total` and `items`
-data without HTML. Histogram is vertical, Line preserves the final category
-order, and Radar is recommended with 4 to 6 axes (minimum 3, maximum 8).
-Only `minimum-maximum` and `minimum+` are valid range items. Text such as
-`ranges=Gravel;Route` is rejected; omit `ranges` to count text field values.
+`groups=18-29;30-39;40-49;50-59;60+` creates inclusive, declaration-ordered
+interval groups. `groups=1,2,7,9=Group%201;3,4,8=Group%202` creates explicit
+non-contiguous value groups. Overlaps are allowed and every group is counted
+independently. Chart outputs return normalized `total` and `items` data without
+HTML. Histogram is vertical, Line preserves the final category order, and
+Radar is recommended with 4 to 6 axes (minimum 3, maximum 8).

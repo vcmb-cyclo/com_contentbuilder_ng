@@ -1,6 +1,12 @@
 # Templates and customization
 
-The CBStats syntax documented here is current for ContentBuilder NG 6.1.11.
+The CBStats syntax documented here is current for ContentBuilder NG 6.1.12.
+
+`groupset="ages-fr-FR.ini"` loads reusable value groups from the same safe
+custom/provided directories as `titleset`. Its `[groups]` keys accept inclusive
+intervals such as `13-`, `13-17` and `70+`, or comma-separated explicit values
+such as `1,2,7,9`. Inline `groups=` has priority; inline `titles=` has priority
+over file labels and `titleset=`.
 
 ContentBuilder NG stores view-specific templates for record details, editing,
 generated Joomla articles, emails, and some list output.
@@ -169,15 +175,17 @@ Examples:
 ```text
 {CBStats id=3 output=total}
 {CBStats id=15 output=remaining target=200}
-{CBStats id=3 output=form_name}
+{CBStats id=15 field=Gender value="M" output=percentage}
+{CBStats id=15 output=progress target=200}
+{CBStats id=3 output=view_name}
 {CBStats id=3 field=FieldName output=table}
 {CBStats id=3 field=FieldName output=json sort=title dir=asc}
 {CBStats id=3 field=FieldName output=pie sort=value dir=desc}
 {CBStats id=3 field=FieldName output=bar sort=value dir=desc}
 {CBStats id=3 field=Age output=avg}
-{CBStats id=3 field=Age output=histogram ranges="18-29;30-39;40-49;50+"}
+{CBStats id=3 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
 {CBStats id=3 field=RegistrationDate output=line sort=title dir=asc limit=30}
-{CBStats id=3 field=Age output=radar ranges="18-29;30-39;40-49;50+"}
+{CBStats id=3 field=Age output=radar groups="18-29;30-39;40-49;50+"}
 {CBStats id=25 field=Route output=pie title="👥 Total registrations" export=manual}
 {CBStats id=3 field=Category output=pie add="Existing=-2;External=3"}
 {CBStats id=3 field=Category output=table titles="1=Group 1;2=Group 2"}
@@ -208,7 +216,7 @@ data with `add`, negative-to-zero normalization, `titles`, final sorting and
 output. The total is the sum of the final merged categories.
 
 Invalid or duplicate identifiers, fewer than two or more than five views,
-missing or inaccessible views, missing fields and `output=form_name` are
+missing or inaccessible views, missing fields and `output=view_name` are
 rejected. Duplicate identifiers are refused to prevent double counting.
 
 ### Frozen manual export
@@ -218,7 +226,7 @@ Add `export=manual` to a Pie, Bar or Table tag to show the final labels, values 
 | Output | Result | `field` required |
 | --- | --- | --- |
 | `total` | Number of matching records | No |
-| `form_name` | View title, or its name when the title is empty | No |
+| `view_name` | ContentBuilder NG view name | No |
 | `table` | Static HTML value/count table | Yes |
 | `json` | Raw JSON array of `{label,value}` objects | Yes |
 | `pie` | Responsive Pie chart | Yes |
@@ -290,7 +298,8 @@ and the first equals sign separates each pair.
 
 Pie, Bar, Histogram, Line and Radar use the same normalized data, tooltips and
 localized chart text. Charts are responsive and can coexist in any combination
-on one page. Use `ranges="18-29;30-39;40-49;50+"` for inclusive numeric buckets,
+on one page. Use `groups="18-29;30-39;40-49;50+"` for inclusive interval groups,
+or `groups="1,2,7,9=Group 1;3,4,8=Group 2"` for explicit non-contiguous values,
 `output=line sort=title dir=asc` for a date/category sequence, and
 `output=radar` for a compact comparison of 3 to 8 dimensions.
 
@@ -301,8 +310,8 @@ remains `0`. All field-based outputs enforce the field's API/Stats availability.
 CBStats always enforces the view's STATS permission. For URL/API use, check the
 view's **API + Rights** settings, API/Stats field availability and the **API** tab.
 The supported URL outputs are `json`, `table`, `pie`, `bar`, `histogram`, `line`,
-`radar`, `total`, `distinct`, `sum`, `min`, `max`, `avg` and `form_name`; list outputs also
-accept `add`, `titles`, `sort`, `dir`, `ranges` and `limit`. In Joomla articles,
+`radar`, `total`, `distinct`, `sum`, `min`, `max`, `avg` and `view_name`; list outputs also
+accept `add`, `titles`, `sort`, `dir`, `groups` and `limit`. In Joomla articles,
 CBStats reports all independent tag syntax errors together, identifies the
 affected parameter and value, and does not display statistics when the tag is
 invalid. The error block links to localized public CBStats syntax help in a new

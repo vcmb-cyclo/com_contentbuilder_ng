@@ -12,16 +12,19 @@ final class CbStatsRc96B01Test extends TestCase
 {
     private const ROOT = __DIR__ . '/../../../..';
 
-    public function testRangesPreserveDeclarationOrderAndInclusiveBounds(): void
+    public function testIntervalGroupsPreserveDeclarationOrderAndInclusiveBounds(): void
     {
-        $ranges = StatsService::parseFieldStatsRanges('18-29;30-39;60+');
+        $groups = StatsService::parseFieldStatsGroups('18-29;30-39;60+');
 
-        self::assertSame(['18-29', '30-39', '60+'], array_column($ranges, 'label'));
+        self::assertSame(['18-29', '30-39', '60+'], array_column($groups, 'label'));
         self::assertSame([
             '18-29' => 2,
             '30-39' => 2,
             '60+' => 2,
-        ], StatsService::applyFieldStatsRanges([
+            '17' => 1,
+            '59' => 1,
+            'invalid' => 8,
+        ], StatsService::applyFieldStatsGroups([
             '' => 4,
             '17' => 1,
             '18' => 1,
@@ -32,19 +35,35 @@ final class CbStatsRc96B01Test extends TestCase
             '60' => 1,
             '75' => 1,
             'invalid' => 8,
-        ], $ranges));
+        ], $groups));
     }
 
-    public function testOverlappingRangesCountEveryMembershipIndependently(): void
+    public function testUpperBoundOnlyIntervalGroupIsInclusive(): void
     {
-        $ranges = StatsService::parseFieldStatsRanges('18-35;30-45;40-55;50+');
-        $counts = StatsService::applyFieldStatsRanges([
+        $groups = StatsService::parseFieldStatsGroups('13-;14-17;70+');
+        self::assertSame([
+            '13-' => 2,
+            '14-17' => 1,
+            '70+' => 1,
+            '69' => 1,
+        ], StatsService::applyFieldStatsGroups([
+            '12' => 1,
+            '13' => 1,
+            '14' => 1,
+            '69' => 1,
+            '70' => 1,
+        ], $groups));
+    }
+    public function testOverlappingGroupsCountEveryMembershipIndependently(): void
+    {
+        $groups = StatsService::parseFieldStatsGroups('18-35;30-45;40-55;50+');
+        $counts = StatsService::applyFieldStatsGroups([
             '18' => 1,
             '30' => 2,
             '40' => 3,
             '50' => 4,
             '60' => 5,
-        ], $ranges);
+        ], $groups);
 
         self::assertSame([
             '18-35' => 3,
@@ -55,48 +74,74 @@ final class CbStatsRc96B01Test extends TestCase
         self::assertGreaterThan(array_sum([1, 2, 3, 4, 5]), array_sum($counts));
     }
 
-    #[DataProvider('invalidRangesProvider')]
-    public function testInvalidRangeReportsTheExactSuspiciousItem(string $syntax, string $item): void
+    #[DataProvider('invalidGroupsProvider')]
+    public function testInvalidGroupReportsTheExactSuspiciousItem(string $syntax, string $item): void
     {
         try {
-            StatsService::parseFieldStatsRanges($syntax);
-            self::fail('Invalid ranges syntax was accepted.');
+            StatsService::parseFieldStatsGroups($syntax);
+            self::fail('Invalid groups syntax was accepted.');
         } catch (\InvalidArgumentException $exception) {
-            self::assertSame(StatsService::CBSTATS_ERROR_INVALID_RANGES, $exception->getCode());
+            self::assertSame(StatsService::CBSTATS_ERROR_INVALID_GROUPS, $exception->getCode());
             self::assertSame($item, $exception->getMessage());
         }
     }
 
-    public static function invalidRangesProvider(): iterable
+    public static function invalidGroupsProvider(): iterable
     {
         yield ['Gravel;Route', 'Gravel'];
         yield ['0-17;18/29;60+', '18/29'];
-        yield ['18-', '18-'];
         yield ['+60', '+60'];
         yield ['18--29', '18--29'];
         yield ['20-10', '20-10'];
         yield ['0-17;;60+', ''];
     }
 
-    public function testMixedFieldDataIgnoresTextWithoutTurningItIntoRangeSyntaxError(): void
+    public function testExplicitValueGroupsSupportNonContiguousNumericAndTextValues(): void
     {
-        $ranges = StatsService::parseFieldStatsRanges('18-29;30-49');
+        $groups = StatsService::parseFieldStatsGroups(
+            '1,2,7,9=Group 1;3,4,8=Group 2;Gravel,Route=Surface'
+        );
+
+        self::assertSame([
+            '1,2,7,9' => 10,
+            '3,4,8' => 6,
+            'Gravel,Route' => 11,
+            'Other' => 20,
+        ], StatsService::applyFieldStatsGroups([
+            '1' => 1,
+            '2' => 2,
+            '3' => 3,
+            '4' => 1,
+            '7' => 3,
+            '8' => 2,
+            '9' => 4,
+            'Gravel' => 5,
+            'Route' => 6,
+            'Other' => 20,
+        ], $groups));
+        self::assertSame(['Group 1', 'Group 2', 'Surface'], array_column($groups, 'title'));
+    }
+
+    public function testMixedFieldDataPreservesTextThatDoesNotMatchANumericGroup(): void
+    {
+        $groups = StatsService::parseFieldStatsGroups('18-29;30-49');
 
         self::assertSame([
             '18-29' => 2,
             '30-49' => 1,
-        ], StatsService::applyFieldStatsRanges([
+            'Gravel' => 1,
+        ], StatsService::applyFieldStatsGroups([
             '18' => 1,
             '27' => 1,
             'Gravel' => 1,
             '42' => 1,
-        ], $ranges));
+        ], $groups));
     }
 
-    public function testTitlesApplyToRangesWithoutChangingTheirOrder(): void
+    public function testTitlesApplyToGroupsWithoutChangingTheirOrder(): void
     {
-        $ranges = StatsService::parseFieldStatsRanges('18-29;30-39;60+');
-        $counts = StatsService::applyFieldStatsRanges(['18' => 2, '35' => 3, '70' => 4], $ranges);
+        $groups = StatsService::parseFieldStatsGroups('18-29;30-39;60+');
+        $counts = StatsService::applyFieldStatsGroups(['18' => 2, '35' => 3, '70' => 4], $groups);
 
         self::assertSame([
             ['label' => '18 to 29', 'value' => 2],
@@ -138,8 +183,13 @@ final class CbStatsRc96B01Test extends TestCase
             self::assertStringContainsString("'$output'", $controller);
         }
 
-        self::assertStringContainsString('StatsService::parseFieldStatsRanges($ranges)', $plugin);
-        self::assertStringContainsString('StatsService::parseFieldStatsRanges($ranges)', $controller);
+        foreach (['percentage', 'progress'] as $output) {
+            self::assertStringContainsString("'$output'", $plugin);
+            self::assertStringContainsString("'$output'", $controller);
+        }
+        self::assertStringContainsString("getString('groupset', '')", $controller);
+        self::assertStringContainsString('StatsService::parseFieldStatsGroups(', $plugin);
+        self::assertStringContainsString('StatsService::parseFieldStatsGroups(', $controller);
         self::assertStringContainsString(
             "['type' => \$output, 'items' => \$items]",
             $plugin
@@ -150,7 +200,61 @@ final class CbStatsRc96B01Test extends TestCase
         self::assertStringContainsString("htmlspecialchars(\$json", $plugin);
     }
 
-    public function testInvalidRangesDiagnosticIsSharedByArticleOutputsAndUrlApi(): void
+    public function testTitleSetImportIsDisabledWhileRowsAreSelected(): void
+    {
+        $template = (string) file_get_contents(self::ROOT . '/admin/tmpl/titlesets/default.php');
+        $view = (string) file_get_contents(self::ROOT . '/admin/src/View/Titlesets/HtmlView.php');
+
+        self::assertStringContainsString("function syncImportState()", $template);
+        self::assertStringContainsString("document.querySelector('[data-cb-titlesets-import-button]')", $template);
+        self::assertStringContainsString("importToolbarButton.disabled = disabled", $template);
+        self::assertStringContainsString("'data-cb-titlesets-import-button' => ''", $view);
+        self::assertStringContainsString("input[name=\"cid[]\"]", $template);
+        self::assertStringContainsString("if (task === 'titlesets.import')", $template);
+        self::assertStringContainsString("return false;", $template);
+    }
+
+    public function testHelpAndApiUseTheCanonicalOutputOrder(): void
+    {
+        $order = [
+            'total', 'table', 'pie', 'bar', 'histogram', 'line', 'radar', 'json',
+            'sum', 'avg', 'remaining', 'percentage', 'progress', 'distinct', 'view_name',
+        ];
+
+        foreach (['en-GB', 'fr-FR', 'de-DE'] as $locale) {
+            $strings = parse_ini_file(
+                self::ROOT . '/plugins/content/contentbuilderng_cbstats/language/' . $locale
+                . '/plg_content_contentbuilderng_cbstats.ini'
+            );
+            self::assertIsArray($strings);
+            $help = (string) $strings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_TEXT'];
+            $position = -1;
+
+            foreach ($order as $output) {
+                $next = strpos($help, '<code>' . $output . '</code>', $position + 1);
+                self::assertNotFalse($next, $locale . ': missing ' . $output);
+                self::assertGreaterThan($position, $next, $locale . ': misplaced ' . $output);
+                $position = $next;
+            }
+        }
+
+        $canonical = 'total, table, pie, bar, histogram, line, radar, json, sum, min, max, avg, '
+            . 'remaining, percentage, progress, distinct, view_name';
+        $apiHelp = (string) file_get_contents(self::ROOT . '/admin/layouts/form/api_tab.php');
+        $openApi = (string) file_get_contents(self::ROOT . '/admin/src/Service/OpenApiSpecService.php');
+
+        self::assertStringContainsString($canonical, $apiHelp);
+        self::assertStringContainsString(
+            "'total', 'table', 'pie', 'bar', 'histogram', 'line', 'radar', 'json',",
+            $openApi
+        );
+        self::assertStringContainsString(
+            "'sum', 'min', 'max', 'avg', 'remaining', 'percentage', 'progress', 'distinct', 'view_name',",
+            $openApi
+        );
+    }
+
+    public function testInvalidGroupsDiagnosticIsSharedByArticleOutputsAndUrlApi(): void
     {
         $plugin = (string) file_get_contents(
             self::ROOT . '/plugins/content/contentbuilderng_cbstats/src/Extension/ContentbuilderngStats.php'
@@ -163,7 +267,7 @@ final class CbStatsRc96B01Test extends TestCase
         }
 
         self::assertStringContainsString(
-            '$exception->getCode() === StatsService::CBSTATS_ERROR_INVALID_RANGES',
+            '$exception->getCode() === StatsService::CBSTATS_ERROR_INVALID_GROUPS',
             $plugin
         );
         self::assertStringContainsString(
@@ -171,11 +275,11 @@ final class CbStatsRc96B01Test extends TestCase
             $plugin
         );
         self::assertStringContainsString(
-            "'COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_RANGES'",
+            "'COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_GROUPS'",
             $controller
         );
         self::assertStringContainsString(
-            'StatsService::parseFieldStatsRanges($ranges)',
+            'StatsService::parseFieldStatsGroups(',
             $controller
         );
     }
@@ -221,22 +325,22 @@ final class CbStatsRc96B01Test extends TestCase
             self::assertIsArray($siteStrings);
             self::assertIsArray($adminStrings);
             self::assertArrayHasKey(
-                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_RANGES',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_GROUPS',
                 $pluginStrings
             );
             self::assertSame(
-                $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_RANGES'],
-                $siteStrings['COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_RANGES']
+                $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_GROUPS'],
+                $siteStrings['COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_GROUPS']
             );
             self::assertSame(
-                $siteStrings['COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_RANGES'],
-                $adminStrings['COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_RANGES']
+                $siteStrings['COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_GROUPS'],
+                $adminStrings['COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_GROUPS']
             );
-            self::assertStringContainsString('ranges', $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_RANGES']);
-            self::assertStringContainsString('%s', $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_RANGES']);
+            self::assertStringContainsString('groups', $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_GROUPS']);
+            self::assertStringContainsString('%s', $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_GROUPS']);
             self::assertStringContainsString(
                 'minimum-maximum',
-                $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_RANGES']
+                $pluginStrings['PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_GROUPS']
             );
             self::assertArrayHasKey('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_CHART_ARIA_LABEL', $pluginStrings);
             self::assertArrayHasKey('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_RADAR_TOO_FEW', $pluginStrings);

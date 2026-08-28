@@ -27,14 +27,14 @@ final class CbStatsValidationServiceTest extends TestCase
             'add' => 'Route=five',
             'titles' => 'Route=',
             'headers' => 'Route',
-            'ranges' => 'young-old',
+            'groups' => 'young-old',
             'typo' => 'value',
         ]);
 
         self::assertSame(
             [
                 'typo', 'id', 'field', 'sort', 'dir', 'limit', 'hide',
-                'export', 'background', 'headers', 'add', 'titles', 'ranges',
+                'export', 'background', 'headers', 'add', 'titles', 'groups',
             ],
             array_column($errors, 'parameter')
         );
@@ -61,6 +61,28 @@ final class CbStatsValidationServiceTest extends TestCase
         ]));
     }
 
+    public function testGroupsSyntaxIsAcceptedAndUnreleasedRangeNamesAreRejected(): void
+    {
+        self::assertSame([], StatsTagValidationService::validationErrors([
+            'id' => '15',
+            'field' => 'Category',
+            'output' => 'bar',
+            'groups' => '18-24;25-;70+;1,2,7,9=Group 1;3,4,8=Group 2',
+            'groupset' => 'groups.ini',
+        ]));
+
+        $errors = StatsTagValidationService::validationErrors([
+            'id' => '15',
+            'field' => 'Category',
+            'output' => 'bar',
+            'ranges' => '18-24',
+            'rangeset' => 'ages.ini',
+        ]);
+
+        self::assertSame(['ranges', 'rangeset'], array_column($errors, 'parameter'));
+        self::assertSame(['unknown_option', 'unknown_option'], array_column($errors, 'code'));
+    }
+
     public function testDistinctOutputRequiresAFieldAndAcceptsExistingFilters(): void
     {
         self::assertSame([], StatsTagValidationService::validationErrors([
@@ -83,7 +105,9 @@ final class CbStatsValidationServiceTest extends TestCase
             'id=15 output=remaining target=200 filter[field]=Status filter[value]="Open|Pending"'
         );
         self::assertSame([], StatsTagValidationService::validationErrors(
-            $valid['attributes'], 0, $valid['quoted']
+            $valid['attributes'],
+            0,
+            $valid['quoted']
         ));
 
         foreach (['', '0', '-1', 'abc'] as $target) {
@@ -96,13 +120,50 @@ final class CbStatsValidationServiceTest extends TestCase
         self::assertSame(
             ['target_syntax'],
             array_column(StatsTagValidationService::validationErrors(
-                $quoted['attributes'], 0, $quoted['quoted']
+                $quoted['attributes'],
+                0,
+                $quoted['quoted']
             ), 'detail')
         );
         self::assertSame(['target'], array_column(StatsTagValidationService::validationErrors([
             'id' => '15', 'output' => 'total', 'target' => '200',
         ]), 'parameter'));
     }
+
+    public function testPercentageAndProgressSyntaxIsStrict(): void
+    {
+        self::assertSame([], StatsTagValidationService::validationErrors([
+            'id' => '15',
+            'field' => 'Civilite',
+            'value' => 'H',
+            'filter[field]' => 'Parcours',
+            'filter[value]' => '200 km',
+            'output' => 'percentage',
+        ]));
+        self::assertSame(['value'], array_column(StatsTagValidationService::validationErrors([
+            'id' => '15', 'field' => 'Civilite', 'output' => 'percentage',
+        ]), 'parameter'));
+        self::assertSame([], StatsTagValidationService::validationErrors([
+            'id' => '15', 'output' => 'progress', 'target' => '200',
+        ]));
+        self::assertSame(['target'], array_column(StatsTagValidationService::validationErrors([
+            'id' => '15', 'output' => 'progress', 'target' => '0',
+        ]), 'parameter'));
+    }
+
+    public function testViewNameReplacesFormNameWithoutAlias(): void
+    {
+        self::assertSame([], StatsTagValidationService::validationErrors([
+            'id' => '15', 'output' => 'view_name',
+        ]));
+        self::assertSame(['output'], array_column(StatsTagValidationService::validationErrors([
+            'id' => '15', 'output' => 'form_name',
+        ]), 'parameter'));
+        self::assertSame(['idsum_output'], array_column(StatsTagValidationService::validationErrors([
+            'idsum' => '15+16', 'field' => 'Group', 'output' => 'view_name',
+        ]), 'detail'));
+    }
+
     public function testCardsAndResponsiveDimensionsAreValidatedStrictly(): void
     {
         foreach (['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6'] as $card) {
@@ -226,6 +287,8 @@ final class CbStatsValidationServiceTest extends TestCase
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_DISTINCT_TEXT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_REMAINING_LABEL',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_REMAINING_TEXT',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_GROUPSET_LABEL',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_GROUPSET_TEXT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET_OUTPUT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_EDITORIAL_CARD_LABEL',
@@ -245,6 +308,12 @@ final class CbStatsValidationServiceTest extends TestCase
             ]);
             self::assertStringNotContainsString("filter[value='", (string) $strings[
                 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_ADD_TEXT'
+            ]);
+            self::assertStringContainsString('groupset', (string) $strings[
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_GROUPSET_LABEL'
+            ]);
+            self::assertStringContainsString('id=15', (string) $strings[
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_GROUPSET_TEXT'
             ]);
 
             preg_match_all('/%(?:\d+\$)?s/', (string) $strings[

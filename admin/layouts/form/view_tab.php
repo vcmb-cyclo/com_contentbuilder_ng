@@ -40,7 +40,7 @@ if (!is_object($item) || !is_callable($formatTypeDisplay)) {
         </div>
         <div class="col-12 col-lg-4 d-flex flex-wrap flex-lg-nowrap align-items-center gap-2">
             <label for="tag" class="mb-0 text-nowrap">
-                <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_VIEW_TAG_TIP'); ?>"><b><?php echo Text::_('COM_CONTENTBUILDERNG_TAG'); ?>:</b></span>
+                <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_VIEW_TAG_TIP'); ?>"><b><?php echo Text::_('COM_CONTENTBUILDERNG_VIEW_CATEGORY_LABEL'); ?></b></span>
             </label>
             <input class="form-control form-control-sm flex-grow-1 cb-form-view-inline-input" type="text" name="jform[tag]" id="tag" size="32"
                 maxlength="255"
