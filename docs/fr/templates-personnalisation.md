@@ -217,7 +217,7 @@ Exemples :
 {CBStats id=25 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
 {CBStats id=25 field=DateInscription output=line sort=title dir=asc limit=30}
 {CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}
-{CBStats id=25 field=Parcours output=pie title="👥 Total des inscrits" export=manual}
+{CBStats id=25 field=Parcours output=pie labels="title=👥 Total des inscrits" export=manual}
 {CBStats id=25 field=Catégorie output=pie add="Existant=-2;Externe=3"}
 {CBStats id=25 field=Catégorie output=table titles="1=Groupe 1;2=Groupe 2"}
 {CBStats id=25 field=Catégorie output=bar add="1=-2;2=3" titles="1=Groupe 1;2=Groupe 2" sort=value dir=desc}
@@ -229,8 +229,8 @@ Exemples :
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert*" output=total}
 {CBStats id=25 filter[field]=Statut filter[value]="Ouvert* | En attente" output=total}
 {CBStats id=15 filter[field]=Statut filter[value]="Ouvert" output=remaining target=200}
-{CBStats idsum=25+27 field="Parcours" output="table" title="Monticyclo / Montigravel"}
-{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
+{CBStats idsum=25+27 field="Parcours" output="table" labels="title=Monticyclo / Montigravel"}
+{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" labels="title=BRM"}
 ```
 
 ### Fusionner des vues avec `idsum`

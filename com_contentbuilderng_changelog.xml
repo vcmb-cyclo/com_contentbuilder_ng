@@ -3,7 +3,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.12</version>
+		<version>6.1.13-RC01</version>
 		<addition>
 			<item>Added CBStats value groups with inclusive numeric intervals and explicit non-contiguous value lists.</item>
 			<item>Added CBStats output=percentage for the share of a selected field value within the filtered population.</item>
@@ -32,6 +32,8 @@
 			<item>Added a CBList actions section to the frontend debug panel, listing which terms apply on each screen and whether each is currently allowed.</item>
 		</addition>
 		<change>
+			<item>Replaced the unreleased CBStats title and headers options with the unified labels option using title, category, value and total keys.</item>
+			<item>Made visual CBStats totals represent the sum of displayed results after grouping, sorting and limiting, including overlapping value groups.</item>
 			<item>Replaced the unreleased CBStats output=form_name syntax with output=view_name, which returns only the ContentBuilder NG view name.</item>
 			<item>Renamed the view classification label from Tag to Category throughout the administrator, frontend and menu settings.</item>
 			<item>Ordered CBStats outputs consistently by importance in article help, API help, validation guidance and OpenAPI.</item>

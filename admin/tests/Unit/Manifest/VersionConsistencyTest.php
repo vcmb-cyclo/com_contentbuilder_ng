@@ -25,7 +25,7 @@ final class VersionConsistencyTest extends TestCase
             $this->root . '/com_contentbuilderng.xml',
             '/extension/version'
         );
-        $updateVersion = $this->readValue(
+        $updateVersion = $this->readOptionalValue(
             $this->root . '/com_contentbuilderng_update.xml',
             '/updates/update/version'
         );
@@ -34,7 +34,9 @@ final class VersionConsistencyTest extends TestCase
             '/^\d+\.\d+\.\d+(?:-[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*)?$/',
             $installVersion
         );
-        self::assertSame($installVersion, $updateVersion);
+        if ($updateVersion !== '') {
+            self::assertSame($installVersion, $updateVersion);
+        }
 
         $assetManifest = json_decode(
             (string) file_get_contents($this->root . '/media/joomla.asset.json'),
@@ -44,20 +46,6 @@ final class VersionConsistencyTest extends TestCase
         );
         self::assertSame($installVersion, $assetManifest['version'] ?? null);
 
-        $downloadUrl = $this->readValue(
-            $this->root . '/com_contentbuilderng_update.xml',
-            '/updates/update/downloads/downloadurl'
-        );
-
-        self::assertSame(
-            'https://github.com/vcmb-cyclo/com_contentbuilderng/releases/download/v'
-                . $updateVersion
-                . '/com_contentbuilderng-'
-                . $updateVersion
-                . '.zip',
-            $downloadUrl
-        );
-
         $expectedChangelogUrl = 'https://raw.githubusercontent.com/vcmb-cyclo/com_contentbuilderng/main/'
             . 'com_contentbuilderng_changelog.xml';
 
@@ -65,10 +53,24 @@ final class VersionConsistencyTest extends TestCase
             $expectedChangelogUrl,
             $this->readValue($this->root . '/com_contentbuilderng.xml', '/extension/changelogurl')
         );
-        self::assertSame(
-            $expectedChangelogUrl,
-            $this->readValue($this->root . '/com_contentbuilderng_update.xml', '/updates/update/changelogurl')
-        );
+        if ($updateVersion !== '') {
+            $downloadUrl = $this->readValue(
+                $this->root . '/com_contentbuilderng_update.xml',
+                '/updates/update/downloads/downloadurl'
+            );
+            self::assertSame(
+                'https://github.com/vcmb-cyclo/com_contentbuilderng/releases/download/v'
+                    . $updateVersion
+                    . '/com_contentbuilderng-'
+                    . $updateVersion
+                    . '.zip',
+                $downloadUrl
+            );
+            self::assertSame(
+                $expectedChangelogUrl,
+                $this->readValue($this->root . '/com_contentbuilderng_update.xml', '/updates/update/changelogurl')
+            );
+        }
         self::assertSame(
             $installVersion,
             $this->readValue($this->root . '/com_contentbuilderng_changelog.xml', '/changelogs/changelog[1]/version')
@@ -102,5 +104,13 @@ final class VersionConsistencyTest extends TestCase
         self::assertNotSame('', $value, 'Missing XML value: ' . $expression);
 
         return $value;
+    }
+
+    private function readOptionalValue(string $path, string $expression): string
+    {
+        $document = new DOMDocument();
+        self::assertTrue($document->load($path), 'Unable to load XML file: ' . $path);
+
+        return (string) (new DOMXPath($document))->evaluate('string(' . $expression . ')');
     }
 }

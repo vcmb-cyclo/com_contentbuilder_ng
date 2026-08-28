@@ -88,12 +88,12 @@ final class CbStatsManualExportServiceTest extends TestCase
     public function testPreservesFinalOrderValuesDecimalsUnicodeAndVisualOptions(): void
     {
         self::assertSame(
-            '{CBStats source=manual output=pie values="🚴=0;École=2.5;Route=15" title="👥 Total des inscrits" background="transparent"}',
+            '{CBStats source=manual output=pie values="🚴=0;École=2.5;Route=15" labels="title=Groupes;total=Total des inscrits" background="transparent"}',
             ManualExportService::buildSyntax([
                 ['label' => '🚴', 'value' => 0],
                 ['label' => 'École', 'value' => 2.5],
                 ['label' => 'Route', 'value' => 15],
-            ], 'pie', '👥 Total des inscrits', 'transparent')
+            ], 'pie', 'title=Groupes;total=Total des inscrits', 'transparent')
         );
     }
 
@@ -111,10 +111,10 @@ final class CbStatsManualExportServiceTest extends TestCase
     public function testEscapesQuotesWithoutHtmlOrJavaScriptInterpretation(): void
     {
         self::assertSame(
-            '{CBStats source=manual output=bar values="&&lt;tag&gt; \\"test\\"=1" title="L\\"été d\'Alice 👥"}',
+            '{CBStats source=manual output=bar values="&&lt;tag&gt; \\"test\\"=1" labels="title=L\\"été d\'Alice 👥"}',
             ManualExportService::buildSyntax([
                 ['label' => '&<tag> "test"', 'value' => 1],
-            ], 'bar', 'L"été d\'Alice 👥')
+            ], 'bar', 'title=L"été d\'Alice 👥')
         );
     }
 
@@ -132,7 +132,6 @@ final class CbStatsManualExportServiceTest extends TestCase
         $syntax = ManualExportService::buildSyntax(
             [['label' => 'Final', 'value' => 9]],
             'pie',
-            '',
             '',
             '',
             'total|values'

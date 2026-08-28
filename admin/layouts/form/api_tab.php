@@ -163,7 +163,7 @@ $wa->useStyle('com_contentbuilderng.admin-form-api');
                 <h4 class="h5 mb-2">CBStats</h4>
                 <p><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_SUMMARY'); ?></p>
                 <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OUTPUTS'); ?></strong><br><code>total, table, pie, bar, histogram, line, radar, json, sum, min, max, avg, remaining, percentage, progress, distinct, view_name</code></p>
-                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OPTIONS'); ?></strong><br><code>id, idsum, field, value, filter[field], filter[value], output, target, groups, groupset, titles, titleset, sort, dir, limit, hide, title, card, w, width, height, export</code></p>
+                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OPTIONS'); ?></strong><br><code>id, idsum, field, value, filter[field], filter[value], output, target, groups, groupset, titles, titleset, sort, dir, limit, hide, labels, card, w, width, height, export</code></p>
                 <a class="btn btn-sm btn-outline-primary" href="<?php echo htmlspecialchars($cbStatsHelpUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                     <?php echo Text::_('COM_CONTENTBUILDERNG_API_OPEN_CBSTATS_HELP'); ?> <span aria-hidden="true">↗</span>
                 </a>

@@ -1,6 +1,6 @@
 # CBStats public syntax / API reference
 
-Stable release baseline: ContentBuilder NG 6.1.12. This reference
+Release-candidate baseline: ContentBuilder NG 6.1.13-RC01. This reference
 includes the validated `output=distinct`, `titleset`, `groupset` and
 `output=remaining target=Number` contracts, plus `output=percentage` and
 `output=progress target=Number`.
@@ -28,27 +28,33 @@ localized public CBStats help page in a new browser tab, without requiring acces
 to the Joomla administration or exposing view data. Access-control failures and
 unexpected internal errors deliberately remain generic.
 
-## Table column headers
+## Presentation labels
 
-`headers=` customizes only the two column headers of `output=table`:
+`labels=` centralizes every presentation label with four stable keys:
 
 ```text
-{CBStats id=15 field=Dpt output=table headers="Dpt=Département;Total=Qté"}
+{CBStats id=15 field=Dpt output=table labels="title=Répartition;category=Département;value=Inscrits;total=Total affiché"}
 ```
 
-The syntax is `key=label;key=label`, with surrounding spaces ignored. Unmapped headers keep their default label; unknown keys and empty labels are ignored. The displayed field can be addressed by its field name or current label, and the numeric column by the stable key `Total`. UTF-8 labels are supported.
+The keys are `title` (block or Card heading), `category` (first Table column),
+`value` (numeric Table column) and `total` (displayed-results total). Keys must be
+unique and labels non-empty; unknown keys are rejected. Omitted keys retain their
+localized defaults. `category` and `value` apply only to Table. `total` applies
+to Table and charts. `title` is rejected for raw JSON.
 
-`title=` changes the global total label, `titles=` changes category labels and `headers=` changes Table column headers; these options are independent. Pie and Bar have legends rather than associated tables, so `headers=` does not alter them.
+`titles=` remains separate: it renames individual data categories. `labels=`
+names presentation elements and never renames or merges the data themselves.
+The removed `title=` and `headers=` options are not aliases.
 
 ## Manual export
 
 Only `export=manual` enables export for `output=pie`, `output=bar` and `output=table` in Joomla content. Other `export=` values are rejected with a validation message:
 
 ```text
-{CBStats id=25 field=Parcours output=pie title="👥 Total des inscrits" export=manual}
+{CBStats id=25 field=Parcours output=pie labels="title=👥 Total des inscrits" export=manual}
 ```
 
-The normal output is followed by the final title, labels, values and total, then by a visible frozen `{CBStats source=manual ...}` tag and a centered copy button. The exported `values=` uses the final displayed labels and values after filters, grouping, `add=`, negative-to-zero normalization, `titles=` and sorting. The final labels are embedded directly in `values=` and `titles=` is not copied. Dynamic parameters (`id`, `field`, filters, `add`, `titles`, `sort`, `dir`, `limit` and `export`) are not copied. `title`, `headers=` and the validated visual `background` option are retained when explicitly supplied, so a frozen manual Table keeps its customized column headers.
+The normal output is followed by the final title, labels, values and total, then by a visible frozen `{CBStats source=manual ...}` tag and a centered copy button. The exported `values=` uses the final displayed labels and values after filters, grouping, `add=`, negative-to-zero normalization, `titles=` and sorting. The final data labels are embedded directly in `values=` and `titles=` is not copied. Dynamic parameters (`id`, `field`, filters, `add`, `titles`, `sort`, `dir`, `limit` and `export`) are not copied. Explicit `labels=` and the validated visual `background` option are retained.
 
 Labels use the RC83 manual escaping rules: `\;`, `\=` and `\\`. Pie remains Pie, Bar remains Bar and Table remains Table. `output=total` is not exported because it has no category presentation to freeze. With `source=manual export=manual`, CBStats displays one normalized export block without recursion.
 
@@ -82,9 +88,9 @@ together. It accepts two to five unique positive view identifiers separated by
 output, including `output=total`:
 
 ```text
-{CBStats idsum=25+27 field="Parcours" output="table" title="Monticyclo / Montigravel"}
+{CBStats idsum=25+27 field="Parcours" output="table" labels="title=Monticyclo / Montigravel"}
 {CBStats idsum=25+27 field="Fédération" output="pie"}
-{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
+{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" labels="title=BRM"}
 ```
 
 Each view independently enforces STATS and field permissions and applies the
@@ -193,8 +199,10 @@ Behavior:
 Histogram is a responsive vertical chart using the same normalized labels and
 counts as Table, JSON, Pie and Bar. Use `groups=` to define value groups.
 Numeric interval bounds are inclusive and declaration order is preserved. For
-example, `groups="18-29;30-39;40-49;50+"` counts each age group independently
-and keeps the real filtered record total separate from the sum of groups. It is
+example, `groups="18-29;30-39;40-49;50+"` counts each age group independently.
+The displayed total is the sum of the displayed groups after `limit`; overlapping
+groups can therefore count one record more than once. `output=total` remains the
+real filtered record count. It is
 useful for distributions such as age, distance or price.
 
 ## 7. Line output
@@ -315,16 +323,16 @@ title. `sort=title` uses the final display titles.
 
 ### Total label and background
 
-`title=` customizes the total label for `table`, `pie` and `bar`, while
-`titles=` continues to map category labels. An empty `title` uses the translated
-default. When the custom title has no final colon, CBStats appends the localized
+`labels="total=..."` customizes the displayed-total label for Table and chart
+outputs, while `titles=` continues to map category labels. An omitted total key
+uses the translated default. When the custom label has no final colon, CBStats appends the localized
 separator; an existing colon is never duplicated. Unicode and emojis are
 preserved and all label text is HTML-escaped.
 
 ```text
-{CBStats id=25 field=Parcours output=pie title="👥 Total des inscrits :"}
-{CBStats id=25 field=Parcours output=table title="👥 Total des inscrits :"}
-{CBStats id=25 field=Parcours output=pie title="👥 Total des inscrits :" background="transparent"}
+{CBStats id=25 field=Parcours output=pie labels="title=Parcours;total=Total des inscrits"}
+{CBStats id=25 field=Parcours output=table labels="category=Parcours;value=Inscrits;total=Total affiché"}
+{CBStats id=25 field=Parcours output=pie labels="total=Total des inscrits" background="transparent"}
 ```
 
 Without `background=`, the container uses Bootstrap/Joomla body and border

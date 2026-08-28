@@ -19,9 +19,8 @@ final class ManualExportService
     public static function buildSyntax(
         array $items,
         string $output,
-        string $title = '',
+        string $labels = '',
         string $background = '',
-        string $headers = '',
         string $hide = ''
     ): string {
         $values = [];
@@ -33,16 +32,12 @@ final class ManualExportService
         $syntax = '{CBStats source=manual output=' . $output
             . ' values="' . self::escapeAttribute(implode(';', $values)) . '"';
 
-        if ($title !== '') {
-            $syntax .= ' title="' . self::escapeAttribute($title) . '"';
+        if ($labels !== '') {
+            $syntax .= ' labels="' . self::escapeAttribute($labels) . '"';
         }
 
         if ($background !== '') {
             $syntax .= ' background="' . self::escapeAttribute($background) . '"';
-        }
-
-        if ($headers !== '') {
-            $syntax .= ' headers="' . self::escapeAttribute($headers) . '"';
         }
 
         if ($hide !== '') {

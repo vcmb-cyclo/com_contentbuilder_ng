@@ -311,6 +311,8 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
         self::assertIsString($source);
         self::assertStringContainsString('DisplayOptionsService::applyLimit($fullFieldStats, $limit)', $source);
         self::assertStringContainsString("\$fieldTotal = array_sum(array_column(\$fieldStats, 'value'));", $source);
+        self::assertStringContainsString('$displayTotal = $fieldTotal;', $source);
+        self::assertStringNotContainsString('$displayTotal = $usesGroups ?', $source);
         self::assertMatchesRegularExpression("/if \(!\\\$hideOptions\['total'\]\) \{\\R\\s+\\\$html \.= '<tfoot>/", $source);
         self::assertMatchesRegularExpression("/if \(!\\\$hideOptions\['total'\]\) \{\\R\\s+\\\$html \.= '<div class=\"cbstats-total-box\">/", $source);
         self::assertStringContainsString("if (!\$hideOptions['graph']) {", $source);

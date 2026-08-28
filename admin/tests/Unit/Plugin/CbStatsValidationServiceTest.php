@@ -26,7 +26,7 @@ final class CbStatsValidationServiceTest extends TestCase
             'background' => 'url(javascript:alert(1))',
             'add' => 'Route=five',
             'titles' => 'Route=',
-            'headers' => 'Route',
+            'labels' => 'category=',
             'groups' => 'young-old',
             'typo' => 'value',
         ]);
@@ -34,7 +34,7 @@ final class CbStatsValidationServiceTest extends TestCase
         self::assertSame(
             [
                 'typo', 'id', 'field', 'sort', 'dir', 'limit', 'hide',
-                'export', 'background', 'headers', 'add', 'titles', 'groups',
+                'export', 'background', 'add', 'titles', 'groups', 'labels',
             ],
             array_column($errors, 'parameter')
         );
@@ -59,6 +59,40 @@ final class CbStatsValidationServiceTest extends TestCase
             'sort' => 'label',
             'dir' => 'asc',
         ]));
+    }
+
+    public function testLabelsReplaceTitleAndHeadersWithoutAliases(): void
+    {
+        self::assertSame([], StatsTagValidationService::validationErrors([
+            'id' => '15',
+            'field' => 'Group',
+            'output' => 'table',
+            'labels' => 'title=Groups;category=Group;value=Registrations;total=Displayed total',
+        ]));
+
+        $removed = StatsTagValidationService::validationErrors([
+            'id' => '15',
+            'field' => 'Group',
+            'output' => 'table',
+            'title' => 'Groups',
+            'headers' => 'Group=Group;Total=Registrations',
+        ]);
+
+        self::assertSame(['title', 'headers'], array_column($removed, 'parameter'));
+        self::assertSame(['removed_option', 'removed_option'], array_column($removed, 'code'));
+    }
+
+    public function testPresentationLabelScopesAreStrict(): void
+    {
+        self::assertSame(['labels'], array_column(StatsTagValidationService::validationErrors([
+            'id' => '15', 'field' => 'Group', 'output' => 'pie', 'labels' => 'category=Group',
+        ]), 'parameter'));
+        self::assertSame(['labels'], array_column(StatsTagValidationService::validationErrors([
+            'id' => '15', 'output' => 'total', 'labels' => 'total=Displayed total',
+        ]), 'parameter'));
+        self::assertSame(['labels'], array_column(StatsTagValidationService::validationErrors([
+            'id' => '15', 'field' => 'Group', 'output' => 'json', 'labels' => 'title=Groups',
+        ]), 'parameter'));
     }
 
     public function testGroupsSyntaxIsAcceptedAndUnreleasedRangeNamesAreRejected(): void

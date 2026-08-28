@@ -24,7 +24,7 @@ final class StatsTagValidationService
     ];
     private const ALLOWED_KEYS = [
         'source', 'id', 'idsum', 'debug', 'output', 'field', 'filter[field]',
-        'filter[value]', 'value', 'add', 'titles', 'titleset', 'groups', 'groupset', 'headers', 'title',
+        'filter[value]', 'value', 'add', 'titles', 'titleset', 'groups', 'groupset', 'labels',
         'background', 'sort', 'dir', 'values', 'export', 'limit', 'hide', 'total',
         'card', 'w', 'width', 'height', 'target',
     ];
@@ -39,7 +39,10 @@ final class StatsTagValidationService
         $errors = [];
 
         foreach (array_values(array_diff(array_keys($attributes), self::ALLOWED_KEYS)) as $key) {
-            $errors[] = self::error('unknown_option', $key, (string) $attributes[$key]);
+            $removed = ['title' => 'labels_title', 'headers' => 'labels_headers', 'total_label' => 'labels_total'];
+            $errors[] = isset($removed[$key])
+                ? self::error('removed_option', $key, (string) $attributes[$key], $removed[$key])
+                : self::error('unknown_option', $key, (string) $attributes[$key]);
         }
         foreach (['id', 'idsum', 'limit', 'w', 'target'] as $numericKey) {
             if (($quoted[$numericKey] ?? false) === true) {
@@ -157,6 +160,22 @@ final class StatsTagValidationService
 
         self::validateMappings($attributes, $usesListOptions, $manual, $errors);
 
+        $labels = [];
+        try {
+            $labels = StatsService::parseFieldStatsLabels((string) ($attributes['labels'] ?? ''));
+        } catch (\InvalidArgumentException $exception) {
+            $errors[] = self::error('invalid_value', 'labels', $exception->getMessage(), 'labels');
+        }
+        if ((isset($labels['category']) || isset($labels['value'])) && $output !== 'table') {
+            $errors[] = self::error('invalid_value', 'labels', (string) ($attributes['labels'] ?? ''), 'labels_table');
+        }
+        if (isset($labels['total']) && !in_array($output, ['table', 'pie', 'bar', 'histogram', 'line', 'radar'], true)) {
+            $errors[] = self::error('invalid_value', 'labels', (string) ($attributes['labels'] ?? ''), 'labels_total');
+        }
+        if (isset($labels['title']) && $output === 'json') {
+            $errors[] = self::error('invalid_value', 'labels', (string) ($attributes['labels'] ?? ''), 'labels_title');
+        }
+
         return $errors;
     }
 
@@ -213,9 +232,7 @@ final class StatsTagValidationService
      */
     private static function validateMappings(array $attributes, bool $usesListOptions, bool $manual, array &$errors): void
     {
-        $checks = [
-            'headers' => static fn(string $value): array => StatsService::parseFieldStatsHeaders($value),
-        ];
+        $checks = [];
 
         if ($usesListOptions) {
             $checks['add'] = static fn(string $value): array => StatsService::parseFieldStatsAdditions($value);

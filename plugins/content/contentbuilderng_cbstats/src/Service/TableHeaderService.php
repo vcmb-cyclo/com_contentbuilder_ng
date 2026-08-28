@@ -10,43 +10,21 @@ final class TableHeaderService
 {
     /**
      * @param array<string, mixed> $field
-     * @param array<int|string, string> $mappings
-     * @return array{label: string, total: string}
+     * @param array<string, string> $labels
+     * @return array{category: string, value: string}
      */
     public static function resolve(
         array $field,
-        array $mappings,
-        string $defaultValue,
-        string $defaultTotal
+        array $labels,
+        string $defaultCategory,
+        string $defaultValue
     ): array {
         $requested = (string) ($field['requested'] ?? '');
-        $label = (string) ($field['label'] ?? $requested ?: $defaultValue);
-        $labelHeader = $mappings[$label] ?? ($requested !== '' ? ($mappings[$requested] ?? $label) : $label);
-        $totalHeader = $mappings['Total'] ?? ($mappings[$defaultTotal] ?? $defaultTotal);
+        $fieldLabel = (string) ($field['label'] ?? $requested ?: $defaultCategory);
 
-        return ['label' => $labelHeader, 'total' => $totalHeader];
-    }
-
-    /**
-     * A frozen manual source has no field identifier. Its first non-total
-     * mapping key becomes the synthetic field header so the exported mapping
-     * remains both unchanged and effective.
-     *
-     * @param array<int|string, string> $mappings
-     */
-    public static function resolveManualFieldKey(
-        array $mappings,
-        string $defaultValue,
-        string $defaultTotal
-    ): string {
-        foreach ($mappings as $key => $_display) {
-            $key = (string) $key;
-
-            if ($key !== 'Total' && $key !== $defaultTotal) {
-                return $key;
-            }
-        }
-
-        return $defaultValue;
+        return [
+            'category' => $labels['category'] ?? $fieldLabel,
+            'value' => $labels['value'] ?? $defaultValue,
+        ];
     }
 }

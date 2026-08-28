@@ -186,7 +186,7 @@ Examples:
 {CBStats id=3 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
 {CBStats id=3 field=RegistrationDate output=line sort=title dir=asc limit=30}
 {CBStats id=3 field=Age output=radar groups="18-29;30-39;40-49;50+"}
-{CBStats id=25 field=Route output=pie title="👥 Total registrations" export=manual}
+{CBStats id=25 field=Route output=pie labels="title=👥 Total registrations" export=manual}
 {CBStats id=3 field=Category output=pie add="Existing=-2;External=3"}
 {CBStats id=3 field=Category output=table titles="1=Group 1;2=Group 2"}
 {CBStats id=3 field=Category output=bar add="1=-2;2=3" titles="1=Group 1;2=Group 2" sort=value dir=desc}
@@ -198,8 +198,8 @@ Examples:
 {CBStats id=3 filter[field]=Status filter[value]="Open*" output=total}
 {CBStats id=3 filter[field]=Status filter[value]="Open* | Pending" output=total}
 {CBStats id=15 filter[field]=Status filter[value]="Open" output=remaining target=200}
-{CBStats idsum=25+27 field="Route" output="table" title="Monticyclo / Montigravel"}
-{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
+{CBStats idsum=25+27 field="Route" output="table" labels="title=Monticyclo / Montigravel"}
+{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" labels="title=BRM"}
 ```
 
 ### Merging views with `idsum`

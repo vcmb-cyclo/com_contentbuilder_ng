@@ -17,7 +17,7 @@ unexpected internal errors remain generic.
 
 ## Recommended short description — French
 
-**ContentBuilder NG - CBStats - Content - Statistiques** permet d'afficher dans les contenus Joomla des statistiques dynamiques issues des vues ContentBuilder NG au moyen de balises `{CBStats ...}`, ou de publier les sorties de données prises en charge via URL/API. Le plugin gère les totaux, tableaux, agrégats `sum`, `min`, `max` et `avg`, JSON, graphiques Pie, Bar, Histogram, Line et Radar, filtres, tris, groupes de valeurs `groups=`, limites `limit=`, masquage `hide=`, deltas externes signés avec `add=`, titre du total avec `title=` et libellés d'affichage avec `titles=`. Exemples : `{CBStats id=25 field=Age output=avg}` et `{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}`. Les réglages API de la vue ainsi que les permissions STATS et de champ restent appliqués.
+**ContentBuilder NG - CBStats - Content - Statistiques** permet d'afficher dans les contenus Joomla des statistiques dynamiques issues des vues ContentBuilder NG au moyen de balises `{CBStats ...}`, ou de publier les sorties de données prises en charge via URL/API. Le plugin gère les totaux, tableaux, agrégats `sum`, `min`, `max` et `avg`, JSON, graphiques Pie, Bar, Histogram, Line et Radar, filtres, tris, groupes de valeurs `groups=`, limites `limit=`, masquage `hide=`, deltas externes signés avec `add=`, libellés de présentation avec `labels=` et libellés de catégories avec `titles=`. Exemples : `{CBStats id=25 field=Age output=avg}` et `{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}`. Les réglages API de la vue ainsi que les permissions STATS et de champ restent appliqués.
 
 ## Recommended long description — French
 
@@ -41,13 +41,13 @@ fusion des libellés exactement identiques. `add=`, `titles=` et le tri
 s’appliquent ensuite au résultat final. Exemples :
 
 ```text
-{CBStats idsum=25+27 field="Parcours" output="table" title="Monticyclo / Montigravel"}
-{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
+{CBStats idsum=25+27 field="Parcours" output="table" labels="title=Monticyclo / Montigravel"}
+{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" labels="title=BRM"}
 ```
 
 ## Recommended short description — English
 
-**ContentBuilder NG - CBStats - Content statistics** displays dynamic statistics from ContentBuilder NG views in Joomla content through `{CBStats ...}` tags, or publishes supported data outputs through URL/API requests. It supports totals, tables, `sum`/`min`/`max`/`avg`, JSON, Pie, Bar, Histogram, Line and Radar charts, numeric `groups=`, `limit=`, `hide=`, filtering, sorting, signed external deltas with `add=`, total labels with `title=` and category display labels with `titles=`. Examples: `{CBStats id=25 field=Age output=avg}` and `{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}`. View API settings and STATS and field permissions remain enforced.
+**ContentBuilder NG - CBStats - Content statistics** displays dynamic statistics from ContentBuilder NG views in Joomla content through `{CBStats ...}` tags, or publishes supported data outputs through URL/API requests. It supports totals, tables, `sum`/`min`/`max`/`avg`, JSON, Pie, Bar, Histogram, Line and Radar charts, numeric `groups=`, `limit=`, `hide=`, filtering, sorting, signed external deltas with `add=`, presentation labels with `labels=` and data-category labels with `titles=`. Examples: `{CBStats id=25 field=Age output=avg}` and `{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}`. View API settings and STATS and field permissions remain enforced.
 
 ## Recommended long description — English
 
@@ -70,13 +70,13 @@ view applies permissions, filters and grouping before exactly identical labels
 are merged. `add=`, `titles=` and sorting then apply to the final result.
 
 ```text
-{CBStats idsum=25+27 field="Route" output="table" title="Monticyclo / Montigravel"}
-{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
+{CBStats idsum=25+27 field="Route" output="table" labels="title=Monticyclo / Montigravel"}
+{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" labels="title=BRM"}
 ```
 
 ## Recommended short description — German
 
-**ContentBuilder NG - CBStats - Inhalt - Statistiken** zeigt dynamische Statistiken aus ContentBuilder-NG-Ansichten in Joomla-Inhalten über `{CBStats ...}`-Tags an oder veröffentlicht unterstützte Datenausgaben über URL/API-Anfragen. Das Plugin unterstützt Gesamtzahlen, Tabellen, `sum`/`min`/`max`/`avg`, JSON, Kreis-, Balken-, Histogramm-, Linien- und Radardiagramme, numerische `groups=`, `limit=`, `hide=`, Filter, Sortierungen, vorzeichenbehaftete externe Deltas mit `add=`, Gesamtbezeichnungen mit `title=` und Kategoriebezeichnungen mit `titles=`. Beispiele: `{CBStats id=25 field=Age output=avg}` und `{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}`. API-Einstellungen der Ansicht sowie STATS- und Feldberechtigungen bleiben wirksam.
+**ContentBuilder NG - CBStats - Inhalt - Statistiken** zeigt dynamische Statistiken aus ContentBuilder-NG-Ansichten in Joomla-Inhalten über `{CBStats ...}`-Tags an oder veröffentlicht unterstützte Datenausgaben über URL/API-Anfragen. Das Plugin unterstützt Gesamtzahlen, Tabellen, `sum`/`min`/`max`/`avg`, JSON, Kreis-, Balken-, Histogramm-, Linien- und Radardiagramme, numerische `groups=`, `limit=`, `hide=`, Filter, Sortierungen, vorzeichenbehaftete externe Deltas mit `add=`, Darstellungsbezeichnungen mit `labels=` und Datenkategoriebezeichnungen mit `titles=`. Beispiele: `{CBStats id=25 field=Age output=avg}` und `{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}`. API-Einstellungen der Ansicht sowie STATS- und Feldberechtigungen bleiben wirksam.
 
 ## Recommended long description — German
 
@@ -100,8 +100,8 @@ exakt gleiche Bezeichnungen zusammengeführt werden. `add=`, `titles=` und die
 Sortierung gelten anschließend für das Endergebnis.
 
 ```text
-{CBStats idsum=25+27 field="Strecke" output="table" title="Monticyclo / Montigravel"}
-{CBStats idsum=31+32+33+34+35 field="Distanz" output="bar" title="BRM"}
+{CBStats idsum=25+27 field="Strecke" output="table" labels="title=Monticyclo / Montigravel"}
+{CBStats idsum=31+32+33+34+35 field="Distanz" output="bar" labels="title=BRM"}
 ```
 
 ## Application rules

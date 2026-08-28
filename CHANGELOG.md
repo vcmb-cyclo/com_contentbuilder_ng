@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.1.13-RC01 — 2026-08-28
+
+- Replaced the CBStats `title=` and `headers=` presentation options with the unified `labels="title=...;category=...;value=...;total=..."` syntax, without compatibility aliases.
+- Changed visual totals to the sum of the displayed results after groups, additions, labels, sorting and `limit`; `output=total` still returns the filtered view record count.
+- Updated CBStats validation, manual export, EN/FR/DE help, CB/API guidance and technical specifications.
+
 ## 6.1.12 — 2026-08-28
 
 - Finalized CBStats value groups and reusable group sets, including explicit non-contiguous values and preservation of unmatched categories.

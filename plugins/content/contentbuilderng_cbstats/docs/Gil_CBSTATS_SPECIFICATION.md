@@ -241,8 +241,10 @@ output. `add` and `titles` apply to `table`, `json`, `pie`, `bar`, `histogram`,
 `line` and `radar`; they do not change scalar outputs. URL/API list outputs
 reuse the same parsers and normalization path.
 
-The distinct `title=` parameter customizes the localized total label in Table,
-Pie, Bar, Histogram, Line and Radar. An empty value uses the translated default; a missing final colon is
+The `labels=` parameter centralizes presentation labels with the strict keys
+`title`, `category`, `value` and `total`. The last key customizes the localized
+displayed-total label in Table, Pie, Bar, Histogram, Line and Radar. Omitted keys
+use translated defaults; unknown, duplicate or empty keys are rejected. A missing final colon is
 added with localized punctuation. `background=` optionally applies a validated
 background to those HTML containers. Unicode is preserved and HTML is escaped.
 
@@ -536,7 +538,7 @@ A pass is complete only when:
 
 `card=h1` to `card=h6` and `card=v1` to `card=v6` use the shared component
 asset `com_contentbuilderng.cards`. This is opt-in. A header exists only with
-an explicit non-empty `title=` and the inner title is not duplicated.
+an explicit non-empty `labels="title=..."` and the inner title is not duplicated.
 For H and V variants alike, the title is horizontal and above the content.
 H variants use the available width. V variants are compact inline cards that
 sit next to each other when space permits and become full-width on small screens.
@@ -548,7 +550,7 @@ All variants become full-width on small screens. When the current row has too
 few free columns, the Card starts on the next row. `w=` controls the Card;
 CBStats `width=` controls the chart inside it.
 
-Example: `{CBStats id=15 field=Group output=bar title="Groups" card=v2 w=66 width=100%}`.
+Example: `{CBStats id=15 field=Group output=bar labels="title=Groups" card=v2 w=66 width=100%}`.
 
 Chart options `width=` and `height=` accept a positive number, `px` or `%`.
 A number without a unit means pixels. Without `width=`, Pie uses 80% with a
