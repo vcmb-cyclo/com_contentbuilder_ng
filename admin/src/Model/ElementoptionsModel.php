@@ -34,6 +34,10 @@ use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
 
 class ElementoptionsModel extends BaseDatabaseModel
 {
+    private int $_id = 0;
+
+    private mixed $_data = null;
+
     private $_element_id = 0;
 
     private function getComponent(): ContentbuilderngComponent
