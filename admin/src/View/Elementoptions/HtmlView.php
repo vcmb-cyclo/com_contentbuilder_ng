@@ -25,6 +25,9 @@ use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView a
 
 class HtmlView extends BaseHtmlView
 {
+    public string $sourceEditableType = 'text';
+    public array $sourceGroupDefaultValues = [];
+
     public function display($tpl = null)
     {
         // Get data from the model
@@ -34,6 +37,8 @@ class HtmlView extends BaseHtmlView
         $validations = $model->getValidationRules();
         $this->validations = $validations;
         $this->element = $element;
+        $this->sourceEditableType = $model->getSourceEditableType();
+        $this->sourceGroupDefaultValues = $model->getSourceGroupDefaultValues();
         $groupdef = $model->getGroupDefinition();
         $this->group_definition = $groupdef;
         parent::display($tpl);

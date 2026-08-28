@@ -26,7 +26,7 @@ Avant de modifier le code :
 
 Implémente ensuite uniquement cette mission, avec modifications minimales et sans hardcoding métier.
 
-Préserve strictement les outputs existants : `total`, `form_name`, `table`, `sum`, `min`, `max`.
+Préserve strictement les outputs existants : `total`, `view_name`, `table`, `sum`, `min`, `max`.
 
 Après implémentation :
 

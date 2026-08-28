@@ -27,7 +27,7 @@ Before changes:
 
 ```text
 output=total
-output=form_name
+output=view_name
 output=table
 output=sum
 output=min

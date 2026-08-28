@@ -1,6 +1,13 @@
 # Templates et personnalisation
 
-La syntaxe CBStats documentée ici correspond à ContentBuilder NG 6.1.11.
+La syntaxe CBStats documentée ici correspond à ContentBuilder NG 6.1.12.
+
+`groupset="ages-fr-FR.ini"` charge des groupes de valeurs réutilisables depuis
+les mêmes répertoires sécurisés que `titleset`. Les clés de sa section
+`[groups]` acceptent des intervalles inclusifs comme `13-`, `13-17` et `70+`,
+ou des valeurs explicites séparées par des virgules comme `1,2,7,9`.
+`groups=` reste prioritaire ; `titles=` reste prioritaire sur les libellés du
+fichier et sur `titleset=`.
 
 ContentBuilder NG utilise des templates configurés dans chaque vue pour produire les
 détails, les formulaires d'édition, les articles et certaines présentations de liste.
@@ -199,15 +206,17 @@ Exemples :
 ```text
 {CBStats id=25 output=total}
 {CBStats id=15 output=remaining target=200}
-{CBStats id=25 output=form_name}
+{CBStats id=15 field=Civilite value="H" output=percentage}
+{CBStats id=15 output=progress target=200}
+{CBStats id=25 output=view_name}
 {CBStats id=25 field=Parcours output=table}
 {CBStats id=25 field=Parcours output=json sort=title dir=asc}
 {CBStats id=25 field=Parcours output=pie sort=value dir=desc}
 {CBStats id=25 field=Parcours output=bar sort=value dir=desc}
 {CBStats id=25 field=Age output=avg}
-{CBStats id=25 field=Age output=histogram ranges="18-29;30-39;40-49;50+"}
+{CBStats id=25 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
 {CBStats id=25 field=DateInscription output=line sort=title dir=asc limit=30}
-{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50+"}
+{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}
 {CBStats id=25 field=Parcours output=pie title="👥 Total des inscrits" export=manual}
 {CBStats id=25 field=Catégorie output=pie add="Existant=-2;Externe=3"}
 {CBStats id=25 field=Catégorie output=table titles="1=Groupe 1;2=Groupe 2"}
@@ -240,7 +249,7 @@ avec `add`, la normalisation à zéro, `titles`, le tri final et l’output. Le 
 est la somme des catégories fusionnées finales.
 
 Les identifiants invalides ou dupliqués, moins de deux ou plus de cinq vues, une
-vue absente ou inaccessible, un champ absent et `output=form_name` sont refusés.
+vue absente ou inaccessible, un champ absent et `output=view_name` sont refusés.
 Les identifiants dupliqués sont rejetés afin d’éviter tout double comptage.
 
 ### Export manuel figé
@@ -250,7 +259,7 @@ Ajoutez `export=manual` à une balise Pie, Bar ou Table pour afficher les libell
 | Sortie | Résultat | `field` obligatoire |
 | --- | --- | --- |
 | `total` | Nombre d'enregistrements correspondants | Non |
-| `form_name` | Titre de la vue, ou son nom si le titre est vide | Non |
+| `view_name` | Nom de la vue ContentBuilder NG | Non |
 | `table` | Tableau HTML statique valeur/nombre | Oui |
 | `json` | Tableau JSON brut d'objets `{label,value}` | Oui |
 | `pie` | Graphique Pie responsive | Oui |
@@ -326,7 +335,8 @@ points-virgules séparent les entrées et le premier signe égal sépare chaque 
 Pie, Bar, Histogram, Line et Radar utilisent les mêmes données normalisées,
 infobulles et textes graphiques localisés. Les graphiques sont responsives et
 peuvent coexister dans toute combinaison sur une page. Utilisez
-`ranges="18-29;30-39;40-49;50+"` pour des tranches numériques inclusives,
+`groups="18-29;30-39;40-49;50+"` pour des groupes par intervalles inclusifs,
+ou `groups="1,2,7,9=Groupe 1;3,4,8=Groupe 2"` pour des valeurs explicites non contiguës,
 `output=line sort=title dir=asc` pour une séquence de dates/catégories et
 `output=radar` pour comparer de 3 à 8 dimensions.
 
@@ -338,8 +348,8 @@ basées sur un champ vérifient sa disponibilité API/Stats.
 CBStats applique toujours la permission STATS de la vue. Pour l'URL/API, vérifiez
 les réglages **API + Droits**, la disponibilité API/Stats des champs et l'onglet
 **API** de la vue. Les outputs URL disponibles sont `json`, `table`, `pie`, `bar`,
-`histogram`, `line`, `radar`, `total`, `distinct`, `sum`, `min`, `max`, `avg` et `form_name` ;
-les sorties de liste acceptent aussi `add`, `titles`, `sort`, `dir`, `ranges` et
+`histogram`, `line`, `radar`, `total`, `distinct`, `sum`, `min`, `max`, `avg` et `view_name` ;
+les sorties de liste acceptent aussi `add`, `titles`, `sort`, `dir`, `groups` et
 `limit`. Dans les articles Joomla, CBStats signale ensemble toutes les erreurs
 de syntaxe indépendantes de la balise, précise le paramètre et la valeur concernés
 et n'affiche aucune statistique tant que la balise est invalide. Le bloc d'erreur

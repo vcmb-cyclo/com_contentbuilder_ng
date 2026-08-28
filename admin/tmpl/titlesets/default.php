@@ -13,12 +13,13 @@ use Joomla\CMS\HTML\HTMLHelper;
 $columns = [
     'filename' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_FILENAME'),
     'name' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_NAME'),
+    'type' => Text::_('COM_CONTENTBUILDERNG_DATASETS_TYPE'),
     'modified' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_DATE'),
     'source' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_SOURCE'),
     'count' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_COUNT'),
     'status' => Text::_('COM_CONTENTBUILDERNG_TITLESETS_STATUS'),
 ];
-$sortableColumns = ['filename', 'name', 'modified', 'source', 'count', 'status'];
+$sortableColumns = ['filename', 'name', 'type', 'modified', 'source', 'count', 'status'];
 ?>
 <form action="<?php echo Route::_('index.php?option=com_contentbuilderng&view=titlesets'); ?>" method="post" enctype="multipart/form-data" name="adminForm" id="adminForm">
 <div class="container-fluid">
@@ -92,6 +93,7 @@ $sortableColumns = ['filename', 'name', 'modified', 'source', 'count', 'status']
                 <td class="text-center"><input class="form-check-input" type="checkbox" name="cid[]" value="<?php echo htmlspecialchars((string) $item['source'] . ':' . (string) $item['filename'], ENT_QUOTES, 'UTF-8'); ?>" onclick="Joomla.isChecked(this.checked);"></td>
                 <td data-cb-titlesets-column="filename"><a href="<?php echo Route::_($viewUrl, false); ?>" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_TITLESETS_OPEN_DESC'), ENT_QUOTES, 'UTF-8'); ?>"><code><?php echo htmlspecialchars((string) $item['filename'], ENT_QUOTES, 'UTF-8'); ?></code></a></td>
                 <td data-cb-titlesets-column="name"><span class="cb-titlesets-title"><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></span></td>
+                <td data-cb-titlesets-column="type"><?php echo Text::_('COM_CONTENTBUILDERNG_DATASETS_TYPE_' . strtoupper((string) $item['type'])); ?></td>
                 <td data-cb-titlesets-column="modified" data-cb-sort-value="<?php echo (int) ($item['modified'] ?? 0); ?>"><?php echo HTMLHelper::_('date', '@' . (int) ($item['modified'] ?? 0), Text::_('DATE_FORMAT_LC5')); ?></td>
                 <td data-cb-titlesets-column="source"><?php echo Text::_($isCustom
                     ? 'COM_CONTENTBUILDERNG_TITLESETS_SOURCE_CUSTOM'
@@ -101,8 +103,9 @@ $sortableColumns = ['filename', 'name', 'modified', 'source', 'count', 'status']
             </tr>
         <?php endforeach; ?>
         <?php if ($this->items === []) : ?>
-            <tr><td colspan="7"><?php echo Text::_('JGLOBAL_NO_MATCHING_RESULTS'); ?></td></tr>
-        <?php endif; ?>
+            <tr><td colspan="8"><?php echo Text::_('JGLOBAL_NO_MATCHING_RESULTS'); ?></td></tr>
+            <?php
+        endif; ?>
         </tbody>
     </table></div>
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-2" data-cb-titlesets-pagination>
@@ -148,6 +151,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const importInput = document.querySelector('[data-cb-titlesets-import]');
     const overwriteInput = document.querySelector('[data-cb-titlesets-overwrite]');
     const providedToggle = document.querySelector('[data-cb-titlesets-provided-toggle]');
+    const importToolbarItem = document.querySelector('[data-cb-titlesets-import-button]');
+    const importToolbarButton = importToolbarItem instanceof HTMLButtonElement
+        ? importToolbarItem
+        : importToolbarItem?.querySelector('button');
+    const selectionInputs = [...document.querySelectorAll('input[name="cid[]"]')];
+    const checkAllInput = document.querySelector('input[name="checkall-toggle"]');
     const customFilenames = new Set(<?php echo json_encode(array_values(array_map(
         static fn(array $item): string => strtolower((string) $item['filename']),
         array_filter($this->items, static fn(array $item): bool => $item['source'] === 'custom')
@@ -157,6 +166,15 @@ document.addEventListener('DOMContentLoaded', function () {
     let state = {};
     try { state = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (error) {}
     if (providedToggle) providedToggle.checked = state.showProvided === true;
+    function syncImportState() {
+        const disabled = selectionInputs.some(function (checkbox) { return checkbox.checked; });
+        if (importToolbarButton) importToolbarButton.disabled = disabled;
+        importToolbarItem?.classList.toggle('disabled', disabled);
+        importToolbarButton?.classList.toggle('disabled', disabled);
+        importToolbarItem?.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+    }
+    selectionInputs.forEach(function (checkbox) { checkbox.addEventListener('change', syncImportState); });
+    checkAllInput?.addEventListener('click', function () { window.setTimeout(syncImportState, 0); });
     function apply() {
         let visible = 0;
         toggles.forEach(function (toggle) {
@@ -217,6 +235,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     Joomla.submitbutton = function (task) {
         if (task === 'titlesets.import') {
+            if (selectionInputs.some(function (checkbox) { return checkbox.checked; })) return false;
             importInput?.click();
             return true;
         }
@@ -261,5 +280,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     apply();
     filterRows();
+    syncImportState();
 });
 </script>

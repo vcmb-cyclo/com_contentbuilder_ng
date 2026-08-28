@@ -556,7 +556,8 @@ class TemplateRenderService
         $elementReferenceId,
         array $item,
         bool $hasRecords,
-        $defaultValue
+        $defaultValue,
+        ?array $sourceDefaultValues = null
     ): array {
         if ($failedValues !== null && isset($failedValues[$elementReferenceId]) && is_array($failedValues[$elementReferenceId])) {
             return array_map(static fn($failedValue): string => trim((string) $failedValue), $failedValues[$elementReferenceId]);
@@ -564,6 +565,10 @@ class TemplateRenderService
 
         if ($hasRecords && isset($item['values']) && is_array($item['values'])) {
             return array_map(static fn($v): string => trim((string) $v), $item['values']);
+        }
+
+        if (!$hasRecords && trim((string) $defaultValue) === '' && $sourceDefaultValues !== null) {
+            return array_map(static fn($value): string => trim((string) $value), $sourceDefaultValues);
         }
 
         return $this->matchSelectedGroupValues(
@@ -1521,8 +1526,11 @@ class TemplateRenderService
                     $options->horizontal_length = $options->horizontal_length ?? '';
                     if ($form->isGroup($item['id'])) {
                         $groupdef = $form->getGroupDefinition($item['id']);
+                        $sourceGroupDefaults = method_exists($form, 'getGroupDefaultValues')
+                            ? (array) $form->getGroupDefaultValues($item['id'])
+                            : null;
                         $i = 0;
-                        $group = $this->resolveEditableGroupValues($groupdef, $failedValues, $element['reference_id'], $item, $hasRecords, $element['default_value']);
+                        $group = $this->resolveEditableGroupValues($groupdef, $failedValues, $element['reference_id'], $item, $hasRecords, $element['default_value'], $sourceGroupDefaults);
                         $theItem = '<input name="cb_' . $item['id'] . '[]" type="hidden" value="cbGroupMark"/>';
                         $theItem .= '<div class="cbFormField cbGroupFields d-flex flex-wrap align-items-center gap-3">';
                         foreach ($groupdef as $value => $label) {
@@ -1543,8 +1551,11 @@ class TemplateRenderService
                     $options->length = $options->length ?? '';
                     if ($form->isGroup($item['id'])) {
                         $groupdef = $form->getGroupDefinition($item['id']);
+                        $sourceGroupDefaults = method_exists($form, 'getGroupDefaultValues')
+                            ? (array) $form->getGroupDefaultValues($item['id'])
+                            : null;
                         $multi = $options->multiple;
-                        $group = $this->resolveEditableGroupValues($groupdef, $failedValues, $element['reference_id'], $item, $hasRecords, $element['default_value']);
+                        $group = $this->resolveEditableGroupValues($groupdef, $failedValues, $element['reference_id'], $item, $hasRecords, $element['default_value'], $sourceGroupDefaults);
                         $theItem = '<input name="cb_' . $item['id'] . '[]" type="hidden" value="cbGroupMark"/>';
                         $theItem .= '<div class="cbFormField cbSelectField"><select class="form-select form-select-sm" id="cb_' . $item['id'] . '" ' . ($options->length ? 'style="width:' . $options->length . ';" ' : '') . 'name="cb_' . $item['id'] . '[]"' . ($multi ? ' multiple="multiple"' : '') . '>';
                         foreach ($groupdef as $value => $label) {

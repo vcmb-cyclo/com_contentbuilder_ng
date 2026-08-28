@@ -162,12 +162,17 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $debug = false;
         $output = TagSyntaxService::normalizeKeyword((string) ($attributes['output'] ?? 'total'));
         $allowedOutputs = [
-            'total', 'remaining', 'table', 'form_name', 'distinct', 'sum', 'min', 'max', 'avg',
-            'json', 'pie', 'bar', 'histogram', 'line', 'radar',
+            'total', 'table', 'pie', 'bar', 'histogram', 'line', 'radar', 'json',
+            'sum', 'min', 'max', 'avg', 'remaining', 'percentage', 'progress', 'distinct', 'view_name',
         ];
         $listOutputs = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar'];
         $field = trim((string) ($attributes['field'] ?? ''));
-        $filter = TagSyntaxService::resolveFilter($attributes);
+        $filter = $output === 'percentage'
+            ? [
+                'field' => trim((string) ($attributes['filter[field]'] ?? '')),
+                'value' => trim((string) ($attributes['filter[value]'] ?? '')),
+            ]
+            : TagSyntaxService::resolveFilter($attributes);
         $filterField = $filter['field'];
         $filterValue = $filter['value'];
         $add = trim((string) ($attributes['add'] ?? ''));
@@ -176,7 +181,8 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $titleSetMappings = in_array($output, $listOutputs, true)
             ? $this->resolveTitleSet($titleSet)
             : [];
-        $ranges = trim((string) ($attributes['ranges'] ?? ''));
+        $groups = trim((string) ($attributes['groups'] ?? ''));
+        $groupSet = trim((string) ($attributes['groupset'] ?? ''));
         $headers = trim((string) ($attributes['headers'] ?? ''));
         $card = ContentCardService::normalize((string) ($attributes['card'] ?? ''));
         $title = $card === '' ? trim((string) ($attributes['title'] ?? '')) : '';
@@ -186,6 +192,9 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $values = (string) ($attributes['values'] ?? '');
         $exportManual = ManualExportService::isRequested((string) ($attributes['export'] ?? ''));
         $target = (float) ($attributes['target'] ?? 0);
+        $selectedValues = (new StatsFilterValueService())->parseAlternatives(
+            trim((string) ($attributes['value'] ?? ''))
+        );
 
         try {
             $limit = DisplayOptionsService::parseLimit($attributes);
@@ -258,8 +267,8 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                 throw new \RuntimeException(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_FIELD_REQUIRED'), 400);
             }
 
-            if ($idSumValue !== '' && $output === 'form_name') {
-                throw new \RuntimeException(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_IDSUM_FORM_NAME'), 400);
+            if ($idSumValue !== '' && $output === 'view_name') {
+                throw new \RuntimeException(Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_IDSUM_VIEW_NAME'), 400);
             }
 
             if (($filterField === '') !== ($filterValue === '')) {
@@ -318,6 +327,28 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                 ));
             }
 
+            if ($debug && $output === 'progress') {
+                return $this->renderDebugMessage(Text::sprintf(
+                    'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_PROGRESS',
+                    $debugSource,
+                    $this->formatNumber($target),
+                    $this->formatPercentage(StatsService::resolveProgressOutput($payload, $target))
+                ));
+            }
+
+            if ($debug && $output === 'percentage') {
+                return $this->renderDebugMessage(Text::sprintf(
+                    'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_PERCENTAGE',
+                    $debugSource,
+                    trim((string) ($attributes['value'] ?? '')),
+                    $this->formatPercentage(StatsService::resolvePercentageOutput(
+                        (array) ($payload['field']['values'] ?? []),
+                        $selectedValues,
+                        (int) ($payload['records']['total'] ?? 0)
+                    ))
+                ));
+            }
+
             if ($debug && in_array($output, ['distinct', 'sum', 'min', 'max', 'avg'], true)) {
                 $numericValue = $payload['field'][$output] ?? null;
                 return $this->renderDebugMessage(Text::sprintf(
@@ -331,23 +362,34 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             }
 
             $locale = Factory::getApplication()->getLanguage()->getTag();
-            $rangeDefinitions = StatsService::parseFieldStatsRanges($ranges);
-            $usesRanges = $rangeDefinitions !== [];
+            $groupSetMappings = $groups === '' ? $this->resolveGroupSet($groupSet) : [];
+            $groupDefinitions = $groups !== ''
+                ? StatsService::parseFieldStatsGroups($groups)
+                : StatsService::parseFieldStatsGroupSelectors(implode(';', array_keys($groupSetMappings)));
+            $inlineGroupMappings = [];
+            foreach ($groupDefinitions as $groupDefinition) {
+                if ($groupDefinition['title'] !== null) {
+                    $inlineGroupMappings[$groupDefinition['label']] = $groupDefinition['title'];
+                }
+            }
+            $usesGroups = $groupDefinitions !== [];
             $fullFieldStats = $this->getFieldStats(
                 $payload,
-                $usesRanges ? 'none' : $sort,
+                $usesGroups ? 'none' : $sort,
                 $dir,
                 $locale,
                 in_array($output, $listOutputs, true) ? $add : '',
                 in_array($output, $listOutputs, true) ? $titles : '',
-                in_array($output, $listOutputs, true) ? $titleSetMappings : [],
-                $rangeDefinitions
+                in_array($output, $listOutputs, true)
+                    ? array_replace($groupSetMappings, $inlineGroupMappings, $titleSetMappings)
+                    : [],
+                $groupDefinitions
             );
             $fieldStats = in_array($output, $listOutputs, true)
                 ? DisplayOptionsService::applyLimit($fullFieldStats, $limit)
                 : $fullFieldStats;
             $fieldTotal = array_sum(array_column($fieldStats, 'value'));
-            $displayTotal = $usesRanges ? (int) ($payload['records']['total'] ?? 0) : $fieldTotal;
+            $displayTotal = $usesGroups ? (int) ($payload['records']['total'] ?? 0) : $fieldTotal;
 
             if ($debug && in_array($output, ['json', 'pie', 'bar', 'histogram', 'line', 'radar'], true)) {
                 return $this->renderDebugMessage(Text::sprintf(
@@ -359,7 +401,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             }
 
             return match ($output) {
-                'form_name' => htmlspecialchars($this->getFormName($payload), ENT_QUOTES, 'UTF-8'),
+                'view_name' => htmlspecialchars($this->getViewName($payload), ENT_QUOTES, 'UTF-8'),
                 'table' => $this->renderTable(
                     $payload,
                     $fieldStats,
@@ -387,6 +429,12 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                 ),
                 'total' => (string) StatsService::resolveCbstatsOutput($payload, 'total'),
                 'remaining' => $this->formatNumber(StatsService::resolveRemainingOutput($payload, $target)),
+                'percentage' => $this->formatPercentage(StatsService::resolvePercentageOutput(
+                    (array) ($payload['field']['values'] ?? []),
+                    $selectedValues,
+                    (int) ($payload['records']['total'] ?? 0)
+                )),
+                'progress' => $this->formatPercentage(StatsService::resolveProgressOutput($payload, $target)),
                 'distinct' => $this->renderNumericFieldValue($payload, 'distinct'),
                 'sum' => $this->renderSum($payload),
                 'min' => $this->renderNumericFieldValue($payload, 'min'),
@@ -438,7 +486,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
 
             if (
                 $exception instanceof \InvalidArgumentException
-                && $exception->getCode() === StatsService::CBSTATS_ERROR_INVALID_RANGES
+                && $exception->getCode() === StatsService::CBSTATS_ERROR_INVALID_GROUPS
             ) {
                 $message = $this->getFieldStatsErrorMessage($exception);
 
@@ -532,6 +580,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             'output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_OUTPUT',
             'target' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET',
             'target_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TARGET_OUTPUT',
+            'percentage_value' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_PERCENTAGE_VALUE',
             'manual_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_MANUAL_OUTPUT',
             'idsum_output' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_IDSUM_OUTPUT',
             'field' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_FIELD',
@@ -551,7 +600,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             'add' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ADD',
             'titles' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TITLES',
             'headers' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_HEADERS',
-            'ranges' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_RANGES',
+            'groups' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_GROUPS',
             default => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_VALUES',
         };
 
@@ -575,8 +624,8 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
     private function getFieldStatsErrorMessage(\InvalidArgumentException $exception): string
     {
         return match ($exception->getCode()) {
-            StatsService::CBSTATS_ERROR_INVALID_RANGES => Text::sprintf(
-                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_RANGES',
+            StatsService::CBSTATS_ERROR_INVALID_GROUPS => Text::sprintf(
+                'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_DEBUG_INVALID_GROUPS',
                 $exception->getMessage()
             ),
             StatsService::CBSTATS_ERROR_INVALID_TITLES => Text::_(
@@ -619,9 +668,9 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         };
     }
 
-    private function getFormName(array $payload): string
+    private function getViewName(array $payload): string
     {
-        return (string) StatsService::resolveCbstatsOutput($payload, 'form_name');
+        return (string) StatsService::resolveCbstatsOutput($payload, 'view_name');
     }
 
     private function canViewStats(int $formId): bool
@@ -699,7 +748,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $add,
         string $titles,
         array $titleSetMappings = [],
-        array $ranges = []
+        array $groups = []
     ): array {
         $field = (array) ($payload['field'] ?? []);
         $additions = $field === [] ? [] : StatsService::parseFieldStatsAdditions($add);
@@ -707,8 +756,8 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         $titleMappings = CbStatsTitleSetService::merge($titleSetMappings, $inlineTitleMappings);
         $values = (array) ($field['values'] ?? []);
 
-        if ($ranges !== []) {
-            $values = StatsService::applyFieldStatsRanges($values, $ranges);
+        if ($groups !== []) {
+            $values = StatsService::applyFieldStatsGroups($values, $groups);
         }
 
         return StatsService::normalizeFieldStats(
@@ -742,6 +791,29 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         }
 
         return $result['titles'];
+    }
+
+    /** @return array<string, string> */
+    private function resolveGroupSet(string $filename): array
+    {
+        if ($filename === '') {
+            return [];
+        }
+
+        $this->titleSetService ??= new CbStatsTitleSetService(JPATH_SITE);
+        $result = $this->titleSetService->resolve($filename);
+        if (
+            $result['status'] !== 'ok'
+            && !isset($this->warnedTitleSets[$filename])
+            && (bool) Factory::getApplication()->get('debug', false)
+        ) {
+            $key = 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_TITLESET_WARNING_'
+                . strtoupper($result['status']);
+            Log::add(Text::sprintf($key, $filename), Log::WARNING, 'com_contentbuilderng.cbstats');
+            $this->warnedTitleSets[$filename] = true;
+        }
+
+        return $result['status'] === 'ok' ? $result['groups'] : [];
     }
 
     /**
@@ -1077,6 +1149,14 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         return floor((float) $value) === (float) $value
             ? (string) (int) $value
             : rtrim(rtrim(number_format($value, 10, '.', ''), '0'), '.');
+    }
+
+    private function formatPercentage(float $value): string
+    {
+        return PiePresentationService::formatPercentageOutput(
+            $value,
+            Factory::getApplication()->getLanguage()->getTag()
+        );
     }
 
     private function renderManualStats(

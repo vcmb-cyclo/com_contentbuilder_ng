@@ -1472,6 +1472,11 @@ class contentbuilderng_com_breezingformsng
         return $types;
     }
 
+    public function shouldSynchronizeSourceDefaultEditableTypes(): bool
+    {
+        return true;
+    }
+
     public function getPageTitle()
     {
         return $this->properties->title;
@@ -1575,6 +1580,44 @@ class contentbuilderng_com_breezingformsng
             return $return;
         }
         return array();
+    }
+
+    /**
+     * Return the exact values marked as selected in a BreezingForms group.
+     *
+     * The third data2 column is allowed to be empty. Keeping that empty value
+     * is essential: a definition such as "1;No;" represents a selected radio
+     * option whose submitted value is intentionally empty.
+     */
+    public function getGroupDefaultValues($element_id): array
+    {
+        $db = RuntimeContextHelper::getDatabase();
+        $query = $db->getQuery(true)
+            ->select($db->quoteName('data2'))
+            ->from($db->quoteName('#__facileforms_elements'))
+            ->where($db->quoteName('type') . ' NOT IN (' . $db->quote('Radio Button') . ',' . $db->quote('Checkbox') . ')')
+            ->where($db->quoteName('id') . ' = ' . (int) $element_id);
+        $db->setQuery($query);
+        $definition = (string) $db->loadResult();
+
+        if ($definition === '') {
+            return [];
+        }
+
+        $defaults = [];
+        $definition = self::execPHP($definition);
+
+        foreach (explode("\n", str_replace("\r", '', $definition)) as $line) {
+            $columns = explode(';', $line);
+
+            if (count($columns) !== 3 || (int) trim((string) $columns[0]) !== 1) {
+                continue;
+            }
+
+            $defaults[] = trim((string) $columns[2]);
+        }
+
+        return array_values(array_unique($defaults));
     }
 
     public static function execPhp($result): string

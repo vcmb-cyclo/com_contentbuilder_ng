@@ -149,13 +149,13 @@ class HtmlView extends BaseHtmlView
             $maintenanceChildToolbar = $maintenanceDropdown->getChildToolbar();
             $maintenanceChildToolbar->standardButton('about_audit')
                 ->task('about.runAudit')
-                ->text('COM_CONTENTBUILDERNG_ABOUT_AUDIT')
+                ->text('COM_CONTENTBUILDERNG_ABOUT_RUN_AUDIT')
                 ->icon('fa fa-stethoscope')
                 ->listCheck(false);
 
             $maintenanceChildToolbar->standardButton('about_migrate_packed_data')
                 ->task('about.startRepairWorkflow')
-                ->text('COM_CONTENTBUILDERNG_ABOUT_MIGRATE_PACKED_DATA')
+                ->text('COM_CONTENTBUILDERNG_ABOUT_START_REPAIR')
                 ->icon('fa fa-refresh')
                 ->listCheck(false);
 

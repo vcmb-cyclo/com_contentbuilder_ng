@@ -14,10 +14,20 @@ use Joomla\CMS\Router\Route;
     <div class="alert alert-info"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_VIEW_INTRO'); ?></div>
     <div class="card mb-3">
         <div class="card-body"><dl class="row mb-0">
-            <?php foreach (['filename', 'name', 'comments'] as $key) : ?>
-                <dt class="col-sm-3"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_' . strtoupper($key)); ?></dt>
-                <dd class="col-sm-9"><?php echo nl2br(htmlspecialchars((string) ($this->data[$key] ?? ''), ENT_QUOTES, 'UTF-8')); ?></dd>
-            <?php endforeach; ?>
+            <?php foreach (['filename', 'name', 'type', 'comments'] as $key) :
+                ?>
+                <?php
+                $fieldLabel = Text::_($key === 'type'
+                    ? 'COM_CONTENTBUILDERNG_DATASETS_TYPE'
+                    : 'COM_CONTENTBUILDERNG_TITLESETS_' . strtoupper($key));
+                $fieldValue = $key === 'type'
+                    ? Text::_('COM_CONTENTBUILDERNG_DATASETS_TYPE_' . strtoupper((string) ($this->data[$key] ?? 'titles')))
+                    : (string) ($this->data[$key] ?? '');
+                ?>
+                <dt class="col-sm-3"><?php echo htmlspecialchars($fieldLabel, ENT_QUOTES, 'UTF-8'); ?></dt>
+                <dd class="col-sm-9"><?php echo nl2br(htmlspecialchars($fieldValue, ENT_QUOTES, 'UTF-8')); ?></dd>
+                <?php
+            endforeach; ?>
             <dt class="col-sm-3"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_MODIFIED'); ?></dt>
             <dd class="col-sm-9"><?php echo !empty($this->data['modified'])
                 ? HTMLHelper::_('date', '@' . (int) $this->data['modified'], Text::_('DATE_FORMAT_LC5'))
@@ -51,6 +61,7 @@ use Joomla\CMS\Router\Route;
         <div class="card-body">
             <?php echo $this->form->renderField('filename'); ?>
             <?php echo $this->form->renderField('name'); ?>
+            <?php echo $this->form->renderField('type'); ?>
             <?php echo $this->form->renderField('comments'); ?>
             <div class="control-group">
                 <div class="control-label"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_MODIFIED'); ?></div>

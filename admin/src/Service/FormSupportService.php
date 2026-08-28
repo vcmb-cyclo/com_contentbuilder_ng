@@ -338,6 +338,8 @@ class FormSupportService
         $synchronizeEditableTypes = !$removeMissing
             && method_exists($form, 'shouldSynchronizeEditableElementTypes')
             && $form->shouldSynchronizeEditableElementTypes();
+        $synchronizeSourceDefaultTypes = method_exists($form, 'shouldSynchronizeSourceDefaultEditableTypes')
+            && $form->shouldSynchronizeSourceDefaultEditableTypes();
 
         $query = $db->getQuery(true)
             ->select([$db->quoteName('reference_id'), $db->quoteName('label')])
@@ -372,7 +374,7 @@ class FormSupportService
             }
 
             $query = $db->getQuery(true)
-                ->select([$db->quoteName('id'), $db->quoteName('type'), $db->quoteName('options')])
+                ->select($db->quoteName(['id', 'type', 'change_type', 'options']))
                 ->from($db->quoteName('#__contentbuilderng_elements'))
                 ->where($db->quoteName('form_id') . ' = ' . (int) $formId)
                 ->where($db->quoteName('reference_id') . ' = ' . $db->quote($referenceId));
@@ -403,14 +405,16 @@ class FormSupportService
                 $db->setQuery($insertQuery);
                 $db->execute();
                 $report['added'][] = trim((string) $title) !== '' ? trim((string) $title) : (string) $referenceId;
-            } elseif ($synchronizeEditableTypes) {
+            } elseif ($synchronizeEditableTypes || $synchronizeSourceDefaultTypes) {
                 $currentType = (string) ($assoc['type'] ?? '');
                 $expectedType = (string) ($editableTypes[(string) $referenceId] ?? 'text');
+                $synchronizeStorageType = $synchronizeEditableTypes
+                    && $currentType !== $expectedType
+                    && StorageColumnTypeHelper::isStorageManagedEditableType($currentType);
+                $synchronizeSourceType = $synchronizeSourceDefaultTypes
+                    && ElementSettingsStateService::shouldSynchronizeSourceType((object) $assoc, $expectedType);
 
-                if (
-                    $currentType !== $expectedType
-                    && StorageColumnTypeHelper::isStorageManagedEditableType($currentType)
-                ) {
+                if ($synchronizeStorageType || $synchronizeSourceType) {
                     $elementId = (int) ($assoc['id'] ?? 0);
                     $updateTypeQuery = $db->getQuery(true)
                         ->update($db->quoteName('#__contentbuilderng_elements'))

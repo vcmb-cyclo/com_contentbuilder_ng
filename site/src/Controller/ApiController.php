@@ -212,7 +212,8 @@ class ApiController extends BaseController
         $output = strtolower(trim((string) $this->input->getCmd('output', 'json')));
         $supportedOutputs = [
             'json', 'table', 'pie', 'bar', 'histogram', 'line', 'radar',
-            'total', 'distinct', 'sum', 'min', 'max', 'avg', 'form_name',
+            'total', 'remaining', 'percentage', 'progress', 'distinct',
+            'sum', 'min', 'max', 'avg', 'view_name',
         ];
 
         if (!in_array($output, $supportedOutputs, true)) {
@@ -225,13 +226,27 @@ class ApiController extends BaseController
     private function getCbstatsPayload(int $formId, string $output): array|int|float|string
     {
         $listOutputs = ['json', 'table', 'pie', 'bar', 'histogram', 'line', 'radar'];
-        $fieldOutputs = [...$listOutputs, 'distinct', 'sum', 'min', 'max', 'avg'];
+        $fieldOutputs = [...$listOutputs, 'percentage', 'distinct', 'sum', 'min', 'max', 'avg'];
         $field = trim((string) $this->input->getString('field', ''));
 
         if (in_array($output, $fieldOutputs, true) && $field === '') {
             throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_FIELD_REQUIRED'), 400);
         }
 
+        $target = trim((string) $this->input->getString('target', ''));
+        if (in_array($output, ['remaining', 'progress'], true)) {
+            if (preg_match('/^(?:[1-9][0-9]*(?:\.[0-9]+)?|0\.[0-9]*[1-9][0-9]*)$/D', $target) !== 1) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_TARGET_REQUIRED'), 400);
+            }
+        } elseif ($target !== '') {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_TARGET_NOT_APPLICABLE'), 400);
+        }
+
+        $selection = trim((string) $this->input->getString('value', ''));
+        $selectedValues = (new StatsFilterValueService())->parseAlternatives($selection);
+        if ($output === 'percentage' && $selectedValues === []) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_PERCENTAGE_VALUE_REQUIRED'), 400);
+        }
         $filter = (array) $this->input->get('filter', [], 'array');
         $rawFilterField = $filter['field'] ?? '';
         $rawFilterValue = $filter['value'] ?? '';
@@ -281,8 +296,8 @@ class ApiController extends BaseController
             $add = trim((string) $this->input->getString('add', ''));
             $titles = trim((string) $this->input->getString('titles', ''));
             $titleSet = trim((string) $this->input->getString('titleset', ''));
-            $ranges = trim((string) $this->input->getString('ranges', ''));
-
+            $groups = trim((string) $this->input->getString('groups', ''));
+            $groupSet = trim((string) $this->input->getString('groupset', ''));
             if (!in_array($sort, ['none', 'title', 'value'], true)) {
                 throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_SORT'), 400);
             }
@@ -292,11 +307,32 @@ class ApiController extends BaseController
             }
 
             try {
-                $rangeDefinitions = StatsService::parseFieldStatsRanges($ranges);
+                $groupSetMappings = [];
+                if ($groups === '' && $groupSet !== '') {
+                    $groupSetResult = (new CbStatsTitleSetService(JPATH_SITE))->resolve($groupSet);
+                    if ($groupSetResult['status'] === 'ok') {
+                        $groupSetMappings = $groupSetResult['groups'];
+                    } elseif ((bool) $this->siteApp->get('debug', false)) {
+                        Logger::warning(Text::sprintf(
+                            'COM_CONTENTBUILDERNG_API_CBSTATS_TITLESET_WARNING',
+                            $groupSet,
+                            $groupSetResult['status']
+                        ));
+                    }
+                }
+                $groupDefinitions = $groups !== ''
+                    ? StatsService::parseFieldStatsGroups($groups)
+                    : StatsService::parseFieldStatsGroupSelectors(implode(';', array_keys($groupSetMappings)));
+                $inlineGroupMappings = [];
+                foreach ($groupDefinitions as $groupDefinition) {
+                    if ($groupDefinition['title'] !== null) {
+                        $inlineGroupMappings[$groupDefinition['label']] = $groupDefinition['title'];
+                    }
+                }
                 $values = (array) ($payload['field']['values'] ?? []);
 
-                if ($rangeDefinitions !== []) {
-                    $values = StatsService::applyFieldStatsRanges($values, $rangeDefinitions);
+                if ($groupDefinitions !== []) {
+                    $values = StatsService::applyFieldStatsGroups($values, $groupDefinitions);
                 }
 
                 $titleSetMappings = [];
@@ -314,12 +350,12 @@ class ApiController extends BaseController
 
                 $items = StatsService::normalizeFieldStats(
                     $values,
-                    $rangeDefinitions === [] ? $sort : 'none',
+                    $groupDefinitions === [] ? $sort : 'none',
                     $dir,
                     $this->siteApp->getLanguage()->getTag(),
                     StatsService::parseFieldStatsAdditions($add),
                     CbStatsTitleSetService::merge(
-                        $titleSetMappings,
+                        array_replace($groupSetMappings, $inlineGroupMappings, $titleSetMappings),
                         StatsService::parseFieldStatsTitles($titles)
                     )
                 );
@@ -338,6 +374,20 @@ class ApiController extends BaseController
             } catch (\InvalidArgumentException $exception) {
                 throw new \RuntimeException($this->getCbstatsFieldStatsErrorMessage($exception), 400, $exception);
             }
+        }
+
+        if ($output === 'remaining') {
+            return StatsService::resolveRemainingOutput($payload, (float) $target);
+        }
+        if ($output === 'progress') {
+            return round(StatsService::resolveProgressOutput($payload, (float) $target), 1);
+        }
+        if ($output === 'percentage') {
+            return round(StatsService::resolvePercentageOutput(
+                (array) ($payload['field']['values'] ?? []),
+                $selectedValues,
+                (int) ($payload['records']['total'] ?? 0)
+            ), 1);
         }
 
         return StatsService::resolveCbstatsOutput($payload, $output);
@@ -361,8 +411,8 @@ class ApiController extends BaseController
     private function getCbstatsFieldStatsErrorMessage(\InvalidArgumentException $exception): string
     {
         return match ($exception->getCode()) {
-            StatsService::CBSTATS_ERROR_INVALID_RANGES => Text::sprintf(
-                'COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_RANGES',
+            StatsService::CBSTATS_ERROR_INVALID_GROUPS => Text::sprintf(
+                'COM_CONTENTBUILDERNG_API_CBSTATS_INVALID_GROUPS',
                 $exception->getMessage()
             ),
             StatsService::CBSTATS_ERROR_INVALID_TITLES => Text::_(
