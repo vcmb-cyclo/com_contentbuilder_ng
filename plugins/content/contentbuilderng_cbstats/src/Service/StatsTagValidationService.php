@@ -13,15 +13,18 @@ use CB\Component\Contentbuilderng\Site\Service\ContentCardService;
 final class StatsTagValidationService
 {
     private const OUTPUTS = [
-        'total', 'remaining', 'table', 'form_name', 'distinct', 'sum', 'min', 'max', 'avg',
-        'json', 'pie', 'bar', 'histogram', 'line', 'radar',
+        'total', 'table', 'pie', 'bar', 'histogram', 'line', 'radar', 'json',
+        'sum', 'min', 'max', 'avg', 'remaining', 'percentage', 'progress', 'distinct', 'view_name',
     ];
     private const MANUAL_OUTPUTS = ['total', 'table', 'pie', 'bar', 'histogram', 'line', 'radar'];
     private const LIST_OUTPUTS = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar'];
-    private const FIELD_OUTPUTS = ['table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar', 'distinct', 'sum', 'min', 'max', 'avg'];
+    private const FIELD_OUTPUTS = [
+        'table', 'json', 'pie', 'bar', 'histogram', 'line', 'radar',
+        'sum', 'min', 'max', 'avg', 'percentage', 'distinct',
+    ];
     private const ALLOWED_KEYS = [
         'source', 'id', 'idsum', 'debug', 'output', 'field', 'filter[field]',
-        'filter[value]', 'value', 'add', 'titles', 'titleset', 'ranges', 'headers', 'title',
+        'filter[value]', 'value', 'add', 'titles', 'titleset', 'groups', 'groupset', 'headers', 'title',
         'background', 'sort', 'dir', 'values', 'export', 'limit', 'hide', 'total',
         'card', 'w', 'width', 'height', 'target',
     ];
@@ -63,7 +66,7 @@ final class StatsTagValidationService
         }
 
         $target = trim((string) ($attributes['target'] ?? ''));
-        if ($output === 'remaining') {
+        if (in_array($output, ['remaining', 'progress'], true)) {
             if (!self::isPositiveNumber($target)) {
                 $errors[] = self::error('invalid_value', 'target', $target, 'target');
             }
@@ -183,7 +186,13 @@ final class StatsTagValidationService
             $errors[] = self::error('invalid_value', 'field', '', 'field');
         }
 
-        if ($idSum !== '' && $output === 'form_name') {
+        if ($output === 'percentage') {
+            if (trim((string) ($attributes['value'] ?? '')) === '') {
+                $errors[] = self::error('invalid_value', 'value', '', 'percentage_value');
+            }
+        }
+
+        if ($idSum !== '' && $output === 'view_name') {
             $errors[] = self::error('invalid_value', 'output', $output, 'idsum_output');
         }
 
@@ -213,7 +222,7 @@ final class StatsTagValidationService
             $checks['titles'] = static fn(string $value): array => StatsService::parseFieldStatsTitles($value);
         }
         if (!$manual) {
-            $checks['ranges'] = static fn(string $value): array => StatsService::parseFieldStatsRanges($value);
+            $checks['groups'] = static fn(string $value): array => StatsService::parseFieldStatsGroups($value);
         }
 
         foreach ($checks as $parameter => $parser) {

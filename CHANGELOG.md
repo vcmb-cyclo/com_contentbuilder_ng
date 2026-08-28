@@ -1,5 +1,59 @@
 # Changelog
 
+## 6.1.12 — 2026-08-28
+
+- Finalized CBStats value groups and reusable group sets, including explicit non-contiguous values and preservation of unmatched categories.
+- Added and documented the `percentage`, `progress` and `view_name` outputs across article syntax and the CB API.
+- Completed the CBStats data-set manager, multilingual help and EN/FR/DE terminology.
+- Fixed BreezingForms element synchronization, CB Edit defaults and the administrator View workflow corrections validated through RC07.
+
+## 6.1.12-RC07 — 2026-08-28
+
+- Replaced the unreleased CBStats `output=form_name` syntax with `output=view_name`, returning only the ContentBuilder NG view name.
+- Kept standalone `percentage` output formatting language-independent.
+- Preserved values not selected by `groups` or `groupset` as individual categories after the declared groups.
+- Disabled CBStats data-set import while rows are selected, shortened the data-set type to Groups and renamed the view classification label from Tag to Category.
+- Harmonized the CBStats output order across article help, API help, validation messages and OpenAPI.
+
+## 6.1.12-RC06 — 2026-08-28
+
+- Renamed the unreleased CBStats `ranges=` and `rangeset=` syntax to `groups=` and `groupset=` without compatibility aliases.
+- Added explicit non-contiguous value groups such as `groups="1,2,7,9=Group 1;3,4,8=Group 2"` alongside inclusive numeric intervals.
+- Updated the CBStats data-set editor, API, help, EN/FR/DE terminology, specifications, documentation and automated coverage for reusable value groups.
+
+## 6.1.12-RC05 — 2026-08-27
+
+- Synchronized legacy BreezingForms Edit elements still stored as `text` with their native radio, checkbox or select source type.
+- Preserved explicit ContentBuilder type overrides by recording and honoring the manual `change_type` selection.
+- Made the CBStats `groupset` help directly identifiable and added a complete view-ID-15 example plus the administrator file-management path.
+
+## 6.1.12-RC04 — 2026-08-27
+
+- Fixed BreezingForms radio, checkbox and select defaults in CB Edit, including selected options with an intentionally empty submitted value.
+- Clarified Audit and Repair actions, statuses and results; green now identifies successfully applied repairs only.
+- Completed the public CBStats help with `percentage`, `progress`, `titleset` and `groupset` sections.
+- Harmonized CBList, CBStats and CB/API examples around ContentBuilder NG view ID `15` and updated the API option summaries.
+
+## 6.1.12-RC03 — 2026-08-26
+
+- Fixed the Edit-column `Default`/`Modified` indicator for native BreezingForms NG field types.
+- Native radio groups, checkbox groups and select lists now remain `Default` until their ContentBuilder type or element settings are actually overridden.
+- Kept the RC02 CBStats `percentage`, `progress` and API `groupset` behavior unchanged.
+
+## 6.1.12-RC02 — 2026-08-26
+
+- Added CBStats `output=percentage` for the share of `field=`/`value=` records within the population restricted by the normal optional filter.
+- Added CBStats `output=progress target=Number` for filtered progress towards a positive target, capped at 100%.
+- Added `groupset=` parity to the CBStats API and completed article/API validation coverage.
+- Harmonized the CBStats Data sets administrator terminology, help, documentation, specifications and Joomla changelog.
+
+## 6.1.12-RC01 — 2026-08-26
+
+- Added reusable CBStats `groupset="file.ini"` value groups while preserving inline `groups=` priority.
+- Added inclusive upper-bound-only groups such as `13-`, alongside `13-17` and `70+`.
+- Renamed the administrator manager to CBStats Data sets and added explicit Title/Value groups types.
+- Added a bundled French age-group example and updated CBStats help, documentation, specifications and tests.
+
 ## 6.1.11 — 2026-08-25
 
 - Added CBStats `output=distinct` for filtered counts of distinct non-empty field values.
@@ -330,7 +384,7 @@
 ### CBStats 6.1.7-RC96-B04
 
 - Normalized complete pipe-separated `hide=` combinations for article and URL requests.
-- Changed `hide="values"` to hide category/range labels, numeric values, data legends and tooltips while keeping the chart drawing visible.
+- Changed `hide="values"` to hide category/group labels, numeric values, data legends and tooltips while keeping the chart drawing visible.
 - Added regression coverage for shortcode and `%7C` URL parsing plus all chart-only, text-only and total-only combinations.
 
 ### CBStats 6.1.7-RC95-B01

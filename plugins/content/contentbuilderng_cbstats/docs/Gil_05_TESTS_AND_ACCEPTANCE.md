@@ -11,7 +11,7 @@ Codex must first inspect and reuse the repository's actual test framework. Do no
 Verify existing behavior for:
 
 - `output=total`
-- `output=form_name`
+- `output=view_name`
 - `output=table`
 - `output=sum`
 - `output=min`
@@ -68,7 +68,7 @@ Verify:
 - `sort=none` appends new labels in the supplied order;
 - Table, JSON, Pie, Bar, Histogram, Line and Radar receive the same enriched normalized data;
 - `avg` uses original individual numeric values and ignores empty/non-numeric values;
-- `ranges=` accepts inclusive `minimum-maximum` and `minimum+` buckets, preserves order and counts overlaps independently;
+- `groups=` accepts inclusive `minimum-maximum`, `maximum-` and `minimum+` intervals plus explicit `value,value=Label` groups, preserves order and counts overlaps independently;
 - filters, STATS permissions and debug behavior remain unchanged;
 - scalar outputs remain unaffected and URL/API JSON reuses the common parsers.
 
@@ -139,7 +139,7 @@ Verify:
 
 Verify:
 
-- `output=histogram` is vertical and uses normalized counts/ranges;
+- `output=histogram` is vertical and uses normalized counts/groups;
 - `output=line` preserves final sorted categories and does not invent missing values;
 - `output=radar` rejects fewer than 3 or more than 8 axes and renders 4 to 6 axes clearly;
 - each output accepts the applicable filters, sorting, `add=`, `titles=`, `limit=` and `hide=` options;

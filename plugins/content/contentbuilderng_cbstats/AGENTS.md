@@ -83,7 +83,7 @@ This section concerns **no regression of the existing CBStats public syntax and 
 Existing public outputs must continue to work without regression:
 
 - `total`
-- `form_name`
+- `view_name`
 - `table`
 - `json`
 - `pie`
@@ -110,12 +110,13 @@ Existing filter behavior must be preserved unless a mission explicitly changes i
 RC97 documentation and implementation rules:
 
 - `histogram`, `line` and `radar` reuse the normalized field-statistics engine
-  and the common filtering, sorting, `add=`, `titles=`, `ranges=`, `limit=` and
+  and the common filtering, sorting, `add=`, `titles=`, `groups=`, `limit=` and
   `hide=` validation where applicable;
 - `avg` is the arithmetic mean of retained individual numeric values and
   ignores empty and non-numeric values;
-- `ranges=` accepts inclusive `minimum-maximum` or `minimum+` items, preserves
-  declaration order and counts overlapping ranges independently;
+- `groups=` accepts inclusive `minimum-maximum`, `maximum-` or `minimum+`
+  intervals and explicit `value,value=Label` items, preserves declaration order
+  and counts overlapping groups independently;
 - Radar accepts 3 to 8 axes; 4 to 6 axes are recommended for readable labels.
 
 ## Public syntax

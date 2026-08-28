@@ -63,4 +63,11 @@ final class CbStatsPiePresentationServiceTest extends TestCase
             array_column(PiePresentationService::prepare($fieldStats, 'de-DE')['items'], 'percentageLabel')
         );
     }
+
+    public function testFormatsStandalonePercentageWithoutLocaleDependentDecimalSeparator(): void
+    {
+        self::assertSame('29.1&nbsp;%', PiePresentationService::formatPercentageOutput(29.06, 'fr-FR'));
+        self::assertSame('29.1&nbsp;%', PiePresentationService::formatPercentageOutput(29.06, 'en-GB'));
+        self::assertSame('50&nbsp;%', PiePresentationService::formatPercentageOutput(50.0, 'fr-FR'));
+    }
 }

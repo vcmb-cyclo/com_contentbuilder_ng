@@ -17,6 +17,26 @@ Un template non verrouillé peut toujours contenir des marqueurs value ajoutés
 manuellement. Un template verrouillé est régénéré selon la sélection Edit à
 chaque enregistrement.
 
+## État Default / Modified des éléments Edit
+
+Le badge affiché sous la capacité Edit décrit uniquement les réglages de rendu
+de l’élément dans ContentBuilder NG :
+
+- `Default` : le type CB correspond au type éditable natif fourni par la source
+  et aucun réglage CB significatif n’est personnalisé ;
+- `Modified` : le type natif est remplacé ou au moins une option, valeur par
+  défaut, validation, enveloppe ou script propre à CB est configuré.
+
+Pour une source BreezingForms NG, `radiogroup`, `checkboxgroup` et `select`
+sont des types natifs au même titre que `text`. Leur simple synchronisation ne
+doit donc jamais produire le badge `Modified`. Le calcul utilise
+`getEditableElementTypes()` comme référence et reste identique dans la grille
+Vue et après l’ouverture de la fenêtre d’options de l’élément.
+
+Cette règle est corrigée dans `6.1.12-RC03`. Les sorties CBStats
+`percentage` et `progress`, ainsi que la parité API de `groupset`, restent celles
+documentées et introduites dans `6.1.12-RC02`.
+
 ## Export des éléments
 
 La capacité Export est activée par défaut. Un élément est exporté uniquement

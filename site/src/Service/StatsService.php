@@ -23,7 +23,7 @@ use Joomla\Database\QueryInterface;
 final class StatsService
 {
     public const CBSTATS_ERROR_INVALID_ADD = 1001;
-    public const CBSTATS_ERROR_INVALID_RANGES = 1002;
+    public const CBSTATS_ERROR_INVALID_GROUPS = 1002;
     public const CBSTATS_ERROR_INVALID_TITLES = 1004;
     public const CBSTATS_ERROR_INVALID_HEADERS = 1005;
 
@@ -391,7 +391,7 @@ final class StatsService
     {
         return match ($output) {
             'total' => (int) ($payload['records']['total'] ?? 0),
-            'form_name' => self::resolveFormName($payload),
+            'view_name' => self::resolveViewName($payload),
             'distinct' => self::countDistinctFieldValues((array) ($payload['field']['values'] ?? [])),
             'sum', 'min', 'max', 'avg' => self::resolveFieldAggregate($payload, $output),
             default => throw new \InvalidArgumentException('Unsupported CBStats scalar output.'),
@@ -403,6 +403,45 @@ final class StatsService
         return max(0, $target - (int) self::resolveCbstatsOutput($payload, 'total'));
     }
 
+    public static function resolveProgressOutput(array $payload, int|float $target): float
+    {
+        $total = (int) self::resolveCbstatsOutput($payload, 'total');
+
+        return self::percentage($total, $target);
+    }
+
+    /** @param array<int|string,int|float> $values @param list<string> $patterns */
+    public static function resolvePercentageOutput(array $values, array $patterns, int|float $total): float
+    {
+        $selected = 0;
+
+        foreach ($values as $value => $occurrences) {
+            $value = trim((string) $value);
+            if ($value === '' || !is_numeric($occurrences)) {
+                continue;
+            }
+
+            foreach ($patterns as $pattern) {
+                $expression = '/\A' . str_replace('\\*', '.*', preg_quote($pattern, '/')) . '\z/iu';
+                if (preg_match($expression, $value) === 1) {
+                    $selected += (int) $occurrences;
+                    break;
+                }
+            }
+        }
+
+        return self::percentage($selected, $total);
+    }
+
+    private static function percentage(int|float $value, int|float $total): float
+    {
+        if ($total <= 0) {
+            return 0.0;
+        }
+
+        return min(100.0, max(0.0, ($value / $total) * 100));
+    }
+
     public static function countDistinctFieldValues(array $values): int
     {
         return count(array_filter(
@@ -411,12 +450,11 @@ final class StatsService
         ));
     }
 
-    private static function resolveFormName(array $payload): string
+    private static function resolveViewName(array $payload): string
     {
         $form = (array) ($payload['form'] ?? []);
-        $title = trim((string) ($form['title'] ?? ''));
 
-        return $title !== '' ? $title : trim((string) ($form['name'] ?? ''));
+        return trim((string) ($form['name'] ?? ''));
     }
 
     private static function resolveFieldAggregate(array $payload, string $output): int|float|string
@@ -482,72 +520,138 @@ final class StatsService
     }
 
     /**
-     * @return list<array{label: string, min: float, max: float|null}>
+     * @return list<array{label: string, title: string|null, min: float|null, max: float|null, values: list<string>}>
      */
-    public static function parseFieldStatsRanges(string $ranges): array
+    public static function parseFieldStatsGroups(string $groups): array
     {
-        $ranges = trim($ranges);
+        return self::parseFieldStatsGroupDefinitions($groups, true);
+    }
 
-        if ($ranges === '') {
+    /**
+     * Parse selectors whose display labels are supplied separately by a group-set file.
+     *
+     * @return list<array{label: string, title: string|null, min: float|null, max: float|null, values: list<string>}>
+     */
+    public static function parseFieldStatsGroupSelectors(string $selectors): array
+    {
+        return self::parseFieldStatsGroupDefinitions($selectors, false);
+    }
+
+    /**
+     * Count every value group independently, then preserve source values that
+     * did not match any group. Overlapping intervals or explicit value lists
+     * intentionally count the same source entry more than once.
+     *
+     * @param array<int|string,int|float> $values
+     * @param list<array{label: string, title: string|null, min: float|null, max: float|null, values: list<string>}> $groups
+     * @return array<string,int|float>
+     */
+    public static function applyFieldStatsGroups(array $values, array $groups): array
+    {
+        $counts = [];
+        $matchedValues = [];
+
+        foreach ($groups as $group) {
+            $count = 0;
+
+            foreach ($values as $value => $occurrences) {
+                if ((string) $value === '' || !is_numeric($occurrences)) {
+                    continue;
+                }
+
+                if ($group['values'] !== []) {
+                    $matches = in_array((string) $value, $group['values'], true);
+                } elseif (is_numeric($value)) {
+                    $number = (float) $value;
+                    $matches = ($group['min'] === null || $number >= $group['min'])
+                        && ($group['max'] === null || $number <= $group['max']);
+                } else {
+                    $matches = false;
+                }
+
+                if ($matches) {
+                    $count += (int) $occurrences;
+                    $matchedValues[(string) $value] = true;
+                }
+            }
+
+            $counts[$group['label']] = $count;
+        }
+
+        foreach ($values as $value => $occurrences) {
+            $label = (string) $value;
+
+            if ($label === '' || !is_numeric($occurrences) || isset($matchedValues[$label])) {
+                continue;
+            }
+
+            $counts[$label] = $occurrences;
+        }
+
+        return $counts;
+    }
+
+    /**
+     * @return list<array{label: string, title: string|null, min: float|null, max: float|null, values: list<string>}>
+     */
+    private static function parseFieldStatsGroupDefinitions(string $groups, bool $requireExplicitTitle): array
+    {
+        $groups = trim($groups);
+
+        if ($groups === '') {
             return [];
         }
 
         $parsed = [];
         $number = '[+-]?(?:\d+(?:\.\d+)?|\.\d+)';
 
-        foreach (explode(';', $ranges) as $entry) {
+        foreach (explode(';', $groups) as $entry) {
             $entry = trim($entry);
+            $selector = $entry;
+            $title = null;
             $minimum = null;
             $maximum = null;
+            $explicitValues = [];
 
-            if (preg_match('/^(' . $number . ')\s*-\s*(' . $number . ')$/D', $entry, $matches) === 1) {
+            if (str_contains($entry, '=')) {
+                [$selector, $title] = array_map('trim', explode('=', $entry, 2));
+                if ($selector === '' || $title === '') {
+                    throw new \InvalidArgumentException($entry, self::CBSTATS_ERROR_INVALID_GROUPS);
+                }
+            }
+
+            if (preg_match('/^(' . $number . ')\s*-\s*(' . $number . ')$/D', $selector, $matches) === 1) {
                 $minimum = (float) $matches[1];
                 $maximum = (float) $matches[2];
-            } elseif (preg_match('/^(' . $number . ')\s*\+$/D', $entry, $matches) === 1) {
+            } elseif (preg_match('/^(' . $number . ')\s*\+$/D', $selector, $matches) === 1) {
                 $minimum = (float) $matches[1];
+            } elseif (preg_match('/^(' . $number . ')\s*-$/D', $selector, $matches) === 1) {
+                $maximum = (float) $matches[1];
+            } else {
+                $explicitValues = array_map('trim', explode(',', $selector));
+                if (
+                    ($requireExplicitTitle && $title === null)
+                    || $explicitValues === []
+                    || in_array('', $explicitValues, true)
+                ) {
+                    throw new \InvalidArgumentException($entry, self::CBSTATS_ERROR_INVALID_GROUPS);
+                }
             }
 
-            if ($minimum === null || ($maximum !== null && $minimum > $maximum)) {
-                throw new \InvalidArgumentException($entry, self::CBSTATS_ERROR_INVALID_RANGES);
+            if ($minimum !== null && $maximum !== null && $minimum > $maximum) {
+                throw new \InvalidArgumentException($entry, self::CBSTATS_ERROR_INVALID_GROUPS);
             }
 
-            $parsed[] = ['label' => $entry, 'min' => $minimum, 'max' => $maximum];
+            $parsed[] = [
+                'label' => $selector,
+                'title' => $title,
+                'min' => $minimum,
+                'max' => $maximum,
+                'values' => $explicitValues,
+            ];
         }
 
         return $parsed;
-    }
-
-    /**
-     * Count every range independently. Overlapping ranges intentionally count
-     * the same source entry more than once.
-     *
-     * @param array<int|string,int|float> $values
-     * @param list<array{label: string, min: float, max: float|null}> $ranges
-     * @return array<string,int|float>
-     */
-    public static function applyFieldStatsRanges(array $values, array $ranges): array
-    {
-        $counts = [];
-
-        foreach ($ranges as $range) {
-            $count = 0;
-
-            foreach ($values as $value => $occurrences) {
-                if ((string) $value === '' || !is_numeric($value) || !is_numeric($occurrences)) {
-                    continue;
-                }
-
-                $number = (float) $value;
-
-                if ($number >= $range['min'] && ($range['max'] === null || $number <= $range['max'])) {
-                    $count += (int) $occurrences;
-                }
-            }
-
-            $counts[$range['label']] = $count;
-        }
-
-        return $counts;
     }
 
     /**

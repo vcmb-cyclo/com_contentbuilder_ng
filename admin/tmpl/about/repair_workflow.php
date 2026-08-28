@@ -3,6 +3,17 @@
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Language\Text;
+
+$repairWorkflowAppliedCount = count(array_filter(
+    $repairWorkflowSteps,
+    static function ($step): bool {
+        if (!is_array($step) || (string) ($step['status'] ?? '') !== 'done' || (string) ($step['decision'] ?? '') !== 'apply') {
+            return false;
+        }
+
+        return !in_array((string) (($step['result']['level'] ?? 'message')), ['warning', 'error', 'danger'], true);
+    }
+));
 ?>
 
 <?php if ($repairWorkflowIsActive) : ?>
@@ -47,6 +58,8 @@ use Joomla\CMS\Language\Text;
                     $stepPrecheck = (array) ($repairWorkflowStep['precheck'] ?? []);
                     $stepResult = (array) ($repairWorkflowStep['result'] ?? []);
                     $stepResultLevel = (string) ($stepResult['level'] ?? 'message');
+                    $stepWasApplied = $stepStatus === 'done' && (string) ($repairWorkflowStep['decision'] ?? '') === 'apply';
+                    $stepRepairSucceeded = $stepWasApplied && !in_array($stepResultLevel, ['warning', 'error', 'danger'], true);
                     $stepDescription = trim((string) ($stepPrecheck['description'] ?? ($repairWorkflowStepDescriptions[$stepId] ?? '')));
                     $statusLabelKey = match (true) {
                         $stepStatus === 'done' && (string) ($repairWorkflowStep['decision'] ?? '') === 'diagnostic' => 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_CHECKED',
@@ -57,13 +70,16 @@ use Joomla\CMS\Language\Text;
                             ? 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_CURRENT'
                             : 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STATUS_PENDING',
                     };
-                    $statusIconClass = match (true) {
-                        ($stepStatus === 'done' || in_array($stepStatus, ['skipped', 'not_required'], true)) && !in_array($stepResultLevel, ['warning', 'error', 'danger'], true) => 'icon-check-circle',
-                        default => '',
-                    };
+                    if ($stepRepairSucceeded) {
+                        $stepClasses[] = 'is-repaired';
+                        $statusClasses[] = 'is-repaired';
+                    } elseif ($stepStatus === 'done' || in_array($stepStatus, ['skipped', 'not_required'], true)) {
+                        $stepClasses[] = 'is-neutral';
+                        $statusClasses[] = 'is-neutral';
+                    }
                     $showStepCheck = ($stepStatus === 'done' || in_array($stepStatus, ['skipped', 'not_required'], true))
                         && !in_array($stepResultLevel, ['warning', 'error', 'danger'], true);
-                    $stepCheckClass = in_array($stepStatus, ['skipped', 'not_required'], true) ? 'is-neutral' : 'is-ok';
+                    $stepCheckClass = $stepRepairSucceeded ? 'is-ok' : 'is-neutral';
                     ?>
                     <div class="<?php echo implode(' ', $stepClasses); ?>">
                         <div class="cb-repair-workflow-step-head">
@@ -75,9 +91,6 @@ use Joomla\CMS\Language\Text;
                                 <?php echo htmlspecialchars(($stepNumber > 0 ? $stepNumber . '. ' : '') . $stepLabel, ENT_QUOTES, 'UTF-8'); ?>
                             </p>
                             <span class="<?php echo implode(' ', $statusClasses); ?>">
-                                <?php if ($statusIconClass !== '') : ?>
-                                    <span class="<?php echo htmlspecialchars($statusIconClass, ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true"></span>
-                                <?php endif; ?>
                                 <?php echo Text::_($statusLabelKey); ?>
                             </span>
                         </div>
@@ -115,22 +128,25 @@ use Joomla\CMS\Language\Text;
                 $currentStepLines = (array) ($repairWorkflowCurrentResult['lines'] ?? []);
                 $currentStepSummary = trim((string) ($repairWorkflowCurrentResult['summary'] ?? ''));
                 $currentStepLevel = (string) ($repairWorkflowCurrentResult['level'] ?? 'info');
+                $currentStepWasApplied = $repairWorkflowCurrentStatus === 'done'
+                    && (string) ($repairWorkflowCurrentStep['decision'] ?? '') === 'apply';
                 $currentStepAlertClass = match ($currentStepLevel) {
                     'error' => 'danger',
                     'warning' => 'warning',
-                    'message' => 'success',
+                    'message' => $currentStepWasApplied ? 'success' : 'secondary',
                     default => 'info',
                 };
                 $currentStepPanelClasses = ['cb-repair-workflow-result'];
-                if (in_array($repairWorkflowCurrentStatus, ['skipped', 'not_required'], true) || $currentStepAlertClass === 'success') {
+                if ($currentStepWasApplied && $currentStepAlertClass === 'success') {
                     $currentStepPanelClasses[] = 'is-success';
                 } elseif ($currentStepAlertClass === 'warning') {
                     $currentStepPanelClasses[] = 'is-warning';
                 } elseif ($currentStepAlertClass === 'danger') {
                     $currentStepPanelClasses[] = 'is-danger';
                 }
-                $currentStepShowCheck = in_array($repairWorkflowCurrentStatus, ['skipped', 'not_required'], true) || $currentStepAlertClass === 'success';
-                $currentStepCheckClass = in_array($repairWorkflowCurrentStatus, ['skipped', 'not_required'], true) ? 'is-neutral' : 'is-ok';
+                $currentStepShowCheck = $repairWorkflowCurrentStatus !== 'pending'
+                    && !in_array($currentStepLevel, ['warning', 'error', 'danger'], true);
+                $currentStepCheckClass = $currentStepWasApplied ? 'is-ok' : 'is-neutral';
                 ?>
                 <div class="<?php echo implode(' ', $currentStepPanelClasses); ?>">
                     <h4 class="h6 mb-2 cb-repair-workflow-result-title">
@@ -171,10 +187,10 @@ use Joomla\CMS\Language\Text;
 
             <?php if ($repairWorkflowIsCompleted) : ?>
                 <div class="cb-repair-workflow-summary-section">
-                    <h4 class="cb-repair-workflow-summary-title">Summary</h4>
-                    <div class="cb-repair-workflow-summary">
+                    <h4 class="cb-repair-workflow-summary-title"><?php echo Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_SUMMARY_TITLE'); ?></h4>
+                    <div class="cb-repair-workflow-summary <?php echo htmlspecialchars($repairWorkflowAppliedCount > 0 ? 'is-repaired' : 'is-neutral', ENT_QUOTES, 'UTF-8'); ?>">
                         <span class="icon-check-circle" aria-hidden="true"></span>
-                        <span><?php echo Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_FINISHED'); ?></span>
+                        <span><?php echo Text::plural('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_APPLIED_COUNT', $repairWorkflowAppliedCount); ?></span>
                     </div>
                 </div>
             <?php endif; ?>

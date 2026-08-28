@@ -3,6 +3,10 @@
     <fieldset name="metadata" label="COM_CONTENTBUILDERNG_TITLESETS_METADATA">
         <field name="filename" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_FILENAME" description="COM_CONTENTBUILDERNG_TITLESETS_FILENAME_DESC" required="true" />
         <field name="name" type="text" label="COM_CONTENTBUILDERNG_TITLESETS_NAME" description="COM_CONTENTBUILDERNG_TITLESETS_NAME_DESC" required="true" />
+        <field name="type" type="list" label="COM_CONTENTBUILDERNG_DATASETS_TYPE" description="COM_CONTENTBUILDERNG_DATASETS_TYPE_DESC" required="true" default="titles">
+            <option value="titles">COM_CONTENTBUILDERNG_DATASETS_TYPE_TITLES</option>
+            <option value="groups">COM_CONTENTBUILDERNG_DATASETS_TYPE_GROUPS</option>
+        </field>
         <field name="comments" type="textarea" label="COM_CONTENTBUILDERNG_TITLESETS_COMMENTS" description="COM_CONTENTBUILDERNG_TITLESETS_COMMENTS_DESC" rows="3" />
         <field name="modified" type="hidden" />
         <field name="source" type="hidden" />

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="plugin" group="content" version="6.0" method="upgrade">
     <name>PLG_CONTENT_CONTENTBUILDERNG_CBSTATS</name>
-    <creationDate>2026-08-25</creationDate>
+    <creationDate>2026-08-28</creationDate>
     <author>XDA+GIL</author>
     <license>GNU/GPL v2 or later https://www.gnu.org/licenses/old-licenses/gpl-2.0.html</license>
     <copyright>This Joomla! plugin is released under the GNU/GPL license</copyright>
     <authorEmail>noreply@vcmb.fr</authorEmail>
     <authorUrl>breezingforms-ng.vcmb.fr</authorUrl>
-    <version>6.1.11</version>
+    <version>6.1.12</version>
     <description>PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_XML_DESCRIPTION</description>
     <namespace path="src">CB\Plugin\Content\ContentbuilderngStats</namespace>
             <files>
@@ -49,6 +49,27 @@
                     type="note"
                     label="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_TITLESET_LABEL"
                     description="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_TITLESET_TEXT"
+                    class="alert alert-info w-100"
+                />
+                <field
+                    name="cbstats_groupset_note"
+                    type="note"
+                    label="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_GROUPSET_LABEL"
+                    description="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_GROUPSET_TEXT"
+                    class="alert alert-info w-100"
+                />
+                <field
+                    name="cbstats_percentage_note"
+                    type="note"
+                    label="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_PERCENTAGE_LABEL"
+                    description="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_PERCENTAGE_TEXT"
+                    class="alert alert-info w-100"
+                />
+                <field
+                    name="cbstats_progress_note"
+                    type="note"
+                    label="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_PROGRESS_LABEL"
+                    description="PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_HELP_PROGRESS_TEXT"
                     class="alert alert-info w-100"
                 />
                 <field

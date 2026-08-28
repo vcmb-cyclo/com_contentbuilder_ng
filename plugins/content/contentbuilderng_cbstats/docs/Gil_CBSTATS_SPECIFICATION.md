@@ -1,8 +1,26 @@
 # CBStats functional and technical specification
 
-Stable baseline: ContentBuilder NG 6.1.11. This specification includes the
-validated `distinct`, editorial Card, reusable `titleset` and `remaining`
-features delivered in that release.
+Stable release baseline: ContentBuilder NG 6.1.12. This specification
+includes the validated `distinct`, editorial Card, reusable `titleset`,
+`groupset`, `remaining`, `percentage` and `progress` features delivered in that
+release.
+
+`output=percentage` requires `field=` plus a non-empty `value=` selection. Its
+denominator is the record population after the optional explicit
+`filter[field]`/`filter[value]`; its numerator is the matching grouped field
+count. A zero denominator returns 0 and the result is capped at 100.
+`output=progress target=Number` uses the normal filtered total as numerator and
+a strictly positive target as denominator; it also returns 0–100.
+
+`groups=` defines value groups as inclusive numeric intervals (`13-`, `13-17`,
+`70+`) or exact non-contiguous values (`1,2,7,9=Group 1`). Values matching a
+group are replaced by that group in list outputs; unmatched values remain as
+individual categories after the groups.
+`groupset="filename.ini"` loads reusable definitions from a `[groups]` section
+in the same safe custom/provided directories as `titleset`. Inline `groups=`
+replaces the file; display-label priority is inline `titles=`, then `titleset=`,
+then group-set labels. Missing or invalid files remain silent unless Joomla
+Debug is enabled.
 
 ## 1. Purpose
 
@@ -41,7 +59,7 @@ Approved 6.1.10-RC01 numeric syntax migration: scalar numeric options `id` and
 quotation marks. Valid examples are `id=15`, `limit=10` and `idsum=15+16`.
 Quoted forms such as `id="15"`, `limit="10"` and `idsum="15+16"` are invalid
 and must produce a localized validation error. Numeric content inside textual
-mapping options such as `values`, `add`, `ranges` or `filter[value]` is not
+mapping options such as `values`, `add`, `groups` or `filter[value]` is not
 subject to this lexical rule.
 
 ### 2.3 One calculation engine
@@ -56,7 +74,7 @@ The plugin already accepts:
 
 ```text
 output=total
-output=form_name
+output=view_name
 output=table
 output=json
 output=pie
@@ -139,7 +157,7 @@ existing filter and grouping pipeline. It then adds counts with exactly
 identical grouped labels. Values present in only one view remain present.
 Signed additions, negative-to-zero normalization, title mappings and sorting
 run once after this merge. The total is recalculated from the merged values.
-`output=form_name` is not supported because the merged source has no single
+`output=view_name` is not supported because the merged source has no single
 view name.
 
 ## 5. Normalized field statistics engine
@@ -349,17 +367,17 @@ Bar must consume the same normalized field statistics engine.
 The RC97 visual outputs consume the same normalized field-statistics array:
 
 ```text
-{CBStats id=25 field=Age output=histogram ranges="18-29;30-39;40-49;50+"}
+{CBStats id=25 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
 {CBStats id=25 field=RegistrationDate output=line sort=title dir=asc limit=30}
-{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50+"}
+{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}
 {CBStats id=25 field=Age output=avg}
 ```
 
-Histogram is vertical and preserves declared numeric range order. Line plots
+Histogram is vertical and preserves declared value-group order. Line plots
 the final sorted categories without inventing missing values. Radar requires
 3 to 8 axes and recommends 4 to 6. `avg` computes the arithmetic mean of
 retained individual numeric values, ignoring empty and non-numeric values;
-`ranges=` does not change that scalar calculation.
+`groups=` does not change that scalar calculation.
 
 ## 11. Front-end architecture
 
@@ -442,7 +460,7 @@ Codex must inspect the actual repository language files and naming conventions b
 
 `debug=1` must recognize every supported output, including `avg`, `histogram`,
 `line` and `radar`. Diagnostics must identify invalid output names, fields,
-ranges, limits and hide combinations without exposing protected data.
+groups, limits and hide combinations without exposing protected data.
 
 Debug output must remain safe and must not expose secrets or unnecessary internals.
 
@@ -476,7 +494,7 @@ After Pie is validated, implement `output=bar` using the same engine.
 
 Ensure all descriptions, syntax references, examples and API documentation
 reflect the implemented RC97 state, including `avg`, `histogram`, `line`,
-`radar`, numeric `ranges`, `limit` and `hide`.
+`radar`, numeric `groups`, `limit` and `hide`.
 
 ## 20. Definition of done
 

@@ -107,7 +107,7 @@ final class StatsServiceAggregatesTest extends TestCase
         ];
 
         self::assertSame(31, StatsService::resolveCbstatsOutput($payload, 'total'));
-        self::assertSame('Public title', StatsService::resolveCbstatsOutput($payload, 'form_name'));
+        self::assertSame('Internal name', StatsService::resolveCbstatsOutput($payload, 'view_name'));
         self::assertSame(2, StatsService::resolveCbstatsOutput($payload, 'distinct'));
         self::assertSame(48.5, StatsService::resolveCbstatsOutput($payload, 'sum'));
         self::assertSame(-2.5, StatsService::resolveCbstatsOutput($payload, 'min'));
@@ -115,7 +115,7 @@ final class StatsServiceAggregatesTest extends TestCase
         self::assertSame(4.25, StatsService::resolveCbstatsOutput($payload, 'avg'));
     }
 
-    public function testCbstatsScalarOutputsPreserveHistoricalFallbacks(): void
+    public function testCbstatsScalarOutputsPreserveEmptyAggregateFallbacks(): void
     {
         $payload = [
             'form' => ['name' => 'Internal name', 'title' => ''],
@@ -124,7 +124,7 @@ final class StatsServiceAggregatesTest extends TestCase
         ];
 
         self::assertSame(0, StatsService::resolveCbstatsOutput($payload, 'total'));
-        self::assertSame('Internal name', StatsService::resolveCbstatsOutput($payload, 'form_name'));
+        self::assertSame('Internal name', StatsService::resolveCbstatsOutput($payload, 'view_name'));
         self::assertSame(0, StatsService::resolveCbstatsOutput($payload, 'sum'));
         self::assertSame('2026-01-02', StatsService::resolveCbstatsOutput($payload, 'min'));
         self::assertSame('2026-03-04', StatsService::resolveCbstatsOutput($payload, 'max'));
@@ -148,5 +148,21 @@ final class StatsServiceAggregatesTest extends TestCase
         self::assertSame(0, StatsService::resolveRemainingOutput($filteredPayload, 50));
         self::assertSame(0, StatsService::resolveRemainingOutput($filteredPayload, 25));
         self::assertSame(150.5, StatsService::resolveRemainingOutput($filteredPayload, 200.5));
+    }
+
+    public function testPercentageUsesSelectedValuesWithinTheFilteredPopulation(): void
+    {
+        $values = ['H' => 78, 'F' => 5, '' => 2];
+        self::assertEqualsWithDelta(94.0, StatsService::resolvePercentageOutput($values, ['H'], 83), 0.05);
+        self::assertEqualsWithDelta(100.0, StatsService::resolvePercentageOutput($values, ['H', 'F'], 83), 0.001);
+        self::assertEqualsWithDelta(94.0, StatsService::resolvePercentageOutput($values, ['H*'], 83), 0.05);
+        self::assertSame(0.0, StatsService::resolvePercentageOutput($values, ['H'], 0));
+    }
+
+    public function testProgressUsesTheFilteredTotalAndIsCappedAtOneHundredPercent(): void
+    {
+        self::assertSame(41.5, StatsService::resolveProgressOutput(['records' => ['total' => 83]], 200));
+        self::assertSame(100.0, StatsService::resolveProgressOutput(['records' => ['total' => 200]], 200));
+        self::assertSame(100.0, StatsService::resolveProgressOutput(['records' => ['total' => 250]], 200));
     }
 }

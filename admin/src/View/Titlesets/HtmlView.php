@@ -72,7 +72,8 @@ final class HtmlView extends BaseHtmlView
             ->task('titlesets.import')
             ->text('COM_CONTENTBUILDERNG_TITLESETS_IMPORT')
             ->icon('icon-upload')
-            ->listCheck(false);
+            ->listCheck(false)
+            ->attributes(['data-cb-titlesets-import-button' => '']);
         $toolbar->linkButton('titlesets-close')
             ->url(Route::_('index.php?option=com_contentbuilderng&view=about', false))
             ->text('JTOOLBAR_CLOSE')

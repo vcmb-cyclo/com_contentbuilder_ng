@@ -49,7 +49,7 @@ Document:
 - Pie behavior;
 - Bar behavior;
 - Histogram, Line and Radar behavior;
-- `avg` arithmetic aggregate and `ranges=` numeric buckets;
+- `avg` arithmetic aggregate and `groups=` value groups;
 - `limit=` and `hide=` display controls;
 - debug behavior when relevant;
 - permissions when relevant;
@@ -149,7 +149,7 @@ Use generic examples and clearly identify sample-only values.
 ```
 
 ```text
-{CBStats id=25 field=Age output=histogram ranges="18-29;30-39;40-49;50+"}
+{CBStats id=25 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
 ```
 
 ```text
@@ -157,7 +157,7 @@ Use generic examples and clearly identify sample-only values.
 ```
 
 ```text
-{CBStats id=25 field=Age output=radar ranges="18-29;30-39;40-49;50+"}
+{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}
 ```
 
 The plugin code must never depend on those example values.

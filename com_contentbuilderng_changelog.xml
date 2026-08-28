@@ -3,8 +3,12 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.11</version>
+		<version>6.1.12</version>
 		<addition>
+			<item>Added CBStats value groups with inclusive numeric intervals and explicit non-contiguous value lists.</item>
+			<item>Added CBStats output=percentage for the share of a selected field value within the filtered population.</item>
+			<item>Added CBStats output=progress target=Number for capped progress towards a positive target.</item>
+			<item>Added reusable CBStats groupset files, inclusive upper-bound interval groups such as 13-, and article/API parity.</item>
 			<item>Added reusable CBStats INI title sets, a native Joomla manager, Debug warnings, a complete French department mapping and multilingual country examples.</item>
 			<item>Added editor-safe editorial Cards with visually editable H1-H6 headers for grouping free HTML, CBStats and CBList content with the shared Card presentation.</item>
 			<item>Added CBStats output=distinct for counting distinct non-empty field values after all existing filters.</item>
@@ -28,6 +32,15 @@
 			<item>Added a CBList actions section to the frontend debug panel, listing which terms apply on each screen and whether each is currently allowed.</item>
 		</addition>
 		<change>
+			<item>Replaced the unreleased CBStats output=form_name syntax with output=view_name, which returns only the ContentBuilder NG view name.</item>
+			<item>Renamed the view classification label from Tag to Category throughout the administrator, frontend and menu settings.</item>
+			<item>Ordered CBStats outputs consistently by importance in article help, API help, validation guidance and OpenAPI.</item>
+			<item>Renamed the unreleased CBStats ranges and rangeset syntax to groups and groupset throughout the runtime, API, editor, help and documentation.</item>
+			<item>Made the CBStats groupset help directly identifiable and added a complete example plus the administrator data-set management path.</item>
+			<item>Fixed BreezingForms radio, checkbox and select defaults in CB Edit, including selected options whose submitted value is empty.</item>
+			<item>Clarified the Audit and Repair workflow so only successfully applied repairs are highlighted in green.</item>
+			<item>Completed and harmonized the public CBList, CBStats and CB/API help, using view ID 15 in examples.</item>
+			<item>Fixed the Edit-column Default/Modified indicator so native BreezingForms NG radio, checkbox and select types remain Default until ContentBuilder settings actually override them.</item>
 			<item>New views now enable Detail and Edit template locks by default.</item>
 			<item>Made the Export capability follow the same published lock and inactive-cross rendering as Detail and Edit.</item>
 			<item>Moved the type-specific Edit control into the compact display row to expose upload and template settings earlier.</item>
@@ -52,6 +65,11 @@
 			<item>Direct Storage synchronization now preserves unpublished elements and refreshes native controls when SQL field types change.</item>
 		</change>
 		<fix>
+			<item>Kept standalone CBStats percentage formatting language-independent.</item>
+			<item>Preserved values not selected by CBStats groups or groupset as individual categories.</item>
+			<item>Fixed the French Category label spacing and disabled data-set import while existing rows are selected.</item>
+			<item>Disabled CBStats data-set import while one or more existing rows are selected.</item>
+			<item>Synchronized legacy BreezingForms Edit elements stored as text with their native radio, checkbox or select type while preserving explicit ContentBuilder overrides.</item>
 			<item>Added read-only detection and conservative repair of ContentBuilder record rows whose BreezingForms source record no longer exists.</item>
 			<item>Hardened CBStats totals for BreezingForms NG sources by validating both the source record ID and form ID.</item>
 			<item>Prevented empty locked Detail and Edit templates from showing false warning or error states when no corresponding published fields are active.</item>

@@ -189,6 +189,73 @@ class ElementoptionsModel extends BaseDatabaseModel
         return array();
     }
 
+    public function getSourceGroupDefaultValues(): array
+    {
+        if ($this->_data === null) {
+            $this->getData();
+        }
+
+        if (!is_object($this->_data) || empty($this->_data->reference_id)) {
+            return [];
+        }
+
+        $db = $this->getDatabase();
+        $query = $db->getQuery(true)
+            ->select([$db->quoteName('type'), $db->quoteName('reference_id')])
+            ->from($db->quoteName('#__contentbuilderng_forms'))
+            ->where($db->quoteName('id') . ' = ' . (int) $this->_id);
+        $db->setQuery($query);
+        $formRow = $db->loadAssoc();
+
+        if (!is_array($formRow) || empty($formRow['type']) || empty($formRow['reference_id'])) {
+            return [];
+        }
+
+        $form = FormSourceFactory::getForm((string) $formRow['type'], (string) $formRow['reference_id']);
+
+        if (!$form || !method_exists($form, 'getGroupDefaultValues')) {
+            return [];
+        }
+
+        return array_map(
+            static fn($value): string => trim((string) $value),
+            (array) $form->getGroupDefaultValues($this->_data->reference_id)
+        );
+    }
+
+    public function getSourceEditableType(): string
+    {
+        $element = $this->getData();
+
+        if (!is_object($element) || empty($element->reference_id) || empty($element->form_id)) {
+            return 'text';
+        }
+
+        $db = $this->getDatabase();
+        $query = $db->getQuery(true)
+            ->select([$db->quoteName('type'), $db->quoteName('reference_id')])
+            ->from($db->quoteName('#__contentbuilderng_forms'))
+            ->where($db->quoteName('id') . ' = ' . (int) $element->form_id);
+        $db->setQuery($query);
+        $formRow = $db->loadAssoc();
+        if (!is_array($formRow) || empty($formRow['type']) || empty($formRow['reference_id'])) {
+            return 'text';
+        }
+
+        $form = FormSourceFactory::getForm((string) $formRow['type'], (string) $formRow['reference_id']);
+        if (!$form || !method_exists($form, 'getEditableElementTypes')) {
+            return 'text';
+        }
+
+        try {
+            $types = (array) $form->getEditableElementTypes();
+        } catch (\Throwable) {
+            return 'text';
+        }
+
+        return trim((string) ($types[(string) $element->reference_id] ?? 'text')) ?: 'text';
+    }
+
     public function store()
     {
         $input = $this->getInput();
@@ -199,6 +266,7 @@ class ElementoptionsModel extends BaseDatabaseModel
             $query = $db->getQuery(true)
                 ->update($db->quoteName('#__contentbuilderng_elements'))
                 ->set($db->quoteName('type') . ' = ' . $db->quote($input->getCmd('type_selection', '')))
+                ->set($db->quoteName('change_type') . ' = ' . $db->quote($input->getCmd('type_selection', '')))
                 ->set($db->quoteName('item_wrapper') . ' = ' . $db->quote($itemWrapper))
                 ->where($db->quoteName('id') . ' = ' . (int)$this->_element_id);
             $db->setQuery($query);

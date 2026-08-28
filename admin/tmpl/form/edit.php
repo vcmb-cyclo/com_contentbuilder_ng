@@ -5,7 +5,7 @@
  * @author      Markus Bopp
  * @author      XDA+GIL
  * @link        https://breezingforms-ng.vcmb.fr
- * @copyright   Copyright © 2026 XDA+GIL 
+ * @copyright   Copyright © 2026 XDA+GIL
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
@@ -22,7 +22,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Uri\Uri;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory;
-use CB\Component\Contentbuilderng\Administrator\Helper\PackedDataHelper;
+use CB\Component\Contentbuilderng\Administrator\Service\ElementSettingsStateService;
 use CB\Component\Contentbuilderng\Administrator\Service\FormAuditService;
 use CB\Component\Contentbuilderng\Administrator\Service\TextUtilityService;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
@@ -191,12 +191,12 @@ $sortLink = function (string $label, string $field) use ($listOrder, $listDirn, 
 };
 
 $permHeaderLabel = static function (string $labelKey, string $tipKey): string {
-	$label = Text::_($labelKey);
-	$tip = Text::_($tipKey);
+    $label = Text::_($labelKey);
+    $tip = Text::_($tipKey);
 
-	return '<span class="cb-perm-header-tip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="'
-	    . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '" title="' . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '">'
-	    . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</span>';
+    return '<span class="cb-perm-header-tip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="'
+        . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '" title="' . htmlspecialchars($tip, ENT_QUOTES, 'UTF-8') . '">'
+        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</span>';
 };
 
 $permGroupLabel = static function (string $groupText, int $groupId = 0, string $groupPath = '', string $groupTitle = ''): string {
@@ -280,70 +280,20 @@ if (is_object($this->item->form ?? null) && method_exists($this->item->form, 'ge
     }
 }
 
-$isModifiedElementSettings = static function ($row): bool {
-    $type = trim((string) ($row->type ?? ''));
-    if ($type !== '' && $type !== 'text') {
-        return true;
+$sourceEditableTypes = [];
+if (is_object($this->item->form ?? null) && method_exists($this->item->form, 'getEditableElementTypes')) {
+    try {
+        $sourceEditableTypes = (array) $this->item->form->getEditableElementTypes();
+    } catch (\Throwable) {
+        $sourceEditableTypes = [];
     }
+}
+$isModifiedElementSettings = static function ($row) use ($sourceEditableTypes): bool {
 
-    if (trim((string) ($row->item_wrapper ?? '')) !== '') {
-        return true;
-    }
-
-    foreach (
-        [
-            'hint',
-            'default_value',
-            'validations',
-            'custom_init_script',
-            'custom_action_script',
-            'custom_validation_script',
-            'validation_message',
-        ] as $field
-    ) {
-        if (trim((string) ($row->{$field} ?? '')) !== '') {
-            return true;
-        }
-    }
-
-    $options = PackedDataHelper::decodePackedData((string) ($row->options ?? ''), null);
-    if (is_object($options)) {
-        $options = (array) $options;
-    }
-    if (!is_array($options)) {
-        $options = [];
-    }
-
-    $ignoreDefaults = [
-        'length' => '',
-        'maxlength' => '',
-        'password' => 0,
-        'readonly' => 0,
-        'seperator' => ',',
-        'class' => '',
-        'allow_raw' => false,
-        'allow_html' => false,
-    ];
-
-    foreach ($options as $key => $value) {
-        if (is_string($value)) {
-            $value = trim($value);
-        }
-
-        if (array_key_exists((string) $key, $ignoreDefaults) && $ignoreDefaults[(string) $key] === $value) {
-            continue;
-        }
-
-        if ($value === '' || $value === null || $value === false || $value === 0 || $value === '0') {
-            continue;
-        }
-
-        return true;
-    }
-
-    return false;
+    $referenceId = (string) ($row->reference_id ?? '');
+    $sourceType = (string) ($sourceEditableTypes[$referenceId] ?? 'text');
+    return ElementSettingsStateService::isModified($row, $sourceType);
 };
-
 $hasPublishedEditableElements = false;
 foreach ($availableEditablePrepareElements as $elementRow) {
     if (!is_object($elementRow)) {

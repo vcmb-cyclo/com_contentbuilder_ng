@@ -8,6 +8,16 @@ namespace CB\Plugin\Content\ContentbuilderngStats\Service;
 
 final class PiePresentationService
 {
+    public static function formatPercentageOutput(float $percentage, string $locale): string
+    {
+        $rounded = round($percentage, 1);
+        $formatted = floor($rounded) === $rounded
+            ? (string) (int) $rounded
+            : rtrim(rtrim(number_format($rounded, 1, '.', ''), '0'), '.');
+
+        return $formatted . '&nbsp;%';
+    }
+
     /**
      * @param list<array{label: string, value: int|float}> $fieldStats
      * @return array{

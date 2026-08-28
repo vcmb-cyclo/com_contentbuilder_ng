@@ -162,8 +162,8 @@ $wa->useStyle('com_contentbuilderng.admin-form-api');
             <td>
                 <h4 class="h5 mb-2">CBStats</h4>
                 <p><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_SUMMARY'); ?></p>
-                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OUTPUTS'); ?></strong><br><code>total, form_name, distinct, table, json, pie, bar, histogram, line, radar, sum, min, max, avg</code></p>
-                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OPTIONS'); ?></strong><br><code>id, field, output, filter, title, card, width, height</code></p>
+                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OUTPUTS'); ?></strong><br><code>total, table, pie, bar, histogram, line, radar, json, sum, min, max, avg, remaining, percentage, progress, distinct, view_name</code></p>
+                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OPTIONS'); ?></strong><br><code>id, idsum, field, value, filter[field], filter[value], output, target, groups, groupset, titles, titleset, sort, dir, limit, hide, title, card, w, width, height, export</code></p>
                 <a class="btn btn-sm btn-outline-primary" href="<?php echo htmlspecialchars($cbStatsHelpUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                     <?php echo Text::_('COM_CONTENTBUILDERNG_API_OPEN_CBSTATS_HELP'); ?> <span aria-hidden="true">↗</span>
                 </a>
@@ -185,7 +185,7 @@ $wa->useStyle('com_contentbuilderng.admin-form-api');
             <td>
                 <h4 class="h5 mb-2">CBList</h4>
                 <p><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBLIST_SUMMARY'); ?></p>
-                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OPTIONS'); ?></strong><br><code>id, fields, sort, dir, pagination, limit</code></p>
+                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OPTIONS'); ?></strong><br><code>id, fields, sort, dir, pagination, limit, actions, title, layout, height, loading, card, w, output, offset</code></p>
                 <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_ACTIONS'); ?></strong><br><code>search, state, publish, language, new, edit, delete, export, rating, detail, print, none</code></p>
                 <a class="btn btn-sm btn-outline-primary" href="<?php echo htmlspecialchars($cbListHelpUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                     <?php echo Text::_('COM_CONTENTBUILDERNG_API_OPEN_CBLIST_HELP'); ?> <span aria-hidden="true">↗</span>
