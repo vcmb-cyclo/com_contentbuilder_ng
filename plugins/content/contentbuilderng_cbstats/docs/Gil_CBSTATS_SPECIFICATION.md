@@ -1,6 +1,6 @@
 # CBStats functional and technical specification
 
-Stable release baseline: ContentBuilder NG 6.1.12. This specification
+Stable release baseline: ContentBuilder NG 6.1.13. This specification
 includes the validated `distinct`, editorial Card, reusable `titleset`,
 `groupset`, `remaining`, `percentage` and `progress` features delivered in that
 release.
@@ -121,9 +121,9 @@ identical remaining values are counted once after the maps are merged.
 Examples:
 
 ```text
-{CBStats id=25 field=Departement output=distinct}
-{CBStats id=25 field=Departement value="78" output=distinct}
-{CBStats id=25 field=Departement value="78|60" output=distinct}
+{CBStats id=15 field=Departement output=distinct}
+{CBStats id=15 field=Departement value="78" output=distinct}
+{CBStats id=15 field=Departement value="78|60" output=distinct}
 ```
 
 ## 4. Existing filtering behavior to preserve
@@ -148,7 +148,7 @@ Before refactoring, Codex must inspect the implementation to capture exact seman
 
 ## 4.1 Multi-view source with `idsum`
 
-`idsum=25+27` is an alternative to `id=` for field statistics. It accepts
+`idsum=15+27` is an alternative to `id=` for field statistics. It accepts
 two to five unique positive view identifiers separated by `+`; simultaneous
 `id` and `idsum`, invalid identifiers and duplicate identifiers are rejected.
 
@@ -369,10 +369,10 @@ Bar must consume the same normalized field statistics engine.
 The RC97 visual outputs consume the same normalized field-statistics array:
 
 ```text
-{CBStats id=25 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
-{CBStats id=25 field=RegistrationDate output=line sort=title dir=asc limit=30}
-{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}
-{CBStats id=25 field=Age output=avg}
+{CBStats id=15 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
+{CBStats id=15 field=RegistrationDate output=line sort=title dir=asc limit=30}
+{CBStats id=15 field=Age output=radar groups="18-29;30-39;40-49;50+"}
+{CBStats id=15 field=Age output=avg}
 ```
 
 Histogram is vertical and preserves declared value-group order. Line plots
@@ -519,7 +519,9 @@ A pass is complete only when:
 - After limiting, the visible total is recalculated from the retained values.
   Pie and Bar percentages use that limited total as their denominator.
 - No synthetic `Other` category is created.
-- `hide` accepts only `total`, `values` and `graph`, combined with `|`.
+- `hide` accepts only `title`, `total`, `values` and `graph`, combined with `|`.
+- `hide="title"` suppresses the block heading defined by `labels="title=..."`,
+  including the Card heading, without changing the result.
 - `hide="total"` suppresses the displayed total without changing its internal
   calculation.
 - `hide="values"` suppresses only the complementary textual labels-and-values
@@ -538,7 +540,8 @@ A pass is complete only when:
 
 `card=h1` to `card=h6` and `card=v1` to `card=v6` use the shared component
 asset `com_contentbuilderng.cards`. This is opt-in. A header exists only with
-an explicit non-empty `labels="title=..."` and the inner title is not duplicated.
+an explicit non-empty `labels="title=..."` and without `hide="title"`; the inner
+title is not duplicated.
 For H and V variants alike, the title is horizontal and above the content.
 H variants use the available width. V variants are compact inline cards that
 sit next to each other when space permits and become full-width on small screens.
@@ -610,6 +613,47 @@ de="Germany"
 
 ```text
 {CBStats id=15 field=Country titleset="example-en-GB.ini" output=table}
+
+## 19. Reusable presentation configuration
+
+`config="filename.ini"` loads a safe, reusable INI file from
+`media/contentbuilderng/cbstats/configs/`, falling back to
+`media/com_contentbuilderng/cbstats/configs/`. Arbitrary paths are rejected.
+
+Supported sections and keys are strictly limited to:
+
+```ini
+[labels]
+title=Routes
+category=Distance
+value=Participants
+total=Displayed total
+
+[presentation]
+background=#eef6f8
+card=v1
+w=66
+width=600
+height=400
+
+[display]
+hide=none
+sort=value
+dir=desc
+limit=10
+```
+
+Inline tag options override configuration values key by key. Data selection
+and output options (`id`, `idsum`, `field`, filters, `output`, `target`,
+`groups`, `groupset`, `titles`, `titleset`, `add`, `export`) are not accepted
+inside a configuration file.
+
+`w` accepts only `33`, `66` or `100` and controls the Card width. `width`
+controls the chart inside the Card.
+
+```text
+{CBStats id=15 field=Distance output=bar config="vcmb-config.ini" width=800 labels="title=Special routes"}
+```
 ```
 
 The administrator can manage these files from **ContentBuilder NG → About →
@@ -643,3 +687,6 @@ Missing, unreadable, empty or invalid files preserve original values and never
 replace the frontend result with an error. Joomla Debug records one Warning per
 file and request. ContentBuilder NG About links to the native Joomla manager;
 provided files are read-only and can be duplicated into the custom directory.
+# Case rules
+
+The `{CBStats ...}` tag name, option names and technical enumerated values are case-insensitive. For example, `CBStats`, `cbstats`, `OUTPUT=BAR` and `dir=Asc` are equivalent. User data remains case-sensitive: ContentBuilder field names, filter values, group values and labels are preserved and matched exactly.

@@ -58,6 +58,7 @@ final class TitlesetModel extends BaseDatabaseModel
                 'source' => 'custom',
                 'type' => 'titles',
                 'titles' => [['value' => '', 'label' => '']],
+                'config' => [],
             ];
         }
 
@@ -66,7 +67,10 @@ final class TitlesetModel extends BaseDatabaseModel
             $data['source'] = 'custom';
         }
         if ($source === 'custom' && $app->getInput()->getBool('copy', false)) {
-            $data['filename'] = (new CbStatsTitleSetManagerService(JPATH_SITE))->suggestCopyFilename($filename);
+            $data['filename'] = (new CbStatsTitleSetManagerService(JPATH_SITE))->suggestCopyFilename(
+                $filename,
+                (string) ($data['type'] ?? 'titles')
+            );
         }
 
         return $this->dataCache = $data;

@@ -40,12 +40,12 @@ $apiExampleSparseStatsDisplayUrl = (string) ($displayData['apiExampleSparseStats
 $apiExamplePayloadJson = (string) ($displayData['apiExamplePayloadJson'] ?? '');
 $formId = (int) ($displayData['formId'] ?? 0);
 $cbStatsTotalSyntax = '{CBStats id=' . $formId . ' output=total}';
-$cbStatsPieSyntax   = '{CBStats id=' . $formId . ' field=NomDuChamp title="Répartition" output=pie card=h1 width=80%}';
+$cbStatsPieSyntax   = '{CBStats id=' . $formId . ' field=NomDuChamp labels="title=Répartition" output=pie card=h1 width=80%}';
 $cbStatsBarSyntax   = '{CBStats id=' . $formId . ' field=NomDuChamp sort=value dir=desc output=bar}';
 $cbStatsApiJsonUrl = 'index.php?option=com_contentbuilderng&task=api.display&id=' . $formId . '&action=cbstats&field=NomDuChamp&output=json';
 $cbListBasicSyntax = '{CBList id=' . $formId . '}';
-$cbListFieldsSyntax = '{CBList id=' . $formId . ' fields="Nom|Prenom|Email" sort="Nom" dir=asc}';
-$cbListCleanSyntax = '{CBList id=' . $formId . ' actions=none pagination=0 limit=10}';
+$cbListFieldsSyntax = '{CBList id=' . $formId . ' fields="Nom|Prenom|Email" labels="title=CBList" sort="Nom" dir=asc}';
+$cbListCleanSyntax = '{CBList id=' . $formId . ' actions=none pagination=0 limit=10 hide="title"}';
 $cbListTestUrl = 'index.php?option=com_contentbuilderng&task=list.display&id=' . $formId;
 $helpLanguage = match (Factory::getApplication()->getLanguage()->getTag()) {
     'fr-FR' => 'fr-FR',
@@ -163,7 +163,8 @@ $wa->useStyle('com_contentbuilderng.admin-form-api');
                 <h4 class="h5 mb-2">CBStats</h4>
                 <p><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_SUMMARY'); ?></p>
                 <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OUTPUTS'); ?></strong><br><code>total, table, pie, bar, histogram, line, radar, json, sum, min, max, avg, remaining, percentage, progress, distinct, view_name</code></p>
-                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OPTIONS'); ?></strong><br><code>id, idsum, field, value, filter[field], filter[value], output, target, groups, groupset, titles, titleset, sort, dir, limit, hide, labels, card, w, width, height, export</code></p>
+                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OPTIONS'); ?></strong><br><code>id, idsum, field, value, filter[field], filter[value], output, target, groups, groupset, titles, titleset, config, sort, dir, limit, hide, labels, card, w, width, height, export</code></p>
+                <p><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBSTATS_CONFIG_HINT'); ?></p>
                 <a class="btn btn-sm btn-outline-primary" href="<?php echo htmlspecialchars($cbStatsHelpUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                     <?php echo Text::_('COM_CONTENTBUILDERNG_API_OPEN_CBSTATS_HELP'); ?> <span aria-hidden="true">↗</span>
                 </a>
@@ -185,7 +186,7 @@ $wa->useStyle('com_contentbuilderng.admin-form-api');
             <td>
                 <h4 class="h5 mb-2">CBList</h4>
                 <p><?php echo Text::_('COM_CONTENTBUILDERNG_API_CBLIST_SUMMARY'); ?></p>
-                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OPTIONS'); ?></strong><br><code>id, fields, sort, dir, pagination, limit, actions, title, layout, height, loading, card, w, output, offset</code></p>
+                <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_OPTIONS'); ?></strong><br><code>id, fields, sort, dir, pagination, limit, actions, labels, hide, layout, height, loading, card, w, output, offset</code></p>
                 <p><strong><?php echo Text::_('COM_CONTENTBUILDERNG_API_MAIN_ACTIONS'); ?></strong><br><code>search, state, publish, language, new, edit, delete, export, rating, detail, print, none</code></p>
                 <a class="btn btn-sm btn-outline-primary" href="<?php echo htmlspecialchars($cbListHelpUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                     <?php echo Text::_('COM_CONTENTBUILDERNG_API_OPEN_CBLIST_HELP'); ?> <span aria-hidden="true">↗</span>

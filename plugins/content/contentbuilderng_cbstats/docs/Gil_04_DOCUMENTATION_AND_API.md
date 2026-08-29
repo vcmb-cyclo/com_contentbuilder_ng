@@ -125,39 +125,39 @@ If there is no existing CB API/reference file:
 Use generic examples and clearly identify sample-only values.
 
 ```text
-{CBStats id=25 output=total}
+{CBStats id=15 output=total}
 ```
 
 ```text
-{CBStats id=25 field=Parcours output=table}
+{CBStats id=15 field=Parcours output=table}
 ```
 
 ```text
-{CBStats id=25 field=Parcours output=json sort=title dir=asc}
+{CBStats id=15 field=Parcours output=json sort=title dir=asc}
 ```
 
 ```text
-{CBStats id=25 field=Parcours output=pie}
+{CBStats id=15 field=Parcours output=pie}
 ```
 
 ```text
-{CBStats id=25 field=Parcours output=bar sort=value dir=desc}
+{CBStats id=15 field=Parcours output=bar sort=value dir=desc}
 ```
 
 ```text
-{CBStats id=25 field=Age output=avg}
+{CBStats id=15 field=Age output=avg}
 ```
 
 ```text
-{CBStats id=25 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
+{CBStats id=15 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
 ```
 
 ```text
-{CBStats id=25 field=RegistrationDate output=line sort=title dir=asc limit=30}
+{CBStats id=15 field=RegistrationDate output=line sort=title dir=asc limit=30}
 ```
 
 ```text
-{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}
+{CBStats id=15 field=Age output=radar groups="18-29;30-39;40-49;50+"}
 ```
 
 The plugin code must never depend on those example values.

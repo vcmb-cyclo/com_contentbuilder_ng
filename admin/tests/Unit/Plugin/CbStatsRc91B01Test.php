@@ -139,6 +139,6 @@ final class CbStatsRc91B01Test extends TestCase
         );
         self::assertStringContainsString($crossField, $description);
         self::assertStringContainsString($sameField, $description);
-        self::assertSame(3, substr_count($description, "{CBStats id=25 field=Route output=pie add='100 km=-3'}"));
+        self::assertSame(3, substr_count($description, "{CBStats id=15 field=Route output=pie add='100 km=-3'}"));
     }
 }

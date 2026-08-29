@@ -1,5 +1,55 @@
 # Changelog
 
+## 6.1.13 — 2026-08-30
+
+- Promoted the validated RC10 implementation to the stable 6.1.13 release.
+
+## 6.1.13-RC10 — 2026-08-29
+
+- Added reusable CBStats presentation configuration files with `config="filename.ini"`, strict sections, Card widths `w=33|66|100` and key-by-key inline overrides.
+- Added the Configuration type to the CBStats data-set editor.
+
+## 6.1.13-RC09 — 2026-08-29
+
+- Added a navigable visual layout to the public CBStats and CBList help pages.
+
+## 6.1.13-RC08 — 2026-08-29
+
+- Improved the public CBStats and CBList help opening by removing the duplicated first-section heading.
+
+## 6.1.13-RC07 — 2026-08-29
+
+- Synchronized public CBList and CBStats help references and view-ID examples.
+
+## 6.1.13-RC06 — 2026-08-29
+
+- Documented `id=xx` as the generic view identifier while retaining `id=15` in executable examples.
+
+## 6.1.13-RC05 — 2026-08-29
+
+- Documented and specified case-insensitive technical syntax for CBStats and CBList while preserving case-sensitive user data.
+- Aligned the data-set editor with Joomla: existing files show Close, while new copies retain Cancel.
+
+## 6.1.13-RC04 — 2026-08-29
+
+- Improved CBStats and CBList help and documentation with aligned presentation syntax, examples and option guidance while preserving plugin-specific capabilities.
+
+## 6.1.13-RC03 — 2026-08-29
+
+- Fixed CBStats data-set duplication for a selected custom file.
+- Fixed the States disable action so it also clears state permissions.
+- Fixed inactive Details and Edit template tabs so a retained template does not show a warning indicator.
+- Harmonized CBStats and CBList syntax guidance, examples and labels/hide/Card terminology.
+- Fixed the data-set editor toolbar so it shows Close after a successful save.
+
+## 6.1.13-RC02 — 2026-08-28
+
+### Changed
+
+- Replaced the unreleased CBList `title=` option with `labels="title=..."`, aligned with CBStats, without a compatibility alias.
+- Added strict, aligned CBList/CBStats title controls: `labels="title=..."` defines block and Card titles, while `hide="title"` hides them.
+- Updated CBList article help, CB/API help, Card examples, specifications and EN/FR/DE translations for the unified syntax.
+
 ## 6.1.13-RC01 — 2026-08-28
 
 - Replaced the CBStats `title=` and `headers=` presentation options with the unified `labels="title=...;category=...;value=...;total=..."` syntax, without compatibility aliases.

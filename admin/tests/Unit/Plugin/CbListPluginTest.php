@@ -31,7 +31,7 @@ final class CbListPluginTest extends TestCase
     public function testTagAttributesAndOptionsAreResolved(): void
     {
         $attributes = TagSyntaxService::parseAttributes(
-            ' id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 limit=10 actions="detail|edit|export" layout=cards height=700 loading=lazy'
+            ' id=15 fields="Nom|Prenom|Email" labels="title=Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 limit=10 actions="detail|edit|export" layout=cards height=700 loading=lazy'
         );
 
         self::assertSame(
@@ -47,7 +47,8 @@ final class CbListPluginTest extends TestCase
                 'sort' => 'Nom|Prenom',
                 'sort_direction' => 'asc|asc',
                 'title' => 'Liste des inscrits',
-                'title_set' => true,
+                'labels_set' => true,
+                'hide_title' => false,
                 'output' => 'list',
                 'offset' => 0,
                 'card' => '',
@@ -72,7 +73,8 @@ final class CbListPluginTest extends TestCase
                 'sort' => '',
                 'sort_direction' => 'asc',
                 'title' => '',
-                'title_set' => false,
+                'labels_set' => false,
+                'hide_title' => false,
                 'output' => 'list',
                 'offset' => 0,
                 'card' => '',
@@ -113,24 +115,27 @@ final class CbListPluginTest extends TestCase
         );
     }
 
-    public function testEmptyTitleExplicitlyHidesTheVisibleTitle(): void
+    public function testHideTitleExplicitlyHidesTheVisibleTitle(): void
     {
         $options = EmbedOptionsService::resolve(
-            TagSyntaxService::parseAttributes('id=15 title=""')
+            TagSyntaxService::parseAttributes('id=15 labels="title=Registration list" hide="title"')
         );
 
-        self::assertTrue($options['title_set']);
-        self::assertSame('', $options['title']);
+        self::assertTrue($options['labels_set']);
+        self::assertSame('Registration list', $options['title']);
+        self::assertTrue($options['hide_title']);
 
         $extension = file_get_contents(
             self::ROOT . '/plugins/content/contentbuilderng_cblist/src/Extension/ContentbuilderngList.php'
         );
         self::assertIsString($extension);
         self::assertStringContainsString(
-            "\$options['title_set'] && \$options['title'] !== ''",
+            "\$options['labels_set'] && \$options['title'] !== ''",
             $extension,
-            'An empty visible title must retain the translated accessible iframe fallback.'
+            'A hidden visible title must retain an accessible iframe title.'
         );
+        self::assertStringContainsString("\$options['labels_set'] || \$options['hide_title']", $extension);
+        self::assertStringContainsString("!\$options['hide_title'] && \$options['labels_set']", $extension);
 
         $template = file_get_contents(self::ROOT . '/site/tmpl/list/default.php');
         self::assertIsString($template);
@@ -162,14 +167,56 @@ final class CbListPluginTest extends TestCase
         );
     }
 
-    public function testHideTitleKeywordIsAnAliasForAnEmptyTitle(): void
+    public function testLabelsTreatHideAsOrdinaryTitleAndHideTitleIsCaseInsensitive(): void
     {
         foreach (['hide', 'HIDE', ' Hide '] as $value) {
-            $options = EmbedOptionsService::resolve(['id' => '15', 'title' => $value]);
+            $options = EmbedOptionsService::resolve(['id' => '15', 'labels' => 'title=' . $value]);
 
-            self::assertTrue($options['title_set']);
-            self::assertSame('', $options['title']);
+            self::assertTrue($options['labels_set']);
+            self::assertSame(trim($value), $options['title']);
+            self::assertFalse($options['hide_title']);
         }
+
+        foreach (['title', 'TITLE', ' Title ', 'title|TITLE'] as $value) {
+            self::assertTrue(EmbedOptionsService::resolve(['id' => '15', 'hide' => $value])['hide_title']);
+        }
+    }
+
+    public function testHideAcceptsOnlyTitleAndRejectsAnExplicitEmptyValue(): void
+    {
+        foreach (['', 'total', 'title|graph', 'title,total'] as $value) {
+            $errors = EmbedOptionsService::validationErrors(['id' => '15', 'hide' => $value]);
+
+            self::assertContains('hide', array_column($errors, 'parameter'));
+        }
+    }
+
+    public function testLabelsAcceptOnlyOneNonEmptyTitleMapping(): void
+    {
+        self::assertSame([], EmbedOptionsService::validationErrors([
+            'id' => '15',
+            'labels' => ' TITLE = Registration list ',
+        ]));
+
+        foreach (['title=', 'subtitle=List', 'title=One;title=Two', 'List'] as $labels) {
+            $errors = EmbedOptionsService::validationErrors(['id' => '15', 'labels' => $labels]);
+
+            self::assertSame(['labels'], array_column($errors, 'parameter'));
+            self::assertSame(['labels'], array_column($errors, 'detail'));
+        }
+    }
+
+    public function testRemovedTitleOptionPointsToLabelsSyntax(): void
+    {
+        self::assertSame(
+            [[
+                'code' => 'removed_option',
+                'parameter' => 'title',
+                'value' => 'Registration list',
+                'detail' => 'labels_title',
+            ]],
+            EmbedOptionsService::validationErrors(['id' => '15', 'title' => 'Registration list'])
+        );
     }
 
     public function testEveryInvalidParameterIsReportedWithItsValue(): void
@@ -232,15 +279,15 @@ final class CbListPluginTest extends TestCase
         );
     }
 
-    public function testTagPatternAllowsClosingBraceInsideQuotedTitle(): void
+    public function testTagPatternAllowsClosingBraceInsideQuotedLabels(): void
     {
-        $tag = '{CBList id=15 title="Registrations } archived"}';
+        $tag = '{CBList id=15 labels="title=Registrations } archived"}';
 
         self::assertSame(1, preg_match(TagSyntaxService::TAG_PATTERN, $tag, $matches));
         self::assertSame($tag, $matches[0]);
         self::assertSame(
-            'Registrations } archived',
-            TagSyntaxService::parseAttributes((string) $matches[1])['title']
+            'title=Registrations } archived',
+            TagSyntaxService::parseAttributes((string) $matches[1])['labels']
         );
     }
 
@@ -634,7 +681,10 @@ final class CbListPluginTest extends TestCase
         self::assertStringContainsString('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_TEXT', $publicHelpView);
         self::assertStringContainsString('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_FIELDS_TEXT', $publicHelpView);
         self::assertStringContainsString('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_HELP_ACTIONS_TEXT', $publicHelpView);
-        self::assertStringContainsString('foreach ($this->sections as $section)', $publicHelpTemplate);
+        self::assertStringContainsString(
+            'foreach ($this->sections as $sectionIndex => $section)',
+            $publicHelpTemplate
+        );
 
         $embedScript = \file_get_contents(
             self::ROOT . '/plugins/content/contentbuilderng_cblist/media/js/cblist.js'
@@ -729,6 +779,7 @@ final class CbListPluginTest extends TestCase
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_SYNTAX_HELP',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EMPTY_VALUE',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_OPTION',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_REMOVED_OPTION',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_OPTION_VALUE',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_ACTION',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_VIEW',
@@ -745,6 +796,9 @@ final class CbListPluginTest extends TestCase
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LAYOUT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LOADING',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_FIELDS',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LABELS',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LABELS_TITLE',
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_HIDE',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_ACTIONS',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_SORT',
                 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_DIR',
@@ -775,6 +829,7 @@ final class CbListPluginTest extends TestCase
 
         $expectedPlaceholders = [
             'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_OPTION' => 2,
+            'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_REMOVED_OPTION' => 2,
             'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_INVALID_OPTION_VALUE' => 3,
             'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_ACTION' => 1,
             'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_VIEW' => 1,
@@ -841,6 +896,7 @@ final class CbListPluginTest extends TestCase
 
         preg_match_all(TagSyntaxService::TAG_PATTERN, $help, $matches);
         self::assertNotEmpty($matches[1], $language . ': no documented CBList example found');
+        self::assertDoesNotMatchRegularExpression('/\{CBList[^}]*\stitle=/i', $help, $language);
 
         foreach ($matches[1] as $rawAttributes) {
             $syntax = TagSyntaxService::parse((string) $rawAttributes);

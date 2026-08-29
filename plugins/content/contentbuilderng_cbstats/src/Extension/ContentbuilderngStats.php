@@ -21,6 +21,7 @@ use CB\Component\Contentbuilderng\Site\Service\CbstatsHelpService;
 use CB\Component\Contentbuilderng\Site\Service\ContentCardService;
 use CB\Component\Contentbuilderng\Site\Service\EditorialCardService;
 use CB\Component\Contentbuilderng\Site\Service\CbStatsTitleSetService;
+use CB\Component\Contentbuilderng\Site\Service\CbStatsConfigService;
 use CB\Component\Contentbuilderng\Administrator\Service\PermissionService;
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Plugin\Content\ContentbuilderngStats\Service\PiePresentationService;
@@ -58,8 +59,11 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
     private static bool $chartAssetRegistryLoaded = false;
     private static bool $manualExportAssetsLoaded = false;
     private ?CbStatsTitleSetService $titleSetService = null;
+    private ?CbStatsConfigService $configService = null;
     /** @var array<string, true> */
     private array $warnedTitleSets = [];
+    /** @var array<string, true> */
+    private array $warnedConfigs = [];
     /** @var array{width: string, height: string} */
     private array $currentDimensions = ['width' => '', 'height' => ''];
 
@@ -104,9 +108,9 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
 
     private function renderArticleTag(string $rawAttributes): string
     {
-        $syntax = TagSyntaxService::parse($rawAttributes);
+        $syntax = $this->resolveConfigSyntax($rawAttributes);
         $attributes = $syntax['attributes'];
-        $html = $this->renderStatsTag($rawAttributes);
+        $html = $this->renderStatsTag($rawAttributes, $syntax);
         $card = ContentCardService::normalize((string) ($attributes['card'] ?? ''));
 
         if (str_contains($html, 'class="alert alert-warning"')) {
@@ -114,7 +118,8 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         }
 
         $labels = StatsService::parseFieldStatsLabels((string) ($attributes['labels'] ?? ''));
-        $blockTitle = (string) ($labels['title'] ?? '');
+        $hideOptions = StatsHideOptionsService::fromAttributes($attributes);
+        $blockTitle = $hideOptions['title'] ? '' : (string) ($labels['title'] ?? '');
 
         if ($card === '') {
             return $blockTitle === ''
@@ -134,9 +139,10 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         );
     }
 
-    private function renderStatsTag(string $rawAttributes): string
+    /** @param array{attributes: array<string, string>, quoted: array<string, bool>}|null $resolvedSyntax */
+    private function renderStatsTag(string $rawAttributes, ?array $resolvedSyntax = null): string
     {
-        $syntax = TagSyntaxService::parse($rawAttributes);
+        $syntax = $resolvedSyntax ?? $this->resolveConfigSyntax($rawAttributes);
         $attributes = $syntax['attributes'];
         $source = TagSyntaxService::normalizeKeyword((string) ($attributes['source'] ?? 'view'));
         $manual = $source === 'manual';
@@ -530,6 +536,103 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         }
     }
 
+    /** @return array{attributes: array<string, string>, quoted: array<string, bool>} */
+    private function resolveConfigSyntax(string $rawAttributes): array
+    {
+        $syntax = TagSyntaxService::parse($rawAttributes);
+        $filename = trim((string) ($syntax['attributes']['config'] ?? ''));
+        if ($filename === '') {
+            return $syntax;
+        }
+
+        $this->configService ??= new CbStatsConfigService(JPATH_SITE);
+        $result = $this->configService->resolve($filename);
+        if ($result['status'] === 'ok' && !$this->isValidConfigValues($result['values'])) {
+            $result['status'] = 'invalid_value';
+            $result['values'] = [];
+        }
+        if ($result['status'] !== 'ok') {
+            if ((bool) Factory::getApplication()->get('debug') && !isset($this->warnedConfigs[$filename])) {
+                Log::add(
+                    Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_CONFIG_WARNING', $filename, $result['status']),
+                    Log::WARNING,
+                    'com_contentbuilderng.cbstats'
+                );
+                $this->warnedConfigs[$filename] = true;
+            }
+
+            return $syntax;
+        }
+
+        try {
+            $configured = $result['values'];
+            $output = TagSyntaxService::normalizeKeyword((string) ($syntax['attributes']['output'] ?? 'total'));
+            if ($output !== 'table') {
+                unset($configured['category'], $configured['value']);
+            }
+            if (!in_array($output, ['table', 'pie', 'bar', 'histogram', 'line', 'radar'], true)) {
+                unset($configured['total']);
+            }
+            if ($output === 'json') {
+                unset($configured['title']);
+            }
+            $syntax['attributes'] = CbStatsConfigService::merge($configured, $syntax['attributes']);
+        } catch (\InvalidArgumentException) {
+            return $syntax;
+        }
+
+        return $syntax;
+    }
+
+    /** @param array<string, string> $values */
+    private function isValidConfigValues(array $values): bool
+    {
+        $labelValues = array_intersect_key($values, array_flip(['title', 'category', 'value', 'total']));
+        if ($labelValues !== []) {
+            try {
+                StatsService::parseFieldStatsLabels(implode(';', array_map(
+                    static fn(string $key, string $value): string => $key . '=' . $value,
+                    array_keys($labelValues),
+                    array_values($labelValues)
+                )));
+            } catch (\InvalidArgumentException) {
+                return false;
+            }
+        }
+        if (isset($values['background']) && TotalPresentationService::validateBackground($values['background']) === '') {
+            return false;
+        }
+        if (isset($values['card']) && !ContentCardService::isValid($values['card'])) {
+            return false;
+        }
+        if (isset($values['w']) && !ContentCardService::isValidWidth($values['w'])) {
+            return false;
+        }
+        foreach (['width', 'height'] as $dimension) {
+            if (isset($values[$dimension]) && CssDimensionService::normalize($values[$dimension]) === null) {
+                return false;
+            }
+        }
+        if (isset($values['sort']) && !in_array(TagSyntaxService::normalizeKeyword($values['sort']), ['none', 'title', 'value'], true)) {
+            return false;
+        }
+        if (isset($values['dir']) && !in_array(TagSyntaxService::normalizeKeyword($values['dir']), ['asc', 'desc'], true)) {
+            return false;
+        }
+        try {
+            if (isset($values['limit'])) {
+                DisplayOptionsService::parseLimit(['limit' => $values['limit']]);
+            }
+            if (isset($values['hide'])) {
+                StatsHideOptionsService::fromAttributes(['hide' => $values['hide']]);
+            }
+        } catch (\InvalidArgumentException) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * @param list<array{code: string, parameter: string, value: string, detail: string}> $errors
      */
@@ -585,6 +688,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
                 Text::_(match ($error['detail']) {
                     'labels_title' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_LABELS_TITLE',
                     'labels_headers' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_LABELS_HEADERS',
+                    'labels_total_or_hide' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_LABELS_TOTAL_OR_HIDE',
                     default => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_LABELS_TOTAL',
                 })
             );
@@ -617,6 +721,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
             'w_requires_card' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_W_CARD',
             'width' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_WIDTH',
             'height' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_HEIGHT',
+            'config' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_CONFIG',
             'add' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_ADD',
             'titles' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_TITLES',
             'labels' => 'PLG_CONTENT_CONTENTBUILDERNG_CBSTATS_EXPECTED_LABELS',
@@ -862,7 +967,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         array $labelMappings,
         string $labelsRaw,
         bool $exportManual = false,
-        array $hideOptions = ['total' => false, 'values' => false, 'graph' => false]
+        array $hideOptions = ['title' => false, 'total' => false, 'values' => false, 'graph' => false]
     ): string {
         $field = (array) ($payload['field'] ?? []);
 
@@ -923,7 +1028,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $background,
         string $labelsRaw,
         bool $exportManual = false,
-        array $hideOptions = ['total' => false, 'values' => false, 'graph' => false]
+        array $hideOptions = ['title' => false, 'total' => false, 'values' => false, 'graph' => false]
     ): string {
         if ($fieldStats === []) {
             return '<span class="cbstats-pie-empty">'
@@ -981,7 +1086,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $background,
         string $labelsRaw,
         bool $exportManual = false,
-        array $hideOptions = ['total' => false, 'values' => false, 'graph' => false]
+        array $hideOptions = ['title' => false, 'total' => false, 'values' => false, 'graph' => false]
     ): string {
         if ($fieldStats === []) {
             return '<span class="cbstats-bar-empty">'
@@ -1042,7 +1147,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $background,
         string $labelsRaw,
         bool $exportManual = false,
-        array $hideOptions = ['total' => false, 'values' => false, 'graph' => false]
+        array $hideOptions = ['title' => false, 'total' => false, 'values' => false, 'graph' => false]
     ): string {
         if ($fieldStats === []) {
             return '<span class="cbstats-chart-empty">'
@@ -1282,7 +1387,7 @@ final class ContentbuilderngStats extends CMSPlugin implements SubscriberInterfa
         string $output,
         string $labelsRaw,
         string $background,
-        array $hideOptions = ['total' => false, 'values' => false, 'graph' => false]
+        array $hideOptions = ['title' => false, 'total' => false, 'values' => false, 'graph' => false]
     ): string {
         $this->loadManualExportAssets();
         $total = array_sum(array_column($fieldStats, 'value'));

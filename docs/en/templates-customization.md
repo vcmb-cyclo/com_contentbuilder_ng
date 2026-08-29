@@ -1,6 +1,6 @@
 # Templates and customization
 
-The CBStats syntax documented here is current for ContentBuilder NG 6.1.12.
+The CBStats syntax documented here is current for ContentBuilder NG 6.1.13.
 
 `groupset="ages-fr-FR.ini"` loads reusable value groups from the same safe
 custom/provided directories as `titleset`. Its `[groups]` keys accept inclusive
@@ -119,7 +119,7 @@ pagination, actions, layout and theme, without any CBList override:
 Realistic example with the principal options:
 
 ```text
-{CBList id=15 fields="Nom|Prenom|Email" title="Registration list" sort="Nom|Prenom" dir="asc" pagination=25 limit=10 actions="detail|edit|export" layout=cards height=700 loading=lazy}
+{CBList id=15 fields="Nom|Prenom|Email" labels="title=Registration list" sort="Nom|Prenom" dir="asc" pagination=25 limit=10 actions="detail|edit|export" layout=cards height=700 loading=lazy}
 ```
 
 For `fields` and `sort`, use only exact, case-sensitive source element names
@@ -130,9 +130,10 @@ disabled for list display. ContentBuilder simply omits that column; this state i
 not a syntax error. Fields used by `sort` must still be visible list columns.
 
 `id` identifies the ContentBuilder NG view and is required; project examples use
-view `15`. `fields` filters and orders the displayed columns. `title` replaces
-the visible view title; omit it to keep the configured title, or use the clearer
-`title=hide` to hide it completely. `title=""` remains equivalent. `sort`
+view `15`. `fields` filters and orders the displayed columns. The `title` key of
+`labels`, for example `labels="title=Registration list"`, replaces the visible
+view title and supplies the Card title when `card=` is used. Omit `labels` to
+keep the configured title, or use `hide="title"` to hide either title. `sort`
 defines the initial order, and one `dir="asc"` or `dir="desc"`
 applies to every sorted field. Use one `|`-separated direction per field only
 when mixing directions. `pagination` sets the number of records per page.
@@ -160,7 +161,7 @@ summary chart followed by its detailed registration list:
 
 ```text
 {CBStats id=15 field=Ville output=bar}
-{CBList id=15 fields="Nom|Prenom|Email" title="Registration list" sort="Nom|Prenom" dir="asc"}
+{CBList id=15 fields="Nom|Prenom|Email" labels="title=Registration list" sort="Nom|Prenom" dir="asc"}
 ```
 
 CBStats inserts dynamic statistics from a ContentBuilder NG view into Joomla
@@ -186,7 +187,7 @@ Examples:
 {CBStats id=3 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
 {CBStats id=3 field=RegistrationDate output=line sort=title dir=asc limit=30}
 {CBStats id=3 field=Age output=radar groups="18-29;30-39;40-49;50+"}
-{CBStats id=25 field=Route output=pie labels="title=👥 Total registrations" export=manual}
+{CBStats id=15 field=Route output=pie labels="title=👥 Total registrations" export=manual}
 {CBStats id=3 field=Category output=pie add="Existing=-2;External=3"}
 {CBStats id=3 field=Category output=table titles="1=Group 1;2=Group 2"}
 {CBStats id=3 field=Category output=bar add="1=-2;2=3" titles="1=Group 1;2=Group 2" sort=value dir=desc}
@@ -198,13 +199,13 @@ Examples:
 {CBStats id=3 filter[field]=Status filter[value]="Open*" output=total}
 {CBStats id=3 filter[field]=Status filter[value]="Open* | Pending" output=total}
 {CBStats id=15 filter[field]=Status filter[value]="Open" output=remaining target=200}
-{CBStats idsum=25+27 field="Route" output="table" labels="title=Monticyclo / Montigravel"}
+{CBStats idsum=15+27 field="Route" output="table" labels="title=Monticyclo / Montigravel"}
 {CBStats idsum=31+32+33+34+35 field="Distance" output="bar" labels="title=BRM"}
 ```
 
 ### Merging views with `idsum`
 
-Use `idsum=25+27` instead of `id=` to add statistics from two to five
+Use `idsum=15+27` instead of `id=` to add statistics from two to five
 ContentBuilder NG views. Identifiers are unique positive integers separated by
 `+`; `id` and `idsum` cannot be combined. `field=` is required for every
 `idsum` output, including `output=total`.
@@ -375,16 +376,18 @@ plugin, or a maintained project patch instead.
 ### Limiting CBStats values and hiding result elements
 
 Use `limit` after an existing sort to retain only the first statistical values.
-Use `hide` with `total`, `values` or `graph`, separated by `|`. `total` hides
-the displayed total, `values` hides only the textual labels-and-values list
+Use `hide` with `title`, `total`, `values` or `graph`, separated by `|`. `title`
+hides the block or Card heading defined by `labels="title=..."`, `total` hides
+the displayed total, and `values` hides only the textual labels-and-values list
 below the graph without changing the graph itself, and `graph` hides the
 drawing while retaining that lightweight textual list:
 
 ```text
-{CBStats id=25 field="Town" output="table" sort="value" dir="desc" limit=10}
-{CBStats idsum=25+27 field="Club" output="bar" sort="value" dir="desc" limit=10 hide="total"}
-{CBStats id=25 field="Age" output="histogram" hide="total|values"}
-{CBStats id=25 field="Age" output="radar" hide="graph|total"}
+{CBStats id=15 field="Town" output="table" sort="value" dir="desc" limit=10}
+{CBStats id=15 field="Town" output="table" labels="title=Towns" hide="title" card=v1}
+{CBStats idsum=15+27 field="Club" output="bar" sort="value" dir="desc" limit=10 hide="total"}
+{CBStats id=15 field="Age" output="histogram" hide="total|values"}
+{CBStats id=15 field="Age" output="radar" hide="graph|total"}
 ```
 
 The displayed total and chart percentages are recalculated from the values

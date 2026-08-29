@@ -17,7 +17,7 @@ unexpected internal errors remain generic.
 
 ## Recommended short description — French
 
-**ContentBuilder NG - CBStats - Content - Statistiques** permet d'afficher dans les contenus Joomla des statistiques dynamiques issues des vues ContentBuilder NG au moyen de balises `{CBStats ...}`, ou de publier les sorties de données prises en charge via URL/API. Le plugin gère les totaux, tableaux, agrégats `sum`, `min`, `max` et `avg`, JSON, graphiques Pie, Bar, Histogram, Line et Radar, filtres, tris, groupes de valeurs `groups=`, limites `limit=`, masquage `hide=`, deltas externes signés avec `add=`, libellés de présentation avec `labels=` et libellés de catégories avec `titles=`. Exemples : `{CBStats id=25 field=Age output=avg}` et `{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}`. Les réglages API de la vue ainsi que les permissions STATS et de champ restent appliqués.
+**ContentBuilder NG - CBStats - Content - Statistiques** permet d'afficher dans les contenus Joomla des statistiques dynamiques issues des vues ContentBuilder NG au moyen de balises `{CBStats ...}`, ou de publier les sorties de données prises en charge via URL/API. Le plugin gère les totaux, tableaux, agrégats `sum`, `min`, `max` et `avg`, JSON, graphiques Pie, Bar, Histogram, Line et Radar, filtres, tris, groupes de valeurs `groups=`, limites `limit=`, masquage `hide=`, deltas externes signés avec `add=`, libellés de présentation avec `labels=` et libellés de catégories avec `titles=`. Exemples : `{CBStats id=15 field=Age output=avg}` et `{CBStats id=15 field=Age output=radar groups="18-29;30-39;40-49;50+"}`. Les réglages API de la vue ainsi que les permissions STATS et de champ restent appliqués.
 
 ## Recommended long description — French
 
@@ -26,28 +26,28 @@ CBStats est le plugin de statistiques de ContentBuilder NG. Il interroge de faç
 Exemples :
 
 ```text
-{CBStats id=25 field=Route output=pie add='100 km=-3'}
-{CBStats id=25 field=Route output=table titles='1=Group 1;2=Group 2'}
-{CBStats id=25 field=Route output=bar add='1=-2;2=3' titles='1=Group 1;2=Group 2' sort=value dir=desc}
+{CBStats id=15 field=Route output=pie add='100 km=-3'}
+{CBStats id=15 field=Route output=table titles='1=Group 1;2=Group 2'}
+{CBStats id=15 field=Route output=bar add='1=-2;2=3' titles='1=Group 1;2=Group 2' sort=value dir=desc}
 {CBStats id=15 field=Element-1 filter[field]=Element-2 filter[value]="Dét* | 3 | 4" output=bar}
 {CBStats id=15 field=Element-2 value="Dét* | 3 | 4" output=bar}
 ```
 
 ### Fusion de vues
 
-`idsum=25+27` remplace `id=` pour additionner les statistiques de deux à
+`idsum=15+27` remplace `id=` pour additionner les statistiques de deux à
 cinq vues. Chaque vue applique ses droits, filtres et regroupements avant la
 fusion des libellés exactement identiques. `add=`, `titles=` et le tri
 s’appliquent ensuite au résultat final. Exemples :
 
 ```text
-{CBStats idsum=25+27 field="Parcours" output="table" labels="title=Monticyclo / Montigravel"}
+{CBStats idsum=15+27 field="Parcours" output="table" labels="title=Monticyclo / Montigravel"}
 {CBStats idsum=31+32+33+34+35 field="Distance" output="bar" labels="title=BRM"}
 ```
 
 ## Recommended short description — English
 
-**ContentBuilder NG - CBStats - Content statistics** displays dynamic statistics from ContentBuilder NG views in Joomla content through `{CBStats ...}` tags, or publishes supported data outputs through URL/API requests. It supports totals, tables, `sum`/`min`/`max`/`avg`, JSON, Pie, Bar, Histogram, Line and Radar charts, numeric `groups=`, `limit=`, `hide=`, filtering, sorting, signed external deltas with `add=`, presentation labels with `labels=` and data-category labels with `titles=`. Examples: `{CBStats id=25 field=Age output=avg}` and `{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}`. View API settings and STATS and field permissions remain enforced.
+**ContentBuilder NG - CBStats - Content statistics** displays dynamic statistics from ContentBuilder NG views in Joomla content through `{CBStats ...}` tags, or publishes supported data outputs through URL/API requests. It supports totals, tables, `sum`/`min`/`max`/`avg`, JSON, Pie, Bar, Histogram, Line and Radar charts, numeric `groups=`, `limit=`, `hide=`, filtering, sorting, signed external deltas with `add=`, presentation labels with `labels=` and data-category labels with `titles=`. Examples: `{CBStats id=15 field=Age output=avg}` and `{CBStats id=15 field=Age output=radar groups="18-29;30-39;40-49;50+"}`. View API settings and STATS and field permissions remain enforced.
 
 ## Recommended long description — English
 
@@ -56,27 +56,27 @@ CBStats is the statistics plugin for ContentBuilder NG. It generically queries a
 Examples:
 
 ```text
-{CBStats id=25 field=Route output=pie add='100 km=-3'}
-{CBStats id=25 field=Route output=table titles='1=Group 1;2=Group 2'}
-{CBStats id=25 field=Route output=bar add='1=-2;2=3' titles='1=Group 1;2=Group 2' sort=value dir=desc}
+{CBStats id=15 field=Route output=pie add='100 km=-3'}
+{CBStats id=15 field=Route output=table titles='1=Group 1;2=Group 2'}
+{CBStats id=15 field=Route output=bar add='1=-2;2=3' titles='1=Group 1;2=Group 2' sort=value dir=desc}
 {CBStats id=15 field=Element-1 filter[field]=Element-2 filter[value]="Dét* | 3 | 4" output=bar}
 {CBStats id=15 field=Element-2 value="Dét* | 3 | 4" output=bar}
 ```
 
 ### Merging views
 
-`idsum=25+27` replaces `id=` to add statistics from two to five views. Each
+`idsum=15+27` replaces `id=` to add statistics from two to five views. Each
 view applies permissions, filters and grouping before exactly identical labels
 are merged. `add=`, `titles=` and sorting then apply to the final result.
 
 ```text
-{CBStats idsum=25+27 field="Route" output="table" labels="title=Monticyclo / Montigravel"}
+{CBStats idsum=15+27 field="Route" output="table" labels="title=Monticyclo / Montigravel"}
 {CBStats idsum=31+32+33+34+35 field="Distance" output="bar" labels="title=BRM"}
 ```
 
 ## Recommended short description — German
 
-**ContentBuilder NG - CBStats - Inhalt - Statistiken** zeigt dynamische Statistiken aus ContentBuilder-NG-Ansichten in Joomla-Inhalten über `{CBStats ...}`-Tags an oder veröffentlicht unterstützte Datenausgaben über URL/API-Anfragen. Das Plugin unterstützt Gesamtzahlen, Tabellen, `sum`/`min`/`max`/`avg`, JSON, Kreis-, Balken-, Histogramm-, Linien- und Radardiagramme, numerische `groups=`, `limit=`, `hide=`, Filter, Sortierungen, vorzeichenbehaftete externe Deltas mit `add=`, Darstellungsbezeichnungen mit `labels=` und Datenkategoriebezeichnungen mit `titles=`. Beispiele: `{CBStats id=25 field=Age output=avg}` und `{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}`. API-Einstellungen der Ansicht sowie STATS- und Feldberechtigungen bleiben wirksam.
+**ContentBuilder NG - CBStats - Inhalt - Statistiken** zeigt dynamische Statistiken aus ContentBuilder-NG-Ansichten in Joomla-Inhalten über `{CBStats ...}`-Tags an oder veröffentlicht unterstützte Datenausgaben über URL/API-Anfragen. Das Plugin unterstützt Gesamtzahlen, Tabellen, `sum`/`min`/`max`/`avg`, JSON, Kreis-, Balken-, Histogramm-, Linien- und Radardiagramme, numerische `groups=`, `limit=`, `hide=`, Filter, Sortierungen, vorzeichenbehaftete externe Deltas mit `add=`, Darstellungsbezeichnungen mit `labels=` und Datenkategoriebezeichnungen mit `titles=`. Beispiele: `{CBStats id=15 field=Age output=avg}` und `{CBStats id=15 field=Age output=radar groups="18-29;30-39;40-49;50+"}`. API-Einstellungen der Ansicht sowie STATS- und Feldberechtigungen bleiben wirksam.
 
 ## Recommended long description — German
 
@@ -85,22 +85,22 @@ CBStats ist das Statistik-Plugin für ContentBuilder NG. Es fragt eine Ansicht u
 Beispiele:
 
 ```text
-{CBStats id=25 field=Route output=pie add='100 km=-3'}
-{CBStats id=25 field=Route output=table titles='1=Group 1;2=Group 2'}
-{CBStats id=25 field=Route output=bar add='1=-2;2=3' titles='1=Group 1;2=Group 2' sort=value dir=desc}
+{CBStats id=15 field=Route output=pie add='100 km=-3'}
+{CBStats id=15 field=Route output=table titles='1=Group 1;2=Group 2'}
+{CBStats id=15 field=Route output=bar add='1=-2;2=3' titles='1=Group 1;2=Group 2' sort=value dir=desc}
 {CBStats id=15 field=Element-1 filter[field]=Element-2 filter[value]="Dét* | 3 | 4" output=bar}
 {CBStats id=15 field=Element-2 value="Dét* | 3 | 4" output=bar}
 ```
 
 ### Ansichten zusammenführen
 
-`idsum=25+27` ersetzt `id=`, um Statistiken aus zwei bis fünf Ansichten zu
+`idsum=15+27` ersetzt `id=`, um Statistiken aus zwei bis fünf Ansichten zu
 addieren. Jede Ansicht wendet Berechtigungen, Filter und Gruppierung an, bevor
 exakt gleiche Bezeichnungen zusammengeführt werden. `add=`, `titles=` und die
 Sortierung gelten anschließend für das Endergebnis.
 
 ```text
-{CBStats idsum=25+27 field="Strecke" output="table" labels="title=Monticyclo / Montigravel"}
+{CBStats idsum=15+27 field="Strecke" output="table" labels="title=Monticyclo / Montigravel"}
 {CBStats idsum=31+32+33+34+35 field="Distanz" output="bar" labels="title=BRM"}
 ```
 
@@ -117,7 +117,8 @@ When updating the real plugin:
 
 `limit=10` keeps the first ten values after sorting, then recalculates the
 displayed total and chart percentages from those values. `hide=` accepts
-`total`, `values` and `graph`, combined with `|`: `total` hides the displayed
+`title`, `total`, `values` and `graph`, combined with `|`: `title` hides the
+block or Card heading defined by `labels="title=..."`, `total` hides the displayed
 total, `values` hides the textual labels-and-values list below the graph without
 changing the graph itself, and `graph` hides the drawing but keeps that
 lightweight textual list.
@@ -126,17 +127,18 @@ shown. Hiding all three elements produces a message. The former `total=hide`
 syntax is rejected; use `hide="total"`.
 
 ```text
-{CBStats id=25 field="Town" output="table" sort="value" dir="desc" limit=10}
-{CBStats idsum=25+27 field="Club" output="bar" sort="value" dir="desc" limit=10 hide="total"}
-{CBStats id=25 field="Age" output="histogram" groups="18-29;30-39;40-49;50-59;60+" hide="total|values"}
-{CBStats id=25 field="Age" output="radar" groups="18-29;30-39;40-49;50-59;60+" hide="graph|total"}
-{CBStats id=25 field="RegistrationDate" output="line" sort="value" dir="asc" hide="values"}
+{CBStats id=15 field="Town" output="table" sort="value" dir="desc" limit=10}
+{CBStats idsum=15+27 field="Club" output="bar" sort="value" dir="desc" limit=10 hide="total"}
+{CBStats id=15 field="Age" output="histogram" groups="18-29;30-39;40-49;50-59;60+" hide="total|values"}
+{CBStats id=15 field="Age" output="radar" groups="18-29;30-39;40-49;50-59;60+" hide="graph|total"}
+{CBStats id=15 field="RegistrationDate" output="line" sort="value" dir="asc" hide="values"}
 ```
 
 ### Limite du résultat et affichage du total
 
 `limit=10` conserve les dix premières valeurs après le tri. `hide=` accepte
-`total`, `values` et `graph`, combinés avec `|`. `total` masque le Total,
+`title`, `total`, `values` et `graph`, combinés avec `|`. `title` masque le titre
+du bloc ou de la Card défini par `labels="title=..."`, `total` masque le Total,
 `values` masque la liste textuelle des libellés et valeurs sous le graphique
 sans modifier le graphique lui-même, et `graph` masque le dessin tout en
 conservant cette liste textuelle légère. Sans `hide=`, tout
@@ -144,16 +146,17 @@ est affiché. Masquer les trois éléments produit un message. L’ancienne synt
 `total=hide` est refusée ; utilisez `hide="total"`.
 
 ```text
-{CBStats id=25 field="Ville" output="table" sort="value" dir="desc" limit=10}
-{CBStats idsum=25+27 field="Club" output="bar" sort="value" dir="desc" limit=10 hide="total"}
-{CBStats id=25 field="Age" output="radar" hide="graph|total"}
-{CBStats id=25 field="DateInscription" output="line" hide="values"}
+{CBStats id=15 field="Ville" output="table" sort="value" dir="desc" limit=10}
+{CBStats idsum=15+27 field="Club" output="bar" sort="value" dir="desc" limit=10 hide="total"}
+{CBStats id=15 field="Age" output="radar" hide="graph|total"}
+{CBStats id=15 field="DateInscription" output="line" hide="values"}
 ```
 
 ### Ergebnisbegrenzung und Summenanzeige
 
 `limit=10` behält die ersten zehn Werte nach der Sortierung. `hide=` akzeptiert
-`total`, `values` und `graph`, mit `|` kombiniert. `total` blendet die Summe
+`title`, `total`, `values` und `graph`, mit `|` kombiniert. `title` blendet den
+mit `labels="title=..."` definierten Block- oder Card-Titel aus, `total` die Summe
 aus, `values` blendet nur die textuelle Beschriftungs- und Werteliste unter der
 Grafik aus, ohne die Grafik zu ändern, und `graph` blendet die Zeichnung aus und
 behält diese leichte Textliste bei. Ohne

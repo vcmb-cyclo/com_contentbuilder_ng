@@ -6,6 +6,7 @@
         <field name="type" type="list" label="COM_CONTENTBUILDERNG_DATASETS_TYPE" description="COM_CONTENTBUILDERNG_DATASETS_TYPE_DESC" required="true" default="titles">
             <option value="titles">COM_CONTENTBUILDERNG_DATASETS_TYPE_TITLES</option>
             <option value="groups">COM_CONTENTBUILDERNG_DATASETS_TYPE_GROUPS</option>
+            <option value="config">COM_CONTENTBUILDERNG_DATASETS_TYPE_CONFIG</option>
         </field>
         <field name="comments" type="textarea" label="COM_CONTENTBUILDERNG_TITLESETS_COMMENTS" description="COM_CONTENTBUILDERNG_TITLESETS_COMMENTS_DESC" rows="3" />
         <field name="modified" type="hidden" />
@@ -25,4 +26,37 @@
             </form>
         </field>
     </fieldset>
+    <fields name="config">
+    <fieldset name="config_labels" label="COM_CONTENTBUILDERNG_CONFIG_SECTION_LABELS">
+        <field name="title" type="text" label="COM_CONTENTBUILDERNG_CONFIG_TITLE" description="COM_CONTENTBUILDERNG_CONFIG_TITLE_DESC" />
+        <field name="category" type="text" label="COM_CONTENTBUILDERNG_CONFIG_CATEGORY" description="COM_CONTENTBUILDERNG_CONFIG_CATEGORY_DESC" />
+        <field name="value" type="text" label="COM_CONTENTBUILDERNG_CONFIG_VALUE" description="COM_CONTENTBUILDERNG_CONFIG_VALUE_DESC" />
+        <field name="total" type="text" label="COM_CONTENTBUILDERNG_CONFIG_TOTAL" description="COM_CONTENTBUILDERNG_CONFIG_TOTAL_DESC" />
+    </fieldset>
+    <fieldset name="config_presentation" label="COM_CONTENTBUILDERNG_CONFIG_SECTION_PRESENTATION">
+        <field name="background" type="text" label="COM_CONTENTBUILDERNG_CONFIG_BACKGROUND" description="COM_CONTENTBUILDERNG_CONFIG_BACKGROUND_DESC" />
+        <field name="card" type="text" label="COM_CONTENTBUILDERNG_CONFIG_CARD" description="COM_CONTENTBUILDERNG_CONFIG_CARD_DESC" />
+        <field name="w" type="list" label="COM_CONTENTBUILDERNG_CONFIG_CARD_WIDTH" description="COM_CONTENTBUILDERNG_CONFIG_CARD_WIDTH_DESC">
+            <option value="">JNONE</option>
+            <option value="33">33</option>
+            <option value="66">66</option>
+            <option value="100">100</option>
+        </field>
+        <field name="width" type="text" label="COM_CONTENTBUILDERNG_CONFIG_WIDTH" description="COM_CONTENTBUILDERNG_CONFIG_WIDTH_DESC" />
+        <field name="height" type="text" label="COM_CONTENTBUILDERNG_CONFIG_HEIGHT" description="COM_CONTENTBUILDERNG_CONFIG_HEIGHT_DESC" />
+    </fieldset>
+    <fieldset name="config_display" label="COM_CONTENTBUILDERNG_CONFIG_SECTION_DISPLAY">
+        <field name="hide" type="text" label="COM_CONTENTBUILDERNG_CONFIG_HIDE" description="COM_CONTENTBUILDERNG_CONFIG_HIDE_DESC" />
+        <field name="sort" type="list" label="COM_CONTENTBUILDERNG_CONFIG_SORT" description="COM_CONTENTBUILDERNG_CONFIG_SORT_DESC" default="none">
+            <option value="none">COM_CONTENTBUILDERNG_CONFIG_NONE</option>
+            <option value="title">COM_CONTENTBUILDERNG_CONFIG_SORT_TITLE</option>
+            <option value="value">COM_CONTENTBUILDERNG_CONFIG_SORT_VALUE</option>
+        </field>
+        <field name="dir" type="list" label="COM_CONTENTBUILDERNG_CONFIG_DIR" description="COM_CONTENTBUILDERNG_CONFIG_DIR_DESC" default="asc">
+            <option value="asc">COM_CONTENTBUILDERNG_CONFIG_ASC</option>
+            <option value="desc">COM_CONTENTBUILDERNG_CONFIG_DESC</option>
+        </field>
+        <field name="limit" type="number" label="COM_CONTENTBUILDERNG_CONFIG_LIMIT" description="COM_CONTENTBUILDERNG_CONFIG_LIMIT_DESC" min="1" />
+    </fieldset>
+    </fields>
 </form>

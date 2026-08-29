@@ -2110,6 +2110,7 @@
                 cbSetListStateField(row.querySelector('input[name$="[published]"]'), false);
             });
             cbDisableListStateDisplay();
+            cbClearListStatePermissions();
         }
 
         cbHandleDirtyInteraction();

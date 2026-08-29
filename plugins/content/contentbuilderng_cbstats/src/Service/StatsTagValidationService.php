@@ -25,8 +25,8 @@ final class StatsTagValidationService
     private const ALLOWED_KEYS = [
         'source', 'id', 'idsum', 'debug', 'output', 'field', 'filter[field]',
         'filter[value]', 'value', 'add', 'titles', 'titleset', 'groups', 'groupset', 'labels',
-        'background', 'sort', 'dir', 'values', 'export', 'limit', 'hide', 'total',
-        'card', 'w', 'width', 'height', 'target',
+        'background', 'sort', 'dir', 'values', 'export', 'limit', 'hide',
+        'card', 'w', 'width', 'height', 'target', 'config',
     ];
 
     /**
@@ -39,7 +39,12 @@ final class StatsTagValidationService
         $errors = [];
 
         foreach (array_values(array_diff(array_keys($attributes), self::ALLOWED_KEYS)) as $key) {
-            $removed = ['title' => 'labels_title', 'headers' => 'labels_headers', 'total_label' => 'labels_total'];
+            $removed = [
+                'title' => 'labels_title',
+                'headers' => 'labels_headers',
+                'total_label' => 'labels_total',
+                'total' => 'labels_total_or_hide',
+            ];
             $errors[] = isset($removed[$key])
                 ? self::error('removed_option', $key, (string) $attributes[$key], $removed[$key])
                 : self::error('unknown_option', $key, (string) $attributes[$key]);
@@ -132,7 +137,7 @@ final class StatsTagValidationService
             $errors[] = self::error('invalid_value', 'limit', (string) ($attributes['limit'] ?? ''), 'limit');
         }
 
-        if (in_array($output, $allowedOutputs, true)) {
+        if (!array_key_exists('total', $attributes) && in_array($output, $allowedOutputs, true)) {
             try {
                 $hide = StatsHideOptionsService::fromAttributes($attributes);
                 StatsHideOptionsService::validateForOutput($hide, $output);
@@ -165,6 +170,11 @@ final class StatsTagValidationService
             $labels = StatsService::parseFieldStatsLabels((string) ($attributes['labels'] ?? ''));
         } catch (\InvalidArgumentException $exception) {
             $errors[] = self::error('invalid_value', 'labels', $exception->getMessage(), 'labels');
+        }
+
+        $config = trim((string) ($attributes['config'] ?? ''));
+        if ($config !== '' && !\CB\Component\Contentbuilderng\Site\Service\CbStatsTitleSetService::isValidFilename($config)) {
+            $errors[] = self::error('invalid_value', 'config', $config, 'config');
         }
         if ((isset($labels['category']) || isset($labels['value'])) && $output !== 'table') {
             $errors[] = self::error('invalid_value', 'labels', (string) ($attributes['labels'] ?? ''), 'labels_table');

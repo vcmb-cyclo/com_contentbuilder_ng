@@ -103,7 +103,7 @@ Confirmed actions:
 Example:
 
 ```text
-index.php?option=com_contentbuilderng&task=api.display&format=json&action=stats&id=25
+index.php?option=com_contentbuilderng&task=api.display&format=json&action=stats&id=15
 ```
 
 See [JSON API](api-json.md) for permissions and parameters.

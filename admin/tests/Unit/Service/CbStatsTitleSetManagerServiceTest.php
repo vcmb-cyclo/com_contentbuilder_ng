@@ -132,6 +132,103 @@ final class CbStatsTitleSetManagerServiceTest extends TestCase
         self::assertSame('countries-copy-2.ini', $this->service->saveCopy($data));
     }
 
+    public function testSavesLoadsAndListsPresentationConfiguration(): void
+    {
+        $filename = $this->service->save([
+            'filename' => 'vcmb-config.ini',
+            'name' => 'VCMB configuration',
+            'type' => 'config',
+            'config' => [
+                'title' => 'Test option avec Config="',
+                'total' => 'Total des groupes',
+                'background' => '#eef6f8',
+                'card' => 'v1',
+                'w' => '66',
+                'width' => '600',
+                'hide' => 'none',
+                'sort' => 'value',
+                'dir' => 'desc',
+                'limit' => '10',
+            ],
+        ]);
+
+        $loaded = $this->service->load($filename, 'custom');
+        self::assertSame('config', $loaded['type']);
+        self::assertSame('Test option avec Config="', $loaded['config']['title']);
+        self::assertSame('config', $this->service->listFiles()[0]['type']);
+        self::assertStringContainsString('[presentation]', $this->service->getFileContents($filename, 'custom'));
+        self::assertStringContainsString('width="600"', $this->service->getFileContents($filename, 'custom'));
+    }
+
+    public function testValidatesEverySupportedConfigurationField(): void
+    {
+        $result = $this->service->validate([
+            'filename' => 'all-options.ini',
+            'type' => 'config',
+            'config' => [
+                'title' => 'Groups',
+                'category' => 'Group',
+                'value' => 'Registrations',
+                'total' => 'Displayed total',
+                'background' => '#eef6f8',
+                'card' => 'v1',
+                'w' => '66',
+                'width' => '600',
+                'height' => '400px',
+                'hide' => 'total|values',
+                'sort' => 'title',
+                'dir' => 'desc',
+                'limit' => '10',
+            ],
+        ]);
+
+        self::assertTrue($result['valid']);
+        self::assertCount(13, $result['config']);
+    }
+
+    public function testSortByTitleAndLimitAreAValidConfiguration(): void
+    {
+        $result = $this->service->validate([
+            'filename' => 'sorted.ini',
+            'type' => 'config',
+            'config' => ['sort' => 'title', 'dir' => 'asc', 'limit' => '10'],
+        ]);
+
+        self::assertTrue($result['valid']);
+        self::assertSame(
+            ['sort' => 'title', 'dir' => 'asc', 'limit' => '10'],
+            $result['config']
+        );
+    }
+
+    public function testRejectsInvalidValuesForEveryConfigurationRule(): void
+    {
+        foreach ([
+            'title' => 'Invalid;title',
+            'category' => 'Invalid;category',
+            'value' => 'Invalid;value',
+            'total' => 'Invalid;total',
+            'background' => 'rgb(999, 0, 0)',
+            'card' => 'groups',
+            'w' => '75',
+            'width' => '5001px',
+            'height' => '101%',
+            'hide' => 'total,values',
+            'sort' => 'label',
+            'dir' => 'up',
+            'limit' => '0',
+        ] as $key => $value) {
+            $result = $this->service->validate([
+                'filename' => 'invalid-' . $key . '.ini',
+                'type' => 'config',
+                'config' => [$key => $value],
+            ]);
+
+            self::assertFalse($result['valid'], $key);
+            self::assertContains('config_' . $key, $result['errors'], $key);
+        }
+    }
+
     public function testImportsValidIniWithoutOverwritingAndExportsItsContents(): void
     {
         $source = $this->root . '/upload.ini';

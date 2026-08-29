@@ -76,10 +76,12 @@ final class CbStatsValidationServiceTest extends TestCase
             'output' => 'table',
             'title' => 'Groups',
             'headers' => 'Group=Group;Total=Registrations',
+            'total' => 'Displayed total',
         ]);
 
-        self::assertSame(['title', 'headers'], array_column($removed, 'parameter'));
-        self::assertSame(['removed_option', 'removed_option'], array_column($removed, 'code'));
+        self::assertSame(['title', 'headers', 'total'], array_column($removed, 'parameter'));
+        self::assertSame(['removed_option', 'removed_option', 'removed_option'], array_column($removed, 'code'));
+        self::assertSame('labels_total_or_hide', $removed[2]['detail']);
     }
 
     public function testPresentationLabelScopesAreStrict(): void

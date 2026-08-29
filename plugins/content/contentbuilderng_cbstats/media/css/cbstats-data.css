@@ -5,6 +5,10 @@
     background-color: var(--cbstats-background, var(--bs-body-bg, transparent));
 }
 
+.cbstats-title {
+    text-align: center;
+}
+
 .table.cbstats-table {
     width: max-content;
     max-width: 100%;

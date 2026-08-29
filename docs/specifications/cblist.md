@@ -4,7 +4,7 @@
 
 `card=h1` à `card=h6` et `card=v1` à `card=v6` utilisent la Card CSS commune
 ContentBuilder NG. Sans `card`, le rendu reste inchangé. Le bandeau reprend
-uniquement un `title=` explicite et non vide, sans dupliquer le titre intérieur.
+uniquement une clé `title` explicite dans `labels=` et si `hide="title"` est absent, sans dupliquer le titre intérieur.
 `card` est incompatible avec `output=value`.
 Le titre des variantes H et V est horizontal et placé au-dessus du contenu.
 Les variantes V sont compactes et juxtaposables ; elles passent en pleine
@@ -15,8 +15,8 @@ n'est valide qu'avec `card=`. Sans `w=`, V vaut 33 et H vaut 100. Sur petit
 écran, toutes les Cards occupent 100 %. `w` est incompatible avec
 `output=value`, comme `card`.
 
-Exemple : `{CBList id=15 title="Inscriptions" card=h1}`.
-Exemple : `{CBList id=15 title="Inscriptions" card=v2 w=66}`.
+Exemple : `{CBList id=15 labels="title=Inscriptions" card=h1}`.
+Exemple : `{CBList id=15 labels="title=Inscriptions" card=v2 w=66}`.
 
 ## 1. Statut du document
 
@@ -26,7 +26,7 @@ les assistants de développement (Codex, Claude ou autre).
 - Projet : ContentBuilder NG
 - Statut : implémentée et évolutive
 - Version du document : 1.4
-- Dernière mise à jour : 2026-08-20
+- Dernière mise à jour : 2026-08-28
 - Version d'introduction : ContentBuilder NG 6.1.9-RC05
 - Version de l'option `limit` : ContentBuilder NG 6.1.10-RC01
 - Version de la pagination compacte : ContentBuilder NG 6.1.10-RC02
@@ -87,7 +87,7 @@ Syntaxe minimale :
 Syntaxe complète représentative :
 
 ```text
-{CBList id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 limit=10 actions="detail|edit|export" layout=cards height=700 loading=lazy}
+{CBList id=15 fields="Nom|Prenom|Email" labels="title=Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 limit=10 actions="detail|edit|export" layout=cards height=700 loading=lazy}
 ```
 
 Règles lexicales :
@@ -153,15 +153,22 @@ But : réduire les colonnes visibles et fixer leur ordre.
 - Tous les sélecteurs inconnus sont signalés au cours de la même validation.
 - En présence d'une erreur, aucune liste ni donnée ne doit être affichée.
 
-### 5.3 `title` — facultatif
+### 5.3 `labels` — facultatif
 
-- Option absente : conserver le titre configuré dans la vue.
-- `title="Liste des inscrits"` : remplacer le titre visible.
-- `title=hide` : masquer le titre visible.
-- `title=""` : équivalent de `title=hide`.
-- Le mot `hide` n'est pas sensible à la casse.
-- Même si le titre visible est masqué, l'iframe conserve un titre accessible
-  traduit indiquant l'identifiant de la vue.
+- Option absente ou vide : conserver le titre configuré dans la vue.
+- `labels="title=Liste des inscrits"` : remplacer le titre visible.
+- `hide="title"` : masquer le titre visible, y compris le titre d’une Card.
+- La seule clé autorisée est `title`. Elle est insensible à la casse, unique et
+  sa valeur ne peut pas être vide.
+- La valeur `title` de `hide=` n'est pas sensible à la casse.
+- `hide=` accepte uniquement `title`. Les éléments sont séparés par `|`, selon
+  la même convention que CBStats ; une valeur vide ou inconnue est refusée.
+- Une clé inconnue, dupliquée, mal formée ou vide est refusée.
+- L’ancienne option `title=` est supprimée sans alias et son erreur indique la
+  syntaxe `labels="title=..."` attendue.
+- Même si le titre visible est masqué, l'iframe conserve un titre accessible :
+  le libellé `title` fourni, ou le libellé traduit indiquant l’identifiant de la
+  vue lorsqu’aucun titre n’est défini.
 
 ### 5.4 `sort` et `dir` — facultatifs
 
@@ -255,7 +262,7 @@ ACL et visibilité → recherche et filtres → tri effectif → limit → pagin
 Exemple avec recherche et pagination :
 
 ```text
-{CBList id=15 fields="Nom|Prenom|Email" title=hide sort=Prenom dir=asc pagination=3 actions=search limit=10}
+{CBList id=15 fields="Nom|Prenom|Email" hide="title" sort=Prenom dir=asc pagination=3 actions=search limit=10}
 ```
 
 ### 5.7 `output=value` et `offset` — facultatifs
@@ -278,7 +285,7 @@ But : insérer directement la valeur texte d'un unique champ, sans iframe.
 - Aucun résultat ou une valeur absente ne produit aucune sortie.
 - `offset` sans `output=value` est invalide.
 - Avec `output=value`, les options de présentation `pagination`, `actions`,
-  `title`, `layout`, `height` et `loading` sont invalides, même avec leur valeur
+  `labels`, `hide`, `layout`, `height` et `loading` sont invalides, même avec leur valeur
   par défaut. L'erreur cite toujours l'option et la valeur reçue.
 
 Exemples :
@@ -380,7 +387,7 @@ Option absente : conserver la mise en page normale de la vue.
 Les seules options autorisées sont :
 
 ```text
-id, height, pagination, limit, layout, loading, fields, actions, title, sort, dir, output, offset
+id, height, pagination, limit, layout, loading, fields, actions, labels, hide, sort, dir, output, offset, card, w
 ```
 
 Une option analysée mais inconnue est une erreur. La validation doit être
@@ -495,7 +502,7 @@ par des tests automatisés et si les invariants suivants restent vrais :
 12. `actions` ne peut jamais étendre les ACL.
 13. Le vocabulaire des actions est exhaustif et les termes inconnus sont refusés.
 14. Le contexte des champs et actions survit aux parcours autorisés.
-15. `title=hide` et `title=""` masquent le titre visible sans supprimer le titre
+15. `hide="title"` masque le titre visible, y compris celui d’une Card, sans supprimer le titre
     accessible de l'iframe.
 16. Le cadre respecte sa hauteur minimale, grandit et rétrécit avec le contenu,
     notamment entre une avant-dernière page remplie et une dernière page courte,
@@ -605,3 +612,6 @@ Pour CBList, CBStats ou une future balise, l'ordre normal est :
 Ce processus n'interdit pas les ajustements découverts pendant le développement,
 mais chaque ajustement doit revenir dans le contrat et les tests afin d'éviter que
 le code devienne la seule spécification.
+# Case rules
+
+The `{CBList ...}` tag name, option names and technical enumerated values are case-insensitive. User data remains case-sensitive: field names, filter values and labels are preserved and matched exactly.

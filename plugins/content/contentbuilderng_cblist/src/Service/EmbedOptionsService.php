@@ -26,7 +26,8 @@ final class EmbedOptionsService
         'loading',
         'fields',
         'actions',
-        'title',
+        'labels',
+        'hide',
         'sort',
         'dir',
         'output',
@@ -45,7 +46,9 @@ final class EmbedOptionsService
         $errors = [];
 
         foreach (array_values(array_diff(array_keys($attributes), self::ALLOWED_KEYS)) as $key) {
-            $errors[] = self::error('unknown_option', $key, (string) $attributes[$key]);
+            $errors[] = $key === 'title'
+                ? self::error('removed_option', $key, (string) $attributes[$key], 'labels_title')
+                : self::error('unknown_option', $key, (string) $attributes[$key]);
         }
 
         foreach (['id', 'height', 'pagination', 'limit', 'offset', 'w'] as $numericKey) {
@@ -132,8 +135,20 @@ final class EmbedOptionsService
             $errors[] = self::error('invalid_value', 'fields', (string) ($attributes['fields'] ?? ''), 'fields');
         }
 
+        try {
+            self::parseLabels((string) ($attributes['labels'] ?? ''));
+        } catch (\InvalidArgumentException $exception) {
+            $errors[] = self::error('invalid_value', 'labels', $exception->getMessage(), 'labels');
+        }
+
+        try {
+            self::parseHide(array_key_exists('hide', $attributes) ? (string) $attributes['hide'] : null);
+        } catch (\InvalidArgumentException $exception) {
+            $errors[] = self::error('invalid_value', 'hide', $exception->getMessage(), 'hide');
+        }
+
         if ($output === 'value') {
-            foreach (['pagination', 'actions', 'title', 'layout', 'height', 'loading', 'card', 'w'] as $incompatibleKey) {
+            foreach (['pagination', 'actions', 'labels', 'hide', 'layout', 'height', 'loading', 'card', 'w'] as $incompatibleKey) {
                 if (array_key_exists($incompatibleKey, $attributes)) {
                     $errors[] = self::error(
                         'invalid_value',
@@ -205,7 +220,8 @@ final class EmbedOptionsService
      *     sort: string,
      *     sort_direction: non-empty-string,
      *     title: string,
-     *     title_set: bool,
+     *     labels_set: bool,
+     *     hide_title: bool,
      *     output: 'list'|'value',
      *     offset: int,
      *     card: string,
@@ -285,10 +301,9 @@ final class EmbedOptionsService
             throw new \InvalidArgumentException('dir');
         }
 
-        $title = trim((string) ($attributes['title'] ?? ''));
-        if (strcasecmp($title, 'hide') === 0) {
-            $title = '';
-        }
+        $labels = self::parseLabels((string) ($attributes['labels'] ?? ''));
+        $title = (string) ($labels['title'] ?? '');
+        $hide = self::parseHide(array_key_exists('hide', $attributes) ? (string) $attributes['hide'] : null);
 
         return [
             'id' => $id,
@@ -302,7 +317,8 @@ final class EmbedOptionsService
             'sort' => $sort,
             'sort_direction' => $sortDirection,
             'title' => $title,
-            'title_set' => array_key_exists('title', $attributes),
+            'labels_set' => isset($labels['title']),
+            'hide_title' => $hide['title'],
             'output' => $output,
             'offset' => $offset,
             'card' => $card,
@@ -357,6 +373,58 @@ final class EmbedOptionsService
         }
 
         return $selectors;
+    }
+
+    /**
+     * @return array{title?: string}
+     */
+    private static function parseLabels(string $labels): array
+    {
+        $labels = trim($labels);
+
+        if ($labels === '') {
+            return [];
+        }
+
+        $mappings = [];
+
+        foreach (explode(';', $labels) as $entry) {
+            $parts = explode('=', $entry, 2);
+            $key = strtolower(trim((string) ($parts[0] ?? '')));
+            $display = trim((string) ($parts[1] ?? ''));
+
+            if (count($parts) !== 2 || $key !== 'title' || $display === '' || isset($mappings[$key])) {
+                throw new \InvalidArgumentException(trim($entry));
+            }
+
+            $mappings[$key] = $display;
+        }
+
+        return $mappings;
+    }
+
+    /**
+     * @return array{title: bool}
+     */
+    private static function parseHide(?string $hide): array
+    {
+        if ($hide === null) {
+            return ['title' => false];
+        }
+
+        $hide = trim(html_entity_decode(rawurldecode($hide), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+
+        if ($hide === '' || str_contains($hide, ',') || str_contains($hide, ';')) {
+            throw new \InvalidArgumentException($hide);
+        }
+
+        foreach (explode('|', $hide) as $item) {
+            if (strtolower(trim($item)) !== 'title') {
+                throw new \InvalidArgumentException(trim($item));
+            }
+        }
+
+        return ['title' => true];
     }
 
     private static function positiveInteger(string $value): ?int

@@ -530,6 +530,20 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             } elseif ($entryPointEnabled && !$hasAuditIssue) {
                 $stateClass = 'cb-template-state is-filled';
                 $stateTipKey = 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_ACTIVE';
+            } elseif (!$required && !$entryPointEnabled) {
+                $badge = '';
+                if ($locked) {
+                    $lockTip = Text::_('COM_CONTENTBUILDERNG_TAB_TEMPLATE_LOCKED');
+                    $badge = ' <span class="cb-template-state is-locked ms-1" aria-hidden="true" title="'
+                        . htmlspecialchars($lockTip, ENT_QUOTES, 'UTF-8') . '"></span>'
+                        . '<span class="visually-hidden">' . htmlspecialchars($lockTip, ENT_QUOTES, 'UTF-8') . '</span>';
+                }
+
+                return [
+                    'badge' => $badge,
+                    'tipKey' => 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_INACTIVE_EMPTY',
+                    'locked' => $locked,
+                ];
             } elseif ($filled || $required) {
                 $stateClass = 'cb-template-state is-incomplete';
                 $stateTipKey = 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_INCOMPLETE';
