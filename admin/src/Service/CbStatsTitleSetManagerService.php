@@ -468,11 +468,12 @@ final class CbStatsTitleSetManagerService
         }
 
         if ($type === 'config') {
-            foreach ([
+            $sections = [
                 'labels' => ['title', 'category', 'value', 'total'],
                 'presentation' => ['background', 'card', 'w', 'width', 'height'],
                 'display' => ['hide', 'sort', 'dir', 'limit'],
-            ] as $section => $keys) {
+            ];
+            foreach ($sections as $section => $keys) {
                 $sectionValues = array_intersect_key($config, array_flip($keys));
                 if ($sectionValues === []) {
                     continue;
