@@ -25,7 +25,7 @@ final class StatsService
     public const CBSTATS_ERROR_INVALID_ADD = 1001;
     public const CBSTATS_ERROR_INVALID_GROUPS = 1002;
     public const CBSTATS_ERROR_INVALID_TITLES = 1004;
-    public const CBSTATS_ERROR_INVALID_HEADERS = 1005;
+    public const CBSTATS_ERROR_INVALID_LABELS = 1005;
 
     public function __construct(private readonly DatabaseInterface $db)
     {
@@ -714,11 +714,32 @@ final class StatsService
     }
 
     /**
-     * @return array<int|string,string>
+     * @return array<string,string>
      */
-    public static function parseFieldStatsHeaders(string $headers): array
+    public static function parseFieldStatsLabels(string $labels): array
     {
-        return self::parseFieldStatsMappings($headers, true, self::CBSTATS_ERROR_INVALID_HEADERS);
+        $labels = trim($labels);
+
+        if ($labels === '') {
+            return [];
+        }
+
+        $mappings = [];
+        $allowed = ['title', 'category', 'value', 'total'];
+
+        foreach (explode(';', $labels) as $entry) {
+            $parts = explode('=', $entry, 2);
+            $key = strtolower(trim((string) ($parts[0] ?? '')));
+            $display = trim((string) ($parts[1] ?? ''));
+
+            if (count($parts) !== 2 || !in_array($key, $allowed, true) || $display === '' || isset($mappings[$key])) {
+                throw new \InvalidArgumentException(trim($entry), self::CBSTATS_ERROR_INVALID_LABELS);
+            }
+
+            $mappings[$key] = $display;
+        }
+
+        return $mappings;
     }
 
     /**

@@ -1,6 +1,6 @@
 # Templates et personnalisation
 
-La syntaxe CBStats documentée ici correspond à ContentBuilder NG 6.1.12.
+La syntaxe CBStats documentée ici correspond à ContentBuilder NG 6.1.13.
 
 `groupset="ages-fr-FR.ini"` charge des groupes de valeurs réutilisables depuis
 les mêmes répertoires sécurisés que `titleset`. Les clés de sa section
@@ -145,7 +145,7 @@ personnalisation CBList :
 Exemple réaliste avec les principales options :
 
 ```text
-{CBList id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 limit=10 actions="detail|edit|export" layout=cards height=700 loading=lazy}
+{CBList id=15 fields="Nom|Prenom|Email" labels="title=Liste des inscrits" sort="Nom|Prenom" dir="asc" pagination=25 limit=10 actions="detail|edit|export" layout=cards height=700 loading=lazy}
 ```
 
 Pour `fields` et `sort`, utilisez uniquement les noms source exacts des éléments,
@@ -159,9 +159,11 @@ doivent toujours être des colonnes visibles de la liste.
 
 `id` identifie la vue ContentBuilder NG et reste obligatoire ; les exemples du
 projet utilisent la vue `15`. `fields` filtre et ordonne les colonnes affichées.
-`title` remplace le titre visible de la vue ; omettez-le pour conserver le titre
-configuré, ou utilisez la forme plus explicite `title=hide` pour le masquer
-complètement. `title=""` reste équivalent. `sort` définit le tri initial :
+La clé `title` de `labels`, par exemple `labels="title=Liste des inscrits"`,
+remplace le titre visible de la vue et fournit le titre de la Card avec `card=`.
+Omettez `labels` pour conserver le titre configuré. Utilisez `hide="title"` pour
+masquer l’un ou l’autre titre.
+`sort` définit le tri initial :
 une seule valeur `dir="asc"` ou `dir="desc"` s’applique à tous les champs triés.
 Indiquez une direction par champ, séparée par `|`, uniquement pour mélanger les
 directions. `pagination` fixe le nombre d’enregistrements par page. `limit`
@@ -191,7 +193,7 @@ graphique de synthèse suivi de la liste détaillée des inscrits :
 
 ```text
 {CBStats id=15 field=Ville output=bar}
-{CBList id=15 fields="Nom|Prenom|Email" title="Liste des inscrits" sort="Nom|Prenom" dir="asc"}
+{CBList id=15 fields="Nom|Prenom|Email" labels="title=Liste des inscrits" sort="Nom|Prenom" dir="asc"}
 ```
 
 CBStats insère dans les contenus Joomla des statistiques dynamiques provenant
@@ -204,38 +206,38 @@ d'une vue ContentBuilder NG. Sa syntaxe générale est :
 Exemples :
 
 ```text
-{CBStats id=25 output=total}
+{CBStats id=15 output=total}
 {CBStats id=15 output=remaining target=200}
 {CBStats id=15 field=Civilite value="H" output=percentage}
 {CBStats id=15 output=progress target=200}
-{CBStats id=25 output=view_name}
-{CBStats id=25 field=Parcours output=table}
-{CBStats id=25 field=Parcours output=json sort=title dir=asc}
-{CBStats id=25 field=Parcours output=pie sort=value dir=desc}
-{CBStats id=25 field=Parcours output=bar sort=value dir=desc}
-{CBStats id=25 field=Age output=avg}
-{CBStats id=25 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
-{CBStats id=25 field=DateInscription output=line sort=title dir=asc limit=30}
-{CBStats id=25 field=Age output=radar groups="18-29;30-39;40-49;50+"}
-{CBStats id=25 field=Parcours output=pie title="👥 Total des inscrits" export=manual}
-{CBStats id=25 field=Catégorie output=pie add="Existant=-2;Externe=3"}
-{CBStats id=25 field=Catégorie output=table titles="1=Groupe 1;2=Groupe 2"}
-{CBStats id=25 field=Catégorie output=bar add="1=-2;2=3" titles="1=Groupe 1;2=Groupe 2" sort=value dir=desc}
-{CBStats id=25 field=Departement value="78|60" output=distinct}
-{CBStats id=25 field=Parcours output=sum}
-{CBStats id=25 field=Parcours output=min}
-{CBStats id=25 field=Parcours output=max}
-{CBStats id=25 filter[field]=Statut filter[value]="Ouvert" output=total}
-{CBStats id=25 filter[field]=Statut filter[value]="Ouvert*" output=total}
-{CBStats id=25 filter[field]=Statut filter[value]="Ouvert* | En attente" output=total}
+{CBStats id=15 output=view_name}
+{CBStats id=15 field=Parcours output=table}
+{CBStats id=15 field=Parcours output=json sort=title dir=asc}
+{CBStats id=15 field=Parcours output=pie sort=value dir=desc}
+{CBStats id=15 field=Parcours output=bar sort=value dir=desc}
+{CBStats id=15 field=Age output=avg}
+{CBStats id=15 field=Age output=histogram groups="18-29;30-39;40-49;50+"}
+{CBStats id=15 field=DateInscription output=line sort=title dir=asc limit=30}
+{CBStats id=15 field=Age output=radar groups="18-29;30-39;40-49;50+"}
+{CBStats id=15 field=Parcours output=pie labels="title=👥 Total des inscrits" export=manual}
+{CBStats id=15 field=Catégorie output=pie add="Existant=-2;Externe=3"}
+{CBStats id=15 field=Catégorie output=table titles="1=Groupe 1;2=Groupe 2"}
+{CBStats id=15 field=Catégorie output=bar add="1=-2;2=3" titles="1=Groupe 1;2=Groupe 2" sort=value dir=desc}
+{CBStats id=15 field=Departement value="78|60" output=distinct}
+{CBStats id=15 field=Parcours output=sum}
+{CBStats id=15 field=Parcours output=min}
+{CBStats id=15 field=Parcours output=max}
+{CBStats id=15 filter[field]=Statut filter[value]="Ouvert" output=total}
+{CBStats id=15 filter[field]=Statut filter[value]="Ouvert*" output=total}
+{CBStats id=15 filter[field]=Statut filter[value]="Ouvert* | En attente" output=total}
 {CBStats id=15 filter[field]=Statut filter[value]="Ouvert" output=remaining target=200}
-{CBStats idsum=25+27 field="Parcours" output="table" title="Monticyclo / Montigravel"}
-{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" title="BRM"}
+{CBStats idsum=15+27 field="Parcours" output="table" labels="title=Monticyclo / Montigravel"}
+{CBStats idsum=31+32+33+34+35 field="Distance" output="bar" labels="title=BRM"}
 ```
 
 ### Fusionner des vues avec `idsum`
 
-Utiliser `idsum=25+27` à la place de `id=` pour additionner les statistiques
+Utiliser `idsum=15+27` à la place de `id=` pour additionner les statistiques
 de deux à cinq vues ContentBuilder NG. Les identifiants sont des entiers
 positifs uniques séparés par `+` ; `id` et `idsum` ne peuvent pas être combinés.
 `field=` est obligatoire pour tous les outputs `idsum`, y compris
@@ -419,16 +421,18 @@ Une mise à jour peut remplacer ces fichiers.
 ### Limiter les valeurs CBStats et masquer des éléments
 
 Utilisez `limit` après un tri existant pour ne conserver que les premières
-valeurs statistiques. Utilisez `hide` avec `total`, `values` ou `graph`, séparés
-par `|`. `total` masque le Total affiché, `values` masque uniquement la liste
+valeurs statistiques. Utilisez `hide` avec `title`, `total`, `values` ou `graph`,
+séparés par `|`. `title` masque le titre du bloc ou de la Card défini par
+`labels="title=..."`, `total` masque le Total affiché et `values` masque la liste
 textuelle des libellés et valeurs sous le graphique sans modifier le graphique,
 et `graph` masque le dessin tout en conservant cette liste textuelle légère :
 
 ```text
-{CBStats id=25 field="Ville" output="table" sort="value" dir="desc" limit=10}
-{CBStats idsum=25+27 field="Club" output="bar" sort="value" dir="desc" limit=10 hide="total"}
-{CBStats id=25 field="Age" output="histogram" hide="total|values"}
-{CBStats id=25 field="Age" output="radar" hide="graph|total"}
+{CBStats id=15 field="Ville" output="table" sort="value" dir="desc" limit=10}
+{CBStats id=15 field="Ville" output="table" labels="title=Villes" hide="title" card=v1}
+{CBStats idsum=15+27 field="Club" output="bar" sort="value" dir="desc" limit=10 hide="total"}
+{CBStats id=15 field="Age" output="histogram" hide="total|values"}
+{CBStats id=15 field="Age" output="radar" hide="graph|total"}
 ```
 
 Le total affiché et les pourcentages des graphiques sont recalculés sur les

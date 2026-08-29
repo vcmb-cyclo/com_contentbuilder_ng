@@ -247,8 +247,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         const single = identifiers.length === 1 ? identifiers[0] : null;
         if (task === 'titlesets.duplicateSelected') {
-            if (!single || single.source !== 'provided') { window.alert(<?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_TITLESETS_SELECT_ONE_CBSTATS'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>); return false; }
-            window.location.href = 'index.php?option=com_contentbuilderng&view=titleset&source=provided&duplicate=1&filename=' + encodeURIComponent(single.filename);
+            if (!single || !['provided', 'custom'].includes(single.source)) { window.alert(<?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_TITLESETS_SELECT_ONE_CBSTATS'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>); return false; }
+            const duplicateMode = single.source === 'provided' ? '&duplicate=1' : '&copy=1';
+            window.location.href = 'index.php?option=com_contentbuilderng&view=titleset&source=' + encodeURIComponent(single.source) + duplicateMode + '&filename=' + encodeURIComponent(single.filename);
             return true;
         }
         if (task === 'titlesets.editSelected' || task === 'titlesets.copySelected') {

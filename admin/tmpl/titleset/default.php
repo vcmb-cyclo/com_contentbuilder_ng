@@ -36,6 +36,19 @@ use Joomla\CMS\Router\Route;
     </div>
     <div class="card"><div class="card-header"><h2 class="h4 mb-0"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_MAPPINGS'); ?></h2></div>
         <div class="card-body table-responsive">
+            <?php if (($this->data['type'] ?? '') === 'config') : ?>
+                <?php foreach (['labels', 'presentation', 'display'] as $section) : ?>
+                    <h3 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_CONFIG_SECTION_' . strtoupper($section)); ?></h3>
+                    <dl class="row">
+                    <?php foreach ((array) ($this->data['config'] ?? []) as $key => $value) : ?>
+                        <?php if (in_array($key, match ($section) { 'labels' => ['title','category','value','total'], 'presentation' => ['background','card','width','height'], default => ['hide','sort','dir','limit'] }, true)) : ?>
+                            <dt class="col-sm-3"><code><?php echo htmlspecialchars((string) $key, ENT_QUOTES, 'UTF-8'); ?></code></dt>
+                            <dd class="col-sm-9"><?php echo htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'); ?></dd>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                    </dl>
+                <?php endforeach; ?>
+            <?php else : ?>
             <table class="table table-striped mb-0">
                 <thead><tr>
                     <th><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_ORIGINAL_VALUE'); ?></th>
@@ -50,6 +63,7 @@ use Joomla\CMS\Router\Route;
                 <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -75,11 +89,21 @@ use Joomla\CMS\Router\Route;
         </div>
     </div>
 
-    <div class="card">
+    <div class="card" data-cbstats-editor="mappings">
         <div class="card-header">
             <h2 class="h4 mb-0"><?php echo Text::_('COM_CONTENTBUILDERNG_TITLESETS_MAPPINGS'); ?></h2>
         </div>
         <div class="card-body"><?php echo $this->form->renderFieldset('titles'); ?></div>
+    </div>
+
+    <div data-cbstats-editor="config">
+        <div class="alert alert-info"><?php echo Text::_('COM_CONTENTBUILDERNG_CONFIG_LABELS_SYNTAX_HELP'); ?></div>
+        <?php foreach (['config_labels', 'config_presentation', 'config_display'] as $fieldset) : ?>
+            <div class="card mb-3">
+                <div class="card-header"><h2 class="h4 mb-0"><?php echo Text::_('COM_CONTENTBUILDERNG_CONFIG_SECTION_' . strtoupper(substr($fieldset, 7))); ?></h2></div>
+                <div class="card-body"><?php echo $this->form->renderFieldset($fieldset); ?></div>
+            </div>
+        <?php endforeach; ?>
     </div>
 
     <input type="hidden" name="task" value="">
@@ -104,6 +128,19 @@ document.addEventListener('DOMContentLoaded', function () {
         Joomla.submitform(task, form);
         return true;
     };
+    const type = document.getElementById('jform_type');
+    const updateEditor = function () {
+        const isConfig = type?.value === 'config';
+        document.querySelector('[data-cbstats-editor="mappings"]')?.classList.toggle('d-none', isConfig);
+        document.querySelector('[data-cbstats-editor="config"]')?.classList.toggle('d-none', !isConfig);
+        const name = document.getElementById('jform_name');
+        const comments = document.getElementById('jform_comments');
+        name?.closest('.control-group')?.classList.toggle('d-none', isConfig);
+        comments?.closest('.control-group')?.classList.toggle('d-none', isConfig);
+        if (name) name.required = !isConfig;
+    };
+    type?.addEventListener('change', updateEditor);
+    updateEditor();
 });
 </script>
 <?php endif; ?>

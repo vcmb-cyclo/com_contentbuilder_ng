@@ -9,21 +9,25 @@ ou le nombre de colonnes de l'article.
 La syntaxe commune est `card=h1` à `card=h6`, ou `card=v1` à `card=v6`. Les
 classes sont `cb-card`, `cb-card-header`, `cb-card-body`, `cb-card-h1` à
 `cb-card-h6` et `cb-card-v1` à `cb-card-v6`. Un header est créé uniquement si
-un `title=` explicite contient du texte. Pour toutes les variantes H et V, le
+une clé `title` explicite dans `labels=` contient du texte et `hide="title"` est absent. Pour toutes les variantes H et V, le
 titre reste horizontal et placé au-dessus du contenu. Les variantes H occupent
 la largeur disponible. Les variantes V sont compactes, se juxtaposent lorsque
 l'espace le permet et repassent en pleine largeur sur petit écran.
 Les titres des Cards sont centrés par défaut.
 
-Le titre est rendu en `h4` par défaut. Le dernier `|` d'un `title=` peut
+CBList et CBStats partagent le même contrat : `labels="title=..."` fournit le
+titre normal ou le titre de Card, et `hide="title"` le masque. `labels` ne
+contient aucune valeur spéciale de masquage.
+
+Le titre est rendu en `h4` par défaut. Le dernier `|` de la valeur `title` dans `labels=` peut
 indiquer un niveau `h1` à `h6`, sans distinction de casse, ou une taille
 visuelle positive `remX` / `remX.X`. Les espaces autour du séparateur sont
 ignorés. Avec `rem`, le niveau sémantique reste `h4`. Un suffixe inconnu reste
 dans le titre complet, qui utilise alors le rendu `h4` par défaut.
 
 ```text
-title="Départements | h4"
-title="Départements | rem1.25"
+labels="title=Départements | h4"
+labels="title=Départements | rem1.25"
 ```
 
 L'option publique facultative `w=` règle la largeur de la Card dans la grille :
@@ -43,9 +47,9 @@ juxtaposer doivent être dans le même conteneur, sans élément `<br>` entre el
 
 ```html
 <div class="cb-cards">
-{CBStats id=15 field=Groupe output=pie title="Groupes" card=v1 w=33}
-{CBStats id=15 field=Prenom output=bar title="Prénoms" card=v2 w=66}
-{CBList id=15 fields="Nom|Prenom|Email" title="Derniers inscrits" card=h1 w=100}
+{CBStats id=15 field=Groupe output=pie labels="title=Groupes" card=v1 w=33}
+{CBStats id=15 field=Prenom output=bar labels="title=Prénoms" card=v2 w=66}
+{CBList id=15 fields="Nom|Prenom|Email" labels="title=Derniers inscrits" card=h1 w=100}
 </div>
 ```
 

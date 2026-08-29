@@ -7,140 +7,74 @@ namespace CB\Component\Contentbuilderng\Tests\Unit\Plugin;
 use CB\Component\Contentbuilderng\Site\Service\StatsService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\ManualExportService;
 use CB\Plugin\Content\ContentbuilderngStats\Service\TableHeaderService;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class CbStatsTableHeaderServiceTest extends TestCase
 {
-    public function testMissingHeadersPreserveRc94Defaults(): void
+    public function testDefaultTableLabelsUseFieldAndCount(): void
     {
         self::assertSame(
-            ['label' => 'Dpt', 'total' => 'Total'],
+            ['category' => 'Dpt', 'value' => 'Count'],
             TableHeaderService::resolve(
                 ['requested' => 'Dpt', 'label' => 'Dpt'],
-                StatsService::parseFieldStatsHeaders(''),
+                StatsService::parseFieldStatsLabels(''),
                 'Value',
-                'Total'
+                'Count'
             )
         );
     }
 
-    public function testOneHeaderCanBeReplaced(): void
+    public function testAllPresentationLabelsAreParsed(): void
     {
+        $labels = StatsService::parseFieldStatsLabels(
+            ' title = Groupes VCMB ; category = Groupe ; value = Inscrits ; total = Total des groupes '
+        );
+
+        self::assertSame([
+            'title' => 'Groupes VCMB',
+            'category' => 'Groupe',
+            'value' => 'Inscrits',
+            'total' => 'Total des groupes',
+        ], $labels);
         self::assertSame(
-            ['label' => 'Département', 'total' => 'Total'],
-            $this->resolve('Dpt=Département')
+            ['category' => 'Groupe', 'value' => 'Inscrits'],
+            TableHeaderService::resolve(['requested' => 'Dpt', 'label' => 'Département'], $labels, 'Value', 'Count')
         );
     }
 
-    public function testTwoHeadersCanBeReplacedWithWhitespace(): void
+    #[DataProvider('invalidLabelsProvider')]
+    public function testInvalidLabelsAreRejected(string $labels): void
     {
-        self::assertSame(
-            ['label' => 'Département', 'total' => 'Qté'],
-            $this->resolve(' Dpt = Département ; Total = Qté ')
-        );
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionCode(StatsService::CBSTATS_ERROR_INVALID_LABELS);
+        StatsService::parseFieldStatsLabels($labels);
     }
 
-    public function testUnknownAndEmptyMappingsAreIgnored(): void
+    public static function invalidLabelsProvider(): array
     {
-        self::assertSame(
-            ['label' => 'Dpt', 'total' => 'Qté'],
-            $this->resolve('Inconnue=Test;Dpt=;Total=Qté')
-        );
+        return [
+            'unknown key' => ['header=Groupe'],
+            'missing value' => ['total='],
+            'missing equals' => ['total'],
+            'duplicate key' => ['total=One;total=Two'],
+        ];
     }
 
-    public function testRequestedFieldKeyCanBeUsedWhenDisplayedLabelDiffers(): void
+    public function testManualExportPreservesLabelsForEveryVisualOutput(): void
     {
-        self::assertSame(
-            ['label' => 'Département', 'total' => 'Nombre'],
-            TableHeaderService::resolve(
-                ['requested' => 'Dpt', 'label' => 'Département source'],
-                StatsService::parseFieldStatsHeaders('Dpt=Département;Total=Nombre'),
-                'Value',
-                'Total'
-            )
-        );
-    }
+        $labels = 'title=Groupes VCMB;category=Groupe;value=Inscrits;total=Total des groupes';
 
-    public function testUtf8AndFirstEqualsSignArePreserved(): void
-    {
-        self::assertSame(
-            ['Dpt' => 'Département', 'Total' => 'Quantité d’inscrits = validée'],
-            StatsService::parseFieldStatsHeaders(
-                'Dpt=Département;Total=Quantité d’inscrits = validée'
-            )
-        );
-    }
-
-    public function testHeadersDoNotChangeCategoryTitles(): void
-    {
-        $items = StatsService::normalizeFieldStats(
-            ['78' => 1],
-            titles: StatsService::parseFieldStatsTitles('78=Yvelines')
-        );
-
-        self::assertSame([['label' => 'Yvelines', 'value' => 1]], $items);
-        self::assertSame(
-            ['label' => 'Département', 'total' => 'Qté'],
-            $this->resolve('Dpt=Département;Total=Qté')
-        );
-    }
-
-    public function testManualExportPreservesHeadersForEveryVisualOutput(): void
-    {
         foreach (['table', 'pie', 'bar', 'histogram', 'line', 'radar'] as $output) {
             $syntax = ManualExportService::buildSyntax(
                 [['label' => 'Yvelines', 'value' => 1]],
                 $output,
-                '👥 Total des inscrits',
-                '',
-                'Dpt=Département;Total=Qté'
+                $labels
             );
 
-            self::assertStringContainsString(
-                ' headers="Dpt=Département;Total=Qté"',
-                $syntax
-            );
-            self::assertStringContainsString(' title="👥 Total des inscrits"', $syntax);
+            self::assertStringContainsString(' labels="' . $labels . '"', $syntax);
+            self::assertStringNotContainsString(' title=', $syntax);
+            self::assertStringNotContainsString(' headers=', $syntax);
         }
-    }
-
-    public function testManualFieldKeyKeepsExportedHeaderMappingEffective(): void
-    {
-        self::assertSame(
-            'Dpt',
-            TableHeaderService::resolveManualFieldKey(
-                StatsService::parseFieldStatsHeaders('Dpt=Département;Total=Qté'),
-                'Value',
-                'Total'
-            )
-        );
-    }
-
-    public function testPieAndBarLegendsRemainHeaderFree(): void
-    {
-        $source = (string) file_get_contents(
-            dirname(__DIR__, 4)
-                . '/plugins/content/contentbuilderng_cbstats/src/Extension/ContentbuilderngStats.php'
-        );
-        $chartDetails = substr(
-            $source,
-            strpos($source, 'private function renderChartDetails'),
-            strpos($source, 'private function formatNumber')
-                - strpos($source, 'private function renderChartDetails')
-        );
-
-        self::assertStringNotContainsString('TableHeaderService::resolve', $chartDetails);
-        self::assertStringContainsString('cbstats-pie-legend', $chartDetails);
-    }
-
-    /** @return array{label: string, total: string} */
-    private function resolve(string $headers): array
-    {
-        return TableHeaderService::resolve(
-            ['requested' => 'Dpt', 'label' => 'Dpt'],
-            StatsService::parseFieldStatsHeaders($headers),
-            'Value',
-            'Total'
-        );
     }
 }

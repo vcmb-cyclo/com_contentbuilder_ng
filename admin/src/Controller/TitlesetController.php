@@ -47,7 +47,7 @@ final class TitlesetController extends BaseController
                 . rawurlencode($filename);
         } catch (\Throwable $exception) {
             $this->getApp()->setUserState('com_contentbuilderng.titleset.data', $data);
-            $this->setMessage($this->saveFailureMessage($exception), 'error');
+            $this->setMessage($this->saveFailureMessage($exception, $data), 'error');
             $url = 'index.php?option=com_contentbuilderng&view=titleset';
         }
 
@@ -245,7 +245,7 @@ final class TitlesetController extends BaseController
         $this->setMessage(
             $result['valid']
                 ? Text::_('COM_CONTENTBUILDERNG_TITLESETS_VALID')
-                : $this->validationErrorsMessage((array) $result['errors']),
+                : $this->validationErrorsMessage((array) $result['errors'], $data),
             $result['valid'] ? 'message' : 'error'
         );
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=titleset', false));
@@ -277,11 +277,11 @@ final class TitlesetController extends BaseController
             $this->setMessage(Text::_('COM_CONTENTBUILDERNG_TITLESETS_SAVED'));
             $url = $apply
                 ? 'index.php?option=com_contentbuilderng&view=titleset&source=custom&filename='
-                    . rawurlencode($filename)
+                    . rawurlencode($filename) . '&saved=1'
                 : 'index.php?option=com_contentbuilderng&view=titlesets';
         } catch (\Throwable $exception) {
             $this->getApp()->setUserState('com_contentbuilderng.titleset.data', $data);
-            $this->setMessage($this->saveFailureMessage($exception), 'error');
+            $this->setMessage($this->saveFailureMessage($exception, $data), 'error');
             $url = 'index.php?option=com_contentbuilderng&view=titleset';
         }
 
@@ -296,20 +296,34 @@ final class TitlesetController extends BaseController
     }
 
     /** @param list<string> $errors */
-    private function validationErrorsMessage(array $errors): string
+    private function validationErrorsMessage(array $errors, array $data = []): string
     {
         $messages = [];
         foreach (array_unique($errors) as $error) {
+            if (str_starts_with($error, 'config_')) {
+                $field = substr($error, 7);
+                $languageSuffix = strtoupper($field);
+                $messages[] = Text::sprintf(
+                    'COM_CONTENTBUILDERNG_TITLESETS_ERROR_CONFIG_VALUE',
+                    Text::_('COM_CONTENTBUILDERNG_CONFIG_' . $languageSuffix),
+                    trim((string) ($data['config'][$field] ?? '')),
+                    Text::_('COM_CONTENTBUILDERNG_CONFIG_' . $languageSuffix . '_DESC')
+                );
+                continue;
+            }
             $messages[] = Text::_('COM_CONTENTBUILDERNG_TITLESETS_ERROR_' . strtoupper($error));
         }
 
         return implode(' ', $messages);
     }
 
-    private function saveFailureMessage(\Throwable $exception): string
+    private function saveFailureMessage(\Throwable $exception, array $data = []): string
     {
         if ($exception instanceof \InvalidArgumentException) {
-            return $this->validationErrorsMessage(array_values(array_filter(explode(',', $exception->getMessage()))));
+            return $this->validationErrorsMessage(
+                array_values(array_filter(explode(',', $exception->getMessage()))),
+                $data
+            );
         }
 
         return Text::_('COM_CONTENTBUILDERNG_TITLESETS_SAVE_FAILED_WRITE');

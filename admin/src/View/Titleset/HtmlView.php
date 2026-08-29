@@ -34,6 +34,9 @@ final class HtmlView extends BaseHtmlView
         }
         $this->data = $model->getData();
         $this->form = $model->getForm();
+        $isDraft = ($this->data['filename'] ?? '') === ''
+            || $app->getInput()->getBool('duplicate', false)
+            || $app->getInput()->getBool('copy', false);
         $isProvided = ($this->data['source'] ?? '') === 'provided';
         ToolbarHelper::title(Text::_($isProvided
             ? 'COM_CONTENTBUILDERNG_TITLESETS_VIEW_TITLE'
@@ -71,7 +74,17 @@ final class HtmlView extends BaseHtmlView
             'COM_CONTENTBUILDERNG_TITLESETS_VALIDATE',
             false
         );
-        ToolbarHelper::cancel('titleset.cancel');
+        if (!$isDraft || $app->getInput()->getBool('saved', false)) {
+            ToolbarHelper::custom(
+                'titleset.cancel',
+                'cancel',
+                'cancel',
+                'JTOOLBAR_CLOSE',
+                false
+            );
+        } else {
+            ToolbarHelper::cancel('titleset.cancel');
+        }
 
         parent::display($tpl);
     }

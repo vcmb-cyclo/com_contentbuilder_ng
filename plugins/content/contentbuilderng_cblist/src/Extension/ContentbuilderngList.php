@@ -105,8 +105,10 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
             'cblist_embed' => EmbeddedListFieldFilterService::REQUEST_CONTEXT,
         ];
 
-        if ($options['title_set']) {
-            $query['cblist_title'] = $options['card'] !== '' ? '' : $options['title'];
+        if ($options['labels_set'] || $options['hide_title']) {
+            $query['cblist_title'] = !$options['hide_title'] && $options['card'] === ''
+                ? $options['title']
+                : '';
             $query['cblist_title_set'] = 1;
         }
 
@@ -133,7 +135,7 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
         }
 
         $url = Route::_('index.php?' . http_build_query($query), false);
-        $title = $options['title_set'] && $options['title'] !== ''
+        $title = $options['labels_set'] && $options['title'] !== ''
             ? $options['title']
             : Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_IFRAME_TITLE', $options['id']);
         $openLabel = Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_OPEN_LIST');
@@ -159,7 +161,7 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
         return ContentCardService::render(
             $embed,
             $options['card'],
-            $options['title_set'] ? $options['title'] : '',
+            !$options['hide_title'] && $options['labels_set'] ? $options['title'] : '',
             $options['w']
         );
     }
@@ -211,6 +213,14 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
             );
         }
 
+        if ($error['code'] === 'removed_option') {
+            return Text::sprintf(
+                'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_REMOVED_OPTION',
+                $error['parameter'],
+                Text::_('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LABELS_TITLE')
+            );
+        }
+
         if ($error['code'] === 'unknown_action') {
             return Text::sprintf('PLG_CONTENT_CONTENTBUILDERNG_CBLIST_UNKNOWN_ACTION', $value);
         }
@@ -237,6 +247,8 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
             'layout' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LAYOUT',
             'loading' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LOADING',
             'fields' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_FIELDS',
+            'labels' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_LABELS',
+            'hide' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_HIDE',
             'actions' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_ACTIONS',
             'sort' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_SORT',
             'dir_count' => 'PLG_CONTENT_CONTENTBUILDERNG_CBLIST_EXPECTED_DIR_COUNT',

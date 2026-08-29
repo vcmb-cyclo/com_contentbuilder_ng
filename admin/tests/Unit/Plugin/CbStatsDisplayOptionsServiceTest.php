@@ -135,7 +135,7 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
     public function testMissingHidePreservesEveryDisplayElement(): void
     {
         self::assertSame(
-            ['total' => false, 'values' => false, 'graph' => false],
+            ['title' => false, 'total' => false, 'values' => false, 'graph' => false],
             StatsHideOptionsService::fromAttributes([])
         );
     }
@@ -148,21 +148,13 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
 
     public static function validHideProvider(): iterable
     {
-        yield ['total', ['total' => true, 'values' => false, 'graph' => false]];
-        yield ['values', ['total' => false, 'values' => true, 'graph' => false]];
-        yield ['graph', ['total' => false, 'values' => false, 'graph' => true]];
-        yield ['values|total', ['total' => true, 'values' => true, 'graph' => false]];
-        yield [' graph | total ', ['total' => true, 'values' => false, 'graph' => true]];
-        yield ['total|total|values', ['total' => true, 'values' => true, 'graph' => false]];
-        yield ['total|values|graph', ['total' => true, 'values' => true, 'graph' => true]];
-        yield ['graph|total', ['total' => true, 'values' => false, 'graph' => true]];
-        yield ['total|graph', ['total' => true, 'values' => false, 'graph' => true]];
-        yield [' graph | total ', ['total' => true, 'values' => false, 'graph' => true]];
-        yield ['graph|graph|total', ['total' => true, 'values' => false, 'graph' => true]];
-        yield ['values|total', ['total' => true, 'values' => true, 'graph' => false]];
-        yield ['graph|values', ['total' => false, 'values' => true, 'graph' => true]];
-        yield ['values|graph', ['total' => false, 'values' => true, 'graph' => true]];
-        yield ['graph|values|total', ['total' => true, 'values' => true, 'graph' => true]];
+        yield ['title', ['title' => true, 'total' => false, 'values' => false, 'graph' => false]];
+        yield ['total', ['title' => false, 'total' => true, 'values' => false, 'graph' => false]];
+        yield ['values', ['title' => false, 'total' => false, 'values' => true, 'graph' => false]];
+        yield ['graph', ['title' => false, 'total' => false, 'values' => false, 'graph' => true]];
+        yield ['title|values|total', ['title' => true, 'total' => true, 'values' => true, 'graph' => false]];
+        yield ['graph|title|total', ['title' => true, 'total' => true, 'values' => false, 'graph' => true]];
+        yield ['title|total|values|graph', ['title' => true, 'total' => true, 'values' => true, 'graph' => true]];
     }
 
     public function testQuotedShortcodePreservesTheCompletePipeSeparatedHideValue(): void
@@ -173,7 +165,7 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
         $attributes = TagSyntaxService::parseAttributes((string) ($matches[1] ?? ''));
         self::assertSame('graph|total', $attributes['hide']);
         self::assertSame(
-            ['total' => true, 'values' => false, 'graph' => true],
+            ['title' => false, 'total' => true, 'values' => false, 'graph' => true],
             StatsHideOptionsService::fromAttributes($attributes)
         );
     }
@@ -266,6 +258,7 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
     {
         yield ['table', 'graph', 'graph|table'];
         yield ['json', 'values', 'values|json'];
+        yield ['json', 'title', 'title|json'];
         yield ['min', 'graph', 'graph|min'];
         yield ['max', 'values', 'values|max'];
         yield ['avg', 'graph', 'graph|avg'];
@@ -274,7 +267,7 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
     #[DataProvider('chartOutputProvider')]
     public function testEveryChartOutputAcceptsIndividualAndCombinedHideOptions(string $output): void
     {
-        foreach (['total', 'values', 'graph', 'total|values', 'total|graph', 'values|graph'] as $hide) {
+        foreach (['title', 'total', 'values', 'graph', 'title|total', 'title|values|graph', 'total|graph', 'values|graph'] as $hide) {
             StatsHideOptionsService::validateForOutput(StatsHideOptionsService::parse($hide), $output);
             self::addToAssertionCount(1);
         }
@@ -297,9 +290,17 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
     public function testHideSerializationUsesCanonicalOrder(): void
     {
         self::assertSame(
-            'total|values',
-            StatsHideOptionsService::serialize(StatsHideOptionsService::parse('values|total|values'))
+            'title|total|values',
+            StatsHideOptionsService::serialize(StatsHideOptionsService::parse('values|title|total|values'))
         );
+    }
+
+    public function testTitleCanBeHiddenOnEveryHtmlOutput(): void
+    {
+        foreach (['total', 'table', 'pie', 'bar', 'histogram', 'line', 'radar', 'sum', 'min', 'max', 'avg', 'remaining', 'percentage', 'progress', 'distinct', 'view_name'] as $output) {
+            StatsHideOptionsService::validateForOutput(StatsHideOptionsService::parse('title'), $output);
+            self::addToAssertionCount(1);
+        }
     }
 
     public function testPluginUsesNormalizedHideFlagsAcrossEveryChartRenderer(): void
@@ -311,6 +312,8 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
         self::assertIsString($source);
         self::assertStringContainsString('DisplayOptionsService::applyLimit($fullFieldStats, $limit)', $source);
         self::assertStringContainsString("\$fieldTotal = array_sum(array_column(\$fieldStats, 'value'));", $source);
+        self::assertStringContainsString('$displayTotal = $fieldTotal;', $source);
+        self::assertStringNotContainsString('$displayTotal = $usesGroups ?', $source);
         self::assertMatchesRegularExpression("/if \(!\\\$hideOptions\['total'\]\) \{\\R\\s+\\\$html \.= '<tfoot>/", $source);
         self::assertMatchesRegularExpression("/if \(!\\\$hideOptions\['total'\]\) \{\\R\\s+\\\$html \.= '<div class=\"cbstats-total-box\">/", $source);
         self::assertStringContainsString("if (!\$hideOptions['graph']) {", $source);
@@ -321,6 +324,7 @@ final class CbStatsDisplayOptionsServiceTest extends TestCase
         self::assertStringNotContainsString('prepareChartPayloadItems', $source);
         self::assertStringNotContainsString("'showValues' => !\$hideOptions['values']", $source);
         self::assertStringContainsString('StatsHideOptionsService::fromAttributes($attributes)', $source);
+        self::assertStringContainsString("\$blockTitle = \$hideOptions['title'] ? ''", $source);
         self::assertStringNotContainsString('DisplayOptionsService::hidesTotal', $source);
         self::assertStringContainsString("'total' => (string) StatsService::resolveCbstatsOutput", $source);
     }

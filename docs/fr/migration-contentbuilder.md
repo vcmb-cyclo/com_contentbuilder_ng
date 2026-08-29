@@ -104,7 +104,7 @@ Actions confirmées :
 Exemple :
 
 ```text
-index.php?option=com_contentbuilderng&task=api.display&format=json&action=stats&id=25
+index.php?option=com_contentbuilderng&task=api.display&format=json&action=stats&id=15
 ```
 
 Consultez [API JSON](api-json.md) pour les permissions et paramètres.

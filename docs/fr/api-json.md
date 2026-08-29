@@ -317,11 +317,12 @@ traitement commun de `add` signé et de `titles`.
 - `dir=asc|desc` : facultatif pour les sorties de liste/graphiques, défaut `asc`.
 - `add=Libellé=EntierSigné;...` : facultatif pour les sorties de liste/graphiques ;
 - `titles=Original=Titre affiché;...` : facultatif pour les sorties de liste/graphiques.
-- `hide=total|values|graph` : sélection de présentation facultative. Les balises
+- `hide=title|total|values|graph` : sélection de présentation facultative. Les balises
   d’article et les requêtes URL utilisent le même parser et les mêmes contrôles.
 
 Les sorties scalaires ignorent `sort` et `dir`.
 
+`hide="title"` masque le titre du bloc ou de la Card défini par `labels="title=..."`.
 `hide="total"` masque uniquement le Total affiché, `hide="values"` masque
 uniquement la liste textuelle des libellés et valeurs sous le graphique sans
 modifier le graphique, et `hide="graph"` masque le dessin tout en conservant

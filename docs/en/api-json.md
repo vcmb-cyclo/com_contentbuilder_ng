@@ -310,11 +310,12 @@ statistics payload used by the content renderers. JSON reuses the common signed
 - `dir=asc|desc`: optional for list/chart outputs; default `asc`.
 - `add=Label=SignedInteger;...`: optional for list/chart outputs;
 - `titles=Original=Display title;...`: optional for list/chart outputs.
-- `hide=total|values|graph`: optional presentation selection. Article tags and
+- `hide=title|total|values|graph`: optional presentation selection. Article tags and
   URL requests use the same parser and applicability checks.
 
 Scalar outputs ignore `sort` and `dir`.
 
+`hide="title"` hides the block or Card heading defined by `labels="title=..."`.
 `hide="total"` hides only a displayed total, `hide="values"` hides only the
 textual labels-and-values list below the graph without changing the graph, and
 `hide="graph"` hides the drawing while retaining that lightweight textual list. Values may be combined

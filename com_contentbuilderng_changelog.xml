@@ -3,8 +3,9 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.12</version>
+		<version>6.1.13</version>
 		<addition>
+			<item>Added reusable CBStats presentation configuration files with strict INI sections, administrator editing and key-by-key inline overrides.</item>
 			<item>Added CBStats value groups with inclusive numeric intervals and explicit non-contiguous value lists.</item>
 			<item>Added CBStats output=percentage for the share of a selected field value within the filtered population.</item>
 			<item>Added CBStats output=progress target=Number for capped progress towards a positive target.</item>
@@ -32,6 +33,15 @@
 			<item>Added a CBList actions section to the frontend debug panel, listing which terms apply on each screen and whether each is currently allowed.</item>
 		</addition>
 		<change>
+			<item>Aligned the data-set editor with Joomla: existing files show Close, while new copies retain Cancel.</item>
+			<item>Fixed the data-set editor toolbar so it shows Close after a successful save.</item>
+			<item>Fixed inactive Details and Edit template tabs so retained templates no longer show a warning indicator.</item>
+			<item>Fixed the States disable action so it clears state permissions together with the inactive state configuration.</item>
+			<item>Fixed CBStats data-set duplication for a selected custom file.</item>
+			<item>Replaced the unreleased CBList title option with labels using its title key, aligned with CBStats, without a compatibility alias.</item>
+			<item>Aligned CBList and CBStats title visibility: labels defines block and Card titles, while hide=title hides them.</item>
+			<item>Replaced the unreleased CBStats title and headers options with the unified labels option using title, category, value and total keys.</item>
+			<item>Made visual CBStats totals represent the sum of displayed results after grouping, sorting and limiting, including overlapping value groups.</item>
 			<item>Replaced the unreleased CBStats output=form_name syntax with output=view_name, which returns only the ContentBuilder NG view name.</item>
 			<item>Renamed the view classification label from Tag to Category throughout the administrator, frontend and menu settings.</item>
 			<item>Ordered CBStats outputs consistently by importance in article help, API help, validation guidance and OpenAPI.</item>
