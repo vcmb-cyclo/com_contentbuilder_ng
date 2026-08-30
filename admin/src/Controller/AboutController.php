@@ -159,7 +159,13 @@ final class AboutController extends BaseController
             'steps' => count((array) ($workflow['steps'] ?? [])),
         ]);
 
-        $this->setMessage(Text::_(!empty($workflow['completed']) ? 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STARTED_NO_ACTION' : 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STARTED'), 'message');
+        $workflowCompleted = !empty($workflow['completed']);
+        $this->setMessage(
+            Text::_($workflowCompleted
+                ? 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STARTED_NO_ACTION'
+                : 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STARTED'),
+            $workflowCompleted ? 'message' : 'warning'
+        );
         $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about&repair_workflow=1', false));
     }
 

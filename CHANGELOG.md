@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.1.14-RC01 — 2026-08-30
+
+- Corrected the About repair workflow alert semantics: pending repair decisions now use a warning, while green remains reserved for completed workflows requiring no action or successful repairs.
+- Added a central Audit and Repair workflow specification covering actions, statuses, colours, messages, translations and accessibility.
+
 ## 6.1.13 — 2026-08-30
 
 - Promoted the validated RC10 implementation to the stable 6.1.13 release.

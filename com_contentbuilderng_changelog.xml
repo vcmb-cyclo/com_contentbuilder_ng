@@ -3,6 +3,17 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
+		<version>6.1.14-RC01</version>
+		<change>
+			<item>Corrected the About repair workflow alert semantics so pending repair decisions use a warning and green remains reserved for completed or successfully repaired states.</item>
+			<item>Added a central Audit and Repair workflow specification covering actions, statuses, colours, messages, translations and accessibility.</item>
+		</change>
+		<security>
+		</security>
+	</changelog>
+	<changelog>
+		<element>com_contentbuilderng</element>
+		<type>component</type>
 		<version>6.1.13</version>
 		<addition>
 			<item>Added reusable CBStats presentation configuration files with strict INI sections, administrator editing and key-by-key inline overrides.</item>
