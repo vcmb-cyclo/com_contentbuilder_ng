@@ -724,7 +724,7 @@ class ContentbuilderngHelper
         );
 
         if ($enabled) {
-            $toggle = str_replace('icon-publish', 'fa fa-bug text-success', $toggle);
+            $toggle = str_replace('icon-publish', 'fa-solid fa-bug text-success', $toggle);
         }
 
         return $toggle;

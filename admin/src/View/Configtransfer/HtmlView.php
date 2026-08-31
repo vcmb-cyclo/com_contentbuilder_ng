@@ -155,13 +155,13 @@ class HtmlView extends BaseHtmlView
         $toolbar->standardButton('configtransfer_back')
             ->task('configtransfer.back')
             ->text('COM_CONTENTBUILDERNG_ABOUT')
-            ->icon('fa fa-arrow-left')
+            ->icon('fa-solid fa-arrow-left')
             ->listCheck(false);
 
         $toolbar->standardButton('configtransfer_last_log')
             ->task('about.showLog')
             ->text('COM_CONTENTBUILDERNG_ABOUT_LAST_LOG')
-            ->icon('fa fa-file-text-o')
+            ->icon('fa-solid fa-file-lines')
             ->listCheck(false);
     }
 

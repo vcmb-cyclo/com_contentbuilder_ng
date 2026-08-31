@@ -68,7 +68,7 @@ Text::script('COM_CONTENTBUILDERNG_ABOUT_EXPORT_CONFIGURATION_DOWNLOAD_FAILED');
                                     role="tab"
                                     aria-selected="<?php echo $isExportMode ? 'true' : 'false'; ?>"
                                 >
-                                    <span class="fa fa-download me-1" aria-hidden="true"></span>
+                                    <span class="fa-solid fa-download me-1" aria-hidden="true"></span>
                                     <?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_EXPORT_CONFIGURATION'); ?>
                                 </a>
                             </li>
@@ -79,7 +79,7 @@ Text::script('COM_CONTENTBUILDERNG_ABOUT_EXPORT_CONFIGURATION_DOWNLOAD_FAILED');
                                     role="tab"
                                     aria-selected="<?php echo $isImportMode ? 'true' : 'false'; ?>"
                                 >
-                                    <span class="fa fa-upload me-1" aria-hidden="true"></span>
+                                    <span class="fa-solid fa-upload me-1" aria-hidden="true"></span>
                                     <?php echo Text::_('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION'); ?>
                                 </a>
                             </li>

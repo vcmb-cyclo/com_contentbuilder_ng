@@ -130,7 +130,7 @@ if ($themeJs !== '') {
         <div class="col-12 col-sm-auto d-grid d-sm-block">
             <a class="btn btn-sm btn-outline-success"
                 href="<?php echo Route::link('site', 'index.php?option=com_contentbuilderng&view=export&id=' . \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('id', 0) . '&type=xls&format=raw&tmpl=component'); ?>">
-                <i class="fa fa-file-excel" aria-hidden="true"></i>
+                <i class="fa-solid fa-file-excel" aria-hidden="true"></i>
             </a>
         </div>
         <?php
@@ -154,7 +154,7 @@ if ($themeJs !== '') {
         ?>
         <div class="col-12 col-sm-auto d-grid d-sm-block">
             <button class="btn btn-sm btn-outline-danger cbButton cbDeleteButton" type="button" data-cb-action="delete">
-                <i class="fa fa-trash" aria-hidden="true"></i>
+                <i class="fa-solid fa-trash" aria-hidden="true"></i>
                 <?php echo Text::_('COM_CONTENTBUILDERNG_DELETE'); ?>
             </button>
         </div>

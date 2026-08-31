@@ -743,12 +743,12 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                         'UTF-8'
                     );
                     $debugToggleHtml = preg_replace('/<a\b/', '<a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="' . $debugTooltip . '" title="' . $debugTooltip . '"', (string) $debugToggleHtml, 1) ?? (string) $debugToggleHtml;
-                    $debugToggleHtml = str_replace('icon-unpublish', 'fa fa-bug text-muted', (string) $debugToggleHtml);
+                    $debugToggleHtml = str_replace('icon-unpublish', 'fa-solid fa-bug text-muted', (string) $debugToggleHtml);
                     if ($debugEnabled) {
                         // Active debug mode is a state the admin must not miss: render it as a
                         // filled danger pill, matching the frontend debug badge, instead of a
                         // tinted icon that reads the same as the inactive one at a glance.
-                        $debugToggleHtml = str_replace('icon-publish', 'fa fa-bug', $debugToggleHtml);
+                        $debugToggleHtml = str_replace('icon-publish', 'fa-solid fa-bug', $debugToggleHtml);
                         $debugToggleHtml = preg_replace(
                             '/class="([^"]*\btbody-icon\b[^"]*)"/',
                             'class="$1 cb-debug-toggle is-active"',
@@ -768,7 +768,7 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
                        data-bs-title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_DISABLED'); ?>"
                        title="<?php echo Text::_('COM_CONTENTBUILDERNG_DEBUG_MODE_DISABLED'); ?>"
                        onclick="this.classList.toggle('active'); document.getElementById('debug_mode').value = this.classList.contains('active') ? '1' : '0'; return false;">
-                        <span class="fa fa-bug text-muted" aria-hidden="true"></span>
+                        <span class="fa-solid fa-bug text-muted" aria-hidden="true"></span>
                     </a>
                 <?php endif; ?>
             </div>

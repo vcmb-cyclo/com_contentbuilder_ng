@@ -80,7 +80,7 @@ class HtmlView extends BaseHtmlView
         $statusDropdown = $toolbar->dropdownButton('forms-status-group');
         $statusDropdown->text(Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS'));
         $statusDropdown->toggleSplit(false);
-        $statusDropdown->icon('fa fa-ellipsis-h');
+        $statusDropdown->icon('fa-solid fa-ellipsis');
         $statusDropdown->buttonClass('btn btn-action');
         $statusDropdown->listCheck(true);
 
@@ -90,12 +90,12 @@ class HtmlView extends BaseHtmlView
         $statusChildToolbar->standardButton('debug_on')
             ->task('forms.debug_on')
             ->text('COM_CONTENTBUILDERNG_DEBUG_ON')
-            ->icon('fa fa-bug text-success')
+            ->icon('fa-solid fa-bug text-success')
             ->listCheck(true);
         $statusChildToolbar->standardButton('debug_off')
             ->task('forms.debug_off')
             ->text('COM_CONTENTBUILDERNG_DEBUG_OFF')
-            ->icon('fa fa-bug text-danger')
+            ->icon('fa-solid fa-bug text-danger')
             ->listCheck(true);
         $statusChildToolbar->delete('forms.delete', 'JTOOLBAR_DELETE')
             ->message('JGLOBAL_CONFIRM_DELETE')

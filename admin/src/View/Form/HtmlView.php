@@ -215,7 +215,7 @@ class HtmlView extends BaseHtmlView
         $statusDropdown = $toolbar->dropdownButton('form-status-group');
         $statusDropdown->text(Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS'));
         $statusDropdown->toggleSplit(false);
-        $statusDropdown->icon('fa fa-ellipsis-h');
+        $statusDropdown->icon('fa-solid fa-ellipsis');
         $statusDropdown->buttonClass('btn btn-action');
         $statusDropdown->listCheck(true);
         $statusDropdown->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS_TIP')]);
@@ -224,85 +224,85 @@ class HtmlView extends BaseHtmlView
         $statusChildToolbar->standardButton('list_include')
             ->task('form.list_include')
             ->text('COM_CONTENTBUILDERNG_LIST_INCLUDE')
-            ->icon('fa fa-list text-success')
+            ->icon('fa-solid fa-list text-success')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_LIST_INCLUDE_TIP')]);
         $statusChildToolbar->standardButton('no_list_include')
             ->task('form.no_list_include')
             ->text('COM_CONTENTBUILDERNG_NO_LIST_INCLUDE')
-            ->icon('fa fa-list text-danger')
+            ->icon('fa-solid fa-list text-danger')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_NO_LIST_INCLUDE_TIP')]);
         $statusChildToolbar->standardButton('search_include')
             ->task('form.search_include')
             ->text('COM_CONTENTBUILDERNG_SEARCH_INCLUDE')
-            ->icon('fa fa-search text-success')
+            ->icon('fa-solid fa-search text-success')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_SEARCH_INCLUDE_TIP')]);
         $statusChildToolbar->standardButton('no_search_include')
             ->task('form.no_search_include')
             ->text('COM_CONTENTBUILDERNG_NO_SEARCH_INCLUDE')
-            ->icon('fa fa-search text-danger')
+            ->icon('fa-solid fa-search text-danger')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_NO_SEARCH_INCLUDE_TIP')]);
         $statusChildToolbar->standardButton('linkable')
             ->task('form.linkable')
             ->text('COM_CONTENTBUILDERNG_LINKABLE')
-            ->icon('fa fa-link text-success')
+            ->icon('fa-solid fa-link text-success')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_LINKABLE_TIP')]);
         $statusChildToolbar->standardButton('not_linkable')
             ->task('form.not_linkable')
             ->text('COM_CONTENTBUILDERNG_NOT_LINKABLE')
-            ->icon('fa fa-link text-danger')
+            ->icon('fa-solid fa-link text-danger')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_NOT_LINKABLE_TIP')]);
         $statusChildToolbar->standardButton('detail_include')
             ->task('form.detail_include')
             ->text('COM_CONTENTBUILDERNG_DETAIL_INCLUDE')
-            ->icon('fa fa-eye text-success')
+            ->icon('fa-solid fa-eye text-success')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_DETAIL_INCLUDE_TIP')]);
         $statusChildToolbar->standardButton('no_detail_include')
             ->task('form.no_detail_include')
             ->text('COM_CONTENTBUILDERNG_NO_DETAIL_INCLUDE')
-            ->icon('fa fa-eye text-danger')
+            ->icon('fa-solid fa-eye text-danger')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_NO_DETAIL_INCLUDE_TIP')]);
         $statusChildToolbar->standardButton('api_allowed')
             ->task('form.api_allowed')
             ->text('COM_CONTENTBUILDERNG_API_ALLOWED')
-            ->icon('fa fa-plug text-success')
+            ->icon('fa-solid fa-plug text-success')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_API_ALLOWED_TIP')]);
         $statusChildToolbar->standardButton('not_api_allowed')
             ->task('form.not_api_allowed')
             ->text('COM_CONTENTBUILDERNG_NOT_API_ALLOWED')
-            ->icon('fa fa-plug text-danger')
+            ->icon('fa-solid fa-plug text-danger')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_NOT_API_ALLOWED_TIP')]);
         $statusChildToolbar->standardButton('editable')
             ->task('form.editable')
             ->text('COM_CONTENTBUILDERNG_EDITABLE')
-            ->icon('fa fa-pen text-success')
+            ->icon('fa-solid fa-pen text-success')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_EDITABLE_TIP')]);
         $statusChildToolbar->standardButton('not_editable')
             ->task('form.not_editable')
             ->text('COM_CONTENTBUILDERNG_NOT_EDITABLE')
-            ->icon('fa fa-pen text-danger')
+            ->icon('fa-solid fa-pen text-danger')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_NOT_EDITABLE_TIP')]);
         $statusChildToolbar->standardButton('export_include')
             ->task('form.export_include')
             ->text('COM_CONTENTBUILDERNG_EXPORT_INCLUDE')
-            ->icon('fa fa-file-export text-success')
+            ->icon('fa-solid fa-file-export text-success')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_EXPORT_INCLUDE_TIP')]);
         $statusChildToolbar->standardButton('no_export_include')
             ->task('form.no_export_include')
             ->text('COM_CONTENTBUILDERNG_NO_EXPORT_INCLUDE')
-            ->icon('fa fa-file-export text-danger')
+            ->icon('fa-solid fa-file-export text-danger')
             ->listCheck(true)
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_NO_EXPORT_INCLUDE_TIP')]);
         $statusChildToolbar->publish('form.publish')
@@ -315,9 +315,9 @@ class HtmlView extends BaseHtmlView
             ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_UNPUBLISH_ELEMENTS_TIP')]);
 
         $stateResetActions = [
-            ['state_reset_inactive', 'inactive', 'COM_CONTENTBUILDERNG_LIST_STATES_RESET_INACTIVE', 'fa fa-broom'],
-            ['state_reset_palette', 'palette', 'COM_CONTENTBUILDERNG_LIST_STATES_RESET_PALETTE', 'fa fa-palette'],
-            ['state_reset_disable', 'disable', 'COM_CONTENTBUILDERNG_LIST_STATES_RESET_DISABLE', 'fa fa-ban'],
+            ['state_reset_inactive', 'inactive', 'COM_CONTENTBUILDERNG_LIST_STATES_RESET_INACTIVE', 'fa-solid fa-broom'],
+            ['state_reset_palette', 'palette', 'COM_CONTENTBUILDERNG_LIST_STATES_RESET_PALETTE', 'fa-solid fa-palette'],
+            ['state_reset_disable', 'disable', 'COM_CONTENTBUILDERNG_LIST_STATES_RESET_DISABLE', 'fa-solid fa-ban'],
         ];
 
         if (!empty($this->item->debug_mode) && $identity->authorise('core.admin')) {
@@ -325,7 +325,7 @@ class HtmlView extends BaseHtmlView
                 'state_reset_full',
                 'full',
                 'COM_CONTENTBUILDERNG_LIST_STATES_RESET_FULL',
-                'fa fa-triangle-exclamation text-danger',
+                'fa-solid fa-triangle-exclamation text-danger',
             ];
         }
 
@@ -349,20 +349,20 @@ class HtmlView extends BaseHtmlView
             : 'COM_CONTENTBUILDERNG_EDIT_ACTION_REGENERATE';
         $templateActions = [
             'details' => [
-                ['details_reset_display', 'display', 'COM_CONTENTBUILDERNG_DETAILS_ACTION_RESET_DISPLAY', 'fa fa-rotate-left'],
-                ['details_regenerate_template', 'regenerate', $detailsTemplateActionKey, 'fa fa-wand-magic-sparkles'],
-                ['details_disable', 'disable', 'COM_CONTENTBUILDERNG_DETAILS_ACTION_DISABLE', 'fa fa-ban'],
+                ['details_reset_display', 'display', 'COM_CONTENTBUILDERNG_DETAILS_ACTION_RESET_DISPLAY', 'fa-solid fa-rotate-left'],
+                ['details_regenerate_template', 'regenerate', $detailsTemplateActionKey, 'fa-solid fa-wand-magic-sparkles'],
+                ['details_disable', 'disable', 'COM_CONTENTBUILDERNG_DETAILS_ACTION_DISABLE', 'fa-solid fa-ban'],
             ],
             'edit' => [
-                ['edit_reset_display', 'display', 'COM_CONTENTBUILDERNG_EDIT_ACTION_RESET_DISPLAY', 'fa fa-rotate-left'],
-                ['edit_regenerate_template', 'regenerate', $editTemplateActionKey, 'fa fa-wand-magic-sparkles'],
-                ['edit_disable', 'disable', 'COM_CONTENTBUILDERNG_EDIT_ACTION_DISABLE', 'fa fa-ban'],
+                ['edit_reset_display', 'display', 'COM_CONTENTBUILDERNG_EDIT_ACTION_RESET_DISPLAY', 'fa-solid fa-rotate-left'],
+                ['edit_regenerate_template', 'regenerate', $editTemplateActionKey, 'fa-solid fa-wand-magic-sparkles'],
+                ['edit_disable', 'disable', 'COM_CONTENTBUILDERNG_EDIT_ACTION_DISABLE', 'fa-solid fa-ban'],
             ],
         ];
 
         if (!empty($this->item->debug_mode) && $identity->authorise('core.admin')) {
-            $templateActions['details'][] = ['details_reset_full', 'full', 'COM_CONTENTBUILDERNG_DETAILS_ACTION_RESET_FULL', 'fa fa-triangle-exclamation text-danger'];
-            $templateActions['edit'][] = ['edit_reset_full', 'full', 'COM_CONTENTBUILDERNG_EDIT_ACTION_RESET_FULL', 'fa fa-triangle-exclamation text-danger'];
+            $templateActions['details'][] = ['details_reset_full', 'full', 'COM_CONTENTBUILDERNG_DETAILS_ACTION_RESET_FULL', 'fa-solid fa-triangle-exclamation text-danger'];
+            $templateActions['edit'][] = ['edit_reset_full', 'full', 'COM_CONTENTBUILDERNG_EDIT_ACTION_RESET_FULL', 'fa-solid fa-triangle-exclamation text-danger'];
         }
 
         foreach ($templateActions as $context => $actions) {
@@ -387,7 +387,7 @@ class HtmlView extends BaseHtmlView
             $statusChildToolbar->standardButton($buttonName)
                 ->task('')
                 ->text($textKey)
-                ->icon('fa fa-rotate-left')
+                ->icon('fa-solid fa-rotate-left')
                 ->listCheck(false)
                 ->attributes([
                     'data-cb-actions-context' => $context,

@@ -203,7 +203,7 @@ class HtmlView extends BaseHtmlView
         $toolbar->standardButton('restart')
             ->task('storagewizard.start')
             ->text('COM_CONTENTBUILDERNG_WIZARD_RESTART')
-            ->icon('fa fa-rotate-left')
+            ->icon('fa-solid fa-rotate-left')
             ->listCheck(false);
 
         ToolbarHelper::cancel('storagewizard.finish', 'JTOOLBAR_CLOSE');

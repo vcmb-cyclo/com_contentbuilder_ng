@@ -45,7 +45,7 @@ final class FormsDebugActionsTest extends TestCase
         self::assertStringContainsString("'COM_CONTENTBUILDERNG_DEBUG_ON'", $helper);
         self::assertStringContainsString("'COM_CONTENTBUILDERNG_DEBUG_OFF'", $helper);
         self::assertStringContainsString(
-            "str_replace('icon-publish', 'fa fa-bug text-success', \$toggle)",
+            "str_replace('icon-publish', 'fa-solid fa-bug text-success', \$toggle)",
             $helper
         );
     }
@@ -59,7 +59,7 @@ final class FormsDebugActionsTest extends TestCase
         // An enabled debug mode must not read like the disabled one at a glance,
         // so the active toggle gets the danger pill rather than a tinted icon.
         self::assertStringContainsString(
-            "str_replace('icon-publish', 'fa fa-bug', \$debugToggleHtml)",
+            "str_replace('icon-publish', 'fa-solid fa-bug', \$debugToggleHtml)",
             $layout
         );
         self::assertStringContainsString('cb-debug-toggle is-active', $layout);

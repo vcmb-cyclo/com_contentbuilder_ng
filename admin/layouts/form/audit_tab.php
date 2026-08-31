@@ -25,7 +25,7 @@ $debugMode = !empty($auditData['debug_mode']);
 
 $renderStateIcon = static function (bool $enabled, bool $debug, string $tooltip): string {
     $iconClass = $debug
-        ? 'fa fa-bug' . ($enabled ? '' : ' text-muted')
+        ? 'fa-solid fa-bug' . ($enabled ? '' : ' text-muted')
         : ($enabled ? 'icon-publish' : 'icon-unpublish');
     $stateClass = $debug && $enabled ? ' cb-debug-toggle is-active' : '';
 

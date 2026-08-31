@@ -200,7 +200,7 @@ class HtmlView extends BaseHtmlView
         $statusDropdown = $toolbar->dropdownButton('storages-status-group');
         $statusDropdown->text(Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS'));
         $statusDropdown->toggleSplit(false);
-        $statusDropdown->icon('fa fa-ellipsis-h');
+        $statusDropdown->icon('fa-solid fa-ellipsis');
         $statusDropdown->buttonClass('btn btn-action');
         $statusDropdown->listCheck(true);
 

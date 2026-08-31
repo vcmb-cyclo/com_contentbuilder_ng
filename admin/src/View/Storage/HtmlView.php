@@ -288,7 +288,7 @@ class HtmlView extends BaseHtmlView
         $dropdown = $toolbar->dropdownButton('storage-status-group');
         $dropdown->text(Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS'));
         $dropdown->toggleSplit(false);
-        $dropdown->icon('fa fa-ellipsis-h');
+        $dropdown->icon('fa-solid fa-ellipsis');
         $dropdown->buttonClass('btn btn-action');
         $dropdown->listCheck(true);
         $dropdown->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS_TIP')]);
@@ -354,7 +354,7 @@ class HtmlView extends BaseHtmlView
                 $updateDropdown = $toolbar->dropdownButton('storage-update-group');
                 $updateDropdown->text('COM_CONTENTBUILDERNG_STORAGE_UPDATE_GROUP');
                 $updateDropdown->toggleSplit(false);
-                $updateDropdown->icon('fa fa-sync');
+                $updateDropdown->icon('fa-solid fa-sync');
                 $updateDropdown->buttonClass('btn btn-action');
                 $updateDropdown->listCheck(false);
                 $updateDropdown->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_GROUP_TIP')]);
@@ -363,7 +363,7 @@ class HtmlView extends BaseHtmlView
                 $updateChildToolbar->standardButton('datatable.sync')
                 ->task('datatable.sync')
                 ->text('COM_CONTENTBUILDERNG_DATATABLE_SYNC')
-                ->icon('fa fa-sync')
+                ->icon('fa-solid fa-sync')
                 ->listCheck(false)
                 ->attributes(['title' => Text::_('COM_CONTENTBUILDERNG_DATATABLE_SYNC_TIP')]);
 
@@ -373,7 +373,7 @@ class HtmlView extends BaseHtmlView
                     false
                 );
                 $updateChildToolbar->link(Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV'), $csvUpdateUrl)
-                ->icon('fa fa-file-excel')
+                ->icon('fa-solid fa-file-excel')
                 ->attributes([
                     'title' => Text::_('COM_CONTENTBUILDERNG_STORAGE_CSV_TOGGLE_TOOLTIP'),
                 ]);

@@ -142,7 +142,7 @@ class HtmlView extends BaseHtmlView
             $maintenanceDropdown = $toolbar->dropdownButton('about-maintenance-group');
             $maintenanceDropdown->text(Text::_('COM_CONTENTBUILDERNG_TOOLBAR_ACTIONS'));
             $maintenanceDropdown->toggleSplit(false);
-            $maintenanceDropdown->icon('fa fa-wrench');
+            $maintenanceDropdown->icon('fa-solid fa-wrench');
             $maintenanceDropdown->buttonClass('btn btn-action');
             $maintenanceDropdown->listCheck(false);
 
@@ -150,42 +150,42 @@ class HtmlView extends BaseHtmlView
             $maintenanceChildToolbar->standardButton('about_audit')
                 ->task('about.runAudit')
                 ->text('COM_CONTENTBUILDERNG_ABOUT_RUN_AUDIT')
-                ->icon('fa fa-stethoscope')
+                ->icon('fa-solid fa-stethoscope')
                 ->listCheck(false);
 
             $maintenanceChildToolbar->standardButton('about_migrate_packed_data')
                 ->task('about.startRepairWorkflow')
                 ->text('COM_CONTENTBUILDERNG_ABOUT_START_REPAIR')
-                ->icon('fa fa-refresh')
+                ->icon('fa-solid fa-arrows-rotate')
                 ->listCheck(false);
 
             $maintenanceChildToolbar->standardButton('about_export_configuration')
                 ->task('configtransfer.export')
                 ->text('COM_CONTENTBUILDERNG_ABOUT_EXPORT_CONFIGURATION')
-                ->icon('fa fa-download')
+                ->icon('fa-solid fa-download')
                 ->listCheck(false);
 
             $maintenanceChildToolbar->standardButton('about_import_configuration')
                 ->task('configtransfer.import')
                 ->text('COM_CONTENTBUILDERNG_ABOUT_IMPORT_CONFIGURATION')
-                ->icon('fa fa-upload')
+                ->icon('fa-solid fa-upload')
                 ->listCheck(false);
 
             $maintenanceChildToolbar->linkButton('about_titlesets')
                 ->url(Route::_('index.php?option=com_contentbuilderng&view=titlesets', false))
                 ->text('COM_CONTENTBUILDERNG_TITLESETS_TITLE')
-                ->icon('fa fa-list');
+                ->icon('fa-solid fa-list');
 
             $toolbar->standardButton('about_show_log')
                 ->task('about.showLog')
                 ->text('COM_CONTENTBUILDERNG_ABOUT_SHOW_LOG')
-                ->icon('fa fa-file-text-o')
+                ->icon('fa-solid fa-file-lines')
                 ->listCheck(false);
 
             $toolbar->linkButton('about_extensions')
                 ->url(Route::_('index.php?option=com_contentbuilderng&view=about&layout=extensions', false))
                 ->text('COM_CONTENTBUILDERNG_ABOUT_EXTENSIONS')
-                ->icon('fa fa-plug');
+                ->icon('fa-solid fa-plug');
         }
 
         $configReturn = urlencode(base64_encode(
