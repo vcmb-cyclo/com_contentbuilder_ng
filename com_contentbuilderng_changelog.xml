@@ -3,6 +3,20 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
+		<version>6.1.14</version>
+		<change>
+			<item>Promoted the validated RC03 implementation to the stable 6.1.14 release.</item>
+			<item>Added independent Search and State filters in Views and Joomla menu items, with the State filter disabled by default.</item>
+			<item>Hid unusable bulk Delete and State controls when the frontend list has no selection column.</item>
+			<item>Kept Edit and State tab validation valid when optional entry points or features are intentionally disabled.</item>
+			<item>Corrected the About repair workflow alert semantics and documented the audit, view-status and Joomla Update rules.</item>
+		</change>
+		<security>
+		</security>
+	</changelog>
+	<changelog>
+		<element>com_contentbuilderng</element>
+		<type>component</type>
 		<version>6.1.14-RC03</version>
 		<change>
 			<item>Added independent View options for the text Search filter and the State filter, including correct Joomla menu inheritance.</item>

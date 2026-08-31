@@ -1,6 +1,6 @@
 # Templates and customization
 
-The CBStats syntax documented here is current for ContentBuilder NG 6.1.13.
+The CBStats syntax documented here is current for ContentBuilder NG 6.1.14.
 
 `groupset="ages-fr-FR.ini"` loads reusable value groups from the same safe
 custom/provided directories as `titleset`. Its `[groups]` keys accept inclusive

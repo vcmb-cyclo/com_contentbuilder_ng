@@ -1,5 +1,13 @@
 # Changelog
 
+## 6.1.14 — 2026-08-31
+
+- Promoted the validated RC03 implementation to the stable 6.1.14 release.
+- Added independent Search and State filters in Views and Joomla menu items, with the State filter disabled by default.
+- Hid unusable bulk Delete and State controls when the frontend list has no selection column.
+- Kept Edit and State tab validation green when optional entry points or features are intentionally disabled.
+- Corrected the About repair workflow alert semantics and documented the complete audit, view-status and Joomla Update rules.
+
 ## 6.1.14-RC03 — 2026-08-31
 
 - Added independent View options for the text Search filter and the State filter, including correct Joomla menu inheritance.

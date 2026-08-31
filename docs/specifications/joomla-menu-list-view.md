@@ -346,7 +346,8 @@ Les options `Show State` et `Show State filter` proposent séparément
 `Show Search` hérite de `show_filter`, `Show State` hérite de `list_state` et
 `Show State filter` hérite exclusivement de `show_state_filter`. Un menu peut
 donc masquer ou afficher le filtre d'état sans modifier l'affichage des états ni
-le filtre de recherche. Le filtre d'état reste absent si aucun état n'est publié.
+le filtre de recherche. La valeur par défaut de Vue pour le filtre d'état est No.
+Le filtre d'état reste absent si aucun état n'est publié.
 
 Une option d'affichage ne contourne jamais une permission applicable et ne
 crée pas une fonctionnalité absente de la Vue.

@@ -50,6 +50,7 @@ Le filtre d'état ne dépend pas du réglage d'affichage État. Il apparaît seu
 s'il est activé et qu'au moins un état est publié. Les deux filtres de la vue sont
 eux aussi indépendants : **Filtre de recherche** contrôle la recherche textuelle,
 tandis que **Filtre d'état** contrôle uniquement le sélecteur d'état.
+La valeur par défaut de **Filtre d'état** est **OFF**.
 
 Le symbole de l'onglet indique la cohérence de la configuration :
 

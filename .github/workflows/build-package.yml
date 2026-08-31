@@ -361,21 +361,28 @@ jobs:
             fi
           fi
 
-      - name: Publish update checksum to main
+      - name: Publish update manifest to main
         if: steps.release.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          current_version="$(grep -oPm1 '(?<=<version>)[^<]+' com_contentbuilderng_update.xml)"
-          if [ "${current_version}" != "${{ steps.release.outputs.version }}" ]; then
-            echo "Update manifest version ${current_version} does not match package version ${{ steps.release.outputs.version }}." >&2
-            exit 1
-          fi
-          perl -0pi -e 's#\n\s*<sha256>.*?</sha256>##g; s#(\n\s*</downloads>)#\n\t\t<sha256>${{ steps.checksum.outputs.sha256 }}</sha256>$1#' com_contentbuilderng_update.xml
+          release_version="${{ steps.release.outputs.version }}"
+          release_url="https://github.com/vcmb-cyclo/com_contentbuilderng/releases/download/v${release_version}/com_contentbuilderng-${release_version}.zip"
+          gh release view "v${release_version}" --json assets \
+            --jq '.assets[].name' | grep -Fx "com_contentbuilderng-${release_version}.zip"
+          RELEASE_VERSION="${release_version}" RELEASE_URL="${release_url}" \
+            perl -0pi -e '
+              s#(<version>)[^<]*(</version>)#$1$ENV{RELEASE_VERSION}$2#;
+              s#(<downloadurl type="full" format="zip">)[^<]*(</downloadurl>)#$1$ENV{RELEASE_URL}$2#;
+              s#\n\s*<sha256>.*?</sha256>##g;
+              s#(\n\s*</downloads>)#\n\t\t<sha256>${{ steps.checksum.outputs.sha256 }}</sha256>$1#;
+            ' com_contentbuilderng_update.xml
           if git diff --quiet -- com_contentbuilderng_update.xml; then
-            echo "Update checksum already current."
+            echo "Update manifest already current."
             exit 0
           fi
           git add com_contentbuilderng_update.xml
-          git commit -m "Update package checksum for ${{ steps.release.outputs.version }}"
+          git commit -m "Publish update manifest for ${{ steps.release.outputs.version }}"
           git push origin main

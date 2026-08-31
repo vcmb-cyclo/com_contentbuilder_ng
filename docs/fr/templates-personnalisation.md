@@ -1,6 +1,6 @@
 # Templates et personnalisation
 
-La syntaxe CBStats documentée ici correspond à ContentBuilder NG 6.1.13.
+La syntaxe CBStats documentée ici correspond à ContentBuilder NG 6.1.14.
 
 `groupset="ages-fr-FR.ini"` charge des groupes de valeurs réutilisables depuis
 les mêmes répertoires sécurisés que `titleset`. Les clés de sa section
