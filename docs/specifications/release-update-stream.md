@@ -37,11 +37,16 @@ de production : cette installation ne doit pas annoncer la RC aux autres sites.
 ## Publication
 
 Le manifeste de mise à jour peut être modifié seulement après que la release
-GitHub et son ZIP installable sont disponibles. Il doit alors contenir :
+GitHub et son ZIP installable sont disponibles. Le workflow publie d'abord la
+release, vérifie son succès, puis met automatiquement à jour et commit le
+manifeste. Celui-ci doit alors contenir :
 
 - la version publiée exacte ;
 - l'URL du ZIP attaché à cette release ;
 - le checksum SHA-256 produit et validé par le workflow de publication.
+
+La préparation de la release ne modifie donc pas manuellement le manifeste en
+avance.
 
 Un merge dans `main` ne constitue pas une publication. Aucun tag, aucune release
 et aucune modification du flux Joomla Update ne sont créés pour une simple PR.
