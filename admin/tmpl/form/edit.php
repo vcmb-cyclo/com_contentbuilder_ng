@@ -483,6 +483,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             ($hasFrontendPermission('edit') && !empty($this->item->edit_button))
             || ($hasFrontendPermission('new') && !empty($this->item->new_button))
         );
+        $editableEntryPointIntentionallyDisabled = !$editableEntryPointEnabled && (
+            ($hasFrontendPermission('edit') && empty($this->item->edit_button))
+            || ($hasFrontendPermission('new') && empty($this->item->new_button))
+        );
         // At-a-glance state of the two template tabs. An empty template is only
         // surfaced when frontend permissions make the corresponding screen useful.
         $templateAuditReferences = [
@@ -522,9 +526,13 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             bool $hasAuditIssue,
             bool $required,
             bool $entryPointEnabled,
-            bool $locked = false
+            bool $locked = false,
+            bool $intentionallyDisabled = false
         ): array {
-            if ($hasAuditIssue || ($required && !$filled)) {
+            if ($intentionallyDisabled) {
+                $stateClass = 'cb-template-state is-filled';
+                $stateTipKey = 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_VALID';
+            } elseif ($hasAuditIssue || ($required && !$filled)) {
                 $stateClass = 'cb-template-state is-inconsistent';
                 $stateTipKey = 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_INVALID';
             } elseif ($entryPointEnabled && !$hasAuditIssue) {
@@ -598,7 +606,8 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             $hasTemplateAuditIssue($templateAuditReferences['edit']),
             $editableTemplateRequired,
             $editableEntryPointEnabled,
-            !empty($this->item->editable_template_locked)
+            !empty($this->item->editable_template_locked),
+            $editableEntryPointIntentionallyDisabled
         );
         $buildTemplateTabTip = static function (string $baseKey, array $state): string {
             $parts = [Text::_($baseKey), Text::_((string) $state['tipKey'])];
@@ -631,19 +640,20 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             }
         }
         $showsListStates = !empty($this->item->list_state);
+        $showsStateFilter = !empty($this->item->show_state_filter);
         $hasListStatePermission = $hasFrontendPermission('state');
         $listStatesBadge = '';
         $listStatesTabTipKey = 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES';
 
-        if ($hasPublishedListState || $showsListStates || $hasListStatePermission) {
-            if ($hasPublishedListState && $showsListStates && $hasListStatePermission) {
+        if ($hasPublishedListState || $showsListStates || $showsStateFilter || $hasListStatePermission) {
+            if ($hasPublishedListState) {
                 $listStatesBadgeClass = 'cb-template-state is-filled';
                 $listStatesBadgeTip = Text::_('COM_CONTENTBUILDERNG_LIST_STATES_BADGE_COHERENT');
                 $listStatesTabTipKey = 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES_GREEN';
-            } elseif ($hasPublishedListState && !$showsListStates && !$hasListStatePermission) {
+            } elseif ($showsStateFilter) {
                 $listStatesBadgeClass = 'cb-template-state is-incomplete';
-                $listStatesBadgeTip = Text::_('COM_CONTENTBUILDERNG_LIST_STATES_BADGE_CONFIGURED');
-                $listStatesTabTipKey = 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES_ORANGE';
+                $listStatesTabTipKey = 'COM_CONTENTBUILDERNG_TAB_TIP_LIST_STATES_ORANGE_FILTER_NO_STATE';
+                $listStatesBadgeTip = Text::_($listStatesTabTipKey);
             } else {
                 if (!$hasPublishedListState && $showsListStates && $hasListStatePermission) {
                     $listStatesBadgeClass = 'cb-template-state is-inconsistent';

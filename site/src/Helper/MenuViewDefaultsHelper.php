@@ -22,6 +22,7 @@ final class MenuViewDefaultsHelper
         'cb_prefix_in_title',
         'show_title_breadcrumb',
         'show_filter',
+        'show_state_filter',
         'show_records_per_page',
         'edit_button',
         'export_xls',

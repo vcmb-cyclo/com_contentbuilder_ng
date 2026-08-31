@@ -27,15 +27,16 @@ L'activité d'un écran dépend des autorisations frontend :
 Les indicateurs signifient :
 
 - aucun symbole : écran non configuré ;
-- coche verte : configuration complète, cohérente et accessible depuis la liste ;
-- triangle orange : configuration existante mais incomplète, par exemple un
-  template Edit valide avec le bouton Edit masqué ;
+- coche verte : configuration complète et cohérente ; une désactivation
+  volontaire du bouton Edit est également conforme ;
+- triangle orange : configuration existante mais réellement incomplète ;
 - croix rouge : configuration contradictoire ou inutilisable, par exemple un
   écran activé dont le template requis est absent ou invalide.
 
 Pour Détail, l'accessibilité exige le droit frontend View et au moins un champ
-publié cliquable. Pour Edit, elle exige le droit correspondant et le bouton
-Edit ou Nouveau actif.
+publié cliquable. Pour Edit, un écran actif exige le droit correspondant et le
+bouton Edit ou Nouveau actif. Lorsque ces points d'entrée sont volontairement
+désactivés, leur absence ne constitue pas une anomalie et l'indicateur reste vert.
 
 Le cadenas est complémentaire au symbole : il indique que le template est
 verrouillé et régénéré à chaque enregistrement. Il ne masque jamais l'état

@@ -221,7 +221,7 @@ $showStateControl = $resolveMenuVisibility(
 );
 $showStateFilter = $resolveMenuVisibility(
     (string) $input->getCmd('cb_new_show_state_filter', 'default'),
-    !empty($this->list_state)
+    !empty($this->show_state_filter)
 );
 $showEditAction = $resolveMenuVisibility(
     (string) $input->getCmd('cb_new_show_list_edit', 'default'),
@@ -691,19 +691,20 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 		method="<?php echo $___getpost; ?>" name="adminForm" id="adminForm" class="cb-list-template-<?php echo htmlspecialchars($cbListTemplateVariant, ENT_QUOTES, 'UTF-8'); ?><?php echo !empty($this->list_header_sticky) && !$isCardsVariant && !$isTilesVariant ? ' cb-list-has-sticky-header' : ''; ?>">
 	<?php
 	$showNewButton = ($new_allowed && !empty($this->new_button));
+	$hasBulkSelection = !empty($this->select_column);
 	$showStickyButtonBar = !empty($this->button_bar_sticky);
 	$showPreviewLink = !empty($this->show_preview_link);
 	$showTopBar = MenuParamHelper::resolveInputOrMenuToggle($app, 'cb_show_top_bar', (int) ($this->cb_show_top_bar ?? 1)) === 1;
 	$showBottomBar = MenuParamHelper::resolveInputOrMenuToggle($app, 'cb_show_bottom_bar', (int) ($this->cb_show_bottom_bar ?? 1)) === 1;
 	$hasTopBarContent = $language_allowed
-		|| ($showStateControl && $state_allowed && count($this->states))
+		|| ($hasBulkSelection && $showStateControl && $state_allowed && count($this->states))
 		|| ($this->list_publish && $publish_allowed)
 		|| ($this->display_filter && $cbListActionAllowed('search'))
 		|| ($showStateFilter && count($this->states) && $cbListActionAllowed('state'))
 		|| ($this->list_publish && $cbListActionAllowed('publish'))
 		|| ($this->list_language && $cbListActionAllowed('language'))
 		|| $showNewButton
-		|| $delete_allowed
+		|| ($hasBulkSelection && $delete_allowed)
 		|| ($this->show_records_per_page && !$embeddedListHidePagination)
 		|| ($this->export_xls && empty($this->invalid_list_setup) && $cbListActionAllowed('export'));
 	$showTopBar = $showTopBar && $hasTopBarContent;
@@ -813,7 +814,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						<!-- GAUCHE : filtre + selects + boutons (optionnel) -->
 						<div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
 
-								<?php if ($showStateControl && $state_allowed && count($this->states)) : ?>
+								<?php if ($hasBulkSelection && $showStateControl && $state_allowed && count($this->states)) : ?>
 									<select class="form-select form-select-sm cb-filter-select-state" disabled
 										name="list_state" id="list_state" title="<?php echo Text::_('COM_CONTENTBUILDERNG_BULK_OPTIONS'); ?>: <?php echo Text::_('COM_CONTENTBUILDERNG_STATE_CHANGER'); ?>"
 										aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_STATE_CHANGER'); ?>"
@@ -923,7 +924,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						</div>
 
 						<!-- DROITE : actions + limitbox + excel -->
-						<?php if ($showNewButton || $delete_allowed || ($this->show_records_per_page && !$embeddedListHidePagination) || ($this->export_xls && empty($this->invalid_list_setup) && $cbListActionAllowed('export'))) : ?>
+						<?php if ($showNewButton || ($hasBulkSelection && $delete_allowed) || ($this->show_records_per_page && !$embeddedListHidePagination) || ($this->export_xls && empty($this->invalid_list_setup) && $cbListActionAllowed('export'))) : ?>
 								<div class="d-flex align-items-center gap-2 ms-auto cb-list-toolbar-actions">
 
 										<?php if ($showNewButton) : ?>
@@ -935,7 +936,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 											</a>
 										<?php endif; ?>
 
-										<?php if ($delete_allowed) : ?>
+										<?php if ($hasBulkSelection && $delete_allowed) : ?>
 											<button type="button" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 rounded-pill" onclick="contentbuilderng_delete();" title="<?php echo Text::_('COM_CONTENTBUILDERNG_DELETE_SELECTED_TOOLTIP'); ?>">
 												<span class="fa-solid fa-trash" aria-hidden="true"></span>
 												<span class="d-none d-md-inline"><?php echo Text::_('COM_CONTENTBUILDERNG_DELETE'); ?></span>

@@ -40,6 +40,7 @@ final class FormDisplayColumnsHelper
             'show_title_breadcrumb' => 'TINYINT(1) NOT NULL DEFAULT 1',
             'cb_filter_in_title' => 'TINYINT(1) NOT NULL DEFAULT 0',
             'cb_prefix_in_title' => 'TINYINT(1) NOT NULL DEFAULT 0',
+            'show_state_filter' => 'TINYINT(1) NOT NULL DEFAULT 0',
             'debug_mode' => 'TINYINT(1) NOT NULL DEFAULT 0',
             'debug_show_bf_id' => 'TINYINT(1) NOT NULL DEFAULT 0',
             'debug_enable_logs' => 'TINYINT(1) NOT NULL DEFAULT 0',

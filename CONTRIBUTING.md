@@ -82,9 +82,11 @@ The integration test requires Docker.
 ## Publishing a Release Candidate
 
 1. Prepare the RC on a dedicated branch and update the component version in
-   `com_contentbuilderng.xml`, `media/joomla.asset.json`,
-   `com_contentbuilderng_update.xml`, `CHANGELOG.md` and
+   `com_contentbuilderng.xml`, `media/joomla.asset.json`, `CHANGELOG.md` and
    `com_contentbuilderng_changelog.xml`.
+   Do not update `com_contentbuilderng_update.xml` yet: it must continue to
+   advertise the latest version whose GitHub release and installable ZIP
+   actually exist.
 2. Do not bump a bundled plugin manifest for an RC unless that plugin was
    modified. Synchronize all bundled plugin versions only for a final release
    without an `RC` suffix.
@@ -95,7 +97,8 @@ The integration test requires Docker.
 5. The workflow runs the quality gates, builds and validates the production ZIP,
    smoke-tests installation, update and migration on Joomla, creates or updates
    the `v<version>` GitHub release, marks an `-RCxx` version as a prerelease and
-   commits the generated SHA-256 checksum to `com_contentbuilderng_update.xml`.
+   only then updates `com_contentbuilderng_update.xml` with the published
+   version, download URL and generated SHA-256 checksum.
 6. Verify that the release is not a draft, is marked as a prerelease, contains
    `com_contentbuilderng-<version>.zip`, and that its asset digest matches the
    checksum in the update manifest. Pull `main` again to receive the automatic
@@ -103,6 +106,8 @@ The integration test requires Docker.
 
 Do not create a separate manual tag or upload a second ZIP when this workflow is
 used: the workflow owns the official package, tag, prerelease state and checksum.
+Merging RC code into `main`, or installing an unpublished RC ZIP manually on a
+production site, never authorizes changing the Joomla update stream.
 
 By contributing, you agree that your contribution is licensed under
 `GPL-2.0-or-later`.

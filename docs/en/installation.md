@@ -95,6 +95,10 @@ and clean up historical entries.
 > versions through **System > Update > Extensions**. Only published releases are
 > considered stable.
 
+An RC installed manually, or RC code merged into `main`, is not automatically
+published through Joomla Update. The update manifest continues to advertise the
+latest GitHub release until the new release and its installable ZIP actually exist.
+
 ## Common installation errors
 
 ### Unsupported PHP or Joomla version

@@ -353,7 +353,9 @@ final class MenuListViewLayoutsTest extends TestCase
         self::assertStringContainsString("'cb_permission_' . \$menuAction", $defaultsSource);
         self::assertStringContainsString("'COM_CONTENTBUILDERNG_MENU_NEW_VIEW_PERMISSIONS_VALUE'", $fieldSource);
         self::assertStringContainsString("'edit_button'", $defaultsSource);
+        self::assertStringContainsString("'show_state_filter'", $defaultsSource);
         self::assertStringContainsString("'editListButton'", $fieldSource);
+        self::assertStringContainsString("'show_state_filter', true", $fieldSource);
         self::assertStringContainsString("'cb_permission_' . \$key", $fieldSource);
         self::assertStringContainsString('viewPermissionsFormat', $scriptSource);
         self::assertStringContainsString("value === 'disabled'", $scriptSource);

@@ -3,6 +3,28 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
+		<version>6.1.14-RC03</version>
+		<change>
+			<item>Added independent View options for the text Search filter and the State filter, including correct Joomla menu inheritance.</item>
+			<item>Updated State-tab validation so intentional feature deactivation remains valid and a State filter without published states is reported as incomplete.</item>
+		</change>
+		<security>
+		</security>
+	</changelog>
+	<changelog>
+		<element>com_contentbuilderng</element>
+		<type>component</type>
+		<version>6.1.14-RC02</version>
+		<change>
+			<item>Hid the frontend list Delete button and bulk State menu when the list has no selection column.</item>
+			<item>Marked the Edit configuration as valid when its frontend entry point is intentionally disabled.</item>
+		</change>
+		<security>
+		</security>
+	</changelog>
+	<changelog>
+		<element>com_contentbuilderng</element>
+		<type>component</type>
 		<version>6.1.14-RC01</version>
 		<change>
 			<item>Corrected the About repair workflow alert semantics so pending repair decisions use a warning and green remains reserved for completed or successfully repaired states.</item>

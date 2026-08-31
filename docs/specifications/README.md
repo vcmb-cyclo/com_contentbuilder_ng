@@ -21,3 +21,4 @@ Spécifications disponibles :
 - [Aide contextuelle de la vue](contextual-view-help.md)
 - [Audit et workflow de réparation](about-audit-repair.md)
 - [Easter egg About](about-easter-egg.md)
+- [Publication et flux Joomla Update](release-update-stream.md)

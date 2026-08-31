@@ -145,7 +145,8 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_elements`
 --   cb_filter_in_title              1 = append active filter value to page title.
 --   cb_prefix_in_title              1 = prepend view name to page title.
 --   select_column                   1 = show checkbox column for bulk actions.
---   show_filter                     1 = show the search/filter bar.
+--   show_filter                     1 = show the search filter.
+--   show_state_filter               1 = show the state filter when published states exist.
 --   show_records_per_page           1 = show the records-per-page selector.
 --   button_bar_sticky               1 = make the toolbar sticky on scroll.
 --   show_preview_link               1 = show the admin preview link.
@@ -392,6 +393,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_forms`
     `article_record_impact_language`      tinyint(1)   NOT NULL DEFAULT '0',
     `allow_external_filter`               tinyint(1)   NOT NULL DEFAULT '0',
     `show_filter`                         tinyint(1)   NOT NULL DEFAULT '1',
+    `show_state_filter`                   tinyint(1)   NOT NULL DEFAULT '0',
     `show_records_per_page`               tinyint(1)   NOT NULL DEFAULT '1',
     `button_bar_sticky`                   tinyint(1)   NOT NULL DEFAULT '0',
     `show_preview_link`                   tinyint(1)   NOT NULL DEFAULT '0',

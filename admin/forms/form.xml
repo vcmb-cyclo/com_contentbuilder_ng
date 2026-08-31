@@ -166,6 +166,12 @@
       <option value="1">JYES</option>
     </field>
 
+    <field name="show_state_filter" type="radio" default="0" filter="intval"
+           label="COM_CONTENTBUILDERNG_FIELD_SHOW_STATE_FILTER">
+      <option value="0">JNO</option>
+      <option value="1">JYES</option>
+    </field>
+
     <field name="show_records_per_page" type="radio" default="1" filter="intval"
            label="COM_CONTENTBUILDERNG_FIELD_SHOW_RECORDS_PER_PAGE">
       <option value="0">JNO</option>
