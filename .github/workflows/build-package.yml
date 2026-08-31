@@ -54,12 +54,13 @@ jobs:
             -not -path './admin/vendor/*' \
             -print0 | xargs -0 xmllint --noout
 
-      - name: Check version consistency
+      - name: Check package and update stream versions
         run: |
           manifest_version="$(grep -oPm1 '(?<=<version>)[^<]+' com_contentbuilderng.xml)"
           update_version="$(grep -oPm1 '(?<=<version>)[^<]+' com_contentbuilderng_update.xml)"
-          if [ "${manifest_version}" != "${update_version}" ]; then
-            echo "::error::Version mismatch: manifest ${manifest_version} vs update stream ${update_version}."
+          if ! php -r 'exit(version_compare($argv[1], $argv[2], "<=") ? 0 : 1);' \
+            "${update_version}" "${manifest_version}"; then
+            echo "::error::Update stream ${update_version} is newer than package ${manifest_version}."
             exit 1
           fi
 

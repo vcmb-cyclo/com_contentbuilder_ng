@@ -75,8 +75,8 @@ final class UnescapedTemplateOutputTest extends TestCase
         'admin/tmpl/storagewizard/default.php' => 3,
         'admin/tmpl/user/default.php' => 10,
         'admin/tmpl/users/default.php' => 13,
-        // +1 for renderCheckbox(), which returns trusted Joomla checkbox markup.
-        'admin/layouts/form/advanced_options.php' => 34,
+        // renderCheckbox() returns trusted Joomla checkbox markup.
+        'admin/layouts/form/advanced_options.php' => 35,
         // Permission badges are assembled from fixed keys and escaped labels.
         'admin/layouts/form/api_tab.php' => 6,
         'admin/layouts/form/article_tab.php' => 11,

@@ -146,11 +146,15 @@ final class FormTemplateLockLayoutTest extends TestCase
             $formTemplate
         );
         self::assertStringContainsString(
-            'if ($hasPublishedListState || $showsListStates || $hasListStatePermission)',
+            '$showsStateFilter = !empty($this->item->show_state_filter);',
             $formTemplate
         );
         self::assertStringContainsString(
-            'if ($hasPublishedListState && $showsListStates && $hasListStatePermission)',
+            'if ($hasPublishedListState || $showsListStates || $showsStateFilter || $hasListStatePermission)',
+            $formTemplate
+        );
+        self::assertStringContainsString(
+            'if ($hasPublishedListState)',
             $formTemplate
         );
         self::assertStringContainsString(

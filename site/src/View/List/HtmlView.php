@@ -45,6 +45,7 @@ class HtmlView extends BaseHtmlView
     public int $debug_show_filters = 0;
     public int $debug_show_cb_id = 0;
     public int $direct_storage_read_only = 0;
+    public int $show_state_filter = 0;
     public bool $preview_list_access_configured = false;
     public float $render_time_ms = 0;
     /** @var list<string> */

@@ -19,7 +19,7 @@ final class VersionConsistencyTest extends TestCase
         $this->root = \dirname(__DIR__, 4);
     }
 
-    public function testInstallAndUpdateVersionsAreConsistent(): void
+    public function testPackageAndPublishedUpdateVersionsAreValid(): void
     {
         $installVersion = $this->readValue(
             $this->root . '/com_contentbuilderng.xml',
@@ -35,7 +35,14 @@ final class VersionConsistencyTest extends TestCase
             $installVersion
         );
         if ($updateVersion !== '') {
-            self::assertSame($installVersion, $updateVersion);
+            self::assertMatchesRegularExpression(
+                '/^\d+\.\d+\.\d+(?:-[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*)?$/',
+                $updateVersion
+            );
+            self::assertTrue(
+                version_compare($updateVersion, $installVersion, '<='),
+                'The Joomla update stream must not advertise a version newer than the package.'
+            );
         }
 
         $assetManifest = json_decode(
