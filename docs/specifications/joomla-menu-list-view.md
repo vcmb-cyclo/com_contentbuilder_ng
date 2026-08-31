@@ -343,6 +343,11 @@ Non rouge, héritage neutre.
 Les options `Show State` et `Show State filter` proposent séparément
 `Use Default (Yes/No) / Yes / No`.
 
+`Show Search` hérite de `show_filter`, `Show State` hérite de `list_state` et
+`Show State filter` hérite exclusivement de `show_state_filter`. Un menu peut
+donc masquer ou afficher le filtre d'état sans modifier l'affichage des états ni
+le filtre de recherche. Le filtre d'état reste absent si aucun état n'est publié.
+
 Une option d'affichage ne contourne jamais une permission applicable et ne
 crée pas une fonctionnalité absente de la Vue.
 
@@ -579,7 +584,8 @@ publié sous 6.1.10-RC09.
 22. Les cases Liste, Recherche, Lien, Detail, Modifier et Publié du mode Custom
     sont modifiables uniquement dans la limite autorisée par la Vue mère.
 23. Les sélecteurs sont limités à une largeur lisible et les valeurs Oui/Non utilisent les couleurs Joomla verte/rouge.
-24. State et State filter proposent séparément Use Default/Yes/No.
+24. Search, State et State filter proposent séparément Use Default/Yes/No et
+    héritent chacun de leur propre option de Vue.
 25. Maximum lines utilise le contrôle commun à liste déroulante, All et saisie Custom.
 26. Les nouvelles options exposent une aide courte via Toggle Inline Help.
 27. Detail No empêche toute injection de la valeur dans la fiche, quel que soit

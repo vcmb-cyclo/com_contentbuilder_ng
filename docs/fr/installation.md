@@ -100,6 +100,11 @@ plugins livrés et nettoyer des éléments historiques.
 > donc proposer les nouvelles versions via **Système > Mise à jour > Extensions**.
 > Seules les releases publiées sont considérées comme stables.
 
+Une RC installée manuellement, ou dont le code est fusionné dans `main`, n’est
+pas publiée automatiquement par Joomla Update. Le manifeste de mise à jour
+continue d’annoncer la dernière release GitHub jusqu’à ce que la nouvelle
+release et son ZIP installable existent réellement.
+
 ## Erreurs fréquentes
 
 ### Version PHP ou Joomla refusée

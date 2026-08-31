@@ -38,16 +38,26 @@ La palette de base publie les quatre premiers états :
 Les états 5 à 10 sont dépubliés, blancs (`#FFFFFF`), sans action, et portent
 leur titre localisé par défaut « État 5 » à « État 10 ».
 
-## 4. Indicateur de l'onglet États
+## 4. Affichage, filtre et indicateur de l'onglet États
 
-Le symbole de l'onglet indique la cohérence globale de trois réglages : présence
-d'un état publié, affichage des états sur le frontend et permission frontend
-« État ».
+Trois réglages sont indépendants :
 
-- **aucun symbole** : aucun état publié, aucun affichage et aucune permission ;
-- **triangle orange** : configuration existante mais incomplète ;
-- **coche verte** : au moins un état publié, affichage activé et permission accordée ;
-- **croix rouge** : affichage ou permission activé sans aucun état publié.
+- **État** affiche la valeur d'état et, si les droits le permettent, son contrôle ;
+- **Filtre d'état** affiche le sélecteur qui filtre la liste ;
+- la permission frontend **État** autorise les changements d'état.
+
+Le filtre d'état ne dépend pas du réglage d'affichage État. Il apparaît seulement
+s'il est activé et qu'au moins un état est publié. Les deux filtres de la vue sont
+eux aussi indépendants : **Filtre de recherche** contrôle la recherche textuelle,
+tandis que **Filtre d'état** contrôle uniquement le sélecteur d'état.
+
+Le symbole de l'onglet indique la cohérence de la configuration :
+
+- **aucun symbole** : aucun état publié et aucune fonction d'état activée ;
+- **triangle orange** : le filtre d'état est activé sans aucun état publié ;
+- **coche verte** : au moins un état est publié ; l'affichage, le filtre et la
+  permission peuvent être activés ou désactivés indépendamment ;
+- **croix rouge** : l'affichage ou la permission est activé sans aucun état publié.
 
 L'infobulle de l'onglet décrit toujours sa fonction. Lorsqu'un point est
 présent, elle explique aussi son état actuel. Pour une croix rouge, elle
@@ -121,7 +131,10 @@ jamais les états déjà affectés aux enregistrements.
 6. Les infobulles des colonnes décrivent Publier, Titre, Couleur et Action.
 7. L'infobulle de l'onglet distingue absence de symbole, triangle orange,
    coche verte et chaque incohérence signalée par une croix rouge.
-8. Les textes anglais, français et allemands restent alignés.
-9. Le bouton Actions reste visible, affiche uniquement les commandes du
+8. Filtre de recherche et Filtre d'état possèdent chacun leur propre option.
+9. Désactiver volontairement le filtre d'état reste valide même avec des états
+   publiés ; l'activer sans état publié produit un triangle orange.
+10. Les textes anglais, français et allemands restent alignés.
+11. Le bouton Actions reste visible, affiche uniquement les commandes du
    contexte actif et ne reste jamais ouvert après une désélection ou un
    changement d'onglet.

@@ -65,6 +65,7 @@ $advancedDefaults = [
     'cb_filter_in_title' => 0,
     'cb_prefix_in_title' => 0,
     'show_filter' => 1,
+    'show_state_filter' => 0,
     'show_records_per_page' => 1,
     'initial_list_limit' => ListLimitHelper::INHERIT,
     'maximum_records' => ListLimitHelper::ALL,
@@ -418,7 +419,16 @@ $advancedDefaults = [
                             <?php echo $renderCheckbox('jform[show_filter]', 'show_filter', (bool) ($item->show_filter ?? false)); ?>
                             <label class="form-check-label" for="show_filter">
                                 <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_FILTER_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDERNG_FILTER'); ?>
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_FILTER'); ?>
+                                </span>
+                            </label>
+                        </div>
+                        <div>
+                            <input type="hidden" name="jform[show_state_filter]" value="0" />
+                            <?php echo $renderCheckbox('jform[show_state_filter]', 'show_state_filter', (bool) ($item->show_state_filter ?? false)); ?>
+                            <label class="form-check-label" for="show_state_filter">
+                                <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_STATE_FILTER_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_STATE_FILTER'); ?>
                                 </span>
                             </label>
                         </div>

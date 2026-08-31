@@ -711,6 +711,8 @@ class FormModel extends AdminModel
 
             $data->show_filter = 1;
 
+            $data->show_state_filter = 0;
+
             $data->show_records_per_page = 1;
 
             $data->button_bar_sticky = 0;
@@ -1011,6 +1013,7 @@ class FormModel extends AdminModel
             'email_html',
             'email_admin_html',
             'show_filter',
+            'show_state_filter',
             'show_records_per_page',
             'button_bar_sticky',
             'list_header_sticky',

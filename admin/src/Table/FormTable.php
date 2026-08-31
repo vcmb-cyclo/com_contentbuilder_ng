@@ -175,6 +175,8 @@ class FormTable extends Table
 
     public $show_filter = 1;
 
+    public $show_state_filter = 0;
+
     public $show_records_per_page = 1;
 
     public $button_bar_sticky = 0;

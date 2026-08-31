@@ -206,6 +206,7 @@ class HtmlView extends BaseHtmlView
         $this->intro_text = (string) ($subject->intro_text ?? '');
         $this->export_xls = (int) ($subject->export_xls ?? 0);
         $this->display_filter = (int) ($subject->display_filter ?? 0);
+        $this->show_state_filter = (int) ($subject->show_state_filter ?? 0);
         $this->edit_button = (int) ($subject->edit_button ?? 0);
         $this->new_button = (int) ($subject->new_button ?? 0);
         $this->select_column = (int) ($subject->select_column ?? 0);

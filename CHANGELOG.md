@@ -1,5 +1,15 @@
 # Changelog
 
+## 6.1.14-RC03 — 2026-08-31
+
+- Added independent View options for the text Search filter and the State filter, including correct Joomla menu inheritance.
+- Updated State-tab validation so published states remain valid when display, filtering, or permission options are intentionally disabled; enabling the State filter without a published state now reports an incomplete configuration.
+
+## 6.1.14-RC02 — 2026-08-31
+
+- Hid the frontend list Delete button and bulk State menu when the list has no selection column.
+- Marked the Edit configuration as valid when its frontend entry point is intentionally disabled.
+
 ## 6.1.14-RC01 — 2026-08-30
 
 - Corrected the About repair workflow alert semantics: pending repair decisions now use a warning, while green remains reserved for completed workflows requiring no action or successful repairs.
