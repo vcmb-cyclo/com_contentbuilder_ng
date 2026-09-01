@@ -66,7 +66,7 @@ final class ListHeaderTooltipsTest extends TestCase
         self::assertIsString($template);
         self::assertIsString($model);
 
-        $recordsHeader = strpos($template, "'COM_CONTENTBUILDERNG_STORAGE_RECORDS_COUNT', 'records_count'");
+        $recordsHeader = strpos($template, "'COM_CONTENTBUILDERNG_STORAGES_COLUMN_RECORDS', 'records_count'");
         $orderingHeader = strpos($template, "'COM_CONTENTBUILDERNG_ORDERBY', 'a.ordering'");
 
         self::assertIsInt($recordsHeader);

@@ -71,7 +71,7 @@ $wizardStarted = (bool) ($this->wizardState['started'] ?? false);
         <div class="card">
             <div class="card-body">
                 <?php if (!$wizardStarted) : ?>
-                    <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_WELCOME_TITLE'); ?></h2>
+                    <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_WELCOME_TITLE'); ?></h2>
                     <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_WELCOME_DESC'); ?></p>
                     <div class="list-group mb-4">
                         <?php foreach (array_slice($this->steps, 0, -1) as $stepId) : ?>
@@ -106,7 +106,7 @@ $wizardStarted = (bool) ($this->wizardState['started'] ?? false);
                 ?>
 
                     <?php if ($storageSubstep === StorageWizardService::SUBSTEP_PICK_EXISTING) : ?>
-                        <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_PICK_EXISTING_STORAGE_TITLE'); ?></h2>
+                        <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_PICK_EXISTING_STORAGE_TITLE'); ?></h2>
                         <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_PICK_EXISTING_STORAGE_DESC'); ?></p>
                         <?php if (empty($this->existingStorages)) : ?>
                             <div class="alert alert-warning"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_PICK_EXISTING_STORAGE_NONE'); ?></div>
@@ -136,7 +136,7 @@ $wizardStarted = (bool) ($this->wizardState['started'] ?? false);
                         <?php endif; ?>
 
                     <?php elseif ($storageSubstep === StorageWizardService::SUBSTEP_CREATION_MODE) : ?>
-                        <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_CREATION_MODE_TITLE'); ?></h2>
+                        <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_CREATION_MODE_TITLE'); ?></h2>
                         <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_CREATION_MODE_DESC'); ?></p>
                         <div class="list-group mb-3">
                             <label class="list-group-item d-flex gap-3">
@@ -169,7 +169,7 @@ $wizardStarted = (bool) ($this->wizardState['started'] ?? false);
                         </button>
 
                     <?php elseif ($storageSubstep === StorageWizardService::SUBSTEP_INITIALIZATION_MODE) : ?>
-                        <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_INITIALIZATION_MODE_TITLE'); ?></h2>
+                        <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_INITIALIZATION_MODE_TITLE'); ?></h2>
                         <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_INITIALIZATION_MODE_DESC'); ?></p>
                         <div class="list-group mb-3">
                             <label class="list-group-item d-flex gap-3">
@@ -200,7 +200,7 @@ $wizardStarted = (bool) ($this->wizardState['started'] ?? false);
                         </button>
 
                     <?php elseif ($storageSubstep === StorageWizardService::SUBSTEP_NAME) : ?>
-                        <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE'); ?></h2>
+                        <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE'); ?></h2>
                         <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE_DESC'); ?></p>
                         <div class="mb-3">
                             <label class="form-label" for="cb-wizard-title"><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_TITLE'); ?></label>
@@ -312,7 +312,7 @@ $wizardStarted = (bool) ($this->wizardState['started'] ?? false);
                         </button>
 
                     <?php else : ?>
-                        <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE_MODE_TITLE'); ?></h2>
+                        <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE_MODE_TITLE'); ?></h2>
                         <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE_MODE_DESC'); ?></p>
                         <div class="list-group mb-3">
                             <label class="list-group-item d-flex gap-3">
@@ -358,7 +358,7 @@ $wizardStarted = (bool) ($this->wizardState['started'] ?? false);
                     <?php endif; ?>
 
                 <?php elseif ($currentStep === StorageWizardService::STEP_FIELDS) : ?>
-                    <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FIELDS'); ?></h2>
+                    <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FIELDS'); ?></h2>
                     <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FIELDS_DESC'); ?></p>
                     <?php if ($this->storage) : ?>
                         <p>
@@ -401,7 +401,7 @@ $wizardStarted = (bool) ($this->wizardState['started'] ?? false);
                     </div>
 
                 <?php elseif ($currentStep === StorageWizardService::STEP_FORM) : ?>
-                    <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FORM'); ?></h2>
+                    <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FORM'); ?></h2>
                     <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FORM_DESC'); ?></p>
                     <?php if (!$this->form) : ?>
                         <button
@@ -441,7 +441,7 @@ $wizardStarted = (bool) ($this->wizardState['started'] ?? false);
                     <?php endif; ?>
 
                 <?php elseif ($currentStep === StorageWizardService::STEP_MENU) : ?>
-                    <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_MENU'); ?></h2>
+                    <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_MENU'); ?></h2>
                     <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_MENU_DESC'); ?></p>
                     <?php if (empty($this->menutypes)) : ?>
                         <div class="alert alert-warning"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_NO_MENUTYPES'); ?></div>
@@ -503,7 +503,7 @@ $wizardStarted = (bool) ($this->wizardState['started'] ?? false);
                     </button>
 
                 <?php else : ?>
-                    <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_DONE'); ?></h2>
+                    <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_DONE'); ?></h2>
                     <p class="text-success">
                         <span class="fa-solid fa-circle-check me-1" aria-hidden="true"></span>
                         <?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_DONE_DESC'); ?>

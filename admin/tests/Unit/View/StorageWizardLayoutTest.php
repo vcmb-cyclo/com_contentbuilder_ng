@@ -33,4 +33,15 @@ final class StorageWizardLayoutTest extends TestCase
         self::assertStringContainsString("\$supportedExtensions = ['csv', 'xlsx', 'xls'];", $model);
         self::assertStringContainsString('accept=".csv,.xlsx,.xls', $layout);
     }
+
+    public function testEveryWizardScreenHeadingHasTheAssistantIcon(): void
+    {
+        $template = \file_get_contents(\dirname(__DIR__, 4) . '/admin/tmpl/storagewizard/default.php');
+        self::assertIsString($template);
+
+        preg_match_all('/<h2 class="h5">/', $template, $headings);
+        preg_match_all('/<h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"><\/span>/', $template, $iconHeadings);
+
+        self::assertCount(count($headings[0]), $iconHeadings[0]);
+    }
 }
