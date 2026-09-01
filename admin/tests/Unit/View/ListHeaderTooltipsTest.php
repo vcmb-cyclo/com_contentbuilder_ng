@@ -30,6 +30,7 @@ final class ListHeaderTooltipsTest extends TestCase
         'COM_CONTENTBUILDERNG_STORAGES_COLUMN_NAME_TIP',
         'COM_CONTENTBUILDERNG_STORAGES_COLUMN_TITLE_TIP',
         'COM_CONTENTBUILDERNG_STORAGES_COLUMN_MODE_TIP',
+        'COM_CONTENTBUILDERNG_STORAGES_COLUMN_RECORDS_TIP',
         'COM_CONTENTBUILDERNG_COLUMN_ORDERING_TIP',
         'COM_CONTENTBUILDERNG_COLUMN_MODIFIED_TIP',
         'COM_CONTENTBUILDERNG_STORAGES_COLUMN_PUBLISHED_TIP',
@@ -56,6 +57,23 @@ final class ListHeaderTooltipsTest extends TestCase
             'admin/tmpl/storages/default.php',
             self::STORAGE_KEYS
         );
+    }
+
+    public function testStoragesRecordCountIsSortableBeforeOrdering(): void
+    {
+        $template = file_get_contents($this->root . '/admin/tmpl/storages/default.php');
+        $model = file_get_contents($this->root . '/admin/src/Model/StoragesModel.php');
+        self::assertIsString($template);
+        self::assertIsString($model);
+
+        $recordsHeader = strpos($template, "'COM_CONTENTBUILDERNG_STORAGE_RECORDS_COUNT', 'records_count'");
+        $orderingHeader = strpos($template, "'COM_CONTENTBUILDERNG_ORDERBY', 'a.ordering'");
+
+        self::assertIsInt($recordsHeader);
+        self::assertIsInt($orderingHeader);
+        self::assertLessThan($orderingHeader, $recordsHeader);
+        self::assertStringContainsString("'records_count'", $model);
+        self::assertStringContainsString("'records_count', \$listDirn", $template);
     }
 
     #[DataProvider('languageProvider')]

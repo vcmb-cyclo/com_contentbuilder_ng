@@ -54,5 +54,23 @@ final class PreviewColorModeHelperTest extends TestCase
             PreviewColorModeHelper::appendHiddenField('', 'dark')
         );
     }
+
+    public function testPreviewModeButtonsUseSystemLightDarkOrder(): void
+    {
+        $layout = file_get_contents(
+            dirname(__DIR__, 4) . '/site/layouts/contentbuilderng/preview_color_mode.php'
+        );
+        self::assertIsString($layout);
+
+        $system = strpos($layout, "'default'");
+        $light = strpos($layout, "'light'");
+        $dark = strpos($layout, "'dark'");
+
+        self::assertIsInt($system);
+        self::assertIsInt($light);
+        self::assertIsInt($dark);
+        self::assertLessThan($light, $system);
+        self::assertLessThan($dark, $light);
+    }
 }
 }
