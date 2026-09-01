@@ -3,6 +3,22 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
+		<version>6.1.15-RC1</version>
+		<addition>
+			<item>Added a sortable record-count column to the administrator Storage list.</item>
+			<item>Added a welcome screen and clearer guided steps to the Storage creation wizard.</item>
+		</addition>
+		<change>
+			<item>Improved record synchronization and list-query performance by batching inserts and skipping unnecessary total calculations.</item>
+			<item>Improved the Storage field editor and CSV/XLSX import workflow.</item>
+			<item>Linked the GPL-2.0-or-later license identifier directly from the About screen.</item>
+		</change>
+		<security>
+		</security>
+	</changelog>
+	<changelog>
+		<element>com_contentbuilderng</element>
+		<type>component</type>
 		<version>6.1.14</version>
 		<change>
 			<item>Promoted the validated RC03 implementation to the stable 6.1.14 release.</item>

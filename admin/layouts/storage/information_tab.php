@@ -25,6 +25,7 @@ $tableSourceLabels = (array) ($displayData['tableSourceLabels'] ?? []);
 $tableSourceType = (string) ($displayData['tableSourceType'] ?? '');
 $renderCheckbox = $displayData['renderCheckbox'] ?? null;
 $csvToggleTooltip = (string) ($displayData['csvToggleTooltip'] ?? '');
+$csvImportRequested = (bool) ($displayData['csvImportRequested'] ?? false);
 $storageTableExists = $displayData['storageTableExists'] ?? null;
 $storageTableLookupName = trim((string) ($displayData['storageTableLookupName'] ?? ''));
 $storageTableErrorMessage = trim((string) ($displayData['storageTableErrorMessage'] ?? ''));
@@ -58,7 +59,7 @@ $usingForms = (array) ($displayData['usingForms'] ?? []);
         <?php echo Text::_('COM_CONTENTBUILDERNG_ID'); ?> #<?php echo (int) ($item->id ?? 0); ?>
     </span>
     <?php if ((int) ($item->id ?? 0) > 0) : ?>
-        <span class="badge bg-body-tertiary text-body border">
+        <span class="badge text-bg-primary">
             <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_RECORDS_COUNT'); ?> : <?php echo $recordsCount === null ? '-' : (int) $recordsCount; ?>
         </span>
     <?php endif; ?>
@@ -70,7 +71,7 @@ $usingForms = (array) ($displayData['usingForms'] ?? []);
             <tbody>
                 <tr>
                     <th scope="row"><label for="name"><?php echo Text::_('COM_CONTENTBUILDERNG_NAME'); ?></label></th>
-                    <td colspan="3">
+                    <td>
                         <?php if (!$item->bytable) : ?>
                             <input class="form-control form-control-sm" type="text" id="name" name="jform[name]"
                                 value="<?php echo htmlspecialchars($item->name ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
@@ -86,6 +87,12 @@ $usingForms = (array) ($displayData['usingForms'] ?? []);
                         <?php elseif ($item->id) : ?>
                             <input type="hidden" id="bytable" name="jform[bytable]" value="" />
                         <?php endif; ?>
+                    </td>
+                    <th scope="row"><label for="title"><?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE'); ?></label></th>
+                    <td>
+                        <input class="form-control form-control-sm" type="text" id="title"
+                            name="jform[title]"
+                            value="<?php echo htmlspecialchars($item->title ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                     </td>
                 </tr>
                 <?php if (!$item->id) : ?>
@@ -286,14 +293,6 @@ $usingForms = (array) ($displayData['usingForms'] ?? []);
                     </tr>
                 <?php endif; ?>
                 <tr>
-                    <th scope="row"><label for="title"><?php echo Text::_('COM_CONTENTBUILDERNG_LIST_STATES_TITLE'); ?></label></th>
-                    <td colspan="3">
-                        <input class="form-control form-control-sm" type="text" id="title"
-                            name="jform[title]"
-                            value="<?php echo htmlspecialchars($item->title ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
-                    </td>
-                </tr>
-                <tr>
                     <th scope="row"><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_TABLE'); ?></th>
                     <td>
                         <?php if ($tableSourceType === 'joomla') : ?>
@@ -319,7 +318,7 @@ $usingForms = (array) ($displayData['usingForms'] ?? []);
     </div>
 </div>
 
-<?php if ((int) ($item->id ?? 0) > 0) : ?>
+<?php if ((int) ($item->id ?? 0) > 0 && $csvImportRequested) : ?>
     <div class="card border rounded-3 mb-3">
         <div class="card-body">
             <label class="form-label"><b><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_UPDATE_FROM_CSV'); ?></b></label>
@@ -465,19 +464,17 @@ $usingForms = (array) ($displayData['usingForms'] ?? []);
 
 <?php if ((int) ($item->id ?? 0) > 0) : ?>
     <div class="card border rounded-3 mb-3">
-        <div class="card-body p-0">
+        <div class="card-body p-0 table-responsive">
             <table class="table table-striped mb-0">
                 <tbody>
                     <tr class="text-secondary">
-                        <th scope="row" style="width: 240px;"><?php echo Text::_('COM_CONTENTBUILDERNG_CREATED_ON'); ?></th>
+                        <th scope="row" class="text-nowrap"><?php echo Text::_('COM_CONTENTBUILDERNG_CREATED_ON'); ?></th>
                         <td><?php echo htmlspecialchars(is_callable($formatDate) ? $formatDate($item->created ?? null) : '-', ENT_QUOTES, 'UTF-8'); ?></td>
-                        <th scope="row" style="width: 240px;"><?php echo Text::_('JGLOBAL_FIELD_CREATED_BY_LABEL'); ?></th>
+                        <th scope="row" class="text-nowrap"><?php echo Text::_('JGLOBAL_FIELD_CREATED_BY_LABEL'); ?></th>
                         <td><?php echo htmlspecialchars($createdBy !== '' ? $createdBy : '-', ENT_QUOTES, 'UTF-8'); ?></td>
-                    </tr>
-                    <tr class="text-secondary">
-                        <th scope="row"><?php echo Text::_('JGLOBAL_FIELD_MODIFIED_LABEL'); ?></th>
+                        <th scope="row" class="text-nowrap"><?php echo Text::_('JGLOBAL_FIELD_MODIFIED_LABEL'); ?></th>
                         <td><?php echo htmlspecialchars(is_callable($formatDate) ? $formatDate($item->modified ?? null) : '-', ENT_QUOTES, 'UTF-8'); ?></td>
-                        <th scope="row"><?php echo Text::_('JGLOBAL_FIELD_MODIFIED_BY_LABEL'); ?></th>
+                        <th scope="row" class="text-nowrap"><?php echo Text::_('JGLOBAL_FIELD_MODIFIED_BY_LABEL'); ?></th>
                         <td><?php echo htmlspecialchars($modifiedBy !== '' ? $modifiedBy : '-', ENT_QUOTES, 'UTF-8'); ?></td>
                     </tr>
                 </tbody>

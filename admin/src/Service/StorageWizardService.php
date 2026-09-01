@@ -75,6 +75,7 @@ class StorageWizardService
     public function createState(): array
     {
         return [
+            'started' => false,
             'current_step' => self::STEP_STORAGE,
             'storage_substep' => self::SUBSTEP_MODE,
             'storage_mode' => '',

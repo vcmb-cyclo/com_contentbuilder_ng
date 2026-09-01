@@ -28,6 +28,8 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
 
     private static int $instance = 0;
     private static bool $assetRegistryLoaded = false;
+    /** @var array<int, bool> */
+    private static array $viewExistence = [];
 
     public static function getSubscribedEvents(): array
     {
@@ -265,6 +267,10 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
 
     private function viewExists(int $id): bool
     {
+        if (array_key_exists($id, self::$viewExistence)) {
+            return self::$viewExistence[$id];
+        }
+
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $query = $db->getQuery(true)
             ->select('COUNT(*)')
@@ -272,7 +278,7 @@ final class ContentbuilderngList extends CMSPlugin implements SubscriberInterfac
             ->where($db->quoteName('id') . ' = ' . $id);
         $db->setQuery($query);
 
-        return (int) $db->loadResult() === 1;
+        return self::$viewExistence[$id] = (int) $db->loadResult() === 1;
     }
 
     private function loadAssets(SiteApplication $app, bool $withCards = false): void

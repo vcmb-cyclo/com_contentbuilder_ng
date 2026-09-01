@@ -55,34 +55,33 @@ $storageFieldColumns = [
     'publish' => Text::_('COM_CONTENTBUILDERNG_LIST_STATES_PUBLISHED'),
 ];
 ?>
-<table width="100%">
-    <tr>
-        <td class="align-top" style="width: 200px;">
-            <?php if (!$item->bytable && $item->id) : ?>
-                <script type="application/json" id="cb-storage-field-sql-types"><?php echo json_encode($storageSqlTypeOptions, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
-            <?php endif; ?>
-        </td>
+<?php if (!$item->bytable && $item->id) : ?>
+    <script type="application/json" id="cb-storage-field-sql-types"><?php echo json_encode($storageSqlTypeOptions, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
+<?php endif; ?>
 
-        <td class="align-top">
-            <div class="d-flex justify-content-between align-items-center m-3 mb-2">
-                <div>
-                    <?php if (!$item->bytable && $item->id) : ?>
-                        <button type="button"
-                            id="cb-storage-field-add-button"
-                            class="btn btn-success btn-sm hasTooltip"
-                            title="<?php echo htmlspecialchars($addFieldTooltip, ENT_QUOTES, 'UTF-8'); ?>"
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="top">
-                            <span class="fa-solid fa-plus" aria-hidden="true"></span>
-                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_ADD_FIELD_BUTTON'); ?>
-                        </button>
-                    <?php elseif (!$item->bytable) : ?>
-                        <div class="alert alert-info py-1 px-2 mb-0 d-inline-block">
-                            <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_SAVE_FIRST_ADD_FIELDS'); ?>
-                        </div>
-                    <?php endif; ?>
+<div class="card border rounded-3 mb-3 cb-storage-fields-editor">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <h2 class="h5 mb-0"><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE'); ?></h2>
+            <small class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_TAB_TOOLTIP'); ?></small>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <?php if (!$item->bytable && $item->id) : ?>
+                <button type="button"
+                    id="cb-storage-field-add-button"
+                    class="btn btn-success btn-sm hasTooltip"
+                    title="<?php echo htmlspecialchars($addFieldTooltip, ENT_QUOTES, 'UTF-8'); ?>"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top">
+                    <span class="fa-solid fa-plus" aria-hidden="true"></span>
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_ADD_FIELD_BUTTON'); ?>
+                </button>
+            <?php elseif (!$item->bytable) : ?>
+                <div class="alert alert-info py-1 px-2 mb-0 d-inline-block">
+                    <?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_SAVE_FIRST_ADD_FIELDS'); ?>
                 </div>
-                <div class="dropdown cb-storage-columns-dropdown">
+            <?php endif; ?>
+            <div class="dropdown cb-storage-columns-dropdown">
                     <button type="button"
                         class="btn btn-primary btn-sm dropdown-toggle"
                         id="cb-storage-columns-toggle"
@@ -109,9 +108,12 @@ $storageFieldColumns = [
                             <?php echo Text::_('COM_CONTENTBUILDERNG_RESET'); ?>
                         </button>
                     </div>
-                </div>
             </div>
-            <table class="table table-striped m-3 cb-storage-fields-table" data-cb-storage-fields-ordering="<?php echo $ordering ? '1' : '0'; ?>">
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0 cb-storage-fields-table" data-cb-storage-fields-ordering="<?php echo $ordering ? '1' : '0'; ?>">
                 <thead>
                     <tr>
                         <th width="20" data-cb-storage-col="check">
@@ -308,7 +310,7 @@ $storageFieldColumns = [
                                     </span>
                                     <span>
                                         <button type="button"
-                                            class="btn btn-sm btn-link p-0 cb-storage-fields-drag-handle"
+                                            class="btn btn-sm btn-outline-secondary cb-storage-fields-drag-handle"
                                             title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_DRAG_TO_REORDER'), ENT_QUOTES, 'UTF-8'); ?>"
                                             aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_DRAG_TO_REORDER'), ENT_QUOTES, 'UTF-8'); ?>">
                                             <span class="fa-solid fa-grip-lines" aria-hidden="true"></span>
@@ -324,15 +326,17 @@ $storageFieldColumns = [
                         <td class="text-center" data-cb-storage-col="publish"><?php echo $published; ?></td>
                         <td class="text-center" data-cb-storage-col="actions">
                             <?php if ((int) ($item->bytable ?? 0) !== 2 && !$isSystemField) : ?>
-                                <button type="button"
-                                    class="btn btn-sm btn-link text-danger p-0 cb-storage-field-delete"
-                                    title="<?php echo htmlspecialchars(Text::_('JACTION_DELETE'), ENT_QUOTES, 'UTF-8'); ?>"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="top"
-                                    onclick="return cbDeleteStorageField('cb<?php echo (int) $i; ?>');"
-                                >
-                                    <span class="fa-solid fa-trash" aria-hidden="true"></span>
-                                </button>
+                                <div class="cb-storage-field-actions">
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-danger cb-storage-field-delete"
+                                        title="<?php echo htmlspecialchars(Text::_('JACTION_DELETE'), ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        onclick="return cbDeleteStorageField('cb<?php echo (int) $i; ?>');"
+                                    >
+                                        <span class="fa-solid fa-trash" aria-hidden="true"></span>
+                                    </button>
+                                </div>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -403,6 +407,6 @@ $storageFieldColumns = [
                     </tr>
                 </tfoot>
             </table>
-        </td>
-    </tr>
-</table>
+        </div>
+    </div>
+</div>

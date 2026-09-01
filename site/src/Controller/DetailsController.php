@@ -140,7 +140,7 @@ class DetailsController extends BaseController
                 }
             }
 
-            $rec = $form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, (int) ($this->siteApp->getIdentity()->id ?? 0), 0, -1, -1, -1, -1, array(), true, null);
+            $rec = $form->getListRecords($ids, '', array(), 0, 1, '', array(), 'desc', 0, false, (int) ($this->siteApp->getIdentity()->id ?? 0), 0, -1, -1, -1, -1, array(), true, null, [], null, false);
 
             if (count($rec) > 0) {
                 $rec = $rec[0];

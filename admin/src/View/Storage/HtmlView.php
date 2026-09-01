@@ -100,7 +100,12 @@ class HtmlView extends BaseHtmlView
         $wa = $this->getDocument()->getWebAssetManager();
         $wa->getRegistry()->addExtensionRegistryFile('com_contentbuilderng');
         $wa->useScript('com_contentbuilderng.admin-ui');
-        HTMLHelper::_('script', 'com_contentbuilderng/admin-ui.js', ['version' => 'auto', 'relative' => true], ['defer' => true]);
+        HTMLHelper::_(
+            'script',
+            'com_contentbuilderng/admin-ui.js',
+            ['version' => 'auto', 'relative' => true],
+            ['defer' => true]
+        );
         Text::script('COM_CONTENTBUILDERNG_CONFIRM_DELETE_ONE');
         Text::script('COM_CONTENTBUILDERNG_CONFIRM_DELETE_MANY');
 
@@ -203,7 +208,11 @@ class HtmlView extends BaseHtmlView
                 $physicalColumns = $this->getDatabase()->getTableColumns($this->dataTableName, true);
                 foreach (array_keys((array) $physicalColumns) as $columnName) {
                     $columnName = (string) $columnName;
-                    if ($columnName === '' || strtolower($columnName) === 'id' || isset($indexedColumns[strtolower($columnName)])) {
+                    if (
+                        $columnName === ''
+                        || strtolower($columnName) === 'id'
+                        || isset($indexedColumns[strtolower($columnName)])
+                    ) {
                         continue;
                     }
                     $this->indexableColumns[] = $columnName;
@@ -217,8 +226,8 @@ class HtmlView extends BaseHtmlView
         }
 
         // Formulaires construits sur ce storage (type=com_contentbuilderng,
-        // reference_id=storage.id), pour le lien "Formulaires" de l'onglet
-        // Administration.
+        // reference_id=storage.id), pour le lien "Formulaires liés" de
+        // l'onglet Stockage.
         if ($storageId > 0) {
             try {
                 $db = $this->getDatabase();
@@ -247,10 +256,15 @@ class HtmlView extends BaseHtmlView
 
         $isFromWizard = $input->getBool('wizard', false);
         $breadcrumbMiddle = $isFromWizard
-            ? '<a href="' . htmlspecialchars(Route::_('index.php?option=com_contentbuilderng&view=storagewizard', false), ENT_QUOTES, 'UTF-8') . '">'
+            ? '<a href="' . htmlspecialchars(
+                Route::_('index.php?option=com_contentbuilderng&view=storagewizard', false),
+                ENT_QUOTES,
+                'UTF-8'
+            ) . '">'
                 . Text::_('COM_CONTENTBUILDERNG_WIZARD_TITLE')
                 . ' <span class="fa-solid fa-wand-magic-sparkles mx-2" aria-hidden="true"></span></a>'
-            : Text::_('COM_CONTENTBUILDERNG_STORAGES') . ' <span class="fa-solid fa-database mx-2" aria-hidden="true"></span>';
+            : Text::_('COM_CONTENTBUILDERNG_STORAGES')
+                . ' <span class="fa-solid fa-database mx-2" aria-hidden="true"></span>';
 
         ToolbarHelper::title(
             Text::_('COM_CONTENTBUILDERNG') . ' › ' . $breadcrumbMiddle . ' › ' . $storageLabel
@@ -271,7 +285,12 @@ class HtmlView extends BaseHtmlView
         ];
 
         if (!$isFromWizard) {
-            $saveButtons[] = ['save2new', 'storage.save2new', 'JTOOLBAR_SAVE_AND_NEW', 'COM_CONTENTBUILDERNG_STORAGE_SAVE_AND_NEW_TIP'];
+            $saveButtons[] = [
+                'save2new',
+                'storage.save2new',
+                'JTOOLBAR_SAVE_AND_NEW',
+                'COM_CONTENTBUILDERNG_STORAGE_SAVE_AND_NEW_TIP',
+            ];
         }
 
         $toolbar = $this->getDocument()->getToolbar('toolbar');
@@ -323,7 +342,13 @@ class HtmlView extends BaseHtmlView
                 $previewActorName = 'administrator';
             }
             $previewUserId = (int) ($identity->id ?? 0);
-            $previewPayload = PreviewLinkHelper::buildPayload('storage:' . $id, $previewUntil, $previewActorId, $previewActorName, $previewUserId);
+            $previewPayload = PreviewLinkHelper::buildPayload(
+                'storage:' . $id,
+                $previewUntil,
+                $previewActorId,
+                $previewActorName,
+                $previewUserId
+            );
             $previewSig = hash_hmac('sha256', $previewPayload, (string) $app->get('secret'));
             $previewUrl = Route::link(
                 'site',
@@ -380,8 +405,13 @@ class HtmlView extends BaseHtmlView
             }
         }
 
+        $cancelTipKey = $isNew
+            ? 'COM_CONTENTBUILDERNG_STORAGE_CANCEL_TIP'
+            : 'COM_CONTENTBUILDERNG_STORAGE_CLOSE_TIP';
         $toolbar->cancel('storage.cancel', $isNew ? 'JTOOLBAR_CANCEL' : 'JTOOLBAR_CLOSE')
-            ->attributes(['title' => Text::_($isNew ? 'COM_CONTENTBUILDERNG_STORAGE_CANCEL_TIP' : 'COM_CONTENTBUILDERNG_STORAGE_CLOSE_TIP')]);
+            ->attributes([
+                'title' => Text::_($cancelTipKey),
+            ]);
         ToolbarHelper::help(
             'COM_CONTENTBUILDERNG_HELP_STORAGES_TITLE',
             false,
@@ -435,7 +465,10 @@ class HtmlView extends BaseHtmlView
             $this->storageTableExists = in_array($resolvedName, $tableList, true);
 
             if ($this->storageTableExists === false) {
-                $this->storageTableErrorMessage = Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_TABLE_DOES_NOT_EXIST', $db->replacePrefix($lookupName));
+                $this->storageTableErrorMessage = Text::sprintf(
+                    'COM_CONTENTBUILDERNG_STORAGE_TABLE_DOES_NOT_EXIST',
+                    $db->replacePrefix($lookupName)
+                );
             }
         } catch (\Throwable $e) {
             $this->storageTableExists = null;

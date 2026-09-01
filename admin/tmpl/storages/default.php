@@ -338,6 +338,10 @@ if (storagesTable && storagesTable.tBodies.length) {
                         <?php echo HTMLHelper::_('searchtools.sort', 'COM_CONTENTBUILDERNG_STORAGE_MODE', 'a.bytable', $listDirn, $listOrder); ?>
                     </th>
 
+                    <th class="w-10 text-nowrap hasTooltip" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGES_COLUMN_RECORDS_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
+                        <?php echo HTMLHelper::_('searchtools.sort', 'COM_CONTENTBUILDERNG_STORAGES_COLUMN_RECORDS', 'records_count', $listDirn, $listOrder); ?>
+                    </th>
+
                     <th class="w-10 text-nowrap hasTooltip" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_COLUMN_ORDERING_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                         <?php echo HTMLHelper::_('searchtools.sort', 'COM_CONTENTBUILDERNG_ORDERBY', 'a.ordering', $listDirn, $listOrder); ?>
                     </th>
@@ -380,6 +384,7 @@ if (storagesTable && storagesTable.tBodies.length) {
                         $lastUpdate = $lastUpdateRaw
                             ? HTMLHelper::_('date', $lastUpdateRaw, Text::_('DATE_FORMAT_LC5'))
                             : '-';
+                        $recordsCount = $row->records_count === null ? '-' : (string) (int) $row->records_count;
 
                         // ⚠️ Vérifie ta convention : task=storage.edit (singulier) ou storages.edit (pluriel)
                         $link = Route::_('index.php?option=com_contentbuilderng&task=storage.edit&id=' . $id);
@@ -410,6 +415,9 @@ if (storagesTable && storagesTable.tBodies.length) {
                         <td><a href="<?php echo $link; ?>"><?php echo $name; ?></a></td>
                         <td><a href="<?php echo $link; ?>"><?php echo $title; ?></a></td>
                         <td class="text-nowrap"><span class="badge <?php echo $storageModeBadgeClass; ?>"><?php echo htmlspecialchars($storageMode, ENT_QUOTES, 'UTF-8'); ?></span></td>
+                        <td class="text-end text-nowrap">
+                            <?php echo htmlspecialchars($recordsCount, ENT_QUOTES, 'UTF-8'); ?>
+                        </td>
 
                         <td class="order text-nowrap">
                             <?php if ($saveOrder) : ?>
@@ -446,7 +454,7 @@ if (storagesTable && storagesTable.tBodies.length) {
 
             <tfoot>
                 <tr>
-                    <td colspan="9">
+                        <td colspan="10">
                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
 
                             <div class="d-flex flex-wrap align-items-center gap-2">

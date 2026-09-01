@@ -47,10 +47,11 @@ $storageName = trim((string) ($this->item->name ?? ''));
 $dataTableName = $this->dataTableName !== '' ? $this->dataTableName : '-';
 $createdBy = trim((string) ($this->item->created_by ?? ''));
 $modifiedBy = trim((string) ($this->item->modified_by ?? ''));
+$csvImportRequested = $app->getInput()->getBool('csv_import', false);
 $requestedTab = trim((string) $app->getInput()->getCmd('tabStartOffset', ''));
-// À la création, on arrive sur l'onglet "Administration" (Nom/Titre s'y
-// trouvent désormais) ; ensuite, on rouvre toujours "Stockage de données".
-$defaultTab = $storageId < 1 ? 'tab1' : 'tab0';
+// Le nouvel onglet "Stockage" est le point d'entrée, à la création comme à
+// l'édition. Les champs restent accessibles dans l'onglet "Champs".
+$defaultTab = 'tab1';
 $activeTab = preg_match('/^tab\d+$/', $requestedTab) ? $requestedTab : $defaultTab;
 $isPublished = ((int) ($this->item->published ?? 0) === 1);
 $publishedIconClass = $isPublished ? 'fa-solid fa-check text-success' : 'fa-solid fa-circle-xmark text-danger';
@@ -277,6 +278,7 @@ const cbFieldTitlePlaceholder = <?php echo json_encode(Text::_('COM_CONTENTBUILD
 const cbFieldGroupLabel = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_STORAGE_GROUP'), JSON_UNESCAPED_UNICODE); ?>;
 const cbFieldRequiredLabel = <?php echo json_encode(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_REQUIRED'), JSON_UNESCAPED_UNICODE); ?>;
 const cbFieldConfirmLabel = <?php echo json_encode(Text::_('JSAVE'), JSON_UNESCAPED_UNICODE); ?>;
+const cbFieldCancelLabel = <?php echo json_encode(Text::_('JCANCEL'), JSON_UNESCAPED_UNICODE); ?>;
 const cbStorageEditUrl = <?php echo json_encode('index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $storageId . '&tabStartOffset=tab0#tab0', JSON_UNESCAPED_SLASHES); ?>;
 let cbAjaxBusy = false;
 let cbSaveButtonTimer = null;
@@ -999,7 +1001,10 @@ function initStorageInlineAddField() {
             '<td class="cb-order-col" data-cb-storage-col="order"></td>' +
             '<td class="text-center" data-cb-storage-col="publish"></td>' +
             '<td class="text-center text-nowrap" data-cb-storage-col="actions">' +
-                '<button type="button" class="btn btn-sm btn-primary cb-storage-field-new-confirm" title="' + cbFieldConfirmLabel + '"><span class="fa-solid fa-floppy-disk" aria-hidden="true"></span></button>' +
+                '<div class="btn-group btn-group-sm cb-storage-field-actions" role="group">' +
+                    '<button type="button" class="btn btn-primary cb-storage-field-new-confirm" title="' + cbFieldConfirmLabel + '"><span class="fa-solid fa-floppy-disk" aria-hidden="true"></span></button>' +
+                    '<button type="button" class="btn btn-outline-secondary cb-storage-field-new-cancel" title="' + cbFieldCancelLabel + '"><span class="fa-solid fa-xmark" aria-hidden="true"></span></button>' +
+                '</div>' +
             '</td>';
 
         tbody.insertBefore(row, tbody.firstChild);
@@ -1038,6 +1043,7 @@ function initStorageInlineAddField() {
         row.querySelector('.cb-storage-field-new-confirm').addEventListener('click', function () {
             submitNewField(row);
         });
+        row.querySelector('.cb-storage-field-new-cancel').addEventListener('click', cancelNewFieldRow);
     }
 
     function submitNewField(row) {
@@ -1391,9 +1397,8 @@ function initStorageUi() {
     initStorageTabTooltips();
     if (adminUi && typeof adminUi.persistJoomlaTabset === 'function') {
         // restoreFromStorage désactivé : l'onglet de départ est déterminé
-        // côté serveur (Administration à la création, Stockage de données
-        // ensuite) et ne doit pas être écrasé par le dernier onglet visité
-        // sur un autre storage.
+        // côté serveur (Stockage) et ne doit pas être écrasé par le dernier
+        // onglet visité sur un autre storage.
         adminUi.persistJoomlaTabset('view-pane', 'cb_active_storage_tab', function(id) {
             adminUi.setHiddenInputValue('tabStartOffset', id);
         }, { restoreFromStorage: false });
@@ -1438,8 +1443,36 @@ if (document.readyState === 'loading') {
 <?php
 // Démarrer les onglets
 echo HTMLHelper::_('uitab.startTabSet', 'view-pane', ['active' => $activeTab]);
-// Premier onglet
-echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', $storageTabLabel('fa-solid fa-database', 'COM_CONTENTBUILDERNG_STORAGE'));
+// Premier onglet : stockage
+echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', $storageTabLabel('fa-solid fa-database', 'COM_CONTENTBUILDERNG_STORAGE_ADMINISTRATION'));
+echo LayoutHelper::render('storage.information_tab', [
+    'item' => $this->item,
+    'storageId' => $storageId,
+    'tables' => $this->tables,
+    'tableModes' => $this->tableModes,
+    'tableSourceTypes' => $this->tableSourceTypes,
+    'tableSourceLabels' => $this->tableSourceLabels,
+    'tableSourceType' => $this->tableSourceType,
+    'renderCheckbox' => $renderCheckbox,
+    'csvToggleTooltip' => $csvToggleTooltip,
+    'csvImportRequested' => $csvImportRequested,
+    'storageTableExists' => $storageTableExists,
+    'storageTableLookupName' => $storageTableLookupName,
+    'storageTableErrorMessage' => $storageTableErrorMessage,
+    'publishedToggleHtml' => $publishedToggleHtml,
+    'publishedIconClass' => $publishedIconClass,
+    'publishedIconTitle' => $publishedIconTitle,
+    'dataTableName' => $dataTableName,
+    'storageModeKey' => $storageModeKey,
+    'recordsCount' => $recordsCount,
+    'createdBy' => $createdBy,
+    'modifiedBy' => $modifiedBy,
+    'formatDate' => $formatDate,
+], JPATH_COMPONENT_ADMINISTRATOR . '/layouts');
+echo HTMLHelper::_('uitab.endTab');
+
+// Deuxième onglet : champs
+echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab0', $storageTabLabel('fa-solid fa-table-list', 'COM_CONTENTBUILDERNG_STORAGE'));
 ?>
 
 <?php
@@ -1456,31 +1489,6 @@ echo LayoutHelper::render('storage.storage_tab', [
     'recordsCount' => $recordsCount,
     'pagination' => $this->pagination,
     'ordering' => $this->ordering,
-], JPATH_COMPONENT_ADMINISTRATOR . '/layouts');
-echo HTMLHelper::_('uitab.endTab');
-echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab1', $storageTabLabel('fa-solid fa-gear', 'COM_CONTENTBUILDERNG_STORAGE_ADMINISTRATION'));
-echo LayoutHelper::render('storage.information_tab', [
-    'item' => $this->item,
-    'storageId' => $storageId,
-    'tables' => $this->tables,
-    'tableModes' => $this->tableModes,
-    'tableSourceTypes' => $this->tableSourceTypes,
-    'tableSourceLabels' => $this->tableSourceLabels,
-    'tableSourceType' => $this->tableSourceType,
-    'renderCheckbox' => $renderCheckbox,
-    'csvToggleTooltip' => $csvToggleTooltip,
-    'storageTableExists' => $storageTableExists,
-    'storageTableLookupName' => $storageTableLookupName,
-    'storageTableErrorMessage' => $storageTableErrorMessage,
-    'publishedToggleHtml' => $publishedToggleHtml,
-    'publishedIconClass' => $publishedIconClass,
-    'publishedIconTitle' => $publishedIconTitle,
-    'dataTableName' => $dataTableName,
-    'storageModeKey' => $storageModeKey,
-    'recordsCount' => $recordsCount,
-    'createdBy' => $createdBy,
-    'modifiedBy' => $modifiedBy,
-    'formatDate' => $formatDate,
 ], JPATH_COMPONENT_ADMINISTRATOR . '/layouts');
 echo HTMLHelper::_('uitab.endTab');
 echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab2', $storageTabLabel('fa-solid fa-list-ol', 'COM_CONTENTBUILDERNG_STORAGE_INDEX'));

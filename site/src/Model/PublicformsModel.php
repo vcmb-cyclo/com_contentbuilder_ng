@@ -200,7 +200,7 @@ class PublicformsModel extends ListModel
             $in = ' id In (' . implode(',', $this->forms) . ') And ';
         }
 
-        return 'Select SQL_CALC_FOUND_ROWS * From #__contentbuilderng_forms Where ' . $in . ' published = 1 ' . $filter_state . $this->buildOrderBy();
+        return 'Select * From #__contentbuilderng_forms Where ' . $in . ' published = 1 ' . $filter_state . $this->buildOrderBy();
     }
 
     public function getShowPageHeading()
@@ -274,7 +274,7 @@ class PublicformsModel extends ListModel
     public function getData()
     {
         // Lets load the data if it doesn't already exist
-        if (empty($this->_data)) {
+        if ($this->_data === null) {
             $query = $this->buildQuery();
             $this->_data = $this->_getList($query, $this->getState('limitstart'), $this->getState('limit'));
         }
@@ -286,7 +286,7 @@ class PublicformsModel extends ListModel
     public function getTotal()
     {
         // Load the content if it doesn't already exist
-        if (empty($this->_total)) {
+        if ($this->_total === null) {
             $query = $this->buildQuery();
             $this->_total = $this->_getListCount($query);
         }
@@ -296,7 +296,7 @@ class PublicformsModel extends ListModel
     public function getPagination()
     {
         // Load the content if it doesn't already exist
-        if (empty($this->_pagination)) {
+        if ($this->_pagination === null) {
             $this->_pagination = new Pagination($this->getTotal(), $this->getState('limitstart'), $this->getState('limit'));
         }
         return $this->_pagination;

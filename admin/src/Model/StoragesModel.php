@@ -69,7 +69,8 @@ class StoragesModel extends ListModel
                 'a.bytable',
                 'a.display_in',
                 'a.published',
-                'a.modified'
+                'a.modified',
+                'records_count'
             ];
         }
 
@@ -101,7 +102,12 @@ class StoragesModel extends ListModel
         $filterState = $app->getUserStateFromRequest($this->context . '.filter.state', 'filter_state', '', 'cmd');
         $this->setState('filter.state', $filterState);
 
-        $search = trim((string) $app->getUserStateFromRequest($this->context . '.filter.search', 'filter_search', '', 'string'));
+        $search = trim((string) $app->getUserStateFromRequest(
+            $this->context . '.filter.search',
+            'filter_search',
+            '',
+            'string'
+        ));
         $this->setState('filter.search', $search);
     }
 
@@ -114,6 +120,7 @@ class StoragesModel extends ListModel
 
         // Base query
         $query->select('a.*')
+            ->select($this->getRecordsCountExpression() . ' AS ' . $db->quoteName('records_count'))
             ->from($db->quoteName('#__contentbuilderng_storages') . ' AS ' . $db->quoteName('a'));
 
         // Published filter.
@@ -158,7 +165,10 @@ class StoragesModel extends ListModel
         }
 
         // Optionnel : whitelist rapide des colonnes triables
-        $allowedOrdering = ['a.id', 'a.name', 'a.title', 'a.bytable', 'a.published', 'a.ordering', 'a.modified'];
+        $allowedOrdering = [
+            'a.id', 'a.name', 'a.title', 'a.bytable',
+            'a.published', 'a.ordering', 'a.modified', 'records_count',
+        ];
         if (!in_array($ordering, $allowedOrdering, true)) {
             $ordering = 'a.ordering';
         }
@@ -166,6 +176,55 @@ class StoragesModel extends ListModel
         $query->order($db->escape($ordering . ' ' . $direction));
 
         return $query;
+    }
+
+    private function getRecordsCountExpression(): string
+    {
+        $db = $this->getDatabase();
+
+        try {
+            $storageQuery = $db->getQuery(true)
+                ->select($db->quoteName(['id', 'name', 'bytable']))
+                ->from($db->quoteName('#__contentbuilderng_storages'));
+            $db->setQuery($storageQuery);
+            $storages = $db->loadObjectList() ?: [];
+
+            $tableNames = array_fill_keys(
+                array_map('strtolower', (array) $db->getTableList()),
+                true
+            );
+            $branches = [];
+
+            foreach ($storages as $storage) {
+                $storageId = (int) ($storage->id ?? 0);
+                $storageName = trim((string) ($storage->name ?? ''));
+
+                if ($storageId < 1 || $storageName === '') {
+                    continue;
+                }
+
+                $lookupName = (int) ($storage->bytable ?? 0) > 0
+                    ? $storageName
+                    : '#__' . $storageName;
+                $resolvedName = strtolower($db->replacePrefix($lookupName));
+
+                if (!isset($tableNames[$resolvedName])) {
+                    continue;
+                }
+
+                $branches[] = 'WHEN ' . $storageId . ' THEN (SELECT COUNT(*) FROM '
+                    . $db->quoteName($lookupName) . ')';
+            }
+
+            if ($branches === []) {
+                return 'NULL';
+            }
+
+            return 'CASE ' . $db->quoteName('a.id') . ' '
+                . implode(' ', $branches) . ' ELSE NULL END';
+        } catch (\Throwable $e) {
+            return 'NULL';
+        }
     }
 
 

@@ -37,6 +37,13 @@ $stepIcons = [
     StorageWizardService::STEP_MENU => 'fa-bars',
     StorageWizardService::STEP_DONE => 'fa-flag-checkered',
 ];
+$stepDescriptions = [
+    StorageWizardService::STEP_STORAGE => Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE_DESC'),
+    StorageWizardService::STEP_FIELDS => Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FIELDS_DESC'),
+    StorageWizardService::STEP_FORM => Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FORM_DESC'),
+    StorageWizardService::STEP_MENU => Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_MENU_DESC'),
+];
+$wizardStarted = (bool) ($this->wizardState['started'] ?? false);
 ?>
 <form action="index.php" method="post" name="adminForm" id="adminForm">
     <div class="cb-wizard mt-3">
@@ -63,14 +70,43 @@ $stepIcons = [
 
         <div class="card">
             <div class="card-body">
-                <?php if ($currentStep === StorageWizardService::STEP_STORAGE) :
+                <?php if (!$wizardStarted) : ?>
+                    <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_WELCOME_TITLE'); ?></h2>
+                    <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_WELCOME_DESC'); ?></p>
+                    <div class="list-group mb-4">
+                        <?php foreach (array_slice($this->steps, 0, -1) as $stepId) : ?>
+                            <div class="list-group-item d-flex gap-3 align-items-start">
+                                <span class="fa-solid <?php echo htmlspecialchars((string) ($stepIcons[$stepId] ?? 'fa-circle'), ENT_QUOTES, 'UTF-8'); ?> fs-5 mt-1" aria-hidden="true"></span>
+                                <span>
+                                    <strong class="d-block"><?php echo htmlspecialchars($stepLabels[$stepId] ?? $stepId, ENT_QUOTES, 'UTF-8'); ?></strong>
+                                    <small class="text-muted"><?php echo htmlspecialchars((string) ($stepDescriptions[$stepId] ?? ''), ENT_QUOTES, 'UTF-8'); ?></small>
+                                </span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        onclick="Joomla.submitbutton('storagewizard.begin')"
+                        title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_WIZARD_START_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                    >
+                        <span class="fa-solid fa-play me-1" aria-hidden="true"></span>
+                        <?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_START'); ?>
+                    </button>
+
+                <?php elseif ($currentStep === StorageWizardService::STEP_STORAGE) :
                     $storageSubstep = (string) ($this->wizardState['storage_substep'] ?? StorageWizardService::SUBSTEP_MODE);
                     $storageMode = (string) ($this->wizardState['storage_mode'] ?? '');
                     $creationMode = (string) ($this->wizardState['creation_mode'] ?? '');
+                    $saveStorageTask = ($this->wizardState['storage_source'] ?? '') === StorageWizardService::STORAGE_SOURCE_INTERNAL
+                        ? 'storagewizard.saveStorageDetails'
+                        : 'storagewizard.saveStorage';
                 ?>
 
                     <?php if ($storageSubstep === StorageWizardService::SUBSTEP_PICK_EXISTING) : ?>
-                        <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_PICK_EXISTING_STORAGE_TITLE'); ?></h2>
+                        <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_PICK_EXISTING_STORAGE_TITLE'); ?></h2>
                         <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_PICK_EXISTING_STORAGE_DESC'); ?></p>
                         <?php if (empty($this->existingStorages)) : ?>
                             <div class="alert alert-warning"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_PICK_EXISTING_STORAGE_NONE'); ?></div>
@@ -100,7 +136,7 @@ $stepIcons = [
                         <?php endif; ?>
 
                     <?php elseif ($storageSubstep === StorageWizardService::SUBSTEP_CREATION_MODE) : ?>
-                        <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_CREATION_MODE_TITLE'); ?></h2>
+                        <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_CREATION_MODE_TITLE'); ?></h2>
                         <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_CREATION_MODE_DESC'); ?></p>
                         <div class="list-group mb-3">
                             <label class="list-group-item d-flex gap-3">
@@ -133,7 +169,7 @@ $stepIcons = [
                         </button>
 
                     <?php elseif ($storageSubstep === StorageWizardService::SUBSTEP_INITIALIZATION_MODE) : ?>
-                        <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_INITIALIZATION_MODE_TITLE'); ?></h2>
+                        <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_INITIALIZATION_MODE_TITLE'); ?></h2>
                         <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_INITIALIZATION_MODE_DESC'); ?></p>
                         <div class="list-group mb-3">
                             <label class="list-group-item d-flex gap-3">
@@ -164,7 +200,7 @@ $stepIcons = [
                         </button>
 
                     <?php elseif ($storageSubstep === StorageWizardService::SUBSTEP_NAME) : ?>
-                        <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE'); ?></h2>
+                        <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE'); ?></h2>
                         <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE_DESC'); ?></p>
                         <div class="mb-3">
                             <label class="form-label" for="cb-wizard-title"><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_TITLE'); ?></label>
@@ -266,7 +302,7 @@ $stepIcons = [
                         <button
                             type="button"
                             class="btn btn-primary"
-                            onclick="Joomla.submitbutton('storagewizard.saveStorage')"
+                            onclick="Joomla.submitbutton('<?php echo htmlspecialchars($saveStorageTask, ENT_QUOTES, 'UTF-8'); ?>')"
                             title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_WIZARD_NEXT_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
                             data-bs-toggle="tooltip"
                             data-bs-placement="top"
@@ -276,7 +312,7 @@ $stepIcons = [
                         </button>
 
                     <?php else : ?>
-                        <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE_MODE_TITLE'); ?></h2>
+                        <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE_MODE_TITLE'); ?></h2>
                         <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_STORAGE_MODE_DESC'); ?></p>
                         <div class="list-group mb-3">
                             <label class="list-group-item d-flex gap-3">
@@ -322,7 +358,7 @@ $stepIcons = [
                     <?php endif; ?>
 
                 <?php elseif ($currentStep === StorageWizardService::STEP_FIELDS) : ?>
-                    <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FIELDS'); ?></h2>
+                    <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FIELDS'); ?></h2>
                     <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FIELDS_DESC'); ?></p>
                     <?php if ($this->storage) : ?>
                         <p>
@@ -365,7 +401,7 @@ $stepIcons = [
                     </div>
 
                 <?php elseif ($currentStep === StorageWizardService::STEP_FORM) : ?>
-                    <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FORM'); ?></h2>
+                    <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FORM'); ?></h2>
                     <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_FORM_DESC'); ?></p>
                     <?php if (!$this->form) : ?>
                         <button
@@ -405,7 +441,7 @@ $stepIcons = [
                     <?php endif; ?>
 
                 <?php elseif ($currentStep === StorageWizardService::STEP_MENU) : ?>
-                    <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_MENU'); ?></h2>
+                    <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_MENU'); ?></h2>
                     <p class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_MENU_DESC'); ?></p>
                     <?php if (empty($this->menutypes)) : ?>
                         <div class="alert alert-warning"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_NO_MENUTYPES'); ?></div>
@@ -467,7 +503,7 @@ $stepIcons = [
                     </button>
 
                 <?php else : ?>
-                    <h2 class="h5"><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_DONE'); ?></h2>
+                    <h2 class="h5"><span class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></span><?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_STEP_DONE'); ?></h2>
                     <p class="text-success">
                         <span class="fa-solid fa-circle-check me-1" aria-hidden="true"></span>
                         <?php echo Text::_('COM_CONTENTBUILDERNG_WIZARD_DONE_DESC'); ?>

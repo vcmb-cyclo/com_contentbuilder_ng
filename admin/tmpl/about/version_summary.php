@@ -41,13 +41,12 @@ use Joomla\CMS\Language\Text;
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="cb-about-version-tile cb-about-version-tile--license">
                     <span class="cb-about-version-icon"><?php echo Text::_('COM_CONTENTBUILDERNG_LICENSE_LABEL'); ?></span>
-                    <p class="cb-about-version-value"><?php echo htmlspecialchars($licenseValue, ENT_QUOTES, 'UTF-8'); ?></p>
                     <a
-                        class="cb-about-version-link"
+                        class="cb-about-version-value d-block"
                         href="<?php echo htmlspecialchars($licenseUrl, ENT_QUOTES, 'UTF-8'); ?>"
                         target="_blank"
                         rel="noopener noreferrer"
-                    ><?php echo Text::_('COM_CONTENTBUILDERNG_LICENSE_LINK'); ?></a>
+                    ><?php echo htmlspecialchars($licenseValue, ENT_QUOTES, 'UTF-8'); ?></a>
                 </div>
             </div>
         </div>
