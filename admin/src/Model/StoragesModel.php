@@ -102,7 +102,12 @@ class StoragesModel extends ListModel
         $filterState = $app->getUserStateFromRequest($this->context . '.filter.state', 'filter_state', '', 'cmd');
         $this->setState('filter.state', $filterState);
 
-        $search = trim((string) $app->getUserStateFromRequest($this->context . '.filter.search', 'filter_search', '', 'string'));
+        $search = trim((string) $app->getUserStateFromRequest(
+            $this->context . '.filter.search',
+            'filter_search',
+            '',
+            'string'
+        ));
         $this->setState('filter.search', $search);
     }
 
@@ -160,7 +165,10 @@ class StoragesModel extends ListModel
         }
 
         // Optionnel : whitelist rapide des colonnes triables
-        $allowedOrdering = ['a.id', 'a.name', 'a.title', 'a.bytable', 'a.published', 'a.ordering', 'a.modified', 'records_count'];
+        $allowedOrdering = [
+            'a.id', 'a.name', 'a.title', 'a.bytable',
+            'a.published', 'a.ordering', 'a.modified', 'records_count',
+        ];
         if (!in_array($ordering, $allowedOrdering, true)) {
             $ordering = 'a.ordering';
         }

@@ -100,7 +100,8 @@ final class StoragewizardController extends BaseController
 
         $wizardService = $this->getWizardService();
         $state = $wizardService->getState();
-        $currentIndex = $wizardService->stepIndex((string) ($state['current_step'] ?? StorageWizardService::STEP_STORAGE));
+        $currentStep = (string) ($state['current_step'] ?? StorageWizardService::STEP_STORAGE);
+        $currentIndex = $wizardService->stepIndex($currentStep);
 
         // Ne jamais redescendre jusqu'à l'étape "storage" : saveStorage() crée
         // toujours un nouveau storage (pas d'édition), y retourner puis
@@ -340,7 +341,8 @@ final class StoragewizardController extends BaseController
         $mode = (string) ($state['storage_mode'] ?? '');
 
         $state['storage_substep'] = match ($substep) {
-            StorageWizardService::SUBSTEP_PICK_EXISTING, StorageWizardService::SUBSTEP_CREATION_MODE => StorageWizardService::SUBSTEP_MODE,
+            StorageWizardService::SUBSTEP_PICK_EXISTING,
+            StorageWizardService::SUBSTEP_CREATION_MODE => StorageWizardService::SUBSTEP_MODE,
             StorageWizardService::SUBSTEP_INITIALIZATION_MODE => StorageWizardService::SUBSTEP_NAME,
             StorageWizardService::SUBSTEP_NAME => $mode === StorageWizardService::MODE_NEW
                 ? StorageWizardService::SUBSTEP_CREATION_MODE
@@ -531,8 +533,12 @@ final class StoragewizardController extends BaseController
      * après un redirect d'erreur (name requis, doublon, etc.), au lieu de
      * les effacer.
      */
-    private function rememberStorageInput(StorageWizardService $wizardService, string $name, string $title, string $bytable = ''): void
-    {
+    private function rememberStorageInput(
+        StorageWizardService $wizardService,
+        string $name,
+        string $title,
+        string $bytable = ''
+    ): void {
         $state = $wizardService->getState();
         $state['pending_storage_input'] = ['name' => $name, 'title' => $title, 'bytable' => $bytable];
         $wizardService->saveState($state);
