@@ -217,8 +217,8 @@ class HtmlView extends BaseHtmlView
         }
 
         // Formulaires construits sur ce storage (type=com_contentbuilderng,
-        // reference_id=storage.id), pour le lien "Formulaires" de l'onglet
-        // Administration.
+        // reference_id=storage.id), pour le lien "Formulaires liés" de
+        // l'onglet Stockage.
         if ($storageId > 0) {
             try {
                 $db = $this->getDatabase();

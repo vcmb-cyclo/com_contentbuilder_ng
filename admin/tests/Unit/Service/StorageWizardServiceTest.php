@@ -25,6 +25,7 @@ final class StorageWizardServiceTest extends TestCase
     public function testCreatesInitialState(): void
     {
         self::assertSame([
+            'started' => false,
             'current_step' => StorageWizardService::STEP_STORAGE,
             'storage_substep' => StorageWizardService::SUBSTEP_MODE,
             'storage_mode' => '',
