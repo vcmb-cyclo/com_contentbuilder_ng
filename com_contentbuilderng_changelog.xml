@@ -3,9 +3,9 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.14</version>
+		<version>6.1.15-RC1</version>
 		<change>
-			<item>Promoted the validated RC03 implementation to the stable 6.1.14 release.</item>
+			<item>Promoted the validated RC03 implementation to the stable 6.1.15-RC1 release.</item>
 			<item>Added independent Search and State filters in Views and Joomla menu items, with the State filter disabled by default.</item>
 			<item>Hid unusable bulk Delete and State controls when the frontend list has no selection column.</item>
 			<item>Kept Edit and State tab validation valid when optional entry points or features are intentionally disabled.</item>
@@ -17,7 +17,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.14-RC03</version>
+		<version>6.1.15-RC1-RC03</version>
 		<change>
 			<item>Added independent View options for the text Search filter and the State filter, including correct Joomla menu inheritance.</item>
 			<item>Updated State-tab validation so intentional feature deactivation remains valid and a State filter without published states is reported as incomplete.</item>
@@ -28,7 +28,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.14-RC02</version>
+		<version>6.1.15-RC1-RC02</version>
 		<change>
 			<item>Hid the frontend list Delete button and bulk State menu when the list has no selection column.</item>
 			<item>Marked the Edit configuration as valid when its frontend entry point is intentionally disabled.</item>
@@ -39,7 +39,7 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
-		<version>6.1.14-RC01</version>
+		<version>6.1.15-RC1-RC01</version>
 		<change>
 			<item>Corrected the About repair workflow alert semantics so pending repair decisions use a warning and green remains reserved for completed or successfully repaired states.</item>
 			<item>Added a central Audit and Repair workflow specification covering actions, statuses, colours, messages, translations and accessibility.</item>
