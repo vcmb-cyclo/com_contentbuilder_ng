@@ -11,7 +11,7 @@
 		<changelogurl>https://raw.githubusercontent.com/vcmb-cyclo/com_contentbuilderng/main/com_contentbuilderng_changelog.xml</changelogurl>
 		<downloads>
 			<downloadurl type="full" format="zip">https://github.com/vcmb-cyclo/com_contentbuilderng/releases/download/v6.1.15-RC1/com_contentbuilderng-6.1.15-RC1.zip</downloadurl>
-		<sha256>bef60a98a1b567f9342f384c42603bbc431c47b7422db428f5f6c73ad365aaa8</sha256>
+		<sha256>7fe97450616c74294595b65a9a920b2819857cf36f576e7ba877555c2add2d45</sha256>
 		</downloads>
 		<tags>
 			<tag>stable</tag>
