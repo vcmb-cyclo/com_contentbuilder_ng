@@ -448,7 +448,10 @@ class DetailsModel extends ListModel
                             -1,
                             $this->recordFilters,
                             true,
-                            null
+                            null,
+                            [],
+                            null,
+                            false
                         );
 
                         if (count($rec) > 0) {
@@ -531,13 +534,14 @@ class DetailsModel extends ListModel
                     if (count($data->items)) {
                         $user = null;
 
+                        $metadata = null;
                         if ($data->act_as_registration) {
-                            $meta = $data->form->getRecordMetadata($this->_record_id);
+                            $metadata = $data->form->getRecordMetadata($this->_record_id);
                             $db = $this->getDatabase();
                             $query = $db->getQuery(true)
                                 ->select('*')
                                 ->from($db->quoteName('#__users'))
-                                ->where($db->quoteName('id') . ' = ' . (int)$meta->created_id);
+                                ->where($db->quoteName('id') . ' = ' . (int)$metadata->created_id);
                             $db->setQuery($query);
                             $user = $db->loadObject();
                         }
@@ -640,7 +644,7 @@ class DetailsModel extends ListModel
                             $data->page_title = '';
                         }
 
-                        $metadata = $data->form->getRecordMetadata($this->_record_id);
+                        $metadata ??= $data->form->getRecordMetadata($this->_record_id);
                         if ($metadata instanceof \stdClass && $data->metadata) {
                             $data->created = $metadata->created ? $metadata->created : '';
                             $data->created_by = $metadata->created_by ? $metadata->created_by : '';
@@ -814,7 +818,10 @@ class DetailsModel extends ListModel
             -1,
             $this->recordFilters,
             $showAllLanguages,
-            null
+            null,
+            [],
+            null,
+            false
         );
 
         return is_array($matches) && count($matches) > 0;

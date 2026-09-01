@@ -55,7 +55,10 @@ trait VisibilityTrait
             -1,
             $this->recordFilters,
             $showAllLanguages,
-            null
+            null,
+            [],
+            null,
+            false
         );
 
         return is_array($matches) && count($matches) > 0;

@@ -443,7 +443,8 @@ class ExportModel extends BaseDatabaseModel
                         $this->getState('formsd_filter_language'),
                         $act_as_registration,
                         $data,
-                        $this->getState('article_category_filter')
+                        $this->getState('article_category_filter'),
+                        false
                     );
                 } else {
                     $data->invalid_list_setup = true;

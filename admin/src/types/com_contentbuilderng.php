@@ -101,41 +101,33 @@ class contentbuilderng_com_contentbuilderng
             ->select($db->quoteName('r.id'))
             ->from($tableName . ' AS ' . $db->quoteName('r'))
             ->where($db->quoteName('r.id') . ' NOT IN (' . $subQuery . ')');
-        $db->setQuery($query);
+        $syncBatchSize = 500;
+        $query->setLimit($syncBatchSize);
 
-        $reference_ids = $db->loadColumn();
+        do {
+            $db->setQuery($query);
+            $reference_ids = $db->loadColumn();
 
-        // The outer query already selected only ids with no tracking row
-        // (NOT IN the subquery above), so a per-row existence re-check
-        // before inserting was always a no-op — every iteration hit the
-        // insert branch. One set-based multi-row INSERT replaces what was
-        // 2N queries (N existence checks + N inserts) with 1.
-        //
-        // IGNORE, not a plain INSERT: a multi-row INSERT is atomic in
-        // InnoDB — one row losing a race against a concurrent request to
-        // the (type, reference_id, record_id) unique key would abort the
-        // whole statement and silently drop every other row in this batch
-        // too. IGNORE degrades a duplicate-key violation to a per-row
-        // skip instead, matching the original loop's actual behaviour
-        // (each row synced independently of its neighbours).
-        if (is_array($reference_ids) && $reference_ids !== []) {
+            if (!is_array($reference_ids) || $reference_ids === []) {
+                break;
+            }
+
             $rows = [];
-
             foreach ($reference_ids as $reference_id) {
-                $rows[] = '(' . implode(',', [
-                    $db->quote('com_contentbuilderng'),
+                $rows[] = "(" . implode(",", [
+                    $db->quote("com_contentbuilderng"),
                     (int) $reference_id,
                     (int) $this->properties->id,
-                ]) . ')';
+                ]) . ")";
             }
 
             $db->setQuery(
-                'INSERT IGNORE INTO ' . $db->quoteName('#__contentbuilderng_records')
-                . ' (' . $db->quoteName('type') . ', ' . $db->quoteName('record_id') . ', ' . $db->quoteName('reference_id') . ')'
-                . ' VALUES ' . implode(',', $rows)
+                "INSERT IGNORE INTO " . $db->quoteName("#__contentbuilderng_records")
+                . " (" . $db->quoteName("type") . ", " . $db->quoteName("record_id") . ", " . $db->quoteName("reference_id") . ")"
+                . " VALUES " . implode(",", $rows)
             );
             $db->execute();
-        }
+        } while (count($reference_ids) === $syncBatchSize);
     }
 
     public static function getNumRecordsQuery($form_id, $user_id)
@@ -454,7 +446,8 @@ class contentbuilderng_com_contentbuilderng
         $lang_code = null,
         $act_as_registration = array(),
         $form = null,
-        $article_category_filter = -1
+        $article_category_filter = -1,
+        $calculateTotal = true
     ) {
 
         if (!count($ids)) {
@@ -828,14 +821,16 @@ class contentbuilderng_com_contentbuilderng
                 }
             }
         }
-        $db->setQuery("
-            Select Count(*) From (
-                Select
-                    $selectClause
-                $fromClause
-            ) As counted_records
-        ");
-        $this->total = (int) $db->loadResult();
+        if ($calculateTotal) {
+            $db->setQuery("
+                Select Count(*) From (
+                    Select
+                        $selectClause
+                    $fromClause
+                ) As counted_records
+            ");
+            $this->total = (int) $db->loadResult();
+        }
         return $return;
     }
 

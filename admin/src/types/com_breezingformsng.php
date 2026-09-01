@@ -921,7 +921,8 @@ class contentbuilderng_com_breezingformsng
         $lang_code = null,
         $act_as_registration = array(),
         $form = null,
-        $article_category_filter = -1
+        $article_category_filter = -1,
+        $calculateTotal = true
     ) {
 
         if (!count($ids)) {
@@ -1272,10 +1273,12 @@ class contentbuilderng_com_breezingformsng
         $initialOrderDirection1 = strtolower((string) ($form?->initial_order_dir ?? ($order_Dir ?: 'asc'))) === 'asc' ? 'asc' : 'desc';
         $initialOrderDirection2 = strtolower((string) ($form?->initial_order_dir2 ?? $initialOrderDirection1)) === 'asc' ? 'asc' : 'desc';
         $initialOrderDirection3 = strtolower((string) ($form?->initial_order_dir3 ?? $initialOrderDirection1)) === 'asc' ? 'asc' : 'desc';
+        $foundRowsClause = $calculateTotal ? 'SQL_CALC_FOUND_ROWS' : '';
+
 
         $db->setQuery("
             Select
-                SQL_CALC_FOUND_ROWS
+                $foundRowsClause
                 joined_records.published As colPublished,
                 joined_records.lang_code As colLanguage,
                 list.state_id As colStateId,
@@ -1359,8 +1362,10 @@ class contentbuilderng_com_breezingformsng
             exit;
         }
 
-        $db->setQuery('SELECT FOUND_ROWS();');
-        $this->total = $db->loadResult();
+        if ($calculateTotal) {
+            $db->setQuery('SELECT FOUND_ROWS();');
+            $this->total = $db->loadResult();
+        }
         return $return;
     }
 
