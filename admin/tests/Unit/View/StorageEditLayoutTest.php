@@ -78,6 +78,11 @@ final class StorageEditLayoutTest extends TestCase
         // tabStartOffset=tabData must survive the active-tab whitelist.
         self::assertStringContainsString("preg_match('/^tab(?:\\d+|Data)$/'", $template);
 
+        // The data model must populate its list state from data_* request
+        // parameters so pagination, search and sorting are applied.
+        self::assertStringContainsString("createModel('Storagedata', 'Administrator')", $view);
+        self::assertStringNotContainsString("createModel('Storagedata', 'Administrator', ['ignore_request' => true])", $view);
+
         // Add / edit a record reuse the signed front-end editor (same
         // mechanism as the preview button); delete is an admin task.
         $controller = \file_get_contents($root . '/admin/src/Controller/StorageController.php');

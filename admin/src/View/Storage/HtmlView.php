@@ -209,7 +209,7 @@ class HtmlView extends BaseHtmlView
         if ($storageId > 0 && $this->storageTableExists === true) {
             try {
                 $dataModel = $this->getComponent()->getMVCFactory()
-                    ->createModel('Storagedata', 'Administrator', ['ignore_request' => true]);
+                    ->createModel('Storagedata', 'Administrator');
 
                 if ($dataModel instanceof \CB\Component\Contentbuilderng\Administrator\Model\StoragedataModel) {
                     $dataModel->setStorageId($storageId);
