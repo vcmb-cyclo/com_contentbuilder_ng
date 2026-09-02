@@ -56,24 +56,19 @@ $truncate = static function ($value): string {
             <small class="text-muted"><?php echo Text::_('COM_CONTENTBUILDERNG_STORAGE_DATA_TAB_TOOLTIP'); ?></small>
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
-            <form action="index.php" method="get" class="d-flex align-items-center gap-1">
-                <input type="hidden" name="option" value="com_contentbuilderng">
-                <input type="hidden" name="view" value="storage">
-                <input type="hidden" name="layout" value="edit">
-                <input type="hidden" name="id" value="<?php echo (int) $storageId; ?>">
-                <input type="hidden" name="tabStartOffset" value="tabData">
-                <input type="hidden" name="data_limit" value="<?php echo (int) $listLimit; ?>">
-                <input type="hidden" name="data_start" value="0">
+            <?php /* Pas de <form> ici : le contenu de l'onglet est rendu dans
+                     #adminForm et un <form> imbriqué le fermerait prématurément
+                     (perte de boxchecked, cf. joomla-toolbar-button). */ ?>
+            <div class="d-flex align-items-center gap-1 cb-storage-data-search" data-cb-search-base="<?php echo htmlspecialchars(Route::_($baseUrl . '&data_limit=' . (int) $listLimit . '&data_start=0', false), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="search"
-                    class="form-control form-control-sm"
-                    name="data_search"
+                    class="form-control form-control-sm cb-storage-data-search-input"
                     value="<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>"
                     placeholder="<?php echo htmlspecialchars(Text::_('JSEARCH_FILTER'), ENT_QUOTES, 'UTF-8'); ?>"
                     aria-label="<?php echo htmlspecialchars(Text::_('JSEARCH_FILTER'), ENT_QUOTES, 'UTF-8'); ?>">
-                <button type="submit" class="btn btn-primary btn-sm">
+                <button type="button" class="btn btn-primary btn-sm cb-storage-data-search-submit">
                     <span class="icon-search" aria-hidden="true"></span>
                 </button>
-            </form>
+            </div>
             <?php if ($canMutate) : ?>
                 <div class="btn-group btn-group-sm" role="group">
                     <a class="btn btn-success group-add"
@@ -102,7 +97,7 @@ $truncate = static function ($value): string {
                             <th class="text-nowrap"><?php echo htmlspecialchars((string) ($labels[$column] ?? $column), ENT_QUOTES, 'UTF-8'); ?></th>
                         <?php endforeach; ?>
                         <?php if ($canMutate) : ?>
-                            <th width="90" class="text-center"><?php echo Text::_('JGLOBAL_ACTIONS'); ?></th>
+                            <th width="90" class="text-center" aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_DATA_EDIT_RECORD'), ENT_QUOTES, 'UTF-8'); ?>"></th>
                         <?php endif; ?>
                     </tr>
                 </thead>

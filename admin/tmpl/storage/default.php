@@ -1395,6 +1395,36 @@ function initStorageAjaxToggles() {
     }, true);
 }
 
+function initStorageDataSearch() {
+    var wrap = document.querySelector('.cb-storage-data-search');
+    if (!wrap) {
+        return;
+    }
+
+    var input = wrap.querySelector('.cb-storage-data-search-input');
+    var button = wrap.querySelector('.cb-storage-data-search-submit');
+    var base = wrap.getAttribute('data-cb-search-base') || 'index.php';
+
+    var run = function () {
+        var term = input ? input.value.trim() : '';
+        var sep = base.indexOf('?') === -1 ? '?' : '&';
+        cbStorageBypassDirtyBeforeUnload();
+        window.location.assign(base + sep + 'data_search=' + encodeURIComponent(term) + '#tabData');
+    };
+
+    if (button) {
+        button.addEventListener('click', run);
+    }
+    if (input) {
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                run();
+            }
+        });
+    }
+}
+
 function initStorageUi() {
     var adminUi = window.ContentBuilderNgAdmin;
 
@@ -1406,6 +1436,7 @@ function initStorageUi() {
     initStorageFieldTitleInput();
     initStorageFieldTypeSelect();
     initStorageFieldRequiredToggle();
+    initStorageDataSearch();
     initStorageTabTooltips();
     if (adminUi && typeof adminUi.persistJoomlaTabset === 'function') {
         // restoreFromStorage désactivé : l'onglet de départ est déterminé
