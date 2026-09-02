@@ -58,6 +58,38 @@ final class StorageEditLayoutTest extends TestCase
         self::assertStringContainsString('cb-storage-field-new-cancel', $script);
     }
 
+    public function testDataTabIsRegisteredAndDelegatesToItsLayout(): void
+    {
+        $root = \dirname(__DIR__, 4);
+        $template = \file_get_contents($root . '/admin/tmpl/storage/default.php');
+        $layout = \file_get_contents($root . '/admin/layouts/storage/data_tab.php');
+        $view = \file_get_contents($root . '/admin/src/View/Storage/HtmlView.php');
+        $model = \file_get_contents($root . '/admin/src/Model/StoragedataModel.php');
+
+        self::assertIsString($template);
+        self::assertIsString($layout);
+        self::assertIsString($view);
+        self::assertIsString($model);
+
+        // Tab guarded by $this->showDataTab, rendered through its own layout.
+        self::assertStringContainsString("'view-pane', 'tabData'", $template);
+        self::assertStringContainsString("LayoutHelper::render('storage.data_tab'", $template);
+        self::assertStringContainsString('$this->showDataTab', $template);
+        // tabStartOffset=tabData must survive the active-tab whitelist.
+        self::assertStringContainsString("preg_match('/^tab(?:\\d+|Data)$/'", $template);
+
+        // Same ACL / philosophy as the preview: edit/new reuse the signed
+        // front-end editor, delete goes through front-end task=list.delete.
+        self::assertStringContainsString('recordEditBaseUrl', $view);
+        self::assertStringContainsString('view=edit&storage_id=', $view);
+        self::assertStringContainsString("value=\"list.delete\"", $template);
+        self::assertStringContainsString('PreviewLinkHelper::buildHiddenFields', $view);
+
+        // Display reads the physical table directly, paginated.
+        self::assertStringContainsString('class StoragedataModel extends ListModel', $model);
+        self::assertStringContainsString('cb-storage-data-table', $layout);
+    }
+
     public function testFieldRowActionsUseTitlesetSubformFormalism(): void
     {
         $layout = \file_get_contents($this->root . '/admin/layouts/storage/storage_tab.php');

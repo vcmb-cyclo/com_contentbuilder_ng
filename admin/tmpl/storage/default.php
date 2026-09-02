@@ -52,7 +52,7 @@ $requestedTab = trim((string) $app->getInput()->getCmd('tabStartOffset', ''));
 // Le nouvel onglet "Stockage" est le point d'entrée, à la création comme à
 // l'édition. Les champs restent accessibles dans l'onglet "Champs".
 $defaultTab = 'tab1';
-$activeTab = preg_match('/^tab\d+$/', $requestedTab) ? $requestedTab : $defaultTab;
+$activeTab = preg_match('/^tab(?:\d+|Data)$/', $requestedTab) ? $requestedTab : $defaultTab;
 $isPublished = ((int) ($this->item->published ?? 0) === 1);
 $publishedIconClass = $isPublished ? 'fa-solid fa-check text-success' : 'fa-solid fa-circle-xmark text-danger';
 $publishedIconTitle = $isPublished ? Text::_('JPUBLISHED') : Text::_('JUNPUBLISHED');
@@ -79,6 +79,7 @@ $addFieldTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_ADD_FIELD_TOOLTIP');
 $tabStorageTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_TAB_TOOLTIP');
 $tabInfoTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_INFO_TAB_TOOLTIP');
 $tabIndexTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_INDEX_TAB_TOOLTIP');
+$tabDataTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_DATA_TAB_TOOLTIP');
 $tabFormsTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_USING_FORMS_TAB_TOOLTIP');
 $storageTabLabel = static function (string $iconClass, string $labelKey): string {
     return '<span class="' . htmlspecialchars($iconClass, ENT_QUOTES, 'UTF-8') . '" aria-hidden="true"></span> '
@@ -1345,6 +1346,9 @@ function initStorageTabTooltips(attempt) {
         tab0: <?php echo json_encode($tabStorageTooltip, JSON_UNESCAPED_UNICODE); ?>,
         tab1: <?php echo json_encode($tabInfoTooltip, JSON_UNESCAPED_UNICODE); ?>,
         tab2: <?php echo json_encode($tabIndexTooltip, JSON_UNESCAPED_UNICODE); ?>
+        <?php if ($this->showDataTab) : ?>
+        , tabData: <?php echo json_encode($tabDataTooltip, JSON_UNESCAPED_UNICODE); ?>
+        <?php endif; ?>
         <?php if (!empty($this->usingForms)) : ?>
         , tab3: <?php echo json_encode($tabFormsTooltip, JSON_UNESCAPED_UNICODE); ?>
         <?php endif; ?>
@@ -1507,6 +1511,23 @@ echo LayoutHelper::render('storage.index_tab', [
     'indexableColumns' => $this->indexableColumns,
 ], JPATH_COMPONENT_ADMINISTRATOR . '/layouts');
 echo HTMLHelper::_('uitab.endTab');
+if ($this->showDataTab) :
+    echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tabData', $storageTabLabel('fa-solid fa-table-cells', 'COM_CONTENTBUILDERNG_STORAGE_DATA_TAB'));
+    echo LayoutHelper::render('storage.data_tab', [
+        'storageId' => $storageId,
+        'item' => $this->item,
+        'records' => $this->recordItems,
+        'columnLabels' => $this->recordColumnLabels,
+        'hasPrimaryKey' => $this->recordsHavePrimaryKey,
+        'pagination' => $this->recordPagination,
+        'listLimit' => $this->recordListLimit,
+        'listStart' => $this->recordListStart,
+        'search' => $this->recordSearch,
+        'editBaseUrl' => $this->recordEditBaseUrl,
+        'activeTab' => $activeTab,
+    ], JPATH_COMPONENT_ADMINISTRATOR . '/layouts');
+    echo HTMLHelper::_('uitab.endTab');
+endif;
 if (!empty($this->usingForms)) :
     echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab3', $storageTabLabel('fa-solid fa-file-lines', 'COM_CONTENTBUILDERNG_STORAGE_USING_FORMS_LABEL'));
     echo LayoutHelper::render('storage.forms_tab', [
@@ -1548,6 +1569,64 @@ echo HTMLHelper::_('uitab.endTabSet');
     <input type="hidden" name="tabStartOffset" value="<?php echo htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8'); ?>" />
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
+<?php if ($this->showDataTab && $this->recordsHavePrimaryKey && (int) ($this->item->bytable ?? 0) !== 2 && $this->recordDeleteFormAction !== '') : ?>
+    <?php /* Suppression d'un enregistrement : même pipeline que la
+             prévisualisation (front-end task=list.delete, ACL _fe réel).
+             Formulaire hors #adminForm, soumis dans une iframe cachée pour
+             rester sur l'écran d'édition. */ ?>
+    <iframe name="cbStorageRecordDeleteFrame" id="cbStorageRecordDeleteFrame" style="display:none" title="" aria-hidden="true"></iframe>
+    <form id="cbStorageRecordDeleteForm"
+        action="<?php echo htmlspecialchars($this->recordDeleteFormAction, ENT_QUOTES, 'UTF-8'); ?>"
+        method="post"
+        target="cbStorageRecordDeleteFrame"
+        style="display:none">
+        <input type="hidden" name="option" value="com_contentbuilderng" />
+        <input type="hidden" name="task" value="list.delete" />
+        <input type="hidden" name="storage_id" value="<?php echo (int) $storageId; ?>" />
+        <input type="hidden" name="boxchecked" value="1" />
+        <input type="hidden" name="cid[]" id="cbStorageRecordDeleteId" value="" />
+        <?php echo $this->recordDeleteHiddenFields; ?>
+        <?php echo HTMLHelper::_('form.token'); ?>
+    </form>
+    <script>
+    (function () {
+        var form = document.getElementById('cbStorageRecordDeleteForm');
+        var frame = document.getElementById('cbStorageRecordDeleteFrame');
+        var idField = document.getElementById('cbStorageRecordDeleteId');
+        if (!form || !frame || !idField) {
+            return;
+        }
+
+        var submitting = false;
+
+        frame.addEventListener('load', function () {
+            if (!submitting) {
+                return;
+            }
+            submitting = false;
+            cbStorageBypassDirtyBeforeUnload();
+            window.location.assign(<?php echo json_encode('index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . (int) $storageId . '&tabStartOffset=tabData#tabData', JSON_UNESCAPED_SLASHES); ?>);
+        });
+
+        window.cbDeleteStorageRecord = function (recordId, label) {
+            recordId = parseInt(recordId, 10) || 0;
+            if (recordId <= 0) {
+                return false;
+            }
+            var message = (label && window.Joomla && typeof Joomla.Text._ === 'function')
+                ? Joomla.Text._('COM_CONTENTBUILDERNG_CONFIRM_DELETE_ONE').replace('%s', label)
+                : null;
+            if (message !== null && !window.confirm(message)) {
+                return false;
+            }
+            idField.value = String(recordId);
+            submitting = true;
+            form.submit();
+            return false;
+        };
+    })();
+    </script>
+<?php endif; ?>
 <script>
 (function () {
     var fileInput = document.getElementById('csv_file');

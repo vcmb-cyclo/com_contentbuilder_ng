@@ -70,7 +70,11 @@ final class UnescapedTemplateOutputTest extends TestCase
         'admin/tmpl/forms/default.php' => 15,
         'admin/tmpl/list/default.php' => 28,
         'admin/tmpl/list/select.php' => 26,
-        'admin/tmpl/storage/default.php' => 4,
+        // +1 for the Data tab's record-delete helper form: echo of
+        // $this->recordDeleteHiddenFields, the trusted signed-preview hidden
+        // inputs built by PreviewLinkHelper::buildHiddenFields() (already
+        // htmlspecialchars'd internally).
+        'admin/tmpl/storage/default.php' => 5,
         'admin/tmpl/storages/default.php' => 13,
         'admin/tmpl/storagewizard/default.php' => 3,
         'admin/tmpl/user/default.php' => 10,
@@ -92,6 +96,11 @@ final class UnescapedTemplateOutputTest extends TestCase
         'admin/layouts/form/prepare_editor.php' => 10,
         'admin/layouts/form/view_tab.php' => 3,
         'admin/layouts/storage/information_tab.php' => 2,
+        // Data tab pager: three ternaries whose only branches are the
+        // literal strings 'disabled'/'active'/'' — the regex mistakes the
+        // compared int ($current/$p) for raw output. Every actual value
+        // (page links, counters) is int-cast or htmlspecialchars'd.
+        'admin/layouts/storage/data_tab.php' => 3,
         // +3 on 2026-08-01 for the required-field toggle button: a bare
         // int $id (existing pattern throughout this file), a ternary of
         // only literal '1'/'0' branches, and a fixed PHP-side CSS class

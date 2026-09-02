@@ -41,3 +41,8 @@ joomla-tab#view-pane > div[role="tablist"] > button[role="tab"][aria-selected="t
     joomla-tab#view-pane > div[role="tablist"]{flex-wrap:nowrap;overflow:auto;-webkit-overflow-scrolling:touch}
     joomla-tab#view-pane > div[role="tablist"] > button[role="tab"]{white-space:nowrap}
 }
+
+/* Onglet Data : lecture paginée des enregistrements du stockage. */
+.cb-storage-data-table{width:100%}
+.cb-storage-data-table td{max-width:22rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cb-storage-data-editor .cb-storage-pagination{padding:0}
