@@ -338,7 +338,7 @@ if (storagesTable && storagesTable.tBodies.length) {
                         <?php echo HTMLHelper::_('searchtools.sort', 'COM_CONTENTBUILDERNG_STORAGE_MODE', 'a.bytable', $listDirn, $listOrder); ?>
                     </th>
 
-                    <th class="w-10 text-nowrap hasTooltip" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGES_COLUMN_RECORDS_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
+                    <th class="w-1 text-end text-nowrap hasTooltip" title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGES_COLUMN_RECORDS_TIP'), ENT_QUOTES, 'UTF-8'); ?>">
                         <?php echo HTMLHelper::_('searchtools.sort', 'COM_CONTENTBUILDERNG_STORAGES_COLUMN_RECORDS', 'records_count', $listDirn, $listOrder); ?>
                     </th>
 

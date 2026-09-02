@@ -52,7 +52,7 @@ $requestedTab = trim((string) $app->getInput()->getCmd('tabStartOffset', ''));
 // Le nouvel onglet "Stockage" est le point d'entrée, à la création comme à
 // l'édition. Les champs restent accessibles dans l'onglet "Champs".
 $defaultTab = 'tab1';
-$activeTab = preg_match('/^tab\d+$/', $requestedTab) ? $requestedTab : $defaultTab;
+$activeTab = preg_match('/^tab(?:\d+|Data)$/', $requestedTab) ? $requestedTab : $defaultTab;
 $isPublished = ((int) ($this->item->published ?? 0) === 1);
 $publishedIconClass = $isPublished ? 'fa-solid fa-check text-success' : 'fa-solid fa-circle-xmark text-danger';
 $publishedIconTitle = $isPublished ? Text::_('JPUBLISHED') : Text::_('JUNPUBLISHED');
@@ -79,6 +79,7 @@ $addFieldTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_ADD_FIELD_TOOLTIP');
 $tabStorageTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_TAB_TOOLTIP');
 $tabInfoTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_INFO_TAB_TOOLTIP');
 $tabIndexTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_INDEX_TAB_TOOLTIP');
+$tabDataTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_DATA_TAB_TOOLTIP');
 $tabFormsTooltip = Text::_('COM_CONTENTBUILDERNG_STORAGE_USING_FORMS_TAB_TOOLTIP');
 $storageTabLabel = static function (string $iconClass, string $labelKey): string {
     return '<span class="' . htmlspecialchars($iconClass, ENT_QUOTES, 'UTF-8') . '" aria-hidden="true"></span> '
@@ -947,11 +948,17 @@ function toggleCsvUploadOptions() {
 
 
 function initStorageInlineAddField() {
-    var addButton = document.getElementById('cb-storage-field-add-button');
+    var addButtons = Array.prototype.slice.call(document.querySelectorAll('.cb-storage-field-add'));
     var tbody = document.getElementById('cb-storage-fields-tbody');
-    if (!addButton || !tbody) {
+    if (!addButtons.length || !tbody) {
         return;
     }
+
+    var setAddButtonsDisabled = function (disabled) {
+        addButtons.forEach(function (button) {
+            button.disabled = disabled;
+        });
+    };
 
     var optionsScript = document.getElementById('cb-storage-field-sql-types');
     var sqlTypeOptions = {};
@@ -1024,11 +1031,11 @@ function initStorageInlineAddField() {
             nameInput.focus();
         }
 
-        addButton.disabled = true;
+        setAddButtonsDisabled(true);
 
         function cancelNewFieldRow() {
             row.remove();
-            addButton.disabled = false;
+            setAddButtonsDisabled(false);
             document.removeEventListener('keydown', onKeyDown);
         }
 
@@ -1085,7 +1092,9 @@ function initStorageInlineAddField() {
             });
     }
 
-    addButton.addEventListener('click', insertNewFieldRow);
+    addButtons.forEach(function (button) {
+        button.addEventListener('click', insertNewFieldRow);
+    });
 }
 
 function cbSubmitFieldTypeUpdate(fieldId, sqlType, fieldSize, onSuccess, onError) {
@@ -1337,6 +1346,9 @@ function initStorageTabTooltips(attempt) {
         tab0: <?php echo json_encode($tabStorageTooltip, JSON_UNESCAPED_UNICODE); ?>,
         tab1: <?php echo json_encode($tabInfoTooltip, JSON_UNESCAPED_UNICODE); ?>,
         tab2: <?php echo json_encode($tabIndexTooltip, JSON_UNESCAPED_UNICODE); ?>
+        <?php if ($this->showDataTab) : ?>
+        , tabData: <?php echo json_encode($tabDataTooltip, JSON_UNESCAPED_UNICODE); ?>
+        <?php endif; ?>
         <?php if (!empty($this->usingForms)) : ?>
         , tab3: <?php echo json_encode($tabFormsTooltip, JSON_UNESCAPED_UNICODE); ?>
         <?php endif; ?>
@@ -1383,6 +1395,48 @@ function initStorageAjaxToggles() {
     }, true);
 }
 
+function initStorageDataControls() {
+    var wrap = document.querySelector('.cb-storage-data-search');
+
+    if (wrap) {
+        var input = wrap.querySelector('.cb-storage-data-search-input');
+        var button = wrap.querySelector('.cb-storage-data-search-submit');
+        var base = wrap.getAttribute('data-cb-search-base') || 'index.php';
+
+        var run = function () {
+            var term = input ? input.value.trim() : '';
+            var url = base.split('#')[0].replace(/([?&])data_search=[^&]*/, '$1').replace(/[?&]$/, '');
+            var sep = url.indexOf('?') === -1 ? '?' : '&';
+            cbStorageBypassDirtyBeforeUnload();
+            window.location.assign(url + sep + 'data_search=' + encodeURIComponent(term) + '#tabData');
+        };
+
+        if (button) {
+            button.addEventListener('click', run);
+        }
+        if (input) {
+            input.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    run();
+                }
+            });
+        }
+    }
+
+    var limitSelect = document.querySelector('.cb-storage-data-limit');
+    if (limitSelect) {
+        limitSelect.addEventListener('change', function () {
+            var tpl = limitSelect.getAttribute('data-cb-limit-base') || '';
+            if (!tpl) {
+                return;
+            }
+            cbStorageBypassDirtyBeforeUnload();
+            window.location.assign(tpl.replace('__CBLIMIT__', encodeURIComponent(limitSelect.value)));
+        });
+    }
+}
+
 function initStorageUi() {
     var adminUi = window.ContentBuilderNgAdmin;
 
@@ -1394,6 +1448,7 @@ function initStorageUi() {
     initStorageFieldTitleInput();
     initStorageFieldTypeSelect();
     initStorageFieldRequiredToggle();
+    initStorageDataControls();
     initStorageTabTooltips();
     if (adminUi && typeof adminUi.persistJoomlaTabset === 'function') {
         // restoreFromStorage désactivé : l'onglet de départ est déterminé
@@ -1499,6 +1554,25 @@ echo LayoutHelper::render('storage.index_tab', [
     'indexableColumns' => $this->indexableColumns,
 ], JPATH_COMPONENT_ADMINISTRATOR . '/layouts');
 echo HTMLHelper::_('uitab.endTab');
+if ($this->showDataTab) :
+    echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tabData', $storageTabLabel('fa-solid fa-table-cells', 'COM_CONTENTBUILDERNG_STORAGE_DATA_TAB'));
+    echo LayoutHelper::render('storage.data_tab', [
+        'storageId' => $storageId,
+        'item' => $this->item,
+        'records' => $this->recordItems,
+        'columnLabels' => $this->recordColumnLabels,
+        'hasPrimaryKey' => $this->recordsHavePrimaryKey,
+        'pagination' => $this->recordPagination,
+        'listLimit' => $this->recordListLimit,
+        'listStart' => $this->recordListStart,
+        'search' => $this->recordSearch,
+        'ordering' => $this->recordOrdering,
+        'direction' => $this->recordDirection,
+        'editBaseUrl' => $this->recordEditBaseUrl,
+        'activeTab' => $activeTab,
+    ], JPATH_COMPONENT_ADMINISTRATOR . '/layouts');
+    echo HTMLHelper::_('uitab.endTab');
+endif;
 if (!empty($this->usingForms)) :
     echo HTMLHelper::_('uitab.addTab', 'view-pane', 'tab3', $storageTabLabel('fa-solid fa-file-lines', 'COM_CONTENTBUILDERNG_STORAGE_USING_FORMS_LABEL'));
     echo LayoutHelper::render('storage.forms_tab', [
@@ -1540,6 +1614,53 @@ echo HTMLHelper::_('uitab.endTabSet');
     <input type="hidden" name="tabStartOffset" value="<?php echo htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8'); ?>" />
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
+<script>
+// Onglet "Données" : suppression d'un enregistrement via la tâche admin
+// storage.deleteRecord (soumission classique de #adminForm).
+function cbDeleteStorageRecord(recordId, label) {
+    recordId = parseInt(recordId, 10) || 0;
+    if (recordId <= 0) {
+        return false;
+    }
+
+    var message = (label && window.Joomla && typeof Joomla.Text._ === 'function')
+        ? Joomla.Text._('COM_CONTENTBUILDERNG_CONFIRM_DELETE_ONE').replace('%s', label)
+        : null;
+    if (message !== null && !window.confirm(message)) {
+        return false;
+    }
+
+    var form = document.getElementById('adminForm');
+    if (!form) {
+        return false;
+    }
+
+    form.querySelectorAll('input[data-cb-record-cid="1"]').forEach(function (el) {
+        el.remove();
+    });
+
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'cid[]';
+    input.value = String(recordId);
+    input.setAttribute('data-cb-record-cid', '1');
+    form.appendChild(input);
+
+    var boxchecked = form.querySelector('input[name="boxchecked"]');
+    if (boxchecked) {
+        boxchecked.value = 1;
+    }
+
+    var tabField = form.querySelector('input[name="tabStartOffset"]');
+    if (tabField) {
+        tabField.value = 'tabData';
+    }
+
+    cbStorageBypassDirtyBeforeUnload();
+    Joomla.submitform('storage.deleteRecord', form);
+    return false;
+}
+</script>
 <script>
 (function () {
     var fileInput = document.getElementById('csv_file');

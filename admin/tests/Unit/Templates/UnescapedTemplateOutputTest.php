@@ -92,6 +92,12 @@ final class UnescapedTemplateOutputTest extends TestCase
         'admin/layouts/form/prepare_editor.php' => 10,
         'admin/layouts/form/view_tab.php' => 3,
         'admin/layouts/storage/information_tab.php' => 2,
+        // Data tab: three pager ternaries whose only branches are the literal
+        // strings 'disabled'/'active'/'' (the regex mistakes the compared int
+        // $current/$p for output), plus the $sortHeader() closure which
+        // htmlspecialchars() every part it emits. Real values are int-cast or
+        // escaped.
+        'admin/layouts/storage/data_tab.php' => 4,
         // +3 on 2026-08-01 for the required-field toggle button: a bare
         // int $id (existing pattern throughout this file), a ternary of
         // only literal '1'/'0' branches, and a fixed PHP-side CSS class

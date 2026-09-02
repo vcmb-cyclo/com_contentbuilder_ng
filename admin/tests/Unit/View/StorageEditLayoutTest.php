@@ -58,4 +58,65 @@ final class StorageEditLayoutTest extends TestCase
         self::assertStringContainsString('cb-storage-field-new-cancel', $script);
     }
 
+    public function testDataTabIsRegisteredAndDelegatesToItsLayout(): void
+    {
+        $root = \dirname(__DIR__, 4);
+        $template = \file_get_contents($root . '/admin/tmpl/storage/default.php');
+        $layout = \file_get_contents($root . '/admin/layouts/storage/data_tab.php');
+        $view = \file_get_contents($root . '/admin/src/View/Storage/HtmlView.php');
+        $model = \file_get_contents($root . '/admin/src/Model/StoragedataModel.php');
+
+        self::assertIsString($template);
+        self::assertIsString($layout);
+        self::assertIsString($view);
+        self::assertIsString($model);
+
+        // Tab guarded by $this->showDataTab, rendered through its own layout.
+        self::assertStringContainsString("'view-pane', 'tabData'", $template);
+        self::assertStringContainsString("LayoutHelper::render('storage.data_tab'", $template);
+        self::assertStringContainsString('$this->showDataTab', $template);
+        // tabStartOffset=tabData must survive the active-tab whitelist.
+        self::assertStringContainsString("preg_match('/^tab(?:\\d+|Data)$/'", $template);
+
+        // The data model must populate its list state from data_* request
+        // parameters so pagination, search and sorting are applied.
+        self::assertStringContainsString("createModel('Storagedata', 'Administrator')", $view);
+        self::assertStringNotContainsString("createModel('Storagedata', 'Administrator', ['ignore_request' => true])", $view);
+
+        // Add / edit a record reuse the signed front-end editor (same
+        // mechanism as the preview button); delete is an admin task.
+        $controller = \file_get_contents($root . '/admin/src/Controller/StorageController.php');
+        self::assertIsString($controller);
+        self::assertStringContainsString('recordEditBaseUrl', $view);
+        self::assertStringContainsString('view=edit&storage_id=', $view);
+        self::assertStringContainsString('function deleteRecord()', $controller);
+        self::assertStringContainsString("Joomla.submitform('storage.deleteRecord'", $template);
+
+        // Display reads the physical table directly, paginated and sortable.
+        self::assertStringContainsString('class StoragedataModel extends ListModel', $model);
+        self::assertStringContainsString('cb-storage-data-table', $layout);
+        self::assertStringContainsString('data_ordering', $layout);
+        self::assertStringContainsString('data_ordering', $model);
+        self::assertStringContainsString('cb-storage-data-sort', $layout);
+    }
+
+    public function testFieldRowActionsUseTitlesetSubformFormalism(): void
+    {
+        $layout = \file_get_contents($this->root . '/admin/layouts/storage/storage_tab.php');
+        self::assertIsString($layout);
+
+        // Grouped add / remove / move buttons, matching the titleset editor's
+        // native Joomla repeatable-table subform (btn-success / btn-danger /
+        // btn-primary + icon-plus / icon-minus / icon-arrows-alt).
+        self::assertStringContainsString('group-add', $layout);
+        self::assertStringContainsString('group-remove', $layout);
+        self::assertStringContainsString('icon-arrows-alt', $layout);
+        self::assertStringContainsString('cb-storage-field-add', $layout);
+
+        // The separate up/down order icons are gone (drag only).
+        self::assertStringNotContainsString('cb-order-icons', $layout);
+        self::assertStringNotContainsString('storage.orderup', $layout);
+        self::assertStringNotContainsString('storage.orderdown', $layout);
+    }
+
 }

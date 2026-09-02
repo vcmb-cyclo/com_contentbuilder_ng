@@ -3,6 +3,22 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
+		<version>6.1.15-RC2</version>
+		<addition>
+			<item>Added a paginated Data tab to the administrator Storage editor for browsing a storage's records, opening the front-end editor to add or edit one, and deleting one.</item>
+		</addition>
+		<change>
+			<item>Reworked the Storage field editor row actions into a single add / delete / drag button group, matching the data-set editor; the add control now sits in the column header.</item>
+			<item>The existing-table warning in the Storage wizard and editor now appears only when ContentBuilder NG would actually add a missing system column.</item>
+			<item>Explained the read-only external table message in plain terms instead of referring to "bytable mode 2".</item>
+			<item>Narrowed the record-count column in the administrator Storage list so it no longer crowds the Name and Title columns.</item>
+		</change>
+		<security>
+		</security>
+	</changelog>
+	<changelog>
+		<element>com_contentbuilderng</element>
+		<type>component</type>
 		<version>6.1.15-RC1</version>
 		<addition>
 			<item>Added a sortable record-count column to the administrator Storage list.</item>

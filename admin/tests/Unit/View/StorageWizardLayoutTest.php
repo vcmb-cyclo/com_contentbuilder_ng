@@ -34,6 +34,32 @@ final class StorageWizardLayoutTest extends TestCase
         self::assertStringContainsString('accept=".csv,.xlsx,.xls', $layout);
     }
 
+    public function testExistingTablePickerWarnsOnlyWhenColumnsAreMissing(): void
+    {
+        $root = \dirname(__DIR__, 4);
+        $wizard = \file_get_contents($root . '/admin/tmpl/storagewizard/default.php');
+        $infoTab = \file_get_contents($root . '/admin/layouts/storage/information_tab.php');
+        $adminUi = \file_get_contents($root . '/media/js/admin-ui.js');
+        $controller = \file_get_contents($root . '/admin/src/Controller/StorageController.php');
+
+        self::assertIsString($wizard);
+        self::assertIsString($infoTab);
+        self::assertIsString($adminUi);
+        self::assertIsString($controller);
+
+        // Both existing-table pickers route through the shared guard instead of
+        // an unconditional alert().
+        self::assertStringContainsString('ContentBuilderNgAdmin.warnBeforeExistingTable', $wizard);
+        self::assertStringContainsString('ContentBuilderNgAdmin.warnBeforeExistingTable', $infoTab);
+        self::assertStringNotContainsString("alert(selectedMode === '2'", $wizard);
+        self::assertStringNotContainsString("alert(selectedMode === '2'", $infoTab);
+
+        // The guard asks the server which system columns are missing.
+        self::assertStringContainsString('warnBeforeExistingTable', $adminUi);
+        self::assertStringContainsString('storage.checkExistingTableColumns', $adminUi);
+        self::assertStringContainsString('function checkExistingTableColumns()', $controller);
+    }
+
     public function testEveryWizardScreenHeadingHasTheAssistantIcon(): void
     {
         $template = \file_get_contents(\dirname(__DIR__, 4) . '/admin/tmpl/storagewizard/default.php');

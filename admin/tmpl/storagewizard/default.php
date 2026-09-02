@@ -228,14 +228,16 @@ $wizardStarted = (bool) ($this->wizardState['started'] ?? false);
                                             nameField.value = this.value;
                                             nameField.disabled = true;
                                             var selectedOption = this.options[this.selectedIndex];
-                                            var selectedMode = selectedOption.dataset.bytableMode;
                                             var joomlaIcon = document.getElementById('cb-wizard-selected-joomla-table-icon');
                                             if (joomlaIcon) {
                                                 joomlaIcon.classList.toggle('d-none', selectedOption.dataset.sourceType !== 'joomla');
                                             }
-                                            alert(selectedMode === '2'
-                                                ? '<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_READONLY_EXTERNAL_STORAGE_MSG')); ?>'
-                                                : '<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_CUSTOM_STORAGE_MSG')); ?>');
+                                            if (window.ContentBuilderNgAdmin && typeof window.ContentBuilderNgAdmin.warnBeforeExistingTable === 'function') {
+                                                window.ContentBuilderNgAdmin.warnBeforeExistingTable(this, {
+                                                    readonly: '<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_READONLY_EXTERNAL_STORAGE_MSG')); ?>',
+                                                    custom: '<?php echo addslashes(Text::_('COM_CONTENTBUILDERNG_CUSTOM_STORAGE_MSG')); ?>'
+                                                });
+                                            }
                                         } else {
                                             nameField.disabled = false;
                                             var joomlaIcon = document.getElementById('cb-wizard-selected-joomla-table-icon');

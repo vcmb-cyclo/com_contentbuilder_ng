@@ -50,6 +50,20 @@ class HtmlView extends BaseHtmlView
     public string $storageTableErrorMessage = '';
     public string $wizardReturnUrl = '';
     public string $dataTableName = '';
+    /** Data tab: paginated view of the storage's physical records. */
+    public bool $showDataTab = false;
+    /** @var array<int,object> */
+    public array $recordItems = [];
+    /** @var array<string,string> column name => label */
+    public array $recordColumnLabels = [];
+    public bool $recordsHavePrimaryKey = false;
+    public ?object $recordPagination = null;
+    public int $recordListLimit = 20;
+    public int $recordListStart = 0;
+    public string $recordSearch = '';
+    public string $recordOrdering = '';
+    public string $recordDirection = 'asc';
+    public string $recordEditBaseUrl = '';
     /** @var array<int,array{name:string,columns:array<int,string>,unique:bool}> */
     public array $indexes = [];
     /** @var array<int,string> */
@@ -188,6 +202,39 @@ class HtmlView extends BaseHtmlView
                 Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_LOAD_FIELDS_ERROR', $e->getMessage()),
                 'warning'
             );
+        }
+
+        // Onglet "Data" : lecture paginée des enregistrements de la table
+        // physique, dès qu'elle existe et est lisible (interne ou externe).
+        if ($storageId > 0 && $this->storageTableExists === true) {
+            try {
+                $dataModel = $this->getComponent()->getMVCFactory()
+                    ->createModel('Storagedata', 'Administrator');
+
+                if ($dataModel instanceof \CB\Component\Contentbuilderng\Administrator\Model\StoragedataModel) {
+                    $dataModel->setStorageId($storageId);
+
+                    if ($dataModel->isReadable()) {
+                        $this->showDataTab = true;
+                        $this->recordItems = (array) $dataModel->getItems();
+                        $this->recordColumnLabels = $dataModel->getColumnLabels();
+                        $this->recordsHavePrimaryKey = $dataModel->hasPrimaryKey();
+                        $this->recordPagination = $dataModel->getPagination();
+                        $this->recordListLimit = (int) $dataModel->getState('list.limit', 20);
+                        $this->recordListStart = (int) $dataModel->getState('list.start', 0);
+                        $this->recordSearch = (string) $dataModel->getState('data.search', '');
+                        $this->recordOrdering = (string) $dataModel->getState('list.ordering', '');
+                        $this->recordDirection = strtolower((string) $dataModel->getState('list.direction', 'asc')) === 'desc'
+                            ? 'desc'
+                            : 'asc';
+                    }
+                }
+            } catch (\Throwable $e) {
+                $app->enqueueMessage(
+                    Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_LOAD_FIELDS_ERROR', $e->getMessage()),
+                    'warning'
+                );
+            }
         }
 
         // Onglet Index : uniquement pour un storage interne (bytable=0),
@@ -350,19 +397,34 @@ class HtmlView extends BaseHtmlView
                 $previewUserId
             );
             $previewSig = hash_hmac('sha256', $previewPayload, (string) $app->get('secret'));
+            $previewSignedQuery = PreviewLinkHelper::buildQuery(
+                $previewUntil,
+                $previewActorId,
+                $previewActorName,
+                $previewUserId,
+                $previewSig
+            );
             $previewUrl = Route::link(
                 'site',
-                'index.php?option=com_contentbuilderng&view=list&storage_id=' . $id
-                    . '&cb_preview=1'
-                    . '&cb_preview_until=' . $previewUntil
-                    . '&cb_preview_actor_id=' . $previewActorId
-                    . '&cb_preview_actor_name=' . rawurlencode($previewActorName)
-                    . '&cb_preview_user_id=' . $previewUserId
-                    . '&cb_preview_sig=' . $previewSig,
+                'index.php?option=com_contentbuilderng&view=list&storage_id=' . $id . $previewSignedQuery,
                 false,
                 Route::TLS_IGNORE,
                 true
             );
+
+            // Onglet "Data" : l'ajout/édition d'un enregistrement ouvrent
+            // l'éditeur front-end signé (même mécanisme que la prévisualisation).
+            // La suppression, elle, passe par la tâche admin storage.deleteRecord.
+            if ($this->showDataTab) {
+                $this->recordEditBaseUrl = Route::link(
+                    'site',
+                    'index.php?option=com_contentbuilderng&view=edit&storage_id=' . $id . $previewSignedQuery,
+                    false,
+                    Route::TLS_IGNORE,
+                    true
+                );
+            }
+
             $toolbar->link(Text::_('COM_CONTENTBUILDERNG_PREVIEW'), $previewUrl)
                 ->icon('icon-eye')
                 ->target('_blank')

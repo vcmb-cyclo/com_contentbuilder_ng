@@ -256,11 +256,64 @@ window.ContentBuilderNgAdmin = window.ContentBuilderNgAdmin || (function () {
         previewWindow.focus();
     }, true);
 
+    /**
+     * Existing-table picker guard. Only alerts about the system columns that
+     * ContentBuilder NG would add when the chosen table is actually missing at
+     * least one of them (or cannot be introspected). Read-only external tables
+     * (bytable mode 2) always get their own warning without a round trip.
+     *
+     * @param {HTMLSelectElement} select
+     * @param {{readonly?:string, custom?:string}} messages
+     */
+    function warnBeforeExistingTable(select, messages) {
+        messages = messages || {};
+
+        if (!select) {
+            return;
+        }
+
+        var value = select.value || '';
+        var option = select.options[select.selectedIndex] || null;
+
+        if (value === '' || !option) {
+            return;
+        }
+
+        if (option.getAttribute('data-bytable-mode') === '2') {
+            if (messages.readonly) {
+                window.alert(messages.readonly);
+            }
+
+            return;
+        }
+
+        var url = 'index.php?option=com_contentbuilderng&task=storage.checkExistingTableColumns&format=json&table='
+            + encodeURIComponent(value);
+
+        fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (response) { return response.json(); })
+            .then(function (payload) {
+                var data = (payload && payload.data) ? payload.data : payload;
+                var missing = (data && Array.isArray(data.missing)) ? data.missing : [];
+                var known = !!(data && data.known);
+
+                if ((!known || missing.length > 0) && messages.custom) {
+                    window.alert(messages.custom);
+                }
+            })
+            .catch(function () {
+                if (messages.custom) {
+                    window.alert(messages.custom);
+                }
+            });
+    }
+
     return {
         applyTabTooltips: applyTabTooltips,
         getTabTargetId: getTabTargetId,
         initBootstrapTooltips: initBootstrapTooltips,
         persistJoomlaTabset: persistJoomlaTabset,
-        setHiddenInputValue: setHiddenInputValue
+        setHiddenInputValue: setHiddenInputValue,
+        warnBeforeExistingTable: warnBeforeExistingTable
     };
 }());
