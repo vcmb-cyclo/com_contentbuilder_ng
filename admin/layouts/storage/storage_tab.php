@@ -314,18 +314,24 @@ $storageFieldColumns = [
                         </td>
                         <td class="text-center" data-cb-storage-col="publish"><?php echo $published; ?></td>
                         <td class="text-center text-nowrap" data-cb-storage-col="actions">
-                            <div class="btn-group btn-group-sm cb-storage-field-actions" role="group">
-                                <?php if (!$item->bytable && $item->id) : ?>
-                                    <button type="button"
-                                        class="btn btn-success group-add cb-storage-field-add hasTooltip"
-                                        title="<?php echo htmlspecialchars($addFieldTooltip, ENT_QUOTES, 'UTF-8'); ?>"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="top"
-                                        aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_ADD_FIELD_BUTTON'), ENT_QUOTES, 'UTF-8'); ?>">
-                                        <span class="icon-plus" aria-hidden="true"></span>
-                                    </button>
-                                <?php endif; ?>
-                                <?php if ((int) ($item->bytable ?? 0) !== 2 && !$isSystemField) : ?>
+                            <?php
+                            // Un champ système (ni supprimable ni réordonnable) et une
+                            // table externe en lecture seule n'ont aucune action : jamais
+                            // de « + » seul — c'est le groupe [＋ －] complet ou rien.
+                            $rowCanDelete = (int) ($item->bytable ?? 0) !== 2 && !$isSystemField;
+                            ?>
+                            <?php if ($rowCanDelete) : ?>
+                                <div class="btn-group btn-group-sm cb-storage-field-actions" role="group">
+                                    <?php if (!$item->bytable && $item->id) : ?>
+                                        <button type="button"
+                                            class="btn btn-success group-add cb-storage-field-add hasTooltip"
+                                            title="<?php echo htmlspecialchars($addFieldTooltip, ENT_QUOTES, 'UTF-8'); ?>"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_ADD_FIELD_BUTTON'), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <span class="icon-plus" aria-hidden="true"></span>
+                                        </button>
+                                    <?php endif; ?>
                                     <button type="button"
                                         class="btn btn-danger group-remove cb-storage-field-delete hasTooltip"
                                         title="<?php echo htmlspecialchars(Text::_('JACTION_DELETE'), ENT_QUOTES, 'UTF-8'); ?>"
@@ -335,16 +341,16 @@ $storageFieldColumns = [
                                     >
                                         <span class="icon-minus" aria-hidden="true"></span>
                                     </button>
-                                <?php endif; ?>
-                                <?php if ($ordering) : ?>
-                                    <button type="button"
-                                        class="btn btn-primary cb-storage-fields-drag-handle"
-                                        title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_DRAG_TO_REORDER'), ENT_QUOTES, 'UTF-8'); ?>"
-                                        aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_DRAG_TO_REORDER'), ENT_QUOTES, 'UTF-8'); ?>">
-                                        <span class="icon-arrows-alt" aria-hidden="true"></span>
-                                    </button>
-                                <?php endif; ?>
-                            </div>
+                                    <?php if ($ordering) : ?>
+                                        <button type="button"
+                                            class="btn btn-primary cb-storage-fields-drag-handle"
+                                            title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_DRAG_TO_REORDER'), ENT_QUOTES, 'UTF-8'); ?>"
+                                            aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_DRAG_TO_REORDER'), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <span class="icon-arrows-alt" aria-hidden="true"></span>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
