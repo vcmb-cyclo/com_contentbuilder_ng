@@ -87,9 +87,12 @@ final class StorageEditLayoutTest extends TestCase
         self::assertStringContainsString('function deleteRecord()', $controller);
         self::assertStringContainsString("Joomla.submitform('storage.deleteRecord'", $template);
 
-        // Display reads the physical table directly, paginated.
+        // Display reads the physical table directly, paginated and sortable.
         self::assertStringContainsString('class StoragedataModel extends ListModel', $model);
         self::assertStringContainsString('cb-storage-data-table', $layout);
+        self::assertStringContainsString('data_ordering', $layout);
+        self::assertStringContainsString('data_ordering', $model);
+        self::assertStringContainsString('cb-storage-data-sort', $layout);
     }
 
     public function testFieldRowActionsUseTitlesetSubformFormalism(): void

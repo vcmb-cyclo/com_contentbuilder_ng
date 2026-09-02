@@ -49,3 +49,7 @@ joomla-tab#view-pane > div[role="tablist"] > button[role="tab"][aria-selected="t
 /* Le template Atum ajoute une icône « lien externe » à tout a[target=_blank] :
    inutile ici, ces boutons ont déjà leur propre icône. */
 .cb-storage-data-editor a[target="_blank"]::after{content:none!important;display:none!important}
+.cb-storage-data-sort{text-decoration:none;color:inherit;white-space:nowrap}
+.cb-storage-data-sort .fa-sort{opacity:.35}
+.cb-storage-data-sort:hover .fa-sort{opacity:.7}
+.cb-storage-data-sort.active{font-weight:600}

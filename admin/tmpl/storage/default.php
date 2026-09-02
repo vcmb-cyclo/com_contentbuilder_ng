@@ -1407,9 +1407,10 @@ function initStorageDataSearch() {
 
     var run = function () {
         var term = input ? input.value.trim() : '';
-        var sep = base.indexOf('?') === -1 ? '?' : '&';
+        var url = base.split('#')[0].replace(/([?&])data_search=[^&]*/, '$1').replace(/[?&]$/, '');
+        var sep = url.indexOf('?') === -1 ? '?' : '&';
         cbStorageBypassDirtyBeforeUnload();
-        window.location.assign(base + sep + 'data_search=' + encodeURIComponent(term) + '#tabData');
+        window.location.assign(url + sep + 'data_search=' + encodeURIComponent(term) + '#tabData');
     };
 
     if (button) {
@@ -1554,6 +1555,8 @@ if ($this->showDataTab) :
         'listLimit' => $this->recordListLimit,
         'listStart' => $this->recordListStart,
         'search' => $this->recordSearch,
+        'ordering' => $this->recordOrdering,
+        'direction' => $this->recordDirection,
         'editBaseUrl' => $this->recordEditBaseUrl,
         'activeTab' => $activeTab,
     ], JPATH_COMPONENT_ADMINISTRATOR . '/layouts');

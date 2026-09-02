@@ -25,6 +25,8 @@ $pagination  = $displayData['pagination'] ?? null;
 $listLimit   = max(0, (int) ($displayData['listLimit'] ?? 20));
 $listStart   = max(0, (int) ($displayData['listStart'] ?? 0));
 $search      = (string) ($displayData['search'] ?? '');
+$ordering    = (string) ($displayData['ordering'] ?? '');
+$direction   = strtolower((string) ($displayData['direction'] ?? 'asc')) === 'desc' ? 'desc' : 'asc';
 $editBaseUrl = (string) ($displayData['editBaseUrl'] ?? '');
 
 $columns = array_keys($labels);
@@ -38,8 +40,35 @@ $total   = $pagination ? (int) $pagination->total : $rowCount;
 $pages   = ($listLimit > 0) ? (int) ceil(max(1, $total) / $listLimit) : 1;
 $current = ($listLimit > 0) ? (int) floor($listStart / $listLimit) + 1 : 1;
 
-$baseUrl = 'index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $storageId . '&tabStartOffset=tabData';
-$pageLink = static fn (int $start): string => Route::_($baseUrl . '&data_start=' . max(0, $start) . '&data_limit=' . $listLimit, false) . '#tabData';
+$baseParams = [
+    'option'         => 'com_contentbuilderng',
+    'view'           => 'storage',
+    'layout'         => 'edit',
+    'id'             => $storageId,
+    'tabStartOffset' => 'tabData',
+    'data_limit'     => $listLimit,
+    'data_search'    => $search,
+    'data_ordering'  => $ordering,
+    'data_direction' => $direction,
+    'data_start'     => $listStart,
+];
+$dataUrl = static fn (array $overrides = []): string =>
+    Route::_('index.php?' . http_build_query(array_merge($baseParams, $overrides)), false) . '#tabData';
+
+$pageLink = static fn (int $start): string => $dataUrl(['data_start' => max(0, $start)]);
+
+// Lien de tri d'une colonne : bascule asc/desc si déjà triée, sinon asc.
+$sortHeader = static function (string $column, string $label) use ($dataUrl, $ordering, $direction): string {
+    $active = $ordering === $column;
+    $nextDir = ($active && $direction === 'asc') ? 'desc' : 'asc';
+    $icon = $active
+        ? ($direction === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down')
+        : 'fa-solid fa-sort';
+    return '<a href="' . htmlspecialchars($dataUrl(['data_ordering' => $column, 'data_direction' => $nextDir, 'data_start' => 0]), ENT_QUOTES, 'UTF-8')
+        . '" class="cb-storage-data-sort' . ($active ? ' active' : '') . '">'
+        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+        . ' <span class="' . $icon . '" aria-hidden="true"></span></a>';
+};
 
 $truncate = static function ($value): string {
     $value = (string) ($value ?? '');
@@ -59,7 +88,7 @@ $truncate = static function ($value): string {
             <?php /* Pas de <form> ici : le contenu de l'onglet est rendu dans
                      #adminForm et un <form> imbriqué le fermerait prématurément
                      (perte de boxchecked, cf. joomla-toolbar-button). */ ?>
-            <div class="d-flex align-items-center gap-1 cb-storage-data-search" data-cb-search-base="<?php echo htmlspecialchars(Route::_($baseUrl . '&data_limit=' . (int) $listLimit . '&data_start=0', false), ENT_QUOTES, 'UTF-8'); ?>">
+            <div class="d-flex align-items-center gap-1 cb-storage-data-search" data-cb-search-base="<?php echo htmlspecialchars($dataUrl(['data_search' => '', 'data_start' => 0]), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="search"
                     class="form-control form-control-sm cb-storage-data-search-input"
                     value="<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>"
@@ -94,7 +123,7 @@ $truncate = static function ($value): string {
                 <thead>
                     <tr>
                         <?php foreach ($columns as $column) : ?>
-                            <th class="text-nowrap"><?php echo htmlspecialchars((string) ($labels[$column] ?? $column), ENT_QUOTES, 'UTF-8'); ?></th>
+                            <th class="text-nowrap"><?php echo $sortHeader((string) $column, (string) ($labels[$column] ?? $column)); ?></th>
                         <?php endforeach; ?>
                         <?php if ($canMutate) : ?>
                             <th width="90" class="text-center" aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_DATA_EDIT_RECORD'), ENT_QUOTES, 'UTF-8'); ?>"></th>

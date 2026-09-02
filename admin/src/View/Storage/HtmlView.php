@@ -61,6 +61,8 @@ class HtmlView extends BaseHtmlView
     public int $recordListLimit = 20;
     public int $recordListStart = 0;
     public string $recordSearch = '';
+    public string $recordOrdering = '';
+    public string $recordDirection = 'asc';
     public string $recordEditBaseUrl = '';
     /** @var array<int,array{name:string,columns:array<int,string>,unique:bool}> */
     public array $indexes = [];
@@ -221,6 +223,10 @@ class HtmlView extends BaseHtmlView
                         $this->recordListLimit = (int) $dataModel->getState('list.limit', 20);
                         $this->recordListStart = (int) $dataModel->getState('list.start', 0);
                         $this->recordSearch = (string) $dataModel->getState('data.search', '');
+                        $this->recordOrdering = (string) $dataModel->getState('list.ordering', '');
+                        $this->recordDirection = strtolower((string) $dataModel->getState('list.direction', 'asc')) === 'desc'
+                            ? 'desc'
+                            : 'asc';
                     }
                 }
             } catch (\Throwable $e) {
