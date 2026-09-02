@@ -14,6 +14,7 @@
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use CB\Component\Contentbuilderng\Administrator\Helper\ListLimitHelper;
 
 /** @var array $displayData */
 $storageId   = (int) ($displayData['storageId'] ?? 0);
@@ -185,11 +186,28 @@ $truncate = static function ($value): string {
             </table>
         </div>
     </div>
-    <?php if ($pages > 1 || $listLimit > 0) : ?>
+    <?php
+    $limitChoices = ListLimitHelper::getPaginationChoices();
+    if (!in_array($listLimit, $limitChoices, true)) {
+        $limitChoices[] = $listLimit;
+        sort($limitChoices);
+    }
+    ?>
         <div class="card-footer">
             <div class="cb-storage-pagination">
-                <div class="cbPagesCounter">
-                    <?php echo Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_DATA_PAGE_COUNTER', $current, max(1, $pages), $total); ?>
+                <div class="cbPagesCounter d-flex flex-wrap align-items-center gap-2">
+                    <span><?php echo Text::sprintf('COM_CONTENTBUILDERNG_STORAGE_DATA_PAGE_COUNTER', $current, max(1, $pages), $total); ?></span>
+                    <label class="d-flex align-items-center gap-1 mb-0">
+                        <span><?php echo Text::_('COM_CONTENTBUILDERNG_DISPLAY_NUM'); ?></span>
+                        <select class="form-select form-select-sm w-auto cb-storage-data-limit"
+                            data-cb-limit-base="<?php echo htmlspecialchars($dataUrl(['data_limit' => '__CBLIMIT__', 'data_start' => 0]), ENT_QUOTES, 'UTF-8'); ?>">
+                            <?php foreach ($limitChoices as $choice) : ?>
+                                <option value="<?php echo (int) $choice; ?>"<?php echo (int) $choice === $listLimit ? ' selected' : ''; ?>>
+                                    <?php echo $choice === 0 ? htmlspecialchars(Text::_('JALL'), ENT_QUOTES, 'UTF-8') : (int) $choice; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
                 </div>
                 <?php if ($pages > 1) : ?>
                     <nav class="cb-storage-pages">
@@ -214,5 +232,4 @@ $truncate = static function ($value): string {
                 <?php endif; ?>
             </div>
         </div>
-    <?php endif; ?>
 </div>

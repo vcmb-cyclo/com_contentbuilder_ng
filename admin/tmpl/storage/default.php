@@ -1395,33 +1395,44 @@ function initStorageAjaxToggles() {
     }, true);
 }
 
-function initStorageDataSearch() {
+function initStorageDataControls() {
     var wrap = document.querySelector('.cb-storage-data-search');
-    if (!wrap) {
-        return;
+
+    if (wrap) {
+        var input = wrap.querySelector('.cb-storage-data-search-input');
+        var button = wrap.querySelector('.cb-storage-data-search-submit');
+        var base = wrap.getAttribute('data-cb-search-base') || 'index.php';
+
+        var run = function () {
+            var term = input ? input.value.trim() : '';
+            var url = base.split('#')[0].replace(/([?&])data_search=[^&]*/, '$1').replace(/[?&]$/, '');
+            var sep = url.indexOf('?') === -1 ? '?' : '&';
+            cbStorageBypassDirtyBeforeUnload();
+            window.location.assign(url + sep + 'data_search=' + encodeURIComponent(term) + '#tabData');
+        };
+
+        if (button) {
+            button.addEventListener('click', run);
+        }
+        if (input) {
+            input.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    run();
+                }
+            });
+        }
     }
 
-    var input = wrap.querySelector('.cb-storage-data-search-input');
-    var button = wrap.querySelector('.cb-storage-data-search-submit');
-    var base = wrap.getAttribute('data-cb-search-base') || 'index.php';
-
-    var run = function () {
-        var term = input ? input.value.trim() : '';
-        var url = base.split('#')[0].replace(/([?&])data_search=[^&]*/, '$1').replace(/[?&]$/, '');
-        var sep = url.indexOf('?') === -1 ? '?' : '&';
-        cbStorageBypassDirtyBeforeUnload();
-        window.location.assign(url + sep + 'data_search=' + encodeURIComponent(term) + '#tabData');
-    };
-
-    if (button) {
-        button.addEventListener('click', run);
-    }
-    if (input) {
-        input.addEventListener('keydown', function (event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                run();
+    var limitSelect = document.querySelector('.cb-storage-data-limit');
+    if (limitSelect) {
+        limitSelect.addEventListener('change', function () {
+            var tpl = limitSelect.getAttribute('data-cb-limit-base') || '';
+            if (!tpl) {
+                return;
             }
+            cbStorageBypassDirtyBeforeUnload();
+            window.location.assign(tpl.replace('__CBLIMIT__', encodeURIComponent(limitSelect.value)));
         });
     }
 }
@@ -1437,7 +1448,7 @@ function initStorageUi() {
     initStorageFieldTitleInput();
     initStorageFieldTypeSelect();
     initStorageFieldRequiredToggle();
-    initStorageDataSearch();
+    initStorageDataControls();
     initStorageTabTooltips();
     if (adminUi && typeof adminUi.persistJoomlaTabset === 'function') {
         // restoreFromStorage désactivé : l'onglet de départ est déterminé
