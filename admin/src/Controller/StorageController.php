@@ -621,6 +621,109 @@ class StorageController extends BaseFormController
         $this->closeApp();
     }
 
+    /**
+     * Task storage.deleteRecord — supprime un ou plusieurs enregistrements de la
+     * table physique d'un storage depuis l'onglet « Données ». Réservé aux
+     * storages gérés/externes en écriture (jamais bytable=2) et gardé par
+     * l'accès d'édition du composant (l'écran d'édition du storage l'exige
+     * déjà). Nettoie les fichiers d'upload liés (via la source de formulaire)
+     * puis les métadonnées record (#__contentbuilderng_records / _list_records
+     * / _articles).
+     */
+    public function deleteRecord(): void
+    {
+        $this->checkToken();
+
+        $storageId = (int) $this->input->getInt('id', 0);
+        $recordIds = array_values(array_unique(array_filter(
+            array_map('intval', (array) $this->input->get('cid', [], 'array')),
+            static fn (int $v): bool => $v > 0
+        )));
+
+        $redirect = Route::_(
+            'index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . $storageId
+            . '&tabStartOffset=tabData#tabData',
+            false
+        );
+
+        try {
+            if (!$this->getApp()->getIdentity()->authorise('core.edit', 'com_contentbuilderng')) {
+                throw new NotAllowed(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+            }
+
+            if ($storageId <= 0 || $recordIds === []) {
+                throw new \RuntimeException(Text::_('JERROR_NO_ITEMS_SELECTED'));
+            }
+
+            $db = $this->getDatabase();
+
+            $storageQuery = $db->getQuery(true)
+                ->select($db->quoteName(['name', 'bytable']))
+                ->from($db->quoteName('#__contentbuilderng_storages'))
+                ->where($db->quoteName('id') . ' = ' . $storageId);
+            $db->setQuery($storageQuery);
+            $storage = $db->loadAssoc();
+
+            if (!is_array($storage)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ERROR'));
+            }
+
+            if ((int) ($storage['bytable'] ?? 0) === 2) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_READONLY_EXTERNAL_STORAGE_MSG'));
+            }
+
+            $formQuery = $db->getQuery(true)
+                ->select($db->quoteName('id'))
+                ->from($db->quoteName('#__contentbuilderng_forms'))
+                ->where($db->quoteName('type') . ' = ' . $db->quote('com_contentbuilderng'))
+                ->where($db->quoteName('reference_id') . ' = ' . $storageId);
+            $db->setQuery($formQuery);
+            $formId = (int) $db->loadResult();
+
+            $source = \CB\Component\Contentbuilderng\Administrator\Helper\FormSourceFactory::getForm(
+                'com_contentbuilderng',
+                $storageId
+            );
+
+            if (!is_object($source) || !method_exists($source, 'delete')) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ERROR'));
+            }
+
+            // Supprime les lignes physiques (+ fichiers d'upload référencés).
+            $source->delete($recordIds, $formId);
+
+            // Métadonnées record éventuelles (formulaires/listes bâtis dessus).
+            $stringIds = array_map('strval', $recordIds);
+
+            $cleanupListRecords = $db->getQuery(true)
+                ->delete($db->quoteName('#__contentbuilderng_list_records'))
+                ->where($db->quoteName('form_id') . ' = ' . $formId)
+                ->whereIn($db->quoteName('record_id'), $stringIds, \Joomla\Database\ParameterType::STRING);
+            $db->setQuery($cleanupListRecords)->execute();
+
+            $cleanupRecords = $db->getQuery(true)
+                ->delete($db->quoteName('#__contentbuilderng_records'))
+                ->where($db->quoteName('type') . ' = ' . $db->quote('com_contentbuilderng'))
+                ->where($db->quoteName('reference_id') . ' = ' . $db->quote((string) $storageId))
+                ->whereIn($db->quoteName('record_id'), $stringIds, \Joomla\Database\ParameterType::STRING);
+            $db->setQuery($cleanupRecords)->execute();
+
+            $cleanupArticles = $db->getQuery(true)
+                ->delete($db->quoteName('#__contentbuilderng_articles'))
+                ->where($db->quoteName('type') . ' = ' . $db->quote('com_contentbuilderng'))
+                ->where($db->quoteName('reference_id') . ' = ' . $db->quote((string) $storageId))
+                ->whereIn($db->quoteName('record_id'), $stringIds, \Joomla\Database\ParameterType::STRING);
+            $db->setQuery($cleanupArticles)->execute();
+
+            $this->setRedirect(
+                $redirect,
+                Text::plural('COM_CONTENTBUILDERNG_N_ITEMS_DELETED', count($recordIds))
+            );
+        } catch (\Throwable $e) {
+            $this->setRedirect($redirect, $this->safeErrorMessage($e), 'error');
+        }
+    }
+
 
     public function addfield(): bool
     {

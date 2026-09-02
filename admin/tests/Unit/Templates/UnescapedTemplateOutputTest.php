@@ -70,11 +70,7 @@ final class UnescapedTemplateOutputTest extends TestCase
         'admin/tmpl/forms/default.php' => 15,
         'admin/tmpl/list/default.php' => 28,
         'admin/tmpl/list/select.php' => 26,
-        // +1 for the Data tab's record-delete helper form: echo of
-        // $this->recordDeleteHiddenFields, the trusted signed-preview hidden
-        // inputs built by PreviewLinkHelper::buildHiddenFields() (already
-        // htmlspecialchars'd internally).
-        'admin/tmpl/storage/default.php' => 5,
+        'admin/tmpl/storage/default.php' => 4,
         'admin/tmpl/storages/default.php' => 13,
         'admin/tmpl/storagewizard/default.php' => 3,
         'admin/tmpl/user/default.php' => 10,

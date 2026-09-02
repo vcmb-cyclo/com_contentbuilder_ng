@@ -78,12 +78,14 @@ final class StorageEditLayoutTest extends TestCase
         // tabStartOffset=tabData must survive the active-tab whitelist.
         self::assertStringContainsString("preg_match('/^tab(?:\\d+|Data)$/'", $template);
 
-        // Same ACL / philosophy as the preview: edit/new reuse the signed
-        // front-end editor, delete goes through front-end task=list.delete.
+        // Add / edit a record reuse the signed front-end editor (same
+        // mechanism as the preview button); delete is an admin task.
+        $controller = \file_get_contents($root . '/admin/src/Controller/StorageController.php');
+        self::assertIsString($controller);
         self::assertStringContainsString('recordEditBaseUrl', $view);
         self::assertStringContainsString('view=edit&storage_id=', $view);
-        self::assertStringContainsString("value=\"list.delete\"", $template);
-        self::assertStringContainsString('PreviewLinkHelper::buildHiddenFields', $view);
+        self::assertStringContainsString('function deleteRecord()', $controller);
+        self::assertStringContainsString("Joomla.submitform('storage.deleteRecord'", $template);
 
         // Display reads the physical table directly, paginated.
         self::assertStringContainsString('class StoragedataModel extends ListModel', $model);

@@ -46,3 +46,6 @@ joomla-tab#view-pane > div[role="tablist"] > button[role="tab"][aria-selected="t
 .cb-storage-data-table{width:100%}
 .cb-storage-data-table td{max-width:22rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cb-storage-data-editor .cb-storage-pagination{padding:0}
+/* Le template Atum ajoute une icône « lien externe » à tout a[target=_blank] :
+   inutile ici, ces boutons ont déjà leur propre icône. */
+.cb-storage-data-editor a[target="_blank"]::after{content:none!important;display:none!important}

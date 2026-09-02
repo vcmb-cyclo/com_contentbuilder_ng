@@ -1600,64 +1600,53 @@ echo HTMLHelper::_('uitab.endTabSet');
     <input type="hidden" name="tabStartOffset" value="<?php echo htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8'); ?>" />
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
-<?php if ($this->showDataTab && $this->recordsHavePrimaryKey && (int) ($this->item->bytable ?? 0) !== 2 && $this->recordDeleteFormAction !== '') : ?>
-    <?php /* Suppression d'un enregistrement : même pipeline que la
-             prévisualisation (front-end task=list.delete, ACL _fe réel).
-             Formulaire hors #adminForm, soumis dans une iframe cachée pour
-             rester sur l'écran d'édition. */ ?>
-    <iframe name="cbStorageRecordDeleteFrame" id="cbStorageRecordDeleteFrame" style="display:none" title="" aria-hidden="true"></iframe>
-    <form id="cbStorageRecordDeleteForm"
-        action="<?php echo htmlspecialchars($this->recordDeleteFormAction, ENT_QUOTES, 'UTF-8'); ?>"
-        method="post"
-        target="cbStorageRecordDeleteFrame"
-        style="display:none">
-        <input type="hidden" name="option" value="com_contentbuilderng" />
-        <input type="hidden" name="task" value="list.delete" />
-        <input type="hidden" name="storage_id" value="<?php echo (int) $storageId; ?>" />
-        <input type="hidden" name="boxchecked" value="1" />
-        <input type="hidden" name="cid[]" id="cbStorageRecordDeleteId" value="" />
-        <?php echo $this->recordDeleteHiddenFields; ?>
-        <?php echo HTMLHelper::_('form.token'); ?>
-    </form>
-    <script>
-    (function () {
-        var form = document.getElementById('cbStorageRecordDeleteForm');
-        var frame = document.getElementById('cbStorageRecordDeleteFrame');
-        var idField = document.getElementById('cbStorageRecordDeleteId');
-        if (!form || !frame || !idField) {
-            return;
-        }
+<script>
+// Onglet "Données" : suppression d'un enregistrement via la tâche admin
+// storage.deleteRecord (soumission classique de #adminForm).
+function cbDeleteStorageRecord(recordId, label) {
+    recordId = parseInt(recordId, 10) || 0;
+    if (recordId <= 0) {
+        return false;
+    }
 
-        var submitting = false;
+    var message = (label && window.Joomla && typeof Joomla.Text._ === 'function')
+        ? Joomla.Text._('COM_CONTENTBUILDERNG_CONFIRM_DELETE_ONE').replace('%s', label)
+        : null;
+    if (message !== null && !window.confirm(message)) {
+        return false;
+    }
 
-        frame.addEventListener('load', function () {
-            if (!submitting) {
-                return;
-            }
-            submitting = false;
-            cbStorageBypassDirtyBeforeUnload();
-            window.location.assign(<?php echo json_encode('index.php?option=com_contentbuilderng&view=storage&layout=edit&id=' . (int) $storageId . '&tabStartOffset=tabData#tabData', JSON_UNESCAPED_SLASHES); ?>);
-        });
+    var form = document.getElementById('adminForm');
+    if (!form) {
+        return false;
+    }
 
-        window.cbDeleteStorageRecord = function (recordId, label) {
-            recordId = parseInt(recordId, 10) || 0;
-            if (recordId <= 0) {
-                return false;
-            }
-            var message = (label && window.Joomla && typeof Joomla.Text._ === 'function')
-                ? Joomla.Text._('COM_CONTENTBUILDERNG_CONFIRM_DELETE_ONE').replace('%s', label)
-                : null;
-            if (message !== null && !window.confirm(message)) {
-                return false;
-            }
-            idField.value = String(recordId);
-            submitting = true;
-            form.submit();
-            return false;
-        };
-    })();
-    </script>
-<?php endif; ?>
+    form.querySelectorAll('input[data-cb-record-cid="1"]').forEach(function (el) {
+        el.remove();
+    });
+
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'cid[]';
+    input.value = String(recordId);
+    input.setAttribute('data-cb-record-cid', '1');
+    form.appendChild(input);
+
+    var boxchecked = form.querySelector('input[name="boxchecked"]');
+    if (boxchecked) {
+        boxchecked.value = 1;
+    }
+
+    var tabField = form.querySelector('input[name="tabStartOffset"]');
+    if (tabField) {
+        tabField.value = 'tabData';
+    }
+
+    cbStorageBypassDirtyBeforeUnload();
+    Joomla.submitform('storage.deleteRecord', form);
+    return false;
+}
+</script>
 <script>
 (function () {
     var fileInput = document.getElementById('csv_file');

@@ -130,15 +130,7 @@ $truncate = static function ($value): string {
                             <?php endforeach; ?>
                             <?php if ($canMutate) : ?>
                                 <td class="text-center text-nowrap">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a class="btn btn-success group-add"
-                                            href="<?php echo htmlspecialchars($editBaseUrl, ENT_QUOTES, 'UTF-8'); ?>"
-                                            target="_blank"
-                                            rel="noopener"
-                                            title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_DATA_ADD_RECORD'), ENT_QUOTES, 'UTF-8'); ?>"
-                                            aria-label="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_DATA_ADD_RECORD'), ENT_QUOTES, 'UTF-8'); ?>">
-                                            <span class="icon-plus" aria-hidden="true"></span>
-                                        </a>
+                                    <div class="btn-group btn-group-sm cb-storage-data-actions" role="group">
                                         <a class="btn btn-primary"
                                             href="<?php echo htmlspecialchars($editBaseUrl . '&record_id=' . $recordId, ENT_QUOTES, 'UTF-8'); ?>"
                                             target="_blank"

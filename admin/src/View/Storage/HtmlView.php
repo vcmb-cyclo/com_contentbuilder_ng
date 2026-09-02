@@ -62,8 +62,6 @@ class HtmlView extends BaseHtmlView
     public int $recordListStart = 0;
     public string $recordSearch = '';
     public string $recordEditBaseUrl = '';
-    public string $recordDeleteFormAction = '';
-    public string $recordDeleteHiddenFields = '';
     /** @var array<int,array{name:string,columns:array<int,string>,unique:bool}> */
     public array $indexes = [];
     /** @var array<int,string> */
@@ -408,10 +406,9 @@ class HtmlView extends BaseHtmlView
                 true
             );
 
-            // Onglet "Data" : mêmes ACL et philosophie que la prévisualisation.
-            // L'affichage lit la table physique en direct ; l'ajout/édition
-            // ouvrent l'éditeur front-end signé ; la suppression passe par le
-            // pipeline front-end (task=list.delete), qui applique le vrai ACL _fe.
+            // Onglet "Data" : l'ajout/édition d'un enregistrement ouvrent
+            // l'éditeur front-end signé (même mécanisme que la prévisualisation).
+            // La suppression, elle, passe par la tâche admin storage.deleteRecord.
             if ($this->showDataTab) {
                 $this->recordEditBaseUrl = Route::link(
                     'site',
@@ -419,20 +416,6 @@ class HtmlView extends BaseHtmlView
                     false,
                     Route::TLS_IGNORE,
                     true
-                );
-                $this->recordDeleteFormAction = Route::link(
-                    'site',
-                    'index.php?option=com_contentbuilderng',
-                    false,
-                    Route::TLS_IGNORE,
-                    true
-                );
-                $this->recordDeleteHiddenFields = PreviewLinkHelper::buildHiddenFields(
-                    $previewUntil,
-                    $previewActorId,
-                    $previewActorName,
-                    $previewUserId,
-                    $previewSig
                 );
             }
 
