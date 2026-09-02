@@ -947,11 +947,17 @@ function toggleCsvUploadOptions() {
 
 
 function initStorageInlineAddField() {
-    var addButton = document.getElementById('cb-storage-field-add-button');
+    var addButtons = Array.prototype.slice.call(document.querySelectorAll('.cb-storage-field-add'));
     var tbody = document.getElementById('cb-storage-fields-tbody');
-    if (!addButton || !tbody) {
+    if (!addButtons.length || !tbody) {
         return;
     }
+
+    var setAddButtonsDisabled = function (disabled) {
+        addButtons.forEach(function (button) {
+            button.disabled = disabled;
+        });
+    };
 
     var optionsScript = document.getElementById('cb-storage-field-sql-types');
     var sqlTypeOptions = {};
@@ -1024,11 +1030,11 @@ function initStorageInlineAddField() {
             nameInput.focus();
         }
 
-        addButton.disabled = true;
+        setAddButtonsDisabled(true);
 
         function cancelNewFieldRow() {
             row.remove();
-            addButton.disabled = false;
+            setAddButtonsDisabled(false);
             document.removeEventListener('keydown', onKeyDown);
         }
 
@@ -1085,7 +1091,9 @@ function initStorageInlineAddField() {
             });
     }
 
-    addButton.addEventListener('click', insertNewFieldRow);
+    addButtons.forEach(function (button) {
+        button.addEventListener('click', insertNewFieldRow);
+    });
 }
 
 function cbSubmitFieldTypeUpdate(fieldId, sqlType, fieldSize, onSuccess, onError) {

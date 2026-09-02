@@ -58,4 +58,23 @@ final class StorageEditLayoutTest extends TestCase
         self::assertStringContainsString('cb-storage-field-new-cancel', $script);
     }
 
+    public function testFieldRowActionsUseTitlesetSubformFormalism(): void
+    {
+        $layout = \file_get_contents($this->root . '/admin/layouts/storage/storage_tab.php');
+        self::assertIsString($layout);
+
+        // Grouped add / remove / move buttons, matching the titleset editor's
+        // native Joomla repeatable-table subform (btn-success / btn-danger /
+        // btn-primary + icon-plus / icon-minus / icon-arrows-alt).
+        self::assertStringContainsString('group-add', $layout);
+        self::assertStringContainsString('group-remove', $layout);
+        self::assertStringContainsString('icon-arrows-alt', $layout);
+        self::assertStringContainsString('cb-storage-field-add', $layout);
+
+        // The separate up/down order icons are gone (drag only).
+        self::assertStringNotContainsString('cb-order-icons', $layout);
+        self::assertStringNotContainsString('storage.orderup', $layout);
+        self::assertStringNotContainsString('storage.orderdown', $layout);
+    }
+
 }
