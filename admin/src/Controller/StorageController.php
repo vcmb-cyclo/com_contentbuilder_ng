@@ -579,6 +579,48 @@ class StorageController extends BaseFormController
         $this->closeApp();
     }
 
+    /**
+     * Ajax (GET) : renvoie les colonnes système absentes d'une table existante
+     * choisie pour un storage « table existante ». Permet de n'afficher
+     * l'avertissement COM_CONTENTBUILDERNG_CUSTOM_STORAGE_MSG que lorsque
+     * ContentBuilder NG ajouterait réellement au moins une colonne.
+     */
+    public function checkExistingTableColumns(): void
+    {
+        if (!$this->getApp()->getIdentity()->authorise('core.manage', 'com_contentbuilderng')) {
+            throw new NotAllowed(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+
+        $table = trim((string) $this->input->getString('table', ''));
+        $missing = [];
+        $known = false;
+
+        try {
+            if ($table !== '') {
+                $db = $this->getDatabase();
+                $resolved = strtolower($db->replacePrefix($table));
+                $tableList = array_map('strtolower', (array) $db->getTableList());
+
+                if (in_array($resolved, $tableList, true)) {
+                    $known = true;
+                    $columns = array_change_key_case((array) $db->getTableColumns($table, false), CASE_LOWER);
+
+                    foreach (array_keys(StorageSystemFieldHelper::definitions()) as $systemColumn) {
+                        if (!\array_key_exists(strtolower($systemColumn), $columns)) {
+                            $missing[] = $systemColumn;
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            $missing = [];
+            $known = false;
+        }
+
+        echo new JsonResponse(['known' => $known, 'missing' => array_values($missing)]);
+        $this->closeApp();
+    }
+
 
     public function addfield(): bool
     {
