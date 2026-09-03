@@ -54,8 +54,12 @@ final class StorageEditLayoutTest extends TestCase
         self::assertIsString($layout);
         self::assertIsString($script);
         self::assertStringContainsString('cb-storage-fields-editor', $layout);
+        self::assertStringContainsString('cb-storage-field-sql-size-limits', $layout);
         self::assertStringContainsString('cb-storage-field-actions', $layout);
         self::assertStringContainsString('cb-storage-field-new-cancel', $script);
+        self::assertStringContainsString('cb-storage-field-new-size', $script);
+        self::assertStringContainsString("max=\"' + maximum + '\"", $script);
+        self::assertStringContainsString('data-max-size=', $layout);
     }
 
     public function testDataTabIsRegisteredAndDelegatesToItsLayout(): void
@@ -105,18 +109,52 @@ final class StorageEditLayoutTest extends TestCase
         $layout = \file_get_contents($this->root . '/admin/layouts/storage/storage_tab.php');
         self::assertIsString($layout);
 
-        // Grouped add / remove / move buttons, matching the titleset editor's
-        // native Joomla repeatable-table subform (btn-success / btn-danger /
-        // btn-primary + icon-plus / icon-minus / icon-arrows-alt).
-        self::assertStringContainsString('group-add', $layout);
+        // The add button is available once in the table header; rows only
+        // expose delete and move actions.
+        self::assertSame(1, substr_count($layout, 'class="btn btn-success group-add cb-storage-field-add'));
         self::assertStringContainsString('group-remove', $layout);
+        self::assertStringContainsString('fa-solid fa-trash', $layout);
         self::assertStringContainsString('icon-arrows-alt', $layout);
-        self::assertStringContainsString('cb-storage-field-add', $layout);
+        self::assertStringNotContainsString('icon-minus', $layout);
 
         // The separate up/down order icons are gone (drag only).
         self::assertStringNotContainsString('cb-order-icons', $layout);
         self::assertStringNotContainsString('storage.orderup', $layout);
         self::assertStringNotContainsString('storage.orderdown', $layout);
+    }
+
+    public function testGroupDefinitionEditControlRequiresGroupSelection(): void
+    {
+        $layout = \file_get_contents($this->root . '/admin/layouts/storage/storage_tab.php');
+        $script = \file_get_contents($this->root . '/admin/tmpl/storage/default.php');
+
+        self::assertIsString($layout);
+        self::assertIsString($script);
+        self::assertStringContainsString('data-cb-group-definition-edit', $layout);
+        self::assertStringContainsString("\$isGroup ? '' : ' hidden'", $layout);
+        self::assertStringContainsString('function initStorageFieldGroupToggle()', $script);
+        self::assertStringContainsString('editControl.hidden = !isGroup;', $script);
+    }
+
+    public function testSystemFieldsUsePersistedUnpublishedMetadataRows(): void
+    {
+        $layout = \file_get_contents($this->root . '/admin/layouts/storage/storage_tab.php');
+        $model = \file_get_contents($this->root . '/admin/src/Model/StorageModel.php');
+        $view = \file_get_contents($this->root . '/admin/src/View/Storage/HtmlView.php');
+
+        self::assertIsString($layout);
+        self::assertIsString($model);
+        self::assertIsString($view);
+
+        self::assertStringContainsString("ContentbuilderngHelper::listPublish('storage', \$row, \$i)", $layout);
+        self::assertStringContainsString("'published',", $model);
+        self::assertStringContainsString('public function ensureSystemFieldMetadata(', $model);
+        self::assertStringContainsString('$storageModel->ensureSystemFieldMetadata($storageId)', $view);
+        self::assertStringContainsString('$isSystemField) : ?>', $layout);
+        self::assertStringNotContainsString('showPendingSystemFields', $layout);
+        self::assertStringNotContainsString('cb-storage-field-system-preview', $layout);
+        self::assertStringNotContainsString('storage.publishSystemField', $layout);
+        self::assertStringNotContainsString('cb-system-field-name', \file_get_contents($this->root . '/admin/tmpl/storage/default.php'));
     }
 
 }

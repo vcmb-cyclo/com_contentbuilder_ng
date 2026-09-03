@@ -970,6 +970,16 @@ function initStorageInlineAddField() {
         }
     }
 
+    var sizeLimitsScript = document.getElementById('cb-storage-field-sql-size-limits');
+    var sqlTypeSizeLimits = {};
+    if (sizeLimitsScript) {
+        try {
+            sqlTypeSizeLimits = JSON.parse(sizeLimitsScript.textContent || '{}');
+        } catch (e) {
+            sqlTypeSizeLimits = {};
+        }
+    }
+
     function buildTypeOptionsHtml() {
         var html = '';
         Object.keys(sqlTypeOptions).forEach(function (value) {
@@ -1015,6 +1025,35 @@ function initStorageInlineAddField() {
             '</td>';
 
         tbody.insertBefore(row, tbody.firstChild);
+
+        var typeSelect = row.querySelector('select[name="jform[sql_type]"]');
+        var fieldSizeCell = row.querySelector('[data-cb-storage-col="field_size"]');
+        var updateFieldSizeControl = function () {
+            var sqlType = typeSelect ? typeSelect.value : '';
+            var maximum = Number(sqlTypeSizeLimits[sqlType] || 0);
+
+            if (!fieldSizeCell || !maximum) {
+                if (fieldSizeCell) {
+                    fieldSizeCell.innerHTML = '';
+                }
+                return;
+            }
+
+            fieldSizeCell.innerHTML = '<input type="number" min="1" max="' + maximum + '" value="' + maximum + '" class="form-control form-control-sm cb-storage-field-new-size" name="jform[field_size]" inputmode="numeric">';
+            var fieldSizeInput = fieldSizeCell.querySelector('.cb-storage-field-new-size');
+            if (fieldSizeInput) {
+                fieldSizeInput.addEventListener('input', function () {
+                    if (fieldSizeInput.value !== '' && Number(fieldSizeInput.value) > maximum) {
+                        fieldSizeInput.value = String(maximum);
+                    }
+                });
+            }
+        };
+
+        if (typeSelect) {
+            typeSelect.addEventListener('change', updateFieldSizeControl);
+            updateFieldSizeControl();
+        }
 
         var isGroupToggle = row.querySelector('.cb-storage-field-new-is-group');
         var groupDefinition = row.querySelector('.cb-storage-field-new-group-definition');
@@ -1072,6 +1111,11 @@ function initStorageInlineAddField() {
         formData.set('jform[fieldname]', nameInput.value);
         formData.set('jform[required]', row.querySelector('.cb-storage-field-new-required').checked ? '1' : '0');
 
+        var sizeInput = row.querySelector('.cb-storage-field-new-size');
+        if (sizeInput) {
+            formData.set('jform[field_size]', sizeInput.value);
+        }
+
         fetch('index.php', {
             method: 'POST',
             body: formData,
@@ -1094,6 +1138,31 @@ function initStorageInlineAddField() {
 
     addButtons.forEach(function (button) {
         button.addEventListener('click', insertNewFieldRow);
+    });
+}
+
+function initStorageFieldGroupToggle() {
+    document.addEventListener('change', function (event) {
+        var input = event.target;
+        if (!input || !input.matches('input[type="radio"][name^="itemIsGroup["]')) {
+            return;
+        }
+
+        var row = input.closest('tr');
+        if (!row) {
+            return;
+        }
+
+        var editControl = row.querySelector('[data-cb-group-definition-edit]');
+        var definition = row.querySelector('textarea[id^="itemGroupDefinitions"]');
+        var isGroup = input.value === '1';
+
+        if (editControl) {
+            editControl.hidden = !isGroup;
+        }
+        if (!isGroup && definition) {
+            definition.style.display = 'none';
+        }
     });
 }
 
@@ -1275,13 +1344,14 @@ function initStorageFieldTypeSelect() {
             var selectedOption = select.options[select.selectedIndex];
             var supportsSize = selectedOption && selectedOption.dataset.supportsSize === '1';
             var defaultSize = selectedOption ? parseInt(selectedOption.dataset.defaultSize || '0', 10) : 0;
+            var maximumSize = selectedOption ? parseInt(selectedOption.dataset.maxSize || '0', 10) : 0;
 
             // La taille dépend du type : on régénère la cellule pour
             // basculer entre "champ modifiable" et "—" (non applicable).
             if (sizeCell) {
                 if (supportsSize) {
                     sizeCell.innerHTML = '<input type="number" min="1" class="form-control form-control-sm cb-storage-field-size-input" '
-                        + 'data-field-id="' + fieldId + '" data-sql-type="' + sqlType + '" data-previous-value="' + defaultSize + '" '
+                        + 'max="' + maximumSize + '" data-field-id="' + fieldId + '" data-sql-type="' + sqlType + '" data-previous-value="' + defaultSize + '" '
                         + 'style="width:6rem;" value="' + defaultSize + '">';
                 } else {
                     sizeCell.innerHTML = '&mdash;';
@@ -1314,6 +1384,10 @@ function initStorageFieldTypeSelect() {
 
         var sizeFieldId = parseInt(sizeInputChanged.dataset.fieldId || '0', 10);
         var previousSize = sizeInputChanged.dataset.previousValue || sizeInputChanged.value;
+        var maximumSize = parseInt(sizeInputChanged.getAttribute('max') || '0', 10);
+        if (maximumSize > 0 && Number(sizeInputChanged.value) > maximumSize) {
+            sizeInputChanged.value = String(maximumSize);
+        }
         sizeInputChanged.disabled = true;
 
         cbSubmitFieldTypeUpdate(sizeFieldId, sizeSqlType, sizeInputChanged.value, function () {
@@ -1445,6 +1519,7 @@ function initStorageUi() {
     cbStorageInitColumnPicker();
     initStorageAjaxToggles();
     initStorageInlineAddField();
+    initStorageFieldGroupToggle();
     initStorageFieldTitleInput();
     initStorageFieldTypeSelect();
     initStorageFieldRequiredToggle();
@@ -1539,7 +1614,6 @@ echo LayoutHelper::render('storage.storage_tab', [
     'addFieldTooltip' => $addFieldTooltip,
     'sortLink' => $sortLink,
     'fields' => $fields,
-    'fieldNames' => $this->storageFieldNames,
     'fieldsCount' => $fieldsCount,
     'recordsCount' => $recordsCount,
     'pagination' => $this->pagination,
@@ -1610,7 +1684,6 @@ echo HTMLHelper::_('uitab.endTabSet');
     <input type="hidden" id="list_fullordering" name="list[fullordering]" value="<?php echo htmlspecialchars($fullOrdering, ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="limitstart" value="<?php echo (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('limitstart', 0); ?>" />
     <input type="hidden" name="boxchecked" value="0" />
-    <input type="hidden" id="cb-system-field-name" name="system_field_name" value="" />
     <input type="hidden" name="tabStartOffset" value="<?php echo htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8'); ?>" />
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

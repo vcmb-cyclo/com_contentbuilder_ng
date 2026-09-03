@@ -36,6 +36,7 @@ use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngCompon
 use CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\StorageColumnTypeHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\StorageSystemFieldHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\VendorHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\DatatableService;
 use CB\Component\Contentbuilderng\Administrator\Dto\CsvImportOptions;
@@ -629,6 +630,131 @@ class StorageModel extends AdminModel
         $table->load($storageId);
 
         $this->syncStorageDataTableOrBytable($storageId, $isNew, $table, $oldName);
+        $this->ensureSystemFieldMetadata($storageId, $table);
+    }
+
+    /**
+     * Ensures that the reserved physical columns have stable field metadata.
+     *
+     * System fields are deliberately created unpublished. This keeps them
+     * available for ordering and normal publish/unpublish handling while
+     * preventing them from appearing in the data views until explicitly
+     * enabled by an administrator.
+     */
+    public function ensureSystemFieldMetadata(
+        int $storageId,
+        ?\Joomla\CMS\Table\Table $storageTable = null
+    ): void {
+        if ($storageId <= 0) {
+            return;
+        }
+
+        $db = $this->getDatabase();
+        $table = $storageTable ?? $this->getTable('Storage');
+
+        if ($storageTable === null) {
+            $table->load($storageId);
+        }
+
+        $name = trim((string) ($table->name ?? ''));
+        if ($name === '') {
+            return;
+        }
+
+        $physicalTable = (int) ($table->bytable ?? 0) > 0
+            ? $name
+            : $db->getPrefix() . $name;
+
+        try {
+            $columns = (array) $db->getTableColumns($physicalTable, false);
+        } catch (\Throwable $e) {
+            if ((int) ($table->bytable ?? 0) <= 0) {
+                Logger::exception($e);
+                return;
+            }
+
+            try {
+                $columns = (array) $db->getTableColumns($db->getPrefix() . $name, false);
+            } catch (\Throwable $fallbackException) {
+                Logger::exception($fallbackException);
+                return;
+            }
+        }
+
+        if ($columns === [] && (int) ($table->bytable ?? 0) > 0) {
+            try {
+                $columns = (array) $db->getTableColumns($db->getPrefix() . $name, false);
+            } catch (\Throwable $e) {
+                Logger::exception($e);
+            }
+        }
+
+        $columnNames = array_fill_keys(
+            array_map('strtolower', array_map('strval', array_keys($columns))),
+            true
+        );
+
+        if ($columnNames === []) {
+            return;
+        }
+
+        $existingQuery = $db->getQuery(true)
+            ->select($db->quoteName('name'))
+            ->from($db->quoteName('#__contentbuilderng_storage_fields'))
+            ->where($db->quoteName('storage_id') . ' = ' . (int) $storageId);
+        $db->setQuery($existingQuery);
+        $existingNames = array_fill_keys(
+            array_map('strtolower', array_map('strval', (array) $db->loadColumn())),
+            true
+        );
+
+        $orderingQuery = $db->getQuery(true)
+            ->select('COALESCE(MAX(' . $db->quoteName('ordering') . '), 0)')
+            ->from($db->quoteName('#__contentbuilderng_storage_fields'))
+            ->where($db->quoteName('storage_id') . ' = ' . (int) $storageId);
+        $db->setQuery($orderingQuery);
+        $ordering = (int) $db->loadResult();
+
+        foreach (StorageSystemFieldHelper::definitions() as $fieldName => $definition) {
+            $normalizedName = strtolower($fieldName);
+
+            if (!isset($columnNames[$normalizedName]) || isset($existingNames[$normalizedName])) {
+                continue;
+            }
+
+            $sqlType = StorageColumnTypeHelper::normalize((string) $definition['sql_type']);
+            $fieldSize = StorageColumnTypeHelper::defaultSize($sqlType);
+            $ordering++;
+
+            $insert = $db->getQuery(true)
+                ->insert($db->quoteName('#__contentbuilderng_storage_fields'))
+                ->columns($db->quoteName([
+                    'ordering',
+                    'storage_id',
+                    'name',
+                    'title',
+                    'sql_type',
+                    'field_size',
+                    'required',
+                    'is_group',
+                    'group_definition',
+                    'published',
+                ]))
+                ->values(implode(', ', [
+                    $ordering,
+                    $storageId,
+                    $db->quote($fieldName),
+                    $db->quote((string) $definition['label']),
+                    $db->quote($sqlType),
+                    $fieldSize === null ? 'NULL' : (string) $fieldSize,
+                    (int) $definition['required'],
+                    '0',
+                    $db->quote(''),
+                    '0',
+                ]));
+            $db->setQuery($insert);
+            $db->execute();
+        }
     }
 
     /**

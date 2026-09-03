@@ -24,6 +24,8 @@ final class StorageColumnTypeHelper
     public const INT_MAX = 2147483647;
     public const DATE_MIN = '1000-01-01';
     public const DATE_MAX = '9999-12-31';
+    public const VARCHAR_MAX_SIZE = 255;
+    public const TEXT_MAX_SIZE = 65535;
     private const TYPES = ['text', 'varchar', 'int', 'decimal', 'date', 'datetime', 'boolean'];
 
     /**
@@ -90,9 +92,14 @@ final class StorageColumnTypeHelper
      */
     public static function defaultSize(?string $type): ?int
     {
+        return self::maxSize($type);
+    }
+
+    public static function maxSize(?string $type): ?int
+    {
         return match (self::normalize($type)) {
-            'varchar' => 255,
-            'text' => 65535,
+            'varchar' => self::VARCHAR_MAX_SIZE,
+            'text' => self::TEXT_MAX_SIZE,
             default => null,
         };
     }
@@ -113,13 +120,9 @@ final class StorageColumnTypeHelper
             return self::defaultSize($type);
         }
 
-        return match (self::normalize($type)) {
-            // Limite MySQL pour un VARCHAR (au-delà, TEXT est le type adapté).
-            'varchar' => min($size, 65535),
-            // TEXT/MEDIUMTEXT/LONGTEXT : ceiling large mais fini.
-            'text' => min($size, 4294967295),
-            default => null,
-        };
+        $maximum = self::maxSize($type);
+
+        return $maximum === null ? null : min($size, $maximum);
     }
 
     public static function sqlDefinition(?string $type, mixed $size = null, bool $required = false): string
