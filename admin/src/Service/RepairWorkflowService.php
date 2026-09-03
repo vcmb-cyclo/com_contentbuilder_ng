@@ -725,7 +725,6 @@ class RepairWorkflowService
                 'skip_summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NOT_REQUIRED_SUMMARY'),
                 'has_errors' => false,
             ];
-
         } catch (\Throwable $e) {
             foreach (['duplicate_indexes', 'historical_tables', 'historical_menu_entries', 'table_encoding', 'audit_columns', 'form_audit_columns', 'plugin_duplicates', 'bf_field_sync', 'menu_view_consistency', 'frontend_permission_consistency', 'element_reference_consistency', 'content_record_duplicates', 'bf_content_record_orphans', 'generated_article_categories', 'stale_language_files', 'stale_installer_temp'] as $stepId) {
                 $prechecks[$stepId] = [

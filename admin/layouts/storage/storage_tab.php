@@ -202,7 +202,9 @@ $storageFieldColumns = [
                     ?>
                     <tr class="row<?php echo $i % 2; ?><?php echo $isSystemField && empty($row->published) ? ' cb-storage-system-field-unpublished d-none' : ''; ?>"
                         data-cb-row-id="<?php echo $id; ?>"
-                        <?php if ($isSystemField) : ?>data-cb-system-field="1"<?php endif; ?>
+                        <?php if ($isSystemField) : ?>
+                            data-cb-system-field="1"
+                        <?php endif; ?>
                         data-cb-item-label="<?php echo $title !== '' ? $title : $name; ?>">
                         <td class="text-center" data-cb-storage-col="check"><?php echo $checked; ?></td>
                         <td class="text-nowrap" data-cb-storage-col="id"><?php echo $id; ?></td>
@@ -223,7 +225,9 @@ $storageFieldColumns = [
                                     data-previous-value="<?php echo htmlspecialchars($rawTitle, ENT_QUOTES, 'UTF-8'); ?>"
                                     title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_TITLE_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
                                     value="<?php echo htmlspecialchars($rawTitle, ENT_QUOTES, 'UTF-8'); ?>"
-                                    <?php if ($rowFieldEditable) : ?>disabled<?php endif; ?>
+                                    <?php if ($rowFieldEditable) : ?>
+                                        disabled
+                                    <?php endif; ?>
                                 >
                             <?php endif; ?>
                         </td>
@@ -261,7 +265,9 @@ $storageFieldColumns = [
                                     style="width:6rem;"
                                     title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
                                     value="<?php echo (int) $fieldSize; ?>"
-                                    <?php if ($rowFieldEditable) : ?>disabled<?php endif; ?>
+                                    <?php if ($rowFieldEditable) : ?>
+                                        disabled
+                                    <?php endif; ?>
                                 >
                             <?php elseif (StorageColumnTypeHelper::supportsSize($sqlType)) : ?>
                                 <?php echo (int) $fieldSize; ?>
