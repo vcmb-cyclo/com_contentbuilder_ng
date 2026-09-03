@@ -6,7 +6,7 @@
 		<element>com_contentbuilderng</element>
 		<type>component</type>
 		<client>1</client>
-		<version>6.1.15-RC2</version>
+		<version>6.1.15-RC3</version>
 		<infourl title="ContentBuilder NG">https://breezingforms-ng.vcmb.fr/</infourl>
 		<changelogurl>https://raw.githubusercontent.com/vcmb-cyclo/com_contentbuilderng/main/com_contentbuilderng_changelog.xml</changelogurl>
 		<downloads>

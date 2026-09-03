@@ -382,6 +382,9 @@ class StorageModel extends AdminModel
         $tableQN = $db->quoteName('#__' . $storage->name);
 
         try {
+            // Ensure the table metadata exists, but leave legacy index names
+            // untouched until the database audit repair is explicitly run.
+            $this->getDatatableService()->ensureInternalAuditColumns($storageId);
             $db->setQuery('SHOW INDEX FROM ' . $tableQN);
             $rows = $db->loadAssocList() ?: [];
         } catch (\Throwable $e) {
@@ -848,7 +851,11 @@ class StorageModel extends AdminModel
                 // ne sont jamais triés/filtrés directement (seulement via un
                 // COALESCE non indexable pour colLastModification), et
                 // modified_user_id n'est ni filtré ni trié.
-                $db->setQuery('ALTER TABLE ' . $db->quoteName('#__' . $name) . ' ADD INDEX (' . $db->quoteName('user_id') . ')');
+                $db->setQuery(
+                    'ALTER TABLE ' . $db->quoteName('#__' . $name)
+                    . ' ADD INDEX ' . $db->quoteName('idx_user_id')
+                    . ' (' . $db->quoteName('user_id') . ')'
+                );
                 $db->execute();
             }
 
@@ -938,7 +945,7 @@ class StorageModel extends AdminModel
                 $definition = match ($missing) {
                     'id' => ' INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
                     'storage_id' => ' INT NOT NULL DEFAULT ' . (int) $storageId,
-                    'user_id' => ' INT NOT NULL DEFAULT 0, ADD INDEX (' . $db->quoteName('user_id') . ')',
+                    'user_id' => ' INT NOT NULL DEFAULT 0, ADD INDEX ' . $db->quoteName('idx_user_id') . ' (' . $db->quoteName('user_id') . ')',
                     'created' => ' DATETIME NOT NULL DEFAULT ' . $db->quote($last_update),
                     'created_by' => " VARCHAR(255) NOT NULL DEFAULT ''",
                     'modified_user_id' => ' INT NOT NULL DEFAULT 0',

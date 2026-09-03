@@ -266,6 +266,117 @@ class DatatableService
     }
 
     /**
+     * Renames legacy single-column audit indexes that MySQL named after the
+     * column itself. Explicit names keep index identifiers distinct from
+     * storage field identifiers.
+     */
+    private function renameLegacyAuditIndexes(string $tableQN, string $tableName, int $storageId): int
+    {
+        $db = $this->db;
+        $auditColumns = ['storage_id', 'user_id', 'created', 'modified_user_id', 'modified'];
+        $renamed = 0;
+
+        try {
+            $indexes = $this->getTableIndexes($tableQN);
+        } catch (\Throwable $e) {
+            Logger::warning('Could not inspect indexes for legacy name migration', [
+                'table' => $tableName,
+                'storageId' => $storageId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return 0;
+        }
+
+        $usedNames = array_fill_keys(array_map('strtolower', array_keys($indexes)), true);
+
+        foreach ($auditColumns as $column) {
+            foreach ($indexes as $indexName => $indexDefinition) {
+                $indexColumn = strtolower((string) ($indexDefinition['columns'][0]['name'] ?? ''));
+
+                if (
+                    strcasecmp((string) $indexName, $column) !== 0
+                    || count((array) ($indexDefinition['columns'] ?? [])) !== 1
+                    || $indexColumn !== strtolower($column)
+                ) {
+                    continue;
+                }
+
+                $newName = $this->buildIndexName($column, $usedNames);
+
+                try {
+                    $db->setQuery(
+                        'ALTER TABLE ' . $tableQN
+                        . ' RENAME INDEX ' . $db->quoteName((string) $indexName)
+                        . ' TO ' . $db->quoteName($newName)
+                    );
+                    $db->execute();
+                    unset($usedNames[strtolower((string) $indexName)]);
+                    $usedNames[strtolower($newName)] = true;
+                    $indexes[$newName] = $indexDefinition;
+                    unset($indexes[$indexName]);
+                    $renamed++;
+                } catch (\Throwable $e) {
+                    Logger::warning('Failed renaming legacy audit index', [
+                        'table' => $tableName,
+                        'storageId' => $storageId,
+                        'from' => $indexName,
+                        'to' => $newName,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+
+                break;
+            }
+        }
+
+        return $renamed;
+    }
+
+    /**
+     * Renames legacy audit indexes on demand, from the database audit repair
+     * action. Opening a storage never performs this migration implicitly.
+     */
+    public function repairLegacyAuditIndexes(int $storageId): int
+    {
+        $storage = $this->loadStorage($storageId);
+
+        if ((int) $storage->bytable > 0) {
+            throw new \RuntimeException('bytable=1 : les index d’une table externe ne sont jamais modifiés.');
+        }
+
+        $name = $this->assertSafeIdentifier((string) $storage->name, 'Nom de table storage');
+        $prefixed = $this->db->getPrefix() . $name;
+
+        if (!$this->tableExists($prefixed)) {
+            return 0;
+        }
+
+        return $this->renameLegacyAuditIndexes(
+            $this->db->quoteName('#__' . $name),
+            '#__' . $name,
+            $storageId
+        );
+    }
+
+    private function buildIndexName(string $column, array $usedNames): string
+    {
+        $base = 'idx_' . strtolower($column);
+        if (strlen($base) > 64) {
+            $base = substr($base, 0, 55) . '_' . substr(sha1($column), 0, 8);
+        }
+
+        $name = $base;
+        $suffix = 2;
+        while (isset($usedNames[strtolower($name)])) {
+            $suffixText = '_' . $suffix++;
+            $name = substr($base, 0, 64 - strlen($suffixText)) . $suffixText;
+        }
+
+        return $name;
+    }
+
+    /**
      * Ensure standard audit columns + indexes exist for an internal storage data table.
      */
     public function ensureInternalAuditColumns(int $storageId): void
@@ -444,7 +555,15 @@ class DatatableService
             }
 
             try {
-                $db->setQuery("ALTER TABLE $tableQN ADD INDEX (" . $db->quoteName($indexCol) . ")");
+                $indexName = $this->buildIndexName(
+                    $indexCol,
+                    array_fill_keys(array_map('strtolower', array_keys($this->getTableIndexes($tableQN))), true)
+                );
+                $db->setQuery(
+                    'ALTER TABLE ' . $tableQN
+                    . ' ADD INDEX ' . $db->quoteName($indexName)
+                    . ' (' . $db->quoteName($indexCol) . ')'
+                );
                 $db->execute();
                 $indexedColumns[$indexCol] = true;
             } catch (\Throwable $e) {
@@ -509,15 +628,15 @@ class DatatableService
         // Indexes (idempotence: MySQL ignore si déjà là ? non -> on les ajoute juste après la création)
         $tableQN = $db->quoteName('#__' . $name);
 
-        $db->setQuery("ALTER TABLE $tableQN ADD INDEX (" . $db->quoteName('storage_id') . ")");
+        $db->setQuery("ALTER TABLE $tableQN ADD INDEX " . $db->quoteName('idx_storage_id') . " (" . $db->quoteName('storage_id') . ")");
         $db->execute();
-        $db->setQuery("ALTER TABLE $tableQN ADD INDEX (" . $db->quoteName('user_id') . ")");
+        $db->setQuery("ALTER TABLE $tableQN ADD INDEX " . $db->quoteName('idx_user_id') . " (" . $db->quoteName('user_id') . ")");
         $db->execute();
-        $db->setQuery("ALTER TABLE $tableQN ADD INDEX (" . $db->quoteName('created') . ")");
+        $db->setQuery("ALTER TABLE $tableQN ADD INDEX " . $db->quoteName('idx_created') . " (" . $db->quoteName('created') . ")");
         $db->execute();
-        $db->setQuery("ALTER TABLE $tableQN ADD INDEX (" . $db->quoteName('modified_user_id') . ")");
+        $db->setQuery("ALTER TABLE $tableQN ADD INDEX " . $db->quoteName('idx_modified_user_id') . " (" . $db->quoteName('modified_user_id') . ")");
         $db->execute();
-        $db->setQuery("ALTER TABLE $tableQN ADD INDEX (" . $db->quoteName('modified') . ")");
+        $db->setQuery("ALTER TABLE $tableQN ADD INDEX " . $db->quoteName('idx_modified') . " (" . $db->quoteName('modified') . ")");
         $db->execute();
 
         $this->ensureInternalAuditColumns($storageId);

@@ -486,6 +486,17 @@ function cbApplyAjaxToggleState(actionElement, task) {
     if (hiddenLabel) {
         hiddenLabel.textContent = title;
     }
+
+    var row = typeof actionElement.closest === 'function'
+        ? actionElement.closest('tr[data-cb-row-id][data-cb-system-field="1"]')
+        : null;
+    if (row) {
+        var visibilityToggle = document.querySelector('[data-cb-storage-hide-unpublished-system-fields="1"]');
+        var shouldHide = !meta.enabled && (!visibilityToggle || visibilityToggle.checked);
+
+        row.classList.toggle('cb-storage-system-field-unpublished', !meta.enabled);
+        row.classList.toggle('d-none', shouldHide);
+    }
 }
 
 function cbIsAjaxToggleTask(task) {
@@ -931,6 +942,47 @@ function cbStorageInitColumnPicker() {
     }
 }
 
+function initStorageSystemFieldVisibility() {
+    var toggle = document.querySelector('[data-cb-storage-hide-unpublished-system-fields="1"]');
+    var rows = Array.prototype.slice.call(document.querySelectorAll('tr.cb-storage-system-field-unpublished'));
+
+    if (!toggle || !rows.length) {
+        return;
+    }
+
+    var stateKey = 'cbng.storage.hide-unpublished-system-fields.<?php echo (int) ($this->item->id ?? 0); ?>';
+    var hideFields = true;
+
+    try {
+        var storedState = window.localStorage.getItem(stateKey);
+        if (storedState !== null) {
+            hideFields = storedState !== '0';
+        }
+    } catch (e) {
+        // Keep the default when local storage is unavailable.
+    }
+
+    var applyVisibility = function () {
+        rows.forEach(function (row) {
+            row.classList.toggle('d-none', hideFields);
+        });
+        toggle.checked = hideFields;
+    };
+
+    applyVisibility();
+
+    toggle.addEventListener('change', function () {
+        hideFields = toggle.checked;
+        applyVisibility();
+
+        try {
+            window.localStorage.setItem(stateKey, hideFields ? '1' : '0');
+        } catch (e) {
+            // Ignore storage failures; the current page state still applies.
+        }
+    });
+}
+
 function toggleCsvUploadOptions() {
     var panel = document.getElementById('csvUpload');
     if (!panel) return false;
@@ -1166,6 +1218,30 @@ function initStorageFieldGroupToggle() {
     });
 }
 
+function initStorageFieldEditToggle() {
+    document.addEventListener('click', function (event) {
+        var button = typeof event.target.closest === 'function'
+            ? event.target.closest('.cb-storage-field-edit')
+            : null;
+        if (!button) {
+            return;
+        }
+
+        event.preventDefault();
+
+        var row = button.closest('tr[data-cb-row-id]');
+        if (!row) {
+            return;
+        }
+
+        var editing = button.getAttribute('aria-expanded') !== 'true';
+        button.setAttribute('aria-expanded', editing ? 'true' : 'false');
+        row.querySelectorAll('.cb-storage-field-editable').forEach(function (control) {
+            control.disabled = !editing;
+        });
+    });
+}
+
 function cbSubmitFieldTypeUpdate(fieldId, sqlType, fieldSize, onSuccess, onError) {
     var form = document.getElementById('adminForm') || document.adminForm;
     var formData = new FormData(form);
@@ -1285,10 +1361,13 @@ function initStorageFieldTitleInput() {
             if (hiddenTitle) {
                 hiddenTitle.value = nextValue;
             }
-            input.disabled = false;
+            var editButton = row ? row.querySelector('.cb-storage-field-edit') : null;
+            input.disabled = editButton ? editButton.getAttribute('aria-expanded') !== 'true' : false;
         }, function (error) {
             input.value = previousValue;
-            input.disabled = false;
+            var row = input.closest('tr');
+            var editButton = row ? row.querySelector('.cb-storage-field-edit') : null;
+            input.disabled = editButton ? editButton.getAttribute('aria-expanded') !== 'true' : false;
             window.alert((error && error.message) || cbSaveFailedMessage);
         });
     });
@@ -1350,9 +1429,10 @@ function initStorageFieldTypeSelect() {
             // basculer entre "champ modifiable" et "—" (non applicable).
             if (sizeCell) {
                 if (supportsSize) {
-                    sizeCell.innerHTML = '<input type="number" min="1" class="form-control form-control-sm cb-storage-field-size-input" '
+                    var editEnabled = row && row.querySelector('.cb-storage-field-edit[aria-expanded="true"]') !== null;
+                    sizeCell.innerHTML = '<input type="number" min="1" class="form-control form-control-sm cb-storage-field-size-input cb-storage-field-editable" '
                         + 'max="' + maximumSize + '" data-field-id="' + fieldId + '" data-sql-type="' + sqlType + '" data-previous-value="' + defaultSize + '" '
-                        + 'style="width:6rem;" value="' + defaultSize + '">';
+                        + 'style="width:6rem;" value="' + defaultSize + '"' + (editEnabled ? '' : ' disabled') + '>';
                 } else {
                     sizeCell.innerHTML = '&mdash;';
                 }
@@ -1361,10 +1441,10 @@ function initStorageFieldTypeSelect() {
             select.disabled = true;
             cbSubmitFieldTypeUpdate(fieldId, sqlType, supportsSize ? defaultSize : 0, function () {
                 select.dataset.previousValue = sqlType;
-                select.disabled = false;
+                select.disabled = !row || row.querySelector('.cb-storage-field-edit[aria-expanded="true"]') === null;
             }, function (error) {
                 select.value = previousValue;
-                select.disabled = false;
+                select.disabled = !row || row.querySelector('.cb-storage-field-edit[aria-expanded="true"]') === null;
                 window.alert((error && error.message) || cbSaveFailedMessage);
             });
             return;
@@ -1392,10 +1472,10 @@ function initStorageFieldTypeSelect() {
 
         cbSubmitFieldTypeUpdate(sizeFieldId, sizeSqlType, sizeInputChanged.value, function () {
             sizeInputChanged.dataset.previousValue = sizeInputChanged.value;
-            sizeInputChanged.disabled = false;
+            sizeInputChanged.disabled = !sizeRow || sizeRow.querySelector('.cb-storage-field-edit[aria-expanded="true"]') === null;
         }, function (error) {
             sizeInputChanged.value = previousSize;
-            sizeInputChanged.disabled = false;
+            sizeInputChanged.disabled = !sizeRow || sizeRow.querySelector('.cb-storage-field-edit[aria-expanded="true"]') === null;
             window.alert((error && error.message) || cbSaveFailedMessage);
         });
     });
@@ -1517,9 +1597,11 @@ function initStorageUi() {
     initStorageTooltips();
     cbStorageInitDirtyTracking();
     cbStorageInitColumnPicker();
+    initStorageSystemFieldVisibility();
     initStorageAjaxToggles();
     initStorageInlineAddField();
     initStorageFieldGroupToggle();
+    initStorageFieldEditToggle();
     initStorageFieldTitleInput();
     initStorageFieldTypeSelect();
     initStorageFieldRequiredToggle();

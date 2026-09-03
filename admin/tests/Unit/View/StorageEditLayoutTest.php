@@ -157,4 +157,99 @@ final class StorageEditLayoutTest extends TestCase
         self::assertStringNotContainsString('cb-system-field-name', \file_get_contents($this->root . '/admin/tmpl/storage/default.php'));
     }
 
+    public function testUnpublishedSystemFieldsCanBeHiddenByDefault(): void
+    {
+        $layout = \file_get_contents($this->root . '/admin/layouts/storage/storage_tab.php');
+        $script = \file_get_contents($this->root . '/admin/tmpl/storage/default.php');
+
+        self::assertIsString($layout);
+        self::assertIsString($script);
+        self::assertStringContainsString('data-cb-storage-hide-unpublished-system-fields="1"', $layout);
+        self::assertStringContainsString('aria-controls="cb-storage-fields-tbody"', $layout);
+        self::assertStringContainsString('checked>', $layout);
+        self::assertStringContainsString('cb-storage-system-field-unpublished d-none', $layout);
+        $systemCheckbox = <<<'PHP'
+? '<input class="form-check-input" type="checkbox" id="cb' . (int) $i . '" value="' . $id . '" disabled>
+PHP;
+        self::assertStringContainsString($systemCheckbox, $layout);
+        self::assertStringContainsString('data-cb-system-field="1"', $layout);
+        self::assertStringContainsString('function initStorageSystemFieldVisibility()', $script);
+        self::assertStringContainsString("row.classList.toggle('d-none', hideFields)", $script);
+        self::assertStringContainsString("row.classList.toggle('cb-storage-system-field-unpublished', !meta.enabled)", $script);
+        self::assertStringContainsString("hide-unpublished-system-fields.", $script);
+
+        $expectedLabels = [
+            'en-GB' => 'Hide unpublished system fields',
+            'fr-FR' => 'Masquer les champs système non publiés',
+            'de-DE' => 'Nicht veröffentlichte Systemfelder ausblenden',
+        ];
+
+        foreach ($expectedLabels as $language => $expectedLabel) {
+            $translations = \parse_ini_file(
+                $this->root . '/admin/language/' . $language . '/com_contentbuilderng.ini',
+                true,
+                INI_SCANNER_RAW
+            );
+
+            self::assertIsArray($translations);
+            self::assertSame(
+                $expectedLabel,
+                $translations['COM_CONTENTBUILDERNG_STORAGE_HIDE_UNPUBLISHED_SYSTEM_FIELDS'] ?? null,
+                $language
+            );
+        }
+    }
+
+    public function testStorageIndexesUseNamesDistinctFromColumns(): void
+    {
+        $model = \file_get_contents($this->root . '/admin/src/Model/StorageModel.php');
+        $service = \file_get_contents($this->root . '/admin/src/Service/DatatableService.php');
+
+        self::assertIsString($model);
+        self::assertIsString($service);
+        self::assertStringContainsString("'idx_user_id'", $model);
+        self::assertStringContainsString("'idx_storage_id'", $service);
+        self::assertStringContainsString('RENAME INDEX', $service);
+        self::assertStringNotContainsString('ADD INDEX (', $model);
+        self::assertStringNotContainsString('ADD INDEX (', $service);
+    }
+
+    public function testFieldEditActionUnlocksEditableColumnProperties(): void
+    {
+        $layout = \file_get_contents($this->root . '/admin/layouts/storage/storage_tab.php');
+        $script = \file_get_contents($this->root . '/admin/tmpl/storage/default.php');
+
+        self::assertIsString($layout);
+        self::assertIsString($script);
+        self::assertStringContainsString('$rowFieldEditable = !$isSystemField', $layout);
+        self::assertStringContainsString('cb-storage-field-edit', $layout);
+        self::assertStringContainsString('fa-solid fa-pencil', $layout);
+        self::assertStringContainsString('aria-expanded="false"', $layout);
+        self::assertStringContainsString('cb-storage-field-editable', $layout);
+        self::assertStringContainsString('function initStorageFieldEditToggle()', $script);
+        self::assertStringContainsString('control.disabled = !editing;', $script);
+        self::assertStringContainsString('initStorageFieldEditToggle();', $script);
+
+        $expectedLabels = [
+            'en-GB' => 'Edit field',
+            'fr-FR' => 'Modifier le champ',
+            'de-DE' => 'Feld bearbeiten',
+        ];
+
+        foreach ($expectedLabels as $language => $expectedLabel) {
+            $translations = \parse_ini_file(
+                $this->root . '/admin/language/' . $language . '/com_contentbuilderng.ini',
+                true,
+                INI_SCANNER_RAW
+            );
+
+            self::assertIsArray($translations);
+            self::assertSame(
+                $expectedLabel,
+                $translations['COM_CONTENTBUILDERNG_STORAGE_FIELD_EDIT'] ?? null,
+                $language
+            );
+        }
+    }
+
 }

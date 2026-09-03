@@ -40,6 +40,8 @@ final class DatabaseAuditReportBuilder
      *   element_reference_issues:array<int,array<string,mixed>>,
      *   content_record_duplicate_issues:array<int,array<string,mixed>>,
      *   invalid_datetime_sort_issues:array<int,array<string,mixed>>,
+     *   legacy_storage_index_issues:array<int,array<string,mixed>>,
+     *   upload_directory_protection_issues:array<int,array<string,mixed>>,
      *   generated_article_category_issues:array<int,array<string,mixed>>,
      *   debug_mode_issues:array<int,array<string,mixed>>,
      *   form_audits:array<int,array<string,mixed>>,
@@ -70,6 +72,8 @@ final class DatabaseAuditReportBuilder
         $contentRecordDuplicateIssues = (array) ($data['content_record_duplicate_issues'] ?? []);
         $bfContentRecordOrphans = (array) ($data['bf_content_record_orphans'] ?? []);
         $invalidDatetimeSortIssues = (array) ($data['invalid_datetime_sort_issues'] ?? []);
+        $legacyStorageIndexIssues = (array) ($data['legacy_storage_index_issues'] ?? []);
+        $uploadDirectoryProtectionIssues = (array) ($data['upload_directory_protection_issues'] ?? []);
         $storageColumnTypeIssues = (array) ($data['storage_column_type_issues'] ?? []);
         $generatedArticleCategoryIssues = (array) ($data['generated_article_category_issues'] ?? []);
         $debugModeIssues = (array) ($data['debug_mode_issues'] ?? []);
@@ -201,6 +205,8 @@ final class DatabaseAuditReportBuilder
             + count($contentRecordDuplicateIssues)
             + count($bfContentRecordOrphans)
             + count($invalidDatetimeSortIssues)
+            + count($legacyStorageIndexIssues)
+            + count($uploadDirectoryProtectionIssues)
             + count($storageColumnTypeIssues)
             + count($generatedArticleCategoryIssues)
             + count($debugModeIssues)
@@ -226,6 +232,8 @@ final class DatabaseAuditReportBuilder
             + count($contentRecordDuplicateIssues)
             + count($bfContentRecordOrphans)
             + count($invalidDatetimeSortIssues)
+            + count($legacyStorageIndexIssues)
+            + count($uploadDirectoryProtectionIssues)
             + count($storageColumnTypeIssues)
             + count($generatedArticleCategoryIssues)
             + count($debugModeIssues)
@@ -259,6 +267,8 @@ final class DatabaseAuditReportBuilder
             'content_record_duplicate_issues' => $contentRecordDuplicateIssues,
             'bf_content_record_orphans' => $bfContentRecordOrphans,
             'invalid_datetime_sort_issues' => $invalidDatetimeSortIssues,
+            'legacy_storage_index_issues' => $legacyStorageIndexIssues,
+            'upload_directory_protection_issues' => $uploadDirectoryProtectionIssues,
             'storage_column_type_issues' => $storageColumnTypeIssues,
             'generated_article_category_issues' => $generatedArticleCategoryIssues,
             'debug_mode_issues' => $debugModeIssues,
@@ -293,6 +303,11 @@ final class DatabaseAuditReportBuilder
                 'bf_content_record_orphan_rows' => $bfContentRecordOrphanRows,
                 'invalid_datetime_sort_issues' => count($invalidDatetimeSortIssues),
                 'invalid_datetime_sort_rows' => $invalidDatetimeSortRows,
+                'legacy_storage_indexes' => array_sum(array_map(
+                    static fn(array $issue): int => count((array) ($issue['indexes'] ?? [])),
+                    array_filter($legacyStorageIndexIssues, 'is_array')
+                )),
+                'upload_directory_protection' => count($uploadDirectoryProtectionIssues),
                 'storage_column_type_issues' => count($storageColumnTypeIssues),
                 'generated_article_category_issues' => count($generatedArticleCategoryIssues),
                 'debug_mode_issues' => count($debugModeIssues),

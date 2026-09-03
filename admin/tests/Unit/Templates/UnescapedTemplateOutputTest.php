@@ -62,7 +62,6 @@ final class UnescapedTemplateOutputTest extends TestCase
         // +7 trusted audit helpers, translated labels and integer orphan identifiers.
         'admin/tmpl/about/audit_report.php' => 164,
         'admin/tmpl/about/installed_plugins.php' => 3,
-        'admin/tmpl/about/repair_workflow.php' => 2,
         'admin/tmpl/about/version_summary.php' => 1,
         'admin/tmpl/configtransfer/default.php' => 17,
         'admin/tmpl/elementoptions/default.php' => 41,

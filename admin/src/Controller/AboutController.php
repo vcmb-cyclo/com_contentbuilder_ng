@@ -19,6 +19,7 @@ use CB\Component\Contentbuilderng\Administrator\Helper\Audit\DebugModeAuditHelpe
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\GeneratedArticleCategoryAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Logger;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleInstallerTempAuditHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\UploadDirectoryProtectionAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
 use CB\Component\Contentbuilderng\Administrator\Model\StorageModel;
 use CB\Component\Contentbuilderng\Administrator\Service\ConfigExportService;
@@ -47,6 +48,21 @@ final class AboutController extends BaseController
     private const CONFIG_TRANSFER_SELECTION_STATE_KEY = 'com_contentbuilderng.configtransfer.selection';
     private const ABOUT_LOG_FILES = ['com_contentbuilderng.log'];
     private const ABOUT_LOG_TAIL_BYTES = 262144;
+    private const DIRECT_AUDIT_REPAIR_ISSUES = [
+        'duplicate_indexes',
+        'historical_tables',
+        'historical_menu_entries',
+        'table_encoding',
+        'packed_data',
+        'audit_columns',
+        'form_audit_columns',
+        'plugin_duplicates',
+        'bf_field_sync',
+        'element_reference_consistency',
+        'content_record_duplicates',
+        'bf_content_record_orphans',
+        'stale_language_files',
+    ];
 
     private function getApp(): AdministratorApplication
     {
@@ -138,154 +154,144 @@ final class AboutController extends BaseController
     }
 
     // -------------------------------------------------------------------------
-    // Repair workflow
-    // -------------------------------------------------------------------------
-
-    public function migratePackedData(): void
-    {
-        $this->startRepairWorkflow();
-    }
-
-    public function startRepairWorkflow(): void
-    {
-        $this->checkToken();
-
-        $app = $this->getAuthorizedApplication();
-        $service = $this->getRepairWorkflowService();
-        $workflow = $service->createWorkflowState();
-        $app->setUserState(RepairWorkflowService::WORKFLOW_STATE_KEY, $workflow);
-
-        Logger::info('DB repair workflow started', [
-            'steps' => count((array) ($workflow['steps'] ?? [])),
-        ]);
-
-        $workflowCompleted = !empty($workflow['completed']);
-        $this->setMessage(
-            Text::_($workflowCompleted
-                ? 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STARTED_NO_ACTION'
-                : 'COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_STARTED'),
-            $workflowCompleted ? 'message' : 'warning'
-        );
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about&repair_workflow=1', false));
-    }
-
-    public function executeRepairWorkflowStep(): void
-    {
-        $this->checkToken();
-
-        $app = $this->getAuthorizedApplication();
-        $service = $this->getRepairWorkflowService();
-        $workflow = $service->getWorkflowState($app);
-
-        if ($workflow === []) {
-            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_MISSING'), 'warning');
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about&repair_workflow=1', false));
-            return;
-        }
-
-        $currentIndex = (int) ($workflow['current_step'] ?? 0);
-        $steps = array_values((array) ($workflow['steps'] ?? []));
-        $currentStep = $steps[$currentIndex] ?? null;
-        $requestedStepId = trim((string) $this->input->post->get('repair_step', '', 'cmd'));
-        $action = trim((string) $this->input->post->get('repair_action', '', 'cmd'));
-
-        if (!is_array($currentStep) || $requestedStepId === '' || $requestedStepId !== (string) ($currentStep['id'] ?? '')) {
-            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_INVALID_STEP'), 'warning');
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about&repair_workflow=1', false));
-            return;
-        }
-
-        if ($action !== 'apply' && $action !== 'skip') {
-            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_INVALID_ACTION'), 'warning');
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about&repair_workflow=1', false));
-            return;
-        }
-
-        if ((string) ($currentStep['status'] ?? 'pending') !== 'pending') {
-            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_ALREADY_DONE'), 'message');
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about&repair_workflow=1', false));
-            return;
-        }
-
-        try {
-            if ($action === 'skip') {
-                $result = [
-                    'level' => 'message',
-                    'summary' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_SKIPPED_SUMMARY'),
-                    'lines' => [Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_SKIPPED_LOG')],
-                ];
-                $currentStep['status'] = 'skipped';
-            } else {
-                $result = $service->executeStep($requestedStepId);
-                $currentStep['status'] = 'done';
-            }
-        } catch (\Throwable $e) {
-            $result = [
-                'level' => 'error',
-                'summary' => Text::sprintf('COM_CONTENTBUILDERNG_PACKED_MIGRATION_FAILED', $this->safeErrorMessage($e)),
-                'lines' => [],
-            ];
-            $currentStep['status'] = 'done';
-        }
-
-        $currentStep['decision'] = $action;
-        $currentStep['result'] = $result;
-        $currentStep['completed_at'] = $this->getJoomlaLocalDateTime();
-        $steps[$currentIndex] = $currentStep;
-        $workflow['steps'] = $steps;
-
-        if ($action === 'skip') {
-            $workflow = $service->advanceToNextPendingStep($workflow, $currentIndex);
-        }
-
-        $workflow['updated_at'] = $currentStep['completed_at'];
-        $app->setUserState(RepairWorkflowService::WORKFLOW_STATE_KEY, $workflow);
-
-        $service->logStepResult($requestedStepId, $action, $result);
-        $this->setMessage((string) ($result['summary'] ?? ''), (string) ($result['level'] ?? 'message'));
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about&repair_workflow=1', false));
-    }
-
-    public function nextRepairWorkflowStep(): void
-    {
-        $this->checkToken();
-
-        $app = $this->getAuthorizedApplication();
-        $service = $this->getRepairWorkflowService();
-        $workflow = $service->getWorkflowState($app);
-
-        if ($workflow === []) {
-            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_MISSING'), 'warning');
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about&repair_workflow=1', false));
-            return;
-        }
-
-        $currentIndex = (int) ($workflow['current_step'] ?? 0);
-        $steps = array_values((array) ($workflow['steps'] ?? []));
-        $currentStep = $steps[$currentIndex] ?? null;
-
-        if (!is_array($currentStep) || (string) ($currentStep['status'] ?? 'pending') === 'pending') {
-            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_COMPLETE_STEP_FIRST'), 'warning');
-            $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about&repair_workflow=1', false));
-            return;
-        }
-
-        $workflow = $service->advanceToNextPendingStep($workflow, $currentIndex);
-        $workflow['updated_at'] = $this->getJoomlaLocalDateTime();
-        $app->setUserState(RepairWorkflowService::WORKFLOW_STATE_KEY, $workflow);
-
-        if (empty($workflow['completed'])) {
-            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_NEXT_STEP'), 'message');
-        } else {
-            $this->setMessage(Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_WORKFLOW_FINISHED'), 'message');
-        }
-
-        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about&repair_workflow=1', false));
-    }
-
-    // -------------------------------------------------------------------------
     // Audit
     // -------------------------------------------------------------------------
+
+    public function repairAuditIssue(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $issue = trim((string) $this->input->post->get('repair_issue', '', 'cmd'));
+
+        try {
+            if (!in_array($issue, self::DIRECT_AUDIT_REPAIR_ISSUES, true)) {
+                throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_REPAIR_UNAVAILABLE'));
+            }
+
+            $service = $this->getRepairWorkflowService();
+            $result = $service->executeStep($issue);
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $service->logStepResult($issue, 'apply', $result);
+
+            $message = trim((string) ($result['summary'] ?? ''));
+            if ($message === '') {
+                $message = Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_REPAIR_COMPLETED');
+            }
+
+            $level = strtolower((string) ($result['level'] ?? 'message'));
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(!in_array($level, ['error', 'danger'], true), $message);
+                return;
+            }
+
+            $this->setMessage($message, $level);
+        } catch (\Throwable $e) {
+            $message = Text::sprintf(
+                'COM_CONTENTBUILDERNG_ABOUT_AUDIT_REPAIR_FAILED',
+                $this->safeErrorMessage($e)
+            );
+
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function repairLegacyStorageIndexes(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $storageId = $this->input->post->getInt('repair_storage_id', 0);
+
+        try {
+            if ($storageId <= 0) {
+                throw new \RuntimeException(Text::_('JERROR_NO_ITEMS_SELECTED'));
+            }
+
+            $renamed = $this->getComponent()->getContainer()
+                ->get(DatatableService::class)
+                ->repairLegacyAuditIndexes($storageId);
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf('COM_CONTENTBUILDERNG_ABOUT_AUDIT_LEGACY_STORAGE_INDEXES_REPAIRED', $renamed);
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf(
+                'COM_CONTENTBUILDERNG_ABOUT_AUDIT_LEGACY_STORAGE_INDEXES_REPAIR_FAILED',
+                $this->safeErrorMessage($e)
+            );
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function repairUploadDirectoryProtection(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+
+        try {
+            $summary = UploadDirectoryProtectionAuditHelper::repair(
+                $this->getComponent()->getContainer()->get(DatabaseInterface::class)
+            );
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf(
+                'COM_CONTENTBUILDERNG_DB_REPAIR_UPLOAD_PROTECTION_SUMMARY',
+                (int) ($summary['scanned'] ?? 0),
+                (int) ($summary['repaired'] ?? 0),
+                (int) ($summary['errors'] ?? 0)
+            );
+
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, (int) ($summary['errors'] ?? 0) > 0 ? 'warning' : 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf(
+                'COM_CONTENTBUILDERNG_ABOUT_AUDIT_UPLOAD_PROTECTION_REPAIR_FAILED',
+                $this->safeErrorMessage($e)
+            );
+
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
 
     public function repairMissingStorageTable(): void
     {
@@ -500,6 +506,58 @@ final class AboutController extends BaseController
             $this->setMessage($message, 'message');
         } catch (\Throwable $e) {
             $message = Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_TEMPLATES_REPAIR_FAILED', $this->safeErrorMessage($e));
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(false, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'error');
+        }
+
+        $this->setRedirect(Route::_('index.php?option=com_contentbuilderng&view=about', false));
+    }
+
+    public function repairFormUnknownMarker(): void
+    {
+        $this->checkToken();
+
+        $app = $this->getAuthorizedApplication();
+        $formId = $this->input->post->getInt('form_id', 0);
+        $markerName = $this->input->post->getString('marker_name', '');
+        $templateType = $this->input->post->getCmd('template_type', '');
+
+        try {
+            $formSupportService = $this->getComponent()->getContainer()->get(FormSupportService::class);
+            $formName = $formSupportService->removeUnknownTemplateMarker(
+                $formId,
+                $templateType,
+                $markerName,
+                $this->getCurrentUserId()
+            );
+            $templateLabel = Text::_($templateType === 'details'
+                ? 'COM_CONTENTBUILDERNG_TAB_DETAILS_DISPLAY'
+                : 'COM_CONTENTBUILDERNG_TAB_EDIT_DISPLAY');
+
+            $report = DatabaseAuditHelper::run();
+            $app->setUserState('com_contentbuilderng.about.audit', $report);
+            $this->getRepairWorkflowService()->logAuditReport($report);
+
+            $message = Text::sprintf(
+                'COM_CONTENTBUILDERNG_AUDIT_UNKNOWN_MARKER_REPAIRED',
+                $markerName,
+                $templateLabel
+            );
+            if ($this->isAjaxCall()) {
+                $this->respondAjax(true, $message);
+                return;
+            }
+
+            $this->setMessage($message, 'message');
+        } catch (\Throwable $e) {
+            $message = Text::sprintf(
+                'COM_CONTENTBUILDERNG_AUDIT_UNKNOWN_MARKER_REPAIR_FAILED',
+                $this->safeErrorMessage($e)
+            );
             if ($this->isAjaxCall()) {
                 $this->respondAjax(false, $message);
                 return;
