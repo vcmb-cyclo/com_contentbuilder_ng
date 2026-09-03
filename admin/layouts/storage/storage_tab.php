@@ -202,9 +202,7 @@ $storageFieldColumns = [
                     ?>
                     <tr class="row<?php echo $i % 2; ?><?php echo $isSystemField && empty($row->published) ? ' cb-storage-system-field-unpublished d-none' : ''; ?>"
                         data-cb-row-id="<?php echo $id; ?>"
-                        <?php if ($isSystemField) : ?>
-                            data-cb-system-field="1"
-                        <?php endif; ?>
+                        <?php echo $isSystemField ? 'data-cb-system-field="1"' : ''; ?>
                         data-cb-item-label="<?php echo $title !== '' ? $title : $name; ?>">
                         <td class="text-center" data-cb-storage-col="check"><?php echo $checked; ?></td>
                         <td class="text-nowrap" data-cb-storage-col="id"><?php echo $id; ?></td>
@@ -220,14 +218,12 @@ $storageFieldColumns = [
                             <?php else : ?>
                                 <input
                                     type="text"
-                                    class="form-control form-control-sm cb-storage-field-title-input<?php if ($rowFieldEditable) : ?> cb-storage-field-editable<?php endif; ?>"
+                                    class="form-control form-control-sm cb-storage-field-title-input<?php echo htmlspecialchars($rowFieldEditable ? ' cb-storage-field-editable' : '', ENT_QUOTES, 'UTF-8'); ?>"
                                     data-field-id="<?php echo htmlspecialchars((string) $id, ENT_QUOTES, 'UTF-8'); ?>"
                                     data-previous-value="<?php echo htmlspecialchars($rawTitle, ENT_QUOTES, 'UTF-8'); ?>"
                                     title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_TITLE_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
                                     value="<?php echo htmlspecialchars($rawTitle, ENT_QUOTES, 'UTF-8'); ?>"
-                                    <?php if ($rowFieldEditable) : ?>
-                                        disabled
-                                    <?php endif; ?>
+                                    <?php echo htmlspecialchars($rowFieldEditable ? 'disabled' : '', ENT_QUOTES, 'UTF-8'); ?>
                                 >
                             <?php endif; ?>
                         </td>
@@ -258,16 +254,14 @@ $storageFieldColumns = [
                                     type="number"
                                     min="1"
                                     max="<?php echo (int) StorageColumnTypeHelper::maxSize($sqlType); ?>"
-                                    class="form-control form-control-sm cb-storage-field-size-input<?php if ($rowFieldEditable) : ?> cb-storage-field-editable<?php endif; ?>"
+                                    class="form-control form-control-sm cb-storage-field-size-input<?php echo htmlspecialchars($rowFieldEditable ? ' cb-storage-field-editable' : '', ENT_QUOTES, 'UTF-8'); ?>"
                                     data-field-id="<?php echo $id; ?>"
                                     data-sql-type="<?php echo htmlspecialchars($sqlType, ENT_QUOTES, 'UTF-8'); ?>"
                                     data-previous-value="<?php echo htmlspecialchars((string) (int) $fieldSize, ENT_QUOTES, 'UTF-8'); ?>"
                                     style="width:6rem;"
                                     title="<?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_STORAGE_FIELD_SIZE_TIP'), ENT_QUOTES, 'UTF-8'); ?>"
                                     value="<?php echo (int) $fieldSize; ?>"
-                                    <?php if ($rowFieldEditable) : ?>
-                                        disabled
-                                    <?php endif; ?>
+                                    <?php echo htmlspecialchars($rowFieldEditable ? 'disabled' : '', ENT_QUOTES, 'UTF-8'); ?>
                                 >
                             <?php elseif (StorageColumnTypeHelper::supportsSize($sqlType)) : ?>
                                 <?php echo (int) $fieldSize; ?>

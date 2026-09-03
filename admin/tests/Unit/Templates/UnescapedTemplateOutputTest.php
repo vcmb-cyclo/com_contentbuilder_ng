@@ -101,7 +101,10 @@ final class UnescapedTemplateOutputTest extends TestCase
         // int $id (existing pattern throughout this file), a ternary of
         // only literal '1'/'0' branches, and a fixed PHP-side CSS class
         // string ($requiredIconClass, never user-controlled).
-        'admin/layouts/storage/storage_tab.php' => 31,
+        // The system-field data attribute is a fixed literal selected by a
+        // boolean flag; escaping the complete attribute would encode its
+        // delimiters and change the rendered HTML.
+        'admin/layouts/storage/storage_tab.php' => 32,
         'site/tmpl/details/default.php' => 16,
         'site/tmpl/details/print.php' => 8,
         'site/tmpl/edit/default.php' => 76,
