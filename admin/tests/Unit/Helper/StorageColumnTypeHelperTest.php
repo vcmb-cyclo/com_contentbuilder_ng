@@ -95,6 +95,15 @@ final class StorageColumnTypeHelperTest extends TestCase
         self::assertFalse(StorageColumnTypeHelper::isStorageManagedEditableType('upload'));
     }
 
+    public function testNormalizesTextSizesToTheirSupportedLimits(): void
+    {
+        self::assertSame(255, StorageColumnTypeHelper::defaultSize('varchar'));
+        self::assertSame(65535, StorageColumnTypeHelper::defaultSize('text'));
+        self::assertSame(255, StorageColumnTypeHelper::normalizeSize('varchar', 256));
+        self::assertSame(65535, StorageColumnTypeHelper::normalizeSize('text', 65536));
+        self::assertNull(StorageColumnTypeHelper::normalizeSize('int', 65536));
+    }
+
     /**
      * @return array<string,array{0:string,1:string}>
      */

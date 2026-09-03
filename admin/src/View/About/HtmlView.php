@@ -41,7 +41,6 @@ class HtmlView extends BaseHtmlView
     protected array $auditReport = [];
     protected array $logReport = [];
     protected array $packedPayloadReport = [];
-    protected array $repairWorkflow = [];
 
     private function getApp(): AdministratorApplication
     {
@@ -153,12 +152,6 @@ class HtmlView extends BaseHtmlView
                 ->icon('fa-solid fa-stethoscope')
                 ->listCheck(false);
 
-            $maintenanceChildToolbar->standardButton('about_migrate_packed_data')
-                ->task('about.startRepairWorkflow')
-                ->text('COM_CONTENTBUILDERNG_ABOUT_START_REPAIR')
-                ->icon('fa-solid fa-arrows-rotate')
-                ->listCheck(false);
-
             $maintenanceChildToolbar->standardButton('about_export_configuration')
                 ->task('configtransfer.export')
                 ->text('COM_CONTENTBUILDERNG_ABOUT_EXPORT_CONFIGURATION')
@@ -224,9 +217,6 @@ class HtmlView extends BaseHtmlView
         $this->packedPayloadReport = $this->getLayout() === 'packedpayload'
             ? $this->getPackedPayloadReport($app)
             : [];
-        $repairWorkflow = $app->getUserState('com_contentbuilderng.about.repair_workflow', []);
-        $this->repairWorkflow = is_array($repairWorkflow) ? $repairWorkflow : [];
-
         // 3️⃣ Affichage du layout
         parent::display($tpl);
     }

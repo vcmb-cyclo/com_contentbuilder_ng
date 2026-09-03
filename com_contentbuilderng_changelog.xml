@@ -3,6 +3,26 @@
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>
+		<version>6.1.15-RC3</version>
+		<addition>
+			<item>Added per-issue Repair actions to the administrator database audit, including storage index names, upload-directory protection, schema consistency and template marker repairs.</item>
+			<item>Added editable Storage field controls for titles, SQL types, sizes and required states, with conditional text-size validation.</item>
+		</addition>
+		<change>
+			<item>Reworked the Storage field editor actions and system-field visibility so unpublished system fields can be managed without exposing an unnecessary add control.</item>
+			<item>Removed the separate Start Repair Process screen and moved its repairable operations into the corresponding Audit sections.</item>
+			<item>Aligned the administrator audit section order with the numbered summary table and clarified audit statuses and translations.</item>
+		</change>
+		<fix>
+			<item>Fixed system-field metadata initialization so newly created storage system fields receive a stable unpublished state and ordering.</item>
+			<item>Fixed legacy storage index handling so existing indexes are not renamed automatically and new index names use the idx_ prefix.</item>
+		</fix>
+		<security>
+		</security>
+	</changelog>
+	<changelog>
+		<element>com_contentbuilderng</element>
+		<type>component</type>
 		<version>6.1.15-RC2</version>
 		<addition>
 			<item>Added a paginated Data tab to the administrator Storage editor for browsing a storage's records, opening the front-end editor to add or edit one, and deleting one.</item>

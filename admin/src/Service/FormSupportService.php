@@ -266,6 +266,61 @@ class FormSupportService
     }
 
     /**
+     * Removes one unknown field marker from an existing template while
+     * preserving all other template content.
+     *
+     * @throws \RuntimeException when the form, template type or marker cannot
+     *                            be resolved, or when the marker is not found.
+     */
+    public function removeUnknownTemplateMarker(
+        int $formId,
+        string $templateType,
+        string $markerName,
+        int $modifiedByUserId
+    ): string {
+        if ($formId <= 0) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_UNKNOWN_MARKER_REPAIR_INVALID'));
+        }
+
+        $templateColumn = match (trim($templateType)) {
+            'details' => 'details_template',
+            'edit' => 'editable_template',
+            default => throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_UNKNOWN_MARKER_REPAIR_INVALID')),
+        };
+        $markerName = trim($markerName);
+
+        if ($markerName === '') {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_UNKNOWN_MARKER_REPAIR_INVALID'));
+        }
+
+        $db = $this->db;
+        $query = $db->getQuery(true)
+            ->select($db->quoteName(['name', $templateColumn]))
+            ->from($db->quoteName('#__contentbuilderng_forms'))
+            ->where($db->quoteName('id') . ' = :formId')
+            ->bind(':formId', $formId, ParameterType::INTEGER);
+        $db->setQuery($query, 0, 1);
+        $formRow = $db->loadAssoc();
+
+        if (!is_array($formRow)) {
+            throw new \RuntimeException(Text::_('COM_CONTENTBUILDERNG_AUDIT_UNKNOWN_MARKER_REPAIR_INVALID'));
+        }
+
+        $template = (string) ($formRow[$templateColumn] ?? '');
+        $pattern = '/\{' . preg_quote($markerName, '/') . ':(label|value|item)\}/i';
+        $updatedTemplate = preg_replace($pattern, '', $template, -1, $replacedCount);
+
+        if ($updatedTemplate === null || $replacedCount < 1) {
+            throw new \RuntimeException(Text::sprintf('COM_CONTENTBUILDERNG_AUDIT_UNKNOWN_MARKER_REPAIR_NOT_FOUND', $markerName));
+        }
+
+        $formName = htmlspecialchars(trim((string) ($formRow['name'] ?? '')) ?: ('#' . $formId), ENT_QUOTES, 'UTF-8');
+        $this->saveRegeneratedTemplate($formId, $templateColumn, $updatedTemplate, $modifiedByUserId);
+
+        return $formName;
+    }
+
+    /**
      * @return array{0:object,1:string,2:string} the resolved source form, theme plugin and form name
      * @throws \RuntimeException when the form or its source cannot be resolved.
      */

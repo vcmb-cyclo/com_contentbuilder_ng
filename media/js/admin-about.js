@@ -151,6 +151,8 @@
         var value = button.dataset.cbAuditAjaxValue || '';
         var task = button.dataset.cbAuditAjaxTask || '';
         var checkboxSelector = button.dataset.cbAuditAjaxCheckboxSelector || '';
+        var markerName = button.dataset.cbAuditAjaxMarkerName || '';
+        var templateType = button.dataset.cbAuditAjaxTemplateType || '';
 
         if (!form || field === '' || task === '') {
             return;
@@ -166,6 +168,12 @@
             });
         } else {
             formData.set(field, value);
+        }
+        if (markerName !== '') {
+            formData.set('marker_name', markerName);
+        }
+        if (templateType !== '') {
+            formData.set('template_type', templateType);
         }
         formData.set('cb_ajax', '1');
         button.disabled = true;
