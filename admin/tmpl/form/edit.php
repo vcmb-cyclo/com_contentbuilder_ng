@@ -476,17 +476,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             }
         }
         $detailsTemplateRequired = $hasPublishedDetailElement && $hasFrontendPermission('view');
-        $editableTemplateRequired = $hasPublishedEditableElement
-            && ($hasFrontendPermission('edit') || $hasFrontendPermission('new'));
+        // This tab describes modification only; creation keeps its own access.
+        $editableTemplateRequired = $hasFrontendPermission('edit') && !empty($this->item->edit_button);
         $detailsEntryPointEnabled = $detailsTemplateRequired && $hasPublishedLinkableElement;
-        $editableEntryPointEnabled = $hasPublishedEditableElement && (
-            ($hasFrontendPermission('edit') && !empty($this->item->edit_button))
-            || ($hasFrontendPermission('new') && !empty($this->item->new_button))
-        );
-        $editableEntryPointIntentionallyDisabled = !$editableEntryPointEnabled && (
-            ($hasFrontendPermission('edit') && empty($this->item->edit_button))
-            || ($hasFrontendPermission('new') && empty($this->item->new_button))
-        );
+        $editableEntryPointEnabled = $hasPublishedEditableElement && $editableTemplateRequired;
         // At-a-glance state of the two template tabs. An empty template is only
         // surfaced when frontend permissions make the corresponding screen useful.
         $templateAuditReferences = [
@@ -526,13 +519,9 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
             bool $hasAuditIssue,
             bool $required,
             bool $entryPointEnabled,
-            bool $locked = false,
-            bool $intentionallyDisabled = false
+            bool $locked = false
         ): array {
-            if ($intentionallyDisabled) {
-                $stateClass = 'cb-template-state is-filled';
-                $stateTipKey = 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_VALID';
-            } elseif ($hasAuditIssue || ($required && !$filled)) {
+            if ($hasAuditIssue || ($required && !$filled)) {
                 $stateClass = 'cb-template-state is-inconsistent';
                 $stateTipKey = 'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_INVALID';
             } elseif ($entryPointEnabled && !$hasAuditIssue) {
@@ -603,11 +592,10 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         );
         $editableTemplateState = $templateTabState(
             trim((string) ($this->item->editable_template ?? '')) !== '',
-            $hasTemplateAuditIssue($templateAuditReferences['edit']),
+            $editableTemplateRequired && $hasTemplateAuditIssue($templateAuditReferences['edit']),
             $editableTemplateRequired,
             $editableEntryPointEnabled,
-            !empty($this->item->editable_template_locked),
-            $editableEntryPointIntentionallyDisabled
+            !empty($this->item->editable_template_locked)
         );
         $buildTemplateTabTip = static function (string $baseKey, array $state): string {
             $parts = [Text::_($baseKey), Text::_((string) $state['tipKey'])];

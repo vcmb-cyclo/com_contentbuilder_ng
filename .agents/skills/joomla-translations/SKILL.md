@@ -74,3 +74,11 @@ dans les menus, l’administration, le site et les descriptions associées :
   généraux. Ne pas utiliser ces termes pour l’héritage d’une vue.
 - Vérifier toutes les copies des clés concernées dans les fichiers `.ini`,
   `.sys.ini` et `.menu.ini` des trois langues, côté administrateur et site.
+
+## Priorité en cas de conflit
+
+Lorsqu’une spécification, une traduction existante et une source amont divergent,
+appliquer cet ordre : instructions explicites de Gilles et `AGENTS.md`, puis
+les règles de cette skill, puis les conventions Joomla 6, puis la valeur amont.
+Conserver les clés et placeholders existants, et signaler toute divergence qui
+ne peut pas être résolue sans modifier le comportement.

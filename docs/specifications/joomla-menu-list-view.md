@@ -340,11 +340,14 @@ par exemple `Use Default (Yes)` ou `Use Default (No)`.
 Les listes Oui/Non utilisent l'état couleur Joomla validé en RC08 : Oui vert,
 Non rouge, héritage neutre.
 
-Les options `Show State` et `Show State filter` proposent séparément
+Les options `Show State`, `Show bulk state changer` et `Show State filter` proposent séparément
 `Use Default (Yes/No) / Yes / No`.
 
 `Show Search` hérite de `show_filter`, `Show State` hérite de `list_state` et
-`Show State filter` hérite exclusivement de `show_state_filter`. Un menu peut
+`Show State` pilote l’affichage individuel de l’état et les contrôles par ligne.
+`Show bulk state changer` pilote uniquement l’action groupée de changement d’état
+et hérite de `list_state` par défaut ; il peut être forcé indépendamment dans le
+menu. `Show State filter` hérite exclusivement de `show_state_filter`. Un menu peut
 donc masquer ou afficher le filtre d'état sans modifier l'affichage des états ni
 le filtre de recherche. La valeur par défaut de Vue pour le filtre d'état est No.
 Le filtre d'état reste absent si aucun état n'est publié.
@@ -424,6 +427,7 @@ Ordre fonctionnel validé dans RC09-B13 :
 8. **Search and State**
    - Show Search ;
    - Show State ;
+   - Show bulk state changer ;
    - Show State filter.
 9. **Access restrictions**
    - Create access ;

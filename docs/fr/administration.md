@@ -189,6 +189,11 @@ Permet de définir des états personnalisés avec :
 
 Les plugins fournis comprennent des actions de mise à la corbeille et de restauration.
 
+Dans le menu Joomla, **Afficher le changement d’état multiple** se règle
+séparément de **Afficher l’état** et du **filtre d’état**. Il permet d’afficher
+le sélecteur d’action groupée même lorsque l’affichage individuel de l’état est
+masqué. Il reste soumis à la permission frontend État et à la sélection multiple.
+
 ### Onglet Détail
 
 Contient :
@@ -200,6 +205,17 @@ Contient :
 - la génération d'un exemple depuis le thème.
 
 ### Onglet Édition
+
+La coche verte concerne uniquement la modification frontend : permission Edit,
+bouton Modifier activé, au moins un champ publié éditable et template valide.
+Si la permission ou le bouton est désactivé, la coche disparaît. Si Edit est
+actif, un champ éditable manquant produit un triangle orange ; un template absent
+ou incohérent produit une croix rouge. Le cadenas reste indépendant.
+
+New conserve son bouton et sa permission dans Vue/Liste. **Désactiver Édition**
+ne désactive pas la création. Le formulaire technique reste partagé, sans
+template New distinct à gérer. L'indicateur décrit la configuration de la Vue ;
+les droits de chaque utilisateur sur chaque enregistrement sont vérifiés en frontend.
 
 Contient :
 

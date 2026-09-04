@@ -24,6 +24,19 @@
 - Keep changes minimal and targeted.
 - Stop after completing the requested task.
 
+## Local Git branches
+- Before editing files, check the active local branch and working tree status.
+- Work on a local branch named `gil_<development-version>`, for example
+  `gil_6.1.15` for version 6.1.15 under development. Use the development version
+  established with Gilles; do not invent or increment it.
+- Create or switch to that branch before making changes, and keep using it
+  for subsequent work on the same development version.
+- Do not work on `main`. Creating a branch only at commit or push time does
+  not satisfy this workflow.
+- When commit and push are requested, commit on the working branch and push
+  it to the remote branch of the same name, configuring upstream tracking.
+- Preserve existing uncommitted changes when switching branches.
+
 ## Joomla
 - Prefer native Joomla 6 admin patterns before custom markup, CSS, or JavaScript.
 - Keep custom CSS and JavaScript minimal.
@@ -58,6 +71,9 @@
 - Update `en-GB`, `fr-FR`, and `de-DE` together for every translation change.
 - Keep wording aligned across languages.
 - French must use correct spelling, grammar, typography, and accents.
+- In translation conflicts, apply explicit instructions from Gilles and this
+  repository's `AGENTS.md` before the translation skill, Joomla conventions and
+  upstream wording. Preserve keys and placeholders.
 
 ## Output
 - Return final code directly when coding is requested.

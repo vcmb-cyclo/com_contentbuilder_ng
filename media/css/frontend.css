@@ -24,7 +24,11 @@
 .cb-filter-select-pub   { min-width: 13rem; max-width: 22rem; }
 .cb-filter-select-md    { min-width: 12rem; max-width: 18rem; }
 .cb-filter-select-rpp   { min-width: 5.5rem; max-width: 7rem; }
-.cb-filter-search-group { max-width: 360px; }
+.cb-filter-search-group {
+    width: min(100%, 560px);
+    max-width: 560px;
+    flex: 1 1 420px;
+}
 .cb-list-toolbar-actions {
     flex-wrap: wrap;
 }

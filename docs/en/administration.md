@@ -146,12 +146,28 @@ Content displayed above the frontend list.
 Custom states have a title, color, publication state, and optional plugin action.
 Bundled actions include Trash and Untrash.
 
+In the Joomla menu, **Show bulk state changer** is configured independently from
+**Show State** and **Show State filter**. It can expose the multiple-record action
+selector while individual state display is hidden. It remains subject to the
+frontend State permission and multiple selection.
+
 ### Details tab
 
 Contains the details template, top and bottom bars, Back button, PHP preparation code,
 and theme-based example generation.
 
 ### Edit tab
+
+The green check concerns frontend modification only: Edit permission, an enabled
+Edit button, at least one published editable field and a valid template.
+Disabling the permission or button removes the check. When Edit is active,
+missing editable fields produce an orange triangle; a missing or inconsistent
+template produces a red cross. The lock remains independent.
+
+New keeps its own button and permission in View/List. **Disable Edit** does not
+disable creation. The technical form remains shared, with no separate New
+template to manage. The indicator describes the View configuration; individual
+user permissions for each record are still checked in the frontend.
 
 Contains the editable template, top and bottom bars, upload directory, directory
 protection, PHP preparation code, and **Edit by type**.

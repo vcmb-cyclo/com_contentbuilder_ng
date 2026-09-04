@@ -22,21 +22,34 @@ L'infobulle décrit la fonction et l'état réel de l'onglet.
 L'activité d'un écran dépend des autorisations frontend :
 
 - Détail est actif si une autorisation view est accordée ;
-- Éditer est actif si une autorisation edit ou new est accordée.
+- Éditer est actif si une autorisation edit est accordée et le bouton Edit est activé.
+- New et son bouton n'interviennent jamais dans l'indicateur Éditer.
 
 Les indicateurs signifient :
 
-- aucun symbole : écran non configuré ;
-- coche verte : configuration complète et cohérente ; une désactivation
-  volontaire du bouton Edit est également conforme ;
+- aucun symbole : écran non configuré ou Éditer désactivé (permission ou bouton) ;
+- coche verte : configuration complète et cohérente ;
 - triangle orange : configuration existante mais réellement incomplète ;
 - croix rouge : configuration contradictoire ou inutilisable, par exemple un
   écran activé dont le template requis est absent ou invalide.
 
 Pour Détail, l'accessibilité exige le droit frontend View et au moins un champ
-publié cliquable. Pour Edit, un écran actif exige le droit correspondant et le
-bouton Edit ou Nouveau actif. Lorsque ces points d'entrée sont volontairement
-désactivés, leur absence ne constitue pas une anomalie et l'indicateur reste vert.
+publié cliquable. Pour Edit, la coche verte exige la permission edit, le bouton
+Edit, au moins un champ publié éditable et un template valide. Avec Edit actif,
+l'absence de champ éditable produit un triangle orange ; un template absent ou
+une anomalie de template détectée par l'audit produit une croix rouge.
+
+Si la permission edit ou le bouton Edit est désactivé, aucun symbole fonctionnel
+n'est affiché, même si New reste actif ou si le template conservé présente une
+anomalie. Le cadenas reste visible indépendamment.
+
+L'indicateur décrit la configuration de chaque Vue, pas les droits effectifs
+d'un utilisateur sur un enregistrement. Le frontend continue de vérifier ces
+droits. Deux Vues partageant le même formulaire BF ont des indicateurs indépendants.
+
+New reste géré par Vue/Liste, son bouton et sa permission new. Le moteur conserve
+le formulaire technique partagé pour la création et la modification ; aucun
+template New distinct n'est ajouté.
 
 Le cadenas est complémentaire au symbole : il indique que le template est
 verrouillé et régénéré à chaque enregistrement. Il ne masque jamais l'état
@@ -58,6 +71,9 @@ le bouton **Aide** ; ils ne prennent pas de place dans les panneaux de travail.
    l'écran recharge automatiquement la configuration sauvegardée en restaurant
    la position dans la liste. Tous les indicateurs, résultats d'audit et
    templates verrouillés sont ainsi recalculés immédiatement.
+7. New seul ne produit aucun check Édition. Désactiver Édition retire le check
+   sans couper New. La configuration de Détail conserve son comportement.
+
 Le cadenas des onglets Détail et Édition est affiché immédiatement après leur libellé et aligné sur sa ligne basse. L'indicateur fonctionnel est placé juste au-dessus, à une hauteur identique pour la coche, le triangle et la croix. Le groupe reste compact et ne masque jamais le texte.
 
 ## Actions contextuelles Détail et Édition
