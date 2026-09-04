@@ -124,7 +124,32 @@ COM_CONTENTBUILDERNG_MSG_REINDEXED="%1$s Elemente in %2$s Sekunden neu indiziert
    n'est pas connue, le signaler explicitement au lieu de dupliquer le texte
    anglais comme valeur fr-FR/de-DE.
 
-## 6. Ce que cette skill ne couvre pas
+## 6. Terminologie des paramètres par défaut et hérités
+
+Pour ContentBuilder NG, utiliser les libellés suivants de manière uniforme
+dans les menus, l’administration, le site et les descriptions associées :
+
+| Contexte | en-GB | fr-FR | de-DE |
+|---|---|---|---|
+| Valeur par défaut affichée | Use Default (%s) | Paramètre par défaut (%s) | Standardeinstellung (%s) |
+| Héritage de la vue sans valeur affichée | Use Default (View) | Paramètre par défaut (Vue) | Standardeinstellung (Ansicht) |
+| Valeur booléenne affichée | Use Default (Yes/No) | Paramètre par défaut (Oui/Non) | Standardeinstellung (Ja/Nein) |
+
+- Les formes booléennes du tableau désignent deux options possibles : afficher
+  uniquement la valeur effective, par exemple `Paramètre par défaut (Oui)`.
+- Préserver `%s` et la valeur réellement héritée ; ne pas modifier la logique
+  d’héritage pour un changement de traduction.
+- Remplacer les anciens libellés « Utiliser la valeur par défaut », « Utiliser
+  par défaut » et « Standard verwenden », y compris leurs mentions dans l’aide.
+- Dans les descriptions françaises, employer « L’option « Paramètre par
+  défaut »… » lorsque le libellé est le sujet de la phrase.
+- Réserver `Use Global (%s)` / `Paramètres généraux (%s)` /
+  `Globale Einstellungen (%s)` aux options qui héritent réellement des paramètres
+  généraux. Ne pas utiliser ces termes pour l’héritage d’une vue.
+- Vérifier toutes les copies des clés concernées dans les fichiers `.ini`,
+  `.sys.ini` et `.menu.ini` des trois langues, côté administrateur et site.
+
+## 7. Ce que cette skill ne couvre pas
 - La création de nouvelles langues au-delà de en-GB/fr-FR/de-DE (hors
   périmètre, cf. `AGENTS.md`/`CLAUDE.md`).
 - La logique de fallback de langue Joomla (gérée nativement par le cœur,

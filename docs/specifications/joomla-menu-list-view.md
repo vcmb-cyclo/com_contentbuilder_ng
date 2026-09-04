@@ -546,6 +546,16 @@ lien, au détail ou à un Data filter sans redevenir visible après sauvegarde.
 - Le JavaScript personnalisé doit rester minimal.
 - Tous les textes passent par des clés de langue alignées en `en-GB`, `fr-FR`
   et `de-DE`.
+- Les options de valeur par défaut utilisent `Use Default (%s)` en anglais,
+  `Paramètre par défaut (%s)` en français et `Standardeinstellung (%s)` en
+  allemand. Les mentions dans les descriptions suivent cette terminologie.
+- Sans valeur affichée, préciser la source entre parenthèses : `View`, `Vue`
+  ou `Ansicht`. Avec une valeur affichée, conserver la valeur réellement héritée.
+- `Use Global` / `Paramètres généraux` / `Globale Einstellungen` est réservé
+  à l’héritage des paramètres généraux, pas à celui d’une vue.
+- Appliquer la règle à toutes les copies administrateur et site (`.ini`,
+  `.sys.ini`, `.menu.ini`), conformément à la spécification de traduction
+  [joomla-translations](../../.agents/skills/joomla-translations/SKILL.md).
 - Chaque option possède une aide inline courte.
 - Les aides courtes utilisent le mécanisme Joomla `Toggle Inline Help` et sont
   masquées par défaut. L'aide de syntaxe des filtres de données reste visible
