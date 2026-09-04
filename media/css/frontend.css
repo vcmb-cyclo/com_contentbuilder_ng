@@ -41,8 +41,8 @@
 .cb-list-toolbar-actions .form-select {
     flex: 0 0 auto;
 }
-.cb-list-filters-row > .d-flex.flex-grow-1 {
-    flex-wrap: nowrap;
+.cb-list-filters-row .d-flex.flex-grow-1 {
+    flex-wrap: nowrap !important;
 }
 
 /* ── Selects d'actions groupées (état / publication) désactivés ───
@@ -69,8 +69,8 @@
         flex-shrink: 0;
     }
 
-    .cb-list-filters-row > .d-flex.flex-grow-1 {
-        flex-wrap: wrap;
+    .cb-list-filters-row .d-flex.flex-grow-1 {
+        flex-wrap: wrap !important;
     }
 }
 
