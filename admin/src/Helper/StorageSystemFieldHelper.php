@@ -18,11 +18,9 @@ use Joomla\CMS\Language\Text;
 
 /**
  * Reserved columns automatically added to every Storage data table
- * (StorageModel::syncStorageDataTableOrBytable()) but never exposed as a
- * manageable #__contentbuilderng_storage_fields row by default. Mirrors the
- * BreezingForms "Champ système" feature (Form screen): lets an admin
- * explicitly surface one of these existing columns as a regular field
- * (visible, sortable, searchable) without altering the table.
+ * (StorageModel::syncStorageDataTableOrBytable()). They are represented by
+ * regular metadata rows, initially unpublished, so an administrator can
+ * expose them without altering the physical table.
  */
 final class StorageSystemFieldHelper
 {

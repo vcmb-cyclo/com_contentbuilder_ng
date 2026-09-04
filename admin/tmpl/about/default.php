@@ -58,14 +58,12 @@ $buildTypeDisplay = $buildTimestampDisplay !== ''
     : $buildTypeLabel;
 $licenseUrl = 'https://www.gnu.org/licenses/gpl-2.0.html';
 $tooltipAudit = Text::_('COM_CONTENTBUILDERNG_ABOUT_TOOLTIP_AUDIT');
-$tooltipDbRepair = Text::_('COM_CONTENTBUILDERNG_ABOUT_TOOLTIP_DB_REPAIR');
 $tooltipShowLog = Text::_('COM_CONTENTBUILDERNG_ABOUT_TOOLTIP_SHOW_LOG');
 $tooltipLinkVcmb = Text::_('COM_CONTENTBUILDERNG_ABOUT_TOOLTIP_LINK_VCMB');
 $tooltipLinkLicense = Text::_('COM_CONTENTBUILDERNG_ABOUT_TOOLTIP_LINK_LICENSE');
 $tooltipLinkOpenApi = Text::_('COM_CONTENTBUILDERNG_ABOUT_TOOLTIP_LINK_OPENAPI');
 $openApiSpecUrl = Route::_('index.php?option=com_contentbuilderng&view=about&layout=openapi', false);
 $labelAuditButton = Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT');
-$labelDbRepairButton = Text::_('COM_CONTENTBUILDERNG_ABOUT_MIGRATE_PACKED_DATA');
 $labelShowLogButton = Text::_('COM_CONTENTBUILDERNG_ABOUT_LAST_LOG');
 $auditRowNumberLabel = Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ROW');
 Text::script('COM_CONTENTBUILDERNG_ABOUT_AUDIT_AJAX_REQUEST_FAILED');
@@ -73,6 +71,8 @@ Text::script('COM_CONTENTBUILDERNG_ABOUT_AUDIT_REFRESH_FAILED');
 $auditReport = is_array($this->auditReport ?? null) ? $this->auditReport : [];
 $auditSummary = (array) ($auditReport['summary'] ?? []);
 $duplicateIndexes = (array) ($auditReport['duplicate_indexes'] ?? []);
+$legacyStorageIndexIssues = (array) ($auditReport['legacy_storage_index_issues'] ?? []);
+$uploadDirectoryProtectionIssues = (array) ($auditReport['upload_directory_protection_issues'] ?? []);
 $historicalTables = (array) ($auditReport['historical_tables'] ?? []);
 $historicalMenuEntries = (array) ($auditReport['historical_menu_entries'] ?? []);
 $tableEncodingIssues = (array) ($auditReport['table_encoding_issues'] ?? []);
@@ -94,6 +94,13 @@ $bfFieldSyncIssues = (array) ($auditReport['bf_view_field_sync_issues'] ?? []);
 $menuViewIssues = (array) ($auditReport['menu_view_issues'] ?? []);
 $frontendPermissionIssues = (array) ($auditReport['frontend_permission_issues'] ?? []);
 $elementReferenceIssues = (array) ($auditReport['element_reference_issues'] ?? []);
+$hasElementReferenceRepairableIssues = false;
+foreach ($elementReferenceIssues as $elementReferenceIssue) {
+    if (is_array($elementReferenceIssue) && !empty((array) ($elementReferenceIssue['orphan_reference_ids'] ?? []))) {
+        $hasElementReferenceRepairableIssues = true;
+        break;
+    }
+}
 $contentRecordDuplicateIssues = (array) ($auditReport['content_record_duplicate_issues'] ?? []);
 $bfContentRecordOrphans = (array) ($auditReport['bf_content_record_orphans'] ?? []);
 $invalidDatetimeSortIssues = (array) ($auditReport['invalid_datetime_sort_issues'] ?? []);
@@ -107,6 +114,8 @@ $hasStaleLanguageFiles = $staleLanguageFilesCount > 0;
 $staleInstallerTempDirs = (array) ($auditReport['stale_installer_temp_dirs'] ?? []);
 $staleInstallerTempDirsCount = (int) ($auditSummary['stale_installer_temp_dirs'] ?? count($staleInstallerTempDirs));
 $hasStaleInstallerTempDirs = $staleInstallerTempDirsCount > 0;
+$uploadDirectoryProtectionCount = (int) ($auditSummary['upload_directory_protection'] ?? count($uploadDirectoryProtectionIssues));
+$hasUploadDirectoryProtectionIssues = $uploadDirectoryProtectionCount > 0;
 $encodingTargetCharset = (string) ($auditSummary['encoding_target_charset'] ?? 'utf8mb4');
 $encodingTargetCollation = (string) ($auditSummary['encoding_target_collation'] ?? 'utf8mb4_0900_ai_ci');
 $missingAuditColumnsTotal = (int) ($auditSummary['missing_audit_columns_total'] ?? 0);
@@ -251,82 +260,6 @@ if ($logDisplayContent !== '') {
 }
 $logTruncated = (int) ($logReport['truncated'] ?? 0) === 1;
 $logTailBytes = (int) ($logReport['tail_bytes'] ?? 0);
-$repairWorkflow = is_array($this->repairWorkflow ?? null) ? $this->repairWorkflow : [];
-$repairWorkflowSteps = array_values((array) ($repairWorkflow['steps'] ?? []));
-$repairWorkflowCurrentIndex = (int) ($repairWorkflow['current_step'] ?? 0);
-$repairWorkflowCurrentStep = $repairWorkflowSteps[$repairWorkflowCurrentIndex] ?? null;
-$repairWorkflowCurrentStepId = is_array($repairWorkflowCurrentStep) ? (string) ($repairWorkflowCurrentStep['id'] ?? '') : '';
-$repairWorkflowCurrentStatus = is_array($repairWorkflowCurrentStep) ? (string) ($repairWorkflowCurrentStep['status'] ?? 'pending') : 'pending';
-$repairWorkflowCurrentResult = is_array($repairWorkflowCurrentStep) ? (array) ($repairWorkflowCurrentStep['result'] ?? []) : [];
-$repairWorkflowRequested = \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('repair_workflow', 0) === 1;
-$repairWorkflowIsActive = $repairWorkflowRequested && !empty($repairWorkflow) && (bool) ($repairWorkflow['active'] ?? false);
-$repairWorkflowIsCompleted = (bool) ($repairWorkflow['completed'] ?? false);
-$repairWorkflowHasNext = $repairWorkflowIsActive
-    && !$repairWorkflowIsCompleted
-    && $repairWorkflowCurrentIndex < count($repairWorkflowSteps) - 1;
-$repairWorkflowDisplayCurrentIndex = $repairWorkflowCurrentIndex;
-if ($repairWorkflowCurrentStatus !== 'pending' && $repairWorkflowHasNext) {
-    $repairWorkflowDisplayCurrentIndex++;
-}
-$repairWorkflowShowCurrentPanel = true;
-if (
-    $repairWorkflowIsCompleted
-    && is_array($repairWorkflowCurrentStep)
-    && in_array($repairWorkflowCurrentStatus, ['done', 'skipped', 'not_required'], true)
-) {
-    $currentResultLines = (array) ($repairWorkflowCurrentResult['lines'] ?? []);
-    $currentResultSummary = trim((string) ($repairWorkflowCurrentResult['summary'] ?? ''));
-
-    if ($currentResultLines === [] || $currentResultSummary !== '') {
-        $repairWorkflowShowCurrentPanel = false;
-    }
-}
-$repairWorkflowStepLabels = [
-    'duplicate_indexes' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DUPLICATE_GROUPS'),
-    'historical_tables' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_HISTORICAL_TABLES'),
-    'historical_menu_entries' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_HISTORICAL_MENU_ENTRIES'),
-    'table_encoding' => Text::sprintf(
-        'COM_CONTENTBUILDERNG_DB_REPAIR_STEP_TABLE_ENCODING_TITLE_WITH_TARGET',
-        $encodingTargetCollation
-    )
-        . ' / '
-        . Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_COLUMN_ENCODING_ISSUES')
-        . ' / '
-        . Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MIXED_COLLATIONS'),
-    'packed_data' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_PACKED_DATA_TITLE'),
-    'audit_columns' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MISSING_AUDIT_COLUMNS'),
-    'form_audit_columns' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MISSING_FORM_AUDIT_COLUMNS'),
-    'plugin_duplicates' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_PLUGIN_DUPLICATES'),
-    'bf_field_sync' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_FIELD_SYNC'),
-    'menu_view_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MENU_VIEW_CONSISTENCY'),
-    'frontend_permission_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FRONTEND_PERMISSION_CONSISTENCY'),
-    'element_reference_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_ELEMENT_REFERENCE_CONSISTENCY'),
-    'content_record_duplicates' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_CONTENT_RECORD_DUPLICATES'),
-    'bf_content_record_orphans' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_CONTENT_RECORD_ORPHANS'),
-    'generated_article_categories' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_GENERATED_ARTICLE_CATEGORIES'),
-    'debug_mode' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DEBUG_MODE'),
-    'stale_language_files' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_LANGUAGE_FILES'),
-    'stale_installer_temp' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_STALE_INSTALLER_TEMP'),
-    'upload_directory_protection' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_UPLOAD_DIRECTORY_PROTECTION'),
-];
-$repairWorkflowStepDescriptions = [
-    'duplicate_indexes' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_DUPLICATE_GROUPS'),
-    'historical_tables' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_HISTORICAL_TABLES'),
-    'table_encoding' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_TABLE_ENCODING_DESC'),
-    'packed_data' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_PACKED_DATA_DESC'),
-    'audit_columns' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_AUDIT_COLUMNS_DESC'),
-    'form_audit_columns' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_FORM_AUDIT_COLUMNS_DESC'),
-    'plugin_duplicates' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_PLUGIN_DUPLICATES_DESC'),
-    'historical_menu_entries' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_HISTORICAL_MENU_DESC'),
-    'bf_field_sync' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_BF_FIELD_SYNC'),
-    'menu_view_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_MENU_VIEW_CONSISTENCY'),
-    'frontend_permission_consistency' => Text::_('COM_CONTENTBUILDERNG_ABOUT_AUDIT_FRONTEND_PERMISSION_CONSISTENCY'),
-    'element_reference_consistency' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_ELEMENT_REFERENCE_DESC'),
-    'content_record_duplicates' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_CONTENT_RECORD_DUPLICATES_DESC'),
-    'bf_content_record_orphans' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_BF_CONTENT_RECORD_ORPHANS_DESC'),
-    'generated_article_categories' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_GENERATED_ARTICLE_CATEGORIES_DESC'),
-    'upload_directory_protection' => Text::_('COM_CONTENTBUILDERNG_DB_REPAIR_STEP_UPLOAD_DIRECTORY_PROTECTION_DESC'),
-];
 $phpLibrariesCount = count((array) $this->phpLibraries);
 $javascriptLibrariesCount = count((array) $this->javascriptLibraries);
 $pluginsCount = count((array) $this->plugins);
@@ -339,6 +272,15 @@ $columnEncodingIssueHiddenCount = max(0, count($columnEncodingIssues) - count($c
 $hasAuditIssues = (int) ($auditSummary['issues_total'] ?? 0) > 0;
 $hasDuplicateIndexIssues = !empty($duplicateIndexes);
 $hasDuplicateIndexDropIssues = (int) ($auditSummary['duplicate_indexes_to_drop'] ?? 0) > 0;
+$legacyStorageIndexCount = (int) ($auditSummary['legacy_storage_indexes'] ?? 0);
+if ($legacyStorageIndexCount === 0 && $legacyStorageIndexIssues !== []) {
+    foreach ($legacyStorageIndexIssues as $legacyStorageIndexIssue) {
+        if (is_array($legacyStorageIndexIssue)) {
+            $legacyStorageIndexCount += count((array) ($legacyStorageIndexIssue['indexes'] ?? []));
+        }
+    }
+}
+$hasLegacyStorageIndexIssues = $legacyStorageIndexCount > 0;
 $hasLegacyTableIssues = !empty($historicalTables);
 $hasLegacyMenuIssues = $historicalMenuEntriesCount > 0;
 $hasTableEncodingIssues = $tableEncodingIssueCount > 0;
@@ -559,8 +501,6 @@ $renderNumberedAuditTitle = static function (string $sectionId, string $label, b
 <?php require __DIR__ . '/audit_report.php'; ?>
 
 <?php require __DIR__ . '/log.php'; ?>
-
-<?php require __DIR__ . '/repair_workflow.php'; ?>
 
 <?php require __DIR__ . '/php_libraries.php'; ?>
 

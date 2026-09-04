@@ -24,6 +24,7 @@ use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
 use CB\Component\Contentbuilderng\Site\Helper\PreviewLinkHelper;
 use CB\Component\Contentbuilderng\Administrator\Extension\ContentbuilderngComponent;
+use CB\Component\Contentbuilderng\Administrator\Model\StorageModel;
 use CB\Component\Contentbuilderng\Administrator\Model\StoragefieldsModel;
 use CB\Component\Contentbuilderng\Administrator\Service\ExternalTableService;
 use CB\Component\Contentbuilderng\Administrator\View\Contentbuilderng\HtmlView as BaseHtmlView;
@@ -32,8 +33,6 @@ class HtmlView extends BaseHtmlView
 {
     public $form;
     public $fields;
-    /** @var array<int,string> */
-    public array $storageFieldNames = [];
     public $tables;
     public array $tableModes = [];
     public array $tableSourceTypes = [];
@@ -180,6 +179,13 @@ class HtmlView extends BaseHtmlView
         try {
             $storageId = (int) ($this->item->id ?? $input->getInt('id', 0));
             if ($storageId > 0) {
+                $storageModel = $this->getModel();
+                if ($storageModel instanceof StorageModel) {
+                    // Backfill metadata for storages created before system
+                    // fields became regular unpublished field rows.
+                    $storageModel->ensureSystemFieldMetadata($storageId);
+                }
+
                 $factory = $this->getComponent()->getMVCFactory();
                 $fieldsModel = $factory->createModel('Storagefields', 'Administrator');
 
@@ -192,7 +198,6 @@ class HtmlView extends BaseHtmlView
 
                 // Charge les items
                 $this->fields     = $fieldsModel->getItems();
-                $this->storageFieldNames = $fieldsModel->getFieldNames();
                 $this->pagination = $fieldsModel->getPagination();
                 $this->state      = $fieldsModel->getState();
                 $this->ordering   = ($this->state && $this->state->get('list.ordering') === 'ordering');

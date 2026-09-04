@@ -867,7 +867,22 @@ final class FormAuditService
             array_values($sourceNames)
         );
 
-        foreach (['COM_CONTENTBUILDERNG_AUDIT_CHECK_UNKNOWN_MARKER_DETAILS' => $detailsTemplate, 'COM_CONTENTBUILDERNG_AUDIT_CHECK_UNKNOWN_MARKER_EDIT' => $editableTemplate] as $key => $template) {
+        foreach (
+            [
+                'COM_CONTENTBUILDERNG_AUDIT_CHECK_UNKNOWN_MARKER_DETAILS' => [
+                    'template' => $detailsTemplate,
+                    'code' => 'unknown_marker_details',
+                    'template_type' => 'details',
+                ],
+                'COM_CONTENTBUILDERNG_AUDIT_CHECK_UNKNOWN_MARKER_EDIT' => [
+                    'template' => $editableTemplate,
+                    'code' => 'unknown_marker_edit',
+                    'template_type' => 'edit',
+                ],
+            ] as $key => $definition
+        ) {
+            $template = (string) ($definition['template'] ?? '');
+
             foreach ($this->extractMarkerNames($template) as $markerName) {
                 $needle = function_exists('mb_strtolower') ? mb_strtolower($markerName, 'UTF-8') : strtolower($markerName);
                 if (!in_array($needle, $lowerNames, true)) {
@@ -877,6 +892,9 @@ final class FormAuditService
                         'reference' => $key === 'COM_CONTENTBUILDERNG_AUDIT_CHECK_UNKNOWN_MARKER_DETAILS'
                             ? 'CBNG-AUDIT-UNKNOWN-MARKER-DETAILS'
                             : 'CBNG-AUDIT-UNKNOWN-MARKER-EDIT',
+                        'code' => (string) ($definition['code'] ?? ''),
+                        'field' => $markerName,
+                        'template_type' => (string) ($definition['template_type'] ?? ''),
                     ];
                 }
             }

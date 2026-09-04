@@ -1,130 +1,56 @@
 ---
 name: joomla-translations
 description: >
-  Use this skill whenever creating, editing, or reviewing any user-facing
-  string in a Joomla 6 extension (component, module, plugin, template): admin
-  field labels and descriptions, form/XML labels, toolbar buttons, error and
-  success messages, tooltips, JS-exposed strings (Text::script), email
-  templates. Triggers on any edit to a language .ini file, any new or changed
-  Text::_() / Text::sprintf() / Text::plural() call, any <field> label/
-  description/hint in XML manifests or forms, or any request to add/update a
-  translation. Always update en-GB, fr-FR, and de-DE together, keep wording
-  aligned across the three, and apply correct French typography (fine
-  non-breaking spaces, French quotation marks, capitalization rules).
+  Use when adding or changing a user-facing translation key or value in a
+  Joomla 6 extension, or when editing a language .ini file. Do not use for a
+  refactor that leaves the displayed text unchanged.
 ---
 
-# Traductions Joomla 6 (en-GB / fr-FR / de-DE)
+# Joomla 6 translations
 
-## Quand s'applique cette skill
-Dès qu'une chaîne destinée à l'utilisateur est créée ou modifiée :
-libellés de champs, descriptions, infobulles, messages d'erreur/succès,
-boutons de la toolbar admin, libellés XML (`<field label="..." description="...">`),
-chaînes exposées au JS via `Text::script()`.
+Apply this skill only when the user-facing text or its language key actually
+changes. A technical change to an unchanged `Text::_()`, `Text::sprintf()` or
+`Text::plural()` call does not trigger translation work.
 
-## Règle d'or
-**Une clé de langue ne doit jamais être ajoutée ou modifiée dans une seule
-langue.** Les trois fichiers `en-GB`, `fr-FR`, `de-DE` sont édités dans le
-même tour de modification, avec un sens strictement équivalent.
+## Required changes
 
-## 1. Emplacement des fichiers
+- Update the changed key in `en-GB`, `fr-FR` and `de-DE` in the corresponding
+  component language files, unless the user explicitly scopes the work
+  differently.
+- Keep the three values semantically equivalent and preserve every format
+  placeholder (`%s`, `%d`, `%1$s`, etc.). Use positional placeholders when the
+  word order differs between languages.
+- Use existing project key conventions and Joomla plural keys. Do not reorder
+  unrelated entries merely to make language files identical.
+- Keep manifest name and description strings in `.sys.ini`; runtime strings
+  belong in the regular `.ini` file.
 
-```
-admin/language/en-GB/en-GB.com_xxx.ini
-admin/language/en-GB/en-GB.com_xxx.sys.ini   (nom, description du manifeste)
-admin/language/fr-FR/fr-FR.com_xxx.ini
-admin/language/fr-FR/fr-FR.com_xxx.sys.ini
-admin/language/de-DE/de-DE.com_xxx.ini
-admin/language/de-DE/de-DE.com_xxx.sys.ini
+## Context-specific checks
 
-site/language/en-GB/en-GB.com_xxx.ini   (chaînes front-end, si différentes)
-site/language/fr-FR/fr-FR.com_xxx.ini
-site/language/de-DE/de-DE.com_xxx.ini
-```
+- For a JavaScript-exposed string, declare the key with
+  `Text::script()` in PHP before reading it with `Joomla.Text._()` in JS.
+- For a plural change, follow the plural-key pattern already used by the
+  target language files and verify the singular, plural and zero forms when
+  they exist.
+- Check the actual component layout: admin files are under
+  `admin/language/<locale>/` and frontend files under `site/language/<locale>/`.
 
-- `*.sys.ini` : uniquement le nom et la description visibles dans le
-  gestionnaire d'extensions (chargé même quand l'extension est désactivée).
-- `*.ini` (sans `.sys`) : toutes les autres chaînes, chargées à l'exécution.
+## French and German quality
 
-## 2. Convention de nommage des clés
+- French: use correct accents, grammar and interface capitalization. Use
+  French quotation marks and non-breaking spaces only when appropriate for the
+  output format; do not insert HTML entities into an INI value blindly.
+- German: use a consistent formal register (`Sie`) for the administration UI.
+- Do not leave a changed key untranslated or silently copy English as a
+  placeholder. If a definitive translation cannot be supplied, report it.
 
-Format : `COM_<EXTENSION>_<CONTEXTE>_<ELEMENT>`, toujours en MAJUSCULES,
-underscores, pas d'espaces ni d'accents dans la clé elle-même.
+## Final check
 
-```ini
-COM_CONTENTBUILDERNG_FIELD_API_KEY_LABEL="API Key"
-COM_CONTENTBUILDERNG_FIELD_API_KEY_DESC="Your Anthropic API key, used for completions."
-COM_CONTENTBUILDERNG_ERROR_INVALID_KEY="The provided API key is invalid."
-COM_CONTENTBUILDERNG_TOOLBAR_REINDEX="Reindex"
-COM_CONTENTBUILDERNG_N_ITEMS_INDEXED_1="%d item indexed"
-COM_CONTENTBUILDERNG_N_ITEMS_INDEXED_MORE="%d items indexed"
-```
+Review the diff and confirm that every changed key exists in the required
+locale files, that placeholders match, and that no unrelated language entries
+were modified.
 
-Suffixes courants à respecter pour la cohérence avec le cœur Joomla :
-- `_LABEL` pour le libellé d'un champ
-- `_DESC` pour la description/infobulle d'un champ
-- `_HINT` pour le placeholder
-- `_N_ITEMS_..._1` / `_..._MORE` pour le pluriel (cf. `Text::plural()`)
-
-## 3. Alignement du sens entre les langues
-
-Pour chaque clé, les trois traductions doivent :
-- exprimer **exactement** la même information (pas de paraphrase libre ni
-  d'ajout/suppression de nuance) ;
-- avoir un registre cohérent (vouvoiement en français, formel en allemand —
-  `Sie`, jamais `du`, dans une interface d'administration) ;
-- conserver les mêmes espaces réservés (`%s`, `%d`, `%1$s`...) **dans le même
-  ordre logique** — utiliser les index positionnels (`%1$s`, `%2$d`) dès que
-  l'ordre des arguments diffère entre langues, ce qui est fréquent en
-  allemand (ordre des mots différent).
-
-Exemple correct (ordre des arguments figé par index, pas par position) :
-
-```ini
-; en-GB
-COM_CONTENTBUILDERNG_MSG_REINDEXED="%1$s items reindexed in %2$s seconds"
-; fr-FR
-COM_CONTENTBUILDERNG_MSG_REINDEXED="%1$s éléments réindexés en %2$s secondes"
-; de-DE
-COM_CONTENTBUILDERNG_MSG_REINDEXED="%1$s Elemente in %2$s Sekunden neu indiziert"
-```
-
-## 4. Typographie française (fr-FR)
-
-À appliquer systématiquement dans les fichiers `fr-FR` :
-
-- **Espace fine insécable** avant `:`, `?`, `!`, `;` lorsque le rendu final
-  est du HTML/texte affiché à l'utilisateur (utiliser `&#8239;` ou une espace
-  insécable normale `&nbsp;` selon ce que le moteur de template restitue
-  correctement — à défaut de certitude sur le rendu, préférer une espace
-  insécable simple plutôt que rien).
-- **Guillemets français** « comme ceci » avec espace insécable interne,
-  jamais de guillemets droits `"..."` dans le texte affiché (les guillemets
-  droits restent les délimiteurs INI, ce n'est pas le sujet ici).
-- **Majuscules** : seule la première lettre d'un libellé de champ est
-  capitalisée (« Clé API », pas « Clé API » → correct ; éviter
-  « Clé Api » ou « CLÉ API » sauf si l'anglais lui-même est tout en
-  capitales pour un acronyme volontaire).
-- **Accents obligatoires**, y compris sur les majuscules (« Écrire »,
-  pas « Ecrire »).
-- Pas d'anglicisme évitable (« télécharger » plutôt que « uploader » quand
-  un équivalent existe nativement dans Joomla FR).
-
-## 5. Workflow de modification
-
-1. Identifier ou créer la clé dans `en-GB` (source de vérité sémantique).
-2. Ajouter immédiatement la même clé dans `fr-FR` et `de-DE`, dans le
-   fichier correspondant (`.ini` ou `.sys.ini` selon le contexte, cf. §1).
-3. Vérifier que les trois fichiers gardent le même **ordre de clés** (facilite
-   la relecture en diff).
-4. Si la chaîne est utilisée en JS, vérifier qu'elle est bien déclarée via
-   `Text::script('COM_XXX_KEY')` côté PHP avant d'être consommée par
-   `Joomla.Text._('COM_XXX_KEY')` côté JS — sinon elle n'existera que côté
-   serveur.
-5. Ne jamais laisser une clé `TODO`/non traduite : si la traduction définitive
-   n'est pas connue, le signaler explicitement au lieu de dupliquer le texte
-   anglais comme valeur fr-FR/de-DE.
-
-## 6. Terminologie des paramètres par défaut et hérités
+## Terminologie des paramètres par défaut et hérités
 
 Pour ContentBuilder NG, utiliser les libellés suivants de manière uniforme
 dans les menus, l’administration, le site et les descriptions associées :
@@ -148,9 +74,3 @@ dans les menus, l’administration, le site et les descriptions associées :
   généraux. Ne pas utiliser ces termes pour l’héritage d’une vue.
 - Vérifier toutes les copies des clés concernées dans les fichiers `.ini`,
   `.sys.ini` et `.menu.ini` des trois langues, côté administrateur et site.
-
-## 7. Ce que cette skill ne couvre pas
-- La création de nouvelles langues au-delà de en-GB/fr-FR/de-DE (hors
-  périmètre, cf. `AGENTS.md`/`CLAUDE.md`).
-- La logique de fallback de langue Joomla (gérée nativement par le cœur,
-  pas de workaround à coder).

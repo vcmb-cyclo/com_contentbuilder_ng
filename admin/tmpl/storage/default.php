@@ -486,6 +486,17 @@ function cbApplyAjaxToggleState(actionElement, task) {
     if (hiddenLabel) {
         hiddenLabel.textContent = title;
     }
+
+    var row = typeof actionElement.closest === 'function'
+        ? actionElement.closest('tr[data-cb-row-id][data-cb-system-field="1"]')
+        : null;
+    if (row) {
+        var visibilityToggle = document.querySelector('[data-cb-storage-hide-unpublished-system-fields="1"]');
+        var shouldHide = !meta.enabled && (!visibilityToggle || visibilityToggle.checked);
+
+        row.classList.toggle('cb-storage-system-field-unpublished', !meta.enabled);
+        row.classList.toggle('d-none', shouldHide);
+    }
 }
 
 function cbIsAjaxToggleTask(task) {
@@ -931,6 +942,47 @@ function cbStorageInitColumnPicker() {
     }
 }
 
+function initStorageSystemFieldVisibility() {
+    var toggle = document.querySelector('[data-cb-storage-hide-unpublished-system-fields="1"]');
+    var rows = Array.prototype.slice.call(document.querySelectorAll('tr.cb-storage-system-field-unpublished'));
+
+    if (!toggle || !rows.length) {
+        return;
+    }
+
+    var stateKey = 'cbng.storage.hide-unpublished-system-fields.<?php echo (int) ($this->item->id ?? 0); ?>';
+    var hideFields = true;
+
+    try {
+        var storedState = window.localStorage.getItem(stateKey);
+        if (storedState !== null) {
+            hideFields = storedState !== '0';
+        }
+    } catch (e) {
+        // Keep the default when local storage is unavailable.
+    }
+
+    var applyVisibility = function () {
+        rows.forEach(function (row) {
+            row.classList.toggle('d-none', hideFields);
+        });
+        toggle.checked = hideFields;
+    };
+
+    applyVisibility();
+
+    toggle.addEventListener('change', function () {
+        hideFields = toggle.checked;
+        applyVisibility();
+
+        try {
+            window.localStorage.setItem(stateKey, hideFields ? '1' : '0');
+        } catch (e) {
+            // Ignore storage failures; the current page state still applies.
+        }
+    });
+}
+
 function toggleCsvUploadOptions() {
     var panel = document.getElementById('csvUpload');
     if (!panel) return false;
@@ -967,6 +1019,16 @@ function initStorageInlineAddField() {
             sqlTypeOptions = JSON.parse(optionsScript.textContent || '{}');
         } catch (e) {
             sqlTypeOptions = {};
+        }
+    }
+
+    var sizeLimitsScript = document.getElementById('cb-storage-field-sql-size-limits');
+    var sqlTypeSizeLimits = {};
+    if (sizeLimitsScript) {
+        try {
+            sqlTypeSizeLimits = JSON.parse(sizeLimitsScript.textContent || '{}');
+        } catch (e) {
+            sqlTypeSizeLimits = {};
         }
     }
 
@@ -1015,6 +1077,35 @@ function initStorageInlineAddField() {
             '</td>';
 
         tbody.insertBefore(row, tbody.firstChild);
+
+        var typeSelect = row.querySelector('select[name="jform[sql_type]"]');
+        var fieldSizeCell = row.querySelector('[data-cb-storage-col="field_size"]');
+        var updateFieldSizeControl = function () {
+            var sqlType = typeSelect ? typeSelect.value : '';
+            var maximum = Number(sqlTypeSizeLimits[sqlType] || 0);
+
+            if (!fieldSizeCell || !maximum) {
+                if (fieldSizeCell) {
+                    fieldSizeCell.innerHTML = '';
+                }
+                return;
+            }
+
+            fieldSizeCell.innerHTML = '<input type="number" min="1" max="' + maximum + '" value="' + maximum + '" class="form-control form-control-sm cb-storage-field-new-size" name="jform[field_size]" inputmode="numeric">';
+            var fieldSizeInput = fieldSizeCell.querySelector('.cb-storage-field-new-size');
+            if (fieldSizeInput) {
+                fieldSizeInput.addEventListener('input', function () {
+                    if (fieldSizeInput.value !== '' && Number(fieldSizeInput.value) > maximum) {
+                        fieldSizeInput.value = String(maximum);
+                    }
+                });
+            }
+        };
+
+        if (typeSelect) {
+            typeSelect.addEventListener('change', updateFieldSizeControl);
+            updateFieldSizeControl();
+        }
 
         var isGroupToggle = row.querySelector('.cb-storage-field-new-is-group');
         var groupDefinition = row.querySelector('.cb-storage-field-new-group-definition');
@@ -1072,6 +1163,11 @@ function initStorageInlineAddField() {
         formData.set('jform[fieldname]', nameInput.value);
         formData.set('jform[required]', row.querySelector('.cb-storage-field-new-required').checked ? '1' : '0');
 
+        var sizeInput = row.querySelector('.cb-storage-field-new-size');
+        if (sizeInput) {
+            formData.set('jform[field_size]', sizeInput.value);
+        }
+
         fetch('index.php', {
             method: 'POST',
             body: formData,
@@ -1094,6 +1190,55 @@ function initStorageInlineAddField() {
 
     addButtons.forEach(function (button) {
         button.addEventListener('click', insertNewFieldRow);
+    });
+}
+
+function initStorageFieldGroupToggle() {
+    document.addEventListener('change', function (event) {
+        var input = event.target;
+        if (!input || !input.matches('input[type="radio"][name^="itemIsGroup["]')) {
+            return;
+        }
+
+        var row = input.closest('tr');
+        if (!row) {
+            return;
+        }
+
+        var editControl = row.querySelector('[data-cb-group-definition-edit]');
+        var definition = row.querySelector('textarea[id^="itemGroupDefinitions"]');
+        var isGroup = input.value === '1';
+
+        if (editControl) {
+            editControl.hidden = !isGroup;
+        }
+        if (!isGroup && definition) {
+            definition.style.display = 'none';
+        }
+    });
+}
+
+function initStorageFieldEditToggle() {
+    document.addEventListener('click', function (event) {
+        var button = typeof event.target.closest === 'function'
+            ? event.target.closest('.cb-storage-field-edit')
+            : null;
+        if (!button) {
+            return;
+        }
+
+        event.preventDefault();
+
+        var row = button.closest('tr[data-cb-row-id]');
+        if (!row) {
+            return;
+        }
+
+        var editing = button.getAttribute('aria-expanded') !== 'true';
+        button.setAttribute('aria-expanded', editing ? 'true' : 'false');
+        row.querySelectorAll('.cb-storage-field-editable').forEach(function (control) {
+            control.disabled = !editing;
+        });
     });
 }
 
@@ -1216,10 +1361,13 @@ function initStorageFieldTitleInput() {
             if (hiddenTitle) {
                 hiddenTitle.value = nextValue;
             }
-            input.disabled = false;
+            var editButton = row ? row.querySelector('.cb-storage-field-edit') : null;
+            input.disabled = editButton ? editButton.getAttribute('aria-expanded') !== 'true' : false;
         }, function (error) {
             input.value = previousValue;
-            input.disabled = false;
+            var row = input.closest('tr');
+            var editButton = row ? row.querySelector('.cb-storage-field-edit') : null;
+            input.disabled = editButton ? editButton.getAttribute('aria-expanded') !== 'true' : false;
             window.alert((error && error.message) || cbSaveFailedMessage);
         });
     });
@@ -1275,14 +1423,16 @@ function initStorageFieldTypeSelect() {
             var selectedOption = select.options[select.selectedIndex];
             var supportsSize = selectedOption && selectedOption.dataset.supportsSize === '1';
             var defaultSize = selectedOption ? parseInt(selectedOption.dataset.defaultSize || '0', 10) : 0;
+            var maximumSize = selectedOption ? parseInt(selectedOption.dataset.maxSize || '0', 10) : 0;
 
             // La taille dépend du type : on régénère la cellule pour
             // basculer entre "champ modifiable" et "—" (non applicable).
             if (sizeCell) {
                 if (supportsSize) {
-                    sizeCell.innerHTML = '<input type="number" min="1" class="form-control form-control-sm cb-storage-field-size-input" '
-                        + 'data-field-id="' + fieldId + '" data-sql-type="' + sqlType + '" data-previous-value="' + defaultSize + '" '
-                        + 'style="width:6rem;" value="' + defaultSize + '">';
+                    var editEnabled = row && row.querySelector('.cb-storage-field-edit[aria-expanded="true"]') !== null;
+                    sizeCell.innerHTML = '<input type="number" min="1" class="form-control form-control-sm cb-storage-field-size-input cb-storage-field-editable" '
+                        + 'max="' + maximumSize + '" data-field-id="' + fieldId + '" data-sql-type="' + sqlType + '" data-previous-value="' + defaultSize + '" '
+                        + 'style="width:6rem;" value="' + defaultSize + '"' + (editEnabled ? '' : ' disabled') + '>';
                 } else {
                     sizeCell.innerHTML = '&mdash;';
                 }
@@ -1291,10 +1441,10 @@ function initStorageFieldTypeSelect() {
             select.disabled = true;
             cbSubmitFieldTypeUpdate(fieldId, sqlType, supportsSize ? defaultSize : 0, function () {
                 select.dataset.previousValue = sqlType;
-                select.disabled = false;
+                select.disabled = !row || row.querySelector('.cb-storage-field-edit[aria-expanded="true"]') === null;
             }, function (error) {
                 select.value = previousValue;
-                select.disabled = false;
+                select.disabled = !row || row.querySelector('.cb-storage-field-edit[aria-expanded="true"]') === null;
                 window.alert((error && error.message) || cbSaveFailedMessage);
             });
             return;
@@ -1314,14 +1464,18 @@ function initStorageFieldTypeSelect() {
 
         var sizeFieldId = parseInt(sizeInputChanged.dataset.fieldId || '0', 10);
         var previousSize = sizeInputChanged.dataset.previousValue || sizeInputChanged.value;
+        var maximumSize = parseInt(sizeInputChanged.getAttribute('max') || '0', 10);
+        if (maximumSize > 0 && Number(sizeInputChanged.value) > maximumSize) {
+            sizeInputChanged.value = String(maximumSize);
+        }
         sizeInputChanged.disabled = true;
 
         cbSubmitFieldTypeUpdate(sizeFieldId, sizeSqlType, sizeInputChanged.value, function () {
             sizeInputChanged.dataset.previousValue = sizeInputChanged.value;
-            sizeInputChanged.disabled = false;
+            sizeInputChanged.disabled = !sizeRow || sizeRow.querySelector('.cb-storage-field-edit[aria-expanded="true"]') === null;
         }, function (error) {
             sizeInputChanged.value = previousSize;
-            sizeInputChanged.disabled = false;
+            sizeInputChanged.disabled = !sizeRow || sizeRow.querySelector('.cb-storage-field-edit[aria-expanded="true"]') === null;
             window.alert((error && error.message) || cbSaveFailedMessage);
         });
     });
@@ -1443,8 +1597,11 @@ function initStorageUi() {
     initStorageTooltips();
     cbStorageInitDirtyTracking();
     cbStorageInitColumnPicker();
+    initStorageSystemFieldVisibility();
     initStorageAjaxToggles();
     initStorageInlineAddField();
+    initStorageFieldGroupToggle();
+    initStorageFieldEditToggle();
     initStorageFieldTitleInput();
     initStorageFieldTypeSelect();
     initStorageFieldRequiredToggle();
@@ -1539,7 +1696,6 @@ echo LayoutHelper::render('storage.storage_tab', [
     'addFieldTooltip' => $addFieldTooltip,
     'sortLink' => $sortLink,
     'fields' => $fields,
-    'fieldNames' => $this->storageFieldNames,
     'fieldsCount' => $fieldsCount,
     'recordsCount' => $recordsCount,
     'pagination' => $this->pagination,
@@ -1610,7 +1766,6 @@ echo HTMLHelper::_('uitab.endTabSet');
     <input type="hidden" id="list_fullordering" name="list[fullordering]" value="<?php echo htmlspecialchars($fullOrdering, ENT_QUOTES, 'UTF-8'); ?>" />
     <input type="hidden" name="limitstart" value="<?php echo (int) \CB\Component\Contentbuilderng\Administrator\Helper\RuntimeContextHelper::getApplication()->getInput()->getInt('limitstart', 0); ?>" />
     <input type="hidden" name="boxchecked" value="0" />
-    <input type="hidden" id="cb-system-field-name" name="system_field_name" value="" />
     <input type="hidden" name="tabStartOffset" value="<?php echo htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8'); ?>" />
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

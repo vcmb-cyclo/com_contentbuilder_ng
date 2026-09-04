@@ -31,6 +31,8 @@ use CB\Component\Contentbuilderng\Administrator\Helper\Audit\MenuViewAuditHelper
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleInstallerTempAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StaleLanguageFilesAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StorageColumnTypeAuditHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\StorageIndexNamingAuditHelper;
+use CB\Component\Contentbuilderng\Administrator\Helper\Audit\UploadDirectoryProtectionAuditHelper;
 use CB\Component\Contentbuilderng\Administrator\Helper\FormDisplayColumnsHelper;
 use CB\Component\Contentbuilderng\Administrator\Service\FormAuditService;
 final class DatabaseAuditHelper
@@ -161,6 +163,8 @@ final class DatabaseAuditHelper
      *     invalid_count:int,
      *     sample_values:array<int,string>
      *   }>,
+     *   legacy_storage_index_issues:array<int,array<string,mixed>>,
+     *   upload_directory_protection_issues:array<int,array<string,mixed>>,
      *   form_audits:array<int,array<string,mixed>>,
      *   cb_tables:array{
      *     summary:array{
@@ -210,6 +214,8 @@ final class DatabaseAuditHelper
      *     content_record_duplicate_rows_to_remove:int,
      *     invalid_datetime_sort_issues:int,
      *     invalid_datetime_sort_rows:int,
+     *     legacy_storage_indexes:int,
+     *     upload_directory_protection:int,
      *     issues_total:int
      *   },
      *   errors:array<int,string>
@@ -267,6 +273,8 @@ final class DatabaseAuditHelper
         $errors = array_merge($errors, $invalidDatetimeSortErrors);
         [$storageColumnTypeIssues, $storageColumnTypeErrors] = StorageColumnTypeAuditHelper::inspect($db);
         $errors = array_merge($errors, $storageColumnTypeErrors);
+        [$legacyStorageIndexIssues, $legacyStorageIndexErrors] = StorageIndexNamingAuditHelper::inspect($db);
+        $errors = array_merge($errors, $legacyStorageIndexErrors);
         [$generatedArticleCategoryIssues, $generatedArticleCategoryErrors] = GeneratedArticleCategoryAuditHelper::inspect($db);
         $errors = array_merge($errors, $generatedArticleCategoryErrors);
         [$debugModeIssues, $debugModeErrors] = DebugModeAuditHelper::inspect($db);
@@ -275,6 +283,8 @@ final class DatabaseAuditHelper
         $errors = array_merge($errors, $staleLanguageErrors);
         [$staleInstallerTempDirs, $staleInstallerTempErrors] = StaleInstallerTempAuditHelper::inspect();
         $errors = array_merge($errors, $staleInstallerTempErrors);
+        [$uploadDirectoryProtectionIssues, $uploadDirectoryProtectionErrors] = UploadDirectoryProtectionAuditHelper::inspect($db);
+        $errors = array_merge($errors, $uploadDirectoryProtectionErrors);
 
         $formAudits = [];
         try {
@@ -345,6 +355,8 @@ final class DatabaseAuditHelper
             'bf_content_record_orphans' => $bfContentRecordOrphans,
             'invalid_datetime_sort_issues' => $invalidDatetimeSortIssues,
             'storage_column_type_issues' => $storageColumnTypeIssues,
+            'legacy_storage_index_issues' => $legacyStorageIndexIssues,
+            'upload_directory_protection_issues' => $uploadDirectoryProtectionIssues,
             'generated_article_category_issues' => $generatedArticleCategoryIssues,
             'debug_mode_issues' => $debugModeIssues,
             'stale_language_files' => $staleLanguageFiles,
