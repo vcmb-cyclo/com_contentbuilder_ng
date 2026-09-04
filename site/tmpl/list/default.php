@@ -219,6 +219,10 @@ $showStateControl = $resolveMenuVisibility(
     (string) $input->getCmd('cb_new_show_state', 'default'),
     !empty($this->list_state)
 );
+$showStateBulkControl = $resolveMenuVisibility(
+    (string) $input->getCmd('cb_new_show_state_bulk', 'default'),
+    !empty($this->list_state_bulk)
+);
 $showStateFilter = $resolveMenuVisibility(
     (string) $input->getCmd('cb_new_show_state_filter', 'default'),
     !empty($this->show_state_filter)
@@ -697,7 +701,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	$showTopBar = MenuParamHelper::resolveInputOrMenuToggle($app, 'cb_show_top_bar', (int) ($this->cb_show_top_bar ?? 1)) === 1;
 	$showBottomBar = MenuParamHelper::resolveInputOrMenuToggle($app, 'cb_show_bottom_bar', (int) ($this->cb_show_bottom_bar ?? 1)) === 1;
 	$hasTopBarContent = $language_allowed
-		|| ($hasBulkSelection && $showStateControl && $state_allowed && count($this->states))
+			|| ($hasBulkSelection && $showStateBulkControl && $state_allowed && count($this->states))
 		|| ($this->list_publish && $publish_allowed)
 		|| ($this->display_filter && $cbListActionAllowed('search'))
 		|| ($showStateFilter && count($this->states) && $cbListActionAllowed('state'))
@@ -814,7 +818,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						<!-- GAUCHE : filtre + selects + boutons (optionnel) -->
 						<div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
 
-								<?php if ($hasBulkSelection && $showStateControl && $state_allowed && count($this->states)) : ?>
+								<?php if ($hasBulkSelection && $showStateBulkControl && $state_allowed && count($this->states)) : ?>
 									<select class="form-select form-select-sm cb-filter-select-state" disabled
 										name="list_state" id="list_state" title="<?php echo Text::_('COM_CONTENTBUILDERNG_BULK_OPTIONS'); ?>: <?php echo Text::_('COM_CONTENTBUILDERNG_STATE_CHANGER'); ?>"
 										aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_STATE_CHANGER'); ?>"
@@ -825,10 +829,10 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 										<?php foreach ($this->states as $state) : ?>
 											<option value="<?php echo (int) $state['id']; ?>" data-state-color="<?php echo htmlspecialchars((string) ($state['color'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
 												<?php echo htmlspecialchars((string) $state['title'], ENT_QUOTES, 'UTF-8'); ?>
-										</option>
-									<?php endforeach; ?>
-								</select>
-							<?php endif; ?>
+											</option>
+										<?php endforeach; ?>
+									</select>
+								<?php endif; ?>
 
 								<?php if ($this->list_publish && $publish_allowed) : ?>
 									<select class="form-select form-select-sm cb-filter-select-pub" disabled

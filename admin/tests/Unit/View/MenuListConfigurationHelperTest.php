@@ -46,6 +46,7 @@ final class MenuListConfigurationHelperTest extends TestCase
             'maximumRecords' => 25,
             'searchShow' => 'no',
             'stateShow' => 'yes',
+            'stateBulkShow' => 'yes',
             'stateFilterShow' => 'no',
             'editListButton' => 'no',
             'action' => [
@@ -73,6 +74,7 @@ final class MenuListConfigurationHelperTest extends TestCase
         self::assertArrayNotHasKey('cb_new_show_limit_selector', $parameters);
         self::assertSame('no', $parameters['cb_new_show_search']);
         self::assertSame('yes', $parameters['cb_new_show_state']);
+        self::assertSame('yes', $parameters['cb_new_show_state_bulk']);
         self::assertSame('no', $parameters['cb_new_show_state_filter']);
         self::assertSame('no', $parameters['cb_new_show_list_edit']);
         self::assertStringNotContainsString('delete', (string) $parameters['cblist_actions']);
@@ -144,6 +146,7 @@ final class MenuListConfigurationHelperTest extends TestCase
         self::assertArrayNotHasKey('cb_new_list_menu', $parameters);
         self::assertArrayNotHasKey('cb_new_show_search', $parameters);
         self::assertArrayNotHasKey('cb_new_show_state', $parameters);
+        self::assertArrayNotHasKey('cb_new_show_state_bulk', $parameters);
         self::assertArrayNotHasKey('cb_new_show_state_filter', $parameters);
         self::assertArrayNotHasKey('cb_new_show_list_edit', $parameters);
     }

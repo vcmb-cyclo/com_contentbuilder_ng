@@ -340,11 +340,18 @@ par exemple `Use Default (Yes)` ou `Use Default (No)`.
 Les listes Oui/Non utilisent l'état couleur Joomla validé en RC08 : Oui vert,
 Non rouge, héritage neutre.
 
-Les options `Show State` et `Show State filter` proposent séparément
+Les options `Show State`, `Show bulk state changer` et `Show State filter` proposent séparément
 `Use Default (Yes/No) / Yes / No`.
 
 `Show Search` hérite de `show_filter`, `Show State` hérite de `list_state` et
-`Show State filter` hérite exclusivement de `show_state_filter`. Un menu peut
+`Show State` pilote l’affichage individuel de l’état et les contrôles par ligne.
+`Show bulk state changer` est une option de la Vue, placée dans le panneau
+`Panneau d’affichage des boutons`. Elle pilote uniquement l’outil groupé de
+changement d’état, est indépendante de `Choisir` et de la colonne `État`, et
+hérite de `list_state_bulk`. L’outil est rendu dans la barre d’actions de la
+liste, jamais dans la zone des filtres. Une surcharge de menu peut encore
+forcer cette option indépendamment. `Show State filter` hérite exclusivement de
+`show_state_filter` et correspond au filtrage réel par état. Un menu peut
 donc masquer ou afficher le filtre d'état sans modifier l'affichage des états ni
 le filtre de recherche. La valeur par défaut de Vue pour le filtre d'état est No.
 Le filtre d'état reste absent si aucun état n'est publié.
@@ -424,6 +431,7 @@ Ordre fonctionnel validé dans RC09-B13 :
 8. **Search and State**
    - Show Search ;
    - Show State ;
+   - Show bulk state changer ;
    - Show State filter.
 9. **Access restrictions**
    - Create access ;
@@ -546,6 +554,16 @@ lien, au détail ou à un Data filter sans redevenir visible après sauvegarde.
 - Le JavaScript personnalisé doit rester minimal.
 - Tous les textes passent par des clés de langue alignées en `en-GB`, `fr-FR`
   et `de-DE`.
+- Les options de valeur par défaut utilisent `Use Default (%s)` en anglais,
+  `Paramètre par défaut (%s)` en français et `Standardeinstellung (%s)` en
+  allemand. Les mentions dans les descriptions suivent cette terminologie.
+- Sans valeur affichée, préciser la source entre parenthèses : `View`, `Vue`
+  ou `Ansicht`. Avec une valeur affichée, conserver la valeur réellement héritée.
+- `Use Global` / `Paramètres généraux` / `Globale Einstellungen` est réservé
+  à l’héritage des paramètres généraux, pas à celui d’une vue.
+- Appliquer la règle à toutes les copies administrateur et site (`.ini`,
+  `.sys.ini`, `.menu.ini`), conformément à la spécification de traduction
+  [joomla-translations](../../.agents/skills/joomla-translations/SKILL.md).
 - Chaque option possède une aide inline courte.
 - Les aides courtes utilisent le mécanisme Joomla `Toggle Inline Help` et sont
   masquées par défaut. L'aide de syntaxe des filtres de données reste visible
@@ -625,6 +643,10 @@ publié sous 6.1.10-RC09.
     sont comptés et ils sont conservés dans le rendu frontend.
 46. Print conserve strictement son fonctionnement Detail historique, porte le
     libellé Detail - Print et se trouve immédiatement sous Detail - Bottom panel.
+    Dans CB → Vue → Options, sa case est regroupée avec Export XLS sur la même
+    ligne. Cette disposition n'ajoute aucun bouton d'impression de liste.
+    Dans CB → Vue → Options, sa case est regroupée avec Export XLS sur la même
+    ligne. Cette disposition n'ajoute aucun bouton d'impression de liste.
 47. Rating termine le groupe Display - Detail - Edit et les deux contrôles
     déplacés utilisent le même alignement horizontal que les panneaux.
 48. Tous les contrôles de Display - Detail - Edit partagent la même grille

@@ -100,6 +100,7 @@ final class MenuListConfigurationHelper
             [
             'searchShow' => 'cb_new_show_search',
             'stateShow' => 'cb_new_show_state',
+            'stateBulkShow' => 'cb_new_show_state_bulk',
             'stateFilterShow' => 'cb_new_show_state_filter',
             'editListButton' => 'cb_new_show_list_edit',
             ] as $configKey => $requestKey

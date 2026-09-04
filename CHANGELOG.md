@@ -1,5 +1,16 @@
 # Changelog
 
+## 6.1.15 — 2026-09-04
+
+- Promoted the validated RC implementation to stable 6.1.15; synchronized all shipped plugin versions.
+- Improved storage browsing, editing, synchronization and per-issue audit repairs introduced during the 6.1.15 release candidates.
+- Separated bulk state changes from the State column and filtering, with menu inheritance and preserved settings when selection is disabled.
+- Restored the compact frontend toolbar with a 180 px search input and aligned state filter.
+- Recognized Edit access through Details even when the list Edit button is disabled; kept template locks independent of status indicators.
+- Grouped Print with XLS options and moved sorting above referencing menus, using compact native Joomla controls.
+- Updated French, English and German help and menu labels, configuration reset behavior and specifications.
+- Updated the development dependency fast-uri to 3.1.6 to fix CVE-2026-76172.
+
 ## 6.1.14 — 2026-08-31
 
 - Promoted the validated RC03 implementation to the stable 6.1.14 release.

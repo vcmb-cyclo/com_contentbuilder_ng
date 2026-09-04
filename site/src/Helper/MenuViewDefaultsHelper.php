@@ -29,6 +29,7 @@ final class MenuViewDefaultsHelper
         'print_button',
         'list_rating',
         'list_state',
+        'list_state_bulk',
     ];
 
     private static ?array $defaults = null;

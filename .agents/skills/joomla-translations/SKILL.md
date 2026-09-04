@@ -49,3 +49,36 @@ changes. A technical change to an unchanged `Text::_()`, `Text::sprintf()` or
 Review the diff and confirm that every changed key exists in the required
 locale files, that placeholders match, and that no unrelated language entries
 were modified.
+
+## Terminologie des paramètres par défaut et hérités
+
+Pour ContentBuilder NG, utiliser les libellés suivants de manière uniforme
+dans les menus, l’administration, le site et les descriptions associées :
+
+| Contexte | en-GB | fr-FR | de-DE |
+|---|---|---|---|
+| Valeur par défaut affichée | Use Default (%s) | Paramètre par défaut (%s) | Standardeinstellung (%s) |
+| Héritage de la vue sans valeur affichée | Use Default (View) | Paramètre par défaut (Vue) | Standardeinstellung (Ansicht) |
+| Valeur booléenne affichée | Use Default (Yes/No) | Paramètre par défaut (Oui/Non) | Standardeinstellung (Ja/Nein) |
+
+- Les formes booléennes du tableau désignent deux options possibles : afficher
+  uniquement la valeur effective, par exemple `Paramètre par défaut (Oui)`.
+- Préserver `%s` et la valeur réellement héritée ; ne pas modifier la logique
+  d’héritage pour un changement de traduction.
+- Remplacer les anciens libellés « Utiliser la valeur par défaut », « Utiliser
+  par défaut » et « Standard verwenden », y compris leurs mentions dans l’aide.
+- Dans les descriptions françaises, employer « L’option « Paramètre par
+  défaut »… » lorsque le libellé est le sujet de la phrase.
+- Réserver `Use Global (%s)` / `Paramètres généraux (%s)` /
+  `Globale Einstellungen (%s)` aux options qui héritent réellement des paramètres
+  généraux. Ne pas utiliser ces termes pour l’héritage d’une vue.
+- Vérifier toutes les copies des clés concernées dans les fichiers `.ini`,
+  `.sys.ini` et `.menu.ini` des trois langues, côté administrateur et site.
+
+## Priorité en cas de conflit
+
+Lorsqu’une spécification, une traduction existante et une source amont divergent,
+appliquer cet ordre : instructions explicites de Gilles et `AGENTS.md`, puis
+les règles de cette skill, puis les conventions Joomla 6, puis la valeur amont.
+Conserver les clés et placeholders existants, et signaler toute divergence qui
+ne peut pas être résolue sans modifier le comportement.

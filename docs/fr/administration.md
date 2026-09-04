@@ -142,6 +142,9 @@ Options observées :
 - affichage limité aux enregistrements publiés ;
 - colonnes techniques et métadonnées ;
 - boutons Nouveau, Éditer, Export, Imprimer et Retour ;
+- dans les Options de Vue, les cases Export XLS et Imprimer partagent la même ligne ; Imprimer concerne la fiche Détails ;
+- dans les Options de Vue, les cases Export XLS et Imprimer partagent la même ligne ; Imprimer concerne la fiche Détails ;
+- outil de changement d’état multiple, indépendant de la colonne État et du filtre par état ;
 - barre de boutons ou en-tête de liste fixe ;
 - prévisualisation ;
 - affichage du nom et des filtres dans le titre ;
@@ -189,6 +192,21 @@ Permet de définir des états personnalisés avec :
 
 Les plugins fournis comprennent des actions de mise à la corbeille et de restauration.
 
+Dans le menu Joomla, **Afficher le changement d’état multiple** se règle
+séparément de **Afficher l’état** et du **filtre d’état**. Il permet d’afficher
+le sélecteur d’action groupée même lorsque l’affichage individuel de l’état est
+masqué. Il reste soumis à la permission frontend État et à la sélection multiple.
+
+Dans les options de la vue, activez **Choisir** dans **Affichage des données**
+pour rendre la case **Changement d’état multiple** disponible. Sans Choisir,
+elle est grisée ; sa valeur reste mémorisée et une aide indique le réglage requis.
+Dans la liste, cochez au moins un enregistrement pour activer le sélecteur.
+Au moins un état doit être publié.
+
+**Réinitialiser les options** réactive Choisir et désactive Changement d’état
+multiple, même si ce dernier était coché. Enregistrez la vue pour conserver
+les valeurs réinitialisées.
+
 ### Onglet Détail
 
 Contient :
@@ -200,6 +218,20 @@ Contient :
 - la génération d'un exemple depuis le thème.
 
 ### Onglet Édition
+
+La coche verte concerne uniquement la modification frontend : permission Edit,
+bouton Modifier dans la liste ou accès via Détail, au moins un champ publié
+éditable et template valide. L’accès via Détail exige la permission View et
+des champs publiés pour le détail et le lien depuis la liste. Désactiver le
+bouton Modifier de la liste ne retire pas la coche si cet accès reste actif.
+Si la permission Edit ou les deux accès sont désactivés, la coche disparaît. Si Edit est
+actif, un champ éditable manquant produit un triangle orange ; un template absent
+ou incohérent produit une croix rouge. Le cadenas reste indépendant.
+
+New conserve son bouton et sa permission dans Vue/Liste. **Désactiver Édition**
+ne désactive pas la création. Le formulaire technique reste partagé, sans
+template New distinct à gérer. L'indicateur décrit la configuration de la Vue ;
+les droits de chaque utilisateur sur chaque enregistrement sont vérifiés en frontend.
 
 Contient :
 

@@ -107,6 +107,9 @@ Observed options include:
 - showing only published records;
 - technical columns and metadata;
 - New, Edit, Export, Print, and Back buttons;
+- in View Options, the Export XLS and Print checkboxes share the same row; Print applies to the Details page;
+- in View Options, the Export XLS and Print checkboxes share the same row; Print applies to the Details page;
+- bulk state changer, independent of the State column and the state filter;
 - button bar or fixed list header;
 - preview;
 - view name and filters in the page title;
@@ -146,12 +149,40 @@ Content displayed above the frontend list.
 Custom states have a title, color, publication state, and optional plugin action.
 Bundled actions include Trash and Untrash.
 
+In the Joomla menu, **Show bulk state changer** is configured independently from
+**Show State** and **Show State filter**. It can expose the multiple-record action
+selector while individual state display is hidden. It remains subject to the
+frontend State permission and multiple selection.
+
+In the view options, enable **Select** under **Data display** to make the
+**Bulk state changer** checkbox available. Without Select, it is greyed out;
+its value is preserved and a help message identifies the required setting.
+In the list, check at least one record to enable the state changer.
+At least one state must be published.
+
+**Reset options** enables Select and disables Bulk state changer, even if
+the latter was checked. Save the view to keep the reset values.
+
 ### Details tab
 
 Contains the details template, top and bottom bars, Back button, PHP preparation code,
 and theme-based example generation.
 
 ### Edit tab
+
+The green check concerns frontend modification only: Edit permission, an Edit
+button in the list or access through Details, at least one published editable
+field and a valid template. Access through Details requires View permission and
+published fields for detail display and linking from the list. Disabling the
+list Edit button keeps the check when Details access remains active.
+Disabling Edit permission or both entry points removes the check. When Edit is active,
+missing editable fields produce an orange triangle; a missing or inconsistent
+template produces a red cross. The lock remains independent.
+
+New keeps its own button and permission in View/List. **Disable Edit** does not
+disable creation. The technical form remains shared, with no separate New
+template to manage. The indicator describes the View configuration; individual
+user permissions for each record are still checked in the frontend.
 
 Contains the editable template, top and bottom bars, upload directory, directory
 protection, PHP preparation code, and **Edit by type**.

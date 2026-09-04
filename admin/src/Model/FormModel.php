@@ -604,6 +604,7 @@ class FormModel extends AdminModel
             $data->own_only = false;
             $data->own_only_fe = false;
             $data->list_state = false;
+            $data->list_state_bulk = false;
             $data->list_publish = false;
             $data->initial_sort_order = -1;
             $data->initial_sort_order2 = -1;
@@ -1046,6 +1047,7 @@ class FormModel extends AdminModel
             'edit_button',
             'new_button',
             'list_state',
+            'list_state_bulk',
             'list_publish',
             'list_rating',
             'list_language',

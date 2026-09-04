@@ -46,6 +46,7 @@ class HtmlView extends BaseHtmlView
     public int $debug_show_cb_id = 0;
     public int $direct_storage_read_only = 0;
     public int $show_state_filter = 0;
+    public int $list_state_bulk = 0;
     public bool $preview_list_access_configured = false;
     public float $render_time_ms = 0;
     /** @var list<string> */
@@ -213,6 +214,7 @@ class HtmlView extends BaseHtmlView
         $this->select_column = (int) ($subject->select_column ?? 0);
         $this->states = is_array($subject->states ?? null) ? $subject->states : [];
         $this->list_state = (int) ($subject->list_state ?? 0);
+        $this->list_state_bulk = (int) ($subject->list_state_bulk ?? 0);
         $this->list_publish = (int) ($subject->list_publish ?? 0);
         $this->list_language = (int) ($subject->list_language ?? 0);
         $this->list_article = (int) ($subject->list_article ?? 0);

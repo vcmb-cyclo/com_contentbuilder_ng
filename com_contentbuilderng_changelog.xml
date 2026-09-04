@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <changelogs>
+    <changelog>
+        <element>com_contentbuilderng</element>
+        <type>component</type>
+        <version>6.1.15</version>
+        <addition><item>Independent bulk state changer with menu inheritance and selection dependency help.</item></addition>
+        <change>
+            <item>Promoted validated release candidates, including storage management and per-issue audit repairs, to stable 6.1.15.</item>
+            <item>Compact Joomla sorting controls, Print and XLS option grouping, and updated translations and specifications.</item>
+        </change>
+        <fix>
+            <item>Restored compact frontend filter alignment with a 180 px search input.</item>
+            <item>Recognized frontend Edit access through Details independently of the list Edit button.</item>
+            <item>Reset the bulk state option correctly and refreshed asset versions.</item>
+        </fix>
+        <security><item>Updated fast-uri to 3.1.6 for CVE-2026-76172 (development dependency).</item></security>
+    </changelog>
 	<changelog>
 		<element>com_contentbuilderng</element>
 		<type>component</type>

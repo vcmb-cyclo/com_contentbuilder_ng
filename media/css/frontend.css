@@ -24,7 +24,17 @@
 .cb-filter-select-pub   { min-width: 13rem; max-width: 22rem; }
 .cb-filter-select-md    { min-width: 12rem; max-width: 18rem; }
 .cb-filter-select-rpp   { min-width: 5.5rem; max-width: 7rem; }
-.cb-filter-search-group { max-width: 360px; }
+/* Cassiopeia may load .input-group { width: 100%; } after this stylesheet. */
+.cb-list-filters .cb-filter-search-group {
+    width: fit-content;
+    max-width: 100%;
+    flex: 0 0 auto;
+}
+.cb-list-filters .cb-filter-search-group > .form-control {
+    width: 180px !important;
+    min-width: 180px;
+    flex: 0 0 180px !important;
+}
 .cb-list-toolbar-actions {
     flex-wrap: wrap;
 }
@@ -56,6 +66,7 @@
     .cb-filter-rpp-wrap {
         flex-shrink: 0;
     }
+
 }
 
 /* ── Pagination compacte ──────────────────────────────────────── */
