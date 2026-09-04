@@ -790,23 +790,6 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 	<?php if ($showTopBar) : ?>
 		<div class="<?php echo $showStickyButtonBar ? 'cb-list-sticky' : ''; ?>">
 			<div class="cb-list-panel cb-list-sticky-panel">
-			<?php if ($hasBulkSelection && $showStateBulkControl && $state_allowed && count($this->states)) : ?>
-				<div class="cb-list-actions-row d-flex flex-wrap align-items-center gap-2 mb-2">
-					<select class="form-select form-select-sm cb-filter-select-state" disabled
-						name="list_state" id="list_state" title="<?php echo Text::_('COM_CONTENTBUILDERNG_BULK_OPTIONS'); ?>: <?php echo Text::_('COM_CONTENTBUILDERNG_STATE_CHANGER'); ?>"
-						aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_STATE_CHANGER'); ?>"
-						data-cb-state-select
-						onchange="if (this.value !== '-1') { contentbuilderng_state(); }">
-						<option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDERNG_STATE_CHANGER'); ?> -</option>
-						<option value="0">-</option>
-						<?php foreach ($this->states as $state) : ?>
-							<option value="<?php echo (int) $state['id']; ?>" data-state-color="<?php echo htmlspecialchars((string) ($state['color'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
-								<?php echo htmlspecialchars((string) $state['title'], ENT_QUOTES, 'UTF-8'); ?>
-							</option>
-						<?php endforeach; ?>
-					</select>
-				</div>
-			<?php endif; ?>
 			<div class="cb-list-filters w-100">
 				<?php if ($language_allowed) : ?>
 					<div class="cb-list-filters-row">
@@ -834,6 +817,22 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 
 						<!-- GAUCHE : filtre + selects + boutons (optionnel) -->
 						<div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+
+								<?php if ($hasBulkSelection && $showStateBulkControl && $state_allowed && count($this->states)) : ?>
+									<select class="form-select form-select-sm cb-filter-select-state" disabled
+										name="list_state" id="list_state" title="<?php echo Text::_('COM_CONTENTBUILDERNG_BULK_OPTIONS'); ?>: <?php echo Text::_('COM_CONTENTBUILDERNG_STATE_CHANGER'); ?>"
+										aria-label="<?php echo Text::_('COM_CONTENTBUILDERNG_STATE_CHANGER'); ?>"
+										data-cb-state-select
+										onchange="if (this.value !== '-1') { contentbuilderng_state(); }">
+										<option value="-1"> - <?php echo Text::_('COM_CONTENTBUILDERNG_STATE_CHANGER'); ?> -</option>
+										<option value="0">-</option>
+										<?php foreach ($this->states as $state) : ?>
+											<option value="<?php echo (int) $state['id']; ?>" data-state-color="<?php echo htmlspecialchars((string) ($state['color'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
+												<?php echo htmlspecialchars((string) $state['title'], ENT_QUOTES, 'UTF-8'); ?>
+											</option>
+										<?php endforeach; ?>
+									</select>
+								<?php endif; ?>
 
 								<?php if ($this->list_publish && $publish_allowed) : ?>
 									<select class="form-select form-select-sm cb-filter-select-pub" disabled
