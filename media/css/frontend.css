@@ -24,7 +24,8 @@
 .cb-filter-select-pub   { min-width: 13rem; max-width: 22rem; }
 .cb-filter-select-md    { min-width: 12rem; max-width: 18rem; }
 .cb-filter-select-rpp   { min-width: 5.5rem; max-width: 7rem; }
-.cb-filter-search-group {
+/* Cassiopeia may load .input-group { width: 100%; } after this stylesheet. */
+.cb-list-filters .cb-filter-search-group {
     width: fit-content;
     max-width: 100%;
     flex: 0 0 auto;
