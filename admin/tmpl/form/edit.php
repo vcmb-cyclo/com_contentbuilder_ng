@@ -477,8 +477,9 @@ $renderCheckbox = static function (string $name, string $id, bool $checked = fal
         }
         $detailsTemplateRequired = $hasPublishedDetailElement && $hasFrontendPermission('view');
         // This tab describes modification only; creation keeps its own access.
-        $editableTemplateRequired = $hasFrontendPermission('edit') && !empty($this->item->edit_button);
         $detailsEntryPointEnabled = $detailsTemplateRequired && $hasPublishedLinkableElement;
+        $editableTemplateRequired = $hasFrontendPermission('edit')
+            && (!empty($this->item->edit_button) || $detailsEntryPointEnabled);
         $editableEntryPointEnabled = $hasPublishedEditableElement && $editableTemplateRequired;
         // At-a-glance state of the two template tabs. An empty template is only
         // surfaced when frontend permissions make the corresponding screen useful.

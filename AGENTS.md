@@ -38,6 +38,8 @@
 - Preserve existing uncommitted changes when switching branches.
 
 ## Joomla
+- Keep local package ZIP files in `build/`. Store intermediate screenshots,
+  previews and diagnostic scripts in ignored `qa-artifacts/`, not in `build/`.
 - Prefer native Joomla 6 admin patterns before custom markup, CSS, or JavaScript.
 - Keep custom CSS and JavaScript minimal.
 - Respect MVC separation strictly.

@@ -91,7 +91,7 @@ final class FormTemplateLockLayoutTest extends TestCase
         self::assertStringContainsString("\$editableTemplateRequired = \$hasFrontendPermission('edit')", $formTemplate);
         self::assertStringContainsString('$detailsEntryPointEnabled = $detailsTemplateRequired && $hasPublishedLinkableElement', $formTemplate);
         self::assertStringContainsString('$editableEntryPointEnabled = $hasPublishedEditableElement', $formTemplate);
-        self::assertStringContainsString("\$hasFrontendPermission('edit') && !empty(\$this->item->edit_button)", $formTemplate);
+        self::assertStringContainsString('(!empty($this->item->edit_button) || $detailsEntryPointEnabled)', $formTemplate);
         self::assertStringNotContainsString("\$hasFrontendPermission('new') && !empty(\$this->item->new_button)", $formTemplate);
         self::assertStringContainsString("'COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_INCOMPLETE'", $formTemplate);
         self::assertStringContainsString(

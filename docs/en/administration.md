@@ -154,6 +154,15 @@ In the Joomla menu, **Show bulk state changer** is configured independently from
 selector while individual state display is hidden. It remains subject to the
 frontend State permission and multiple selection.
 
+In the view options, enable **Select** under **Data display** to make the
+**Bulk state changer** checkbox available. Without Select, it is greyed out;
+its value is preserved and a help message identifies the required setting.
+In the list, check at least one record to enable the state changer.
+At least one state must be published.
+
+**Reset options** enables Select and disables Bulk state changer, even if
+the latter was checked. Save the view to keep the reset values.
+
 ### Details tab
 
 Contains the details template, top and bottom bars, Back button, PHP preparation code,
@@ -161,9 +170,12 @@ and theme-based example generation.
 
 ### Edit tab
 
-The green check concerns frontend modification only: Edit permission, an enabled
-Edit button, at least one published editable field and a valid template.
-Disabling the permission or button removes the check. When Edit is active,
+The green check concerns frontend modification only: Edit permission, an Edit
+button in the list or access through Details, at least one published editable
+field and a valid template. Access through Details requires View permission and
+published fields for detail display and linking from the list. Disabling the
+list Edit button keeps the check when Details access remains active.
+Disabling Edit permission or both entry points removes the check. When Edit is active,
 missing editable fields produce an orange triangle; a missing or inconsistent
 template produces a red cross. The lock remains independent.
 

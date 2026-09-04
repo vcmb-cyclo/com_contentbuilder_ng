@@ -43,6 +43,7 @@ $advancedDefaults = [
     'auto_publish' => 0,
     'select_column' => 1,
     'list_state' => 0,
+    'list_state_bulk' => 0,
     'list_publish' => 0,
     'list_language' => 0,
     'list_article' => 0,
@@ -325,13 +326,16 @@ $advancedDefaults = [
                             </div>
                         </div>
                         <div>
-                            <input type="hidden" name="jform[list_state_bulk]" value="0" />
+                            <input type="hidden" id="list_state_bulk_saved" name="jform[list_state_bulk]" value="0" />
                             <?php echo $renderCheckbox('jform[list_state_bulk]', 'list_state_bulk', (bool) ($item->list_state_bulk ?? false)); ?>
                             <label class="form-check-label" for="list_state_bulk">
                                 <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_STATE_BULK_TIP'); ?>">
                                     <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_STATE_BULK'); ?>
                                 </span>
                             </label>
+                            <div id="list_state_bulk_dependency" class="small text-body-secondary" hidden>
+                                <?php echo htmlspecialchars(Text::_('COM_CONTENTBUILDERNG_SHOW_STATE_BULK_DEPENDENCY'), ENT_QUOTES, 'UTF-8'); ?>
+                            </div>
                         </div>
                         <div>
                             <input type="hidden" name="jform[show_back_button]" value="0" />
@@ -520,61 +524,37 @@ $advancedDefaults = [
 
     <hr />
 
-    <div id="cb-form-advanced-referencing-menus" class="alert alert-info">
-        <div class="fw-semibold mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_REFERENCING_MENUS'); ?></div>
-        <?php if ($referencingMenuItems !== []) : ?>
-            <div class="d-flex flex-column gap-2">
-                <?php foreach ($referencingMenuItems as $referencingMenuItem) : ?>
-                    <?php
-                    $menuLabel = trim((string) ($referencingMenuItem['title'] ?? ''));
-                    $menuType = trim((string) ($referencingMenuItem['menutype'] ?? ''));
-                    if ($menuType !== '') {
-                        $menuLabel .= ' [' . $menuType . ']';
-                    }
-                    ?>
-                    <div>
-                        <a href="<?php echo htmlspecialchars((string) ($referencingMenuItem['edit_link'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
-                            <?php echo htmlspecialchars($menuLabel, ENT_QUOTES, 'UTF-8'); ?>
-                        </a>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php else : ?>
-            <div><?php echo Text::_('COM_CONTENTBUILDERNG_REFERENCING_MENUS_NONE'); ?></div>
-        <?php endif; ?>
-    </div>
-
     <div class="row g-3 align-items-stretch">
         <div class="col-12 col-xl-8 d-flex">
             <fieldset id="cb-form-advanced-sorting" class="d-flex flex-column flex-grow-1" aria-labelledby="cb-form-advanced-sorting-title">
-                <legend>
-                    <h3 id="cb-form-advanced-sorting-title">
+                <legend class="mb-2">
+                    <h3 id="cb-form-advanced-sorting-title" class="mb-0">
                         <?php echo Text::_('COM_CONTENTBUILDERNG_SORTING'); ?>
                     </h3>
                 </legend>
-                <div class="alert flex-grow-1 mb-0">
+                <div class="border rounded p-2 flex-grow-1">
                     <label for="initial_sort_order">
                         <span class="editlinktip hasTip"
                             title="<?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_TIP'); ?>"><b>
                                 <?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER'); ?>:
                             </b></span>
                     </label>
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                    <select class="form-select-sm" name="jform[initial_sort_order]" id="initial_sort_order" style="max-width: 200px;">
+                    <div class="d-flex flex-wrap align-items-center gap-1 mb-1">
+                    <select class="form-select form-select-sm" name="jform[initial_sort_order]" id="initial_sort_order" style="width: 20rem; max-width: 100%;">
                         <option value="" <?php echo (($item->initial_sort_order ?? null) === 0 || (string) ($item->initial_sort_order ?? '') === '0') ? ' selected="selected"' : ''; ?>>
                             <?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_BY_ID'); ?>
                         </option>
                         <?php foreach ($elements as $sortable) : ?>
-                            <option value="<?php echo $sortable->reference_id; ?>" <?php echo ($item->initial_sort_order ?? null) == $sortable->reference_id ? ' selected="selected"' : ''; ?>>
+                            <option value="<?php echo (int) $sortable->reference_id; ?>" <?php echo ($item->initial_sort_order ?? null) == $sortable->reference_id ? ' selected="selected"' : ''; ?>>
                                 <?php echo htmlspecialchars($sortable->label ?? '', ENT_QUOTES, 'UTF-8'); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
                     <?php echo $renderDirectionButtonGroup('jform[initial_order_dir]', 'initial_order_dir', (string) ($item->initial_order_dir ?? 'desc')); ?>
                     </div>
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                    <select class="form-select-sm" name="jform[initial_sort_order2]" id="initial_sort_order2"
-                        style="max-width: 200px;">
+                    <div class="d-flex flex-wrap align-items-center gap-1 mb-1">
+                    <select class="form-select form-select-sm" name="jform[initial_sort_order2]" id="initial_sort_order2"
+                        style="width: 20rem; max-width: 100%;">
                         <option value="-1">
                             <?php echo Text::_('COM_CONTENTBUILDERNG_NONE'); ?>
                         </option>
@@ -582,16 +562,16 @@ $advancedDefaults = [
                             <?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_BY_ID'); ?>
                         </option>
                         <?php foreach ($elements as $sortable) : ?>
-                            <option value="<?php echo $sortable->reference_id; ?>" <?php echo ($item->initial_sort_order2 ?? null) == $sortable->reference_id ? ' selected="selected"' : ''; ?>>
+                            <option value="<?php echo (int) $sortable->reference_id; ?>" <?php echo ($item->initial_sort_order2 ?? null) == $sortable->reference_id ? ' selected="selected"' : ''; ?>>
                                 <?php echo htmlspecialchars($sortable->label ?? '', ENT_QUOTES, 'UTF-8'); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
                     <?php echo $renderDirectionButtonGroup('jform[initial_order_dir2]', 'initial_order_dir2', (string) (($item->initial_sort_order2 ?? -1) == -1 ? 'asc' : ($item->initial_order_dir2 ?? 'asc'))); ?>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
-                    <select class="form-select-sm" name="jform[initial_sort_order3]" id="initial_sort_order3"
-                        style="max-width: 200px;">
+                    <div class="d-flex flex-wrap align-items-center gap-1">
+                    <select class="form-select form-select-sm" name="jform[initial_sort_order3]" id="initial_sort_order3"
+                        style="width: 20rem; max-width: 100%;">
                         <option value="-1">
                             <?php echo Text::_('COM_CONTENTBUILDERNG_NONE'); ?>
                         </option>
@@ -599,7 +579,7 @@ $advancedDefaults = [
                             <?php echo Text::_('COM_CONTENTBUILDERNG_INITIAL_SORT_ORDER_BY_ID'); ?>
                         </option>
                         <?php foreach ($elements as $sortable) : ?>
-                            <option value="<?php echo $sortable->reference_id; ?>" <?php echo ($item->initial_sort_order3 ?? null) == $sortable->reference_id ? ' selected="selected"' : ''; ?>>
+                            <option value="<?php echo (int) $sortable->reference_id; ?>" <?php echo ($item->initial_sort_order3 ?? null) == $sortable->reference_id ? ' selected="selected"' : ''; ?>>
                                 <?php echo htmlspecialchars($sortable->label ?? '', ENT_QUOTES, 'UTF-8'); ?>
                             </option>
                         <?php endforeach; ?>
@@ -639,6 +619,30 @@ $advancedDefaults = [
     </div>
 
     <hr />
+
+    <div id="cb-form-advanced-referencing-menus" class="alert alert-info">
+        <div class="fw-semibold mb-2"><?php echo Text::_('COM_CONTENTBUILDERNG_REFERENCING_MENUS'); ?></div>
+        <?php if ($referencingMenuItems !== []) : ?>
+            <div class="d-flex flex-column gap-2">
+                <?php foreach ($referencingMenuItems as $referencingMenuItem) : ?>
+                    <?php
+                    $menuLabel = trim((string) ($referencingMenuItem['title'] ?? ''));
+                    $menuType = trim((string) ($referencingMenuItem['menutype'] ?? ''));
+                    if ($menuType !== '') {
+                        $menuLabel .= ' [' . $menuType . ']';
+                    }
+                    ?>
+                    <div>
+                        <a href="<?php echo htmlspecialchars((string) ($referencingMenuItem['edit_link'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
+                            <?php echo htmlspecialchars($menuLabel, ENT_QUOTES, 'UTF-8'); ?>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else : ?>
+            <div><?php echo Text::_('COM_CONTENTBUILDERNG_REFERENCING_MENUS_NONE'); ?></div>
+        <?php endif; ?>
+    </div>
 
     <fieldset id="cb-form-advanced-buttons" aria-labelledby="cb-form-advanced-buttons-title">
         <legend>
@@ -687,6 +691,23 @@ $advancedDefaults = [
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var button = document.getElementById('cb-reset-advanced-options');
+    var selection = document.getElementById('select_column');
+    var bulkState = document.getElementById('list_state_bulk');
+    var bulkStateSaved = document.getElementById('list_state_bulk_saved');
+    var bulkStateDependency = document.getElementById('list_state_bulk_dependency');
+
+    var updateBulkStateAvailability = function () {
+        bulkState.disabled = !selection.checked;
+        // Disabled checkboxes are not submitted: preserve the configured value.
+        bulkStateSaved.value = bulkState.disabled && bulkState.checked ? '1' : '0';
+        bulkState.labels[0].classList.toggle('text-body-secondary', bulkState.disabled);
+        bulkStateDependency.hidden = !bulkState.disabled;
+    };
+
+    bulkState.setAttribute('aria-describedby', 'list_state_bulk_dependency');
+    selection.addEventListener('change', updateBulkStateAvailability);
+    bulkState.addEventListener('change', updateBulkStateAvailability);
+    updateBulkStateAvailability();
 
     ['2', '3'].forEach(function (suffix) {
         var orderField = document.getElementById('initial_sort_order' + suffix);

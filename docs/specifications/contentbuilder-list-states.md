@@ -52,6 +52,21 @@ eux aussi indépendants : **Filtre de recherche** contrôle la recherche textuel
 tandis que **Filtre d'état** contrôle uniquement le sélecteur d'état.
 La valeur par défaut de **Filtre d'état** est **OFF**.
 
+Dans Options, **Changement d’état multiple** nécessite **Choisir**, dans
+**Affichage des données**. Lorsque Choisir est décoché, la case de changement
+d’état multiple est désactivée et grisée, accompagnée d’une aide indiquant le
+réglage requis. Sa valeur est conservée lors de l’enregistrement et redevient
+modifiable dès que Choisir est coché. L’infobulle explique que cet outil applique
+un même état à plusieurs lignes cochées ; dans la liste, au moins une ligne doit
+être sélectionnée pour l’activer. Les droits de changement d’état et au moins
+un état publié restent nécessaires. Cet outil est indépendant de la colonne
+État et du filtre d’état.
+
+La réinitialisation des options remet **Changement d’état multiple** sur
+désactivé (`list_state_bulk = 0`) et **Choisir** sur activé. Contrairement à une
+simple désactivation de Choisir, cette action remplace volontairement la valeur
+configurée du changement d’état multiple. Enregistrer la vue pour la conserver.
+
 Le symbole de l'onglet indique la cohérence de la configuration :
 
 - **aucun symbole** : aucun état publié et aucune fonction d'état activée ;

@@ -197,6 +197,16 @@ séparément de **Afficher l’état** et du **filtre d’état**. Il permet d�
 le sélecteur d’action groupée même lorsque l’affichage individuel de l’état est
 masqué. Il reste soumis à la permission frontend État et à la sélection multiple.
 
+Dans les options de la vue, activez **Choisir** dans **Affichage des données**
+pour rendre la case **Changement d’état multiple** disponible. Sans Choisir,
+elle est grisée ; sa valeur reste mémorisée et une aide indique le réglage requis.
+Dans la liste, cochez au moins un enregistrement pour activer le sélecteur.
+Au moins un état doit être publié.
+
+**Réinitialiser les options** réactive Choisir et désactive Changement d’état
+multiple, même si ce dernier était coché. Enregistrez la vue pour conserver
+les valeurs réinitialisées.
+
 ### Onglet Détail
 
 Contient :
@@ -210,8 +220,11 @@ Contient :
 ### Onglet Édition
 
 La coche verte concerne uniquement la modification frontend : permission Edit,
-bouton Modifier activé, au moins un champ publié éditable et template valide.
-Si la permission ou le bouton est désactivé, la coche disparaît. Si Edit est
+bouton Modifier dans la liste ou accès via Détail, au moins un champ publié
+éditable et template valide. L’accès via Détail exige la permission View et
+des champs publiés pour le détail et le lien depuis la liste. Désactiver le
+bouton Modifier de la liste ne retire pas la coche si cet accès reste actif.
+Si la permission Edit ou les deux accès sont désactivés, la coche disparaît. Si Edit est
 actif, un champ éditable manquant produit un triangle orange ; un template absent
 ou incohérent produit une croix rouge. Le cadenas reste indépendant.
 

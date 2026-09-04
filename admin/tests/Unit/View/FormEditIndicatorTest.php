@@ -18,7 +18,11 @@ final class FormEditIndicatorTest extends TestCase
         return [
             'new only' => [false, true, true, true, false, 'INACTIVE_EMPTY'],
             'edit active' => [true, true, true, true, false, 'ACTIVE'],
-            'edit button disabled' => [true, false, true, true, false, 'INACTIVE_EMPTY'],
+            'edit through details with list button disabled' => [true, false, true, true, false, 'ACTIVE'],
+            'no edit entry point' => [true, false, true, true, false, 'INACTIVE_EMPTY', false],
+            'list edit without detail access' => [true, true, true, true, false, 'ACTIVE', false],
+            'details edit missing template' => [true, false, true, false, false, 'INVALID'],
+            'details edit without editable fields' => [true, false, false, true, false, 'INCOMPLETE'],
             'no editable fields' => [true, true, false, true, false, 'INCOMPLETE'],
             'missing template' => [true, true, true, false, false, 'INVALID'],
             'invalid template' => [true, true, true, true, true, 'INVALID'],
@@ -33,7 +37,8 @@ final class FormEditIndicatorTest extends TestCase
         bool $fields,
         bool $template,
         bool $auditIssue,
-        string $expected
+        string $expected,
+        bool $detailAccess = true
     ): void {
         $source = file_get_contents(dirname(__DIR__, 4) . '/admin/tmpl/form/edit.php');
         $start = strpos($source, '$frontendPermissionConfig =');
@@ -58,7 +63,7 @@ final class FormEditIndicatorTest extends TestCase
                     }
                 };
                 $view->item = (object) [
-                    'config' => ['permissions_fe' => [['edit' => $edit, 'new' => $new, 'view' => true]]],
+                    'config' => ['permissions_fe' => [['edit' => $edit, 'new' => $new, 'view' => $detailAccess]]],
                     'edit_button' => $button,
                     'new_button' => $new,
                     'editable_template' => $template ? '{name:item}' : '',
@@ -75,7 +80,7 @@ final class FormEditIndicatorTest extends TestCase
                 [$editState, $detailState] = $view->states($code);
                 self::assertSame('COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_' . $expected, $editState['tipKey']);
                 self::assertSame($locked, $editState['locked']);
-                self::assertSame('COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_ACTIVE', $detailState['tipKey']);
+                self::assertSame('COM_CONTENTBUILDERNG_TAB_TEMPLATE_STATUS_' . ($detailAccess ? 'ACTIVE' : 'INACTIVE_EMPTY'), $detailState['tipKey']);
                 if ($expected === 'INACTIVE_EMPTY') {
                     self::assertStringNotContainsString('is-filled', $editState['badge']);
                     self::assertSame($locked, str_contains($editState['badge'], 'is-locked'));

@@ -27,6 +27,11 @@ Les fichiers suivants portent la version RC :
 - `CHANGELOG.md` ;
 - `com_contentbuilderng_changelog.xml`.
 
+La version de `media/joomla.asset.json` doit correspondre à celle du manifeste
+du composant, notamment lorsque le CSS change. Elle permet aux URL des
+ressources de changer de version pour éviter la réutilisation du CSS précédent
+depuis le cache du navigateur. Pour la version finale validée : `6.1.15`.
+
 Le fichier `com_contentbuilderng_update.xml` reste inchangé et continue de
 référencer la dernière release publiée. Le ZIP local n'inclut pas ce manifeste
 de mise à jour.
