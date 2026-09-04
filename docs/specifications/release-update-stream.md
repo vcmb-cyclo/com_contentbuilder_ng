@@ -9,6 +9,26 @@
 
 ## Principe
 
+### État validé au 4 septembre 2026
+
+- La version stable `6.1.15` est publiée sous le tag `v6.1.15`, avec son ZIP
+  officiel et le manifeste Joomla Update correspondant. La PR #132 est fusionnée.
+- La branche de développement suivante est `gil_6.2.0`, créée depuis `main`
+  après publication du manifeste. Les corrections et spécifications de 6.2.0
+  sont poussées sur cette même branche, sans modifier la release 6.1.15.
+- Les trois appels inutiles à `ReflectionMethod::setAccessible()` ont été
+  supprimés des tests pour PHP 8.5 : 988 tests et 5 445 assertions passent sans
+  dépréciation.
+- La sortie des fichiers de langue FR et DE du paquet principal est prévue
+  pour 6.2.0. Le conditionnement, l’installation et les mises à jour des langues
+  restent à spécifier avant toute modification des paquets.
+
+Après publication réussie, une branche de release peut être supprimée localement
+et sur GitHub uniquement après vérification de son intégration complète dans
+`origin/main`. Le tag et la release sont conservés. Les développements suivants
+restent sur leur branche `gil_<version>` ; la branche locale `main` peut être
+synchronisée sans y effectuer de développement.
+
 La version du code et la version proposée par Joomla Update sont deux états
 distincts. Une RC peut être préparée, testée, installée manuellement et fusionnée
 dans `main` sans être publiée comme release GitHub.

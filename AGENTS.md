@@ -25,6 +25,7 @@
 - Stop after completing the requested task.
 
 ## Local Git branches
+- Current development branch: `gil_6.2.0`. Version 6.1.15 is published.
 - Before editing files, check the active local branch and working tree status.
 - Work on a local branch named `gil_<development-version>`, for example
   `gil_6.1.15` for version 6.1.15 under development. Use the development version
