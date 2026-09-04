@@ -323,6 +323,15 @@ $advancedDefaults = [
                             </label>
                         </div>
                         <div>
+                            <input type="hidden" name="jform[list_state_bulk]" value="0" />
+                            <?php echo $renderCheckbox('jform[list_state_bulk]', 'list_state_bulk', (bool) ($item->list_state_bulk ?? false)); ?>
+                            <label class="form-check-label" for="list_state_bulk">
+                                <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_STATE_BULK_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_STATE_BULK'); ?>
+                                </span>
+                            </label>
+                        </div>
+                        <div>
                             <input type="hidden" name="jform[show_back_button]" value="0" />
                             <?php echo $renderCheckbox('jform[show_back_button]', 'show_back_button', (bool) ($item->show_back_button ?? true)); ?>
                             <label class="form-check-label" for="show_back_button">

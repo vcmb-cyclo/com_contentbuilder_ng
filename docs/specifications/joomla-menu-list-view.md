@@ -345,9 +345,13 @@ Les options `Show State`, `Show bulk state changer` et `Show State filter` propo
 
 `Show Search` hérite de `show_filter`, `Show State` hérite de `list_state` et
 `Show State` pilote l’affichage individuel de l’état et les contrôles par ligne.
-`Show bulk state changer` pilote uniquement l’action groupée de changement d’état
-et hérite de `list_state` par défaut ; il peut être forcé indépendamment dans le
-menu. `Show State filter` hérite exclusivement de `show_state_filter`. Un menu peut
+`Show bulk state changer` est une option de la Vue, placée dans le panneau
+`Panneau d’affichage des boutons`. Elle pilote uniquement l’outil groupé de
+changement d’état, est indépendante de `Choisir` et de la colonne `État`, et
+hérite de `list_state_bulk`. L’outil est rendu dans la barre d’actions de la
+liste, jamais dans la zone des filtres. Une surcharge de menu peut encore
+forcer cette option indépendamment. `Show State filter` hérite exclusivement de
+`show_state_filter` et correspond au filtrage réel par état. Un menu peut
 donc masquer ou afficher le filtre d'état sans modifier l'affichage des états ni
 le filtre de recherche. La valeur par défaut de Vue pour le filtre d'état est No.
 Le filtre d'état reste absent si aucun état n'est publié.

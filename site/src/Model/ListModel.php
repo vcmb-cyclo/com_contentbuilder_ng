@@ -545,6 +545,7 @@ class ListModel extends BaseListModel
             'select_column' => 0,
             'states' => [],
             'list_state' => 0,
+            'list_state_bulk' => 0,
             'list_publish' => 0,
             'list_language' => 0,
             'list_article' => 0,

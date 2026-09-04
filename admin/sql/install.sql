@@ -130,6 +130,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_elements`
 --   edit_button                     1 = show Edit button in list row.
 --   new_button                      1 = show New-record button.
 --   list_state                      1 = show the state column in list.
+--   list_state_bulk                 1 = show the multiple-record state changer.
 --   list_publish                    1 = show the published column in list.
 --   list_language                   1 = show the language column.
 --   list_article                    1 = show the linked article column.
@@ -290,6 +291,7 @@ CREATE TABLE IF NOT EXISTS `#__contentbuilderng_forms`
     `edit_button`                         tinyint(1)   NOT NULL DEFAULT '0',
     `new_button`                          tinyint(1)   NOT NULL DEFAULT '0',
     `list_state`                          tinyint(1)   NOT NULL DEFAULT '0',
+    `list_state_bulk`                     tinyint(1)   NOT NULL DEFAULT '0',
     `list_publish`                        tinyint(1)   NOT NULL DEFAULT '0',
     `list_language`                       tinyint(1)   NOT NULL DEFAULT '0',
     `list_article`                        tinyint(1)   NOT NULL DEFAULT '0',

@@ -198,7 +198,7 @@ final class MenulistbuilderField extends FormField
         $searchHtml = '<div class="row g-3">'
             . $this->selectControl('searchShow', Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SHOW_SEARCH'), $toggleOptions, (string) ($config['searchShow'] ?? 'default'), $options, 'show_filter', true, 'COM_CONTENTBUILDERNG_MENU_NEW_SHOW_SEARCH_DESC')
             . $this->selectControl('stateShow', Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SHOW_STATE'), $toggleOptions, (string) ($config['stateShow'] ?? 'default'), $options, 'list_state', true, 'COM_CONTENTBUILDERNG_MENU_NEW_SHOW_STATE_DESC')
-            . $this->selectControl('stateBulkShow', Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SHOW_STATE_BULK'), $toggleOptions, (string) ($config['stateBulkShow'] ?? 'default'), $options, 'list_state', true, 'COM_CONTENTBUILDERNG_MENU_NEW_SHOW_STATE_BULK_DESC')
+            . $this->selectControl('stateBulkShow', Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SHOW_STATE_BULK'), $toggleOptions, (string) ($config['stateBulkShow'] ?? 'default'), $options, 'list_state_bulk', true, 'COM_CONTENTBUILDERNG_MENU_NEW_SHOW_STATE_BULK_DESC')
             . $this->selectControl('stateFilterShow', Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SHOW_STATE_FILTER'), $toggleOptions, (string) ($config['stateFilterShow'] ?? 'default'), $options, 'show_state_filter', true, 'COM_CONTENTBUILDERNG_MENU_NEW_SHOW_STATE_FILTER_DESC')
             . '</div>';
         $out .= $this->section(Text::_('COM_CONTENTBUILDERNG_MENU_NEW_SEARCH_STATE'), $searchHtml);

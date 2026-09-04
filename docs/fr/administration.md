@@ -142,6 +142,7 @@ Options observées :
 - affichage limité aux enregistrements publiés ;
 - colonnes techniques et métadonnées ;
 - boutons Nouveau, Éditer, Export, Imprimer et Retour ;
+- outil de changement d’état multiple, indépendant de la colonne État et du filtre par état ;
 - barre de boutons ou en-tête de liste fixe ;
 - prévisualisation ;
 - affichage du nom et des filtres dans le titre ;

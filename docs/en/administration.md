@@ -107,6 +107,7 @@ Observed options include:
 - showing only published records;
 - technical columns and metadata;
 - New, Edit, Export, Print, and Back buttons;
+- bulk state changer, independent of the State column and the state filter;
 - button bar or fixed list header;
 - preview;
 - view name and filters in the page title;
