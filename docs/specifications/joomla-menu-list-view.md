@@ -643,6 +643,10 @@ publié sous 6.1.10-RC09.
     sont comptés et ils sont conservés dans le rendu frontend.
 46. Print conserve strictement son fonctionnement Detail historique, porte le
     libellé Detail - Print et se trouve immédiatement sous Detail - Bottom panel.
+    Dans CB → Vue → Options, sa case est regroupée avec Export XLS sur la même
+    ligne. Cette disposition n'ajoute aucun bouton d'impression de liste.
+    Dans CB → Vue → Options, sa case est regroupée avec Export XLS sur la même
+    ligne. Cette disposition n'ajoute aucun bouton d'impression de liste.
 47. Rating termine le groupe Display - Detail - Edit et les deux contrôles
     déplacés utilisent le même alignement horizontal que les panneaux.
 48. Tous les contrôles de Display - Detail - Edit partagent la même grille

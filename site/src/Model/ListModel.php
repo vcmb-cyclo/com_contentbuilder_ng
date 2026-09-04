@@ -539,7 +539,6 @@ class ListModel extends BaseListModel
             'page_title' => (string) (($this->_page_title !== '' && $this->_show_page_heading) ? $this->_page_title : ($storage->title ?: $storage->name)),
             'intro_text' => '',
             'export_xls' => 0,
-            'print_button' => 0,
             'display_filter' => !empty($ids),
             'edit_button' => (int) ($storage->bytable ?? 0) === 2 ? 0 : 1,
             'new_button' => (int) ($storage->bytable ?? 0) === 2 ? 0 : 1,

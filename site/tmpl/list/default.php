@@ -711,7 +711,6 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 		|| ($hasBulkSelection && $delete_allowed)
 		|| ($this->show_records_per_page && !$embeddedListHidePagination)
 		|| ($this->export_xls && empty($this->invalid_list_setup) && $cbListActionAllowed('export'));
-	$hasTopBarContent = $hasTopBarContent || ($this->print_button && $cbListActionAllowed('print'));
 	$showTopBar = $showTopBar && $hasTopBarContent;
 	$listEditBaseParams = [
 		'option' => 'com_contentbuilderng',
@@ -929,7 +928,7 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 						</div>
 
 						<!-- DROITE : actions + limitbox + excel -->
-						<?php if ($showNewButton || ($hasBulkSelection && $delete_allowed) || ($this->show_records_per_page && !$embeddedListHidePagination) || ($this->export_xls && empty($this->invalid_list_setup) && $cbListActionAllowed('export')) || ($this->print_button && $cbListActionAllowed('print'))) : ?>
+						<?php if ($showNewButton || ($hasBulkSelection && $delete_allowed) || ($this->show_records_per_page && !$embeddedListHidePagination) || ($this->export_xls && empty($this->invalid_list_setup) && $cbListActionAllowed('export'))) : ?>
 								<div class="d-flex align-items-center gap-2 ms-auto cb-list-toolbar-actions">
 
 										<?php if ($showNewButton) : ?>
@@ -997,15 +996,6 @@ $cbListInitScriptVersion = is_file($cbListInitScriptPath) ? (string) filemtime($
 												<span class="fa-solid fa-download" aria-hidden="true"></span>
 												<span>XLSX</span>
 											</a>
-										<?php endif; ?>
-
-										<?php if ($this->print_button && $cbListActionAllowed('print')) : ?>
-											<button type="button" class="btn btn-sm btn-outline-secondary align-self-center d-inline-flex align-items-center gap-1 rounded-pill"
-												title="<?php echo Text::_('COM_CONTENTBUILDERNG_LIST_PRINT_TOOLTIP'); ?>"
-												onclick="window.print();">
-												<span class="fa-solid fa-print" aria-hidden="true"></span>
-												<span><?php echo Text::_('JGLOBAL_PRINT'); ?></span>
-											</button>
 										<?php endif; ?>
 
 							</div>

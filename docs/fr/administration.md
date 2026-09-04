@@ -142,6 +142,8 @@ Options observées :
 - affichage limité aux enregistrements publiés ;
 - colonnes techniques et métadonnées ;
 - boutons Nouveau, Éditer, Export, Imprimer et Retour ;
+- dans les Options de Vue, les cases Export XLS et Imprimer partagent la même ligne ; Imprimer concerne la fiche Détails ;
+- dans les Options de Vue, les cases Export XLS et Imprimer partagent la même ligne ; Imprimer concerne la fiche Détails ;
 - outil de changement d’état multiple, indépendant de la colonne État et du filtre par état ;
 - barre de boutons ou en-tête de liste fixe ;
 - prévisualisation ;

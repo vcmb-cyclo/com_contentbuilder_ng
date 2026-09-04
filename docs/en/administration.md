@@ -107,6 +107,8 @@ Observed options include:
 - showing only published records;
 - technical columns and metadata;
 - New, Edit, Export, Print, and Back buttons;
+- in View Options, the Export XLS and Print checkboxes share the same row; Print applies to the Details page;
+- in View Options, the Export XLS and Print checkboxes share the same row; Print applies to the Details page;
 - bulk state changer, independent of the State column and the state filter;
 - button bar or fixed list header;
 - preview;

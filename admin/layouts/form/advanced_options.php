@@ -271,6 +271,7 @@ $advancedDefaults = [
                                 </span>
                             </label>
                         </div>
+                        <div class="d-flex flex-wrap align-items-center gap-3 w-100">
                         <div>
                             <input type="hidden" name="jform[export_xls]" value="0" />
                             <?php echo $renderCheckbox('jform[export_xls]', 'export_xls', (bool) ($item->export_xls ?? false)); ?>
@@ -279,6 +280,16 @@ $advancedDefaults = [
                                     <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_XLSEXPORT'); ?>
                                 </span>
                             </label>
+                        </div>
+                        <div>
+                            <input type="hidden" name="jform[print_button]" value="0" />
+                            <?php echo $renderCheckbox('jform[print_button]', 'print_button', (bool) ($item->print_button ?? false)); ?>
+                            <label class="form-check-label" for="print_button">
+                                <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_PRINTBUTTON_TIP'); ?>">
+                                    <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_PRINTBUTTON'); ?>
+                                </span>
+                            </label>
+                        </div>
                         </div>
                         <div class="w-100">
                             <div class="dropdown">
@@ -312,15 +323,6 @@ $advancedDefaults = [
                                     <?php endforeach; ?>
                                 </div>
                             </div>
-                        </div>
-                        <div>
-                            <input type="hidden" name="jform[print_button]" value="0" />
-                            <?php echo $renderCheckbox('jform[print_button]', 'print_button', (bool) ($item->print_button ?? false)); ?>
-                            <label class="form-check-label" for="print_button">
-                                <span class="editlinktip hasTip" title="<?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_PRINTBUTTON_TIP'); ?>">
-                                    <?php echo Text::_('COM_CONTENTBUILDERNG_SHOW_PRINTBUTTON'); ?>
-                                </span>
-                            </label>
                         </div>
                         <div>
                             <input type="hidden" name="jform[list_state_bulk]" value="0" />
