@@ -41,6 +41,9 @@
 .cb-list-toolbar-actions .form-select {
     flex: 0 0 auto;
 }
+.cb-list-filters-row > .d-flex.flex-grow-1 {
+    flex-wrap: nowrap;
+}
 
 /* ── Selects d'actions groupées (état / publication) désactivés ───
    Bootstrap ne change que le fond (--bs-secondary-bg) sur :disabled ;
@@ -64,6 +67,10 @@
     .cb-list-toolbar-actions,
     .cb-filter-rpp-wrap {
         flex-shrink: 0;
+    }
+
+    .cb-list-filters-row > .d-flex.flex-grow-1 {
+        flex-wrap: wrap;
     }
 }
 
