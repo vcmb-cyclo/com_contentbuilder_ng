@@ -46,6 +46,7 @@ class HtmlView extends BaseHtmlView
     public int $debug_show_cb_id = 0;
     public int $direct_storage_read_only = 0;
     public int $show_state_filter = 0;
+    public int $print_button = 0;
     public int $list_state_bulk = 0;
     public bool $preview_list_access_configured = false;
     public float $render_time_ms = 0;
@@ -207,6 +208,7 @@ class HtmlView extends BaseHtmlView
         $this->page_title = (string) ($subject->page_title ?? '');
         $this->intro_text = (string) ($subject->intro_text ?? '');
         $this->export_xls = (int) ($subject->export_xls ?? 0);
+        $this->print_button = (int) ($subject->print_button ?? 0);
         $this->display_filter = (int) ($subject->display_filter ?? 0);
         $this->show_state_filter = (int) ($subject->show_state_filter ?? 0);
         $this->edit_button = (int) ($subject->edit_button ?? 0);
