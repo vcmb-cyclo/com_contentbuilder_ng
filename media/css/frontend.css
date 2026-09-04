@@ -29,9 +29,10 @@
     max-width: 560px;
     flex: 0 1 auto;
 }
-.cb-filter-search-group .form-control {
-    width: 180px;
-    flex: 0 0 180px;
+.cb-list-filters .cb-filter-search-group > .form-control {
+    width: 180px !important;
+    min-width: 180px;
+    flex: 0 0 180px !important;
 }
 .cb-list-toolbar-actions {
     flex-wrap: wrap;
